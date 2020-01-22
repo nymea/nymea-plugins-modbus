@@ -1,0 +1,374 @@
+{
+    "name": "DrexelUndWeiss",
+    "displayName": "Drexel und Weiss",
+    "id": "68d78ce6-82d0-4a5b-b901-7c3b843ef63c",
+    "paramTypes":[
+        {
+            "id": "ecc8e0f1-5fac-4ea9-b5ef-459d75c4fe78",
+            "name": "updateInterval",
+            "displayName": "Update interval",
+            "type": "int",
+            "unit": "Seconds",
+            "defaultValue": 15
+        }
+    ],
+    "vendors": [
+        {
+            "name": "DrexelUndWeiss",
+            "displayName": "Drexel und Weiss",
+            "id": "9f476e8b-7e95-448e-b03b-874747e8fb1f",
+            "deviceClasses": [
+                {
+                    "name": "modbusConnection",
+                    "displayName": "Modbus Connection",
+                    "id": "06d04eec-ab5d-479a-b9e6-8c89efc18a8b",
+                    "createMethods": ["discovery", "user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                        {
+                            "id": "ed49f7d8-ab18-4c37-9b80-1004b75dcb91",
+                            "name": "serialPort",
+                            "displayName": "Serial port",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": "ttyAMA0"
+                        },
+                        {
+                            "id": "d0c04612-cc3e-4d38-b4c9-708e28dc4eb3",
+                            "name": "baudRate",
+                            "displayName": "Baudrate",
+                            "type": "int",
+                            "defaultValue": 9600
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "181ce6e2-9c55-45c6-b329-adf379679e07a",
+                            "name": "connected",
+                            "displayName": "connected",
+                            "displayNameEvent": "connection status changed",
+                            "type": "bool",
+                            "defaultValue": false
+                        }
+                    ],
+                    "actionTypes": [
+                        {
+                            "id": "b9a24ecc-4433-4f31-99ba-596033bda421",
+                            "name": "discoverDevices",
+                            "displayName": "Discover devices",
+                            "paramTypes": [
+                                {
+                                    "id": "22413a22-31d4-4b8c-b855-8a29da5946bc",
+                                    "name": "slaveAddress",
+                                    "displayName": "Slave address",
+                                    "type": "int",
+                                    "minValue": 0,
+                                    "maxValue": 250,
+                                    "defaultValue": 0
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "x2lu",
+                    "displayName": "X2 LU",
+                    "id": "0de8e21e-392a-4790-a78a-b1a7eaa7571b",
+                    "createMethods": ["auto"],
+                    "interfaces": ["co2sensor", "connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "22413a22-31d4-4b8c-b855-8a29da5946bc",
+                            "name": "slaveAddress",
+                            "displayName": "Slave address",
+                            "type": "int",
+                            "minValue": 0,
+                            "maxValue": 250,
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "91ef76cf-6c53-4a8a-a278-6f6e2ef68cc6",
+                            "name": "sofwareVersion",
+                            "displayName": "Software version",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": "-"
+                        }
+                    ],
+                    "stateTypes":[
+                        {
+                            "id": "181ce6e2-9c55-45c6-b329-adf379679e07a",
+                            "name": "connected",
+                            "displayName": "connected",
+                            "displayNameEvent": "connection status changed",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "0a6b44c8-e7af-4148-92ff-682ae717f3a8",
+                            "name": "co2",
+                            "displayName": "CO2",
+                            "displayNameEvent": "CO2 changed",
+                            "unit": "PartsPerMillion",
+                            "type": "double",
+                            "defaultValue": 350
+                        },
+                        {
+                            "id": "4269d9d0-ddff-4e7a-9d7a-bf9a7db50f98",
+                            "name": "ventilationMode",
+                            "displayName": "Ventilation mode",
+                            "displayNameEvent": "Ventilation mode changed",
+                            "displayNameAction": "Change ventilation mode",
+                            "type": "QString",
+                            "defaultValue": "Manual level 0",
+                            "possibleValues": [
+                                "Manual level 0",
+                                "Manual level 1",
+                                "Manual level 2",
+                                "Manual level 3",
+                                "Automatic",
+                                "Party"
+                            ],
+                            "writable": true
+                        },
+                        {
+                            "id": "1f26a013-7836-4f3e-b369-7ce07310fc59",
+                            "name": "activeVentilationLevel",
+                            "displayName": "Ventilation level",
+                            "displayNameEvent": "Ventilation level changed",
+                            "type": "int",
+                            "defaultValue": 0
+                        }
+                    ]
+                },
+                {
+                    "name": "x2wp",
+                    "displayName": "X2 WP",
+                    "id": "e548f962-92db-4110-8279-10fbcde35f93",
+                    "createMethods": ["auto"],
+                    "interfaces": ["thermostat", "heating", "temperaturesensor", "connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "22413a22-31d4-4b8c-b855-8a29da5946bc",
+                            "name": "slaveAddress",
+                            "displayName": "Slave address",
+                            "type": "int",
+                            "minValue": 0,
+                            "maxValue": 250,
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "91ef76cf-6c53-4a8a-a278-6f6e2ef68cc6",
+                            "name": "sofwareVersion",
+                            "displayName": "Software version",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": "-"
+                        }
+                    ],
+                    "stateTypes":[
+
+                        {
+                            "id": "181ce6e2-9c55-45c6-b329-adf379679e07a",
+                            "name": "connected",
+                            "displayName": "connected",
+                            "displayNameEvent": "connection status changed",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "f2ce8389-c33f-4f10-8484-f2e993841762",
+                            "name": "power",
+                            "displayName": "Power",
+                            "displayNameEvent": "Power changed",
+                            "displayNameAction": "Change power",
+                            "type": "bool",
+                            "defaultValue": 0,
+                            "writable": true
+                        },
+                        {
+                            "id": "3ab2d609-1686-4fd7-84e3-580c8e0537d0",
+                            "name": "temperature",
+                            "displayName": "Room temperature",
+                            "displayNameEvent": "Room temperature changed",
+                            "type": "double",
+                            "unit": "DegreeCelsius",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "77a96b57-fa0a-4946-af5b-39c3b66d9422",
+                            "name": "waterTemperature",
+                            "displayName": "Water temperature",
+                            "displayNameEvent": "Water temperature changed",
+                            "type": "double",
+                            "unit": "DegreeCelsius",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "32378843-5478-4b86-9c0e-ccbf978c02be",
+                            "name": "outsideAirTemperature",
+                            "displayName": "Outside air temperature",
+                            "displayNameEvent": "Outside air temperature changed",
+                            "type": "double",
+                            "unit": "DegreeCelsius",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "fb98754d-0fba-4163-9b74-3e5a07d71421",
+                            "name": "targetTemperature",
+                            "displayName": "Target room temperature",
+                            "displayNameEvent": "Target room temperature changed",
+                            "displayNameAction": "Change room target temperature",
+                            "type": "double",
+                            "unit": "DegreeCelsius",
+                            "minValue": 14.00,
+                            "maxValue": 26.00,
+                            "defaultValue": 22.00,
+                            "writable": true
+                        },
+                        {
+                            "id": "fb021cac-1236-4324-a45c-8d89ad069052",
+                            "name": "targetWaterTemperature",
+                            "displayName": "Target water temperature",
+                            "displayNameEvent": "Target water temperature changed",
+                            "displayNameAction": "Change water target temperature",
+                            "type": "double",
+                            "unit": "DegreeCelsius",
+                            "minValue": 20.00,
+                            "maxValue": 55.00,
+                            "defaultValue": 46.00,
+                            "writable": true
+                        },
+                        {
+                            "id": "5c125ddd-a0db-40fe-9998-2afea6c727f1",
+                            "name": "heatPumpMode",
+                            "displayName": "Heat pump mode",
+                            "displayNameEvent": "Heat pump mode changed",
+                            "type": "QString",
+                            "defaultValue": "Heat pump off",
+                            "possibleValues": [
+                                "Restart interlock" ,
+                                "Heat pump off",
+                                "Lead time brine pump",
+                                "Fan run-up time",
+                                "Open hot gas valve",
+                                "Open LPG valve",
+                                "Start compressor",
+                                "Minimum runtime heat pump",
+                                "Heat pump on",
+                                "Draw off refrigerant",
+                                "Vacuum during defrosting",
+                                "Defrost",
+                                "Drain after defrosting"
+                            ]
+                        },
+                        {
+                            "id": "8d6e52ef-992d-47ac-90a8-9dba95ab200e",
+                            "name": "error",
+                            "displayName": "Error",
+                            "displayNameEvent": "Error occured",
+                            "type": "QString",
+                            "defaultValue": "No error",
+                            "possibleValues": [
+                                "No error",
+                                "Exhaust fan" ,
+                                "Boiler sensor electric heating element",
+                                "Boiler sensor solar",
+                                "Boiler sensor heat pump",
+                                "Boiler overtemperature",
+                                "CO2-Sensor",
+                                "Pressure loss exhaust air too big",
+                                "Pressure loss supply air too large",
+                                "Flow rate of heating circuit",
+                                "Flow rate brine circuit",
+                                "Participant not available",
+                                "Temperature sensor outside air",
+                                "Temperature sensor heating circuit flow",
+                                "Temperature sensor room",
+                                "Temperature sensor solar collector",
+                                "Temperature sensor brine",
+                                "Temperature sensor brine outside air",
+                                "Heat pump high pressure",
+                                "Heat pump low pressure",
+                                "Value not allowed",
+                                "Supply air fan"
+                            ]
+                        },
+                        {
+                            "id": "7287943a-ea6d-4c92-abbd-f55f6c7ee9e5",
+                            "name": "powerCompressor",
+                            "displayName": "Power consumption compressor",
+                            "displayNameEvent": "Power consumption compressor changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "59beeff5-89c1-4996-9e07-48d53d74684d",
+                            "name": "powerAirPreheating",
+                            "displayName": "Power consumption air preheating",
+                            "displayNameEvent": "Power consumption air preheating changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "c4237da0-0ead-42b8-b192-6a681509dc90",
+                            "name": "powerRoomHeating",
+                            "displayName": "Power consumption room heating",
+                            "displayNameEvent": "Power consumption room heating changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "21dfc736-f35c-469f-be57-afc1976d8328",
+                            "name": "powerWaterHeating",
+                            "displayName": "Power consumption water heating",
+                            "displayNameEvent": "Power consumption water heating changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "b423657b-4e59-41cd-89a3-4f5cb1c3a271",
+                            "name": "energyCompressor",
+                            "displayName": "Energy compressor",
+                            "displayNameEvent": "Energy compressor changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "0816ca6d-a178-4a2a-8183-c26a794fb0ca",
+                            "name": "energyAirPreheating",
+                            "displayName": "Energy air preheating",
+                            "displayNameEvent": "Energy air preheating changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "cb189b75-3634-4674-a847-f29ca322d4be",
+                            "name": "energyWaterHeating",
+                            "displayName": "Energy water heating",
+                            "displayNameEvent": "Energy water heating changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "4495618e-5a43-46ac-9f76-32aae3f3e954",
+                            "name": "energyRoomHeating",
+                            "displayName": "Energy room heating",
+                            "displayNameEvent": "Energy room heating changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

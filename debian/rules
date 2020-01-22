@@ -1,0 +1,25 @@
+#!/usr/bin/make -f
+
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+PREPROCESS_FILES := $(wildcard debian/*.in)
+
+$(PREPROCESS_FILES:.in=): %: %.in
+	sed 's,/@DEB_HOST_MULTIARCH@,$(DEB_HOST_MULTIARCH:%=/%),g' $< > $@
+
+%:
+	dh $@ --parallel
+
+override_dh_auto_build:
+	dh_auto_build
+	make lrelease
+
+override_dh_install: $(PREPROCESS_FILES:.in=)
+	dh_install --fail-missing
+
+override_dh_auto_clean:
+	dh_auto_clean
+	find -name *plugininfo.h -exec rm {} \;
+	find -name *.qm -exec rm {} \;
+	rm -rf $(PREPROCESS_FILES:.in=)
+
