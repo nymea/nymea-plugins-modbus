@@ -33,11 +33,26 @@ Description: nymea.io plugin for Drexel & Weiss heat pumps
  This package will install the nymea.io plugin for Drexel & Weiss heat pumps
 
 
+Package: nymea-plugin-wallbe
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         nymea-plugins-translations,
+         libmodbus,
+Description: nymea.io plugin for wallbe ev charging stations
+ The nymea daemon is a plugin based IoT (Internet of Things) server. The
+ server works like a translator for devices, things and services and
+ allows them to interact.
+ With the powerful rule engine you are able to connect any device available
+ in the system and create individual scenes and behaviors for your environment.
+ .
+ This package will install the nymea.io plugin for wallbe
+
+
 Package: nymea-plugins-translations
 Section: misc
 Architecture: all
 Depends: ${misc:Depends}
-Replaces: guh-plugins-translations
 Description: Translation files for nymea plugins - translations
  The nymea daemon is a plugin based IoT (Internet of Things) server. The
  server works like a translator for devices, things and services and
@@ -52,6 +67,7 @@ Package: nymea-plugins-modbus
 Section: libs
 Architecture: all
 Depends: nymea-plugin-drexelundweiss,
+         nymea-plugin-wallbe,
 Description: Plugins for nymea IoT server - the modbus plugin collection
  The nymea daemon is a plugin based IoT (Internet of Things) server. The
  server works like a translator for devices, things and services and
