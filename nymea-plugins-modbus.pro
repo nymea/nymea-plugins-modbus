@@ -2,6 +2,7 @@ TEMPLATE = subdirs
 
 PLUGIN_DIRS = \
     drexelundweiss          \
+    mypv                    \
     wallbe                  \
 
 message(============================================)
