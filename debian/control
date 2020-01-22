@@ -33,6 +33,22 @@ Description: nymea.io plugin for Drexel & Weiss heat pumps
  This package will install the nymea.io plugin for Drexel & Weiss heat pumps
 
 
+Package: nymea-plugin-mypv
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         nymea-plugins-translations,
+         libmodbus,
+Description: nymea.io plugin for my-pv heating rods
+ The nymea daemon is a plugin based IoT (Internet of Things) server. The
+ server works like a translator for devices, things and services and
+ allows them to interact.
+ With the powerful rule engine you are able to connect any device available
+ in the system and create individual scenes and behaviors for your environment.
+ .
+ This package will install the nymea.io plugin for my-pv
+
+
 Package: nymea-plugin-wallbe
 Architecture: any
 Depends: ${shlibs:Depends},

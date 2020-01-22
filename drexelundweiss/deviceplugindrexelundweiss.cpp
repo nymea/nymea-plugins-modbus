@@ -171,12 +171,10 @@ void DevicePluginDrexelUndWeiss::executeAction(DeviceActionInfo *info)
             discoverModbusSlaves(modbus, slave);
             info->finish(Device::DeviceErrorNoError);
             return;
+        } else {
+            info->finish(Device::DeviceErrorActionTypeNotFound);
         }
-        info->finish(Device::DeviceErrorActionTypeNotFound);
-        return;
-    }
-
-    if (device->deviceClassId() == x2luDeviceClassId) {
+    } else if (device->deviceClassId() == x2luDeviceClassId) {
         Device *parentDevice = myDevices().findById(device->parentId());
         if (!parentDevice) {
             qWarning(dcDrexelUndWeiss()) << "Could not find the parent device";
@@ -210,12 +208,10 @@ void DevicePluginDrexelUndWeiss::executeAction(DeviceActionInfo *info)
             }
             m_pendingActions.insert(modbus->writeHoldingRegister(slave, ModbusRegisterX2::Betriebsart, data), info);
             return;
+        } else {
+            info->finish(Device::DeviceErrorActionTypeNotFound);
         }
-        info->finish(Device::DeviceErrorActionTypeNotFound);
-        return;
-    }
-
-    if (device->deviceClassId() == x2wpDeviceClassId) {
+    } else if (device->deviceClassId() == x2wpDeviceClassId) {
         Device *parentDevice = myDevices().findById(device->parentId());
         if (!parentDevice) {
             qWarning(dcDrexelUndWeiss()) << "Could not find modbus interface";
@@ -235,18 +231,17 @@ void DevicePluginDrexelUndWeiss::executeAction(DeviceActionInfo *info)
             int data = static_cast<int>(qRound(targetTemp * 1000));
             m_pendingActions.insert(modbus->writeHoldingRegister(slave,ModbusRegisterX2::RaumSoll, data), info);
             return;
-        }
-        if (action.actionTypeId() == x2wpTargetWaterTemperatureActionTypeId) {
+        } else if (action.actionTypeId() == x2wpTargetWaterTemperatureActionTypeId) {
             qreal targetWaterTemp = action.param(x2wpTargetWaterTemperatureActionTargetWaterTemperatureParamTypeId).value().toDouble();
             int data = static_cast<int>(qRound(targetWaterTemp * 1000));
             m_pendingActions.insert(modbus->writeHoldingRegister(slave, ModbusRegisterX2::BrauchwasserSolltermperatur, data), info);
             return;
+        } else {
+            info->finish(Device::DeviceErrorActionTypeNotFound);
         }
-        info->finish(Device::DeviceErrorActionTypeNotFound);
-        return;
+    } else {
+        info->finish(Device::DeviceErrorDeviceClassNotFound);
     }
-    info->finish(Device::DeviceErrorDeviceClassNotFound);
-    return;
 }
 
 

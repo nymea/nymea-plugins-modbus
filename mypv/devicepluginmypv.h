@@ -25,27 +25,25 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef DEVICEPLUGINDREXELUNDWEISS_H
-#define DEVICEPLUGINDREXELUNDWEISS_H
+#ifndef DEVICEPLUGINMYPV_H
+#define DEVICEPLUGINMYPV_H
 
-#include "devices/devicemanager.h"
+#include "devices/deviceplugin.h"
 #include "plugintimer.h"
+#include "modbustcpmaster.h"
 
-#include <QDateTime>
-#include "modbusrtumaster.h"
-#include <QSerialPortInfo>
+#include <QUdpSocket>
 
-class DevicePluginDrexelUndWeiss : public DevicePlugin
+class DevicePluginMyPv: public DevicePlugin
 {
     Q_OBJECT
 
-    Q_PLUGIN_METADATA(IID "io.nymea.DevicePlugin" FILE "deviceplugindrexelundweiss.json")
+    Q_PLUGIN_METADATA(IID "io.nymea.DevicePlugin" FILE "devicepluginmypv.json")
     Q_INTERFACES(DevicePlugin)
 
+
 public:
-    explicit DevicePluginDrexelUndWeiss();
-    ~DevicePluginDrexelUndWeiss() override;
-    void init() override;
+    explicit DevicePluginMyPv();
 
     void discoverDevices(DeviceDiscoveryInfo *info) override;
     void setupDevice(DeviceSetupInfo *info) override;
@@ -54,25 +52,36 @@ public:
     void executeAction(DeviceActionInfo *info) override;
 
 private:
-    QList<QString> m_usedSerialPorts;
-    QHash<Device *, ModbusRTUMaster *> m_modbusRTUMasters;
-    PluginTimer *m_refreshTimer = nullptr;
-    QHash<QUuid, DeviceActionInfo *> m_pendingActions;
 
-    void updateStates(Device *device);
-    void discoverModbusSlaves(ModbusRTUMaster *modbus, int slaveAddress);
+    enum ElwaModbusRegisters {
+        Power= 1000,
+        WaterTemperature = 1001,
+        TargetWaterTemperature = 1002,
+        Status = 1003,
+        ManuelStart = 1012
+    };
+
+    enum ElwaStatus {
+        Heating = 2,
+        Standby = 3,
+        Boosted = 4,
+        HeatFinished = 5,
+        Setup = 9,
+        ErrorOvertempFuseBlown = 201,
+        ErrorOvertempMeasured = 202,
+        ErrorOvertempElectronics = 203,
+        ErrorHardwareFault = 204,
+        ErrorTempSensor = 205
+    };
+
+    PluginTimer *m_refreshTimer = nullptr;
+    QHash<Device *, ModbusTCPMaster *> m_modbusTcpMasters;
+
+    void update(Device *device);
 
 private slots:
     void onRefreshTimer();
-    void onPluginConfigurationChanged(const ParamTypeId &paramTypeId, const QVariant &value);
-
-    void onConnectionStateChanged(bool status);
-    void onReceivedCoil(int slaveAddress, int modbusRegister, bool value);
-    void onReceivedDiscreteInput(int slaveAddress, int modbusRegister, bool value);
-    void onReceivedHoldingRegister(int slaveAddress, int modbusRegister, int value);
-    void onReceivedInputRegister(int slaveAddress, int modbusRegister, int value);
-
-    void onWriteRequestFinished(QUuid requestId, bool success);
 };
 
-#endif // DEVICEPLUGINDREXELUNDWEISS_H
+#endif // DEVICEPLUGINMYPV_H
+
