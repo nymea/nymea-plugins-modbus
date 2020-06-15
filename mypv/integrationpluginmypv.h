@@ -28,32 +28,63 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef HOST_H
-#define HOST_H
+#ifndef INTEGRATIONPLUGINMYPV_H
+#define INTEGRATIONPLUGINMYPV_H
 
-#include <QString>
-#include <QDebug>
+#include "integrations/integrationplugin.h"
+#include "plugintimer.h"
+#include "modbustcpmaster.h"
 
-class Host
+#include <QUdpSocket>
+
+class IntegrationPluginMyPv: public IntegrationPlugin
 {
+    Q_OBJECT
+
+    Q_PLUGIN_METADATA(IID "io.nymea.IntegrationPlugin" FILE "integrationpluginmypv.json")
+    Q_INTERFACES(IntegrationPlugin)
+
+
 public:
-    Host();
-    Host(const QString &hostName, const QString &address, const QString &macAddress, const bool &reachable);
+    explicit IntegrationPluginMyPv();
 
-    QString hostName() const;
-    QString address() const;
-    QString macAddress() const;
-    bool reachable() const;
-
-    bool isValid() const;
+    void discoverThings(ThingDiscoveryInfo *info) override;
+    void setupThing(ThingSetupInfo *info) override;
+    void postSetupThing(Thing *thing) override;
+    void thingRemoved(Thing *thing) override;
+    void executeAction(ThingActionInfo *info) override;
 
 private:
-    QString m_hostName;
-    QString m_address;
-    QString m_macAddress;
-    bool m_reachable;
+
+    enum ElwaModbusRegisters {
+        Power= 1000,
+        WaterTemperature = 1001,
+        TargetWaterTemperature = 1002,
+        Status = 1003,
+        ManuelStart = 1012
+    };
+
+    enum ElwaStatus {
+        Heating = 2,
+        Standby = 3,
+        Boosted = 4,
+        HeatFinished = 5,
+        Setup = 9,
+        ErrorOvertempFuseBlown = 201,
+        ErrorOvertempMeasured = 202,
+        ErrorOvertempElectronics = 203,
+        ErrorHardwareFault = 204,
+        ErrorTempSensor = 205
+    };
+
+    PluginTimer *m_refreshTimer = nullptr;
+    QHash<Thing *, ModbusTCPMaster *> m_modbusTcpMasters;
+
+    void update(Thing *thing);
+
+private slots:
+    void onRefreshTimer();
 };
 
-QDebug operator<<(QDebug dbg, const Host &host);
+#endif // INTEGRATIONPLUGINMYPV_H
 
-#endif // HOST_H

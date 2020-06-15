@@ -1,0 +1,13 @@
+{
+    "title": "Drexel und Weiss",
+    "tagline": "Connect to Drexel und Weiss HVAC systems.",
+    "icon": "drexelundweiss.png",
+    "stability": "community",
+    "offline": true,
+    "technologies": [
+        "network"
+    ],
+    "categories": [
+        "heating"
+    ]
+}

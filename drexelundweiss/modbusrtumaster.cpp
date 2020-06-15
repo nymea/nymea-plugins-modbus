@@ -24,6 +24,7 @@
 * or see our FAQ/Licensing Information on https://nymea.io/license/faq
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include "modbusrtumaster.h"
 #include "extern-plugininfo.h"
 

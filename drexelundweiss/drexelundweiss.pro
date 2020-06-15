@@ -1,17 +1,15 @@
 include(../plugins.pri)
 
-TARGET = $$qtLibraryTarget(nymea_deviceplugindrexelundweiss)
-
 QT += \
     serialport \
     serialbus \
 
 SOURCES += \
-    deviceplugindrexelundweiss.cpp \
+    integrationplugindrexelundweiss.cpp \
     modbusrtumaster.cpp \
 
 HEADERS += \
-    deviceplugindrexelundweiss.h \
+    integrationplugindrexelundweiss.h \
     modbusrtumaster.h \
     modbusdegisterdefinition.h
 

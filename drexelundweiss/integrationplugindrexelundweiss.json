@@ -17,7 +17,7 @@
             "name": "DrexelUndWeiss",
             "displayName": "Drexel und Weiss",
             "id": "9f476e8b-7e95-448e-b03b-874747e8fb1f",
-            "deviceClasses": [
+            "thingClasses": [
                 {
                     "name": "modbusConnection",
                     "displayName": "Modbus Connection",

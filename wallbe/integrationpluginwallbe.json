@@ -7,7 +7,7 @@
             "displayName": "Petring",
             "name": "petring",
             "id": "831b4b87-0a6c-4d51-b055-967bb6e5fab5",
-            "deviceClasses": [
+            "thingClasses": [
                 {
                     "id": "e66c84f6-b398-47e9-8aeb-33840e7b4492",
                     "displayName": "Wallbe eco 2.0",

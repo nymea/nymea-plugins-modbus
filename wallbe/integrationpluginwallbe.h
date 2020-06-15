@@ -28,32 +28,40 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef HOST_H
-#define HOST_H
+#ifndef INTEGRATIONPLUGINWALLBE_H
+#define INTEGRATIONPLUGINWALLBE_H
 
-#include <QString>
-#include <QDebug>
+#include "integrations/integrationplugin.h"
+#include "wallbe.h"
+#include "host.h"
+#include "discover.h"
+#include "plugintimer.h"
 
-class Host
+#include <QObject>
+#include <QHostAddress>
+
+class IntegrationPluginWallbe : public IntegrationPlugin
 {
+    Q_OBJECT
+
+    Q_PLUGIN_METADATA(IID "io.nymea.IntegrationPlugin" FILE "integrationpluginwallbe.json")
+    Q_INTERFACES(IntegrationPlugin)
+
 public:
-    Host();
-    Host(const QString &hostName, const QString &address, const QString &macAddress, const bool &reachable);
+    explicit IntegrationPluginWallbe();
 
-    QString hostName() const;
-    QString address() const;
-    QString macAddress() const;
-    bool reachable() const;
-
-    bool isValid() const;
+    void discoverThings(ThingDiscoveryInfo *info) override;
+    void setupThing(ThingSetupInfo *info) override;
+    void postSetupThing(Thing *thing) override;
+    void executeAction(ThingActionInfo *info) override;
+    void thingRemoved(Thing *thing) override;
 
 private:
-    QString m_hostName;
-    QString m_address;
-    QString m_macAddress;
-    bool m_reachable;
+    QHash<Thing *, WallBe *> m_connections;
+    QList<QHostAddress> m_address;
+    PluginTimer *m_pluginTimer = nullptr;
+
+    void update(Thing *thing);
 };
 
-QDebug operator<<(QDebug dbg, const Host &host);
-
-#endif // HOST_H
+#endif // INTEGRATIONPLUGINWALLBE_H

@@ -7,7 +7,7 @@
             "name": "myPV",
             "displayName": "my-PV",
             "id": "1f17597f-e0d0-459b-858d-ec9cbcd10b2c",
-            "deviceClasses": [
+            "thingClasses": [
                 {
                     "name": "elwa",
                     "displayName": "AC Elwa E",
