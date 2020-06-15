@@ -1,0 +1,13 @@
+{
+    "title": "Wall-Be",
+    "tagline": "Integrate Wall-Be EV-Charger into nymea-",
+    "icon": "walllbe.png",
+    "stability": "community",
+    "offline": true,
+    "technologies": [
+        "network"
+    ],
+    "categories": [
+        "tool"
+    ]
+}

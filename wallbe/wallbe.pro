@@ -1,19 +1,17 @@
 include(../plugins.pri)
 
-TARGET = $$qtLibraryTarget(nymea_devicepluginwallbe)
-
 QT += \ 
     network \
     serialbus \
 
 SOURCES += \
-    devicepluginwallbe.cpp \
+    integrationpluginwallbe.cpp \
     wallbe.cpp \
     host.cpp \
     discover.cpp
 
 HEADERS += \
-    devicepluginwallbe.h \
+    integrationpluginwallbe.h \
     wallbe.h \
     host.h \
     discover.h

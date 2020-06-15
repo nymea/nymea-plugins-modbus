@@ -1,19 +1,15 @@
 include(../plugins.pri)
 
-TARGET = $$qtLibraryTarget(nymea_devicepluginmypv)
-
 QT += \
     network \
     serialbus \
 
-LIBS += -lmodbus
-
 SOURCES += \
-    devicepluginmypv.cpp \
+    integrationpluginmypv.cpp \
     modbustcpmaster.cpp \
 
 HEADERS += \
-    devicepluginmypv.h \
+    integrationpluginmypv.h \
     modbustcpmaster.h \
 
 
