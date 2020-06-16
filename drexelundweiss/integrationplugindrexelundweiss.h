@@ -34,8 +34,9 @@
 #include "integrations/integrationplugin.h"
 #include "plugintimer.h"
 
-#include <QDateTime>
 #include "modbusrtumaster.h"
+
+#include <QDateTime>
 #include <QSerialPortInfo>
 
 class IntegrationPluginDrexelUndWeiss : public IntegrationPlugin

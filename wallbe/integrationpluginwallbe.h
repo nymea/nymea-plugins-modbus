@@ -32,10 +32,11 @@
 #define INTEGRATIONPLUGINWALLBE_H
 
 #include "integrations/integrationplugin.h"
-#include "wallbe.h"
+#include "plugintimer.h"
+
 #include "host.h"
 #include "discover.h"
-#include "plugintimer.h"
+#include "../modbus/modbustcpmaster.h"
 
 #include <QObject>
 #include <QHostAddress>
@@ -48,6 +49,14 @@ class IntegrationPluginWallbe : public IntegrationPlugin
     Q_INTERFACES(IntegrationPlugin)
 
 public:
+    enum WallbeRegisterAddress {
+        EVStatus        = 100,
+        ChargingTime    = 102,
+        ErrorCode       = 107,
+        ChargingCurrent = 300,
+        ChargingStatus  = 400,
+    };
+
     explicit IntegrationPluginWallbe();
 
     void discoverThings(ThingDiscoveryInfo *info) override;
@@ -57,11 +66,23 @@ public:
     void thingRemoved(Thing *thing) override;
 
 private:
-    QHash<Thing *, WallBe *> m_connections;
-    QList<QHostAddress> m_address;
+    QHash<Thing *, ModbusTCPMaster *> m_connections;
     PluginTimer *m_pluginTimer = nullptr;
+    QHash<QUuid, ThingActionInfo *> m_asyncActions;
 
     void update(Thing *thing);
+
+private slots:
+    void onRefreshTimer();
+
+    void onConnectionStateChanged(bool status);
+    void onReceivedCoil(int slaveAddress, int modbusRegister, bool value);
+    void onReceivedDiscreteInput(int slaveAddress, int modbusRegister, bool value);
+    void onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value);
+    void onReceivedInputRegister(int slaveAddress, int modbusRegister, int value);
+
+    void onWriteRequestExecuted(const QUuid &requestId, bool success);
+    void onWriteRequestError(const QUuid &requestId, const QString &error);
 };
 
 #endif // INTEGRATIONPLUGINWALLBE_H

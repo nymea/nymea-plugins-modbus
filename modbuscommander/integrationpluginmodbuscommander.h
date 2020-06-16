@@ -33,8 +33,9 @@
 
 #include "integrations/integrationplugin.h"
 #include "plugintimer.h"
-#include "modbustcpmaster.h"
-#include "modbusrtumaster.h"
+
+#include "../modbus/modbustcpmaster.h"
+#include "../modbus/modbusrtumaster.h"
 
 #include <QSerialPortInfo>
 #include <QUuid>

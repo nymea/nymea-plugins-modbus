@@ -11,7 +11,8 @@ SOURCES += \
     froniusinverter.cpp \
     froniusstorage.cpp \
     froniusmeter.cpp \
-    sunspecthing.cpp
+    sunspecthing.cpp \
+    ../modbus/modbustcpmaster.h \
 
 HEADERS += \
     integrationpluginfronius.h \
@@ -20,4 +21,5 @@ HEADERS += \
     froniusinverter.h \
     froniusstorage.h \
     froniusmeter.h \
-    sunspecthing.h
+    sunspecthing.h \
+    ../modbus/modbustcpmaster.h \
