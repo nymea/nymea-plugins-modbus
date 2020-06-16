@@ -1,19 +1,16 @@
 Source: nymea-plugins-modbus
 Section: utils
 Priority: options
-Maintainer: Michael Zanetti <michael.zanetti@guh.io>
-Build-depends: libboblight-dev,
-               debhelper (>= 0.0.0),
+Maintainer: Bernhard Trinnes <bernhard.trinnes@nymea.io>
+Build-depends: debhelper (>= 0.0.0),
                libnymea1-dev (>= 0.17),
                libnymea-mqtt-dev,
                libqt5serialport5-dev,
-               libqt5websockets5-dev,
                nymea-dev-tools:native,
                pkg-config,
                python:any,
                qtbase5-dev,
                qtconnectivity5-dev,
-               libow-dev,
 Standards-Version: 3.9.3
 
 
@@ -31,6 +28,22 @@ Description: nymea.io plugin for Drexel & Weiss heat pumps
  in the system and create individual scenes and behaviors for your environment.
  .
  This package will install the nymea.io plugin for Drexel & Weiss heat pumps
+
+
+Package: nymea-plugin-fronius
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         nymea-plugins-translations,
+Description: nymea.io plugin for Fronius PV inverters
+ The nymea daemon is a plugin based IoT (Internet of Things) server. The
+ server works like a translator for devices, things and services and
+ allows them to interact.
+ With the powerful rule engine you are able to connect any device available
+ in the system and create individual scenes and behaviors for your environment.
+ .
+ This package will install the nymea.io plugin for Fronius
 
 
 Package: nymea-plugin-mypv
@@ -83,6 +96,8 @@ Package: nymea-plugins-modbus
 Section: libs
 Architecture: all
 Depends: nymea-plugin-drexelundweiss,
+         nymea-plugin-fronius,
+         nymea-plugin-mypv
          nymea-plugin-wallbe,
 Description: Plugins for nymea IoT server - the modbus plugin collection
  The nymea daemon is a plugin based IoT (Internet of Things) server. The
@@ -92,4 +107,3 @@ Description: Plugins for nymea IoT server - the modbus plugin collection
  in the system and create individual scenes and behaviors for your environment.
  .
  This package will install the nymea modbus plugins.
-
