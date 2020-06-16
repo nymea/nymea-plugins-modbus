@@ -49,7 +49,7 @@ public:
     QUuid readCoil(uint slaveAddress, uint registerAddress);
     QUuid readDiscreteInput(uint slaveAddress, uint registerAddress);
     QUuid readInputRegister(uint slaveAddress, uint registerAddress);
-    QUuid readHoldingRegister(uint slaveAddress, uint registerAddress);
+    QUuid readHoldingRegister(uint slaveAddress, uint registerAddress, uint size = 1);
 
     QUuid writeCoil(uint slaveAddress, uint registerAddress, bool status);
     QUuid writeHoldingRegister(uint slaveAddress, uint registerAddress, const QVector<quint16> &values);

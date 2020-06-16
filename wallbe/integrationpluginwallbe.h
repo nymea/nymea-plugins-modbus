@@ -73,13 +73,9 @@ private:
     void update(Thing *thing);
 
 private slots:
-    void onRefreshTimer();
-
     void onConnectionStateChanged(bool status);
     void onReceivedCoil(int slaveAddress, int modbusRegister, bool value);
-    void onReceivedDiscreteInput(int slaveAddress, int modbusRegister, bool value);
     void onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value);
-    void onReceivedInputRegister(int slaveAddress, int modbusRegister, int value);
 
     void onWriteRequestExecuted(const QUuid &requestId, bool success);
     void onWriteRequestError(const QUuid &requestId, const QString &error);

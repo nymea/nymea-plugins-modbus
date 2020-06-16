@@ -63,7 +63,7 @@ void IntegrationPluginWallbe::setupThing(ThingSetupInfo *info)
     connect(modbusTcpMaster, &ModbusTCPMaster::writeRequestError, this, &IntegrationPluginWallbe::onWriteRequestError);
 
     m_connections.insert(thing, modbusTcpMaster);
-    connect(modbusTcpMaster, &ModbusTCPMaster::connectionStateChanged, info, [this, modbusTcpMaster](bool connected) {
+    connect(modbusTcpMaster, &ModbusTCPMaster::connectionStateChanged, info, [this, info, modbusTcpMaster](bool connected) {
         if(connected) {
             info->finish(Thing::ThingErrorNoError);
         } else {

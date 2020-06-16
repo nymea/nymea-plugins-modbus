@@ -274,7 +274,7 @@ QUuid ModbusTCPMaster::readInputRegister(uint slaveAddress, uint registerAddress
     return requestId;
 }
 
-QUuid ModbusTCPMaster::readHoldingRegister(uint slaveAddress, uint registerAddress, uint size = 1)
+QUuid ModbusTCPMaster::readHoldingRegister(uint slaveAddress, uint registerAddress, uint size)
 {
     if (!m_modbusTcpClient) {
         return "";

@@ -37,6 +37,7 @@
 #include "../modbus/modbustcpmaster.h"
 
 #include <QUdpSocket>
+#include <QUuid>
 
 class IntegrationPluginMyPv: public IntegrationPlugin
 {
@@ -80,6 +81,7 @@ private:
 
     PluginTimer *m_refreshTimer = nullptr;
     QHash<Thing *, ModbusTCPMaster *> m_modbusTcpMasters;
+    QHash<QUuid, ThingActionInfo *> m_asyncActions;
 
     void update(Thing *thing);
 
@@ -89,12 +91,11 @@ private slots:
     void onPluginConfigurationChanged(const ParamTypeId &paramTypeId, const QVariant &value);
 
     void onConnectionStateChanged(bool status);
-    void onRequestExecuted(QUuid requestId, bool success);
-    void onRequestError(QUuid requestId, const QString &error);
-    void onReceivedCoil(quint32 slaveAddress, quint32 modbusRegister, bool value);
-    void onReceivedDiscreteInput(quint32 slaveAddress, quint32 modbusRegister, bool value);
-    void onReceivedHoldingRegister(quint32 slaveAddress, quint32 modbusRegister, int value);
-    void onReceivedInputRegister(quint32 slaveAddress, quint32 modbusRegister, int value);
+    void onWriteRequestExecuted(QUuid requestId, bool success);
+    void onWriteRequestError(QUuid requestId, const QString &error);
+
+    void onReceivedHoldingRegister(quint32 slaveAddress, quint32 modbusRegister, const QVector<quint16> &values);
+    void onReceivedInputRegister(quint32 slaveAddress, quint32 modbusRegister, const QVector<quint16> &values);
 };
 
 #endif // INTEGRATIONPLUGINMYPV_H
