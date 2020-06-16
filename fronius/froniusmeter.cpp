@@ -56,8 +56,8 @@ QUrl FroniusMeter::updateUrl()
     QUrlQuery query;
     requestUrl.setHost(hostAddress());
     requestUrl.setPath(baseUrl() + "GetMeterRealtimeData.cgi");
-    query.addQueryItem("Scope", "Thing");
-    query.addQueryItem("ThingId", thingId().toString());
+    query.addQueryItem("Scope", "Device");
+    query.addQueryItem("DeviceId", thingId());
     requestUrl.setQuery(query);
     return requestUrl;
 }
@@ -93,10 +93,8 @@ void FroniusMeter::updateThingInfo(const QByteArray &data)
             pluginThing()->setStateValue(meterTotalEnergyConsumedStateTypeId, dataMap.value("EnergyReal_WAC_Sum_Consumed").toInt()/1000);
     }
 
-
     //update successful
     pluginThing()->setStateValue(meterConnectedStateTypeId,true);
-
 }
 
 QUrl FroniusMeter::activityUrl()

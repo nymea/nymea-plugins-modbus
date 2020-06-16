@@ -100,15 +100,15 @@ void IntegrationPluginFronius::setupThing(ThingSetupInfo *info)
     } else if (thing->thingClassId() == inverterThingClassId) {
 
         FroniusInverter *newInverter = new FroniusInverter(thing,this);
-        newInverter->setThingId(thing->paramValue(inverterThingIdParamTypeId));
+        newInverter->setThingId(thing->paramValue(inverterThingIdParamTypeId).toString());
         newInverter->setName(thing->paramValue(inverterThingNameParamTypeId).toString());
         newInverter->setBaseUrl(thing->paramValue(inverterThingBaseParamTypeId).toString());
-        newInverter->setHostId(thing->paramValue(inverterThingHostIdParamTypeId));
+        newInverter->setHostId(thing->paramValue(inverterThingHostIdParamTypeId).toString());
         newInverter->setHostAddress(thing->paramValue(inverterThingHostParamTypeId).toString());
 
         m_froniusInverters.insert(newInverter,thing);
 
-        thing->setParentId(newInverter->hostId());
+        thing->setParentId(ThingId(newInverter->hostId()));
         thing->setName(newInverter->name());
 
         // get inverter unique ID
@@ -161,7 +161,7 @@ void IntegrationPluginFronius::setupThing(ThingSetupInfo *info)
 
         m_froniusStorages.insert(newStorage,thing);
 
-        thing->setParentId(newStorage->hostId());
+        thing->setParentId(ThingId(newStorage->hostId()));
         thing->setName(newStorage->name());
 
         // Get storage manufacturer and maximum capacity
@@ -213,7 +213,7 @@ void IntegrationPluginFronius::setupThing(ThingSetupInfo *info)
 
         m_froniusMeters.insert(newMeter,thing);
 
-        thing->setParentId(newMeter->hostId());
+        thing->setParentId(ThingId(newMeter->hostId()));
         thing->setName(newMeter->name());
 
         info->finish(Thing::ThingErrorNoError);
@@ -318,13 +318,11 @@ void IntegrationPluginFronius::executeAction(ThingActionInfo *info)
     Thing *thing = info->thing();
     qCDebug(dcFronius()) << "Execute action" << thing->name() << action.actionTypeId().toString();
 
-    if (thing->thingClassId() == inverterThingClassId ||
-            thing->thingClassId() == dataloggerThingClassId ||
-            thing->thingClassId() == storageThingClassId) {
+    if (thing->thingClassId() == dataloggerThingClassId) {
 
-        if (action.actionTypeId() == dataloggerSearchThingsActionTypeId) {
+        if (action.actionTypeId() == dataloggerSearchDevicesActionTypeId) {
             searchNewThings(m_froniusLoggers.key(thing));
-            info->finish(ThingManager::ThingErrorNoError);
+            info->finish(Thing::ThingErrorNoError);
         } else {
             Q_ASSERT_X(false, "executeAction", QString("Unhandled action: %1").arg(action.actionTypeId().toString()).toUtf8());
         }
