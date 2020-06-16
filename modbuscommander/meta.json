@@ -1,0 +1,14 @@
+{
+    "title": "Modbus Commander",
+    "tagline": "Write and read Modbus register.",
+    "icon": "modbus.svg",
+    "stability": "community",
+    "offline": true,
+    "technologies": [
+        "serial-port",
+        "network"
+    ],
+    "categories": [
+        "tool"
+    ]
+}
