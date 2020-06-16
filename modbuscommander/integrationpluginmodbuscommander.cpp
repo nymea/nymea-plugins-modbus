@@ -28,7 +28,6 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 #include "integrationpluginmodbuscommander.h"
 #include "plugininfo.h"
 
@@ -70,20 +69,20 @@ void IntegrationPluginModbusCommander::setupThing(ThingSetupInfo *info)
     Thing *thing = info->thing();
 
     if (thing->thingClassId() == modbusTCPClientThingClassId) {
-        QString ipAddress = thing->paramValue(modbusTCPClientThingIpv4addressParamTypeId).toString();
+        QHostAddress hostAddress = QHostAddress(thing->paramValue(modbusTCPClientThingIpv4addressParamTypeId).toString());
         uint port = thing->paramValue(modbusTCPClientThingPortParamTypeId).toUInt();
 
         foreach (ModbusTCPMaster *modbusTCPMaster, m_modbusTCPMasters.values()) {
-            if ((modbusTCPMaster->ipv4Address() == ipAddress) && (modbusTCPMaster->port() == port)){
+            if ((modbusTCPMaster->hostAddress() == hostAddress) && (modbusTCPMaster->port() == port)){
                 m_modbusTCPMasters.insert(thing, modbusTCPMaster);
                 return info->finish(Thing::ThingErrorNoError);
             }
         }
 
-        ModbusTCPMaster *modbusTCPMaster = new ModbusTCPMaster(ipAddress, port, this);
+        ModbusTCPMaster *modbusTCPMaster = new ModbusTCPMaster(hostAddress, port, this);
         connect(modbusTCPMaster, &ModbusTCPMaster::connectionStateChanged, this, &IntegrationPluginModbusCommander::onConnectionStateChanged);
-        connect(modbusTCPMaster, &ModbusTCPMaster::requestExecuted, this, &IntegrationPluginModbusCommander::onRequestExecuted);
-        connect(modbusTCPMaster, &ModbusTCPMaster::requestError, this, &IntegrationPluginModbusCommander::onRequestError);
+        connect(modbusTCPMaster, &ModbusTCPMaster::writeRequestExecuted, this, &IntegrationPluginModbusCommander::onRequestExecuted);
+        connect(modbusTCPMaster, &ModbusTCPMaster::writeRequestError, this, &IntegrationPluginModbusCommander::onRequestError);
         connect(modbusTCPMaster, &ModbusTCPMaster::receivedCoil, this, &IntegrationPluginModbusCommander::onReceivedCoil);
         connect(modbusTCPMaster, &ModbusTCPMaster::receivedDiscreteInput, this, &IntegrationPluginModbusCommander::onReceivedDiscreteInput);
         connect(modbusTCPMaster, &ModbusTCPMaster::receivedHoldingRegister, this, &IntegrationPluginModbusCommander::onReceivedHoldingRegister);

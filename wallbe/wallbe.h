@@ -35,14 +35,15 @@
 #include <QHostAddress>
 #include <QProcess>
 
-#include <modbus/modbus.h>
+#include "../modbus/modbustcpmaster.h"
 
 class WallBe : public QObject
 {
     Q_OBJECT
 public:
 
-    WallBe(QHostAddress address, int port, QObject *parent = nullptr);
+
+    WallBe(const QHostAddress &address, int port, QObject *parent = nullptr);
     ~WallBe();
     bool isAvailable();
     bool connect();

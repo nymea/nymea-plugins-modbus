@@ -6,10 +6,9 @@ QT += \
 
 SOURCES += \
     integrationpluginmypv.cpp \
-    modbustcpmaster.cpp \
+    ../modbus/modbustcpmaster.cpp \
 
 HEADERS += \
     integrationpluginmypv.h \
-    modbustcpmaster.h \
-
+    ../modbus/modbustcpmaster.h \
 

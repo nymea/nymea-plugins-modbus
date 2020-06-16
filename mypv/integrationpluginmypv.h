@@ -33,7 +33,8 @@
 
 #include "integrations/integrationplugin.h"
 #include "plugintimer.h"
-#include "modbustcpmaster.h"
+
+#include "../modbus/modbustcpmaster.h"
 
 #include <QUdpSocket>
 
@@ -84,6 +85,16 @@ private:
 
 private slots:
     void onRefreshTimer();
+
+    void onPluginConfigurationChanged(const ParamTypeId &paramTypeId, const QVariant &value);
+
+    void onConnectionStateChanged(bool status);
+    void onRequestExecuted(QUuid requestId, bool success);
+    void onRequestError(QUuid requestId, const QString &error);
+    void onReceivedCoil(quint32 slaveAddress, quint32 modbusRegister, bool value);
+    void onReceivedDiscreteInput(quint32 slaveAddress, quint32 modbusRegister, bool value);
+    void onReceivedHoldingRegister(quint32 slaveAddress, quint32 modbusRegister, int value);
+    void onReceivedInputRegister(quint32 slaveAddress, quint32 modbusRegister, int value);
 };
 
 #endif // INTEGRATIONPLUGINMYPV_H

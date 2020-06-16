@@ -36,7 +36,6 @@
 
 IntegrationPluginMyPv::IntegrationPluginMyPv()
 {
-
 }
 
 
@@ -162,14 +161,14 @@ void IntegrationPluginMyPv::executeAction(ThingActionInfo *info)
         if (action.actionTypeId() == elwaHeatingPowerActionTypeId) {
             int heatingPower = action.param(elwaHeatingPowerActionHeatingPowerParamTypeId).value().toInt();
 
-            if(!modbusTCPMaster->setRegister(0xff, ElwaModbusRegisters::Power, heatingPower)){
+            if(!modbusTCPMaster->writeHoldingRegister(0xff, ElwaModbusRegisters::Power, heatingPower)){
                 return info->finish(Thing::ThingErrorHardwareFailure);
             }
             return;
         } else if (action.actionTypeId() == elwaPowerActionTypeId) {
             bool power = action.param(elwaHeatingPowerActionHeatingPowerParamTypeId).value().toBool();
             if(power) {
-                if(!modbusTCPMaster->setRegister(0xff, ElwaModbusRegisters::ManuelStart, 1)){
+                if(!modbusTCPMaster->writeHoldingRegister(0xff, ElwaModbusRegisters::ManuelStart, 1)){
                     return info->finish(Thing::ThingErrorHardwareFailure);
                 }
             }
@@ -188,13 +187,18 @@ void IntegrationPluginMyPv::onRefreshTimer(){
     }
 }
 
+void IntegrationPluginMyPv::onConnectionStateChanged(bool status)
+{
+//TODO set device connected state
+}
+
 void IntegrationPluginMyPv::update(Thing *thing) {
     if (thing->thingClassId() == elwaThingClassId)
     {
         ModbusTCPMaster *modbusTCPMaster = m_modbusTcpMasters.value(thing);
 
         int data;
-        if (modbusTCPMaster->getRegister(0xff, ElwaModbusRegisters::Status, &data)) {
+        if (modbusTCPMaster->readHoldingRegister(0xff, ElwaModbusRegisters::Status, &data)) {
             switch (data) {
             case Heating: {
                 thing->setStateValue(elwaStatusStateTypeId, "Heating");

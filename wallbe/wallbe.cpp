@@ -171,7 +171,7 @@ int WallBe::getChargingTime()
     if(modbus_read_registers(m_device, 102, 2, reg) == -1)
         return 0;
 
-    return (((uint32_t)(reg[2]<<16)|(uint32_t)(reg[3]))/60); //Converts to minutes
+    return
 }
 
 void WallBe::setChargingCurrent(int current)

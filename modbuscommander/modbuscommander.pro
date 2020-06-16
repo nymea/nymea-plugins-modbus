@@ -1,4 +1,4 @@
-include(../plugin.pri)
+include(../plugins.pri)
 
 QT += \
     serialport \
@@ -6,11 +6,10 @@ QT += \
     serialbus \
 
 SOURCES += \
-    integrationpluginmodbuscommander.cpp \  
-    modbustcpmaster.cpp \
-    modbusrtumaster.cpp \
+    integrationpluginmodbuscommander.cpp \
+    ../modbus/modbustcpmaster.cpp \
 
 HEADERS += \
     integrationpluginmodbuscommander.h \
-    modbustcpmaster.h \
-    modbusrtumaster.h \
+    ../modbus/modbustcpmaster.h \
+
