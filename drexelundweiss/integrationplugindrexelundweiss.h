@@ -38,7 +38,7 @@
 #include "modbusrtumaster.h"
 #include <QSerialPortInfo>
 
-class DevicePluginDrexelUndWeiss : public IntegrationPlugin
+class IntegrationPluginDrexelUndWeiss : public IntegrationPlugin
 {
     Q_OBJECT
 
@@ -46,8 +46,8 @@ class DevicePluginDrexelUndWeiss : public IntegrationPlugin
     Q_INTERFACES(IntegrationPlugin)
 
 public:
-    explicit DevicePluginDrexelUndWeiss();
-    ~DevicePluginDrexelUndWeiss() override;
+    explicit IntegrationPluginDrexelUndWeiss();
+    ~IntegrationPluginDrexelUndWeiss() override;
     void init() override;
 
     void discoverThings(ThingDiscoveryInfo *info) override;
@@ -62,7 +62,7 @@ private:
     PluginTimer *m_refreshTimer = nullptr;
     QHash<QUuid, ThingActionInfo *> m_pendingActions;
 
-    void updateStates(Device *device);
+    void updateStates(Thing *thing);
     void discoverModbusSlaves(ModbusRTUMaster *modbus, int slaveAddress);
 
 private slots:

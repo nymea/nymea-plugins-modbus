@@ -78,7 +78,7 @@
                     "interfaces": ["co2sensor", "connectable"],
                     "paramTypes": [
                         {
-                            "id": "22413a22-31d4-4b8c-b855-8a29da5946bc",
+                            "id": "28a72cb7-3cd0-4704-b604-44fb090d5a88",
                             "name": "slaveAddress",
                             "displayName": "Slave address",
                             "type": "int",
@@ -97,7 +97,7 @@
                     ],
                     "stateTypes":[
                         {
-                            "id": "181ce6e2-9c55-45c6-b329-adf379679e07a",
+                            "id": "b4c4726f-d3d7-46e8-badb-0d590e7f5fac",
                             "name": "connected",
                             "displayName": "connected",
                             "displayNameEvent": "connection status changed",
@@ -149,7 +149,7 @@
                     "interfaces": ["thermostat", "heating", "temperaturesensor", "connectable"],
                     "paramTypes": [
                         {
-                            "id": "22413a22-31d4-4b8c-b855-8a29da5946bc",
+                            "id": "b551d138-b006-4290-bfef-97072ff677c6",
                             "name": "slaveAddress",
                             "displayName": "Slave address",
                             "type": "int",
@@ -158,7 +158,7 @@
                             "defaultValue": 0
                         },
                         {
-                            "id": "91ef76cf-6c53-4a8a-a278-6f6e2ef68cc6",
+                            "id": "1ffd72a9-7b3f-4287-b671-7f22e159f9b8",
                             "name": "sofwareVersion",
                             "displayName": "Software version",
                             "type": "QString",
@@ -169,7 +169,7 @@
                     "stateTypes":[
 
                         {
-                            "id": "181ce6e2-9c55-45c6-b329-adf379679e07a",
+                            "id": "baf203be-a391-4bfc-8198-53b4ecbcce80",
                             "name": "connected",
                             "displayName": "connected",
                             "displayNameEvent": "connection status changed",

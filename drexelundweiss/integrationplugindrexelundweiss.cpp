@@ -55,7 +55,7 @@ void IntegrationPluginDrexelUndWeiss::discoverThings(ThingDiscoveryInfo *info)
     if (info->thingClassId() == modbusConnectionThingClassId) {
         Q_FOREACH(QSerialPortInfo port, QSerialPortInfo::availablePorts()) {
             if (m_usedSerialPorts.contains(port.systemLocation())){
-                //device already in use
+                //Thing already in use
                 qCDebug(dcDrexelUndWeiss()) << "Found serial port that is already used:" << port.portName();
             } else {
                 //Serial port is not yet used, create now a new one
@@ -82,7 +82,7 @@ void IntegrationPluginDrexelUndWeiss::discoverThings(ThingDiscoveryInfo *info)
         return;
     }
 
-    info->finish(Thing::ThingErrorDeviceClassNotFound);
+    info->finish(Thing::ThingErrorThingClassNotFound);
     return;
 }
 
@@ -118,11 +118,11 @@ void IntegrationPluginDrexelUndWeiss::setupThing(ThingSetupInfo *info)
         info->finish(Thing::ThingErrorNoError);
         return;
     }
-    info->finish(Thing::ThingErrorDeviceClassNotFound);
+    info->finish(Thing::ThingErrorThingClassNotFound);
     return;
 }
 
-void IntegrationPluginDrexelUndWeiss::postSetupDevice(Thing *thing)
+void IntegrationPluginDrexelUndWeiss::postSetupThing(Thing *thing)
 {
     if (!m_refreshTimer) {
         // Refresh timer for TCP read
@@ -132,8 +132,8 @@ void IntegrationPluginDrexelUndWeiss::postSetupDevice(Thing *thing)
     }
 
     if (thing->thingClassId() == modbusConnectionThingClassId) {
-        // read Register 5000 and emit auto-device
-        ModbusRTUMaster *modbus = m_modbusRTUMasters.value(device);
+        // read Register 5000 and emit auto-Thing
+        ModbusRTUMaster *modbus = m_modbusRTUMasters.value(thing);
         if (!modbus){
             qCWarning(dcDrexelUndWeiss()) << "No modbus master available";
         }
@@ -141,28 +141,28 @@ void IntegrationPluginDrexelUndWeiss::postSetupDevice(Thing *thing)
     }
 
     if ((thing->thingClassId() == x2luThingClassId) || (thing->thingClassId() == x2wpThingClassId)) {
-        Device *parentDevice = myThings().findById(thing->parentId());
-        if (!parentDevice) {
-            qWarning(dcDrexelUndWeiss()) << "Could not find the parent device";
+        Thing *parentThing = myThings().findById(thing->parentId());
+        if (!parentThing) {
+            qWarning(dcDrexelUndWeiss()) << "Could not find the parent Thing";
             return;
         }
-        ModbusRTUMaster *modbus = m_modbusRTUMasters.value(parentDevice);
+        ModbusRTUMaster *modbus = m_modbusRTUMasters.value(parentThing);
         if (!modbus){
             qCWarning(dcDrexelUndWeiss()) << "No modbus interface available";
         }
-        updateStates(device);
+        updateStates(thing);
         // Update states
     }
 }
 
-void IntegrationPluginDrexelUndWeiss::executeAction(DeviceActionInfo *info)
+void IntegrationPluginDrexelUndWeiss::executeAction(ThingActionInfo *info)
 {
-    Thing *thing = info->device();
+    Thing *thing = info->thing();
     Action action = info->action();
 
     if (thing->thingClassId() == modbusConnectionThingClassId) {
 
-        ModbusRTUMaster *modbus = m_modbusRTUMasters.value(device);
+        ModbusRTUMaster *modbus = m_modbusRTUMasters.value(thing);
         if (!modbus){
             qCWarning(dcDrexelUndWeiss()) << "No modbus interface available";
             info->finish(Thing::ThingErrorHardwareFailure);
@@ -178,13 +178,13 @@ void IntegrationPluginDrexelUndWeiss::executeAction(DeviceActionInfo *info)
             info->finish(Thing::ThingErrorActionTypeNotFound);
         }
     } else if (thing->thingClassId() == x2luThingClassId) {
-        Device *parentDevice = myThings().findById(thing->parentId());
-        if (!parentDevice) {
-            qWarning(dcDrexelUndWeiss()) << "Could not find the parent device";
+        Thing *parentThing = myThings().findById(thing->parentId());
+        if (!parentThing) {
+            qWarning(dcDrexelUndWeiss()) << "Could not find the parent thing";
             info->finish(Thing::ThingErrorHardwareFailure);
             return;
         }
-        ModbusRTUMaster *modbus = m_modbusRTUMasters.value(parentDevice);
+        ModbusRTUMaster *modbus = m_modbusRTUMasters.value(parentThing);
         int slave = thing->paramValue(x2luThingSlaveAddressParamTypeId).toInt();
         if (!modbus){
             qCWarning(dcDrexelUndWeiss()) << "No modbus interface available";
@@ -215,13 +215,13 @@ void IntegrationPluginDrexelUndWeiss::executeAction(DeviceActionInfo *info)
             info->finish(Thing::ThingErrorActionTypeNotFound);
         }
     } else if (thing->thingClassId() == x2wpThingClassId) {
-        Device *parentDevice = myThings().findById(thing->parentId());
-        if (!parentDevice) {
+        Thing *parentThing = myThings().findById(thing->parentId());
+        if (!parentThing) {
             qWarning(dcDrexelUndWeiss()) << "Could not find modbus interface";
             info->finish(Thing::ThingErrorHardwareFailure);
             return;
         }
-        ModbusRTUMaster *modbus = m_modbusRTUMasters.value(parentDevice);
+        ModbusRTUMaster *modbus = m_modbusRTUMasters.value(parentThing);
         int slave = thing->paramValue(x2wpThingSlaveAddressParamTypeId).toInt();
         if (!modbus){
             qCWarning(dcDrexelUndWeiss()) << "No modbus master available";
@@ -243,16 +243,16 @@ void IntegrationPluginDrexelUndWeiss::executeAction(DeviceActionInfo *info)
             info->finish(Thing::ThingErrorActionTypeNotFound);
         }
     } else {
-        info->finish(Thing::ThingErrorDeviceClassNotFound);
+        info->finish(Thing::ThingErrorThingClassNotFound);
     }
 }
 
 
-void IntegrationPluginDrexelUndWeiss::deviceRemoved(Thing *thing)
+void IntegrationPluginDrexelUndWeiss::thingRemoved(Thing *thing)
 {
     if (thing->thingClassId() == modbusConnectionThingClassId) {
 
-        ModbusRTUMaster *modbus = m_modbusRTUMasters.take(device);
+        ModbusRTUMaster *modbus = m_modbusRTUMasters.take(thing);
         if (!modbus){
             qCWarning(dcDrexelUndWeiss()) << "No modbus interface available";
             return;
@@ -267,14 +267,14 @@ void IntegrationPluginDrexelUndWeiss::onRefreshTimer()
     foreach (Thing *thing, myThings()) {
 
         if (thing->thingClassId() == modbusConnectionThingClassId) {
-            ModbusRTUMaster *modbus = m_modbusRTUMasters.value(device);
+            ModbusRTUMaster *modbus = m_modbusRTUMasters.value(thing);
 
             if (!modbus) {
                 qCWarning(dcDrexelUndWeiss()) << "No modbus master available";
                 return;
             }
         } else if (thing->thingClassId() == x2luThingClassId || thing->thingClassId() == x2wpThingClassId){
-            updateStates(device);
+            updateStates(thing);
         }
     }
 }
@@ -282,7 +282,7 @@ void IntegrationPluginDrexelUndWeiss::onRefreshTimer()
 void IntegrationPluginDrexelUndWeiss::updateStates(Thing *thing)
 {
     if (thing->thingClassId() == x2luThingClassId) {
-        Device *parent = myThings().findById(thing->parentId());
+        Thing *parent = myThings().findById(thing->parentId());
         ModbusRTUMaster *modbus = m_modbusRTUMasters.value(parent);
         int slave = thing->paramValue(x2luThingSlaveAddressParamTypeId).toInt();
 
@@ -292,7 +292,7 @@ void IntegrationPluginDrexelUndWeiss::updateStates(Thing *thing)
     }
 
     if (thing->thingClassId() == x2wpThingClassId) {
-        Device *parent = myThings().findById(thing->parentId());
+        Thing *parent = myThings().findById(thing->parentId());
         ModbusRTUMaster *modbus = m_modbusRTUMasters.value(parent);
         int slave = thing->paramValue(x2wpThingSlaveAddressParamTypeId).toInt();
 
@@ -351,9 +351,9 @@ void IntegrationPluginDrexelUndWeiss::onReceivedHoldingRegister(int slaveAddress
     ModbusRTUMaster *modbus = static_cast<ModbusRTUMaster *>(sender());
 
     if (m_modbusRTUMasters.values().contains(modbus) ){
-        Device *parentDevice = m_modbusRTUMasters.key(static_cast<ModbusRTUMaster *>(modbus));
+        Thing *parentThing = m_modbusRTUMasters.key(static_cast<ModbusRTUMaster *>(modbus));
 
-        foreach(Thing *thing, myThings().filterByParentDeviceId(parentthing->id())) {
+        foreach(Thing *thing, myThings().filterByParentId(parentThing->id())) {
             if (thing->thingClassId() == x2luThingClassId && thing->paramValue(x2luThingSlaveAddressParamTypeId) == slaveAddress) {
                 switch (modbusRegister) {
                 case ModbusRegisterX2::Waermepumpe:
@@ -557,7 +557,7 @@ void IntegrationPluginDrexelUndWeiss::onReceivedHoldingRegister(int slaveAddress
             case DeviceType::X2_WP: {
                 qDebug(dcDrexelUndWeiss()) << "Discovered X2 heat pump";
                 QList<ThingDescriptor> thingDescriptors;
-                ThingDescriptor descriptor(x2wpThingClassId, "X2 WP", "Drexel und Weiss", parentthing->id());
+                ThingDescriptor descriptor(x2wpThingClassId, "X2 WP", "Drexel und Weiss", parentThing->id());
                 ParamList params;
 
                 //modbus->readHoldingRegister(slaveAddress, ModbusRegisterX2::SoftwareVersion);
@@ -565,13 +565,13 @@ void IntegrationPluginDrexelUndWeiss::onReceivedHoldingRegister(int slaveAddress
                 params.append(Param(x2wpThingSlaveAddressParamTypeId, slaveAddress));
                 descriptor.setParams(params);
                 thingDescriptors.append(descriptor);
-                emit autoDevicesAppeared(thingDescriptors);
+                emit autoThingsAppeared(thingDescriptors);
                 break;
             }
             case DeviceType::X2_LU: {
                 qDebug(dcDrexelUndWeiss()) << "Discovered X2 ventilation unit";
                 QList<ThingDescriptor> thingDescriptors;
-                ThingDescriptor descriptor(x2luThingClassId, "X2 LU", "Drexel und Weiss", parentthing->id());
+                ThingDescriptor descriptor(x2luThingClassId, "X2 LU", "Drexel und Weiss", parentThing->id());
                 ParamList params;
 
                 //modbus->readHoldingRegister(slaveAddress, ModbusRegisterX2::SoftwareVersion);
@@ -579,7 +579,7 @@ void IntegrationPluginDrexelUndWeiss::onReceivedHoldingRegister(int slaveAddress
                 params.append(Param(x2luThingSlaveAddressParamTypeId, slaveAddress));
                 descriptor.setParams(params);
                 thingDescriptors.append(descriptor);
-                emit autoDevicesAppeared(thingDescriptors);
+                emit autoThingsAppeared(thingDescriptors);
                 break;
             }
             case DeviceType::AerosilentBianco:
@@ -587,7 +587,7 @@ void IntegrationPluginDrexelUndWeiss::onReceivedHoldingRegister(int slaveAddress
                 qDebug(dcDrexelUndWeiss()) << "Discovered Aerosilent Bianco";
                 break;
             default:
-                qDebug(dcDrexelUndWeiss()) << "Unkown Devicetype" << value;
+                qDebug(dcDrexelUndWeiss()) << "Unkown Thingtype" << value;
             }
         }
     }
@@ -602,7 +602,7 @@ void IntegrationPluginDrexelUndWeiss::onReceivedInputRegister(int slaveAddress, 
 
 void IntegrationPluginDrexelUndWeiss::onWriteRequestFinished(QUuid requestId, bool success)
 {
-    DeviceActionInfo *info = m_pendingActions.take(requestId);
+    ThingActionInfo *info = m_pendingActions.take(requestId);
     if (!info)
         return;
 
@@ -618,7 +618,7 @@ void IntegrationPluginDrexelUndWeiss::discoverModbusSlaves(ModbusRTUMaster *modb
     foreach (Thing *thing, myThings()) {
         if (thing->thingClassId() == x2luThingClassId) {
             if (thing->paramValue(x2luThingSlaveAddressParamTypeId).toInt() == slaveAddress) {
-                qWarning(dcDrexelUndWeiss()) << "Device with slave address" << slaveAddress << "already added";
+                qWarning(dcDrexelUndWeiss()) << "Thing with slave address" << slaveAddress << "already added";
                 return;
             }
         }
