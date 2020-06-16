@@ -48,8 +48,8 @@ public:
     QString name() const;
     void setName(const QString &name);
 
-    ThingId hostId() const;
-    void setHostId(const ThingId &hostId);
+    QString hostId() const;
+    void setHostId(const QString &hostId);
 
     QString hostAddress() const;
     void setHostAddress(const QString &hostAddress);
@@ -60,8 +60,8 @@ public:
     QString uniqueId() const;
     void setUniqueId(const QString &uniqueId);
 
-    ThingId thingId() const;
-    void setThingId(const ThingId &thingId);
+    QString thingId() const;
+    void setThingId(const QString &thingId);
 
     Thing* pluginThing() const;
 
@@ -70,12 +70,13 @@ private:
     Thing* m_thing;
 
     QString m_name;
-    ThingId m_hostId;
+    QString m_hostId;
     QString m_hostAddress;
     QString m_apiVersion;
     QString m_baseUrl;
     QString m_uniqueId;
-    ThingId m_thingId;
+    QString m_thingId;
+
 };
 
 #endif // FRONIUSTHING_H

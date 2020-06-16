@@ -36,12 +36,12 @@ void FroniusThing::setName(const QString &name)
     m_name = name;
 }
 
-ThingId FroniusThing::hostId() const
+QString FroniusThing::hostId() const
 {
     return m_hostId;
 }
 
-void FroniusThing::setHostId(const ThingId &hostId)
+void FroniusThing::setHostId(const QString &hostId)
 {
     m_hostId = hostId;
 }
@@ -76,12 +76,12 @@ void FroniusThing::setUniqueId(const QString &uniqueId)
     m_uniqueId = uniqueId;
 }
 
-ThingId FroniusThing::thingId() const
+QString FroniusThing::thingId() const
 {
     return m_thingId;
 }
 
-void FroniusThing::setThingId(const ThingId &thingId)
+void FroniusThing::setThingId(const QString &thingId)
 {
     m_thingId = thingId;
 }
