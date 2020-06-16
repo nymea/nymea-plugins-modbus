@@ -123,12 +123,11 @@ void IntegrationPluginMyPv::setupThing(ThingSetupInfo *info)
     if(thing->thingClassId() == elwaThingClassId) {
         QHostAddress address = QHostAddress(thing->paramValue(elwaThingIpAddressParamTypeId).toString());
         ModbusTCPMaster *modbusTcpMaster = new ModbusTCPMaster(address, 502, this);
+        connect(modbusTcpMaster, &ModbusTCPMaster::connectionStateChanged, this, &IntegrationPluginMyPv::onConnectionStateChanged);
+        connect(modbusTcpMaster, &ModbusTCPMaster::receivedHoldingRegister, this, &IntegrationPluginMyPv::onReceivedHoldingRegister);
+        connect(modbusTcpMaster, &ModbusTCPMaster::writeRequestExecuted, this, &IntegrationPluginMyPv::onWriteRequestExecuted);
+        connect(modbusTcpMaster, &ModbusTCPMaster::writeRequestError, this, &IntegrationPluginMyPv::onWriteRequestError);
 
-        if (!modbusTcpMaster->createInterface()) {
-            modbusTcpMaster->deleteLater();
-
-            return;
-        }
         m_modbusTcpMasters.insert(thing, modbusTcpMaster);
     } else {
         Q_ASSERT_X(false, "setupDevice", QString("Unhandled deviceClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
@@ -161,16 +160,12 @@ void IntegrationPluginMyPv::executeAction(ThingActionInfo *info)
         if (action.actionTypeId() == elwaHeatingPowerActionTypeId) {
             int heatingPower = action.param(elwaHeatingPowerActionHeatingPowerParamTypeId).value().toInt();
 
-            if(!modbusTCPMaster->writeHoldingRegister(0xff, ElwaModbusRegisters::Power, heatingPower)){
-                return info->finish(Thing::ThingErrorHardwareFailure);
-            }
-            return;
+            QUuid requestId = modbusTCPMaster->writeHoldingRegister(0xff, ElwaModbusRegisters::Power, QVector<quint16>() << heatingPower));
+            m_asyncActions.insert(requestId, info);
         } else if (action.actionTypeId() == elwaPowerActionTypeId) {
             bool power = action.param(elwaHeatingPowerActionHeatingPowerParamTypeId).value().toBool();
             if(power) {
-                if(!modbusTCPMaster->writeHoldingRegister(0xff, ElwaModbusRegisters::ManuelStart, 1)){
-                    return info->finish(Thing::ThingErrorHardwareFailure);
-                }
+                QUuid requestId = modbusTCPMaster->writeHoldingRegister(0xff, ElwaModbusRegisters::ManuelStart,  QVector<quint16>() << 1));
             }
         } else {
             Q_ASSERT_X(false, "executeAction", QString("Unhandled actionTypeId: %1").arg(action.actionTypeId().toString()).toUtf8());
@@ -189,80 +184,102 @@ void IntegrationPluginMyPv::onRefreshTimer(){
 
 void IntegrationPluginMyPv::onConnectionStateChanged(bool status)
 {
-//TODO set device connected state
+    ModbusTCPMaster *modbusTcpMaster = sender();
+    Thing *thing = m_modbusTcpMasters.key(modbusTcpMaster);
+    if (!thing)
+        return;
+    thing->setStateValue(elwaConnectedStateTypeId, status);
 }
 
-void IntegrationPluginMyPv::update(Thing *thing) {
-    if (thing->thingClassId() == elwaThingClassId)
-    {
+void IntegrationPluginMyPv::onWriteRequestExecuted(QUuid requestId, bool success)
+{
+
+}
+
+void IntegrationPluginMyPv::onWriteRequestError(QUuid requestId, const QString &error)
+{
+    Q_UNUSED(requestId)
+    qCWarning(dcMypv()) << "Error "
+}
+
+void IntegrationPluginMyPv::onReceivedHoldingRegister(quint32 slaveAddress, quint32 modbusRegister, int value)
+{
+    Q_UNUSED(slaveAddress)
+    ModbusTCPMaster *modbusTcpMaster = sender();
+    Thing *thing = m_modbusTcpMasters.key(modbusTcpMaster);
+    if (!thing)
+        return;
+
+    if(modbusRegister == ElwaModbusRegisters::Status) {
+        switch (ElwaStatus(value)) {
+        case ElwaStatus::Heating: {
+            thing->setStateValue(elwaStatusStateTypeId, "Heating");
+            thing->setStateValue(elwaPowerStateTypeId, true);
+            break;
+        }
+        case ElwaStatus::Standby:{
+            thing->setStateValue(elwaStatusStateTypeId, "Standby");
+            thing->setStateValue(elwaPowerStateTypeId, false);
+            break;
+        }
+        case ElwaStatus::Boosted:{
+            thing->setStateValue(elwaStatusStateTypeId, "Boosted");
+            thing->setStateValue(elwaPowerStateTypeId, true);
+            break;
+        }
+        case ElwaStatus::HeatFinished:{
+            thing->setStateValue(elwaStatusStateTypeId, "Heat finished");
+            thing->setStateValue(elwaPowerStateTypeId, false);
+            break;
+        }
+        case ElwaStatus::Setup:{
+            thing->setStateValue(elwaStatusStateTypeId, "Setup");
+            thing->setStateValue(elwaPowerStateTypeId, false);
+            break;
+        }
+        case ElwaStatus::ErrorOvertempFuseBlown:{
+            thing->setStateValue(elwaStatusStateTypeId, "Error Overtemp Fuse blown");
+            break;
+        }
+        case ElwaStatus::ErrorOvertempMeasured:{
+            thing->setStateValue(elwaStatusStateTypeId, "Error Overtemp measured");
+            break;
+        }
+        case ElwaStatus::ErrorOvertempElectronics:{
+            thing->setStateValue(elwaStatusStateTypeId, "Error Overtemp Electronics");
+            break;
+        }
+        case ElwaStatus::ErrorHardwareFault:{
+            thing->setStateValue(elwaStatusStateTypeId, "Error Hardware Fault");
+            break;
+        }
+        case ElwaStatus::ErrorTempSensor:{
+            thing->setStateValue(elwaStatusStateTypeId, "Error Temp Sensor");
+            break;
+        }
+        default:
+            thing->setStateValue(elwaStatusStateTypeId, "Unknown");
+        }
+    } else if(modbusRegister == ElwaModbusRegisters::WaterTemperature) {
+        thing->setStateValue(elwaTemperatureStateTypeId, value[0]/10.00);
+    } else if(modbusRegister == ElwaModbusRegisters::TargetWaterTemperature) {
+        thing->setStateValue(elwaTargetWaterTemperatureStateTypeId, value[0]/10.00);
+    } else if(modbusRegister == ElwaModbusRegisters::Power) {
+        thing->setStateValue(elwaHeatingPowerStateTypeId, value[0]);
+    } else {
+        qCWarning(dcMypv()) << "Received unhandled modbus register";
+    }
+}
+
+void IntegrationPluginMyPv::update(Thing *thing)
+{
+    if (thing->thingClassId() == elwaThingClassId) {
         ModbusTCPMaster *modbusTCPMaster = m_modbusTcpMasters.value(thing);
 
-        int data;
-        if (modbusTCPMaster->readHoldingRegister(0xff, ElwaModbusRegisters::Status, &data)) {
-            switch (data) {
-            case Heating: {
-                thing->setStateValue(elwaStatusStateTypeId, "Heating");
-                thing->setStateValue(elwaPowerStateTypeId, true);
-                break;
-            }
-            case Standby:{
-                thing->setStateValue(elwaStatusStateTypeId, "Standby");
-                thing->setStateValue(elwaPowerStateTypeId, false);
-                break;
-            }
-            case Boosted:{
-                thing->setStateValue(elwaStatusStateTypeId, "Boosted");
-                thing->setStateValue(elwaPowerStateTypeId, true);
-                break;
-            }
-            case HeatFinished:{
-                thing->setStateValue(elwaStatusStateTypeId, "Heat finished");
-                thing->setStateValue(elwaPowerStateTypeId, false);
-                break;
-            }
-            case Setup:{
-                thing->setStateValue(elwaStatusStateTypeId, "Setup");
-                thing->setStateValue(elwaPowerStateTypeId, false);
-                break;
-            }
-            case ErrorOvertempFuseBlown:{
-                thing->setStateValue(elwaStatusStateTypeId, "Error Overtemp Fuse blown");
-                break;
-            }
-            case ErrorOvertempMeasured:{
-                thing->setStateValue(elwaStatusStateTypeId, "Error Overtemp measured");
-                break;
-            }
-            case  ErrorOvertempElectronics:{
-                thing->setStateValue(elwaStatusStateTypeId, "Error Overtemp Electronics");
-                break;
-            }
-            case ErrorHardwareFault:{
-                thing->setStateValue(elwaStatusStateTypeId, "Error Hardware Fault");
-                break;
-            }
-            case ErrorTempSensor:{
-                thing->setStateValue(elwaStatusStateTypeId, "Error Temp Sensor");
-                break;
-            }
-            default:
-                thing->setStateValue(elwaStatusStateTypeId, "Unknown");
-            }
-
-            thing->setStateValue(elwaConnectedStateTypeId, true);
-        } else {
-            thing->setStateValue(elwaConnectedStateTypeId, false);
-        }
-
-        if (modbusTCPMaster->getRegister(0xff, ElwaModbusRegisters::WaterTemperature, &data)) {
-            thing->setStateValue(elwaTemperatureStateTypeId, data/10.00);
-        }
-        if (modbusTCPMaster->getRegister(0xff, ElwaModbusRegisters::TargetWaterTemperature, &data)) {
-            thing->setStateValue(elwaTargetWaterTemperatureStateTypeId, data/10.00);
-        }
-        if (modbusTCPMaster->getRegister(0xff, ElwaModbusRegisters::Power, &data)) {
-            thing->setStateValue(elwaHeatingPowerStateTypeId, data);
-        }
+        modbusTCPMaster->readHoldingRegister(0xff, ElwaModbusRegisters::Status);
+        modbusTCPMaster->readHoldingRegister(0xff, ElwaModbusRegisters::WaterTemperature);
+        modbusTCPMaster->readHoldingRegister(0xff, ElwaModbusRegisters::TargetWaterTemperature);
+        modbusTCPMaster->readHoldingRegister(0xff, ElwaModbusRegisters::Power);
     }
 }
 
