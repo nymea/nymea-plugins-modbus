@@ -420,7 +420,7 @@ void IntegrationPluginModbusCommander::onReceivedDiscreteInput(quint32 slaveAddr
     }
 }
 
-void IntegrationPluginModbusCommander::onReceivedHoldingRegister(quint32 slaveAddress, quint32 modbusRegister, int value)
+void IntegrationPluginModbusCommander::onReceivedHoldingRegister(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values)
 {
     auto modbus = sender();
 
@@ -430,7 +430,7 @@ void IntegrationPluginModbusCommander::onReceivedHoldingRegister(quint32 slaveAd
             if (thing->thingClassId() == holdingRegisterThingClassId) {
                 if ((thing->paramValue(m_slaveAddressParamTypeId.value(thing->thingClassId())) == slaveAddress)
                         && (thing->paramValue(m_registerAddressParamTypeId.value(thing->thingClassId())) == modbusRegister)) {
-                    thing->setStateValue(m_valueStateTypeId.value(thing->thingClassId()), value);
+                    thing->setStateValue(m_valueStateTypeId.value(thing->thingClassId()), values[0]);
                     thing->setStateValue(m_connectedStateTypeId.value(thing->thingClassId()), true);
                     return;
                 }
@@ -442,7 +442,7 @@ void IntegrationPluginModbusCommander::onReceivedHoldingRegister(quint32 slaveAd
             if (thing->thingClassId() == holdingRegisterThingClassId) {
                 if ((thing->paramValue(m_slaveAddressParamTypeId.value(thing->thingClassId())) == slaveAddress)
                         && (thing->paramValue(m_registerAddressParamTypeId.value(thing->thingClassId())) == modbusRegister)) {
-                    thing->setStateValue(m_valueStateTypeId.value(thing->thingClassId()), value);
+                    thing->setStateValue(m_valueStateTypeId.value(thing->thingClassId()), values[0]);
                     thing->setStateValue(m_connectedStateTypeId.value(thing->thingClassId()), true);
                     return;
                 }

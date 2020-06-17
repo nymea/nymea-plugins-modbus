@@ -265,7 +265,7 @@ void IntegrationPluginFronius::postSetupThing(Thing *thing)
         SunspecThing *sunspecThing = m_sunspecThings.key(thing);
         sunspecThing->update();
     } else {
-         Q_ASSERT_X(false, "postSetupThing", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
+        Q_ASSERT_X(false, "postSetupThing", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
     }
 }
 
@@ -302,7 +302,7 @@ void IntegrationPluginFronius::thingRemoved(Thing *thing)
         qCDebug(dcFronius()) << "Sunspec thing deleted";
         return;
     } else {
-         Q_ASSERT_X(false, "thingRemoved", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
+        Q_ASSERT_X(false, "thingRemoved", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
     }
 
     if (myThings().isEmpty()) {
@@ -335,36 +335,41 @@ void IntegrationPluginFronius::executeAction(ThingActionInfo *info)
         }
 
         if (action.actionTypeId() == sunspecStorageGridChargingActionTypeId) {
-            if (sunspecThing->setGridCharging(action.param(sunspecStorageGridChargingActionGridChargingParamTypeId).value().toBool())){
-                info->finish(Thing::ThingErrorNoError);
-            } else {
+            QUuid requestId = sunspecThing->setGridCharging(action.param(sunspecStorageGridChargingActionGridChargingParamTypeId).value().toBool());
+            if (requestId.isNull()) {
                 info->finish(Thing::ThingErrorHardwareFailure);
+            } else {
+                m_asyncActions.insert(requestId, info);
             }
         } else if (action.actionTypeId() == sunspecStorageEnableChargingLimitActionTypeId) {
             int value = (action.param(sunspecStorageEnableChargingLimitActionEnableChargingLimitParamTypeId).value().toBool() << 1) | thing->stateValue(sunspecStorageEnableDischargingLimitStateTypeId).toBool();
-            if (sunspecThing->setStorageControlMode(value)) {
-                info->finish(Thing::ThingErrorNoError);
-            } else {
+            QUuid requestId = sunspecThing->setStorageControlMode(value);
+            if (requestId.isNull()) {
                 info->finish(Thing::ThingErrorHardwareFailure);
+            } else {
+                m_asyncActions.insert(requestId, info);
             }
         } else if (action.actionTypeId() == sunspecStorageChargingRateActionTypeId) {
-            if (sunspecThing->setChargingRate(action.param(sunspecStorageChargingRateActionChargingRateParamTypeId).value().toInt())) {
-                info->finish(Thing::ThingErrorNoError);
-            } else {
+            QUuid requestId = sunspecThing->setChargingRate(action.param(sunspecStorageChargingRateActionChargingRateParamTypeId).value().toInt());
+            if (requestId.isNull()) {
                 info->finish(Thing::ThingErrorHardwareFailure);
+            } else {
+                m_asyncActions.insert(requestId, info);
             }
         } else if (action.actionTypeId() == sunspecStorageEnableDischargingLimitActionTypeId) {
             int value = (action.param(sunspecStorageEnableDischargingLimitActionEnableDischargingLimitParamTypeId).value().toBool() << 1) | thing->stateValue(sunspecStorageEnableChargingLimitStateTypeId).toBool();
-            if (sunspecThing->setStorageControlMode(value)) {
-                info->finish(Thing::ThingErrorNoError);
-            } else {
+            QUuid requestId = sunspecThing->setStorageControlMode(value);
+            if (requestId.isNull()) {
                 info->finish(Thing::ThingErrorHardwareFailure);
+            } else {
+                m_asyncActions.insert(requestId, info);
             }
         } else if (action.actionTypeId() == sunspecStorageDischargingRateActionTypeId) {
-            if (sunspecThing->setDischargingRate(action.param(sunspecStorageDischargingRateActionDischargingRateParamTypeId).value().toInt())) {
-                info->finish(Thing::ThingErrorNoError);
-            } else {
+            QUuid requestId = sunspecThing->setDischargingRate(action.param(sunspecStorageDischargingRateActionDischargingRateParamTypeId).value().toInt());
+            if (requestId.isNull()) {
                 info->finish(Thing::ThingErrorHardwareFailure);
+            } else {
+                m_asyncActions.insert(requestId, info);
             }
         } else {
             Q_ASSERT_X(false, "executeAction", QString("Unhandled action: %1").arg(action.actionTypeId().toString()).toUtf8());

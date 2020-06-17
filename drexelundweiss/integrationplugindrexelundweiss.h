@@ -34,7 +34,7 @@
 #include "integrations/integrationplugin.h"
 #include "plugintimer.h"
 
-#include "modbusrtumaster.h"
+#include "../modbus/modbusrtumaster.h"
 
 #include <QDateTime>
 #include <QSerialPortInfo>
@@ -71,10 +71,9 @@ private slots:
     void onPluginConfigurationChanged(const ParamTypeId &paramTypeId, const QVariant &value);
 
     void onConnectionStateChanged(bool status);
-    void onReceivedCoil(int slaveAddress, int modbusRegister, bool value);
-    void onReceivedDiscreteInput(int slaveAddress, int modbusRegister, bool value);
-    void onReceivedHoldingRegister(int slaveAddress, int modbusRegister, int value);
-    void onReceivedInputRegister(int slaveAddress, int modbusRegister, int value);
+    void onReceivedCoil(uint slaveAddress, uint modbusRegister, bool value);
+    void onReceivedDiscreteInput(uint slaveAddress, uint modbusRegister, bool value);
+    void onReceivedHoldingRegister(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values);
 
     void onWriteRequestFinished(QUuid requestId, bool success);
 };

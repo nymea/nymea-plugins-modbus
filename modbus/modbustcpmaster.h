@@ -45,6 +45,8 @@ public:
     ~ModbusTCPMaster();
 
     bool connectDevice();
+    void setNumberOfRetries(int number);
+    void setTimeout(int timeout);
 
     QUuid readCoil(uint slaveAddress, uint registerAddress);
     QUuid readDiscreteInput(uint slaveAddress, uint registerAddress);
@@ -52,7 +54,9 @@ public:
     QUuid readHoldingRegister(uint slaveAddress, uint registerAddress, uint size = 1);
 
     QUuid writeCoil(uint slaveAddress, uint registerAddress, bool status);
-    QUuid writeHoldingRegister(uint slaveAddress, uint registerAddress, const QVector<quint16> &values);
+
+    QUuid writeHoldingRegister(uint slaveAddress, uint registerAddress, quint16 value);
+    QUuid writeHoldingRegisters(uint slaveAddress, uint registerAddress, const QVector<quint16> &values);
 
     QHostAddress hostAddress();
     uint port();

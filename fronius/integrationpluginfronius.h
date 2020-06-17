@@ -38,6 +38,7 @@
 #include <QHash>
 #include <QNetworkReply>
 #include <QTimer>
+#include <QUuid>
 
 class PluginTimer;
 
@@ -67,7 +68,7 @@ private:
     QHash<FroniusStorage *, Thing *> m_froniusStorages;
     QHash<SunspecThing *, Thing *> m_sunspecThings;
 
-    QHash<ThingActionInfo *, Thing *> m_asyncActions;
+    QHash<QUuid, ThingActionInfo *> m_asyncActions;
 
     void updateThingStates(Thing *thing);
 

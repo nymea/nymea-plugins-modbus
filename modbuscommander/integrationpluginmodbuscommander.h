@@ -86,7 +86,7 @@ private slots:
     void onRequestError(QUuid requestId, const QString &error);
     void onReceivedCoil(quint32 slaveAddress, quint32 modbusRegister, bool value);
     void onReceivedDiscreteInput(quint32 slaveAddress, quint32 modbusRegister, bool value);
-    void onReceivedHoldingRegister(quint32 slaveAddress, quint32 modbusRegister, int value);
+    void onReceivedHoldingRegister(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values);
     void onReceivedInputRegister(quint32 slaveAddress, quint32 modbusRegister, int value);
 };
 
