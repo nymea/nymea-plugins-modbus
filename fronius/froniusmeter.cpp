@@ -73,12 +73,11 @@ void FroniusMeter::updateThingInfo(const QByteArray &data)
         return;
     }
 
-    qCDebug(dcFronius()) << "FroniusMeter: ThingInfo received:" << qUtf8Printable(data);
     // Parse the data and update the states of our thing
     QVariantMap dataMap = jsonDoc.toVariant().toMap().value("Body").toMap().value("Data").toMap();
     //QVariantMap headMap = jsonDoc.toVariant().toMap().value("Head").toMap();
 
-    //Request from Gerald Aigner, add Smart meter with following states: „PowerReal_P_Sum“, „EnergyReal_WAC_Sum_Produced“, „EnergyReal_WAC_Sum_Consumed“
+    //Add Smart meter with following states: „PowerReal_P_Sum“, „EnergyReal_WAC_Sum_Produced“, „EnergyReal_WAC_Sum_Consumed“
 
     // Set the inverter thing state
     if (dataMap.contains("PowerReal_P_Sum")) {

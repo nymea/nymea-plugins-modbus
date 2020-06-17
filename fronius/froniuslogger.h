@@ -45,7 +45,6 @@ public:
     explicit FroniusLogger(Thing *thing, QObject *parent = 0);
 
     QUrl updateUrl();
-    QUrl updateRelayStateUrl();
 
     void updateThingInfo(const QByteArray &data);
     void updatePowerRelayState(const QByteArray &data);

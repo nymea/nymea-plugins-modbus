@@ -49,18 +49,6 @@ QUrl FroniusLogger::updateUrl()
     return requestUrl;
 }
 
-
-QUrl FroniusLogger::updateRelayStateUrl()
-{
-    QUrl requestUrl;
-    requestUrl.setScheme("http");
-    requestUrl.setHost(hostAddress());
-    requestUrl.setPath("/status/emrs/");
-
-    return requestUrl;
-}
-
-
 void FroniusLogger::updateThingInfo(const QByteArray &data)
 {
     // Convert the rawdata to a json document
