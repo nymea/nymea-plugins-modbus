@@ -154,13 +154,6 @@
                     "interfaces" : ["extendedsmartmeterproducer", "connectable"],
                     "paramTypes": [
                         {
-                            "id": "2aa06052-bb2f-4868-9c2d-f221fb6f1ed8",
-                            "name": "name",
-                            "displayName": "Name",
-                            "type": "QString",
-                            "inputType": "TextLine"
-                        },
-                        {
                             "id": "1aa82e12-ee8c-4142-8b89-a4f1e85556d0",
                             "name": "host",
                             "displayName": "Host address",
@@ -252,37 +245,30 @@
                     "interfaces": [ "extendedsmartmeterconsumer", "extendedsmartmeterproducer", "connectable" ],
                     "paramTypes": [
                         {
-                            "id": "8ce0ba4f-e490-4b85-9c34-7da8586a8d1c",
-                            "name": "name",
-                            "displayName": "Name",
-                            "type": "QString",
-                            "inputType": "TextLine"
-                        },
-                        {
                             "id": "ddcb8689-b0b8-4b94-b022-4ce4cf9e0ec2",
                             "name": "host",
-                            "displayName": "host address",
+                            "displayName": "Address",
                             "type": "QString",
                             "inputType": "TextLine"
                         },
                         {
                             "id": "2cb4acd6-a663-48c3-8366-ab538c7b4e7d",
                             "name": "base",
-                            "displayName": "base url",
+                            "displayName": "Base URL",
                             "type": "QString",
                             "inputType": "TextLine"
                         },
                         {
                             "id": "cf3a7025-d368-475a-8f48-efc1344a8409",
                             "name": "id",
-                            "displayName": "device id",
+                            "displayName": "Device ID",
                             "type": "QString",
                             "inputType": "TextLine"
                         },
                         {
                             "id": "285eabb2-47c8-4406-8123-6621b21558c1",
                             "name": "uniqueId",
-                            "displayName": "uique id",
+                            "displayName": "Unique ID",
                             "type": "QString",
                             "inputType": "TextLine"
                         }
@@ -291,8 +277,8 @@
                         {
                             "id": "b70b61a4-54cb-47ec-b62a-b498eb1f650e",
                             "name": "connected",
-                            "displayName": "reachable",
-                            "displayNameEvent": "Meter reachable changed",
+                            "displayName": "Reachable",
+                            "displayNameEvent": "Reachable changed",
                             "type": "bool",
                             "defaultValue": false
                         },
@@ -300,7 +286,7 @@
                             "id": "e5056ea1-88a2-410b-9c5e-6322aca4cb17",
                             "name": "currentPower",
                             "displayName": "Total current power",
-                            "displayNameEvent": "total current power changed",
+                            "displayNameEvent": "Total current power changed",
                             "type": "double",
                             "unit": "Watt",
                             "defaultValue": "0"
@@ -309,7 +295,7 @@
                             "id": "ca14cca5-d9f0-49c5-a8f7-907d4c0825f0",
                             "name": "totalEnergyProduced",
                             "displayName": "Energy Produced",
-                            "displayNameEvent": "energy production changed",
+                            "displayNameEvent": "Energy production changed",
                             "type": "double",
                             "unit": "KiloWattHour",
                             "defaultValue": "0"
@@ -318,7 +304,7 @@
                             "id": "f3451818-48d2-42a5-94fd-ad094c06967f",
                             "name": "totalEnergyConsumed",
                             "displayName": "Energy Consumed",
-                            "displayNameEvent": "energy consumption changed",
+                            "displayNameEvent": "Energy consumption changed",
                             "type": "double",
                             "unit": "KiloWattHour",
                             "defaultValue": "0"
@@ -330,54 +316,47 @@
                     "name": "storage",
                     "displayName": "Fronius Solar Storage",
                     "createMethods": ["auto"],
-                    "interfaces": [ "connectable", "batterylevel"],
+                    "interfaces": [ "batterylevel", "connectable" ],
                     "paramTypes": [
-                        {
-                            "id": "e511c738-15d1-4881-b1c0-c284740564ba",
-                            "name": "name",
-                            "displayName": "displayName",
-                            "type": "QString",
-                            "defaultValue": "TextLine"
-                        },
                         {
                             "id": "9665c38b-c13a-428f-b741-1470239c63dc",
                             "name": "manufacturer",
-                            "displayName": "manufacturer",
+                            "displayName": "Manufacturer",
                             "type": "QString",
                             "defaultValue": "TextLine"
                         },
                         {
                             "id": "59a68e91-1aad-46b7-b351-03b7b2216366",
                             "name": "capacity",
-                            "displayName": "maxmimum capacity",
+                            "displayName": "Maxmimum capacity",
                             "type": "QString",
                             "defaultValue": "TextLine"
                         },
                         {
                             "id": "84bd8a41-2411-4bb0-87a9-ab7e01044b10",
                             "name": "host",
-                            "displayName": "host address",
+                            "displayName": "Address",
                             "type": "QString",
                             "inputType": "TextLine"
                         },
                         {
                             "id": "d19b5d81-4e62-48be-bad6-287b0019274a",
                             "name": "base",
-                            "displayName": "base url",
+                            "displayName": "Base URL",
                             "type": "QString",
                             "inputType": "TextLine"
                         },
                         {
                             "id": "49087f31-abf5-4bb8-946b-a3626ee80566",
                             "name": "id",
-                            "displayName": "device id",
+                            "displayName": "Device ID",
                             "type": "QString",
                             "inputType": "TextLine"
                         },
                         {
                             "id": "0d62432a-38bc-48b8-99d2-895f17fcf0b2",
                             "name": "uniqueId",
-                            "displayName": "unique id",
+                            "displayName": "Unique ID",
                             "type": "QString",
                             "inputType": "TextLine"
                         }
@@ -386,7 +365,7 @@
                         {
                             "id": "2f7e1267-b0be-4b78-9aa3-832b86c4efad",
                             "name": "connected",
-                            "displayName": "reachable",
+                            "displayName": "Reachable",
                             "displayNameEvent": "Storage reachable changed",
                             "type": "bool",
                             "defaultValue": false
@@ -394,16 +373,16 @@
                         {
                             "id": "2de34a1f-de2e-43ad-8998-8a5460dff9ae",
                             "name": "charging",
-                            "displayName": "state of charge",
-                            "displayNameEvent": "charge state changed",
+                            "displayName": "State of charge",
+                            "displayNameEvent": "Charge state changed",
                             "type": "QString",
                             "defaultValue": "-"
                         },
                         {
                             "id": "5c6da672-9662-41bc-8c8c-aa0f32481251",
                             "name": "batteryLevel",
-                            "displayName": "current charge",
-                            "displayNameEvent": "current charge changed",
+                            "displayName": "Current charge",
+                            "displayNameEvent": "Current charge changed",
                             "type": "int",
                             "unit": "Percentage",
                             "defaultValue": "0",
@@ -427,7 +406,6 @@
                             "type": "bool",
                             "defaultValue": false
                         }
-
                     ]
                 },
                 {
@@ -435,7 +413,7 @@
                     "name": "sunspecStorage",
                     "displayName": "SunSpec Storage",
                     "createMethods": ["user"],
-                    "interfaces": [ "connectable" ],
+                    "interfaces": ["batterylevel", "connectable" ],
                     "paramTypes": [
                         {
                             "id": "830a3cc6-ae0a-4cc3-94d6-86575e410e49",
@@ -456,12 +434,22 @@
                             "defaultValue": false
                         },
                         {
+                            "id": "3171a6e0-43a7-4de8-8e20-f748e44af7ac",
+                            "name": "batteryCritical",
+                            "displayName": "Battery critical",
+                            "displayNameEvent": "Battery critical changed",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
                             "id": "0bf53f80-97f8-488b-b514-58f9fe08c183",
-                            "name": "energy",
+                            "name": "batteryLevel",
                             "displayName": "Energy",
-                            "displayNameEvent": "storage energy changed",
-                            "type": "double",
+                            "displayNameEvent": "Storage energy changed",
+                            "type": "int",
                             "unit": "Percentage",
+                            "minValue": 0,
+                            "maxValue": 100,
                             "defaultValue": 0
                         },
                         {

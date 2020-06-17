@@ -327,8 +327,9 @@ void SunspecThing::onReceivedHoldingRegister(quint32 slaveAddress, quint32 modbu
 
         // ChaState
         qCDebug(dcFronius()) << "Current energy:" << ((double)data[8] / 100.0) << "[%]";
-        m_thing->setStateValue(sunspecStorageEnergyStateTypeId, (double)data[8] / 100.0);
-
+        int percentage = data[8] / 100.00;
+        m_thing->setStateValue(sunspecStorageBatteryLevelEventTypeId, percentage);
+        m_thing->setStateValue(sunspecStorageBatteryCriticalStateTypeId, (percentage < 10));
         // ChaSt
         //Charge status of storage thing. Enumerated
         qCDebug(dcFronius()) << "Charge state" << storageStateToString(static_cast<StorageState>(data[11]));

@@ -102,7 +102,6 @@ void IntegrationPluginFronius::setupThing(ThingSetupInfo *info)
 
         FroniusInverter *newInverter = new FroniusInverter(thing,this);
         newInverter->setDeviceId(thing->paramValue(inverterThingIdParamTypeId).toString());
-        newInverter->setName(thing->paramValue(inverterThingNameParamTypeId).toString());
         newInverter->setBaseUrl(thing->paramValue(inverterThingBaseParamTypeId).toString());
         newInverter->setHostAddress(thing->paramValue(inverterThingHostParamTypeId).toString());
 
@@ -154,7 +153,6 @@ void IntegrationPluginFronius::setupThing(ThingSetupInfo *info)
 
         FroniusStorage *newStorage = new FroniusStorage(thing, this);
         newStorage->setDeviceId(thing->paramValue(storageThingIdParamTypeId).toString());
-        newStorage->setName(thing->paramValue(storageThingNameParamTypeId).toString());
         newStorage->setBaseUrl(thing->paramValue(storageThingBaseParamTypeId).toString());
         newStorage->setHostAddress(thing->paramValue(storageThingHostParamTypeId).toString());
 
@@ -205,7 +203,6 @@ void IntegrationPluginFronius::setupThing(ThingSetupInfo *info)
 
         FroniusMeter *newMeter = new FroniusMeter(thing, this);;
         newMeter->setDeviceId(thing->paramValue(meterThingIdParamTypeId).toString());
-        newMeter->setName(thing->paramValue(meterThingNameParamTypeId).toString());
         newMeter->setBaseUrl(thing->paramValue(meterThingBaseParamTypeId).toString());
         newMeter->setHostAddress(thing->paramValue(meterThingHostParamTypeId).toString());
 
@@ -527,7 +524,6 @@ void IntegrationPluginFronius::searchNewThings(FroniusLogger *logger)
                 QString thingName = loggerThing->name() + " Inverter " + inverterId;
                 ThingDescriptor descriptor(inverterThingClassId, thingName, "Fronius Solar Inverter", loggerThing->id());
                 ParamList params;
-                params.append(Param(inverterThingNameParamTypeId, thingName));
                 params.append(Param(inverterThingHostParamTypeId, m_froniusLoggers.key(loggerThing)->hostAddress()));
                 params.append(Param(inverterThingBaseParamTypeId, m_froniusLoggers.key(loggerThing)->baseUrl()));
                 params.append(Param(inverterThingIdParamTypeId, inverterId));
@@ -545,7 +541,6 @@ void IntegrationPluginFronius::searchNewThings(FroniusLogger *logger)
                 QString thingName = loggerThing->name() + " Meter " + meterId;
                 ThingDescriptor descriptor(meterThingClassId, thingName, "Fronius Solar Meter", loggerThing->id());
                 ParamList params;
-                params.append(Param(meterThingNameParamTypeId, thingName));
                 params.append(Param(meterThingHostParamTypeId, m_froniusLoggers.key(loggerThing)->hostAddress()));
                 params.append(Param(meterThingBaseParamTypeId, m_froniusLoggers.key(loggerThing)->baseUrl()));
                 params.append(Param(meterThingIdParamTypeId, meterId));
@@ -563,7 +558,6 @@ void IntegrationPluginFronius::searchNewThings(FroniusLogger *logger)
                 QString thingName = loggerThing->name() + " Storage " + storageId;
                 ThingDescriptor descriptor(storageThingClassId, thingName, "Fronius Solar Storage", loggerThing->id());
                 ParamList params;
-                params.append(Param(storageThingNameParamTypeId, thingName));
                 params.append(Param(storageThingManufacturerParamTypeId, ""));
                 params.append(Param(storageThingCapacityParamTypeId, ""));
                 params.append(Param(storageThingHostParamTypeId, m_froniusLoggers.key(loggerThing)->hostAddress()));
