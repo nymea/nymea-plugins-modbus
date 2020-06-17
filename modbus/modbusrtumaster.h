@@ -74,7 +74,7 @@ signals:
 
     void receivedCoil(uint slaveAddress, uint modbusRegister, bool value);
     void receivedDiscreteInput(uint slaveAddress, uint modbusRegister, bool value);
-    void receivedHoldingRegister(uint slaveAddress, uint modbusRegister, uint value);
+    void receivedHoldingRegister(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values);
     void receivedInputRegister(uint slaveAddress, uint modbusRegister, uint value);
 };
 

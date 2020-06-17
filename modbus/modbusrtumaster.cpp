@@ -99,8 +99,8 @@ QUuid ModbusRTUMaster::readCoil(uint slaveAddress, uint registerAddress)
 
     if (QModbusReply *reply = m_modbusRtuSerialMaster->sendReadRequest(request, slaveAddress)) {
         if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
             connect(reply, &QModbusReply::finished, this, [reply, requestId, this] {
-
 
                 if (reply->error() == QModbusDevice::NoError) {
                     requestExecuted(requestId, true);
@@ -112,7 +112,6 @@ QUuid ModbusRTUMaster::readCoil(uint slaveAddress, uint registerAddress)
                     requestExecuted(requestId, false);
                     qCWarning(dcModbusRTU()) << "Read response error:" << reply->error();
                 }
-                reply->deleteLater();
             });
             connect(reply, &QModbusReply::errorOccurred, this, [reply, requestId, this] (QModbusDevice::Error error){
 
@@ -145,6 +144,7 @@ QUuid ModbusRTUMaster::writeCoil(uint slaveAddress, uint registerAddress, bool v
 
     if (QModbusReply *reply = m_modbusRtuSerialMaster->sendWriteRequest(request, slaveAddress)) {
         if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
             connect(reply, &QModbusReply::finished, this, [reply, requestId, this] {
 
                 if (reply->error() == QModbusDevice::NoError) {
@@ -157,7 +157,6 @@ QUuid ModbusRTUMaster::writeCoil(uint slaveAddress, uint registerAddress, bool v
                     requestExecuted(requestId, false);
                     qCWarning(dcModbusRTU()) << "Read response error:" << reply->error();
                 }
-                reply->deleteLater();
             });
             connect(reply, &QModbusReply::errorOccurred, this, [reply, requestId, this] (QModbusDevice::Error error){
 
@@ -189,19 +188,19 @@ QUuid ModbusRTUMaster::writeHoldingRegister(uint slaveAddress, uint registerAddr
 
     if (QModbusReply *reply = m_modbusRtuSerialMaster->sendWriteRequest(request, slaveAddress)) {
         if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
             connect(reply, &QModbusReply::finished, this, [reply, requestId, this] {
 
                 if (reply->error() == QModbusDevice::NoError) {
                     requestExecuted(requestId, true);
                     const QModbusDataUnit unit = reply->result();
                     uint modbusAddress = unit.startAddress();
-                    emit receivedHoldingRegister(reply->serverAddress(), modbusAddress, unit.value(0));
+                    emit receivedHoldingRegister(reply->serverAddress(), modbusAddress, unit.values());
 
                 } else {
                     requestExecuted(requestId, false);
                     qCWarning(dcModbusRTU()) << "Read response error:" << reply->error();
                 }
-                reply->deleteLater();
             });
             connect(reply, &QModbusReply::errorOccurred, this, [reply, requestId, this] (QModbusDevice::Error error){
 
@@ -232,6 +231,7 @@ QUuid ModbusRTUMaster::readDiscreteInput(uint slaveAddress, uint registerAddress
 
     if (QModbusReply *reply = m_modbusRtuSerialMaster->sendReadRequest(request, slaveAddress)) {
         if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
             connect(reply, &QModbusReply::finished, this, [reply, requestId, this] {
 
                 if (reply->error() == QModbusDevice::NoError) {
@@ -244,7 +244,6 @@ QUuid ModbusRTUMaster::readDiscreteInput(uint slaveAddress, uint registerAddress
                     requestExecuted(requestId, false);
                     qCWarning(dcModbusRTU()) << "Read response error:" << reply->error();
                 }
-                reply->deleteLater();
             });
             connect(reply, &QModbusReply::errorOccurred, this, [reply, requestId, this] (QModbusDevice::Error error){
 
@@ -276,6 +275,7 @@ QUuid ModbusRTUMaster::readInputRegister(uint slaveAddress, uint registerAddress
 
     if (QModbusReply *reply = m_modbusRtuSerialMaster->sendReadRequest(request, slaveAddress)) {
         if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
             connect(reply, &QModbusReply::finished, this, [reply, requestId, this] {
 
 
@@ -289,7 +289,6 @@ QUuid ModbusRTUMaster::readInputRegister(uint slaveAddress, uint registerAddress
                     requestExecuted(requestId, false);
                     qCWarning(dcModbusRTU()) << "Read response error:" << reply->error();
                 }
-                reply->deleteLater();
             });
             connect(reply, &QModbusReply::errorOccurred, this, [reply, requestId, this] (QModbusDevice::Error error){
 
@@ -321,19 +320,19 @@ QUuid ModbusRTUMaster::readHoldingRegister(uint slaveAddress, uint registerAddre
 
     if (QModbusReply *reply = m_modbusRtuSerialMaster->sendReadRequest(request, slaveAddress)) {
         if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
             connect(reply, &QModbusReply::finished, this, [reply, requestId, this] {
 
                 if (reply->error() == QModbusDevice::NoError) {
                     requestExecuted(requestId, true);
                     const QModbusDataUnit unit = reply->result();
                     uint modbusAddress = unit.startAddress();
-                    emit receivedHoldingRegister(reply->serverAddress(), modbusAddress, unit.value(0));
+                    emit receivedHoldingRegister(reply->serverAddress(), modbusAddress, unit.values());
 
                 } else {
                     requestExecuted(requestId, false);
                     qCWarning(dcModbusRTU()) << "Read response error:" << reply->error();
                 }
-                reply->deleteLater();
             });
             connect(reply, &QModbusReply::errorOccurred, this, [reply, requestId, this] (QModbusDevice::Error error){
 

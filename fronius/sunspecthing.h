@@ -37,9 +37,9 @@
 #include <QHostAddress>
 #include <QByteArray>
 #include <QBitArray>
+#include <QUuid>
 
-#include <modbus/modbus.h>
-#include <modbus/modbus-tcp.h>
+#include "../modbus/modbustcpmaster.h"
 
 class SunspecThing : public QObject
 {
@@ -61,31 +61,38 @@ public:
 
 private:
     Thing *m_thing;
-    modbus_t *m_modbus;
+    ModbusTCPMaster *m_modbusTcpMaster = nullptr;
     int m_slaveId = 1;
     bool m_floatingPointRepresentation = false;
-
-    void destroyModbus();
 
     void readCommonBlock();
     void readStorageBlock();
 
     QByteArray convertModbusRegister(const uint16_t &modbusData);
     QBitArray convertModbusRegisterBits(const uint16_t &modbusData);
-    QByteArray convertModbusRegisters(uint16_t *modbusData, const int &offset, const int &size);
+    QByteArray convertModbusRegisters(const QVector<quint16> &modbusData, int offset, int size);
 
     QString storageStateToString(const StorageState &state);
 
 public slots:
     bool connectModbus();
-    void disconnectModbus();
 
-    bool setGridCharging(const bool &charging);
-    bool setDischargingRate(const int &charging);
-    bool setChargingRate(const int &charging);
-    bool setStorageControlMode(const int &charging);
+    QUuid setGridCharging(const bool &charging);
+    QUuid setDischargingRate(const int &charging);
+    QUuid setChargingRate(const int &charging);
+    QUuid setStorageControlMode(const int &charging);
 
     void update();
+
+signals:
+    void connectionStateChanged(bool status);
+    void requestExecuted(QUuid requetId, bool success);
+
+private slots:
+    void onConnectionStateChanged(bool status);
+    void onRequestExecuted(QUuid requestId, bool success);
+    void onRequestError(QUuid requestId, const QString &error);
+    void onReceivedHoldingRegister(quint32 slaveAddress, quint32 modbusRegister, const QVector<quint16> &values);
 };
 
 #endif // SUNSPECTHING_H

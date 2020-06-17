@@ -160,12 +160,13 @@ void IntegrationPluginMyPv::executeAction(ThingActionInfo *info)
         if (action.actionTypeId() == elwaHeatingPowerActionTypeId) {
             int heatingPower = action.param(elwaHeatingPowerActionHeatingPowerParamTypeId).value().toInt();
 
-            QUuid requestId = modbusTCPMaster->writeHoldingRegister(0xff, ElwaModbusRegisters::Power, QVector<quint16>() << heatingPower));
+            QUuid requestId = modbusTCPMaster->writeHoldingRegister(0xff, ElwaModbusRegisters::Power, heatingPower);
             m_asyncActions.insert(requestId, info);
         } else if (action.actionTypeId() == elwaPowerActionTypeId) {
             bool power = action.param(elwaHeatingPowerActionHeatingPowerParamTypeId).value().toBool();
             if(power) {
-                QUuid requestId = modbusTCPMaster->writeHoldingRegister(0xff, ElwaModbusRegisters::ManuelStart,  QVector<quint16>() << 1));
+                QUuid requestId = modbusTCPMaster->writeHoldingRegister(0xff, ElwaModbusRegisters::ManuelStart, 1);
+                m_asyncActions.insert(requestId, info);
             }
         } else {
             Q_ASSERT_X(false, "executeAction", QString("Unhandled actionTypeId: %1").arg(action.actionTypeId().toString()).toUtf8());
@@ -184,7 +185,7 @@ void IntegrationPluginMyPv::onRefreshTimer(){
 
 void IntegrationPluginMyPv::onConnectionStateChanged(bool status)
 {
-    ModbusTCPMaster *modbusTcpMaster = sender();
+    ModbusTCPMaster *modbusTcpMaster = static_cast<ModbusTCPMaster *>(sender());
     Thing *thing = m_modbusTcpMasters.key(modbusTcpMaster);
     if (!thing)
         return;
@@ -193,25 +194,32 @@ void IntegrationPluginMyPv::onConnectionStateChanged(bool status)
 
 void IntegrationPluginMyPv::onWriteRequestExecuted(QUuid requestId, bool success)
 {
-
+    if (m_asyncActions.contains(requestId)) {
+        ThingActionInfo *info = m_asyncActions.value(requestId);
+        if (success) {
+            info->finish(Thing::ThingErrorNoError);
+        } else {
+            info->finish(Thing::ThingErrorHardwareNotAvailable);
+        }
+    }
 }
 
 void IntegrationPluginMyPv::onWriteRequestError(QUuid requestId, const QString &error)
 {
     Q_UNUSED(requestId)
-    qCWarning(dcMypv()) << "Error "
+    qCWarning(dcMypv()) << "Modbus error "<< error;
 }
 
-void IntegrationPluginMyPv::onReceivedHoldingRegister(quint32 slaveAddress, quint32 modbusRegister, int value)
+void IntegrationPluginMyPv::onReceivedHoldingRegister(quint32 slaveAddress, quint32 modbusRegister, const QVector<quint16> &value)
 {
     Q_UNUSED(slaveAddress)
-    ModbusTCPMaster *modbusTcpMaster = sender();
+    ModbusTCPMaster *modbusTcpMaster = static_cast<ModbusTCPMaster *>(sender());
     Thing *thing = m_modbusTcpMasters.key(modbusTcpMaster);
     if (!thing)
         return;
 
     if(modbusRegister == ElwaModbusRegisters::Status) {
-        switch (ElwaStatus(value)) {
+        switch (ElwaStatus(value[0])) {
         case ElwaStatus::Heating: {
             thing->setStateValue(elwaStatusStateTypeId, "Heating");
             thing->setStateValue(elwaPowerStateTypeId, true);

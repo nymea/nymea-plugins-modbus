@@ -12,7 +12,7 @@ SOURCES += \
     froniusstorage.cpp \
     froniusmeter.cpp \
     sunspecthing.cpp \
-    ../modbus/modbustcpmaster.h \
+    ../modbus/modbustcpmaster.cpp \
 
 HEADERS += \
     integrationpluginfronius.h \

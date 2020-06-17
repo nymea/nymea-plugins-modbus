@@ -71,6 +71,16 @@ bool ModbusTCPMaster::connectDevice() {
     return m_modbusTcpClient->connectDevice();
 }
 
+void ModbusTCPMaster::setNumberOfRetries(int number)
+{
+    m_modbusTcpClient->setNumberOfRetries(number);
+}
+
+void ModbusTCPMaster::setTimeout(int timeout)
+{
+    m_modbusTcpClient->setTimeout(timeout);
+}
+
 uint ModbusTCPMaster::port()
 {
     return m_modbusTcpClient->connectionParameter(QModbusDevice::NetworkPortParameter).toUInt();
@@ -143,7 +153,7 @@ QUuid ModbusTCPMaster::readCoil(uint slaveAddress, uint registerAddress)
     return requestId;
 }
 
-QUuid ModbusTCPMaster::writeHoldingRegister(uint slaveAddress, uint registerAddress, const QVector<quint16> &values)
+QUuid ModbusTCPMaster::writeHoldingRegisters(uint slaveAddress, uint registerAddress, const QVector<quint16> &values)
 {
     if (!m_modbusTcpClient) {
         return "";
@@ -361,6 +371,11 @@ QUuid ModbusTCPMaster::writeCoil(uint slaveAddress, uint registerAddress, bool v
         return "";
     }
     return requestId;
+}
+
+QUuid ModbusTCPMaster::writeHoldingRegister(uint slaveAddress, uint registerAddress, quint16 value)
+{
+    return writeHoldingRegisters(slaveAddress, registerAddress, QVector<quint16>() << value);
 }
 
 
