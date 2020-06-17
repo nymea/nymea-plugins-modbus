@@ -76,7 +76,7 @@ void IntegrationPluginFronius::setupThing(ThingSetupInfo *info)
             QByteArray data = reply->readAll();
 
             if (reply->error() != QNetworkReply::NoError) {
-                qCWarning(dcFronius()) << "Fronius: Network request error:" << reply->error() << reply->errorString();
+                qCWarning(dcFronius()) << "Fronius: Network request error:" << reply->error() << reply->errorString() << reply->url();
                 info->finish(Thing::ThingErrorHardwareNotAvailable, tr("Device not reachable"));
                 return;
             }
@@ -383,7 +383,7 @@ void IntegrationPluginFronius::updateThingStates(Thing *thing)
         connect(reply, &QNetworkReply::finished, [this, thing, reply]() {
 
             if (reply->error() != QNetworkReply::NoError) {
-                qCWarning(dcFronius()) << "Network request error:" << reply->error() << reply->errorString();
+                qCWarning(dcFronius()) << "Network request error:" << reply->error() << reply->errorString() << reply->request().url();
                 return;
             }
             QByteArray data = reply->readAll();
@@ -395,7 +395,7 @@ void IntegrationPluginFronius::updateThingStates(Thing *thing)
         connect(next_reply, &QNetworkReply::finished, next_reply, &QNetworkReply::deleteLater);
         connect(next_reply, &QNetworkReply::finished, [this, thing, next_reply]() {
             if (next_reply->error() != QNetworkReply::NoError) {
-                qCWarning(dcFronius()) << "Network request error:" << next_reply->error() << next_reply->errorString();
+                qCWarning(dcFronius()) << "Network request error:" << next_reply->error() << next_reply->errorString() << next_reply->request().url();
                 return;
             }
             QByteArray data = next_reply->readAll();
@@ -409,7 +409,7 @@ void IntegrationPluginFronius::updateThingStates(Thing *thing)
         connect(reply, &QNetworkReply::finished, [this, thing, reply]() {
 
             if (reply->error() != QNetworkReply::NoError) {
-                qCWarning(dcFronius()) << "Network request error:" << reply->error() << reply->errorString();
+                qCWarning(dcFronius()) << "Network request error:" << reply->error() << reply->errorString() << reply->request().url();
                 return;
             }
             QByteArray data = reply->readAll();
@@ -418,26 +418,12 @@ void IntegrationPluginFronius::updateThingStates(Thing *thing)
             }
         });
 
-        reply = hardwareManager()->networkManager()->get(QNetworkRequest(m_froniusLoggers.key(thing)->updateRelayStateUrl()));
-        connect(reply, &QNetworkReply::finished, reply, &QNetworkReply::deleteLater);
-        connect(reply, &QNetworkReply::finished, [this, thing, reply]() {
-
-            if (reply->error() != QNetworkReply::NoError) {
-                qCWarning(dcFronius()) << "Network request error:" << reply->error() << reply->errorString();
-                return;
-            }
-            QByteArray data = reply->readAll();
-            if(m_froniusLoggers.values().contains(thing)){ // check if thing was not removed before reply was received
-                m_froniusLoggers.key(thing)->updatePowerRelayState(data);
-            }
-        });
-
     } else if (thing->thingClassId() == meterThingClassId) {
         QNetworkReply *reply = hardwareManager()->networkManager()->get(QNetworkRequest(m_froniusMeters.key(thing)->updateUrl()));
         connect(reply, &QNetworkReply::finished, reply, &QNetworkReply::deleteLater);
         connect(reply, &QNetworkReply::finished, [this, thing, reply]() {
             if (reply->error() != QNetworkReply::NoError) {
-                qCWarning(dcFronius()) << "Network request error:" << reply->error() << reply->errorString();
+                qCWarning(dcFronius()) << "Network request error:" << reply->error() << reply->errorString() << reply->request().url();
                 return;
             }
             QByteArray data = reply->readAll();
@@ -450,7 +436,7 @@ void IntegrationPluginFronius::updateThingStates(Thing *thing)
         connect(next_reply, &QNetworkReply::finished, [this, thing, next_reply]() {
 
             if (next_reply->error() != QNetworkReply::NoError) {
-                qCWarning(dcFronius()) << "Network request error:" << next_reply->error() << next_reply->errorString();
+                qCWarning(dcFronius()) << "Network request error:" << next_reply->error() << next_reply->errorString() << next_reply->request().url();
                 return;
             }
             QByteArray data = next_reply->readAll();
@@ -464,7 +450,7 @@ void IntegrationPluginFronius::updateThingStates(Thing *thing)
         connect(reply, &QNetworkReply::finished, [this, thing, reply]() {
 
             if (reply->error() != QNetworkReply::NoError) {
-                qCWarning(dcFronius()) << "Network request error:" << reply->error() << reply->errorString();
+                qCWarning(dcFronius()) << "Network request error:" << reply->error() << reply->errorString() << reply->request().url();
                 return;
             }
             QByteArray data = reply->readAll();
@@ -477,7 +463,7 @@ void IntegrationPluginFronius::updateThingStates(Thing *thing)
         connect(next_reply, &QNetworkReply::finished, [this, thing, next_reply]() {
             next_reply->deleteLater();
             if (next_reply->error() != QNetworkReply::NoError) {
-                qCWarning(dcFronius()) << "Network request error:" << next_reply->error() << next_reply->errorString();
+                qCWarning(dcFronius()) << "Network request error:" << next_reply->error() << next_reply->errorString() << next_reply->request().url();
                 return;
             }
             QByteArray data = next_reply->readAll();
@@ -509,7 +495,7 @@ void IntegrationPluginFronius::searchNewThings(FroniusLogger *logger)
     connect(reply, &QNetworkReply::finished, [this, logger, reply]() {
 
         if (reply->error() != QNetworkReply::NoError) {
-            qCWarning(dcFronius()) << "Network request error:" << reply->error() << reply->errorString();
+            qCWarning(dcFronius()) << "Network request error:" << reply->error() << reply->errorString() << reply->request().url();
             return;
         }
 
