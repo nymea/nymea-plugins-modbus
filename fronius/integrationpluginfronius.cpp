@@ -63,10 +63,14 @@ void IntegrationPluginFronius::setupThing(ThingSetupInfo *info)
         }
 
         // Perform a HTTP request on the given IPv4Address to find things
-        QUrl url(QString("http://%1/solar_api/GetAPIVersion.cgi").arg(thing->paramValue(dataloggerThingLoggerHostParamTypeId).toString()));
-        qCDebug(dcFronius()) << "Search at address" << url.toString();
+        QUrl requestUrl;
+        requestUrl.setScheme("http");
+        requestUrl.setHost(thing->paramValue(dataloggerThingLoggerHostParamTypeId).toString());
+        requestUrl.setPath("/solar_api/GetAPIVersion.cgi");
 
-        QNetworkReply *reply = hardwareManager()->networkManager()->get(QNetworkRequest(url));
+        qCDebug(dcFronius()) << "Search at address" << requestUrl.toString();
+
+        QNetworkReply *reply = hardwareManager()->networkManager()->get(QNetworkRequest(requestUrl));
         connect(reply, &QNetworkReply::finished, reply, &QNetworkReply::deleteLater);
         connect(reply, &QNetworkReply::finished, [this, info, thing, reply]() {
             QByteArray data = reply->readAll();
@@ -92,18 +96,14 @@ void IntegrationPluginFronius::setupThing(ThingSetupInfo *info)
             m_froniusLoggers.insert(newLogger, thing);
 
             info->finish(Thing::ThingErrorNoError);
-            // FIX ME: remove after testing
-            //searchNewThings(m_froniusLoggers.key(thing));
-            //updateThingStates(thing);
         });
         //Async Setup
     } else if (thing->thingClassId() == inverterThingClassId) {
 
         FroniusInverter *newInverter = new FroniusInverter(thing,this);
-        newInverter->setThingId(thing->paramValue(inverterThingIdParamTypeId).toString());
+        newInverter->setDeviceId(thing->paramValue(inverterThingIdParamTypeId).toString());
         newInverter->setName(thing->paramValue(inverterThingNameParamTypeId).toString());
         newInverter->setBaseUrl(thing->paramValue(inverterThingBaseParamTypeId).toString());
-        newInverter->setHostId(thing->paramValue(inverterThingHostIdParamTypeId).toString());
         newInverter->setHostAddress(thing->paramValue(inverterThingHostParamTypeId).toString());
 
         m_froniusInverters.insert(newInverter,thing);
@@ -141,9 +141,9 @@ void IntegrationPluginFronius::setupThing(ThingSetupInfo *info)
             // Check reply information
             QVariantMap dataMap = jsonDoc.toVariant().toMap().value("Body").toMap().value("Data").toMap();
             // check for thing id in reply
-            if (dataMap.contains(newInverter->thingId())) {
-                qCDebug(dcFronius()) << "Found Thing with unique:" << dataMap.value(newInverter->thingId()).toMap().value("UniqueID").toString();
-                newInverter->setUniqueId(dataMap.value(newInverter->thingId()).toMap().value("UniqueID").toString());
+            if (dataMap.contains(newInverter->deviceId())) {
+                qCDebug(dcFronius()) << "Found Thing with unique:" << dataMap.value(newInverter->deviceId()).toMap().value("UniqueID").toString();
+                newInverter->setUniqueId(dataMap.value(newInverter->deviceId()).toMap().value("UniqueID").toString());
                 newInverter->pluginThing()->setParamValue(inverterThingUniqueIdParamTypeId,newInverter->uniqueId());
                 qCDebug(dcFronius()) << "Stored unique ID:" << newInverter->uniqueId();
             }
@@ -153,10 +153,9 @@ void IntegrationPluginFronius::setupThing(ThingSetupInfo *info)
     } else if (thing->thingClassId() == storageThingClassId) {
 
         FroniusStorage *newStorage = new FroniusStorage(thing, this);
-        newStorage->setThingId(thing->paramValue(storageThingIdParamTypeId).toString());
+        newStorage->setDeviceId(thing->paramValue(storageThingIdParamTypeId).toString());
         newStorage->setName(thing->paramValue(storageThingNameParamTypeId).toString());
         newStorage->setBaseUrl(thing->paramValue(storageThingBaseParamTypeId).toString());
-        newStorage->setHostId(thing->paramValue(storageThingHostIdParamTypeId).toString());
         newStorage->setHostAddress(thing->paramValue(storageThingHostParamTypeId).toString());
 
         m_froniusStorages.insert(newStorage,thing);
@@ -170,8 +169,8 @@ void IntegrationPluginFronius::setupThing(ThingSetupInfo *info)
         requestUrl.setScheme("http");
         requestUrl.setHost(newStorage->hostAddress());
         requestUrl.setPath(newStorage->baseUrl() + "GetStorageRealtimeData.cgi");
-        query.addQueryItem("Scope","Thing");
-        query.addQueryItem("ThingId",newStorage->thingId());
+        query.addQueryItem("Scope","Device");
+        query.addQueryItem("DeviceId", newStorage->deviceId());
         requestUrl.setQuery(query);
         qCDebug(dcFronius()) << "Get Storage Data at address" << requestUrl.toString();
         QNetworkReply *reply = hardwareManager()->networkManager()->get(QNetworkRequest(requestUrl));
@@ -205,10 +204,9 @@ void IntegrationPluginFronius::setupThing(ThingSetupInfo *info)
     } else if (thing->thingClassId() == meterThingClassId) {
 
         FroniusMeter *newMeter = new FroniusMeter(thing, this);;
-        newMeter->setThingId(thing->paramValue(meterThingIdParamTypeId).toString());
+        newMeter->setDeviceId(thing->paramValue(meterThingIdParamTypeId).toString());
         newMeter->setName(thing->paramValue(meterThingNameParamTypeId).toString());
         newMeter->setBaseUrl(thing->paramValue(meterThingBaseParamTypeId).toString());
-        newMeter->setHostId(thing->paramValue(meterThingHostIdParamTypeId).toString());
         newMeter->setHostAddress(thing->paramValue(meterThingHostParamTypeId).toString());
 
         m_froniusMeters.insert(newMeter,thing);
@@ -227,30 +225,29 @@ void IntegrationPluginFronius::setupThing(ThingSetupInfo *info)
     }
 }
 
-void IntegrationPluginFronius::init()
-{
-    m_pluginTimer = hardwareManager()->pluginTimerManager()->registerTimer(30);
-    connect(m_pluginTimer, &PluginTimer::timeout, this, [this]() {
-        foreach (Thing *logger, m_froniusLoggers)
-            updateThingStates(logger);
-
-        foreach (Thing *inverter, m_froniusInverters)
-            updateThingStates(inverter);
-
-        foreach (Thing *meter, m_froniusMeters)
-            updateThingStates(meter);
-
-        foreach (Thing *storage, m_froniusStorages)
-            updateThingStates(storage);
-
-        foreach (SunspecThing *sunspecThing, m_sunspecThings.keys())
-            sunspecThing->update();
-    });
-}
-
 void IntegrationPluginFronius::postSetupThing(Thing *thing)
 {
     qCDebug(dcFronius()) << "Post setup" << thing->name();
+
+    if (!m_pluginTimer) {
+        m_pluginTimer = hardwareManager()->pluginTimerManager()->registerTimer(30);
+        connect(m_pluginTimer, &PluginTimer::timeout, this, [this]() {
+            foreach (Thing *logger, m_froniusLoggers)
+                updateThingStates(logger);
+
+            foreach (Thing *inverter, m_froniusInverters)
+                updateThingStates(inverter);
+
+            foreach (Thing *meter, m_froniusMeters)
+                updateThingStates(meter);
+
+            foreach (Thing *storage, m_froniusStorages)
+                updateThingStates(storage);
+
+            foreach (SunspecThing *sunspecThing, m_sunspecThings.keys())
+                sunspecThing->update();
+        });
+    }
 
     if (thing->thingClassId() == dataloggerThingClassId) {
         searchNewThings(m_froniusLoggers.key(thing));
@@ -271,9 +268,6 @@ void IntegrationPluginFronius::postSetupThing(Thing *thing)
 
 void IntegrationPluginFronius::thingRemoved(Thing *thing)
 {
-    // Remove things
-
-    // Data Logger
     if (thing->thingClassId() == dataloggerThingClassId) {
         FroniusLogger *logger = m_froniusLoggers.key(thing);
         m_froniusLoggers.remove(logger);
@@ -500,26 +494,27 @@ void IntegrationPluginFronius::updateThingStates(Thing *thing)
 void IntegrationPluginFronius::searchNewThings(FroniusLogger *logger)
 {
     QUrl url; QUrlQuery query;
-    query.addQueryItem("ThingClass", "System");
+    query.addQueryItem("DeviceClass", "System");
     url.setScheme("http");
     url.setHost(logger->hostAddress());
-    url.setPath(logger->baseUrl() + "GetActiveThingInfo.cgi");
+    url.setPath(logger->baseUrl() + "GetActiveDeviceInfo.cgi");
     url.setQuery(query);
 
     qCDebug(dcFronius()) << "Search Things at address" << url.toString();
+    QNetworkRequest request = QNetworkRequest(url);
+    request.setHeader(QNetworkRequest::KnownHeaders::ContentTypeHeader, "application/json");
 
-    QNetworkReply *reply = hardwareManager()->networkManager()->get(QNetworkRequest(url));
+    QNetworkReply *reply = hardwareManager()->networkManager()->get(request);
+    connect(reply, &QNetworkReply::finished, reply, &QNetworkReply::deleteLater);
     connect(reply, &QNetworkReply::finished, [this, logger, reply]() {
-
-        reply->deleteLater();
 
         if (reply->error() != QNetworkReply::NoError) {
             qCWarning(dcFronius()) << "Network request error:" << reply->error() << reply->errorString();
             return;
         }
 
-        Thing *thing = m_froniusLoggers.value(logger);
-        if (!thing)
+        Thing *loggerThing = m_froniusLoggers.value(logger);
+        if (!loggerThing)
             return;
 
         QByteArray data = reply->readAll();
@@ -543,68 +538,52 @@ void IntegrationPluginFronius::searchNewThings(FroniusLogger *logger)
         foreach (QString inverterId, inverterMap.keys()) {
             //check if thing already connected to logger
             if(!existingThing(inverterThingIdParamTypeId,inverterId)) {
-                QString thingName = thing->name() + " Inverter " + inverterId;
-                ThingDescriptor descriptor(inverterThingClassId, thingName, "Fronius Solar Inverter");
+                QString thingName = loggerThing->name() + " Inverter " + inverterId;
+                ThingDescriptor descriptor(inverterThingClassId, thingName, "Fronius Solar Inverter", loggerThing->id());
                 ParamList params;
                 params.append(Param(inverterThingNameParamTypeId, thingName));
-                params.append(Param(inverterThingHostParamTypeId, m_froniusLoggers.key(thing)->hostAddress()));
-                params.append(Param(inverterThingBaseParamTypeId, m_froniusLoggers.key(thing)->baseUrl()));
+                params.append(Param(inverterThingHostParamTypeId, m_froniusLoggers.key(loggerThing)->hostAddress()));
+                params.append(Param(inverterThingBaseParamTypeId, m_froniusLoggers.key(loggerThing)->baseUrl()));
                 params.append(Param(inverterThingIdParamTypeId, inverterId));
                 params.append(Param(inverterThingUniqueIdParamTypeId, ""));
-                params.append(Param(inverterThingHostIdParamTypeId, thing->id()));
                 descriptor.setParams(params);
                 thingDescriptors.append(descriptor);
             }
-        }
-
-        if (!thingDescriptors.empty()) {
-            emit autoThingsAppeared(thingDescriptors);
-            thingDescriptors.clear();
         }
 
         // parse reply for meter things at the host address
         QVariantMap meterMap = bodyMap.value("Data").toMap().value("Meter").toMap();
         foreach (QString meterId, meterMap.keys()) {
             //check if thing already connected to logger
-            if(!existingThing(meterThingIdParamTypeId,meterId)) {
-                QString thingName = thing->name() + " Meter " + meterId;
-                ThingDescriptor descriptor(meterThingClassId, thingName, "Fronius Solar Meter");
+            if(!existingThing(meterThingIdParamTypeId, meterId)) {
+                QString thingName = loggerThing->name() + " Meter " + meterId;
+                ThingDescriptor descriptor(meterThingClassId, thingName, "Fronius Solar Meter", loggerThing->id());
                 ParamList params;
                 params.append(Param(meterThingNameParamTypeId, thingName));
-                //params.append(Param(meterThingManufParamTypeId, ""));
-                //params.append(Param(meterThingCapacityParamTypeId, ""));
-                params.append(Param(meterThingHostParamTypeId, m_froniusLoggers.key(thing)->hostAddress()));
-                params.append(Param(meterThingBaseParamTypeId, m_froniusLoggers.key(thing)->baseUrl()));
+                params.append(Param(meterThingHostParamTypeId, m_froniusLoggers.key(loggerThing)->hostAddress()));
+                params.append(Param(meterThingBaseParamTypeId, m_froniusLoggers.key(loggerThing)->baseUrl()));
                 params.append(Param(meterThingIdParamTypeId, meterId));
                 params.append(Param(meterThingUniqueIdParamTypeId, meterMap.value(meterId).toMap().value("Serial").toString()));
-                params.append(Param(meterThingHostIdParamTypeId, thing->id()));
                 descriptor.setParams(params);
                 thingDescriptors.append(descriptor);
             }
         }
-
-        if (!thingDescriptors.empty()) {
-            emit autoThingsAppeared(thingDescriptors);
-            thingDescriptors.clear();
-        }
-
 
         // parse reply for storage things at the host address
         QVariantMap storageMap = bodyMap.value("Data").toMap().value("Storage").toMap();
         foreach (QString storageId, storageMap.keys()) {
             //check if thing already connected to logger
             if(!existingThing(storageThingIdParamTypeId,storageId)) {
-                QString thingName = thing->name() + " Storage " + storageId;
-                ThingDescriptor descriptor(storageThingClassId, thingName, "Fronius Solar Storage");
+                QString thingName = loggerThing->name() + " Storage " + storageId;
+                ThingDescriptor descriptor(storageThingClassId, thingName, "Fronius Solar Storage", loggerThing->id());
                 ParamList params;
                 params.append(Param(storageThingNameParamTypeId, thingName));
                 params.append(Param(storageThingManufacturerParamTypeId, ""));
                 params.append(Param(storageThingCapacityParamTypeId, ""));
-                params.append(Param(storageThingHostParamTypeId, m_froniusLoggers.key(thing)->hostAddress()));
-                params.append(Param(storageThingBaseParamTypeId, m_froniusLoggers.key(thing)->baseUrl()));
+                params.append(Param(storageThingHostParamTypeId, m_froniusLoggers.key(loggerThing)->hostAddress()));
+                params.append(Param(storageThingBaseParamTypeId, m_froniusLoggers.key(loggerThing)->baseUrl()));
                 params.append(Param(storageThingIdParamTypeId, storageId));
                 params.append(Param(storageThingUniqueIdParamTypeId, storageMap.value(storageId).toMap().value("Serial").toString()));
-                params.append(Param(storageThingHostIdParamTypeId, thing->id()));
                 descriptor.setParams(params);
                 thingDescriptors.append(descriptor);
             }
@@ -614,9 +593,7 @@ void IntegrationPluginFronius::searchNewThings(FroniusLogger *logger)
             emit autoThingsAppeared(thingDescriptors);
             thingDescriptors.clear();
         }
-
     });
-
 }
 
 bool IntegrationPluginFronius::existingThing(ParamTypeId thingParamId, QString thingId)

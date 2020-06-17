@@ -66,7 +66,7 @@ QUrl FroniusStorage::updateUrl()
     requestUrl.setHost(hostAddress());
     requestUrl.setPath(baseUrl() + "GetStorageRealtimeData.cgi");
     query.addQueryItem("Scope", "Device");
-    query.addQueryItem("DeviceId", thingId());
+    query.addQueryItem("DeviceId", deviceId());
     requestUrl.setQuery(query);
 
     return requestUrl;
