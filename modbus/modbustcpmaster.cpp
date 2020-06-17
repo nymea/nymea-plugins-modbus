@@ -110,14 +110,14 @@ QHostAddress ModbusTCPMaster::hostAddress()
     return QHostAddress(m_modbusTcpClient->connectionParameter(QModbusDevice::NetworkAddressParameter).toString());
 }
 
-QUuid ModbusTCPMaster::readCoil(uint slaveAddress, uint registerAddress)
+QUuid ModbusTCPMaster::readCoil(uint slaveAddress, uint registerAddress, uint size)
 {
     if (!m_modbusTcpClient) {
         return "";
     }
     QUuid requestId = QUuid::createUuid();
 
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, registerAddress, 1);
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, registerAddress, size);
 
     if (QModbusReply *reply = m_modbusTcpClient->sendReadRequest(request, slaveAddress)) {
         if (!reply->isFinished()) {
@@ -128,7 +128,7 @@ QUuid ModbusTCPMaster::readCoil(uint slaveAddress, uint registerAddress)
                     writeRequestExecuted(requestId, true);
                     const QModbusDataUnit unit = reply->result();
                     uint modbusAddress = unit.startAddress();
-                    emit receivedCoil(reply->serverAddress(), modbusAddress, unit.value(0));
+                    emit receivedCoil(reply->serverAddress(), modbusAddress, unit.values());
 
                 } else {
                     writeRequestExecuted(requestId, false);
@@ -197,14 +197,14 @@ QUuid ModbusTCPMaster::writeHoldingRegisters(uint slaveAddress, uint registerAdd
     return requestId;
 }
 
-QUuid ModbusTCPMaster::readDiscreteInput(uint slaveAddress, uint registerAddress)
+QUuid ModbusTCPMaster::readDiscreteInput(uint slaveAddress, uint registerAddress, uint size)
 {
     if (!m_modbusTcpClient) {
         return "";
     }
     QUuid requestId = QUuid::createUuid();
 
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::DiscreteInputs, registerAddress, 1);
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::DiscreteInputs, registerAddress, size);
 
     if (QModbusReply *reply = m_modbusTcpClient->sendReadRequest(request, slaveAddress)) {
         if (!reply->isFinished()) {
@@ -215,7 +215,7 @@ QUuid ModbusTCPMaster::readDiscreteInput(uint slaveAddress, uint registerAddress
                     writeRequestExecuted(requestId, true);
                     const QModbusDataUnit unit = reply->result();
                     uint modbusAddress = unit.startAddress();
-                    emit receivedDiscreteInput(reply->serverAddress(), modbusAddress, unit.value(0));
+                    emit receivedDiscreteInput(reply->serverAddress(), modbusAddress, unit.values());
 
                 } else {
                     writeRequestExecuted(requestId, false);
@@ -241,14 +241,14 @@ QUuid ModbusTCPMaster::readDiscreteInput(uint slaveAddress, uint registerAddress
     return requestId;
 }
 
-QUuid ModbusTCPMaster::readInputRegister(uint slaveAddress, uint registerAddress)
+QUuid ModbusTCPMaster::readInputRegister(uint slaveAddress, uint registerAddress, uint size)
 {
     if (!m_modbusTcpClient) {
         return "";
     }
     QUuid requestId = QUuid::createUuid();
 
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::InputRegisters, registerAddress, 1);
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::InputRegisters, registerAddress, size);
 
     if (QModbusReply *reply = m_modbusTcpClient->sendReadRequest(request, slaveAddress)) {
         if (!reply->isFinished()) {
@@ -259,7 +259,7 @@ QUuid ModbusTCPMaster::readInputRegister(uint slaveAddress, uint registerAddress
                     writeRequestExecuted(requestId, true);
                     const QModbusDataUnit unit = reply->result();
                     uint modbusAddress = unit.startAddress();
-                    emit receivedInputRegister(reply->serverAddress(), modbusAddress, unit.value(0));
+                    emit receivedInputRegister(reply->serverAddress(), modbusAddress, unit.values());
 
                 } else {
                     writeRequestExecuted(requestId, false);
@@ -330,13 +330,18 @@ QUuid ModbusTCPMaster::readHoldingRegister(uint slaveAddress, uint registerAddre
 
 QUuid ModbusTCPMaster::writeCoil(uint slaveAddress, uint registerAddress, bool value)
 {
+    return writeCoils(slaveAddress, registerAddress, QVector<quint16>() << static_cast<quint16>(value));
+}
+
+QUuid ModbusTCPMaster::writeCoils(uint slaveAddress, uint registerAddress, const QVector<quint16> &values)
+    {
     if (!m_modbusTcpClient) {
         return "";
     }
     QUuid requestId = QUuid::createUuid();
 
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, registerAddress, 1);
-    request.setValue(0, static_cast<uint16_t>(value));
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, registerAddress, values.length());
+    request.setValues(values);
 
     if (QModbusReply *reply = m_modbusTcpClient->sendWriteRequest(request, slaveAddress)) {
         if (!reply->isFinished()) {
@@ -347,7 +352,7 @@ QUuid ModbusTCPMaster::writeCoil(uint slaveAddress, uint registerAddress, bool v
                     writeRequestExecuted(requestId, true);
                     const QModbusDataUnit unit = reply->result();
                     uint modbusAddress = unit.startAddress();
-                    emit receivedCoil(reply->serverAddress(), modbusAddress, unit.value(0));
+                    emit receivedCoil(reply->serverAddress(), modbusAddress, unit.values());
 
                 } else {
                     writeRequestExecuted(requestId, false);

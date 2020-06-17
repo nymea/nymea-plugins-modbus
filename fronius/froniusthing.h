@@ -60,8 +60,8 @@ public:
     QString uniqueId() const;
     void setUniqueId(const QString &uniqueId);
 
-    QString thingId() const;
-    void setThingId(const QString &thingId);
+    QString deviceId() const;
+    void setDeviceId(const QString &deviceId);
 
     Thing* pluginThing() const;
 

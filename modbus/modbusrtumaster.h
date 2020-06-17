@@ -45,14 +45,19 @@ public:
     ~ModbusRTUMaster();
 
     bool connectDevice();
+    void setNumberOfRetries(int number);
+    void setTimeout(int timeout);
 
-    QUuid readCoil(uint slaveAddress, uint registerAddress);
-    QUuid readDiscreteInput(uint slaveAddress, uint registerAddress);
-    QUuid readInputRegister(uint slaveAddress, uint registerAddress);
-    QUuid readHoldingRegister(uint slaveAddress, uint registerAddress);
+    QUuid readCoil(uint slaveAddress, uint registerAddress, uint size = 1);
+    QUuid readDiscreteInput(uint slaveAddress, uint registerAddress, uint size = 1);
+    QUuid readInputRegister(uint slaveAddress, uint registerAddress, uint size = 1);
+    QUuid readHoldingRegister(uint slaveAddress, uint registerAddress, uint size = 1);
 
     QUuid writeCoil(uint slaveAddress, uint registerAddress, bool status);
-    QUuid writeHoldingRegister(uint slaveAddress, uint registerAddress, uint data);
+    QUuid writeCoils(uint slaveAddress, uint registerAddress, const QVector<quint16> &values);
+
+    QUuid writeHoldingRegister(uint slaveAddress, uint registerAddress, quint16 value);
+    QUuid writeHoldingRegisters(uint slaveAddress, uint registerAddress, const QVector<quint16> &values);
 
     QString serialPort();
 
@@ -72,10 +77,10 @@ signals:
     void requestExecuted(QUuid requestId, bool success);
     void requestError(QUuid requestId, const QString &error);
 
-    void receivedCoil(uint slaveAddress, uint modbusRegister, bool value);
-    void receivedDiscreteInput(uint slaveAddress, uint modbusRegister, bool value);
+    void receivedCoil(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values);
+    void receivedDiscreteInput(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values);
     void receivedHoldingRegister(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values);
-    void receivedInputRegister(uint slaveAddress, uint modbusRegister, uint value);
+    void receivedInputRegister(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values);
 };
 
 #endif // MODBUSRTUMASTER_H

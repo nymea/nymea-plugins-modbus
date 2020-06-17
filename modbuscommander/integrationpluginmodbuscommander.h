@@ -84,10 +84,11 @@ private slots:
     void onConnectionStateChanged(bool status);
     void onRequestExecuted(QUuid requestId, bool success);
     void onRequestError(QUuid requestId, const QString &error);
-    void onReceivedCoil(quint32 slaveAddress, quint32 modbusRegister, bool value);
-    void onReceivedDiscreteInput(quint32 slaveAddress, quint32 modbusRegister, bool value);
+
+    void onReceivedCoil(quint32 slaveAddress, quint32 modbusRegister, const QVector<quint16> &values);
+    void onReceivedDiscreteInput(quint32 slaveAddress, quint32 modbusRegister, const QVector<quint16> &values);
     void onReceivedHoldingRegister(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values);
-    void onReceivedInputRegister(quint32 slaveAddress, quint32 modbusRegister, int value);
+    void onReceivedInputRegister(quint32 slaveAddress, quint32 modbusRegister, const QVector<quint16> &values);
 };
 
 #endif // INTEGRATIONPLUGINMODBUSCOMMANDER_H

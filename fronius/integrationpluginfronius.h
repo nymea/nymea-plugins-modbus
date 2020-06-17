@@ -51,13 +51,10 @@ class IntegrationPluginFronius : public IntegrationPlugin
 public:
     explicit IntegrationPluginFronius(QObject *parent = nullptr);
 
-    void init() override;
     void setupThing(ThingSetupInfo *thing) override;
     void postSetupThing(Thing* thing) override;
     void executeAction(ThingActionInfo *info) override;
     void thingRemoved(Thing* thing) override;
-
-    void startMonitoringAutoThings() override;
 
 private:
     PluginTimer *m_pluginTimer = nullptr;

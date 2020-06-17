@@ -56,7 +56,7 @@ QUrl FroniusInverter::updateUrl()
     requestUrl.setHost(hostAddress());
     requestUrl.setPath(baseUrl() + "GetInverterRealtimeData.cgi");
     query.addQueryItem("Scope", "Device");
-    query.addQueryItem("DeviceId", thingId());
+    query.addQueryItem("DeviceId", deviceId());
     query.addQueryItem("DataCollection", "CommonInverterData");
     requestUrl.setQuery(query);
 

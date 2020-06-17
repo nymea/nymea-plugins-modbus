@@ -187,13 +187,6 @@
                             "displayName": "Uique id",
                             "type": "QString",
                             "inputType": "TextLine"
-                        },
-                        {
-                            "id": "e329ecd2-6893-432f-9f14-069593c996e9",
-                            "name": "hostId",
-                            "displayName": "host id",
-                            "type": "QString",
-                            "inputType": "TextLine"
                         }
                     ],
                     "stateTypes": [
@@ -292,13 +285,6 @@
                             "displayName": "uique id",
                             "type": "QString",
                             "inputType": "TextLine"
-                        },
-                        {
-                            "id": "b4b86bfc-598a-4b5c-9350-52b944556ccc",
-                            "name": "hostId",
-                            "displayName": "host id",
-                            "type": "QString",
-                            "inputType": "TextLine"
                         }
                     ],
                     "stateTypes": [
@@ -392,13 +378,6 @@
                             "id": "0d62432a-38bc-48b8-99d2-895f17fcf0b2",
                             "name": "uniqueId",
                             "displayName": "unique id",
-                            "type": "QString",
-                            "inputType": "TextLine"
-                        },
-                        {
-                            "id": "79daa7f4-2551-4b89-b34a-2d75d1441a55",
-                            "name": "hostId",
-                            "displayName": "Host ID",
                             "type": "QString",
                             "inputType": "TextLine"
                         }
