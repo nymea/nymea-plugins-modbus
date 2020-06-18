@@ -52,14 +52,8 @@ The name of the StateType ({a5afaad5-78bf-4cac-b98d-7eae31aac518}) of ThingClass
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="68"/>
-        <source>Mypv</source>
-        <extracomment>The name of the plugin Mypv ({73c7efcc-80d5-4166-ad97-2cbbeb129d91})</extracomment>
-        <translation>my-PV</translation>
-    </message>
-    <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="71"/>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="74"/>
-        <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="77"/>
         <source>Power</source>
         <extracomment>The name of the ParamType (ThingClass: elwa, ActionType: power, ID: {e6b0260b-f255-4f17-8ac1-bc87a950f449})
 ----------
@@ -69,15 +63,15 @@ The name of the StateType ({e6b0260b-f255-4f17-8ac1-bc87a950f449}) of ThingClass
         <translation>Eingeschalten</translation>
     </message>
     <message>
-        <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="80"/>
+        <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="77"/>
         <source>Power changed</source>
         <extracomment>The name of the EventType ({e6b0260b-f255-4f17-8ac1-bc87a950f449}) of ThingClass elwa</extracomment>
         <translation>Leistung geändert</translation>
     </message>
     <message>
+        <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="80"/>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="83"/>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="86"/>
-        <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="89"/>
         <source>Power consumption</source>
         <extracomment>The name of the ParamType (ThingClass: elwa, ActionType: heatingPower, ID: {2eb3c40c-1b43-4b64-82e2-6558f0b8817e})
 ----------
@@ -87,20 +81,20 @@ The name of the StateType ({2eb3c40c-1b43-4b64-82e2-6558f0b8817e}) of ThingClass
         <translation>Leistung</translation>
     </message>
     <message>
-        <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="92"/>
+        <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="89"/>
         <source>Power consumption changed</source>
         <extracomment>The name of the EventType ({2eb3c40c-1b43-4b64-82e2-6558f0b8817e}) of ThingClass elwa</extracomment>
         <translation>Leistung geändert</translation>
     </message>
     <message>
-        <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="95"/>
+        <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="92"/>
         <source>Serial number</source>
         <extracomment>The name of the ParamType (ThingClass: elwa, Type: thing, ID: {b31a263a-2fdc-4a88-88ec-9e182025da8f})</extracomment>
         <translation>Seriennummer</translation>
     </message>
     <message>
+        <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="95"/>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="98"/>
-        <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="101"/>
         <source>Status</source>
         <extracomment>The name of the ParamType (ThingClass: elwa, EventType: status, ID: {d0a7065e-7773-47d7-b474-ce8d21d55aa7})
 ----------
@@ -108,14 +102,14 @@ The name of the StateType ({d0a7065e-7773-47d7-b474-ce8d21d55aa7}) of ThingClass
         <translation>Status</translation>
     </message>
     <message>
-        <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="104"/>
+        <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="101"/>
         <source>Status changed</source>
         <extracomment>The name of the EventType ({d0a7065e-7773-47d7-b474-ce8d21d55aa7}) of ThingClass elwa</extracomment>
         <translation>Status geändert</translation>
     </message>
     <message>
+        <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="104"/>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="107"/>
-        <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="110"/>
         <source>Target water temperature</source>
         <extracomment>The name of the ParamType (ThingClass: elwa, EventType: targetWaterTemperature, ID: {2b089c93-6411-41f7-96aa-f78d5cf910cb})
 ----------
@@ -123,14 +117,14 @@ The name of the StateType ({2b089c93-6411-41f7-96aa-f78d5cf910cb}) of ThingClass
         <translation>Zielwassertemperatur</translation>
     </message>
     <message>
-        <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="113"/>
+        <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="110"/>
         <source>Target water temperature changed</source>
         <extracomment>The name of the EventType ({2b089c93-6411-41f7-96aa-f78d5cf910cb}) of ThingClass elwa</extracomment>
         <translation>Zielwassertemperatur geändert</translation>
     </message>
     <message>
+        <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="113"/>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="116"/>
-        <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="119"/>
         <source>Water temperature</source>
         <extracomment>The name of the ParamType (ThingClass: elwa, EventType: temperature, ID: {60006f93-8852-433b-bbc0-f10cc3939eeb})
 ----------
@@ -138,15 +132,18 @@ The name of the StateType ({60006f93-8852-433b-bbc0-f10cc3939eeb}) of ThingClass
         <translation>Wassertemperatur</translation>
     </message>
     <message>
-        <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="122"/>
+        <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="119"/>
         <source>Water temperature changed</source>
         <extracomment>The name of the EventType ({60006f93-8852-433b-bbc0-f10cc3939eeb}) of ThingClass elwa</extracomment>
         <translation>Wassertemperatur geändert</translation>
     </message>
     <message>
+        <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="122"/>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mypv/plugininfo.h" line="125"/>
         <source>my-PV</source>
-        <extracomment>The name of the vendor ({1f17597f-e0d0-459b-858d-ec9cbcd10b2c})</extracomment>
+        <extracomment>The name of the vendor ({1f17597f-e0d0-459b-858d-ec9cbcd10b2c})
+----------
+The name of the plugin Mypv ({73c7efcc-80d5-4166-ad97-2cbbeb129d91})</extracomment>
         <translation>my-PV</translation>
     </message>
 </context>
