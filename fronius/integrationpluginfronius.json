@@ -177,7 +177,7 @@
                         {
                             "id": "8fadc0e8-9d69-4b9d-b493-b6ac3eb59c49",
                             "name": "uniqueId",
-                            "displayName": "Uique id",
+                            "displayName": "Unique id",
                             "type": "QString",
                             "inputType": "TextLine"
                         }
@@ -366,7 +366,7 @@
                             "id": "2f7e1267-b0be-4b78-9aa3-832b86c4efad",
                             "name": "connected",
                             "displayName": "Reachable",
-                            "displayNameEvent": "Storage reachable changed",
+                            "displayNameEvent": "Reachable changed",
                             "type": "bool",
                             "defaultValue": false
                         },
@@ -381,8 +381,8 @@
                         {
                             "id": "5c6da672-9662-41bc-8c8c-aa0f32481251",
                             "name": "batteryLevel",
-                            "displayName": "Current charge",
-                            "displayNameEvent": "Current charge changed",
+                            "displayName": "Battery level",
+                            "displayNameEvent": "Battery level changed",
                             "type": "int",
                             "unit": "Percentage",
                             "defaultValue": "0",
@@ -392,8 +392,8 @@
                         {
                             "id": "4417499c-1757-4309-868a-be5cf3455c4a",
                             "name": "cellTemperature",
-                            "displayName": "cell temperature",
-                            "displayNameEvent": "cell temperature changed",
+                            "displayName": "Cell temperature",
+                            "displayNameEvent": "Cell temperature changed",
                             "type": "double",
                             "unit": "DegreeCelsius",
                             "defaultValue": "0"
@@ -418,7 +418,7 @@
                         {
                             "id": "830a3cc6-ae0a-4cc3-94d6-86575e410e49",
                             "name": "modbusHost",
-                            "displayName": "Host address",
+                            "displayName": "Address",
                             "type": "QString",
                             "inputType": "IPv4Address",
                             "defaultValue": "88.117.152.99"
@@ -429,7 +429,7 @@
                             "id": "50ed3a6f-6ad3-445f-950b-eb6d1b7e7ef7",
                             "name": "connected",
                             "displayName": "Connected",
-                            "displayNameEvent": "connected changed",
+                            "displayNameEvent": "Connected changed",
                             "type": "bool",
                             "defaultValue": false
                         },
@@ -444,8 +444,8 @@
                         {
                             "id": "0bf53f80-97f8-488b-b514-58f9fe08c183",
                             "name": "batteryLevel",
-                            "displayName": "Energy",
-                            "displayNameEvent": "Storage energy changed",
+                            "displayName": "Battery level",
+                            "displayNameEvent": "Battery level changed",
                             "type": "int",
                             "unit": "Percentage",
                             "minValue": 0,
@@ -456,7 +456,7 @@
                             "id": "da2b19c5-0f48-49d1-93f0-abdc0051407d",
                             "name": "storageState",
                             "displayName": "State",
-                            "displayNameEvent": "Storage state changed",
+                            "displayNameEvent": "State changed",
                             "type": "QString",
                             "possibleValues": [
                                 "Off",
@@ -473,17 +473,17 @@
                             "id": "221a2ef6-0a92-4ff0-87fe-7bd920dbec0b",
                             "name": "gridCharging",
                             "displayName": "Grid charging",
-                            "displayNameEvent": "Charging from grid changed",
+                            "displayNameEvent": "Grid charging changed",
                             "type": "bool",
                             "defaultValue": false,
                             "writable": true,
-                            "displayNameAction": "Set charging from grid"
+                            "displayNameAction": "Set grid charging"
                         },
                         {
                             "id": "1f530f79-c0d2-466b-90e1-79149e34d92f",
                             "name": "enableChargingLimit",
-                            "displayName": "Turn Charging Limit",
-                            "displayNameEvent": "Charging limit",
+                            "displayName": "Charging limit",
+                            "displayNameEvent": "Charging limit changed",
                             "type": "bool",
                             "defaultValue": false,
                             "writable": true,
@@ -505,12 +505,12 @@
                         {
                             "id": "bc99a159-815a-40ab-a6e8-b46f315305f7",
                             "name": "enableDischargingLimit",
-                            "displayName": "Turn Discharging Limit",
-                            "displayNameEvent": "Discharging limit",
+                            "displayName": "Discharging limit",
+                            "displayNameEvent": "Discharging limit changed",
+                            "displayNameAction": "Enable Discharging Limit",
                             "type": "bool",
                             "defaultValue": false,
-                            "writable": true,
-                            "displayNameAction": "Enable Discharging Limit"
+                            "writable": true
                         },
                         {
                             "id": "6068f030-acce-44a2-b95f-bd00dd5ca760",

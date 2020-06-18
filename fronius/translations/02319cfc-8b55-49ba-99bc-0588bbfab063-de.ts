@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1">
+<TS version="2.1" language="de">
 <context>
     <name>IntegrationPluginFronius</name>
     <message>
         <location filename="../integrationpluginfronius.cpp" line="80"/>
         <source>Device not reachable</source>
-        <translation type="unfinished"></translation>
+        <translation>Gerät nicht erreichbar</translation>
     </message>
     <message>
         <location filename="../integrationpluginfronius.cpp" line="89"/>
         <location filename="../integrationpluginfronius.cpp" line="183"/>
         <source>Please try again</source>
-        <translation type="unfinished"></translation>
+        <translation>Bitte versuchen Sie es erneut</translation>
     </message>
 </context>
 <context>
@@ -27,7 +27,7 @@
 The name of the ParamType (ThingClass: storage, Type: thing, ID: {84bd8a41-2411-4bb0-87a9-ab7e01044b10})
 ----------
 The name of the ParamType (ThingClass: meter, Type: thing, ID: {ddcb8689-b0b8-4b94-b022-4ce4cf9e0ec2})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Adresse</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="177"/>
@@ -36,13 +36,13 @@ The name of the ParamType (ThingClass: meter, Type: thing, ID: {ddcb8689-b0b8-4b
         <extracomment>The name of the ParamType (ThingClass: storage, Type: thing, ID: {d19b5d81-4e62-48be-bad6-287b0019274a})
 ----------
 The name of the ParamType (ThingClass: meter, Type: thing, ID: {2cb4acd6-a663-48c3-8366-ab538c7b4e7d})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Basis URL</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="183"/>
         <source>Base url</source>
         <extracomment>The name of the ParamType (ThingClass: inverter, Type: thing, ID: {ec1f792a-b453-49f0-8ea6-677ad3c25a5c})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Basis URL</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="186"/>
@@ -51,13 +51,13 @@ The name of the ParamType (ThingClass: meter, Type: thing, ID: {2cb4acd6-a663-48
         <extracomment>The name of the ParamType (ThingClass: sunspecStorage, EventType: batteryCritical, ID: {3171a6e0-43a7-4de8-8e20-f748e44af7ac})
 ----------
 The name of the StateType ({3171a6e0-43a7-4de8-8e20-f748e44af7ac}) of ThingClass sunspecStorage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Batterie kritisch</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="192"/>
         <source>Battery critical changed</source>
         <extracomment>The name of the EventType ({3171a6e0-43a7-4de8-8e20-f748e44af7ac}) of ThingClass sunspecStorage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Batterie kritisch geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="195"/>
@@ -72,7 +72,7 @@ The name of the StateType ({0bf53f80-97f8-488b-b514-58f9fe08c183}) of ThingClass
 The name of the ParamType (ThingClass: storage, EventType: batteryLevel, ID: {5c6da672-9662-41bc-8c8c-aa0f32481251})
 ----------
 The name of the StateType ({5c6da672-9662-41bc-8c8c-aa0f32481251}) of ThingClass storage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Batteriestand</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="207"/>
@@ -81,7 +81,7 @@ The name of the StateType ({5c6da672-9662-41bc-8c8c-aa0f32481251}) of ThingClass
         <extracomment>The name of the EventType ({0bf53f80-97f8-488b-b514-58f9fe08c183}) of ThingClass sunspecStorage
 ----------
 The name of the EventType ({5c6da672-9662-41bc-8c8c-aa0f32481251}) of ThingClass storage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Batteriestand geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="213"/>
@@ -90,13 +90,13 @@ The name of the EventType ({5c6da672-9662-41bc-8c8c-aa0f32481251}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: storage, EventType: batteryCritical, ID: {e5396312-b50e-4d6f-b628-5b51448971d3})
 ----------
 The name of the StateType ({e5396312-b50e-4d6f-b628-5b51448971d3}) of ThingClass storage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Batteriestand kritisch</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="219"/>
         <source>Battery level critical changed</source>
         <extracomment>The name of the EventType ({e5396312-b50e-4d6f-b628-5b51448971d3}) of ThingClass storage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Batteriestand kritisch geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="222"/>
@@ -105,13 +105,13 @@ The name of the StateType ({e5396312-b50e-4d6f-b628-5b51448971d3}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: datalogger, EventType: co2factor, ID: {8ab01225-7be5-4482-a99b-314108ae0e2b})
 ----------
 The name of the StateType ({8ab01225-7be5-4482-a99b-314108ae0e2b}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>CO2 Faktor</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="228"/>
         <source>CO2 factor changed</source>
         <extracomment>The name of the EventType ({8ab01225-7be5-4482-a99b-314108ae0e2b}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>CO2 Faktor geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="231"/>
@@ -120,19 +120,19 @@ The name of the StateType ({8ab01225-7be5-4482-a99b-314108ae0e2b}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: datalogger, EventType: co2unit, ID: {b0e655f8-27d0-4add-918b-461cadc8efcc})
 ----------
 The name of the StateType ({b0e655f8-27d0-4add-918b-461cadc8efcc}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>CO2-Einheit</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="237"/>
         <source>CO2 unit changed</source>
         <extracomment>The name of the EventType ({b0e655f8-27d0-4add-918b-461cadc8efcc}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>CO2-Einheit geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="240"/>
         <source>Cash Currency changed</source>
         <extracomment>The name of the EventType ({84da30c8-a7fb-49c6-884c-9521f9f62bbc}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Bargeldwährung geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="243"/>
@@ -141,7 +141,7 @@ The name of the StateType ({b0e655f8-27d0-4add-918b-461cadc8efcc}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: datalogger, EventType: cashcurrency, ID: {84da30c8-a7fb-49c6-884c-9521f9f62bbc})
 ----------
 The name of the StateType ({84da30c8-a7fb-49c6-884c-9521f9f62bbc}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Bargeldwährung</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="249"/>
@@ -150,13 +150,13 @@ The name of the StateType ({84da30c8-a7fb-49c6-884c-9521f9f62bbc}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: datalogger, EventType: cashfactor, ID: {bc18595b-17c7-4a1f-8002-b908a3d9239d})
 ----------
 The name of the StateType ({bc18595b-17c7-4a1f-8002-b908a3d9239d}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Cash-Faktor</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="255"/>
         <source>Cash factor changed</source>
         <extracomment>The name of the EventType ({bc18595b-17c7-4a1f-8002-b908a3d9239d}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Cash-Faktor geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="258"/>
@@ -165,19 +165,19 @@ The name of the StateType ({bc18595b-17c7-4a1f-8002-b908a3d9239d}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: storage, EventType: cellTemperature, ID: {4417499c-1757-4309-868a-be5cf3455c4a})
 ----------
 The name of the StateType ({4417499c-1757-4309-868a-be5cf3455c4a}) of ThingClass storage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Zellentemperatur</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="264"/>
         <source>Cell temperature changed</source>
         <extracomment>The name of the EventType ({4417499c-1757-4309-868a-be5cf3455c4a}) of ThingClass storage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Zellentemperatur geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="267"/>
         <source>Charge state changed</source>
         <extracomment>The name of the EventType ({2de34a1f-de2e-43ad-8998-8a5460dff9ae}) of ThingClass storage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Ladezustand geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="270"/>
@@ -189,7 +189,7 @@ The name of the StateType ({4417499c-1757-4309-868a-be5cf3455c4a}) of ThingClass
 The name of the ParamType (ThingClass: sunspecStorage, EventType: enableChargingLimit, ID: {1f530f79-c0d2-466b-90e1-79149e34d92f})
 ----------
 The name of the StateType ({1f530f79-c0d2-466b-90e1-79149e34d92f}) of ThingClass sunspecStorage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Ladelimit</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="282"/>
@@ -201,13 +201,13 @@ The name of the StateType ({1f530f79-c0d2-466b-90e1-79149e34d92f}) of ThingClass
 The name of the ParamType (ThingClass: sunspecStorage, EventType: chargingRate, ID: {7f469bbc-64a5-4045-8d5f-9a1a85039851})
 ----------
 The name of the StateType ({7f469bbc-64a5-4045-8d5f-9a1a85039851}) of ThingClass sunspecStorage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Laderate</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="291"/>
         <source>Charging rate changed</source>
         <extracomment>The name of the EventType ({7f469bbc-64a5-4045-8d5f-9a1a85039851}) of ThingClass sunspecStorage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Laderate geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="294"/>
@@ -216,13 +216,13 @@ The name of the StateType ({7f469bbc-64a5-4045-8d5f-9a1a85039851}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: sunspecStorage, EventType: connected, ID: {50ed3a6f-6ad3-445f-950b-eb6d1b7e7ef7})
 ----------
 The name of the StateType ({50ed3a6f-6ad3-445f-950b-eb6d1b7e7ef7}) of ThingClass sunspecStorage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Verbunden</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="303"/>
         <source>Current Power changed</source>
         <extracomment>The name of the EventType ({788accbc-b86e-471b-b37f-14c9c6411526}) of ThingClass inverter</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Aktuelle Leistung geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="306"/>
@@ -231,7 +231,7 @@ The name of the StateType ({50ed3a6f-6ad3-445f-950b-eb6d1b7e7ef7}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: inverter, EventType: currentPower, ID: {788accbc-b86e-471b-b37f-14c9c6411526})
 ----------
 The name of the StateType ({788accbc-b86e-471b-b37f-14c9c6411526}) of ThingClass inverter</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Aktuelle Leistung</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="312"/>
@@ -240,13 +240,13 @@ The name of the StateType ({788accbc-b86e-471b-b37f-14c9c6411526}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: datalogger, EventType: defaultlang, ID: {18b250e2-080a-4991-b368-177c4da83eca})
 ----------
 The name of the StateType ({18b250e2-080a-4991-b368-177c4da83eca}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Standardsprache</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="318"/>
         <source>Default language changed</source>
         <extracomment>The name of the EventType ({18b250e2-080a-4991-b368-177c4da83eca}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Standardsprache geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="321"/>
@@ -255,13 +255,13 @@ The name of the StateType ({18b250e2-080a-4991-b368-177c4da83eca}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: storage, Type: thing, ID: {49087f31-abf5-4bb8-946b-a3626ee80566})
 ----------
 The name of the ParamType (ThingClass: meter, Type: thing, ID: {cf3a7025-d368-475a-8f48-efc1344a8409})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Geräte ID</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="327"/>
         <source>Device id</source>
         <extracomment>The name of the ParamType (ThingClass: inverter, Type: thing, ID: {f2f8c2f5-dd6a-4786-b336-82fc84e5bb98})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Geräte ID</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="330"/>
@@ -273,7 +273,7 @@ The name of the ParamType (ThingClass: meter, Type: thing, ID: {cf3a7025-d368-47
 The name of the ParamType (ThingClass: sunspecStorage, EventType: enableDischargingLimit, ID: {bc99a159-815a-40ab-a6e8-b46f315305f7})
 ----------
 The name of the StateType ({bc99a159-815a-40ab-a6e8-b46f315305f7}) of ThingClass sunspecStorage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Entladelimit</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="342"/>
@@ -285,25 +285,25 @@ The name of the StateType ({bc99a159-815a-40ab-a6e8-b46f315305f7}) of ThingClass
 The name of the ParamType (ThingClass: sunspecStorage, EventType: dischargingRate, ID: {6068f030-acce-44a2-b95f-bd00dd5ca760})
 ----------
 The name of the StateType ({6068f030-acce-44a2-b95f-bd00dd5ca760}) of ThingClass sunspecStorage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Entladerate</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="351"/>
         <source>Discharging rate changed</source>
         <extracomment>The name of the EventType ({6068f030-acce-44a2-b95f-bd00dd5ca760}) of ThingClass sunspecStorage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Entladerate geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="354"/>
         <source>Enable Charging Limit</source>
         <extracomment>The name of the ActionType ({1f530f79-c0d2-466b-90e1-79149e34d92f}) of ThingClass sunspecStorage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Aktiviere Ladelimit</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="357"/>
         <source>Enable Discharging Limit</source>
         <extracomment>The name of the ActionType ({bc99a159-815a-40ab-a6e8-b46f315305f7}) of ThingClass sunspecStorage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Aktiviere Entladelimit</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="360"/>
@@ -312,7 +312,7 @@ The name of the StateType ({6068f030-acce-44a2-b95f-bd00dd5ca760}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: meter, EventType: totalEnergyConsumed, ID: {f3451818-48d2-42a5-94fd-ad094c06967f})
 ----------
 The name of the StateType ({f3451818-48d2-42a5-94fd-ad094c06967f}) of ThingClass meter</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Energie verbraucht</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="366"/>
@@ -321,13 +321,13 @@ The name of the StateType ({f3451818-48d2-42a5-94fd-ad094c06967f}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: meter, EventType: totalEnergyProduced, ID: {ca14cca5-d9f0-49c5-a8f7-907d4c0825f0})
 ----------
 The name of the StateType ({ca14cca5-d9f0-49c5-a8f7-907d4c0825f0}) of ThingClass meter</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Energie produziert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="372"/>
         <source>Energy consumption changed</source>
         <extracomment>The name of the EventType ({f3451818-48d2-42a5-94fd-ad094c06967f}) of ThingClass meter</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Energieverbrauch geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="375"/>
@@ -336,7 +336,7 @@ The name of the StateType ({ca14cca5-d9f0-49c5-a8f7-907d4c0825f0}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: inverter, EventType: eday, ID: {b6af1bf5-753d-47b6-a151-e4d801fe6ff8})
 ----------
 The name of the StateType ({b6af1bf5-753d-47b6-a151-e4d801fe6ff8}) of ThingClass inverter</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Energie dieses Tages</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="381"/>
@@ -345,25 +345,25 @@ The name of the StateType ({b6af1bf5-753d-47b6-a151-e4d801fe6ff8}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: inverter, EventType: eyear, ID: {7fd2fa28-9bcc-4f01-a823-459437d185f6})
 ----------
 The name of the StateType ({7fd2fa28-9bcc-4f01-a823-459437d185f6}) of ThingClass inverter</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Energie dieses Jahres</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="387"/>
         <source>Energy of day changed</source>
         <extracomment>The name of the EventType ({b6af1bf5-753d-47b6-a151-e4d801fe6ff8}) of ThingClass inverter</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Energie dieses Tages geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="390"/>
         <source>Energy of year changed</source>
         <extracomment>The name of the EventType ({7fd2fa28-9bcc-4f01-a823-459437d185f6}) of ThingClass inverter</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Energie dieses Jahres geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="393"/>
         <source>Energy production changed</source>
         <extracomment>The name of the EventType ({ca14cca5-d9f0-49c5-a8f7-907d4c0825f0}) of ThingClass meter</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Energieproduktion geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="396"/>
@@ -372,49 +372,49 @@ The name of the StateType ({7fd2fa28-9bcc-4f01-a823-459437d185f6}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: inverter, EventType: totalEnergyProduced, ID: {d6dbb879-4cbc-4db3-830e-b92ba91a13e5})
 ----------
 The name of the StateType ({d6dbb879-4cbc-4db3-830e-b92ba91a13e5}) of ThingClass inverter</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Energie gesamt</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="402"/>
         <source>Energy total changed</source>
         <extracomment>The name of the EventType ({d6dbb879-4cbc-4db3-830e-b92ba91a13e5}) of ThingClass inverter</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Energie gesamt geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="405"/>
         <source>Fronius</source>
         <extracomment>The name of the vendor ({2286fc38-afd9-4128-ab7e-0fba527d53ba})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Fronius</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="408"/>
         <source>Fronius Smart Meter</source>
         <extracomment>The name of the ThingClass ({c3cb53a4-32dd-434d-9d9c-aada41f8129c})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Fronius Smart Meter</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="411"/>
         <source>Fronius Solar</source>
         <extracomment>The name of the plugin fronius ({02319cfc-8b55-49ba-99bc-0588bbfab063})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Fronius Solar</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="414"/>
         <source>Fronius Solar Connection</source>
         <extracomment>The name of the ThingClass ({4fd79fed-42f1-4df9-be64-3df7b2e0bda2})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Fronius Solar Verbindung</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="417"/>
         <source>Fronius Solar Inverter</source>
         <extracomment>The name of the ThingClass ({540aa956-8b8f-4982-9f58-343a76cea846})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Fronius Solar Inverter</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="420"/>
         <source>Fronius Solar Storage</source>
         <extracomment>The name of the ThingClass ({b00139fa-7386-48b1-8697-2fdd21a57ced})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Fronius Solar Speicher</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="423"/>
@@ -426,13 +426,13 @@ The name of the StateType ({d6dbb879-4cbc-4db3-830e-b92ba91a13e5}) of ThingClass
 The name of the ParamType (ThingClass: sunspecStorage, EventType: gridCharging, ID: {221a2ef6-0a92-4ff0-87fe-7bd920dbec0b})
 ----------
 The name of the StateType ({221a2ef6-0a92-4ff0-87fe-7bd920dbec0b}) of ThingClass sunspecStorage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Netzaufladung</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="432"/>
         <source>Grid charging changed</source>
         <extracomment>The name of the EventType ({221a2ef6-0a92-4ff0-87fe-7bd920dbec0b}) of ThingClass sunspecStorage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Netzaufladung geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="435"/>
@@ -441,13 +441,13 @@ The name of the StateType ({221a2ef6-0a92-4ff0-87fe-7bd920dbec0b}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: datalogger, EventType: hwversion, ID: {3b4206e5-74c7-4708-96b8-2abfab0c41d6})
 ----------
 The name of the StateType ({3b4206e5-74c7-4708-96b8-2abfab0c41d6}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Hardwareversion</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="441"/>
         <source>Hardware version changed</source>
         <extracomment>The name of the EventType ({3b4206e5-74c7-4708-96b8-2abfab0c41d6}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Hardwareversion geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="444"/>
@@ -456,7 +456,7 @@ The name of the StateType ({3b4206e5-74c7-4708-96b8-2abfab0c41d6}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: inverter, Type: thing, ID: {1aa82e12-ee8c-4142-8b89-a4f1e85556d0})
 ----------
 The name of the ParamType (ThingClass: datalogger, Type: thing, ID: {52da0197-4b78-4fec-aa72-70f949e26edc})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Adresse</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="450"/>
@@ -465,37 +465,37 @@ The name of the ParamType (ThingClass: datalogger, Type: thing, ID: {52da0197-4b
         <extracomment>The name of the ParamType (ThingClass: inverter, EventType: active, ID: {e763baa7-5eaf-438c-83f0-4fa6c0f7eeb0})
 ----------
 The name of the StateType ({e763baa7-5eaf-438c-83f0-4fa6c0f7eeb0}) of ThingClass inverter</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Inverter aktiv</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="456"/>
         <source>Inverter active changed</source>
         <extracomment>The name of the EventType ({e763baa7-5eaf-438c-83f0-4fa6c0f7eeb0}) of ThingClass inverter</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Inverter aktiv geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="459"/>
         <source>Manufacturer</source>
         <extracomment>The name of the ParamType (ThingClass: storage, Type: thing, ID: {9665c38b-c13a-428f-b741-1470239c63dc})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Hersteller</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="462"/>
         <source>Maxmimum capacity</source>
         <extracomment>The name of the ParamType (ThingClass: storage, Type: thing, ID: {59a68e91-1aad-46b7-b351-03b7b2216366})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Maximale Kapazität</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="543"/>
         <source>Set grid charging</source>
         <extracomment>The name of the ActionType ({221a2ef6-0a92-4ff0-87fe-7bd920dbec0b}) of ThingClass sunspecStorage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Aktiviere Netzladung</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="561"/>
         <source>State changed</source>
         <extracomment>The name of the EventType ({da2b19c5-0f48-49d1-93f0-abdc0051407d}) of ThingClass sunspecStorage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Zustand geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="600"/>
@@ -504,13 +504,13 @@ The name of the StateType ({e763baa7-5eaf-438c-83f0-4fa6c0f7eeb0}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: storage, Type: thing, ID: {0d62432a-38bc-48b8-99d2-895f17fcf0b2})
 ----------
 The name of the ParamType (ThingClass: meter, Type: thing, ID: {285eabb2-47c8-4406-8123-6621b21558c1})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Unique ID</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="606"/>
         <source>Unique id</source>
         <extracomment>The name of the ParamType (ThingClass: inverter, Type: thing, ID: {8fadc0e8-9d69-4b9d-b493-b6ac3eb59c49})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Unique ID</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="465"/>
@@ -519,31 +519,31 @@ The name of the ParamType (ThingClass: meter, Type: thing, ID: {285eabb2-47c8-44
         <extracomment>The name of the ParamType (ThingClass: datalogger, EventType: platformid, ID: {65c068e6-4a0b-4672-9724-ae95216c4c9c})
 ----------
 The name of the StateType ({65c068e6-4a0b-4672-9724-ae95216c4c9c}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Plattform ID</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="279"/>
         <source>Charging limit changed</source>
         <extracomment>The name of the EventType ({1f530f79-c0d2-466b-90e1-79149e34d92f}) of ThingClass sunspecStorage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Ladelimit geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="300"/>
         <source>Connected changed</source>
         <extracomment>The name of the EventType ({50ed3a6f-6ad3-445f-950b-eb6d1b7e7ef7}) of ThingClass sunspecStorage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Verbunden geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="339"/>
         <source>Discharging limit changed</source>
         <extracomment>The name of the EventType ({bc99a159-815a-40ab-a6e8-b46f315305f7}) of ThingClass sunspecStorage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Entladelimit geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="471"/>
         <source>Platform ID changed</source>
         <extracomment>The name of the EventType ({65c068e6-4a0b-4672-9724-ae95216c4c9c}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Plattform-ID geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="474"/>
@@ -552,7 +552,7 @@ The name of the StateType ({65c068e6-4a0b-4672-9724-ae95216c4c9c}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: datalogger, EventType: powerManagmentRelay, ID: {b217acf6-0c5e-4a3e-a50c-4c0133c871c2})
 ----------
 The name of the StateType ({b217acf6-0c5e-4a3e-a50c-4c0133c871c2}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Leistungsmanagement Relais</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="480"/>
@@ -561,19 +561,19 @@ The name of the StateType ({b217acf6-0c5e-4a3e-a50c-4c0133c871c2}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: datalogger, EventType: powerManagmentRelayReason, ID: {5650ce9b-0d7d-4c52-b410-ea618889b4bb})
 ----------
 The name of the StateType ({5650ce9b-0d7d-4c52-b410-ea618889b4bb}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Leistungsmanagement Relais Grund</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="486"/>
         <source>Power management relay reason changed</source>
         <extracomment>The name of the EventType ({5650ce9b-0d7d-4c52-b410-ea618889b4bb}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Leistungsmanagement Relais Grund geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="489"/>
         <source>Power management relay status changed</source>
         <extracomment>The name of the EventType ({b217acf6-0c5e-4a3e-a50c-4c0133c871c2}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Leistungsmanagement Relais Status geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="492"/>
@@ -582,13 +582,13 @@ The name of the StateType ({5650ce9b-0d7d-4c52-b410-ea618889b4bb}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: datalogger, EventType: productid, ID: {b22052ef-14da-43d2-982b-f2c2d8c03206})
 ----------
 The name of the StateType ({b22052ef-14da-43d2-982b-f2c2d8c03206}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Produkt-ID</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="498"/>
         <source>Product ID changed</source>
         <extracomment>The name of the EventType ({b22052ef-14da-43d2-982b-f2c2d8c03206}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Produkt-ID geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="501"/>
@@ -615,7 +615,7 @@ The name of the StateType ({eda29c50-73ac-40e0-9c92-26fee352e688}) of ThingClass
 The name of the ParamType (ThingClass: datalogger, EventType: connected, ID: {98e4476f-e745-4a7f-b795-19269cb70c40})
 ----------
 The name of the StateType ({98e4476f-e745-4a7f-b795-19269cb70c40}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Erreichbar</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="525"/>
@@ -627,25 +627,25 @@ The name of the StateType ({98e4476f-e745-4a7f-b795-19269cb70c40}) of ThingClass
 The name of the EventType ({b70b61a4-54cb-47ec-b62a-b498eb1f650e}) of ThingClass meter
 ----------
 The name of the EventType ({eda29c50-73ac-40e0-9c92-26fee352e688}) of ThingClass inverter</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Erreichbar geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="534"/>
         <source>Search new devices</source>
         <extracomment>The name of the ActionType ({c217fdc1-de18-41dc-b5d8-8072f84e7b6c}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Suche neue Geräte</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="537"/>
         <source>Set charging rate</source>
         <extracomment>The name of the ActionType ({7f469bbc-64a5-4045-8d5f-9a1a85039851}) of ThingClass sunspecStorage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Setze Laderate</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="540"/>
         <source>Set discharging rate</source>
         <extracomment>The name of the ActionType ({6068f030-acce-44a2-b95f-bd00dd5ca760}) of ThingClass sunspecStorage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Setze Entladerate</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="546"/>
@@ -654,13 +654,13 @@ The name of the EventType ({eda29c50-73ac-40e0-9c92-26fee352e688}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: datalogger, EventType: swversion, ID: {31743ca5-4353-4f26-b2ad-5da43e5b9d86})
 ----------
 The name of the StateType ({31743ca5-4353-4f26-b2ad-5da43e5b9d86}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Softwareversion</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="552"/>
         <source>Software version changed</source>
         <extracomment>The name of the EventType ({31743ca5-4353-4f26-b2ad-5da43e5b9d86}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Softwareversion geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="555"/>
@@ -669,7 +669,7 @@ The name of the StateType ({31743ca5-4353-4f26-b2ad-5da43e5b9d86}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: sunspecStorage, EventType: storageState, ID: {da2b19c5-0f48-49d1-93f0-abdc0051407d})
 ----------
 The name of the StateType ({da2b19c5-0f48-49d1-93f0-abdc0051407d}) of ThingClass sunspecStorage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Status</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="564"/>
@@ -678,13 +678,13 @@ The name of the StateType ({da2b19c5-0f48-49d1-93f0-abdc0051407d}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: storage, EventType: charging, ID: {2de34a1f-de2e-43ad-8998-8a5460dff9ae})
 ----------
 The name of the StateType ({2de34a1f-de2e-43ad-8998-8a5460dff9ae}) of ThingClass storage</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Ladezustand</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="570"/>
         <source>SunSpec Storage</source>
         <extracomment>The name of the ThingClass ({e14d622f-5d8f-4788-b189-0774a6382a9b})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>SunSpec Speicher</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="573"/>
@@ -693,13 +693,13 @@ The name of the StateType ({2de34a1f-de2e-43ad-8998-8a5460dff9ae}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: datalogger, EventType: tzone, ID: {6bdfeeda-7a47-4043-a011-5eb96308a7d6})
 ----------
 The name of the StateType ({6bdfeeda-7a47-4043-a011-5eb96308a7d6}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Zeitzone</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="579"/>
         <source>Time zone changed</source>
         <extracomment>The name of the EventType ({6bdfeeda-7a47-4043-a011-5eb96308a7d6}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Zeitzone geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="582"/>
@@ -708,13 +708,13 @@ The name of the StateType ({6bdfeeda-7a47-4043-a011-5eb96308a7d6}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: datalogger, EventType: tzoneloc, ID: {d034f59d-dc34-450a-a6f3-68264767a3e4})
 ----------
 The name of the StateType ({d034f59d-dc34-450a-a6f3-68264767a3e4}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Zeitzone Ort</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="588"/>
         <source>Timezone location changed</source>
         <extracomment>The name of the EventType ({d034f59d-dc34-450a-a6f3-68264767a3e4}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Zeitzone Ort geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="591"/>
@@ -723,19 +723,19 @@ The name of the StateType ({d034f59d-dc34-450a-a6f3-68264767a3e4}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: meter, EventType: currentPower, ID: {e5056ea1-88a2-410b-9c5e-6322aca4cb17})
 ----------
 The name of the StateType ({e5056ea1-88a2-410b-9c5e-6322aca4cb17}) of ThingClass meter</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Gesamte Momentanleistung</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="597"/>
         <source>Total current power changed</source>
         <extracomment>The name of the EventType ({e5056ea1-88a2-410b-9c5e-6322aca4cb17}) of ThingClass meter</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Gesamte Momentanleistung geändert</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/fronius/plugininfo.h" line="609"/>
         <source>logger reachable changed</source>
         <extracomment>The name of the EventType ({98e4476f-e745-4a7f-b795-19269cb70c40}) of ThingClass datalogger</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Logger erriechbar geändert</translation>
     </message>
 </context>
 </TS>

@@ -162,8 +162,9 @@ void IntegrationPluginDrexelUndWeiss::executeAction(ThingActionInfo *info)
             info->finish(Thing::ThingErrorNoError);
             return;
         } else {
-            info->finish(Thing::ThingErrorActionTypeNotFound);
+            Q_ASSERT_X(false, "executeAction", QString("Unhandled ActionTypeId: %1").arg(action.actionTypeId().toString()).toUtf8());
         }
+
     } else if (thing->thingClassId() == x2luThingClassId) {
         Thing *parentThing = myThings().findById(thing->parentId());
         if (!parentThing) {
@@ -199,7 +200,7 @@ void IntegrationPluginDrexelUndWeiss::executeAction(ThingActionInfo *info)
             m_pendingActions.insert(modbus->writeHoldingRegister(slave, ModbusRegisterX2::Betriebsart, data), info);
             return;
         } else {
-            info->finish(Thing::ThingErrorActionTypeNotFound);
+            Q_ASSERT_X(false, "executeAction", QString("Unhandled ActionTypeId: %1").arg(action.actionTypeId().toString()).toUtf8());
         }
     } else if (thing->thingClassId() == x2wpThingClassId) {
         Thing *parentThing = myThings().findById(thing->parentId());
@@ -227,7 +228,7 @@ void IntegrationPluginDrexelUndWeiss::executeAction(ThingActionInfo *info)
             m_pendingActions.insert(modbus->writeHoldingRegister(slave, ModbusRegisterX2::BrauchwasserSolltermperatur, data), info);
             return;
         } else {
-            info->finish(Thing::ThingErrorActionTypeNotFound);
+            Q_ASSERT_X(false, "executeAction", QString("Unhandled ActionTypeId: %1").arg(action.actionTypeId().toString()).toUtf8());
         }
     } else {
         Q_ASSERT_X(false, "executeAction", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
@@ -246,6 +247,11 @@ void IntegrationPluginDrexelUndWeiss::thingRemoved(Thing *thing)
         }
         m_usedSerialPorts.removeAll(modbus->serialPort());
         modbus->deleteLater();
+    }
+
+    if (myThings().isEmpty()) {
+        hardwareManager()->pluginTimerManager()->unregisterTimer(m_refreshTimer);
+        m_refreshTimer = nullptr;
     }
 }
 
@@ -539,8 +545,6 @@ void IntegrationPluginDrexelUndWeiss::onReceivedHoldingRegister(uint slaveAddres
                 ThingDescriptor descriptor(x2wpThingClassId, "X2 WP", "Drexel und Weiss", parentThing->id());
                 ParamList params;
 
-                //modbus->readHoldingRegister(slaveAddress, ModbusRegisterX2::SoftwareVersion);
-                //params.append(Param(x2wpThingSofwareVersionParamTypeId, data));
                 params.append(Param(x2wpThingSlaveAddressParamTypeId, slaveAddress));
                 descriptor.setParams(params);
                 thingDescriptors.append(descriptor);
@@ -553,8 +557,6 @@ void IntegrationPluginDrexelUndWeiss::onReceivedHoldingRegister(uint slaveAddres
                 ThingDescriptor descriptor(x2luThingClassId, "X2 LU", "Drexel und Weiss", parentThing->id());
                 ParamList params;
 
-                //modbus->readHoldingRegister(slaveAddress, ModbusRegisterX2::SoftwareVersion);
-                //params.append(Param(x2luThingSofwareVersionParamTypeId, data));
                 params.append(Param(x2luThingSlaveAddressParamTypeId, slaveAddress));
                 descriptor.setParams(params);
                 thingDescriptors.append(descriptor);
@@ -562,11 +564,41 @@ void IntegrationPluginDrexelUndWeiss::onReceivedHoldingRegister(uint slaveAddres
                 break;
             }
             case DeviceType::AerosilentBianco:
-                //Just a test
                 qDebug(dcDrexelUndWeiss()) << "Discovered Aerosilent Bianco";
                 break;
-            default:
-                qDebug(dcDrexelUndWeiss()) << "Unkown Thingtype" << values[0];
+            case DeviceType::AerosilentBusiness:
+                qDebug(dcDrexelUndWeiss()) << "Discovered Aerosilent Business";
+                break;
+            case DeviceType::AerosilentCentro:
+                qDebug(dcDrexelUndWeiss()) << "Discovered Aerosilent Centro";
+                break;
+            case DeviceType::AerosilentMicro:
+                qDebug(dcDrexelUndWeiss()) << "Discovered Aerosilent Micro";
+                break;
+            case DeviceType::AerosilentPrimus:
+                qDebug(dcDrexelUndWeiss()) << "Discovered Aerosilent Primus";
+                break;
+            case DeviceType::AerosilentStratos:
+                qDebug(dcDrexelUndWeiss()) << "Discovered Aerosilent Stratos";
+                break;
+            case DeviceType::AerosilentTopo:
+                qDebug(dcDrexelUndWeiss()) << "Discovered Aerosmart Topo";
+                break;
+            case DeviceType::AerosmartL:
+                qDebug(dcDrexelUndWeiss()) << "Discovered Aerosmart L";
+                break;
+            case DeviceType::AerosmartM:
+                qDebug(dcDrexelUndWeiss()) << "Discovered Aerosmart M";
+                break;
+            case DeviceType::AerosmartMono:
+                qDebug(dcDrexelUndWeiss()) << "Discovered Aerosmart Mono";
+                break;
+            case DeviceType::AerosmartS:
+                qDebug(dcDrexelUndWeiss()) << "Discovered Aerosmart S";
+                break;
+            case DeviceType::AerosmartXls:
+                qDebug(dcDrexelUndWeiss()) << "Discovered Aerosmart Xls";
+                break;
             }
         }
     }

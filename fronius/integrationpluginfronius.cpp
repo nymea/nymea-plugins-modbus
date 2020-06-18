@@ -107,9 +107,6 @@ void IntegrationPluginFronius::setupThing(ThingSetupInfo *info)
 
         m_froniusInverters.insert(newInverter,thing);
 
-        thing->setParentId(ThingId(newInverter->hostId()));
-        thing->setName(newInverter->name());
-
         // get inverter unique ID
         QUrl requestUrl;
         requestUrl.setScheme("http");
@@ -155,11 +152,7 @@ void IntegrationPluginFronius::setupThing(ThingSetupInfo *info)
         newStorage->setDeviceId(thing->paramValue(storageThingIdParamTypeId).toString());
         newStorage->setBaseUrl(thing->paramValue(storageThingBaseParamTypeId).toString());
         newStorage->setHostAddress(thing->paramValue(storageThingHostParamTypeId).toString());
-
         m_froniusStorages.insert(newStorage,thing);
-
-        thing->setParentId(ThingId(newStorage->hostId()));
-        thing->setName(newStorage->name());
 
         // Get storage manufacturer and maximum capacity
         QUrlQuery query;
@@ -206,11 +199,7 @@ void IntegrationPluginFronius::setupThing(ThingSetupInfo *info)
         newMeter->setBaseUrl(thing->paramValue(meterThingBaseParamTypeId).toString());
         newMeter->setHostAddress(thing->paramValue(meterThingHostParamTypeId).toString());
 
-        m_froniusMeters.insert(newMeter,thing);
-
-        thing->setParentId(ThingId(newMeter->hostId()));
-        thing->setName(newMeter->name());
-
+        m_froniusMeters.insert(newMeter, thing);
         info->finish(Thing::ThingErrorNoError);
         //Async setup
     } else if (thing->thingClassId() == sunspecStorageThingClassId) {
@@ -331,6 +320,7 @@ void IntegrationPluginFronius::executeAction(ThingActionInfo *info)
                 info->finish(Thing::ThingErrorHardwareFailure);
             } else {
                 m_asyncActions.insert(requestId, info);
+                connect(info, &ThingActionInfo::aborted, this, [requestId, this] {m_asyncActions.remove(requestId);});
             }
         } else if (action.actionTypeId() == sunspecStorageEnableChargingLimitActionTypeId) {
             int value = (action.param(sunspecStorageEnableChargingLimitActionEnableChargingLimitParamTypeId).value().toBool() << 1) | thing->stateValue(sunspecStorageEnableDischargingLimitStateTypeId).toBool();
@@ -339,6 +329,7 @@ void IntegrationPluginFronius::executeAction(ThingActionInfo *info)
                 info->finish(Thing::ThingErrorHardwareFailure);
             } else {
                 m_asyncActions.insert(requestId, info);
+                connect(info, &ThingActionInfo::aborted, this, [requestId, this] {m_asyncActions.remove(requestId);});
             }
         } else if (action.actionTypeId() == sunspecStorageChargingRateActionTypeId) {
             QUuid requestId = sunspecThing->setChargingRate(action.param(sunspecStorageChargingRateActionChargingRateParamTypeId).value().toInt());
@@ -346,6 +337,7 @@ void IntegrationPluginFronius::executeAction(ThingActionInfo *info)
                 info->finish(Thing::ThingErrorHardwareFailure);
             } else {
                 m_asyncActions.insert(requestId, info);
+                connect(info, &ThingActionInfo::aborted, this, [requestId, this] {m_asyncActions.remove(requestId);});
             }
         } else if (action.actionTypeId() == sunspecStorageEnableDischargingLimitActionTypeId) {
             int value = (action.param(sunspecStorageEnableDischargingLimitActionEnableDischargingLimitParamTypeId).value().toBool() << 1) | thing->stateValue(sunspecStorageEnableChargingLimitStateTypeId).toBool();
@@ -354,6 +346,7 @@ void IntegrationPluginFronius::executeAction(ThingActionInfo *info)
                 info->finish(Thing::ThingErrorHardwareFailure);
             } else {
                 m_asyncActions.insert(requestId, info);
+                connect(info, &ThingActionInfo::aborted, this, [requestId, this] {m_asyncActions.remove(requestId);});
             }
         } else if (action.actionTypeId() == sunspecStorageDischargingRateActionTypeId) {
             QUuid requestId = sunspecThing->setDischargingRate(action.param(sunspecStorageDischargingRateActionDischargingRateParamTypeId).value().toInt());
@@ -361,6 +354,7 @@ void IntegrationPluginFronius::executeAction(ThingActionInfo *info)
                 info->finish(Thing::ThingErrorHardwareFailure);
             } else {
                 m_asyncActions.insert(requestId, info);
+                connect(info, &ThingActionInfo::aborted, this, [requestId, this] {m_asyncActions.remove(requestId);});
             }
         } else {
             Q_ASSERT_X(false, "executeAction", QString("Unhandled action: %1").arg(action.actionTypeId().toString()).toUtf8());
