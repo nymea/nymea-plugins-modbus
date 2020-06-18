@@ -69,7 +69,7 @@ void IntegrationPluginModbusCommander::setupThing(ThingSetupInfo *info)
     Thing *thing = info->thing();
 
     if (thing->thingClassId() == modbusTCPClientThingClassId) {
-        QHostAddress hostAddress = QHostAddress(thing->paramValue(modbusTCPClientThingIpv4addressParamTypeId).toString());
+        QHostAddress hostAddress = QHostAddress(thing->paramValue(modbusTCPClientThingIpAddressParamTypeId).toString());
         uint port = thing->paramValue(modbusTCPClientThingPortParamTypeId).toUInt();
 
         foreach (ModbusTCPMaster *modbusTCPMaster, m_modbusTCPMasters.values()) {
@@ -90,7 +90,6 @@ void IntegrationPluginModbusCommander::setupThing(ThingSetupInfo *info)
         modbusTCPMaster->connectDevice();
         m_modbusTCPMasters.insert(thing, modbusTCPMaster);
         m_asyncTCPSetup.insert(modbusTCPMaster, info);
-        return;
 
     } else if (thing->thingClassId() == modbusRTUClientThingClassId) {
 
@@ -118,17 +117,16 @@ void IntegrationPluginModbusCommander::setupThing(ThingSetupInfo *info)
         modbusRTUMaster->connectDevice();
         m_modbusRTUMasters.insert(thing, modbusRTUMaster);
         m_asyncRTUSetup.insert(modbusRTUMaster, info);
-        return;
 
     } else if ((thing->thingClassId() == coilThingClassId)
                || (thing->thingClassId() == discreteInputThingClassId)
                || (thing->thingClassId() == holdingRegisterThingClassId)
                || (thing->thingClassId() == inputRegisterThingClassId)) {
         info->finish(Thing::ThingErrorNoError);
-        return;
+
+    } else {
+        Q_ASSERT_X(false, "setupThing", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
     }
-    qCWarning(dcModbusCommander()) << "Unhandled thing class in setupDevice!";
-    info->finish(Thing::ThingErrorSetupFailed);
 }
 
 void IntegrationPluginModbusCommander::discoverThings(ThingDiscoveryInfo *info)
@@ -158,7 +156,7 @@ void IntegrationPluginModbusCommander::discoverThings(ThingDiscoveryInfo *info)
     } else if (thingClassId == discreteInputThingClassId) {
         Q_FOREACH(Thing *clientThing, myThings()){
             if (clientThing->thingClassId() == modbusTCPClientThingClassId) {
-                ThingDescriptor descriptor(thingClassId, "Discrete input", clientThing->name() + " " + clientThing->paramValue(modbusTCPClientThingIpv4addressParamTypeId).toString() + " Port: " + clientThing->paramValue(modbusTCPClientThingPortParamTypeId).toString());
+                ThingDescriptor descriptor(thingClassId, "Discrete input", clientThing->name() + " " + clientThing->paramValue(modbusTCPClientThingIpAddressParamTypeId).toString() + " Port: " + clientThing->paramValue(modbusTCPClientThingPortParamTypeId).toString());
                 descriptor.setParentId(clientThing->id());
                 info->addThingDescriptor(descriptor);
             }
@@ -174,7 +172,7 @@ void IntegrationPluginModbusCommander::discoverThings(ThingDiscoveryInfo *info)
     } else if (thingClassId == coilThingClassId) {
         Q_FOREACH(Thing *clientThing, myThings()){
             if (clientThing->thingClassId() == modbusTCPClientThingClassId) {
-                ThingDescriptor descriptor(thingClassId, "Coil", clientThing->name() + " " + clientThing->paramValue(modbusTCPClientThingIpv4addressParamTypeId).toString() + " Port: " + clientThing->paramValue(modbusTCPClientThingPortParamTypeId).toString());
+                ThingDescriptor descriptor(thingClassId, "Coil", clientThing->name() + " " + clientThing->paramValue(modbusTCPClientThingIpAddressParamTypeId).toString() + " Port: " + clientThing->paramValue(modbusTCPClientThingPortParamTypeId).toString());
                 descriptor.setParentId(clientThing->id());
                 info->addThingDescriptor(descriptor);
             }
@@ -189,7 +187,7 @@ void IntegrationPluginModbusCommander::discoverThings(ThingDiscoveryInfo *info)
     } else if (thingClassId == holdingRegisterThingClassId) {
         Q_FOREACH(Thing *clientThing, myThings()){
             if (clientThing->thingClassId() == modbusTCPClientThingClassId) {
-                ThingDescriptor descriptor(thingClassId, "Holding register", clientThing->name() + " " + clientThing->paramValue(modbusTCPClientThingIpv4addressParamTypeId).toString() + " Port: " + clientThing->paramValue(modbusTCPClientThingPortParamTypeId).toString());
+                ThingDescriptor descriptor(thingClassId, "Holding register", clientThing->name() + " " + clientThing->paramValue(modbusTCPClientThingIpAddressParamTypeId).toString() + " Port: " + clientThing->paramValue(modbusTCPClientThingPortParamTypeId).toString());
                 descriptor.setParentId(clientThing->id());
                 info->addThingDescriptor(descriptor);
             }
@@ -205,7 +203,7 @@ void IntegrationPluginModbusCommander::discoverThings(ThingDiscoveryInfo *info)
     } else if (thingClassId == inputRegisterThingClassId) {
         Q_FOREACH(Thing *clientThing, myThings()){
             if (clientThing->thingClassId() == modbusTCPClientThingClassId) {
-                ThingDescriptor descriptor(thingClassId, "Input register", clientThing->name() + " " + clientThing->paramValue(modbusTCPClientThingIpv4addressParamTypeId).toString() + " Port: " + clientThing->paramValue(modbusTCPClientThingPortParamTypeId).toString());
+                ThingDescriptor descriptor(thingClassId, "Input register", clientThing->name() + " " + clientThing->paramValue(modbusTCPClientThingIpAddressParamTypeId).toString() + " Port: " + clientThing->paramValue(modbusTCPClientThingPortParamTypeId).toString());
                 descriptor.setParentId(clientThing->id());
                 info->addThingDescriptor(descriptor);
             }
@@ -217,9 +215,9 @@ void IntegrationPluginModbusCommander::discoverThings(ThingDiscoveryInfo *info)
         }
         info->finish(Thing::ThingErrorNoError);
         return;
+    } else {
+        Q_ASSERT_X(false, "discoverThings", QString("Unhandled thingClassId: %1").arg(info->thingClassId().toString()).toUtf8());
     }
-    info->finish(Thing::ThingErrorThingClassNotFound);
-    qCWarning(dcModbusCommander()) << "Unhandled device class in discovery!";
 }
 
 void IntegrationPluginModbusCommander::postSetupThing(Thing *info)
@@ -267,9 +265,7 @@ void IntegrationPluginModbusCommander::thingRemoved(Thing *thing)
     if (thing->thingClassId() == modbusTCPClientThingClassId) {
         ModbusTCPMaster *modbus = m_modbusTCPMasters.take(thing);
         modbus->deleteLater();
-    }
-
-    if (thing->thingClassId() == modbusRTUClientThingClassId) {
+    } else if (thing->thingClassId() == modbusRTUClientThingClassId) {
         ModbusRTUMaster *modbus = m_modbusRTUMasters.take(thing);
         modbus->deleteLater();
     }

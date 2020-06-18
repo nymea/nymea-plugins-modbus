@@ -27,10 +27,9 @@
                     "paramTypes": [
                         {
                             "id": "2a3fcb23-931b-4ba1-b134-c49b656c76f7",
-                            "name": "ipv4address",
-                            "displayName": "IPv4 address",
+                            "name": "ipAddress",
+                            "displayName": "IP Address",
                             "type": "QString",
-                            "inputType": "IPv4Address",
                             "defaultValue": "127.0.0.1"
                         },
                         {
