@@ -71,10 +71,7 @@ private slots:
     void onPluginConfigurationChanged(const ParamTypeId &paramTypeId, const QVariant &value);
 
     void onConnectionStateChanged(bool status);
-    void onReceivedCoil(uint slaveAddress, uint modbusRegister, bool value);
-    void onReceivedDiscreteInput(uint slaveAddress, uint modbusRegister, bool value);
     void onReceivedHoldingRegister(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values);
-
     void onWriteRequestFinished(QUuid requestId, bool success);
 };
 

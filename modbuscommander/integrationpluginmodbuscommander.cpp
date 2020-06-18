@@ -538,7 +538,7 @@ void IntegrationPluginModbusCommander::writeRegister(Thing *thing, ThingActionIn
 {
     Thing *parent = myThings().findById(thing->parentId());
     if (!parent) {
-        qCWarning(dcModbusCommander()) << "Could not find parente device" << thing->name();
+        qCWarning(dcModbusCommander()) << "Could not find parent device" << thing->name();
         return;
     }
     uint registerAddress = thing->paramValue(m_registerAddressParamTypeId.value(thing->thingClassId())).toUInt();;
