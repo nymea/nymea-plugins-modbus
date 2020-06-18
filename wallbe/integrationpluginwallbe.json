@@ -1,5 +1,5 @@
 {
-    "displayName": "wallbe plugin",
+    "displayName": "Wallbe",
     "name": "Wallbe",
     "id": "0de5bbd2-0dad-4727-9a17-3ee149106048",
     "vendors": [
@@ -20,7 +20,6 @@
                             "displayName": "IP address",
                             "name": "ip",
                             "type": "QString",
-                            "inputType": "IPv4Address",
                             "defaultValue": "192.168.0.8"
                         },
                         {
@@ -35,10 +34,11 @@
                         {
                             "id": "39a8e92b-40e5-4648-b5a8-2ffcb5598081",
                             "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
                             "name": "connected",
                             "type": "bool",
                             "defaultValue": false,
-                            "displayNameEvent": "Connected changed"
+                            "cached": false
                         },
                         {
                             "id": "8dc2fef8-d16e-422a-8498-456b818f5752",

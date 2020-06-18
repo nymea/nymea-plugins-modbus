@@ -53,7 +53,7 @@ void IntegrationPluginWallbe::setupThing(ThingSetupInfo *info)
 
     if (address.isNull()){
         qCWarning(dcWallbe) << "IP address is not valid";
-        info->finish(Thing::ThingErrorSetupFailed, tr("IP address parameter not valid"));
+        info->finish(Thing::ThingErrorSetupFailed, tr("Invalid IP address"));
         return;
     }
     ModbusTCPMaster *modbusTcpMaster = new ModbusTCPMaster(address, 502, this);
