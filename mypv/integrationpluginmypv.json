@@ -1,6 +1,6 @@
 {
     "name": "Mypv",
-    "displayName": "Mypv",
+    "displayName": "my-PV",
     "id": "73c7efcc-80d5-4166-ad97-2cbbeb129d91",
     "vendors": [
         {
@@ -13,7 +13,7 @@
                     "displayName": "AC Elwa E",
                     "id": "19ac4c7c-9c0a-4998-a8f0-c77d940cbb08",
                     "createMethods": ["Discovery"],
-                    "interfaces": ["connectable", "temperaturesensor", "heating"],
+                    "interfaces": ["heating", "temperaturesensor", "connectable"],
                     "paramTypes": [
                         {
                             "id": "ae66596f-f6c7-4d9c-9eee-b9190616a9e1",

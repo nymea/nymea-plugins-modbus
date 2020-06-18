@@ -20,7 +20,7 @@
             "thingClasses": [
                 {
                     "name": "modbusConnection",
-                    "displayName": "Modbus Connection",
+                    "displayName": "Modbus connection",
                     "id": "06d04eec-ab5d-479a-b9e6-8c89efc18a8b",
                     "createMethods": ["discovery", "user"],
                     "interfaces": ["gateway"],
@@ -36,7 +36,7 @@
                         {
                             "id": "d0c04612-cc3e-4d38-b4c9-708e28dc4eb3",
                             "name": "baudRate",
-                            "displayName": "Baudrate",
+                            "displayName": "Baud rate",
                             "type": "int",
                             "defaultValue": 9600
                         }
@@ -45,8 +45,8 @@
                         {
                             "id": "181ce6e2-9c55-45c6-b329-adf379679e07a",
                             "name": "connected",
-                            "displayName": "connected",
-                            "displayNameEvent": "connection status changed",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
                             "type": "bool",
                             "defaultValue": false
                         }
@@ -99,8 +99,8 @@
                         {
                             "id": "b4c4726f-d3d7-46e8-badb-0d590e7f5fac",
                             "name": "connected",
-                            "displayName": "connected",
-                            "displayNameEvent": "connection status changed",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
                             "type": "bool",
                             "defaultValue": false
                         },
@@ -171,8 +171,8 @@
                         {
                             "id": "baf203be-a391-4bfc-8198-53b4ecbcce80",
                             "name": "connected",
-                            "displayName": "connected",
-                            "displayNameEvent": "connection status changed",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
                             "type": "bool",
                             "defaultValue": false
                         },
