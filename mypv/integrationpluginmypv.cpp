@@ -41,6 +41,7 @@ IntegrationPluginMyPv::IntegrationPluginMyPv()
 
 void IntegrationPluginMyPv::discoverThings(ThingDiscoveryInfo *info)
 {
+    if (info->thingClassId() == elwaThingClassId) {
     QUdpSocket *searchSocket = new QUdpSocket(this);
 
     // Note: This will fail, and it's not a problem, but it is required to force the socket to stick to IPv4...
@@ -56,7 +57,7 @@ void IntegrationPluginMyPv::discoverThings(ThingDiscoveryInfo *info)
     qint64 len = searchSocket->writeDatagram(discoveryString, QHostAddress("255.255.255.255"), 16124);
     if (len != discoveryString.length()) {
         searchSocket->deleteLater();
-        qCWarning(dcMypv()) << "Error sending discovery";
+        info->finish(Thing::ThingErrorHardwareNotAvailable , tr("Error starting device discovery"));
         return;
     }
 
@@ -87,33 +88,30 @@ void IntegrationPluginMyPv::discoverThings(ThingDiscoveryInfo *info)
                 continue;
             }
 
-            quint32 uiAddress = 0;
-            for (int i=0; i<4; i++) {
-                uiAddress |= data.at(7-i) << (i*8);
-            }
-            QHostAddress address(uiAddress);
+            ThingDescriptor thingDescriptors(info->thingClassId(), "AC ELWA-E", senderAddress.toString());
             QByteArray serialNumber = data.mid(8, 16);
 
-            bool existing = false;
             foreach (Thing *existingThing, myThings()) {
-                if (existingThing->thingClassId() == info->thingClassId() && existingThing->paramValue(elwaThingIpAddressParamTypeId).toString() == address.toString()) {
-                    existing = true;
+                if (serialNumber == existingThing->paramValue(elwaThingSerialNumberParamTypeId).toString()) {
+                    qCDebug(dcMypv()) << "Rediscovered device " << existingThing->name();
+                    thingDescriptors.setThingId(existingThing->id());
+                    break;
                 }
             }
-            if (existing) {
-                qCDebug(dcMypv()) << "Already have device" << senderAddress << "in configured devices. Skipping...";
-                continue;
-            }
-            ThingDescriptor thingDescriptors(info->thingClassId(), "AC ELWA-E", address.toString());
+
             ParamList params;
-            params << Param(elwaThingIpAddressParamTypeId, address.toString());
+            params << Param(elwaThingIpAddressParamTypeId, senderAddress.toString());
             params << Param(elwaThingSerialNumberParamTypeId, serialNumber);
             thingDescriptors.setParams(params);
             descriptorList << thingDescriptors;
         }
         info->addThingDescriptors(descriptorList);;
         searchSocket->deleteLater();
+        info->finish(Thing::ThingErrorNoError);
     });
+    } else {
+        Q_ASSERT_X(false, "discoverThings", QString("Unhandled thingClassId: %1").arg(info->thingClassId().toString()).toUtf8());
+    }
 }
 
 void IntegrationPluginMyPv::setupThing(ThingSetupInfo *info)
@@ -130,7 +128,7 @@ void IntegrationPluginMyPv::setupThing(ThingSetupInfo *info)
 
         m_modbusTcpMasters.insert(thing, modbusTcpMaster);
     } else {
-        Q_ASSERT_X(false, "setupDevice", QString("Unhandled deviceClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
+        Q_ASSERT_X(false, "setupThing", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
     }
 }
 
@@ -159,14 +157,23 @@ void IntegrationPluginMyPv::executeAction(ThingActionInfo *info)
         ModbusTCPMaster *modbusTCPMaster = m_modbusTcpMasters.value(thing);
         if (action.actionTypeId() == elwaHeatingPowerActionTypeId) {
             int heatingPower = action.param(elwaHeatingPowerActionHeatingPowerParamTypeId).value().toInt();
-
             QUuid requestId = modbusTCPMaster->writeHoldingRegister(0xff, ElwaModbusRegisters::Power, heatingPower);
-            m_asyncActions.insert(requestId, info);
+            if (requestId.isNull()) {
+                info->finish(Thing::ThingErrorHardwareNotAvailable);
+            } else {
+                m_asyncActions.insert(requestId, info);
+                connect(info, &ThingActionInfo::aborted, this, [this, requestId] {m_asyncActions.remove(requestId);});
+            }
         } else if (action.actionTypeId() == elwaPowerActionTypeId) {
             bool power = action.param(elwaHeatingPowerActionHeatingPowerParamTypeId).value().toBool();
             if(power) {
                 QUuid requestId = modbusTCPMaster->writeHoldingRegister(0xff, ElwaModbusRegisters::ManuelStart, 1);
-                m_asyncActions.insert(requestId, info);
+                if (requestId.isNull()) {
+                    info->finish(Thing::ThingErrorHardwareNotAvailable);
+                } else {
+                    m_asyncActions.insert(requestId, info);
+                    connect(info, &ThingActionInfo::aborted, this, [this, requestId] {m_asyncActions.remove(requestId);});
+                }
             }
         } else {
             Q_ASSERT_X(false, "executeAction", QString("Unhandled actionTypeId: %1").arg(action.actionTypeId().toString()).toUtf8());
