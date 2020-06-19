@@ -4,6 +4,7 @@ PLUGIN_DIRS = \
     drexelundweiss          \
     modbuscommander         \
     mypv                    \
+    sunspec                 \
     wallbe                  \
 
 message(============================================)

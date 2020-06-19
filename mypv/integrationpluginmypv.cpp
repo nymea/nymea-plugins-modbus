@@ -195,7 +195,6 @@ void IntegrationPluginMyPv::executeAction(ThingActionInfo *info)
 
 void IntegrationPluginMyPv::onRefreshTimer()
 {
-
     foreach (Thing *thing, myThings()) {
         update(thing);
     }

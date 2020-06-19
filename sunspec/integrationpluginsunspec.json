@@ -1,0 +1,238 @@
+{
+    "name": "SunSpec",
+    "displayName": "sunspec",
+    "id": "73c7efcc-80d5-4166-ad97-2cbbeb129d91",
+    "paramTypes":[
+        {
+            "id": "52da5222-9a94-47a2-9adc-004541d2f5ed",
+            "name": "updateInterval",
+            "displayName": "Update interval",
+            "type": "int",
+            "unit": "Seconds",
+            "defaultValue": 15
+        }
+    ],
+    "vendors": [
+        {
+            "name": "sunspec",
+            "displayName": "SunSpec",
+            "id": "c143a7b4-a16c-4fff-86a3-9ffab3d6841d",
+            "thingClasses": [
+                {
+                    "name": "sunspecInverter",
+                    "displayName": "SunSpec Inverter",
+                    "id": "2e4122ea-96a5-415c-b5e2-7d6012265a83",
+                    "createMethods": [ "User" ],
+                    "interfaces": ["connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "6ffaa694-a4f2-4936-b043-37679449a34b",
+                            "name":"ipAddress",
+                            "displayName": "IP address",
+                            "type": "QString"
+                        },
+                        {
+                            "id": "08bf6597-976d-4fb9-8fc2-4372c07961d4",
+                            "name":"serialNumber",
+                            "displayName": "Serial number",
+                            "type": "QString"
+                        }
+                    ],
+                    "stateTypes":[
+                        {
+                            "id": "4401468c-0385-40a9-b436-daf7ed6a50d5",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "9bdcc785-4738-437e-88a0-fc231095c2dd",
+                            "name": "power",
+                            "displayName": "Power",
+                            "displayNameEvent": "Power changed",
+                            "displayNameAction": "Change power",
+                            "type": "bool",
+                            "defaultValue": 0,
+                            "writable": true
+                        }
+                    ]
+                },
+                {
+                    "name": "sunspecPvModule",
+                    "displayName": "SunSpec PV Module",
+                    "id": "fb7ff0df-a745-4313-83e4-1e5007b06fe2",
+                    "createMethods": [ "User" ],
+                    "interfaces": ["connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "890e468b-fc76-4641-9569-93cd45e6bb8d",
+                            "name":"ipAddress",
+                            "displayName": "IP address",
+                            "type": "QString"
+                        },
+                        {
+                            "id": "d5a9510d-720f-4a28-9d91-977eedd022bd",
+                            "name":"serialNumber",
+                            "displayName": "Serial number",
+                            "type": "QString"
+                        }
+                    ],
+                    "stateTypes":[
+                        {
+                            "id": "edc032d2-022f-43f7-9131-831ad23ee62a",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "0b7485eb-3cf7-45b2-87cf-9ec85366b197",
+                            "name": "power",
+                            "displayName": "Power",
+                            "displayNameEvent": "Power changed",
+                            "displayNameAction": "Change power",
+                            "type": "bool",
+                            "defaultValue": 0,
+                            "writable": true
+                        }
+                    ]
+                },
+                {
+                    "name": "sunspecMeter",
+                    "displayName": "SunSpec Meter",
+                    "id": "68f822f9-ff30-4275-b229-39a3674fead7",
+                    "createMethods": [ "User" ],
+                    "interfaces": ["connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "66bdb89b-bbd4-4edf-96df-649014d94c42",
+                            "name":"ipAddress",
+                            "displayName": "IP address",
+                            "type": "QString"
+                        },
+                        {
+                            "id": "89af6d27-4b81-42ef-9883-1e2ba2067884",
+                            "name":"serialNumber",
+                            "displayName": "Serial number",
+                            "type": "QString"
+                        }
+                    ],
+                    "stateTypes":[
+                        {
+                            "id": "36f861c7-afc1-4725-b41f-67113200d78f",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "36f18720-69ca-4021-9328-262d87397f1b",
+                            "name": "power",
+                            "displayName": "Power",
+                            "displayNameEvent": "Power changed",
+                            "displayNameAction": "Change power",
+                            "type": "bool",
+                            "defaultValue": 0,
+                            "writable": true
+                        }
+                    ]
+                },
+                {
+                    "name": "sunspecTracker",
+                    "displayName": "SunSpec Tracker",
+                    "id": "9941da30-a6d6-475d-8244-3c2145b419e6",
+                    "createMethods": [ "User" ],
+                    "interfaces": ["connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "ccdcca78-7efa-4253-8fdb-8731e6880e9b",
+                            "name":"ipAddress",
+                            "displayName": "IP address",
+                            "type": "QString"
+                        },
+                        {
+                            "id": "67ce05ff-14bf-4d43-94ba-d5f290278514",
+                            "name":"serialNumber",
+                            "displayName": "Serial number",
+                            "type": "QString"
+                        }
+                    ],
+                    "stateTypes":[
+                        {
+                            "id": "fe57e465-e49e-4d50-b880-6d9a243783ff",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "d2bbba4b-998f-444e-935f-f958927afddd",
+                            "name": "power",
+                            "displayName": "Power",
+                            "displayNameEvent": "Power changed",
+                            "displayNameAction": "Change power",
+                            "type": "bool",
+                            "defaultValue": 0,
+                            "writable": true
+                        }
+                    ]
+                },
+                {
+                    "name": "sunspecStorage",
+                    "displayName": "SunSpec Storage",
+                    "id": "9a643ba8-346c-4127-a2f8-956a7133d75e",
+                    "createMethods": [ "User" ],
+                    "interfaces": ["connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "421cacb9-a94d-4ba9-923c-3bc30d8b94c8",
+                            "name":"ipAddress",
+                            "displayName": "IP address",
+                            "type": "QString"
+                        },
+                        {
+                            "id": "ae76db81-7969-440f-85f0-28ed46d772db",
+                            "name":"serialNumber",
+                            "displayName": "Serial number",
+                            "type": "QString"
+                        }
+                    ],
+                    "stateTypes":[
+                        {
+                            "id": "25a1fb10-a6b9-4037-b7cf-ad481a65beb4",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "9c0e0b08-4461-4e54-aaf3-cab9155028da",
+                            "name": "power",
+                            "displayName": "Power",
+                            "displayNameEvent": "Power changed",
+                            "displayNameAction": "Change power",
+                            "type": "bool",
+                            "defaultValue": 0,
+                            "writable": true
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+
+
+
+

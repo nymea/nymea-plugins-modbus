@@ -1,0 +1,12 @@
+{
+    "title": "SunSpec",
+    "tagline": "Connect to SunSpec devices.",
+    "icon": "sunspec.png",
+    "stability": "consumer",
+    "offline": true,
+    "technologies": [
+	"network"
+    ],
+    "categories": [
+    ]
+}
