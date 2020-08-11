@@ -1,0 +1,180 @@
+{
+    "name": "Idm",
+    "displayName": "iDM",
+    "id": "3968d86d-d51a-4ad1-a185-91faa017e38f",
+    "vendors": [
+        {
+            "name": "Idm",
+            "displayName": "iDM",
+            "id": "6f54e4b0-1057-4004-87a9-97fdf4581625",
+            "thingClasses": [
+                {
+                    "name": "navigator2",
+                    "displayName": "Navigator 2.0",
+                    "id": "1c95ac91-4eca-4cbf-b0f4-d60d35d069ed",
+                    "createMethods": ["Discovery"],
+                    "interfaces": ["heating", "temperaturesensor", "connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "05714e5c-d66a-4095-bbff-a0eb96fb035b",
+                            "name":"ipAddress",
+                            "displayName": "IP address",
+                            "type": "QString"
+                        }
+                    ],
+                    "stateTypes":[
+                        {
+                            "id": "cfd71e64-b666-45ef-8db0-8213acd82c5f",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "33c27167-8e24-4cc5-943c-d17cd03e0f68",
+                            "name": "power",
+                            "displayName": "Power",
+                            "displayNameEvent": "Power changed",
+                            "displayNameAction": "Change power",
+                            "type": "bool",
+                            "defaultValue": 0,
+                            "writable": true
+                        },
+                        {
+                            "id": "f0f596bf-7e45-43ea-b3d4-767b82dd422a",
+                            "name": "temperature",
+                            "displayName": "Room temperature",
+                            "displayNameEvent": "Room temperature changed",
+                            "type": "double",
+                            "unit": "DegreeCelsius",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "fcf8e97f-a672-407f-94ae-30df15b310f4",
+                            "name": "waterTemperature",
+                            "displayName": "Water temperature",
+                            "displayNameEvent": "Water temperature changed",
+                            "type": "double",
+                            "unit": "DegreeCelsius",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "9f3462c2-7c42-4eeb-afc4-092e1e41a25d",
+                            "name": "outsideAirTemperature",
+                            "displayName": "Outside air temperature",
+                            "displayNameEvent": "Outside air temperature changed",
+                            "type": "double",
+                            "unit": "DegreeCelsius",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "efae7493-68c3-4cb9-853c-81011bdf09ca",
+                            "name": "targetTemperature",
+                            "displayName": "Target room temperature",
+                            "displayNameEvent": "Target room temperature changed",
+                            "displayNameAction": "Change room target temperature",
+                            "type": "double",
+                            "unit": "DegreeCelsius",
+                            "minValue": 14.00,
+                            "maxValue": 26.00,
+                            "defaultValue": 22.00,
+                            "writable": true
+                        },
+                        {
+                            "id": "746244d6-dd37-4af8-b2ae-a7d8463e51e2",
+                            "name": "targetWaterTemperature",
+                            "displayName": "Target water temperature",
+                            "displayNameEvent": "Target water temperature changed",
+                            "displayNameAction": "Change water target temperature",
+                            "type": "double",
+                            "unit": "DegreeCelsius",
+                            "minValue": 20.00,
+                            "maxValue": 55.00,
+                            "defaultValue": 46.00,
+                            "writable": true
+                        },
+                        {
+                            "id": "e539366b-44da-4119-b11b-497bcdb1f522",
+                            "name": "mode",
+                            "displayName": "Mode",
+                            "displayNameEvent": "Mode changed",
+                            "type": "QString",
+                            "defaultValue": "Off",
+                            "possibleValues": [
+                                "Off",
+                                "Heating",
+                                "Cooling",
+                                "Hot water",
+                                "Defrost"
+                            ]
+                        },
+                        {
+                            "id": "49fd83ee-ddf3-4477-9ee4-e01c53283b43",
+                            "name": "error",
+                            "displayName": "Error",
+                            "displayNameEvent": "Error changed",
+                            "type": "bool",
+                            "defaultValue": false
+                        }
+                    ],
+                    "actionTypes": [
+                        {
+                            "id": "29b65c13-46e9-49b1-970a-68252bdfeadc",
+                            "name": "externTemperature",
+                            "displayName": "Extern temperature",
+                            "paramTypes" : [
+                                {
+                                    "id": "d60fcb0c-19b5-4cac-9b95-a1b414518385",
+                                    "name": "temperature",
+                                    "displayName": "Temperature",
+                                    "type": "double",
+                                    "defaultValue": 0,
+                                    "unit": "DegreeCelsius"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "046f2e72-899a-4d82-91d3-fd268c784a1c",
+                            "name": "externHumidity",
+                            "displayName": "Extern humidity",
+                            "paramTypes" : [
+                                {
+                                    "id": "034b9a8c-1a5a-45da-8422-393273d0a159",
+                                    "name": "humidity",
+                                    "displayName": "humidity",
+                                    "type": "int",
+                                    "defaultValue": 0,
+                                    "minValue": 0,
+                                    "maxValue": 100,
+                                    "unit": "Percentage"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "87633d1f-3826-4bf0-9a2c-46a927446eb5",
+                            "name": "pvEnergy",
+                            "displayName": "Set avilable PV Energy",
+                            "paramTypes" : [
+                                {
+                                    "id": "84b251ab-33b5-45e5-9a5c-468e3affe821",
+                                    "name": "energy",
+                                    "displayName": "Energy",
+                                    "type": "double",
+                                    "defaultValue": 0.00,
+                                    "minValue": 0.00,
+                                    "unit": "KiloWatt"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+
+
+
+

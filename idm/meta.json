@@ -1,0 +1,13 @@
+{
+    "title": "iDM",
+    "tagline": "Control iDM network enabled heat pumps.",
+    "icon": "idm.png",
+    "stability": "consumer",
+    "offline": true,
+    "technologies": [
+        "network"
+    ],
+    "categories": [
+        "heating"
+    ]
+}
