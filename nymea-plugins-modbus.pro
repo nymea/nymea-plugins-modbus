@@ -6,6 +6,7 @@ PLUGIN_DIRS = \
     mypv                    \
     sunspec                 \
     unipi                   \
+    idm                     \
     wallbe                  \
     webasto                 \
 
