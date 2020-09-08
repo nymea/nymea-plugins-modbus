@@ -2,7 +2,6 @@ TEMPLATE = subdirs
 
 PLUGIN_DIRS = \
     drexelundweiss          \
-    fronius                 \
     modbuscommander         \
     mypv                    \
     wallbe                  \
