@@ -7,9 +7,17 @@ QT += \
 SOURCES += \
     integrationpluginsunspec.cpp \
     sunspec.cpp \
-    ../modbus/modbustcpmaster.cpp \
+    sunspecinverter.cpp \
+    sunspecmeter.cpp \
+    sunspecstorage.cpp \
+    sunspectracker.cpp \
+    sunspecstringcombiner.cpp \
 
 HEADERS += \
     integrationpluginsunspec.h \
     sunspec.h \
-    ../modbus/modbustcpmaster.h \
+    sunspecinverter.h \
+    sunspecmeter.h \
+    sunspecstorage.h \
+    sunspectracker.h \
+    sunspecstringcombiner.h \

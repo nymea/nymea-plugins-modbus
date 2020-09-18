@@ -32,10 +32,28 @@
                             "type": "QString"
                         },
                         {
-                            "id": "08bf6597-976d-4fb9-8fc2-4372c07961d4",
+                            "id": "418d90eb-16e9-47e4-83e3-a116a8fa4de7",
+                            "name":"manufacturer",
+                            "displayName": "Manufacturer",
+                            "type": "QString",
+                            "readOnly": true,
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "edf1bc0f-d143-4b75-a11f-635339fb30bf",
+                            "name":"deviceModel",
+                            "displayName": "Device model",
+                            "type": "QString",
+                            "readOnly": true,
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "d5181377-c746-4352-8683-6d90a4a83e6e",
                             "name":"serialNumber",
                             "displayName": "Serial number",
-                            "type": "QString"
+                            "type": "QString",
+                            "readOnly": true,
+                            "defaultValue": "Unkown"
                         }
                     ],
                     "stateTypes":[
@@ -57,48 +75,150 @@
                             "type": "bool",
                             "defaultValue": 0,
                             "writable": true
-                        }
-                    ]
-                },
-                {
-                    "name": "sunspecPvModule",
-                    "displayName": "SunSpec PV Module",
-                    "id": "fb7ff0df-a745-4313-83e4-1e5007b06fe2",
-                    "createMethods": [ "User" ],
-                    "interfaces": ["connectable"],
-                    "paramTypes": [
-                        {
-                            "id": "890e468b-fc76-4641-9569-93cd45e6bb8d",
-                            "name":"ipAddress",
-                            "displayName": "IP address",
-                            "type": "QString"
                         },
                         {
-                            "id": "d5a9510d-720f-4a28-9d91-977eedd022bd",
-                            "name":"serialNumber",
-                            "displayName": "Serial number",
-                            "type": "QString"
-                        }
-                    ],
-                    "stateTypes":[
-                        {
-                            "id": "edc032d2-022f-43f7-9131-831ad23ee62a",
-                            "name": "connected",
-                            "displayName": "Connected",
-                            "displayNameEvent": "Connected changed",
-                            "type": "bool",
-                            "defaultValue": false,
-                            "cached": false
+                            "id": "26560dd8-6de4-445e-ba55-391d7241c370",
+                            "name": "totalCurrent",
+                            "displayName": "Total AC current",
+                            "displayNameEvent": "Total AC current changed",
+                            "type": "int",
+                            "unit": "Ampere",
+                            "defaultValue": 0
                         },
                         {
-                            "id": "0b7485eb-3cf7-45b2-87cf-9ec85366b197",
-                            "name": "power",
-                            "displayName": "Power",
-                            "displayNameEvent": "Power changed",
-                            "displayNameAction": "Change power",
-                            "type": "bool",
-                            "defaultValue": 0,
-                            "writable": true
+                            "id": "3140ccd3-40cf-46c8-8bb2-8c3ea4582f84",
+                            "name": "phaseACurrent",
+                            "displayName": "Phase A current",
+                            "displayNameEvent": "Phase A current changed",
+                            "type": "int",
+                            "unit": "Ampere",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "7ea1a53a-6fd9-4914-8283-b57aa1aaaebf",
+                            "name": "phaseBCurrent",
+                            "displayName": "Phase B current",
+                            "displayNameEvent": "Phase B current changed",
+                            "type": "int",
+                            "unit": "Ampere",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "aa4b4cf5-43d0-4be5-9505-403918b5371d",
+                            "name": "phaseCCurrent",
+                            "displayName": "Phase C current",
+                            "displayNameEvent": "Phase C current changed",
+                            "type": "int",
+                            "unit": "Ampere",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "f08521aa-9c38-4c31-95e1-acb616f6e9c6",
+                            "name": "phaseANVoltage",
+                            "displayName": "Phase AN voltage",
+                            "displayNameEvent": "Phase AN volatage changed",
+                            "type": "int",
+                            "unit": "Volt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "739b8805-d522-4406-bede-d1e4200a3aa9",
+                            "name": "phaseBNVoltage",
+                            "displayName": "Phase BN voltage",
+                            "displayNameEvent": "Phase BN voltage changed",
+                            "type": "int",
+                            "unit": "Volt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "949b797d-5566-4667-8982-e430d23548e2",
+                            "name": "phaseCNVoltage",
+                            "displayName": "Phase CN voltage",
+                            "displayNameEvent": "Phase CN voltage changed",
+                            "type": "int",
+                            "unit": "Volt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "14036f44-25fd-4e93-8e8c-c677b06a2c34",
+                            "name": "acPower",
+                            "displayName": "AC power",
+                            "displayNameEvent": "AC power changed",
+                            "type": "int",
+                            "unit": "KiloWatt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "faa45cae-ed28-4150-9036-fceddf9d6776",
+                            "name": "lineFrequency",
+                            "displayName": "Line frequency",
+                            "displayNameEvent": "Line frequency changed",
+                            "type": "int",
+                            "unit": "Hertz",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "d493880d-eb58-4530-8010-8ea4f6d63387",
+                            "name": "acEnergy",
+                            "displayName": "AC energy",
+                            "displayNameEvent": "AC energy changed",
+                            "type": "int",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "44b0320f-89a7-4248-bad4-288ef898a5cc",
+                            "name": "cabinetTemperature",
+                            "displayName": "Cabinet temperature",
+                            "displayNameEvent": "Cabinet temperature changed",
+                            "type": "int",
+                            "unit": "DegreeCelsius",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "cebdce98-42d1-4a28-8834-8960efc0e83f",
+                            "name": "operatingState",
+                            "displayName": "Operating state",
+                            "displayNameEvent": "Operating state changed",
+                            "type": "QString",
+                            "possibleValues": [
+                                "Off",
+                                "Sleeping",
+                                "Starting",
+                                "MPPT",
+                                "Throttled",
+                                "Shutting down",
+                                "Fault",
+                                "Standby"
+                            ],
+                            "defaultValue": "Off"
+                        },
+                        {
+                            "id": "4479af96-c499-4f15-abd6-4afdb18a9e09",
+                            "name": "error",
+                            "displayName": "Error",
+                            "displayNameEvent": "Error changed",
+                            "type": "QString",
+                            "possibleValues": [
+                                "None",
+                                "Ground fault",
+                                "DC over voltage",
+                                "AC disconnect open",
+                                "DC disconnect open",
+                                "Grid disconnect",
+                                "Cabinet open",
+                                "Manual shutdown",
+                                "Over temperature",
+                                "Frequency above limit",
+                                "Frequency under limit",
+                                "AC voltage above limit",
+                                "AC voltage under limit",
+                                "Blown string fuse on input",
+                                "Under temperature",
+                                "Communication error",
+                                "Hardware test failure"
+                            ],
+                            "defaultValue": "None"
                         }
                     ]
                 },
@@ -116,10 +236,28 @@
                             "type": "QString"
                         },
                         {
-                            "id": "89af6d27-4b81-42ef-9883-1e2ba2067884",
+                            "id": "aa1ca51d-5e9c-4a1a-a4ec-e479d4f702d5",
+                            "name":"manufacturer",
+                            "displayName": "Manufacturer",
+                            "type": "QString",
+                            "readOnly": true,
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "52da5388-28d7-48a2-8ad6-4c1e852a4348",
+                            "name":"deviceModel",
+                            "displayName": "Device model",
+                            "type": "QString",
+                            "readOnly": true,
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "9fa7288c-e7a1-4163-baa1-6f484e1feb55",
                             "name":"serialNumber",
                             "displayName": "Serial number",
-                            "type": "QString"
+                            "type": "QString",
+                            "readOnly": true,
+                            "defaultValue": "Unkown"
                         }
                     ],
                     "stateTypes":[
@@ -133,14 +271,113 @@
                             "cached": false
                         },
                         {
-                            "id": "36f18720-69ca-4021-9328-262d87397f1b",
-                            "name": "power",
-                            "displayName": "Power",
-                            "displayNameEvent": "Power changed",
-                            "displayNameAction": "Change power",
-                            "type": "bool",
-                            "defaultValue": 0,
-                            "writable": true
+                            "id": "7855d176-c6b8-439e-9f12-a71f01c1c7aa",
+                            "name": "totalCurrent",
+                            "displayName": "Total AC current",
+                            "displayNameEvent": "Total AC current changed",
+                            "type": "int",
+                            "unit": "Ampere",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "da494d99-5de3-4d03-b7dd-33a33db32164",
+                            "name": "phaseACurrent",
+                            "displayName": "Phase A current",
+                            "displayNameEvent": "Phase A current changed",
+                            "type": "int",
+                            "unit": "Ampere",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "023b6e5c-be3f-4d8c-adfd-e009c7bebffb",
+                            "name": "phaseBCurrent",
+                            "displayName": "Phase B current",
+                            "displayNameEvent": "Phase B current changed",
+                            "type": "int",
+                            "unit": "Ampere",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "2676ad36-3d97-4691-8334-e13934cc58d1",
+                            "name": "phaseCCurrent",
+                            "displayName": "Phase C current",
+                            "displayNameEvent": "Phase C current changed",
+                            "type": "int",
+                            "unit": "Ampere",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "bc54ca1e-1476-40eb-9974-9e3c2f893dd8",
+                            "name": "lnACVoltage",
+                            "displayName": "Line to Neutral AC Voltage",
+                            "displayNameEvent": "Line to Neutral AC Voltage changed",
+                            "type": "int",
+                            "unit": "Volt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "4bd32d91-877a-4821-9db9-5981de20d21d",
+                            "name": "phaseANVoltage",
+                            "displayName": "Phase AN voltage",
+                            "displayNameEvent": "Phase AN volatage changed",
+                            "type": "int",
+                            "unit": "Volt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "f090cb78-d7ed-44fd-a5ad-ea9016021c34",
+                            "name": "phaseBNVoltage",
+                            "displayName": "Phase BN voltage",
+                            "displayNameEvent": "Phase BN voltage changed",
+                            "type": "int",
+                            "unit": "Volt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "fa5aa6f5-e67d-485a-835f-24e49298856c",
+                            "name": "phaseCNVoltage",
+                            "displayName": "Phase CN voltage",
+                            "displayNameEvent": "Phase CN voltage changed",
+                            "type": "int",
+                            "unit": "Volt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "dfcf52f5-6279-4d25-b7c8-a93b92c39a0c",
+                            "name": "frequency",
+                            "displayName": "Frequency",
+                            "displayNameEvent": "Frequency changed",
+                            "type": "int",
+                            "unit": "Hertz",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "c28c642f-46da-44de-ba0d-c4cbfadbf2cd",
+                            "name": "totalRealPower",
+                            "displayName": "Total real power",
+                            "displayNameEvent": "Total real power changed",
+                            "type": "int",
+                            "unit": "KiloWatt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "73ebf57f-1ad2-4d19-bfd9-9e0a514c1243
+",
+                            "name": "energyExported",
+                            "displayName": "Total real energy exported",
+                            "displayNameEvent": "Total real energy exported changed",
+                            "type": "int",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "63fa4721-1b0a-458c-b66c-17c161107f0d",
+                            "name": "energyImported",
+                            "displayName": "Total real energy imported",
+                            "displayNameEvent": "Total real energy imported changed",
+                            "type": "int",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0
                         }
                     ]
                 },
@@ -158,10 +395,28 @@
                             "type": "QString"
                         },
                         {
-                            "id": "67ce05ff-14bf-4d43-94ba-d5f290278514",
+                            "id": "2795052c-5d63-423d-b44e-fdf02dfaac37",
+                            "name":"manufacturer",
+                            "displayName": "Manufacturer",
+                            "type": "QString",
+                            "readOnly": true,
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "7528c840-da8c-40ba-ab82-914cfc686a49",
+                            "name":"deviceModel",
+                            "displayName": "Device model",
+                            "type": "QString",
+                            "readOnly": true,
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "ce9cc598-947c-4efc-b04f-21e784c5d2df",
                             "name":"serialNumber",
                             "displayName": "Serial number",
-                            "type": "QString"
+                            "type": "QString",
+                            "readOnly": true,
+                            "defaultValue": "Unkown"
                         }
                     ],
                     "stateTypes":[
@@ -200,10 +455,28 @@
                             "type": "QString"
                         },
                         {
-                            "id": "ae76db81-7969-440f-85f0-28ed46d772db",
+                            "id": "1d8f1ef7-33ad-40ed-99dd-ec54f87c2f17",
+                            "name":"manufacturer",
+                            "displayName": "Manufacturer",
+                            "type": "QString",
+                            "readOnly": true,
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "2a7f8464-6f03-4113-ac1d-d8ebd8705695",
+                            "name":"deviceModel",
+                            "displayName": "Device model",
+                            "type": "QString",
+                            "readOnly": true,
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "2003acdb-38ad-4184-baf8-9ef8e67fc452",
                             "name":"serialNumber",
                             "displayName": "Serial number",
-                            "type": "QString"
+                            "type": "QString",
+                            "readOnly": true,
+                            "defaultValue": "Unkown"
                         }
                     ],
                     "stateTypes":[
@@ -217,14 +490,146 @@
                             "cached": false
                         },
                         {
-                            "id": "9c0e0b08-4461-4e54-aaf3-cab9155028da",
-                            "name": "power",
-                            "displayName": "Power",
-                            "displayNameEvent": "Power changed",
-                            "displayNameAction": "Change power",
+                            "id": "3171a6e0-43a7-4de8-8e20-f748e44af7ac",
+                            "name": "batteryCritical",
+                            "displayName": "Battery critical",
+                            "displayNameEvent": "Battery critical changed",
                             "type": "bool",
-                            "defaultValue": 0,
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "0bf53f80-97f8-488b-b514-58f9fe08c183",
+                            "name": "batteryLevel",
+                            "displayName": "Battery level",
+                            "displayNameEvent": "Battery level changed",
+                            "type": "int",
+                            "unit": "Percentage",
+                            "minValue": 0,
+                            "maxValue": 100,
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "da2b19c5-0f48-49d1-93f0-abdc0051407d",
+                            "name": "storageState",
+                            "displayName": "State",
+                            "displayNameEvent": "State changed",
+                            "type": "QString",
+                            "possibleValues": [
+                                "Off",
+                                "Empty",
+                                "Discharging",
+                                "Charging",
+                                "Full",
+                                "Holding",
+                                "Testing"
+                            ],
+                            "defaultValue": "Off"
+                        },
+                        {
+                            "id": "221a2ef6-0a92-4ff0-87fe-7bd920dbec0b",
+                            "name": "gridCharging",
+                            "displayName": "Grid charging",
+                            "displayNameEvent": "Grid charging changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "writable": true,
+                            "displayNameAction": "Set grid charging"
+                        },
+                        {
+                            "id": "1f530f79-c0d2-466b-90e1-79149e34d92f",
+                            "name": "enableChargingLimit",
+                            "displayName": "Charging limit",
+                            "displayNameEvent": "Charging limit changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "writable": true,
+                            "displayNameAction": "Enable Charging Limit"
+                        },
+                        {
+                            "id": "7f469bbc-64a5-4045-8d5f-9a1a85039851",
+                            "name": "chargingRate",
+                            "displayName": "Charging rate",
+                            "displayNameEvent": "Charging rate changed",
+                            "type": "int",
+                            "minValue": -100,
+                            "maxValue": 100,
+                            "unit": "Percentage",
+                            "defaultValue": false,
+                            "writable": true,
+                            "displayNameAction": "Set charging rate"
+                        },
+                        {
+                            "id": "bc99a159-815a-40ab-a6e8-b46f315305f7",
+                            "name": "enableDischargingLimit",
+                            "displayName": "Discharging limit",
+                            "displayNameEvent": "Discharging limit changed",
+                            "displayNameAction": "Enable Discharging Limit",
+                            "type": "bool",
+                            "defaultValue": false,
                             "writable": true
+                        },
+                        {
+                            "id": "6068f030-acce-44a2-b95f-bd00dd5ca760",
+                            "name": "dischargingRate",
+                            "displayName": "Discharging rate",
+                            "displayNameEvent": "Discharging rate changed",
+                            "type": "int",
+                            "minValue": -100,
+                            "maxValue": 100,
+                            "unit": "Percentage",
+                            "defaultValue": false,
+                            "writable": true,
+                            "displayNameAction": "Set discharging rate"
+                        }
+                    ]
+                },
+                {
+                    "name": "sunspecStringCombiner",
+                    "displayName": "SunSpec String Combiner",
+                    "id": "7787f238-f5a3-4ba5-b3ec-7d513b87bf71",
+                    "createMethods": [ "User" ],
+                    "interfaces": ["connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "226697c3-37bd-49c7-8c0e-40537573c18e",
+                            "name":"ipAddress",
+                            "displayName": "IP address",
+                            "type": "QString"
+                        },
+                        {
+                            "id": "3f126e65-05e2-46a3-aeeb-bfacc0bdd9b0",
+                            "name":"manufacturer",
+                            "displayName": "Manufacturer",
+                            "type": "QString",
+                            "readOnly": true,
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "40666030-3609-467f-b26c-3a42d1c6dca1",
+                            "name":"deviceModel",
+                            "displayName": "Device model",
+                            "type": "QString",
+                            "readOnly": true,
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "f5046138-9271-4a91-a3eb-c2ecfa755ef5",
+                            "name":"serialNumber",
+                            "displayName": "Serial number",
+                            "type": "QString",
+                            "readOnly": true,
+                            "defaultValue": "Unkown"
+                        }
+                    ],
+                    "stateTypes":[
+                        {
+                            "id": "3f791612-50fd-4a3c-ac19-27e01dd8c63a",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
                         }
                     ]
                 }
