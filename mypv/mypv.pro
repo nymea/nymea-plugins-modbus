@@ -11,4 +11,3 @@ SOURCES += \
 HEADERS += \
     integrationpluginmypv.h \
     ../modbus/modbustcpmaster.h \
-

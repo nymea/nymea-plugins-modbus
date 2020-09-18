@@ -42,73 +42,73 @@ IntegrationPluginMyPv::IntegrationPluginMyPv()
 void IntegrationPluginMyPv::discoverThings(ThingDiscoveryInfo *info)
 {
     if (info->thingClassId() == elwaThingClassId) {
-    QUdpSocket *searchSocket = new QUdpSocket(this);
+        QUdpSocket *searchSocket = new QUdpSocket(this);
 
-    // Note: This will fail, and it's not a problem, but it is required to force the socket to stick to IPv4...
-    searchSocket->bind(QHostAddress::AnyIPv4, 16124);
+        // Note: This will fail, and it's not a problem, but it is required to force the socket to stick to IPv4...
+        searchSocket->bind(QHostAddress::AnyIPv4, 16124);
 
-    QByteArray discoveryString;
-    discoveryString.resize(19);
-    discoveryString.fill(0);
-    discoveryString.insert(0, QByteArray::fromHex("86d93efc"));
+        QByteArray discoveryString;
+        discoveryString.resize(19);
+        discoveryString.fill(0);
+        discoveryString.insert(0, QByteArray::fromHex("86d93efc"));
 
-    discoveryString.insert(4, "AC ELWA-E");
-    qCDebug(dcMypv()) << "Send datagram:" << discoveryString << "length: " << discoveryString.length();
-    qint64 len = searchSocket->writeDatagram(discoveryString, QHostAddress("255.255.255.255"), 16124);
-    if (len != discoveryString.length()) {
-        searchSocket->deleteLater();
-        info->finish(Thing::ThingErrorHardwareNotAvailable , tr("Error starting device discovery"));
-        return;
-    }
-
-    QTimer::singleShot(2000, this, [this, searchSocket, info](){
-        QList<ThingDescriptor> descriptorList;
-        while(searchSocket->hasPendingDatagrams()) {
-            char buffer[1024];
-            QHostAddress senderAddress;
-            int len = searchSocket->readDatagram(buffer, 1024, &senderAddress);
-            QByteArray data = QByteArray::fromRawData(buffer, len);
-            qCDebug(dcMypv()) << "Have datagram:" << data;
-            if (data.length() < 64) {
-                continue;
-            }
-
-            //Device Id AC•THOR = 0x4e84
-            //Device Id Power  = 0x4e8e
-            //Device Id AC ELWA-E = 0x3efc
-            qCDebug(dcMypv()) << "device Id:" << data.mid(2, 2);
-            if (data.mid(2, 2) == QByteArray::fromHex("3efc")) {
-                qCDebug(dcMypv()) << "Found Device: AC ElWA-E";
-            } else if (data.mid(2, 2) == QByteArray::fromHex("0x4e8e")) {
-                qCDebug(dcMypv()) << "Found Device: Powermeter";
-            } else if (data.mid(2, 2) == QByteArray::fromHex("0x4e84")) {
-                qCDebug(dcMypv()) << "Found Device: AC Thor";
-            } else {
-                qCDebug(dcMypv()) << "Failed to parse discovery datagram from" << senderAddress << data;
-                continue;
-            }
-
-            ThingDescriptor thingDescriptors(info->thingClassId(), "AC ELWA-E", senderAddress.toString());
-            QByteArray serialNumber = data.mid(8, 16);
-
-            foreach (Thing *existingThing, myThings()) {
-                if (serialNumber == existingThing->paramValue(elwaThingSerialNumberParamTypeId).toString()) {
-                    qCDebug(dcMypv()) << "Rediscovered device " << existingThing->name();
-                    thingDescriptors.setThingId(existingThing->id());
-                    break;
-                }
-            }
-
-            ParamList params;
-            params << Param(elwaThingIpAddressParamTypeId, senderAddress.toString());
-            params << Param(elwaThingSerialNumberParamTypeId, serialNumber);
-            thingDescriptors.setParams(params);
-            descriptorList << thingDescriptors;
+        discoveryString.insert(4, "AC ELWA-E");
+        qCDebug(dcMypv()) << "Send datagram:" << discoveryString << "length: " << discoveryString.length();
+        qint64 len = searchSocket->writeDatagram(discoveryString, QHostAddress("255.255.255.255"), 16124);
+        if (len != discoveryString.length()) {
+            searchSocket->deleteLater();
+            info->finish(Thing::ThingErrorHardwareNotAvailable , tr("Error starting device discovery"));
+            return;
         }
-        info->addThingDescriptors(descriptorList);;
-        searchSocket->deleteLater();
-        info->finish(Thing::ThingErrorNoError);
-    });
+
+        QTimer::singleShot(2000, this, [this, searchSocket, info](){
+            QList<ThingDescriptor> descriptorList;
+            while(searchSocket->hasPendingDatagrams()) {
+                char buffer[1024];
+                QHostAddress senderAddress;
+                int len = searchSocket->readDatagram(buffer, 1024, &senderAddress);
+                QByteArray data = QByteArray::fromRawData(buffer, len);
+                qCDebug(dcMypv()) << "Have datagram:" << data;
+                if (data.length() < 64) {
+                    continue;
+                }
+
+                //Device Id AC•THOR = 0x4e84
+                //Device Id Power  = 0x4e8e
+                //Device Id AC ELWA-E = 0x3efc
+                qCDebug(dcMypv()) << "device Id:" << data.mid(2, 2);
+                if (data.mid(2, 2) == QByteArray::fromHex("3efc")) {
+                    qCDebug(dcMypv()) << "Found Device: AC ElWA-E";
+                } else if (data.mid(2, 2) == QByteArray::fromHex("0x4e8e")) {
+                    qCDebug(dcMypv()) << "Found Device: Powermeter";
+                } else if (data.mid(2, 2) == QByteArray::fromHex("0x4e84")) {
+                    qCDebug(dcMypv()) << "Found Device: AC Thor";
+                } else {
+                    qCDebug(dcMypv()) << "Failed to parse discovery datagram from" << senderAddress << data;
+                    continue;
+                }
+
+                ThingDescriptor thingDescriptors(info->thingClassId(), "AC ELWA-E", senderAddress.toString());
+                QByteArray serialNumber = data.mid(8, 16);
+
+                foreach (Thing *existingThing, myThings()) {
+                    if (serialNumber == existingThing->paramValue(elwaThingSerialNumberParamTypeId).toString()) {
+                        qCDebug(dcMypv()) << "Rediscovered device " << existingThing->name();
+                        thingDescriptors.setThingId(existingThing->id());
+                        break;
+                    }
+                }
+
+                ParamList params;
+                params << Param(elwaThingIpAddressParamTypeId, senderAddress.toString());
+                params << Param(elwaThingSerialNumberParamTypeId, serialNumber);
+                thingDescriptors.setParams(params);
+                descriptorList << thingDescriptors;
+            }
+            info->addThingDescriptors(descriptorList);;
+            searchSocket->deleteLater();
+            info->finish(Thing::ThingErrorNoError);
+        });
     } else {
         Q_ASSERT_X(false, "discoverThings", QString("Unhandled thingClassId: %1").arg(info->thingClassId().toString()).toUtf8());
     }
@@ -134,6 +134,11 @@ void IntegrationPluginMyPv::setupThing(ThingSetupInfo *info)
 
 void IntegrationPluginMyPv::postSetupThing(Thing *thing)
 {
+    if (!m_refreshTimer) {
+        m_refreshTimer = hardwareManager()->pluginTimerManager()->registerTimer(10);
+        connect(m_refreshTimer, &PluginTimer::timeout, this, &IntegrationPluginMyPv::onRefreshTimer);
+    }
+
     if (thing->thingClassId() == elwaThingClassId) {
         update(thing);
     }
@@ -144,6 +149,11 @@ void IntegrationPluginMyPv::thingRemoved(Thing *thing)
     if (thing->thingClassId() == elwaThingClassId) {
         ModbusTCPMaster *modbusTCPMaster = m_modbusTcpMasters.take(thing);
         modbusTCPMaster->deleteLater();
+    }
+
+    if (myThings().isEmpty()) {
+        hardwareManager()->pluginTimerManager()->unregisterTimer(m_refreshTimer);
+        m_refreshTimer = nullptr;
     }
 }
 
@@ -179,11 +189,12 @@ void IntegrationPluginMyPv::executeAction(ThingActionInfo *info)
             Q_ASSERT_X(false, "executeAction", QString("Unhandled actionTypeId: %1").arg(action.actionTypeId().toString()).toUtf8());
         }
     } else {
-        Q_ASSERT_X(false, "executeAction", QString("Unhandled deviceClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
+        Q_ASSERT_X(false, "executeAction", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
     }
 }
 
-void IntegrationPluginMyPv::onRefreshTimer(){
+void IntegrationPluginMyPv::onRefreshTimer()
+{
 
     foreach (Thing *thing, myThings()) {
         update(thing);
