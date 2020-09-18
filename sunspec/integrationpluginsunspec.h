@@ -36,6 +36,11 @@
 
 #include "../modbus/modbustcpmaster.h"
 
+#include "sunspecinverter.h"
+#include "sunspecstorage.h"
+#include "sunspecmeter.h"
+#include "sunspectracker.h"
+
 #include <QUuid>
 
 class IntegrationPluginSunSpec: public IntegrationPlugin
@@ -45,22 +50,21 @@ class IntegrationPluginSunSpec: public IntegrationPlugin
     Q_PLUGIN_METADATA(IID "io.nymea.IntegrationPlugin" FILE "integrationpluginsunspec.json")
     Q_INTERFACES(IntegrationPlugin)
 
-
 public:
     explicit IntegrationPluginSunSpec();
-
-    void discoverThings(ThingDiscoveryInfo *info) override;
     void setupThing(ThingSetupInfo *info) override;
     void postSetupThing(Thing *thing) override;
     void thingRemoved(Thing *thing) override;
     void executeAction(ThingActionInfo *info) override;
 
 private:
-
     PluginTimer *m_refreshTimer = nullptr;
-    QHash<Thing *, ModbusTCPMaster *> m_modbusTcpMasters;
     QHash<QUuid, ThingActionInfo *> m_asyncActions;
 
+    QHash<Thing *, SunSpecInverter *> m_sunSpecInverters;
+    QHash<Thing *, SunSpecStorage *> m_sunSpecStorages;
+    QHash<Thing *, SunSpecMeter *> m_sunSpecMeters;
+    QHash<Thing *, SunSpecTracker *> m_sunSpecTrackers;
     void update(Thing *thing);
 
 private slots:
@@ -72,8 +76,10 @@ private slots:
     void onWriteRequestExecuted(QUuid requestId, bool success);
     void onWriteRequestError(QUuid requestId, const QString &error);
 
-    void onReceivedHoldingRegister(quint32 slaveAddress, quint32 modbusRegister, const QVector<quint16> &values);
-    void onReceivedInputRegister(quint32 slaveAddress, quint32 modbusRegister, const QVector<quint16> &values);
+    void onInverterDataReceived(const SunSpecInverter::InverterData &inverterData);
+    void onStorageDataReceived(const SunSpecStorage::StorageData &storageData);
+    void onMeterDataReceived(const SunSpecMeter::MeterData &meterData);
+    void onTrackerDataReceived(const SunSpecTracker::TrackerData &trackerData);
 };
 
 #endif // INTEGRATIONPLUGINSUNSPEC_H
