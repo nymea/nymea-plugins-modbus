@@ -155,7 +155,7 @@
                         {
                             "id": "87633d1f-3826-4bf0-9a2c-46a927446eb5",
                             "name": "pvEnergy",
-                            "displayName": "Set avilable PV Energy",
+                            "displayName": "Set available PV Energy",
                             "paramTypes" : [
                                 {
                                     "id": "84b251ab-33b5-45e5-9a5c-468e3affe821",
