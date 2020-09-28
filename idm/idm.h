@@ -35,13 +35,16 @@
 
 #include "../modbus/modbustcpmaster.h"
 
+#include "idminfo.h"
+
 class Idm : public QObject
 {
     Q_OBJECT
 public:
     explicit Idm(const QHostAddress &address, QObject *parent = nullptr);
-    void getOutsideTemperature();
-    void getCurrentFaultNumber();
+    ~Idm();
+    double getOutsideTemperature();
+    //void getCurrentFaultNumber();
 
 
 private:
@@ -54,51 +57,66 @@ private:
     };
 
     enum RegisterList {
-        OutsideTemperature              = 1000,
-        MeanOutsideTemperature          = 1002,
-        CurrentFaultNumber              = 1004,
-        OperationModeSystem             = 1005,
-        SmartGridStatus                 = 1006,
-        HeatStorageTemperature          = 1008,
-        ColdStorageTemperature          = 1010,
-        DrinkingWaterHeaterTempBelow    = 1012,
-        DrinkingWaterHeaterTempAbove    = 1014,
-        HotWaterTapTemperature          = 1030,
-        TargetHotWaterTemperature       = 1032,
-        HeatPumpOperatingMode           = 1090,
-        SummationFaultHeatPump          = 1099,
-        Humiditysensor                  = 1392,
-        ExternalOutsideTemperature      = 1690,
-        ExternalHumidity                = 1692,
-        ExternalRequestTemperatureHeating = 1694, //Externe Anforderungstemperatur Heizen
+        /* The following modbus addresses are according to the manual
+         * Modbus TCP Navigatorregelung 2.0 pages 13-31.
+         * Comments at the end of each line give their original name
+         * in the German manual. */
+        OutsideTemperature              = 1000, // Außentemperatur (B31)
+        MeanOutsideTemperature          = 1002, // Gemittelte Außentemperature
+        CurrentFaultNumber              = 1004, // Aktuelle Störungsnummer
+        OperationModeSystem             = 1005, // Betriebsart System
+        SmartGridStatus                 = 1006, // Smart Grid Status
+        HeatStorageTemperature          = 1008, // Wärmespeichertemperatur (B38)
+        ColdStorageTemperature          = 1010, // Kältespeichertemperatur (B40)
+        DrinkingWaterHeaterTempBottom   = 1012, // Trinkwassererwärmertmp. unten (B41)
+        DrinkingWaterHeaterTempTop      = 1014, // Trinkwassererwärmertmp. oben (B48)
+        HotWaterTapTemperature          = 1030, // Warmwasserzapftemperatur (B42)
+        TargetHotWaterTemperature       = 1032, // Warmwasser-Solltemperatur
+        HeatPumpOperatingMode           = 1090, // Betriebsart Wärmepumpe
+        SummationFaultHeatPump          = 1099, // Summenstörung Wärepumpe
+        Humiditysensor                  = 1392, // Feuchtesensor
+        ExternalOutsideTemperature      = 1690, // Externe Außentemperatur
+        ExternalHumidity                = 1692, // Externe Feuchte
+        ExternalRequestTemperatureHeating = 1694, // Externe Anforderungstemperatur Heizen
         ExternalRequestTemperatureCooling = 1695, // Externe Anforderungstemperatur Kühlen
-        HeatingRequirement              = 1710
-        CoolingRequirement              = 1711,
+        HeatingRequirement              = 1710, // Anforderung Heizen
+        CoolingRequirement              = 1711, // Anforderung Kühlen
         HotWaterChargingRequirement     = 1712, // Anforderung Warmwasserladung
-        //Wärmemenge Heizen
-        //Wärmemenge Kühlen,
-        //Wärmemenge Warmwasser,
-        //Wärmemenge Abtauung,
-        //Wärmemenge Passive Kühlung,
-        //Wärmemenge Solar,
-        //Wärmemenge Elektroheizeinsatz,
-        Momentanleistung
-        SolarKollektortemperatur
-        SolarKollektorrücklauftemperatur
-        SolarLadetemperatur
-        MomentanleistungSolar,
-        SolarOperatingMode          =
-        ISCModus                    = 1874,
-        AcknowledgeFaultMessages    = 1999, // Störmeldungen quittieren
-        Aktueller PV-Überschuss
-        Aktueller PV Produktion
-        Aktuelle Leistungsaufnahme Wärmepumpe
+        HeatQuantityHeating             = 1750, // Wärmemenge Heizen
+        HeatQuantityCooling             = 1752, // Wärmemenge Kühlen
+        HeatQuantityHotWater            = 1754, // Wärmemenge Warmwasser
+        HeatQuantityDefrosting          = 1756, // Wärmemenge Abtauung
+        HeatQuantityPassiveCooling      = 1758, // Wärmemenge Passive Kühlung,
+        HeatQuantityPhotovolatics       = 1760, // Wärmemenge Solar
+        HeatQuantityHeatingElemetn      = 1762, // Wärmemenge Elektroheizeinsatz,
+        CurrentPower                    = 1790, // Momentanleistung
+        CurrentPowerSolar               = 1792, // MomentanleistungSolar
+        SolarCollectorTemperature       = 1850, // SolarKollektortemperatur (B73)
+        SolarCollectorReturnTemperature = 1852, // SolarKollektorruecklauftemperatur (B75)
+        SolarChargeTemperature          = 1854, // SolarLadetemperatur (B74)
+        SolarOperatingMode              = 1856, // Betriebsart Solar
+        ISCMode                         = 1875, // ISCModus
+        AcknowledgeFaultMessages        = 1999, // Störmeldungen quittieren
+        CurrentPhotovoltaicsSurplus     =   74, // Aktueller PV-Überschuss
+        CurrentPhotovoltaicsProduction  =   78, // Aktueller PV Produktion
+        CurrentPowerConsumption         = 4122, // Aktuelle Leistungsaufnahme Wärmepumpe
     };
 
+    /* Note: This class only requires one IP address and one
+     *       TCP Modbus connection. Multiple devices are managed
+     *       within the IntegrationPluginIdm class. */
     QHostAddress m_hostAddress;
     ModbusTCPMaster *m_modbusMaster = nullptr;
 
 signals:
+    void statusUpdated(IdmInfo *info);
+
+private slots:
+    void onRequestStatus();
+
+// only public for debugging!
+public slots:
+    void onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value);
 
 };
 

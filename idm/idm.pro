@@ -11,5 +11,6 @@ SOURCES += \
 
 HEADERS += \
     idm.h \
+    idminfo.h \
     integrationpluginidm.h \
     ../modbus/modbustcpmaster.h \
