@@ -38,6 +38,7 @@
 
 #include <QUuid>
 
+
 class IntegrationPluginIdm: public IntegrationPlugin
 {
     Q_OBJECT
@@ -54,6 +55,7 @@ public:
     void postSetupThing(Thing *thing) override;
     void thingRemoved(Thing *thing) override;
     void executeAction(ThingActionInfo *info) override;
+    void update(Thing *thing);
 
 private:
 
@@ -87,10 +89,13 @@ private:
 
     PluginTimer *m_refreshTimer = nullptr;
     QHash<Thing *, Idm *> m_idmConnections;
+    QHash<Thing *, ThingSetupInfo *> m_idmInfos;
     QHash<QUuid, ThingActionInfo *> m_asyncActions;
 
-private slots:
     void onRefreshTimer();
+
+private slots:
+    void onStatusUpdated(IdmInfo *info);
 };
 
 #endif // INTEGRATIONPLUGINIDM_H
