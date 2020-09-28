@@ -28,51 +28,22 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "idm.h"
+#ifndef IDMINFO_H
+#define IDMINFO_H
 
-Idm::Idm(const QHostAddress &address, QObject *parent) :
-    QObject(parent),
-    m_hostAddress(address)
-{
-    /* qCDebug(dcIdm()) << "Creating Idm with addr: " << address; */
+#include <QString>
 
-    m_modbusMaster = new ModbusTCPMaster(address, 502, this);
+struct IdmInfo {
+    bool    m_connected;
+    bool    m_power;
+    double  m_roomTemperature;
+    double  m_outsideTemperature;
+    double  m_waterTemperature;
+    double  m_targetRoomTemperature;
+    double  m_targetWaterTemperature;
+    QString m_mode;
+    bool    m_error;
+};
 
-    connect(m_modbusMaster, &ModbusTCPMaster::receivedHoldingRegister, this, &Idm::onReceivedHoldingRegister);
-}
-
-Idm::~Idm()
-{
-    if (m_modbusMaster) {
-        delete m_modbusMaster;
-    }
-}
-
-double Idm::getOutsideTemperature()
-{
-    //m_modbusMaster->
-    return 0.0;
-}
-
-void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value)
-{
-    /* qCDebug(dcIdm()) << "Idm::onReceivedHoldingRegister"; */
-
-    Q_UNUSED(slaveAddress);
-    Q_UNUSED(modbusRegister);
-    Q_UNUSED(value);
-
-    IdmInfo *info = new IdmInfo;
-    info->m_outsideTemperature = 24.3;
-
-    emit statusUpdated(info);
-}
-
-void Idm::onRequestStatus()
-{
-    /* Reading a total of 16 bytes, starting from address 1000.
-     * This covers the following parameters:
-     * */
-    m_modbusMaster->readHoldingRegister(0xff, RegisterList::OutsideTemperature, 16);
-}
+#endif
 
