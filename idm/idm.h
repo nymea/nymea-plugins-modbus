@@ -130,7 +130,7 @@ private:
         TargetRoomTemperatureZ1R1       = 2004, // Zonenmodul 1 Raumsolltemperatur Raum 1
         CurrentPhotovoltaicsSurplus     =   74, // Aktueller PV-Überschuss
         CurrentPhotovoltaicsProduction  =   78, // Aktueller PV Produktion
-        CurrentPowerConsumption         = 4122, // Aktuelle Leistungsaufnahme Wärmepumpe
+        CurrentPowerConsumptionHeatPump = 4122, // Aktuelle Leistungsaufnahme Wärmepumpe
     };
 
     /* Note: This class only requires one IP address and one

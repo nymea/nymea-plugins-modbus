@@ -62,6 +62,9 @@ struct IdmInfo {
     /** RegisterList::HumiditySensor */
     double  m_humidity;
 
+    /** RegisterList::CurrentPowerConsumptionHeatPump */
+    double  m_powerConsumptionHeatPump;
+
     /** RegisterList::OperationModeSystem */
     QString m_mode;
 
