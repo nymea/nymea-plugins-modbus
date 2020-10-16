@@ -84,6 +84,7 @@ void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const 
         break;
     case Idm::TargetHotWaterTemperature:
         if (value.length() == 1) {
+            /* The hot water target temperature is stored as UCHAR (manual p. 13) */
             m_info->m_targetWaterTemperature = (double)value[RegisterList::TargetHotWaterTemperature - modbusRegister];
         }
         m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::HeatPumpOperatingMode, 1);
