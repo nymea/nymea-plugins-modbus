@@ -154,6 +154,7 @@ void IntegrationPluginIdm::onStatusUpdated(IdmInfo *info)
     thing->setStateValue(navigator2WaterTemperatureStateTypeId, info->m_waterTemperature);
     thing->setStateValue(navigator2TargetTemperatureStateTypeId, info->m_targetRoomTemperature);
     thing->setStateValue(navigator2TargetWaterTemperatureStateTypeId, info->m_targetWaterTemperature);
+    thing->setStateValue(navigator2HumidityStateTypeId, info->m_humidity);
     thing->setStateValue(navigator2ModeStateTypeId, info->m_mode);
     thing->setStateValue(navigator2ErrorStateTypeId, info->m_error);
 }
