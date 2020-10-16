@@ -13,7 +13,7 @@
                     "displayName": "Navigator 2.0",
                     "id": "1c95ac91-4eca-4cbf-b0f4-d60d35d069ed",
                     "createMethods": ["User","Discovery"],
-                    "interfaces": ["heating", "temperaturesensor", "connectable"],
+                    "interfaces": ["thermostat", "temperaturesensor", "humiditysensor", "connectable"],
                     "paramTypes": [
                         {
                             "id": "05714e5c-d66a-4095-bbff-a0eb96fb035b",
@@ -68,6 +68,15 @@
                             "type": "double",
                             "unit": "DegreeCelsius",
                             "defaultValue": 0
+                        },
+                        {
+                            "id": "109b4189-491a-4498-8470-b52b1b434c71",
+                            "name": "humidity",
+                            "displayName": "Humidity",
+                            "displayNameEvent": "Humidity changed",
+                            "type": "double",
+                            "minValue": 0,
+                            "maxValue": 100
                         },
                         {
                             "id": "efae7493-68c3-4cb9-853c-81011bdf09ca",

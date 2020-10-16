@@ -43,6 +43,8 @@ Idm::Idm(const QHostAddress &address, QObject *parent) :
         m_modbusMaster->connectDevice();
 
         connect(m_modbusMaster, &ModbusTCPMaster::receivedHoldingRegister, this, &Idm::onReceivedHoldingRegister);
+        connect(m_modbusMaster, &ModbusTCPMaster::readRequestError, this, &Idm::onModbusError);
+        connect(m_modbusMaster, &ModbusTCPMaster::writeRequestError, this, &Idm::onModbusError);
     }
 }
 
@@ -90,6 +92,12 @@ void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const 
         if (value.length() == 1) {
             m_info->m_mode = heatPumpOperationModeToString((Idm::IdmHeatPumpMode)value[RegisterList::HeatPumpOperatingMode-modbusRegister]);
         }
+        m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::HumiditySensor, 2);
+        break;
+    case Idm::HumiditySensor:
+        if (value.length() == 2) {
+            m_info->m_humidity = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::HumiditySensor - modbusRegister]);
+        }
         m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::RoomTemperatureHKA, 2);
         break;
     case Idm::RoomTemperatureHKA:
@@ -97,9 +105,23 @@ void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const 
             m_info->m_roomTemperature = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::ExternalOutsideTemperature - modbusRegister]);
         }
 
+        /* Everything read without an error
+         * -> set connected to true */
+        m_info->m_connected = true;
         emit statusUpdated(m_info);
         break;
     }
+}
+
+void Idm::onModbusError()
+{
+    if (m_info == nullptr) {
+        m_info = new IdmInfo;
+    }
+
+    m_info->m_connected = false;
+
+    emit statusUpdated(m_info);
 }
 
 void Idm::onRequestStatus()
