@@ -75,6 +75,7 @@
                             "displayName": "Humidity",
                             "displayNameEvent": "Humidity changed",
                             "type": "double",
+                            "defaultValue": 0,
                             "minValue": 0,
                             "maxValue": 100
                         },
