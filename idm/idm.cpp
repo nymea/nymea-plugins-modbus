@@ -60,7 +60,7 @@ void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const 
     switch (modbusRegister) {
     case Idm::OutsideTemperature:
         if (value.length() == 2) {
-            m_info->m_roomTemperature = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::OutsideTemperature - modbusRegister]);
+            m_info->m_outsideTemperature = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::OutsideTemperature - modbusRegister]);
         }
         m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::CurrentFaultNumber, 1);
         break;
@@ -90,11 +90,11 @@ void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const 
         if (value.length() == 1) {
             m_info->m_mode = heatPumpOperationModeToString((Idm::IdmHeatPumpMode)value[RegisterList::HeatPumpOperatingMode-modbusRegister]);
         }
-        m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::ExternalOutsideTemperature, 2);
+        m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::RoomTemperatureHKA, 2);
         break;
-    case Idm::ExternalOutsideTemperature:
+    case Idm::RoomTemperatureHKA:
         if (value.length() == 2) {
-            m_info->m_outsideTemperature = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::ExternalOutsideTemperature - modbusRegister]);
+            m_info->m_roomTemperature = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::ExternalOutsideTemperature - modbusRegister]);
         }
 
         emit statusUpdated(m_info);

@@ -29,6 +29,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "modbustcpmaster.h"
+
 #include <loggingcategories.h>
 NYMEA_LOGGING_CATEGORY(dcModbusTCP, "ModbusTCP")
 
