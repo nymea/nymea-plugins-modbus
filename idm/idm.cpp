@@ -102,7 +102,7 @@ void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const 
         break;
     case Idm::RoomTemperatureHKA:
         if (value.length() == 2) {
-            m_info->m_roomTemperature = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::ExternalOutsideTemperature - modbusRegister]);
+            m_info->m_roomTemperature = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::RoomTemperatureHKA - modbusRegister]);
         }
 
         /* Everything read without an error
