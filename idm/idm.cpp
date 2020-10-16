@@ -104,6 +104,18 @@ void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const 
         if (value.length() == 2) {
             m_info->m_roomTemperature = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::RoomTemperatureHKA - modbusRegister]);
         }
+        m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::RoomTemperatureTargetHeatingHKA, 2);
+        break;
+    case Idm::RoomTemperatureTargetHeatingHKA:
+        if (value.length() == 2) {
+            m_info->m_targetRoomTemperature = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::RoomTemperatureTargetHeatingHKA - modbusRegister]);
+        }
+        m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::CurrentPowerConsumptionHeatPump, 2);
+        break;
+    case Idm::CurrentPowerConsumptionHeatPump:
+        if (value.length() == 2) {
+            m_info->m_powerConsumptionHeatPump = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::CurrentPowerConsumptionHeatPump - modbusRegister]);
+        }
 
         /* Everything read without an error
          * -> set connected to true */

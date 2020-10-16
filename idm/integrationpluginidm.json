@@ -106,6 +106,16 @@
                             "writable": true
                         },
                         {
+
+                            "id": "b98fb325-100d-4eae-bf8d-97e8f7e1eb00",
+                            "name": "currentPowerConsumptionHeatPump",
+                            "displayName": "Current power consumption heat pump",
+                            "displayNameEvent": "Current power consumption heat pump changed",
+                            "displayNameAction": "Change current power consumption het pump",
+                            "type": "double",
+                            "defaultValue": 0
+                        },
+                        {
                             "id": "e539366b-44da-4119-b11b-497bcdb1f522",
                             "name": "mode",
                             "displayName": "Mode",
