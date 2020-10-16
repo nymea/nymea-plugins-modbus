@@ -76,6 +76,7 @@
                             "displayNameEvent": "Humidity changed",
                             "type": "double",
                             "defaultValue": 0,
+                            "unit": "Percentage",
                             "minValue": 0,
                             "maxValue": 100
                         },
@@ -113,6 +114,7 @@
                             "displayNameEvent": "Current power consumption heat pump changed",
                             "displayNameAction": "Change current power consumption het pump",
                             "type": "double",
+                            "unit": "KiloWatt",
                             "defaultValue": 0
                         },
                         {
@@ -162,8 +164,8 @@
                             "paramTypes" : [
                                 {
                                     "id": "034b9a8c-1a5a-45da-8422-393273d0a159",
-                                    "name": "humidity",
-                                    "displayName": "humidity",
+                                    "name": "extHumidity",
+                                    "displayName": "External Humidity",
                                     "type": "int",
                                     "defaultValue": 0,
                                     "minValue": 0,
@@ -174,13 +176,13 @@
                         },
                         {
                             "id": "87633d1f-3826-4bf0-9a2c-46a927446eb5",
-                            "name": "pvEnergy",
-                            "displayName": "Set available PV Energy",
+                            "name": "pvPower",
+                            "displayName": "Set available PV Power",
                             "paramTypes" : [
                                 {
                                     "id": "84b251ab-33b5-45e5-9a5c-468e3affe821",
-                                    "name": "energy",
-                                    "displayName": "Energy",
+                                    "name": "pvPower",
+                                    "displayName": "PV Power",
                                     "type": "double",
                                     "defaultValue": 0.00,
                                     "minValue": 0.00,
