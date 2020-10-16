@@ -29,16 +29,21 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "idm.h"
+#include "../modbus/modbushelpers.h"
+
+#include <cstring>
 
 Idm::Idm(const QHostAddress &address, QObject *parent) :
     QObject(parent),
     m_hostAddress(address)
 {
-    /* qCDebug(dcIdm()) << "Creating Idm with addr: " << address; */
-
     m_modbusMaster = new ModbusTCPMaster(address, 502, this);
 
-    connect(m_modbusMaster, &ModbusTCPMaster::receivedHoldingRegister, this, &Idm::onReceivedHoldingRegister);
+    if (m_modbusMaster) {
+        m_modbusMaster->connectDevice();
+
+        connect(m_modbusMaster, &ModbusTCPMaster::receivedHoldingRegister, this, &Idm::onReceivedHoldingRegister);
+    }
 }
 
 Idm::~Idm()
@@ -48,31 +53,104 @@ Idm::~Idm()
     }
 }
 
-double Idm::getOutsideTemperature()
-{
-    //m_modbusMaster->
-    return 0.0;
-}
-
 void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value)
 {
-    /* qCDebug(dcIdm()) << "Idm::onReceivedHoldingRegister"; */
-
     Q_UNUSED(slaveAddress);
-    Q_UNUSED(modbusRegister);
-    Q_UNUSED(value);
 
-    IdmInfo *info = new IdmInfo;
-    info->m_outsideTemperature = 24.3;
+    switch (modbusRegister) {
+    case Idm::OutsideTemperature:
+        if (value.length() == 2) {
+            m_info->m_roomTemperature = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::OutsideTemperature - modbusRegister]);
+        }
+        m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::CurrentFaultNumber, 1);
+        break;
+    case Idm::CurrentFaultNumber:
+        if (value.length() == 1) {
+            if (value[0] > 0) {
+                m_info->m_error = true;
+            } else {
+                m_info->m_error = false;
+            }
+        }
+        m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::TargetHotWaterTemperature, 2);
+        break;
+    case Idm::TargetHotWaterTemperature:
+        if (value.length() == 2) {
+            m_info->m_targetWaterTemperature = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::TargetHotWaterTemperature - modbusRegister]);
+        }
+        m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::HeatPumpOperatingMode, 1);
+        break;
+    case Idm::HeatPumpOperatingMode:
+        if (value.length() == 1) {
+            printf("read heat pump operation mode: %d\n", value[0]);
+            m_info->m_mode = heatPumpOperationModeToString((Idm::IdmHeatPumpMode)value[RegisterList::HeatPumpOperatingMode-modbusRegister]);
+        }
+        m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::ExternalOutsideTemperature, 2);
+        break;
+    case Idm::ExternalOutsideTemperature:
+        if (value.length() == 2) {
+            m_info->m_outsideTemperature = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::ExternalOutsideTemperature - modbusRegister]);
+        }
 
-    emit statusUpdated(info);
+        emit statusUpdated(m_info);
+        break;
+    }
 }
 
 void Idm::onRequestStatus()
 {
-    /* Reading a total of 16 bytes, starting from address 1000.
-     * This covers the following parameters:
-     * */
-    m_modbusMaster->readHoldingRegister(0xff, RegisterList::OutsideTemperature, 16);
+    m_info = new IdmInfo;
+
+    m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::OutsideTemperature, 2);
+}
+
+QString Idm::systemOperationModeToString(IdmSysMode mode) {
+    QString result{};
+
+    /* Operation modes according to table of manual p. 13 */
+    switch (mode) {
+    case IdmSysModeStandby:
+        result = "Standby";
+        break;
+    case IdmSysModeAutomatic:
+        result = "Automatik";
+        break;
+    case IdmSysModeAway:
+        result = "Abwesend";
+        break;
+    case IdmSysModeOnlyHotwater:
+        result = "Nur Warmwasser";
+        break;
+    case IdmSysModeOnlyRoomHeating:
+        result = "Nur Heizung/Kühlung";
+        break;
+    }
+
+    return result;
+}
+
+QString Idm::heatPumpOperationModeToString(IdmHeatPumpMode mode) {
+    QString result{};
+
+    /* Operation modes according to table of manual p. 14 */
+    switch (mode) {
+    case IdmHeatPumpModeOff:
+        result = "Off";
+        break;
+    case IdmHeatPumpModeHeating:
+        result = "Heating";
+        break;
+    case IdmHeatPumpModeCooling:
+        result = "Cooling";
+        break;
+    case IdmHeatPumpModeHotWater:
+        result = "Hot water";
+        break;
+    case IdmHeatPumpModeDefrost:
+        result = "Defrost";
+        break;
+    }
+
+    return result;
 }
 

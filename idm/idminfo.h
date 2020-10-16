@@ -31,19 +31,40 @@
 #ifndef IDMINFO_H
 #define IDMINFO_H
 
+#include <QMetaType>
 #include <QString>
 
+/** This struct holds the status information that is read from the IDM device
+ *  and passed to the nymea framework within this plugin.
+ */
 struct IdmInfo {
     bool    m_connected;
     bool    m_power;
+
+    /** RegisterList::OutsideTemperature */
     double  m_roomTemperature;
+
+    /** RegisterList::ExternalOutsideTemperature */
     double  m_outsideTemperature;
+
+    /** RegisterList::HeatStorageTemperature */
     double  m_waterTemperature;
+
+    /** RegisterList::TargetRoomTemperatureZ1R1 (zone 1, room 1) */
     double  m_targetRoomTemperature;
+
+    /** RegisterList::TargetHotWaterTemperature */
     double  m_targetWaterTemperature;
+
+    /** RegisterList::OperationModeSystem */
     QString m_mode;
+
+    /** True if there is an error code set 
+     *  (RegisterList::CurrentFaultNumber != 0) */
     bool    m_error;
 };
+
+Q_DECLARE_METATYPE(IdmInfo);
 
 #endif
 

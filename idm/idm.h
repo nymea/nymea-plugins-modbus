@@ -41,13 +41,23 @@ class Idm : public QObject
 {
     Q_OBJECT
 public:
+    /** Constructor */
     explicit Idm(const QHostAddress &address, QObject *parent = nullptr);
-    ~Idm();
-    double getOutsideTemperature();
-    //void getCurrentFaultNumber();
 
+    /** Destructor */
+    ~Idm();
 
 private:
+    /* Note: It would be desirable to read the modbus registers
+     *       of the Idm heat pump in groups to minimize the number
+     *       of read requests. However, a maximum of 6 registers 
+     *       can be read simultaneously. With the given set of
+     *       addresses it is not possible to reasonably group the
+     *       registers, therefore they are read individually.
+     */
+
+    /** Modbus Unit ID of Idm device */
+    static const quint16   ModbusUnitID = 1;
 
     enum IscModus {
         KeineAbwarme = 0,
@@ -56,11 +66,29 @@ private:
         Warmequelle  = 8,
     };
 
+    /** System operation modes according to manual p. 13 */
+    enum IdmSysMode {
+        IdmSysModeStandby           = 0,
+        IdmSysModeAutomatic         = 1,
+        IdmSysModeAway              = 2,
+        IdmSysModeOnlyHotwater      = 4,
+        IdmSysModeOnlyRoomHeating   = 5
+    };
+
+    /** Heat pump operation modes according to manual p. 14 */
+    enum IdmHeatPumpMode {
+        IdmHeatPumpModeOff          = 0,
+        IdmHeatPumpModeHeating      = 1,
+        IdmHeatPumpModeCooling      = 2,
+        IdmHeatPumpModeHotWater     = 4,
+        IdmHeatPumpModeDefrost      = 8
+    };
+
+    /** The following modbus addresses are according to the manual
+     *  Modbus TCP Navigatorregelung 2.0 pages 13-31.
+     *  Comments at the end of each line give their original name
+     *  in the German manual. */
     enum RegisterList {
-        /* The following modbus addresses are according to the manual
-         * Modbus TCP Navigatorregelung 2.0 pages 13-31.
-         * Comments at the end of each line give their original name
-         * in the German manual. */
         OutsideTemperature              = 1000, // Außentemperatur (B31)
         MeanOutsideTemperature          = 1002, // Gemittelte Außentemperature
         CurrentFaultNumber              = 1004, // Aktuelle Störungsnummer
@@ -75,6 +103,7 @@ private:
         HeatPumpOperatingMode           = 1090, // Betriebsart Wärmepumpe
         SummationFaultHeatPump          = 1099, // Summenstörung Wärepumpe
         Humiditysensor                  = 1392, // Feuchtesensor
+        RoomTemperatureTargetHeatingHKA = 1401, // Raumsolltemperatur Heizen Normal HK A
         ExternalOutsideTemperature      = 1690, // Externe Außentemperatur
         ExternalHumidity                = 1692, // Externe Feuchte
         ExternalRequestTemperatureHeating = 1694, // Externe Anforderungstemperatur Heizen
@@ -97,6 +126,7 @@ private:
         SolarOperatingMode              = 1856, // Betriebsart Solar
         ISCMode                         = 1875, // ISCModus
         AcknowledgeFaultMessages        = 1999, // Störmeldungen quittieren
+        TargetRoomTemperatureZ1R1       = 2004, // Zonenmodul 1 Raumsolltemperatur Raum 1
         CurrentPhotovoltaicsSurplus     =   74, // Aktueller PV-Überschuss
         CurrentPhotovoltaicsProduction  =   78, // Aktueller PV Produktion
         CurrentPowerConsumption         = 4122, // Aktuelle Leistungsaufnahme Wärmepumpe
@@ -106,18 +136,26 @@ private:
      *       TCP Modbus connection. Multiple devices are managed
      *       within the IntegrationPluginIdm class. */
     QHostAddress m_hostAddress;
+
+    /** Pointer to ModbusTCPMaster object, responseible for low-level communicaiton */
     ModbusTCPMaster *m_modbusMaster = nullptr;
+
+    /** This structure is allocated within onRequestStatus and filled
+     * by the receivedStatusGroupx functions */
+    IdmInfo *m_info = nullptr;
+
+    /** Converts a system operation mode code to a string (according to manual p. 13) */
+    QString systemOperationModeToString(IdmSysMode mode);
+
+    /** Converts a heat pump operation mode code to a string (according to manual p. 14) */
+    QString heatPumpOperationModeToString(IdmHeatPumpMode mode);
 
 signals:
     void statusUpdated(IdmInfo *info);
 
-private slots:
-    void onRequestStatus();
-
-// only public for debugging!
 public slots:
+    void onRequestStatus();
     void onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value);
-
 };
 
 #endif // IDM_H

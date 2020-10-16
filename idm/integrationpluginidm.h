@@ -48,6 +48,7 @@ class IntegrationPluginIdm: public IntegrationPlugin
 
 
 public:
+    /** Constructor */
     explicit IntegrationPluginIdm();
 
     void discoverThings(ThingDiscoveryInfo *info) override;
@@ -58,14 +59,6 @@ public:
     void update(Thing *thing);
 
 private:
-
-    enum IdmSysMode {
-        IdmSysModeStandby = 0,
-        IdmSysModeAutomatic,
-        IdmSysModeAway,
-        IdmSysModeOnlyWarmwater,
-        IdmSysModeOnlyRoomHeating
-    };
 
     enum IdmSmartGridMode {
         EVUSperreKeinPVErtrag,
