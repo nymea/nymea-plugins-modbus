@@ -102,6 +102,7 @@ private:
         TargetHotWaterTemperature       = 1032, // Warmwasser-Solltemperatur
         HeatPumpOperatingMode           = 1090, // Betriebsart Wärmepumpe
         SummationFaultHeatPump          = 1099, // Summenstörung Wärepumpe
+        RoomTemperatureHKA              = 1364, // Heizkreis A Raumtemperature (B61)
         Humiditysensor                  = 1392, // Feuchtesensor
         RoomTemperatureTargetHeatingHKA = 1401, // Raumsolltemperatur Heizen Normal HK A
         ExternalOutsideTemperature      = 1690, // Externe Außentemperatur
