@@ -80,11 +80,11 @@ void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const 
         if (value.length() == 2) {
             m_info->m_waterTemperature = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::HeatStorageTemperature - modbusRegister]);
         }
-        m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::TargetHotWaterTemperature, 2);
+        m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::TargetHotWaterTemperature, 1);
         break;
     case Idm::TargetHotWaterTemperature:
-        if (value.length() == 2) {
-            m_info->m_targetWaterTemperature = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::TargetHotWaterTemperature - modbusRegister]);
+        if (value.length() == 1) {
+            m_info->m_targetWaterTemperature = (double)value[RegisterList::TargetHotWaterTemperature - modbusRegister];
         }
         m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::HeatPumpOperatingMode, 1);
         break;
