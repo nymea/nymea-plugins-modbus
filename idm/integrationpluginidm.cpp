@@ -43,7 +43,7 @@ void IntegrationPluginIdm::discoverThings(ThingDiscoveryInfo *info)
         // The plugin has a parameter for the IP address
 
         QString description = "Navigator 2";
-        ThingDescriptor descriptor(info->thingClassId(), "", description);
+        ThingDescriptor descriptor(info->thingClassId(), "Idm", description);
         info->addThingDescriptor(descriptor);
         
         // Just report no error for now, until the above question
@@ -58,8 +58,12 @@ void IntegrationPluginIdm::setupThing(ThingSetupInfo *info)
 
     if (thing->thingClassId() == navigator2ThingClassId) {
         QHostAddress hostAddress = QHostAddress(thing->paramValue(navigator2ThingIpAddressParamTypeId).toString());
+
+        /* Create new Idm object and store it in hash table */
         Idm *idm = new Idm(hostAddress, this);
         m_idmConnections.insert(thing, idm);
+
+        /* Store thing info in hash table */
         m_idmInfos.insert(thing, info);
 
         info->finish(Thing::ThingErrorNoError);
@@ -119,10 +123,8 @@ void IntegrationPluginIdm::update(Thing *thing)
 
         QVector<quint16> val{};
 
-        idm->onReceivedHoldingRegister(0, 1021, val);
-        //idm->onRequestStatus();
+        idm->onRequestStatus();
 
-        //idm->readHoldingRegister(0xff, RegisterList::OutsideTemperature);
         if (m_idmInfos.contains(thing)) {
             ThingSetupInfo *info = m_idmInfos.take(thing);
             info->finish(Thing::ThingErrorNoError);
