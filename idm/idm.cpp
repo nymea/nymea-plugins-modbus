@@ -72,6 +72,12 @@ void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const 
                 m_info->m_error = false;
             }
         }
+        m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::HeatStorageTemperature, 2);
+        break;
+    case Idm::HeatStorageTemperature:
+        if (value.length() == 2) {
+            m_info->m_waterTemperature = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::HeatStorageTemperature - modbusRegister]);
+        }
         m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::TargetHotWaterTemperature, 2);
         break;
     case Idm::TargetHotWaterTemperature:
@@ -82,7 +88,6 @@ void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const 
         break;
     case Idm::HeatPumpOperatingMode:
         if (value.length() == 1) {
-            printf("read heat pump operation mode: %d\n", value[0]);
             m_info->m_mode = heatPumpOperationModeToString((Idm::IdmHeatPumpMode)value[RegisterList::HeatPumpOperatingMode-modbusRegister]);
         }
         m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::ExternalOutsideTemperature, 2);
