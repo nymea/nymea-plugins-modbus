@@ -305,21 +305,22 @@ QUuid ModbusTCPMaster::readHoldingRegister(uint slaveAddress, uint registerAddre
             connect(reply, &QModbusReply::finished, this, [reply, requestId, this] {
 
                 if (reply->error() == QModbusDevice::NoError) {
-                    writeRequestExecuted(requestId, true);
+                    emit writeRequestExecuted(requestId, true);
                     const QModbusDataUnit unit = reply->result();
                     uint modbusAddress = unit.startAddress();
                     emit receivedHoldingRegister(reply->serverAddress(), modbusAddress, unit.values());
 
                 } else {
-                    writeRequestExecuted(requestId, false);
+                    emit writeRequestExecuted(requestId, false);
                     qCWarning(dcModbusTCP()) << "Read response error:" << reply->error();
+                    emit readRequestError(requestId, reply->errorString());
                 }
                 reply->deleteLater();
             });
             connect(reply, &QModbusReply::errorOccurred, this, [reply, requestId, this] (QModbusDevice::Error error){
 
-                qCWarning(dcModbusTCP()) << "Modbus replay error:" << error;
-                emit writeRequestError(requestId, reply->errorString());
+                qCWarning(dcModbusTCP()) << "Modbus reply error:" << error;
+                emit readRequestError(requestId, reply->errorString());
                 reply->finished(); // To make sure it will be deleted
             });
             QTimer::singleShot(2000, reply, &QModbusReply::deleteLater);
@@ -340,7 +341,7 @@ QUuid ModbusTCPMaster::writeCoil(uint slaveAddress, uint registerAddress, bool v
 }
 
 QUuid ModbusTCPMaster::writeCoils(uint slaveAddress, uint registerAddress, const QVector<quint16> &values)
-    {
+{
     if (!m_modbusTcpClient) {
         return "";
     }
@@ -355,14 +356,14 @@ QUuid ModbusTCPMaster::writeCoils(uint slaveAddress, uint registerAddress, const
             connect(reply, &QModbusReply::finished, this, [reply, requestId, this] () {
 
                 if (reply->error() == QModbusDevice::NoError) {
-                    writeRequestExecuted(requestId, true);
+                    emit writeRequestExecuted(requestId, true);
                     const QModbusDataUnit unit = reply->result();
                     uint modbusAddress = unit.startAddress();
                     emit receivedCoil(reply->serverAddress(), modbusAddress, unit.values());
 
                 } else {
-                    writeRequestExecuted(requestId, false);
-                    qCWarning(dcModbusTCP()) << "Read response error:" << reply->error();
+                    emit writeRequestExecuted(requestId, false);
+                    qCWarning(dcModbusTCP()) << "Write response error:" << reply->error();
                 }
                 reply->deleteLater();
             });
