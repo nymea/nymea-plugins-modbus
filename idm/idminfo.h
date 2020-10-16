@@ -38,7 +38,10 @@
  *  and passed to the nymea framework within this plugin.
  */
 struct IdmInfo {
+    /** Set to true, if register values can be read,
+     *  false in case of communication problems */
     bool    m_connected;
+
     bool    m_power;
 
     /** RegisterList::OutsideTemperature */
@@ -55,6 +58,9 @@ struct IdmInfo {
 
     /** RegisterList::TargetHotWaterTemperature */
     double  m_targetWaterTemperature;
+
+    /** RegisterList::HumiditySensor */
+    double  m_humidity;
 
     /** RegisterList::OperationModeSystem */
     QString m_mode;

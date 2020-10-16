@@ -103,7 +103,7 @@ private:
         HeatPumpOperatingMode           = 1090, // Betriebsart Wärmepumpe
         SummationFaultHeatPump          = 1099, // Summenstörung Wärepumpe
         RoomTemperatureHKA              = 1364, // Heizkreis A Raumtemperature (B61)
-        Humiditysensor                  = 1392, // Feuchtesensor
+        HumiditySensor                  = 1392, // Feuchtesensor
         RoomTemperatureTargetHeatingHKA = 1401, // Raumsolltemperatur Heizen Normal HK A
         ExternalOutsideTemperature      = 1690, // Externe Außentemperatur
         ExternalHumidity                = 1692, // Externe Feuchte
@@ -155,6 +155,7 @@ signals:
     void statusUpdated(IdmInfo *info);
 
 public slots:
+    void onModbusError();
     void onRequestStatus();
     void onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value);
 };
