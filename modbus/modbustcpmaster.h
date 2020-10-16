@@ -37,6 +37,8 @@
 #include <QTimer>
 #include <QUuid>
 
+Q_DECLARE_LOGGING_CATEGORY(dcModbus)
+
 class ModbusTCPMaster : public QObject
 {
     Q_OBJECT
