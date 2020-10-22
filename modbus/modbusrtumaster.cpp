@@ -31,8 +31,10 @@
 #include "modbusrtumaster.h"
 
 #include <QSerialPortInfo>
-#include <QLoggingCategory>
-Q_DECLARE_LOGGING_CATEGORY(dcModbusRTU)
+
+#include <loggingcategories.h>
+
+NYMEA_LOGGING_CATEGORY(dcModbusRTU, "ModbusRTU")
 
 ModbusRTUMaster::ModbusRTUMaster(QString serialPort, uint baudrate, QSerialPort::Parity parity, uint dataBits, uint stopBits, QObject *parent) :
     QObject(parent)
