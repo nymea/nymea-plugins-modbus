@@ -74,7 +74,6 @@ private:
 
 private slots:
     void onConnectionStateChanged(bool status);
-    void onReceivedCoil(int slaveAddress, int modbusRegister, bool value);
     void onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value);
 
     void onWriteRequestExecuted(const QUuid &requestId, bool success);
