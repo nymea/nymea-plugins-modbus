@@ -88,14 +88,11 @@ private:
 private slots:
     void onRefreshTimer();
 
-    void onPluginConfigurationChanged(const ParamTypeId &paramTypeId, const QVariant &value);
-
     void onConnectionStateChanged(bool status);
     void onWriteRequestExecuted(QUuid requestId, bool success);
     void onWriteRequestError(QUuid requestId, const QString &error);
 
     void onReceivedHoldingRegister(quint32 slaveAddress, quint32 modbusRegister, const QVector<quint16> &values);
-    void onReceivedInputRegister(quint32 slaveAddress, quint32 modbusRegister, const QVector<quint16> &values);
 };
 
 #endif // INTEGRATIONPLUGINMYPV_H
