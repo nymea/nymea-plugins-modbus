@@ -5,6 +5,7 @@ PLUGIN_DIRS = \
     modbuscommander         \
     mypv                    \
     sunspec                 \
+    unipi                   \
     wallbe                  \
 
 message(============================================)

@@ -1,0 +1,643 @@
+{
+    "displayName": "UniPi",
+    "name": "UniPi",
+    "id": "26cba644-35ae-40a6-9c48-924198893a5f",
+    "paramTypes": [
+        {
+            "id": "5329655d-7e91-4b16-9abf-2abc82bf1b3c",
+            "name": "port",
+            "displayName": "Port",
+            "type": "int",
+            "defaultValue": "502"
+        },
+        {
+            "id": "fa9d0407-72fd-4f61-ae8d-c95241ddb610",
+            "name": "address",
+            "displayName": "Address",
+            "type": "QString",
+            "defaultValue": "127.0.0.1"
+        },
+        {
+            "id": "1e34aec6-0ff4-400d-80ff-32094612b325",
+            "name": "serialPort",
+            "displayName": "Serial port",
+            "type": "QString",
+            "defaultValue": "/dev/extcomm/0/0"
+        },
+        {
+            "id": "a05aaedf-5345-4ab4-b471-8c7d106b473e",
+            "name": "baudrate",
+            "displayName": "Baudrate",
+            "type": "int",
+            "defaultValue": 19200
+        },
+        {
+            "id": "24323f2c-87f9-4b46-aca9-9c98ca731008",
+            "name": "parity",
+            "displayName": "Parity",
+            "type": "QString",
+            "allowedValues": [
+                "None",
+                "Even"
+            ],
+            "defaultValue": "None"
+        }
+    ],
+    "vendors": [
+        {
+            "displayName": "UniPi",
+            "name": "unipi",
+            "id": "c82bfe27-d14d-40bd-b12f-ddba214b5fc5",
+            "thingClasses": [
+                {
+                    "id": "f9f5d5eb-a768-40da-af62-55b0b486a5e5",
+                    "name": "uniPi1",
+                    "displayName": "UniPi 1",
+                    "createMethods": ["user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "6f4914c1-fce8-4b7a-a73b-ad8a2f4a08ec",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connection changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        }
+                    ]
+                },
+                {
+                    "id": "6ecc110c-f8dc-48af-affd-feef7944421d",
+                    "name": "uniPi1Lite",
+                    "displayName": "UniPi 1 Lite",
+                    "createMethods": ["user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "ab505f67-35b8-4ca5-87a8-883ee85506b7",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connection changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        }
+                    ]
+                },
+                {
+                    "id": "72637166-6730-4b2c-9b5d-4d2066c2fea8",
+                    "name": "neuronL403",
+                    "displayName": "Neuron L403",
+                    "createMethods": ["user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "5d11bb59-da27-42ac-a176-27215068bd6d",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connection changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        }
+                    ]
+                },
+                {
+                    "id": "c28dc232-6797-4aff-83dd-8d811d485482",
+                    "name": "neuronS103",
+                    "displayName": "Neuron S103",
+                    "createMethods": ["user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "e650bb92-2dff-44e2-9500-657efba14492",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connection changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        }
+                    ]
+                },
+                {
+                    "id": "58632506-8d06-4ad0-98d0-275ef8a88955",
+                    "name": "neuronM103",
+                    "displayName": "Neuron M103",
+                    "createMethods": ["user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "8ad0d4b2-8256-41a9-8438-003216383215",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connection changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        }
+                    ]
+                },
+                {
+                    "id": "d254dbed-4cf0-4fe3-96da-9adfd8d1c912",
+                    "name": "neuronM203",
+                    "displayName": "Neuron M203",
+                    "createMethods": ["user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "c7318db4-ba50-4b80-95a7-2a890eaa16c4",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connection changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        }
+                    ]
+                },
+                {
+                    "id": "6ee92fd5-c169-4050-aa3c-d8289bee20ec",
+                    "name": "neuronM303",
+                    "displayName": "Neuron M303",
+                    "createMethods": ["user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "80528228-7ecd-444f-be59-e2ff89cb20a1",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connection changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        }
+                    ]
+                },
+                {
+                    "id": "0621f5f1-8531-4d44-800e-52f926c58b17",
+                    "name": "neuronM403",
+                    "displayName": "Neuron M403",
+                    "createMethods": ["user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "0eb77f43-dc85-450f-ab2c-d150a739570d",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connection changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        }
+                    ]
+                },
+                {
+                    "id": "0d5a09de-daf8-469f-803c-520f763167df",
+                    "name": "neuronM503",
+                    "displayName": "Neuron M503",
+                    "createMethods": ["user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "688d21a7-7658-4874-b02b-9340b2c9ba12",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connection changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        }
+                    ]
+                },
+                {
+                    "id": "366bac45-c602-4c45-9812-1d3d04b2c3db",
+                    "name": "neuronL203",
+                    "displayName": "Neuron L203",
+                    "createMethods": ["user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "515a70d3-d599-426f-88a2-c5a651420812",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connection changed",
+                            "type": "bool",
+                            "defaultValue": false
+                        }
+                    ]
+                },
+                {
+                    "id": "fc1a9aab-8573-42fe-8ed4-4876795870c2",
+                    "name": "neuronL303",
+                    "displayName": "Neuron L303",
+                    "createMethods": ["user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "3a020c62-e5f9-4909-98d4-5538a8d43d9d",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connection changed",
+                            "type": "bool",
+                            "cached": false,
+                            "defaultValue": false
+                        }
+                    ]
+                },
+                {
+                    "id": "58d33a7f-30ac-4d79-94a1-2013dc50743e",
+                    "name": "neuronL503",
+                    "displayName": "Neuron L503",
+                    "createMethods": ["user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "5e689958-02f0-4e0a-9bb3-e04a6fe1dd30",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connection changed",
+                            "type": "bool",
+                            "defaultValue": false
+                        }
+                    ]
+                },
+                {
+                    "id": "4b57e164-5f62-4518-afc1-15a659a2c402",
+                    "name": "neuronL513",
+                    "displayName": "Neuron L513",
+                    "createMethods": ["user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "fa82f6cc-4308-4d8b-96c1-2fb1a638e04d",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connection changed",
+                            "type": "bool",
+                            "cached": false,
+                            "defaultValue": false
+                        }
+                    ]
+                },
+                {
+                    "id": "9bfe46d0-5dbd-432c-877f-1ff47faf6e17",
+                    "name": "neuronXS10",
+                    "displayName": "Neuron xS10",
+                    "createMethods": ["user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                        {
+                            "id": "c105e97a-1e00-44fd-ac10-d43e731e43b0",
+                            "name": "slaveAddress",
+                            "displayName": "Modbus slave address",
+                            "type": "int",
+                            "defaultValue": 1
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "caf378cd-eb86-4779-8618-6f9c2bd58c17",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connection changed",
+                            "type": "bool",
+                            "cached": false,
+                            "defaultValue": false
+                        }
+                    ]
+                },
+                {
+                    "id": "9e2e13bb-c18c-438f-989f-52363561ce85",
+                    "name": "neuronXS20",
+                    "displayName": "Neuron xS20",
+                    "createMethods": ["user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                        {
+                            "id": "a5c97b47-580b-4ea3-8755-ef68380f5c2a",
+                            "name": "slaveAddress",
+                            "displayName": "Modbus slave address",
+                            "type": "int",
+                            "defaultValue": 1
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "7afb047f-4ca4-469c-9171-b6de52d27504",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connection changed",
+                            "type": "bool",
+                            "cached": false,
+                            "defaultValue": false
+                        }
+                    ]
+                },
+                {
+                    "id": "a1ec57b1-fcf9-4540-80c9-40f78cddc85f",
+                    "name": "neuronXS30",
+                    "displayName": "Neuron xS30",
+                    "createMethods": ["user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                        {
+                            "id": "956254a2-83f5-4f3c-8e79-e1b009a7e203",
+                            "name": "slaveAddress",
+                            "displayName": "Modbus slave address",
+                            "type": "int",
+                            "defaultValue": 1
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "ed1adb91-54ec-430b-96ca-fb5ef5cf6628",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connection changed",
+                            "type": "bool",
+                            "cached": false,
+                            "defaultValue": false
+                        }
+                    ]
+                },
+                {
+                    "id": "05c78946-48f4-4e1b-9d45-90fbd66c71c0",
+                    "name": "neuronXS40",
+                    "displayName": "Neuron xS40",
+                    "createMethods": ["user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                        {
+                            "id": "6b2da1ee-5cae-4325-913e-21d26d5909c3",
+                            "name": "slaveAddress",
+                            "displayName": "Modbus slave address",
+                            "type": "int",
+                            "defaultValue": 1
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "7caea8c3-ac29-42fb-835b-beec7fa1ce20",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connection changed",
+                            "type": "bool",
+                            "cached": false,
+                            "defaultValue": false
+                        }
+                    ]
+                },
+                {
+                    "id": "c31f5e8c-a27c-49db-b5a8-dd065336b79a",
+                    "name": "neuronXS50",
+                    "displayName": "Neuron xS50",
+                    "createMethods": ["user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                        {
+                            "id": "6d01f6b3-7c3c-4fc8-acf2-dc9811340a76",
+                            "name": "slaveAddress",
+                            "displayName": "Modbus slave address",
+                            "type": "int",
+                            "defaultValue": 1
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "25b0eaa7-14eb-49ea-a869-13b1ea3bd294",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connection changed",
+                            "type": "bool",
+                            "cached": false,
+                            "defaultValue": false
+                        }
+                    ]
+                },
+                {
+                    "id": "f59bfba2-0455-49f2-b92d-badfec5dcc01",
+                    "name": "neuronXS11",
+                    "displayName": "Neuron xS11",
+                    "createMethods": ["user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                        {
+                            "id": "5b8d8149-f08a-451e-9766-08966f7f91c1",
+                            "name": "slaveAddress",
+                            "displayName": "Modbus slave address",
+                            "type": "int",
+                            "defaultValue": 1
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "bf1acd53-f3c9-4654-a220-d36eb130cda2",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connection changed",
+                            "type": "bool",
+                            "cached": false,
+                            "defaultValue": false
+                        }
+                    ]
+                },
+                {
+                    "id": "0e11fbd3-8d4a-4fd8-aeeb-25ee2d134a17",
+                    "name": "neuronXS51",
+                    "displayName": "Neuron xS51",
+                    "createMethods": ["user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                        {
+                            "id": "8f40b075-ebed-4ce1-b9e7-a37bb31656c4",
+                            "name": "slaveAddress",
+                            "displayName": "Modbus slave address",
+                            "type": "int",
+                            "defaultValue": 1
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "f95875de-d5d5-4e7f-8873-3fe2615a0b11",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connection changed",
+                            "type": "bool",
+                            "cached": false,
+                            "defaultValue": false
+                        }
+                    ]
+                },
+                {
+                    "id": "0bec278a-98f1-416b-b496-6d00740f178a",
+                    "name": "digitalInput",
+                    "displayName": "Digital input",
+                    "createMethods": ["discovery"],
+                    "interfaces": [ ],
+                    "paramTypes": [
+                        {
+                            "id": "9c84d9b8-fdc7-41c1-9559-08f061ffc7a6",
+                            "name": "circuit",
+                            "displayName": "Circuit",
+                            "type": "QString"
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "fa4f2764-b7ff-45e7-993b-b6af1840fd3d",
+                            "name": "inputStatus",
+                            "displayName": "Digital input",
+                            "displayNameEvent": "Digital input changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "ioType": "digitalInput"
+                        }
+                    ]
+                },
+                {
+                    "id": "f3a3c5ed-461a-4ca8-930b-df3af821b9e0",
+                    "name": "digitalOutput",
+                    "displayName": "Digital output",
+                    "createMethods": ["discovery"],
+                    "interfaces": ["power"],
+                    "paramTypes": [
+                        {
+                            "id": "c01d5bde-de5d-42c5-b462-79745827875a",
+                            "name": "circuit",
+                            "displayName": "Circuit",
+                            "type": "QString"
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "470a0e30-a170-47ed-9ed3-c41db919555f",
+                            "name": "power",
+                            "displayName": "Power",
+                            "displayNameAction": "set digital output",
+                            "displayNameEvent": "digital output changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "writable": true,
+                            "ioType": "digitalOutput"
+                        }
+                    ]
+                },
+                {
+                    "id": "9094a69f-f475-4050-a345-5ab52cb19774",
+                    "name": "analogOutput",
+                    "displayName": "Analog output",
+                    "createMethods": ["discovery"],
+                    "interfaces": [ ],
+                    "paramTypes": [
+                        {
+                            "id": "46e606cc-67ee-4891-bc39-8fb0565c87da",
+                            "name": "circuit",
+                            "displayName": "Circuit",
+                            "type": "QString"
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "6d825eb8-6d2a-4ac3-9125-9df8173116c9",
+                            "name": "outputValue",
+                            "displayName": "Analog output",
+                            "displayNameEvent": "Analog output changed",
+                            "displayNameAction": "Set analog output",
+                            "type": "double",
+                            "unit": "Volt",
+                            "minValue": 0.00,
+                            "maxValue": 10.00,
+                            "defaultValue": 0.00,
+                            "writable": true,
+                            "ioType": "analogOutput"
+                        }
+                    ]
+                },
+                {
+                    "id": "06abd6a4-e655-4243-bc9c-9bd4ef5be2e6",
+                    "name": "analogInput",
+                    "displayName": "Analog Input",
+                    "createMethods": ["discovery"],
+                    "interfaces": [ ],
+                    "paramTypes": [
+                        {
+                            "id": "cc6eb664-9fd2-457d-9d0d-0eb9703db4a2",
+                            "name": "circuit",
+                            "displayName": "Circuit",
+                            "type": "QString"
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "2296f575-cc53-48ef-9086-6a412abfdde5",
+                            "name": "inputValue",
+                            "displayName": "Analog input",
+                            "displayNameEvent": "Analog input changed",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0.00,
+                            "minValue": 0.00,
+                            "maxValue": 10.00,
+                            "ioType": "analogInput"
+                        }
+                    ]
+                },
+                {
+                    "id": "6a87e9b3-7f3d-4b7c-8958-905ec039ef57",
+                    "name": "userLED",
+                    "displayName": "User LED",
+                    "createMethods": ["discovery"],
+                    "interfaces": ["power"],
+                    "paramTypes": [
+                        {
+                            "id": "88fffbd6-6469-47ce-bfba-700da90a6075",
+                            "name": "circuit",
+                            "displayName": "Circuit",
+                            "type": "QString"
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "38878388-9a2e-45b0-8f3e-c25073c9dc1d",
+                            "name": "power",
+                            "displayName": "Power",
+                            "displayNameAction": "set digital output",
+                            "displayNameEvent": "digital output changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "writable": true
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,14 @@
+{
+    "title": "UniPi",
+    "tagline": "Integrates UniPi with nymea",
+    "icon": "unipi.png",
+    "stability": "consumer",
+    "offline": true,
+    "technologies": [
+        "network",
+        "serial-port"
+    ],
+    "categories": [
+        "relay"
+    ]
+}
