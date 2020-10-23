@@ -1,1 +1,3 @@
-nymea-plugins-modbus (0.24.0) UNRELEASED; urgency=medium
+nymea-plugins-modbus (0.24.0) xenial; urgency=medium  * Add first plugins
+
+ -- Jenkins <jenkins@nymea.io>  Fri, 23 Oct 2020 13:13:47 +0200
