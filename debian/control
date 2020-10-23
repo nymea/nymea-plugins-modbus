@@ -1,19 +1,15 @@
 Source: nymea-plugins-modbus
 Section: utils
 Priority: options
-Maintainer: Michael Zanetti <michael.zanetti@guh.io>
-Build-depends: libboblight-dev,
-               debhelper (>= 0.0.0),
+Maintainer: Bernhard Trinnes <bernhard.trinnes@nymea.io>
+Build-depends: debhelper (>= 9.0.0),
                libnymea1-dev (>= 0.17),
-               libnymea-mqtt-dev,
+               libqt5serialbus5-dev,
                libqt5serialport5-dev,
-               libqt5websockets5-dev,
                nymea-dev-tools:native,
                pkg-config,
-               python:any,
                qtbase5-dev,
-               qtconnectivity5-dev,
-               libow-dev,
+               qt5-default,
 Standards-Version: 3.9.3
 
 
@@ -22,7 +18,7 @@ Architecture: any
 Section: libs
 Depends: ${shlibs:Depends},
          ${misc:Depends},
-         nymea-plugins-translations,
+         nymea-plugins-modbus-translations
 Description: nymea.io plugin for Drexel & Weiss heat pumps
  The nymea daemon is a plugin based IoT (Internet of Things) server. The
  server works like a translator for devices, things and services and
@@ -33,31 +29,64 @@ Description: nymea.io plugin for Drexel & Weiss heat pumps
  This package will install the nymea.io plugin for Drexel & Weiss heat pumps
 
 
-Package: nymea-plugins-translations
+Package: nymea-plugin-modbuscommander
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         nymea-plugins-modbus-translations
+Description: nymea.io plugin to send and receive generic modbus commands
+ The nymea daemon is a plugin based IoT (Internet of Things) server. The
+ server works like a translator for devices, things and services and
+ allows them to interact.
+ With the powerful rule engine you are able to connect any device available
+ in the system and create individual scenes and behaviors for your environment.
+ .
+ This package will install the nymea.io modbus commander plug-in
+ 
+
+Package: nymea-plugin-mypv
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         nymea-plugins-modbus-translations,
+Description: nymea.io plugin for my-pv heating rods
+ The nymea daemon is a plugin based IoT (Internet of Things) server. The
+ server works like a translator for devices, things and services and
+ allows them to interact.
+ With the powerful rule engine you are able to connect any device available
+ in the system and create individual scenes and behaviors for your environment.
+ .
+ This package will install the nymea.io plugin for my-pv
+
+
+Package: nymea-plugin-wallbe
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         nymea-plugins-modbus-translations
+Description: nymea.io plugin for wallbe ev charging stations
+ The nymea daemon is a plugin based IoT (Internet of Things) server. The
+ server works like a translator for devices, things and services and
+ allows them to interact.
+ With the powerful rule engine you are able to connect any device available
+ in the system and create individual scenes and behaviors for your environment.
+ .
+ This package will install the nymea.io plugin for wallbe
+
+
+Package: nymea-plugins-modbus-translations
 Section: misc
 Architecture: all
 Depends: ${misc:Depends}
-Replaces: guh-plugins-translations
-Description: Translation files for nymea plugins - translations
+Description: Translation files for nymea modbus plugins - translations
  The nymea daemon is a plugin based IoT (Internet of Things) server. The
  server works like a translator for devices, things and services and
  allows them to interact.
  With the powerful rule engine you are able to connect any device available
  in the system and create individual scenes and behaviors for your environment.
  .
- This package provides the translation files for all nymea plugins.
-
-
-Package: nymea-plugins-modbus
-Section: libs
-Architecture: all
-Depends: nymea-plugin-drexelundweiss,
-Description: Plugins for nymea IoT server - the modbus plugin collection
- The nymea daemon is a plugin based IoT (Internet of Things) server. The
- server works like a translator for devices, things and services and
- allows them to interact.
- With the powerful rule engine you are able to connect any device available
- in the system and create individual scenes and behaviors for your environment.
- .
- This package will install the nymea modbus plugins.
+ This package provides the translation files for all nymea modbus plugins.
 

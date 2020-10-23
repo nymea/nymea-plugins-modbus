@@ -2,7 +2,9 @@ TEMPLATE = subdirs
 
 PLUGIN_DIRS = \
     drexelundweiss          \
-
+    modbuscommander         \
+    mypv                    \
+    wallbe                  \
 
 message(============================================)
 message("Qt version:" $$[QT_VERSION])

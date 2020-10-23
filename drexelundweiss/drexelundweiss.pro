@@ -5,12 +5,10 @@ QT += \
     serialbus \
 
 SOURCES += \
-    deviceplugindrexelundweiss.cpp \
-    modbusrtumaster.cpp \
+    integrationplugindrexelundweiss.cpp \
+    ../modbus/modbusrtumaster.cpp \
 
 HEADERS += \
-    deviceplugindrexelundweiss.h \
-    modbusrtumaster.h \
-    modbusdegisterdefinition.h
-
-
+    integrationplugindrexelundweiss.h \
+    modbusdegisterdefinition.h \
+    ../modbus/modbusrtumaster.h \

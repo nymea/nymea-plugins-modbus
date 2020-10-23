@@ -1,0 +1,13 @@
+{
+    "title": "my-PV",
+    "tagline": "Control my-PV network enabled heating rods.",
+    "icon": "mypv.png",
+    "stability": "community",
+    "offline": true,
+    "technologies": [
+        "network"
+    ],
+    "categories": [
+        "heating"
+    ]
+}
