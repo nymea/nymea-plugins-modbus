@@ -55,9 +55,31 @@ Idm::~Idm()
     }
 }
 
+void Idm::setTargetRoomTemperature (double temperature) {
+    QVector<quint16> registers{};
+
+    printf("Setting target room temperature to %g\n", temperature);
+
+    ModbusHelpers::convertFloatToRegister(registers, temperature);
+
+    printf("registers to be sent: %x %x\n", registers[0], registers[1]);
+    
+    m_modbusMaster->writeHoldingRegisters(Idm::ModbusUnitID, Idm::RoomTemperatureHKA, registers);
+
+    emit targetRoomTemperatureChanged();
+}
+
 void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value)
 {
     Q_UNUSED(slaveAddress);
+
+    /* Introducing a delay here for testing.
+     * Purposely set here, so one delay works for all branches
+     * of the following switch statement. In fact, the delay
+     * is used before evaluating what was just read, which
+     * does not seem to make sense, but it also acts before
+     * the next read command is sent. */
+    QThread::msleep(200);
 
     switch (modbusRegister) {
     case Idm::OutsideTemperature:

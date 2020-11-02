@@ -37,7 +37,7 @@ float ModbusHelpers::convertRegisterToFloat(const quint16 *reg) {
 
     if (reg != nullptr) {
         /* low-order byte is sent first, so swap order */
-        quint32 tmp = 0.0;
+        quint32 tmp = 0;
 
         tmp |= ((quint32)(reg[1]) << 16) & 0xFFFF0000;
         tmp |= reg[0];
@@ -48,5 +48,14 @@ float ModbusHelpers::convertRegisterToFloat(const quint16 *reg) {
     }
 
     return result;
+}
+
+void ModbusHelpers::convertFloatToRegister(QVector<quint16> &reg, float value) {
+    quint32 tmp = 0;
+
+    memcpy((char *)&tmp, (char *)&value, sizeof(value));
+
+    reg.append((quint16)(tmp));
+    reg.append((quint16)((tmp & 0xFFFF0000) >> 16));
 }
 

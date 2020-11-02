@@ -32,10 +32,12 @@
 #define MODBUSHELPERS_H
 
 #include <QtGlobal>
+#include <QVector>
 
 class ModbusHelpers {
 public:
     static float    convertRegisterToFloat(const quint16 *reg);
+    static void     convertFloatToRegister(QVector<quint16> &reg, float value);
 };
 
 #endif

@@ -110,7 +110,7 @@
 
                             "id": "b98fb325-100d-4eae-bf8d-97e8f7e1eb00",
                             "name": "currentPowerConsumptionHeatPump",
-                            "displayName": "Current power consumption heat pump",
+                            "displayName": "Curr. power consumption",
                             "displayNameEvent": "Current power consumption heat pump changed",
                             "displayNameAction": "Change current power consumption het pump",
                             "type": "double",
