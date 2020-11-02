@@ -89,6 +89,7 @@ private:
 
 private slots:
     void onStatusUpdated(IdmInfo *info);
+    void onTargetRoomTemperatureChanged();
 };
 
 #endif // INTEGRATIONPLUGINIDM_H

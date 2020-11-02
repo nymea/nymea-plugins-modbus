@@ -47,6 +47,8 @@ public:
     /** Destructor */
     ~Idm();
 
+    void setTargetRoomTemperature (double temperature);
+
 private:
     /* Note: It would be desirable to read the modbus registers
      *       of the Idm heat pump in groups to minimize the number
@@ -153,6 +155,7 @@ private:
 
 signals:
     void statusUpdated(IdmInfo *info);
+    void targetRoomTemperatureChanged();
 
 public slots:
     void onModbusError();
