@@ -55,20 +55,6 @@ Idm::~Idm()
     }
 }
 
-void Idm::setTargetRoomTemperature (double temperature) {
-    QVector<quint16> registers{};
-
-    printf("Setting target room temperature to %g\n", temperature);
-
-    ModbusHelpers::convertFloatToRegister(registers, temperature);
-
-    printf("registers to be sent: %x %x\n", registers[0], registers[1]);
-    
-    m_modbusMaster->writeHoldingRegisters(Idm::ModbusUnitID, Idm::RoomTemperatureHKA, registers);
-
-    emit targetRoomTemperatureChanged();
-}
-
 void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value)
 {
     Q_UNUSED(slaveAddress);
@@ -115,12 +101,6 @@ void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const 
         if (value.length() == 1) {
             m_info->m_mode = heatPumpOperationModeToString((Idm::IdmHeatPumpMode)value[RegisterList::HeatPumpOperatingMode-modbusRegister]);
         }
-        m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::HumiditySensor, 2);
-        break;
-    case Idm::HumiditySensor:
-        if (value.length() == 2) {
-            m_info->m_humidity = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::HumiditySensor - modbusRegister]);
-        }
         m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::RoomTemperatureHKA, 2);
         break;
     case Idm::RoomTemperatureHKA:
@@ -129,7 +109,7 @@ void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const 
         }
         m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::RoomTemperatureTargetHeatingHKA, 2);
         break;
-    case Idm::RoomTemperatureTargetHeatingHKA:
+    case Idm::RoomTemperatureTargetHeatingEcoHKA:
         if (value.length() == 2) {
             m_info->m_targetRoomTemperature = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::RoomTemperatureTargetHeatingHKA - modbusRegister]);
         }

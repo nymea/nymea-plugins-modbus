@@ -60,26 +60,6 @@ public:
 
 private:
 
-    enum IdmSmartGridMode {
-        EVUSperreKeinPVErtrag,
-        EVUBezugKeinPVErtrag,
-        KeinEVUBezugPVErtrag,
-        EVUSperrePVErtrag
-    };
-
-    enum IdmStatus {
-        Heating = 2,
-        Standby = 3,
-        Boosted = 4,
-        HeatFinished = 5,
-        Setup = 9,
-        ErrorOvertempFuseBlown = 201,
-        ErrorOvertempMeasured = 202,
-        ErrorOvertempElectronics = 203,
-        ErrorHardwareFault = 204,
-        ErrorTempSensor = 205
-    };
-
     PluginTimer *m_refreshTimer = nullptr;
     QHash<Thing *, Idm *> m_idmConnections;
     QHash<Thing *, ThingSetupInfo *> m_idmInfos;
@@ -89,7 +69,6 @@ private:
 
 private slots:
     void onStatusUpdated(IdmInfo *info);
-    void onTargetRoomTemperatureChanged();
 };
 
 #endif // INTEGRATIONPLUGINIDM_H
