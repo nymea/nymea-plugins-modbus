@@ -37,6 +37,33 @@
 
 #include "idminfo.h"
 
+/*
+ * Functionality:
+ *       The current version allows read access to selected
+ *       modbus registers:
+ *       + Room temperature (HK A)
+ *       + Water temperature
+ *       + Outside air temperature
+ *       + Target room temperature eco mode (HK A)
+ *       + Target water temperature
+ *       + Current power consumption
+ *       + Operation mode
+ *       + Error
+ *      
+ *       At present there is no write access for target
+ *       room temperature and target water temperature. These
+ *       result in an "invalid data access" error from the
+ *       device.
+ */
+
+/* Note: It would be desirable to read the modbus registers
+ *       of the Idm heat pump in groups to minimize the number
+ *       of read requests. However, a maximum of 6 registers 
+ *       can be read simultaneously. With the given set of
+ *       addresses it is not possible to reasonably group the
+ *       registers, therefore they are read individually.
+ */
+
 class Idm : public QObject
 {
     Q_OBJECT
@@ -47,16 +74,7 @@ public:
     /** Destructor */
     ~Idm();
 
-    void setTargetRoomTemperature (double temperature);
-
 private:
-    /* Note: It would be desirable to read the modbus registers
-     *       of the Idm heat pump in groups to minimize the number
-     *       of read requests. However, a maximum of 6 registers 
-     *       can be read simultaneously. With the given set of
-     *       addresses it is not possible to reasonably group the
-     *       registers, therefore they are read individually.
-     */
 
     /** Modbus Unit ID of Idm device */
     static const quint16   ModbusUnitID = 1;
@@ -107,6 +125,7 @@ private:
         RoomTemperatureHKA              = 1364, // Heizkreis A Raumtemperature (B61)
         HumiditySensor                  = 1392, // Feuchtesensor
         RoomTemperatureTargetHeatingHKA = 1401, // Raumsolltemperatur Heizen Normal HK A
+        RoomTemperatureTargetHeatingEcoHKA = 1415, // Raumsolltemperatur Heizen Eco HK A
         ExternalOutsideTemperature      = 1690, // Externe Außentemperatur
         ExternalHumidity                = 1692, // Externe Feuchte
         ExternalRequestTemperatureHeating = 1694, // Externe Anforderungstemperatur Heizen

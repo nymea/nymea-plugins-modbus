@@ -82,7 +82,6 @@ void IntegrationPluginIdm::postSetupThing(Thing *thing)
         Idm *idm = m_idmConnections.value(thing);
 
         connect(idm, &Idm::statusUpdated, this, &IntegrationPluginIdm::onStatusUpdated);
-        connect(idm, &Idm::targetRoomTemperatureChanged, this, &IntegrationPluginIdm::onTargetRoomTemperatureChanged);
 
         qCDebug(dcIdm()) << "Thing set up, calling update";
         update(thing);
@@ -107,12 +106,7 @@ void IntegrationPluginIdm::executeAction(ThingActionInfo *info)
     if (thing->thingClassId() == navigator2ThingClassId) {
       if (action.actionTypeId() == navigator2PowerActionTypeId) {
           
-      } else if (action.actionTypeId() == navigator2TargetTemperatureStateTypeId) {
-          Idm *idm = m_idmConnections.value(thing);
-
-          idm->setTargetRoomTemperature(action.param(navigator2TargetTemperatureEventTargetTemperatureParamTypeId).value().value<double>());
-
-    } else {
+      } else {
         Q_ASSERT_X(false, "executeAction", QString("Unhandled action: %1").arg(action.actionTypeId().toString()).toUtf8());
         }
     } else {
@@ -161,15 +155,9 @@ void IntegrationPluginIdm::onStatusUpdated(IdmInfo *info)
     thing->setStateValue(navigator2WaterTemperatureStateTypeId, info->m_waterTemperature);
     thing->setStateValue(navigator2TargetTemperatureStateTypeId, info->m_targetRoomTemperature);
     thing->setStateValue(navigator2TargetWaterTemperatureStateTypeId, info->m_targetWaterTemperature);
-    thing->setStateValue(navigator2HumidityStateTypeId, info->m_humidity);
     thing->setStateValue(navigator2CurrentPowerConsumptionHeatPumpStateTypeId, info->m_powerConsumptionHeatPump);
     thing->setStateValue(navigator2ModeStateTypeId, info->m_mode);
     thing->setStateValue(navigator2ErrorStateTypeId, info->m_error);
-}
-
-void IntegrationPluginIdm::onTargetRoomTemperatureChanged()
-{
-
 }
 
 void IntegrationPluginIdm::onRefreshTimer()
