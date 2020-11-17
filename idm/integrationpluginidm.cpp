@@ -39,7 +39,7 @@ IntegrationPluginIdm::IntegrationPluginIdm()
 void IntegrationPluginIdm::discoverThings(ThingDiscoveryInfo *info)
 {
     if (info->thingClassId() == navigator2ThingClassId) {
-        // TODO Is a discovery method actually needed?
+        // TODO Is a discovery method actually possible?
         // The plugin has a parameter for the IP address
 
         QString description = "Navigator 2";
@@ -59,16 +59,29 @@ void IntegrationPluginIdm::setupThing(ThingSetupInfo *info)
     if (thing->thingClassId() == navigator2ThingClassId) {
         QHostAddress hostAddress = QHostAddress(thing->paramValue(navigator2ThingIpAddressParamTypeId).toString());
 
-        /* Create new Idm object and store it in hash table */
-        Idm *idm = new Idm(hostAddress, this);
-        m_idmConnections.insert(thing, idm);
+        if (hostAddress.isNull() == false) {
+            /* Check, if address is already in use for another device */
+            bool found = false;
 
-        /* Store thing info in hash table */
-        m_idmInfos.insert(thing, info);
+            for (QHash<Thing *, Idm *>::iterator item=m_idmConnections.begin(); item != m_idmConnections.end(); item++) {
+                if (hostAddress.isEqual(item.value()->getIdmAddress()))
+                    found = true;
+            }
 
-        info->finish(Thing::ThingErrorNoError);
+            if (found == false) {
+                /* Create new Idm object and store it in hash table */
+                Idm *idm = new Idm(hostAddress, this);
+                m_idmConnections.insert(thing, idm);
+
+                /* Store thing info in hash table */
+                m_idmInfos.insert(thing, info);
+
+                info->finish(Thing::ThingErrorNoError);
+            } else {
+                info->finish(Thing::ThingErrorThingInUse);
+            }
+        }
     }
-
 }
 
 void IntegrationPluginIdm::postSetupThing(Thing *thing)
