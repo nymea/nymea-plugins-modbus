@@ -74,6 +74,8 @@ public:
     /** Destructor */
     ~Idm();
 
+    QHostAddress getIdmAddress() const {return m_hostAddress;};
+
 private:
 
     /** Modbus Unit ID of Idm device */
