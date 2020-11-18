@@ -172,8 +172,14 @@ void IntegrationPluginIdm::update(Thing *thing)
         idm->onRequestStatus();
 
         if (m_idmInfos.contains(thing)) {
+<<<<<<< HEAD
             ThingSetupInfo *info = m_idmInfos.take(thing);
             info->finish(Thing::ThingErrorNoError);
+=======
+            /* ThingSetupInfo *info = m_idmInfos.take(thing); */
+            /* qCDebug(dcIdm()) << "Finishing setup 4!"; */
+            /* info->finish(Thing::ThingErrorNoError); */
+>>>>>>> 3b5ab5c... Another fix for previous commit
         }
     }
 }
