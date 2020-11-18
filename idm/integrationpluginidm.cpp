@@ -38,6 +38,8 @@ IntegrationPluginIdm::IntegrationPluginIdm()
 
 void IntegrationPluginIdm::discoverThings(ThingDiscoveryInfo *info)
 {
+    qCDebug(dcIdm()) << "discoverThings called";
+
     if (info->thingClassId() == navigator2ThingClassId) {
         // TODO Is a discovery method actually possible?
         // The plugin has a parameter for the IP address
@@ -54,21 +56,40 @@ void IntegrationPluginIdm::discoverThings(ThingDiscoveryInfo *info)
 
 void IntegrationPluginIdm::setupThing(ThingSetupInfo *info)
 {
+    qCDebug(dcIdm()) << "setupThing called";
+
     Thing *thing = info->thing();
 
     if (thing->thingClassId() == navigator2ThingClassId) {
         QHostAddress hostAddress = QHostAddress(thing->paramValue(navigator2ThingIpAddressParamTypeId).toString());
 
         if (hostAddress.isNull() == false) {
+            QString msg = "User entered address: ";
+            msg += hostAddress.toString();
+
+            qCDebug(dcIdm()) << msg;
+
             /* Check, if address is already in use for another device */
             bool found = false;
 
             for (QHash<Thing *, Idm *>::iterator item=m_idmConnections.begin(); item != m_idmConnections.end(); item++) {
-                if (hostAddress.isEqual(item.value()->getIdmAddress()))
+                if (hostAddress.isEqual(item.value()->getIdmAddress())) {
+                    msg = "Addr of thing: ";
+                    msg += item.value()->getIdmAddress().toString();
+                    qCDebug(dcIdm()) << msg;
+
+                    qCDebug(dcIdm()) << "Address in use already";
                     found = true;
+                } else {
+                    msg = "Different addr of other thing: ";
+                    msg += item.value()->getIdmAddress().toString();
+                    qCDebug(dcIdm()) << msg;
+                }
             }
 
             if (found == false) {
+                qCDebug(dcIdm()) << "Creating Idm object";
+                
                 /* Create new Idm object and store it in hash table */
                 Idm *idm = new Idm(hostAddress, this);
                 m_idmConnections.insert(thing, idm);
@@ -76,30 +97,41 @@ void IntegrationPluginIdm::setupThing(ThingSetupInfo *info)
                 /* Store thing info in hash table */
                 m_idmInfos.insert(thing, info);
 
-                info->finish(Thing::ThingErrorNoError);
+                msg = "Added IDM heatpump with address ";
+                msg += hostAddress.toString();
+
+                info->thing()->setStateValue(navigator2ConnectedStateTypeId, true);
+                info->finish(Thing::ThingErrorNoError, msg.toStdString().c_str());
             } else {
-                info->finish(Thing::ThingErrorThingInUse);
+                info->finish(Thing::ThingErrorThingInUse, "IP address already in use");
             }
+        } else {
+            info->finish(Thing::ThingErrorInvalidParameter, "No IP address given");
         }
     }
 }
 
 void IntegrationPluginIdm::postSetupThing(Thing *thing)
 {
+    qCDebug(dcIdm()) << "postSetupThing called";
+
     if (!m_refreshTimer) {
         m_refreshTimer = hardwareManager()->pluginTimerManager()->registerTimer(10);
         connect(m_refreshTimer, &PluginTimer::timeout, this, &IntegrationPluginIdm::onRefreshTimer);
     }
 
     if (thing->thingClassId() == navigator2ThingClassId) {
+        qCDebug(dcIdm()) << "Thing id: " << thing->id();
         Idm *idm = m_idmConnections.value(thing);
 
-        connect(idm, &Idm::statusUpdated, this, &IntegrationPluginIdm::onStatusUpdated);
+        if (idm != nullptr) {
+            connect(idm, &Idm::statusUpdated, this, &IntegrationPluginIdm::onStatusUpdated);
 
-        qCDebug(dcIdm()) << "Thing set up, calling update";
-        update(thing);
+            qCDebug(dcIdm()) << "Thing set up, calling update";
+            update(thing);
 
-        thing->setStateValue(navigator2ConnectedStateTypeId, true);
+            thing->setStateValue(navigator2ConnectedStateTypeId, true);
+        }
     }
 }
 
@@ -175,6 +207,8 @@ void IntegrationPluginIdm::onStatusUpdated(IdmInfo *info)
 
 void IntegrationPluginIdm::onRefreshTimer()
 {
+    qCDebug(dcIdm()) << "onRefreshTimer called";
+
     foreach (Thing *thing, myThings().filterByThingClassId(navigator2ThingClassId)) {
         update(thing);
     }
