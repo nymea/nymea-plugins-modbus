@@ -139,7 +139,6 @@ void IntegrationPluginIdm::thingRemoved(Thing *thing)
 {
     if (m_idmConnections.contains(thing)) {
         m_idmConnections.take(thing)->deleteLater();
-        m_idmInfos.take(thing)->deleteLater();
     }
 }
 
@@ -167,9 +166,9 @@ void IntegrationPluginIdm::update(Thing *thing)
         Idm *idm = m_idmConnections.value(thing);
         Q_UNUSED(idm);
 
-        QVector<quint16> val{};
-
-        idm->onRequestStatus();
+        if (idm != nullptr) {
+            idm->onRequestStatus();
+        }
 
         if (m_idmInfos.contains(thing)) {
 <<<<<<< HEAD
@@ -186,6 +185,7 @@ void IntegrationPluginIdm::update(Thing *thing)
 
 void IntegrationPluginIdm::onStatusUpdated(IdmInfo *info)
 {
+    /* qCDebug(dcIdm()) << "onStatusUpdated"; */
     if (!info)
         return;
 
