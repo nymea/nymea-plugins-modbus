@@ -37,14 +37,14 @@ SunSpecMeter::SunSpecMeter(const QHostAddress &hostAddress, uint port, QObject *
         if (state == QModbusDevice::ConnectedState) {
             qCDebug(dcSunSpec()) << "Meter connected successfully";
             QList<BlockId> mapIds;
-            mapIds.append(BlockId::SinglePhaseMeter);
-            mapIds.append(BlockId::SplitSinglePhaseMeter);
-            mapIds.append(BlockId::WyeConnectThreePhaseMeter);
-            mapIds.append(BlockId::DeltaConnectThreePhaseMeter);
-            mapIds.append(BlockId::SinglePhaseMeterFloat);
-            mapIds.append(BlockId::SplitSinglePhaseMeterFloat);
-            mapIds.append(BlockId::WyeConnectThreePhaseMeterFloat);
-            mapIds.append(BlockId::DeltaConnectThreePhaseMeterFloat);
+            mapIds.append(BlockIdSinglePhaseMeter);
+            mapIds.append(BlockIdSplitSinglePhaseMeter);
+            mapIds.append(BlockIdWyeConnectThreePhaseMeter);
+            mapIds.append(BlockIdDeltaConnectThreePhaseMeter);
+            mapIds.append(BlockIdSinglePhaseMeterFloat);
+            mapIds.append(BlockIdSplitSinglePhaseMeterFloat);
+            mapIds.append(BlockIdWyeConnectThreePhaseMeterFloat);
+            mapIds.append(BlockIdDeltaConnectThreePhaseMeterFloat);
             findModbusMap(mapIds);
         }
     });

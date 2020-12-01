@@ -37,7 +37,7 @@ SunSpecStorage::SunSpecStorage(const QHostAddress &hostAddress, uint port, QObje
         if (state == QModbusDevice::ConnectedState) {
             qCDebug(dcSunSpec()) << "Inverter connected successfully";
             QList<BlockId> mapIds;
-            mapIds.append(BlockId::Storage);
+            mapIds.append(BlockIdStorage);
             findModbusMap(mapIds);
         }
     });
@@ -112,7 +112,7 @@ void SunSpecStorage::onModbusMapReceived(SunSpec::BlockId mapId, uint mapLength,
 {
     Q_UNUSED(mapLength)
     switch (mapId) {
-    case BlockId::Storage: {
+    case BlockIdStorage: {
         StorageData storageData;
         storageData.chargingState = ChargingState(data[Model124::Model124ChargeStatus]);
         emit storageDataReceived(storageData);

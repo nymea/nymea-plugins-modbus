@@ -91,14 +91,13 @@ public:
     void getStorageMap();
 
 private:
-    BlockId m_id = BlockId::EnergyStorageBaseModel;
+    BlockId m_id = BlockIdEnergyStorageBaseModel;
     uint m_mapLength = 0;
     uint m_mapModbusStartRegister = 40000;
 
     void readStorageBlockHeader();
 
 private slots:
-    void onConnectionStateChanged();
     void onModbusMapReceived(BlockId mapId, uint mapLength, const QVector<quint16> &data);
 
 signals:

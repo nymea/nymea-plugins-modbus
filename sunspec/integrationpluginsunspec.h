@@ -60,12 +60,12 @@ public:
 private:
     PluginTimer *m_refreshTimer = nullptr;
     QHash<QUuid, ThingActionInfo *> m_asyncActions;
+    QHash<Thing *, SunSpec *> m_sunSpecConnections;
 
     QHash<Thing *, SunSpecInverter *> m_sunSpecInverters;
     QHash<Thing *, SunSpecStorage *> m_sunSpecStorages;
     QHash<Thing *, SunSpecMeter *> m_sunSpecMeters;
     QHash<Thing *, SunSpecTracker *> m_sunSpecTrackers;
-    void update(Thing *thing);
 
 private slots:
     void onRefreshTimer();

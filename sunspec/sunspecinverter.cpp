@@ -37,12 +37,12 @@ SunSpecInverter::SunSpecInverter(const QHostAddress &hostAddress, uint port, QOb
         if (state == QModbusDevice::ConnectedState) {
             qCDebug(dcSunSpec()) << "Inverter connected successfully";
             QList<BlockId> mapIds;
-            mapIds.append(BlockId::InverterSinglePhase);
-            mapIds.append(BlockId::InverterSplitPhase);
-            mapIds.append(BlockId::InverterThreePhase);
-            mapIds.append(BlockId::InverterSinglePhaseFloat);
-            mapIds.append(BlockId::InverterSplitPhaseFloat);
-            mapIds.append(BlockId::InverterThreePhaseFloat);
+            mapIds.append(BlockIdInverterSinglePhase);
+            mapIds.append(BlockIdInverterSplitPhase);
+            mapIds.append(BlockIdInverterThreePhase);
+            mapIds.append(BlockIdInverterSinglePhaseFloat);
+            mapIds.append(BlockIdInverterSplitPhaseFloat);
+            mapIds.append(BlockIdInverterThreePhaseFloat);
             findModbusMap(mapIds);
         }
     });
@@ -75,9 +75,9 @@ void SunSpecInverter::onModbusMapReceived(SunSpec::BlockId mapId, uint mapLength
 {
     Q_UNUSED(mapLength)
     switch (mapId) {
-    case BlockId::InverterSinglePhase:
-    case BlockId::InverterSplitPhase:
-    case BlockId::InverterThreePhase: {
+    case BlockIdInverterSinglePhase:
+    case BlockIdInverterSplitPhase:
+    case BlockIdInverterThreePhase: {
         InverterData inverterData;
         inverterData.acCurrent= convertValueWithSSF(data[Model10X::Model10XAcCurrent], data[Model10X::Model10XAmpereScaleFactor]);
         inverterData.acPower = convertValueWithSSF(data[Model10X::Model10XACPower], data[Model10X::Model10XWattScaleFactor]);
@@ -99,9 +99,9 @@ void SunSpecInverter::onModbusMapReceived(SunSpec::BlockId mapId, uint mapLength
         emit inverterDataReceived(inverterData);
 
     } break;
-    case BlockId::InverterSinglePhaseFloat:
-    case BlockId::InverterSplitPhaseFloat:
-    case BlockId::InverterThreePhaseFloat: {
+    case BlockIdInverterSinglePhaseFloat:
+    case BlockIdInverterSplitPhaseFloat:
+    case BlockIdInverterThreePhaseFloat: {
         InverterData inverterData;
         inverterData.acCurrent = convertFloatValues(data[Model11X::Model11XAcCurrent], data[Model11X::Model11XAcCurrent+1]);
 

@@ -1,7 +1,7 @@
 {
     "name": "SunSpec",
     "displayName": "sunspec",
-    "id": "73c7efcc-80d5-4166-ad97-2cbbeb129d91",
+    "id": "cb4bdec6-cf2c-4a0f-9709-42d951ca2d8b",
     "paramTypes":[
         {
             "id": "52da5222-9a94-47a2-9adc-004541d2f5ed",
@@ -19,10 +19,60 @@
             "id": "c143a7b4-a16c-4fff-86a3-9ffab3d6841d",
             "thingClasses": [
                 {
+                    "name": "sunspecConnection",
+                    "displayName": "SunSpec Device",
+                    "id": "f51853f3-8815-4cf3-b337-45cda1f3e6d5",
+                    "createMethods": [ "User" ],
+                    "interfaces": ["connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "6be6abc4-e2b2-4687-9343-0e5164ed0ab2",
+                            "name":"ipAddress",
+                            "displayName": "IP address",
+                            "type": "QString"
+                        },
+                        {
+                            "id": "04970315-ed3a-45ce-98fc-35ae3c4eb27b",
+                            "name":"manufacturer",
+                            "displayName": "Manufacturer",
+                            "type": "QString",
+                            "readOnly": true,
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "58146c26-17d3-458e-a13f-d7f306c20c44",
+                            "name":"deviceModel",
+                            "displayName": "Device model",
+                            "type": "QString",
+                            "readOnly": true,
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "6ed498e1-37ca-4bb7-bac7-463509c7784e",
+                            "name":"serialNumber",
+                            "displayName": "Serial number",
+                            "type": "QString",
+                            "readOnly": true,
+                            "defaultValue": "Unkown"
+                        }
+                    ],
+                    "stateTypes":[
+                        {
+                            "id": "3e767ad0-b4b3-4398-94c1-00579ea09ca8",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        }
+                    ]
+                },
+                {
                     "name": "sunspecInverter",
                     "displayName": "SunSpec Inverter",
                     "id": "2e4122ea-96a5-415c-b5e2-7d6012265a83",
-                    "createMethods": [ "User" ],
+                    "createMethods": [ "Auto" ],
                     "interfaces": ["connectable"],
                     "paramTypes": [
                         {
@@ -226,7 +276,7 @@
                     "name": "sunspecMeter",
                     "displayName": "SunSpec Meter",
                     "id": "68f822f9-ff30-4275-b229-39a3674fead7",
-                    "createMethods": [ "User" ],
+                    "createMethods": [ "Auto" ],
                     "interfaces": ["connectable"],
                     "paramTypes": [
                         {
@@ -385,7 +435,7 @@
                     "name": "sunspecTracker",
                     "displayName": "SunSpec Tracker",
                     "id": "9941da30-a6d6-475d-8244-3c2145b419e6",
-                    "createMethods": [ "User" ],
+                    "createMethods": [ "Auto" ],
                     "interfaces": ["connectable"],
                     "paramTypes": [
                         {
@@ -445,7 +495,7 @@
                     "name": "sunspecStorage",
                     "displayName": "SunSpec Storage",
                     "id": "9a643ba8-346c-4127-a2f8-956a7133d75e",
-                    "createMethods": [ "User" ],
+                    "createMethods": [ "Auto" ],
                     "interfaces": ["connectable"],
                     "paramTypes": [
                         {
@@ -587,7 +637,7 @@
                     "name": "sunspecStringCombiner",
                     "displayName": "SunSpec String Combiner",
                     "id": "7787f238-f5a3-4ba5-b3ec-7d513b87bf71",
-                    "createMethods": [ "User" ],
+                    "createMethods": [ "Auto" ],
                     "interfaces": ["connectable"],
                     "paramTypes": [
                         {
