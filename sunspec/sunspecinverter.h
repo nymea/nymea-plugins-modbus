@@ -100,14 +100,13 @@ public:
     void getInverterMap();
 
 private:
-    BlockId m_id = BlockId::InverterThreePhase; //e.g. 103 for three phase inverter, 113 for three phase inverter with floating point representation
+    BlockId m_id = BlockIdInverterThreePhase; //e.g. 103 for three phase inverter, 113 for three phase inverter with floating point representation
     uint m_mapLength = 0;
     uint m_mapModbusStartRegister = 40000;
 
     void readInverterBlockHeader();
 
 private slots:
-    void onConnectionStateChanged();
     void onModbusMapReceived(BlockId mapId, uint mapLength, QVector<quint16> data);
 
 signals:

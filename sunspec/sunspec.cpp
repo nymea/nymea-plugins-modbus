@@ -48,12 +48,26 @@ SunSpec::SunSpec(const QHostAddress &hostAddress, uint port, QObject *parent) :
 
 SunSpec::~SunSpec()
 {
-
 }
 
 bool SunSpec::connectModbus()
 {
     return m_modbusTcpClient->connectDevice();;
+}
+
+QString SunSpec::manufacturer()
+{
+    return m_manufacturer;
+}
+
+QString SunSpec::deviceModel()
+{
+    return m_deviceModel;
+}
+
+QString SunSpec::serialNumber()
+{
+    return m_serialNumber;
 }
 
 void SunSpec::findBaseRegister()
@@ -109,7 +123,7 @@ void SunSpec::findModbusMap(const QList<BlockId> &ids, uint modbusAddressOffset)
                     uint modbusAddress = unit.startAddress();
                     BlockId blockId    = BlockId(unit.value(0));
                     int blockLength = unit.value(1);
-                    if (blockId > 800 || blockId == BlockId::End) {
+                    if (blockId > 800 || blockId == BlockIdEnd) {
                         qCDebug(dcSunSpec()) << "Block id not found, Id:" << ids;
                         modbusMapSearchFinished(ids, 0, "Ids not found");
                         return;

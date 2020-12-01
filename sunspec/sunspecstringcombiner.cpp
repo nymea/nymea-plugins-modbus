@@ -37,10 +37,10 @@ SunSpecStringCombiner::SunSpecStringCombiner(const QHostAddress &hostAddress, ui
         if (state == QModbusDevice::ConnectedState) {
             qCDebug(dcSunSpec()) << "String combiner connected successfully";
             QList<BlockId> mapIds;
-            mapIds.append(BlockId::StringCombiner);
-            mapIds.append(BlockId::StringCombinerCurrent);
-            mapIds.append(BlockId::StringCombinerAdvanced);
-            mapIds.append(BlockId::StringCombinerCurrentAdvanced);
+            mapIds.append(BlockIdStringCombiner);
+            mapIds.append(BlockIdStringCombinerCurrent);
+            mapIds.append(BlockIdStringCombinerAdvanced);
+            mapIds.append(BlockIdStringCombinerCurrentAdvanced);
             findModbusMap(mapIds);
         }
     });
@@ -71,15 +71,16 @@ void SunSpecStringCombiner::readStringCombinerMapHeader()
 
 void SunSpecStringCombiner::onModbusMapReceived(SunSpec::BlockId mapId, uint mapLength, QVector<quint16> data)
 {
+    Q_UNUSED(data);
 
     switch (mapId) {
-    case BlockId::StringCombiner: {
+    case BlockIdStringCombiner: {
         int rbCount = (mapLength-14)/8;
         qCDebug(dcSunSpec()) << "Map" << mapId << "Repeating Block Count" << rbCount;
     } break;
-    case BlockId::StringCombinerCurrent:
-    case BlockId::StringCombinerAdvanced:
-    case BlockId::StringCombinerCurrentAdvanced: {
+    case BlockIdStringCombinerCurrent:
+    case BlockIdStringCombinerAdvanced:
+    case BlockIdStringCombinerCurrentAdvanced: {
         //StringCombinerData stringCombinerData;
         //stringCombinerData.acCurrent= convertValueWithSSF(data[Model10X::Model10XAcCurrent], data[Model10X::Model10XAmpereScaleFactor]);
     } break;

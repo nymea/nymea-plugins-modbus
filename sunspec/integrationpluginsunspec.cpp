@@ -40,7 +40,32 @@ IntegrationPluginSunSpec::IntegrationPluginSunSpec()
 
 void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
 {
-    if (info->thing()->thingClassId() == sunspecInverterThingClassId) {
+    if (info->thing()->thingClassId() == sunspecConnectionThingClassId) {
+        QHostAddress address = QHostAddress(info->thing()->paramValue(sunspecConnectionThingIpAddressParamTypeId).toString());
+        SunSpec *sunSpec = new SunSpec(address, 502, this);
+        m_sunSpecConnections.insert(info->thing(), sunSpec);
+        if (!sunSpec->connectModbus()) {
+            QTimer::singleShot(2000, info, [this, info] {
+                setupThing(info);
+            });
+            qCWarning(dcSunSpec()) << "Error connecting to SunSpec device";
+            return;
+        }
+        connect(sunSpec, &SunSpec::connectionStateChanged, info, [info] (bool status) {
+            qCDebug(dcSunSpec()) << "Modbus Inverter init finished" << status;
+            if (status) {
+                info->finish(Thing::ThingErrorNoError);
+            } else {
+                info->finish(Thing::ThingErrorHardwareFailure);
+            }
+        });
+
+        connect(info, &ThingSetupInfo::aborted, sunSpec, [info, this] {
+            m_sunSpecConnections.take(info->thing())->deleteLater();
+        });
+        //connect(sunSpec, &SunSpecInverter::inverterDataReceived, this, &IntegrationPluginSunSpec::onInverterDataReceived);
+
+    } else if (info->thing()->thingClassId() == sunspecInverterThingClassId) {
         QHostAddress address = QHostAddress(info->thing()->paramValue(sunspecInverterThingIpAddressParamTypeId).toString());
         SunSpecInverter *sunSpecInverter = new SunSpecInverter(address, 502, this);
         m_sunSpecInverters.insert(info->thing(), sunSpecInverter);
@@ -229,14 +254,14 @@ void IntegrationPluginSunSpec::executeAction(ThingActionInfo *info)
                 connect(info, &ThingActionInfo::aborted, this, [requestId, this] {m_asyncActions.remove(requestId);});
             }
         } else if (action.actionTypeId() == sunspecStorageEnableChargingLimitActionTypeId) {
-            int value = (action.param(sunspecStorageEnableChargingLimitActionEnableChargingLimitParamTypeId).value().toBool() << 1) | thing->stateValue(sunspecStorageEnableDischargingLimitStateTypeId).toBool();
+            /*int value = (action.param(sunspecStorageEnableChargingLimitActionEnableChargingLimitParamTypeId).value().toBool() << 1) | thing->stateValue(sunspecStorageEnableDischargingLimitStateTypeId).toBool();
             QUuid requestId = sunSpecStorage->setStorageControlMode(value);
             if (requestId.isNull()) {
                 info->finish(Thing::ThingErrorHardwareFailure);
             } else {
                 m_asyncActions.insert(requestId, info);
                 connect(info, &ThingActionInfo::aborted, this, [requestId, this] {m_asyncActions.remove(requestId);});
-            }
+            }*/
         } else if (action.actionTypeId() == sunspecStorageChargingRateActionTypeId) {
             QUuid requestId = sunSpecStorage->setChargingRate(action.param(sunspecStorageChargingRateActionChargingRateParamTypeId).value().toInt());
             if (requestId.isNull()) {
@@ -246,14 +271,14 @@ void IntegrationPluginSunSpec::executeAction(ThingActionInfo *info)
                 connect(info, &ThingActionInfo::aborted, this, [requestId, this] {m_asyncActions.remove(requestId);});
             }
         } else if (action.actionTypeId() == sunspecStorageEnableDischargingLimitActionTypeId) {
-            int value = (action.param(sunspecStorageEnableDischargingLimitActionEnableDischargingLimitParamTypeId).value().toBool() << 1) | thing->stateValue(sunspecStorageEnableChargingLimitStateTypeId).toBool();
+            /*int value = (action.param(sunspecStorageEnableDischargingLimitActionEnableDischargingLimitParamTypeId).value().toBool() << 1) | thing->stateValue(sunspecStorageEnableChargingLimitStateTypeId).toBool();
             QUuid requestId = sunSpecStorage->setStorageControlMode(value);
             if (requestId.isNull()) {
                 info->finish(Thing::ThingErrorHardwareFailure);
             } else {
                 m_asyncActions.insert(requestId, info);
                 connect(info, &ThingActionInfo::aborted, this, [requestId, this] {m_asyncActions.remove(requestId);});
-            }
+            }*/
         } else if (action.actionTypeId() == sunspecStorageDischargingRateActionTypeId) {
             QUuid requestId = sunSpecStorage->setDischargingRate(action.param(sunspecStorageDischargingRateActionDischargingRateParamTypeId).value().toInt());
             if (requestId.isNull()) {
@@ -297,6 +322,23 @@ void IntegrationPluginSunSpec::onPluginConfigurationChanged(const ParamTypeId &p
             m_refreshTimer->startTimer(refreshTime);
         }
     }
+}
+
+void IntegrationPluginSunSpec::onConnectionStateChanged(bool status)
+{
+    Q_UNUSED(status)
+}
+
+void IntegrationPluginSunSpec::onWriteRequestExecuted(QUuid requestId, bool success)
+{
+    Q_UNUSED(requestId)
+    Q_UNUSED(success)
+}
+
+void IntegrationPluginSunSpec::onWriteRequestError(QUuid requestId, const QString &error)
+{
+    Q_UNUSED(requestId)
+    Q_UNUSED(error)
 }
 
 void IntegrationPluginSunSpec::onInverterDataReceived(const SunSpecInverter::InverterData &inverterData)
@@ -413,6 +455,7 @@ void IntegrationPluginSunSpec::onStorageDataReceived(const SunSpecStorage::Stora
 
 void IntegrationPluginSunSpec::onMeterDataReceived(const SunSpecMeter::MeterData &meterData)
 {
+    Q_UNUSED(meterData)
     SunSpecMeter *meter = static_cast<SunSpecMeter *>(sender());
     Thing *thing = m_sunSpecMeters.key(meter);
 
@@ -424,6 +467,7 @@ void IntegrationPluginSunSpec::onMeterDataReceived(const SunSpecMeter::MeterData
 
 void IntegrationPluginSunSpec::onTrackerDataReceived(const SunSpecTracker::TrackerData &trackerData)
 {
+    Q_UNUSED(trackerData)
     SunSpecTracker *tracker = static_cast<SunSpecTracker *>(sender());
     Thing *thing = m_sunSpecTrackers.key(tracker);
 

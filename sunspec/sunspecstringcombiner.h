@@ -42,32 +42,32 @@ public:
     //Map401 length: 14 + (RB Count * 8)
     //Map403 length: 16 + (RB Count * 8)
     enum Map401 {
-        CurrentScaleFactor           = 0,
-        AmpHourScaleFactor           = 1,
-        VoltageScaleFactor           = 2,
-        MaximumDCCurrentRating       = 3,
-        NumberOfInputs               = 4,
-        Events                       = 5,
-        VendorDefniedEvents          = 7,
-        TotalMeasuredCurrent         = 9,
-        TotalMeteredAmpHours         = 10,
-        OutputVoltage                = 12,
-        InternalOperatingTemperature = 13
+        Map401CurrentScaleFactor           = 0,
+        Map401AmpHourScaleFactor           = 1,
+        Map401VoltageScaleFactor           = 2,
+        Map401MaximumDCCurrentRating       = 3,
+        Map401NumberOfInputs               = 4,
+        Map401Events                       = 5,
+        Map401VendorDefniedEvents          = 7,
+        Map401TotalMeasuredCurrent         = 9,
+        Map401TotalMeteredAmpHours         = 10,
+        Map401OutputVoltage                = 12,
+        Map401InternalOperatingTemperature = 13
     };
 
     enum Map402 {
-        CurrentScaleFactor,
-        AmpHourScaleFactor,
-        VoltageScaleFactor
-        PowerScale factor
-        EnergyScale factor
-        Maximum DC Current Rating
-        Number of Inputs
-        Bitmask value.  Events
-        Bitmask value.  Vendor defnied events
-        Total measured current
-        Total metered Amp-hours
-        OutputVoltage
+        Map402CurrentScaleFactor,
+        Map402AmpHourScaleFactor,
+        Map402VoltageScaleFactor,
+        Map402PowerScaleFactor,
+        Map402EnergyScaleFactor,
+        Map402MaximumDCCurrentRating,
+        Map402NumberOfInputs,
+        Map402BitmaskValueEvents,
+        Map402BitmaskvalueVendorDefniedEvents,
+        Map402TotalMeasuredCurrent,
+        Map402TotalMeteredAmpHours,
+        Map402OutputVoltage
     };
 
     enum Map401RB { //Repeating block
@@ -111,14 +111,13 @@ public:
     void getStringCombinerMap();
 
 private:
-    BlockId m_id = BlockId::StringCombiner;
+    BlockId m_id = BlockIdStringCombiner;
     uint m_mapLength = 0;
     uint m_mapModbusStartRegister = 40000;
 
     void readStringCombinerMapHeader();
 
 private slots:
-    void onConnectionStateChanged();
     void onModbusMapReceived(BlockId mapId, uint mapLength, QVector<quint16> data);
 
 signals:

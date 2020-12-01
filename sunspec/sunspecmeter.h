@@ -73,15 +73,14 @@ public:
     void geMeterMap();
 
 private:
-    BlockId m_id = BlockId::DeltaConnectThreePhaseMeter;
+    BlockId m_id = BlockIdDeltaConnectThreePhaseMeter;
     uint m_mapLength = 0;
     uint m_mapModbusStartRegister = 40000;
 
     void readMeterBlockHeader();
 
 private slots:
-    void onConnectionStateChanged();
-    void onModbusMapReceived(BlockId mapId, uint mapLength, QVector<quint16> data);
+   // void onModbusMapReceived(BlockId mapId, uint mapLength, QVector<quint16> data);
 
 signals:
     void initFinished();

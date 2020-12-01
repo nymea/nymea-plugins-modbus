@@ -60,15 +60,14 @@ public:
     void getTrackerMap();
 
 private:
-    BlockId m_id = BlockId::TrackerController;
+    BlockId m_id = BlockIdTrackerController;
     uint m_mapLength = 0;
     uint m_mapModbusStartRegister = 40000;
 
     void readTrackerBlockHeader();
 
 private slots:
-    void onConnectionStateChanged();
-    void onModbusMapReceived(BlockId mapId, uint mapLength, QVector<quint16> data);
+    //void onModbusMapReceived(BlockId mapId, uint mapLength, QVector<quint16> data);
 
 signals:
     void initFinished();
