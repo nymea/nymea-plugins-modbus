@@ -37,32 +37,72 @@ IntegrationPluginModbusCommander::IntegrationPluginModbusCommander()
 {
 }
 
+void IntegrationPluginModbusCommander::init()
+{
+    connect(this, &IntegrationPluginModbusCommander::configValueChanged, this, &IntegrationPluginModbusCommander::onPluginConfigurationChanged);
+
+    m_slaveAddressParamTypeId.insert(coilThingClassId, coilThingSlaveAddressParamTypeId);
+    m_slaveAddressParamTypeId.insert(inputRegisterThingClassId, inputRegisterThingSlaveAddressParamTypeId);
+    m_slaveAddressParamTypeId.insert(discreteInputThingClassId, discreteInputThingSlaveAddressParamTypeId);
+    m_slaveAddressParamTypeId.insert(holdingRegisterThingClassId, holdingRegisterThingSlaveAddressParamTypeId);
+
+    m_registerAddressParamTypeId.insert(coilThingClassId, coilThingRegisterAddressParamTypeId);
+    m_registerAddressParamTypeId.insert(inputRegisterThingClassId, inputRegisterThingRegisterAddressParamTypeId);
+    m_registerAddressParamTypeId.insert(discreteInputThingClassId, discreteInputThingRegisterAddressParamTypeId);
+    m_registerAddressParamTypeId.insert(holdingRegisterThingClassId, holdingRegisterThingRegisterAddressParamTypeId);
+
+    m_connectedStateTypeId.insert(modbusRTUClientThingClassId, modbusRTUClientConnectedStateTypeId);
+    m_connectedStateTypeId.insert(modbusTCPClientThingClassId, modbusTCPClientConnectedStateTypeId);
+    m_connectedStateTypeId.insert(coilThingClassId, coilConnectedStateTypeId);
+    m_connectedStateTypeId.insert(inputRegisterThingClassId, inputRegisterConnectedStateTypeId);
+    m_connectedStateTypeId.insert(discreteInputThingClassId, discreteInputConnectedStateTypeId);
+    m_connectedStateTypeId.insert(holdingRegisterThingClassId, holdingRegisterConnectedStateTypeId);
+
+    m_valueStateTypeId.insert(coilThingClassId, coilValueStateTypeId);
+    m_valueStateTypeId.insert(inputRegisterThingClassId, inputRegisterValueStateTypeId);
+    m_valueStateTypeId.insert(discreteInputThingClassId, discreteInputValueStateTypeId);
+    m_valueStateTypeId.insert(holdingRegisterThingClassId, holdingRegisterValueStateTypeId);
+}
+
 void IntegrationPluginModbusCommander::discoverThings(ThingDiscoveryInfo *info)
 {
     ThingClassId thingClassId = info->thingClassId();
 
     if (thingClassId == modbusRTUClientThingClassId) {
         Q_FOREACH(QSerialPortInfo port, QSerialPortInfo::availablePorts()) {
-            //Serial port is not yet used, create now a new one
             qCDebug(dcModbusCommander()) << "Found serial port:" << port.systemLocation() << "manufacturer" << port.manufacturer() << "description" << port.description() << "serial number" << port.serialNumber();
-            QString description = port.manufacturer() + " " + port.description();
-            ThingDescriptor thingDescriptor(thingClassId, "Modbus RTU interface "+port.portName(), description);
+            if (port.isBusy()) {
+                qCDebug(dcModbusCommander()) << "Serial port ist busy, skipping.";
+                continue;
+            }
+            QString manufacturer = port.manufacturer();
+            if (manufacturer.isEmpty()) {
+                manufacturer = "unknown";
+            }
+            QString description = port.description()+" Manufacturer: "+port.manufacturer();
+            ThingDescriptor thingDescriptor(thingClassId, "Modbus RTU interface", description);
             ParamList parameters;
             QString serialPort = port.systemLocation();
-            foreach (Thing *existingThing, myThings()) {
-                if (existingThing->paramValue(modbusRTUClientThingSerialPortParamTypeId).toString() == serialPort) {
-                    thingDescriptor.setThingId(existingThing->id());
-                    // TODO fix rediscovery of USB to SerialPort converters
-                    // QSerialPort doesn't give any information to rediscover the device
-                    // Un and re-plugging an USB device changes the system location
-                    // detecting if the device is usb and using libsub to get the serialnumber may be a solution
-                    break;
-                }
+            QString serialnumber = port.serialNumber();
+            if (serialnumber.isEmpty()) {
+                serialnumber = port.manufacturer()+QString::number(port.productIdentifier(), 16);
+
+            }
+            qCDebug(dcModbusCommander()) << "    - Serial number" << serialnumber;
+            Q_FOREACH (Thing *exisingThing, myThings().filterByParam(modbusRTUClientThingClassId)) {
+                thingDescriptor.setThingId(exisingThing->id());
+                // Rediscovery is broken because of an missing unique device id
+                // This is a workaround and doesnt work if multiple uart converters are attached.
+                // ThingDiscoveryInfo may be extended to distinquish between discovery and rediscovery
+                break;
             }
             parameters.append(Param(modbusRTUClientThingSerialPortParamTypeId, serialPort));
+            parameters.append(Param(modbusRTUClientThingSerialnumberParamTypeId, serialnumber));
             thingDescriptor.setParams(parameters);
             info->addThingDescriptor(thingDescriptor);
         }
+
+        //FIXME missing info if it is a rediscovery
         info->finish(Thing::ThingErrorNoError);
         return;
     } else if (thingClassId == discreteInputThingClassId) {
@@ -132,33 +172,6 @@ void IntegrationPluginModbusCommander::discoverThings(ThingDiscoveryInfo *info)
     }
 }
 
-void IntegrationPluginModbusCommander::init()
-{
-    connect(this, &IntegrationPluginModbusCommander::configValueChanged, this, &IntegrationPluginModbusCommander::onPluginConfigurationChanged);
-
-    m_slaveAddressParamTypeId.insert(coilThingClassId, coilThingSlaveAddressParamTypeId);
-    m_slaveAddressParamTypeId.insert(inputRegisterThingClassId, inputRegisterThingSlaveAddressParamTypeId);
-    m_slaveAddressParamTypeId.insert(discreteInputThingClassId, discreteInputThingSlaveAddressParamTypeId);
-    m_slaveAddressParamTypeId.insert(holdingRegisterThingClassId, holdingRegisterThingSlaveAddressParamTypeId);
-
-    m_registerAddressParamTypeId.insert(coilThingClassId, coilThingRegisterAddressParamTypeId);
-    m_registerAddressParamTypeId.insert(inputRegisterThingClassId, inputRegisterThingRegisterAddressParamTypeId);
-    m_registerAddressParamTypeId.insert(discreteInputThingClassId, discreteInputThingRegisterAddressParamTypeId);
-    m_registerAddressParamTypeId.insert(holdingRegisterThingClassId, holdingRegisterThingRegisterAddressParamTypeId);
-
-    m_connectedStateTypeId.insert(modbusRTUClientThingClassId, modbusRTUClientConnectedStateTypeId);
-    m_connectedStateTypeId.insert(modbusTCPClientThingClassId, modbusTCPClientConnectedStateTypeId);
-    m_connectedStateTypeId.insert(coilThingClassId, coilConnectedStateTypeId);
-    m_connectedStateTypeId.insert(inputRegisterThingClassId, inputRegisterConnectedStateTypeId);
-    m_connectedStateTypeId.insert(discreteInputThingClassId, discreteInputConnectedStateTypeId);
-    m_connectedStateTypeId.insert(holdingRegisterThingClassId, holdingRegisterConnectedStateTypeId);
-
-    m_valueStateTypeId.insert(coilThingClassId, coilValueStateTypeId);
-    m_valueStateTypeId.insert(inputRegisterThingClassId, inputRegisterValueStateTypeId);
-    m_valueStateTypeId.insert(discreteInputThingClassId, discreteInputValueStateTypeId);
-    m_valueStateTypeId.insert(holdingRegisterThingClassId, holdingRegisterValueStateTypeId);
-}
-
 void IntegrationPluginModbusCommander::setupThing(ThingSetupInfo *info)
 {
     Thing *thing = info->thing();
@@ -176,10 +189,10 @@ void IntegrationPluginModbusCommander::setupThing(ThingSetupInfo *info)
             }
         }
 
-        qCDebug(dcModbusCommander()) << "Setting up RTU client";
+        qCDebug(dcModbusCommander()) << "Setting up TCP client";
         qCDebug(dcModbusCommander()) << "      address:" << hostAddress.toString();
         qCDebug(dcModbusCommander()) << "      port:" << port;
-        qCDebug(dcModbusCommander()) << "      number of retires:" << numberOfRetries;
+        qCDebug(dcModbusCommander()) << "      number of retries:" << numberOfRetries;
         qCDebug(dcModbusCommander()) << "      timeout:" << timeout;
 
         ModbusTCPMaster *modbusTCPMaster = new ModbusTCPMaster(hostAddress, port, this);
@@ -226,10 +239,10 @@ void IntegrationPluginModbusCommander::setupThing(ThingSetupInfo *info)
         }
         qCDebug(dcModbusCommander()) << "Setting up RTU client";
         qCDebug(dcModbusCommander()) << "      baud:" << baudrate;
-        qCDebug(dcModbusCommander()) << "      stop bits:" << baudrate;
-        qCDebug(dcModbusCommander()) << "      data bits:" << baudrate;
+        qCDebug(dcModbusCommander()) << "      stop bits:" << stopBits;
+        qCDebug(dcModbusCommander()) << "      data bits:" << dataBits;
         qCDebug(dcModbusCommander()) << "      parity:" << parityString;
-        qCDebug(dcModbusCommander()) << "      number of retires:" << numberOfRetries;
+        qCDebug(dcModbusCommander()) << "      number of retries:" << numberOfRetries;
         qCDebug(dcModbusCommander()) << "      timeout:" << timeout;
 
         ModbusRTUMaster *modbusRTUMaster = new ModbusRTUMaster(serialPort, baudrate, parity, dataBits, stopBits, this);
