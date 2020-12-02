@@ -48,6 +48,9 @@ public:
     void setNumberOfRetries(int number);
     void setTimeout(int timeout);
 
+    int timeout();
+    int numberOfReties();
+
     QUuid readCoil(uint slaveAddress, uint registerAddress, uint size = 1);
     QUuid readDiscreteInput(uint slaveAddress, uint registerAddress, uint size = 1);
     QUuid readInputRegister(uint slaveAddress, uint registerAddress, uint size = 1);
