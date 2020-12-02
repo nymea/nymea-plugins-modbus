@@ -385,10 +385,9 @@ void ModbusRTUMaster::onModbusErrorOccurred(QModbusDevice::Error error)
 
 void ModbusRTUMaster::onModbusStateChanged(QModbusDevice::State state)
 {
-    bool connected = (state != QModbusDevice::UnconnectedState);
-    if (!connected) {
+    if (state == QModbusDevice::UnconnectedState) {
         //try to reconnect in 10 seconds
         m_reconnectTimer->start(10000);
     }
-    emit connectionStateChanged(connected);
+    emit connectionStateChanged(state == QModbusDevice::ConnectedState);
 }
