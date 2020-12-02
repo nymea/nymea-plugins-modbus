@@ -65,9 +65,6 @@ private:
     QHash<QUuid, ThingActionInfo*> m_asyncActions;
     QHash<QUuid, Thing*> m_readRequests;
 
-    QHash<ModbusRTUMaster*, ThingSetupInfo *> m_asyncRTUSetup;
-    QHash<ModbusTCPMaster*, ThingSetupInfo *> m_asyncTCPSetup;
-
     void readRegister(Thing *thing);
     void writeRegister(Thing *thing, ThingActionInfo *info);
 
@@ -77,8 +74,6 @@ private:
     QHash<ThingClassId, StateTypeId> m_valueStateTypeId;
 
 private slots:
-    void onRefreshTimer();
-
     void onPluginConfigurationChanged(const ParamTypeId &paramTypeId, const QVariant &value);
 
     void onConnectionStateChanged(bool status);
