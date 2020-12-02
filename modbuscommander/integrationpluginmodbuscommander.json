@@ -99,6 +99,13 @@
                             "defaultValue": "ttyAMA0"
                         },
                         {
+                            "id": "9908b01f-a76b-4b21-8242-b507c9252254",
+                            "name": "serialnumber",
+                            "displayName": "Serial number",
+                            "type": "QString",
+                            "defaultValue": ""
+                        },
+                        {
                             "id": "45dfc828-f238-4263-89a3-9b35cf5dea39",
                             "name": "baudRate",
                             "displayName": "Baud rate",
