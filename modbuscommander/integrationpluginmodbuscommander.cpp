@@ -37,107 +37,6 @@ IntegrationPluginModbusCommander::IntegrationPluginModbusCommander()
 {
 }
 
-void IntegrationPluginModbusCommander::init()
-{
-    connect(this, &IntegrationPluginModbusCommander::configValueChanged, this, &IntegrationPluginModbusCommander::onPluginConfigurationChanged);
-    //QLoggingCategory::setFilterRules(QStringLiteral("qt.modbus* = false"));
-
-    m_slaveAddressParamTypeId.insert(coilThingClassId, coilThingSlaveAddressParamTypeId);
-    m_slaveAddressParamTypeId.insert(inputRegisterThingClassId, inputRegisterThingSlaveAddressParamTypeId);
-    m_slaveAddressParamTypeId.insert(discreteInputThingClassId, discreteInputThingSlaveAddressParamTypeId);
-    m_slaveAddressParamTypeId.insert(holdingRegisterThingClassId, holdingRegisterThingSlaveAddressParamTypeId);
-
-    m_registerAddressParamTypeId.insert(coilThingClassId, coilThingRegisterAddressParamTypeId);
-    m_registerAddressParamTypeId.insert(inputRegisterThingClassId, inputRegisterThingRegisterAddressParamTypeId);
-    m_registerAddressParamTypeId.insert(discreteInputThingClassId, discreteInputThingRegisterAddressParamTypeId);
-    m_registerAddressParamTypeId.insert(holdingRegisterThingClassId, holdingRegisterThingRegisterAddressParamTypeId);
-
-    m_connectedStateTypeId.insert(coilThingClassId, coilConnectedStateTypeId);
-    m_connectedStateTypeId.insert(inputRegisterThingClassId, inputRegisterConnectedStateTypeId);
-    m_connectedStateTypeId.insert(discreteInputThingClassId, discreteInputConnectedStateTypeId);
-    m_connectedStateTypeId.insert(holdingRegisterThingClassId, holdingRegisterConnectedStateTypeId);
-
-    m_valueStateTypeId.insert(coilThingClassId, coilValueStateTypeId);
-    m_valueStateTypeId.insert(inputRegisterThingClassId, inputRegisterValueStateTypeId);
-    m_valueStateTypeId.insert(discreteInputThingClassId, discreteInputValueStateTypeId);
-    m_valueStateTypeId.insert(holdingRegisterThingClassId, holdingRegisterValueStateTypeId);
-}
-
-
-void IntegrationPluginModbusCommander::setupThing(ThingSetupInfo *info)
-{
-    Thing *thing = info->thing();
-
-    if (thing->thingClassId() == modbusTCPClientThingClassId) {
-        QHostAddress hostAddress = QHostAddress(thing->paramValue(modbusTCPClientThingIpAddressParamTypeId).toString());
-        uint port = thing->paramValue(modbusTCPClientThingPortParamTypeId).toUInt();
-
-        foreach (ModbusTCPMaster *modbusTCPMaster, m_modbusTCPMasters.values()) {
-            if ((modbusTCPMaster->hostAddress() == hostAddress) && (modbusTCPMaster->port() == port)){
-                m_modbusTCPMasters.insert(thing, modbusTCPMaster);
-                return info->finish(Thing::ThingErrorNoError);
-            }
-        }
-
-        ModbusTCPMaster *modbusTCPMaster = new ModbusTCPMaster(hostAddress, port, this);
-        connect(modbusTCPMaster, &ModbusTCPMaster::connectionStateChanged, this, &IntegrationPluginModbusCommander::onConnectionStateChanged);
-        connect(modbusTCPMaster, &ModbusTCPMaster::writeRequestExecuted, this, &IntegrationPluginModbusCommander::onRequestExecuted);
-        connect(modbusTCPMaster, &ModbusTCPMaster::writeRequestError, this, &IntegrationPluginModbusCommander::onRequestError);
-        connect(modbusTCPMaster, &ModbusTCPMaster::receivedCoil, this, &IntegrationPluginModbusCommander::onReceivedCoil);
-        connect(modbusTCPMaster, &ModbusTCPMaster::receivedDiscreteInput, this, &IntegrationPluginModbusCommander::onReceivedDiscreteInput);
-        connect(modbusTCPMaster, &ModbusTCPMaster::receivedHoldingRegister, this, &IntegrationPluginModbusCommander::onReceivedHoldingRegister);
-        connect(modbusTCPMaster, &ModbusTCPMaster::receivedInputRegister, this, &IntegrationPluginModbusCommander::onReceivedInputRegister);
-        connect(modbusTCPMaster, &ModbusTCPMaster::connectionStateChanged, info, [info, modbusTCPMaster, this] (bool connected) {
-            if (connected) {
-                info->finish(Thing::ThingErrorNoError);
-                m_modbusTCPMasters.insert(info->thing(), modbusTCPMaster);
-            }
-        });
-        modbusTCPMaster->connectDevice();
-
-    } else if (thing->thingClassId() == modbusRTUClientThingClassId) {
-
-        QString serialPort = thing->paramValue(modbusRTUClientThingSerialPortParamTypeId).toString();
-        uint baudrate = thing->paramValue(modbusRTUClientThingBaudRateParamTypeId).toUInt();
-        uint stopBits = thing->paramValue(modbusRTUClientThingStopBitsParamTypeId).toUInt();
-        uint dataBits = thing->paramValue(modbusRTUClientThingDataBitsParamTypeId).toUInt();
-        QSerialPort::Parity parity = QSerialPort::Parity::NoParity;
-        QString parityString = thing->paramValue(modbusRTUClientThingParityParamTypeId).toString();
-        if (parityString.contains("No")) {
-            parity = QSerialPort::Parity::NoParity;
-        } else if (thing->paramValue(modbusRTUClientThingParityParamTypeId).toString().contains("Even")) {
-            parity = QSerialPort::Parity::EvenParity;
-        } else if (thing->paramValue(modbusRTUClientThingParityParamTypeId).toString().contains("Odd")) {
-            parity = QSerialPort::Parity::OddParity;
-        }
-
-        ModbusRTUMaster *modbusRTUMaster = new ModbusRTUMaster(serialPort, baudrate, parity, dataBits, stopBits, this);
-        connect(modbusRTUMaster, &ModbusRTUMaster::connectionStateChanged, this, &IntegrationPluginModbusCommander::onConnectionStateChanged);
-        connect(modbusRTUMaster, &ModbusRTUMaster::requestExecuted, this, &IntegrationPluginModbusCommander::onRequestExecuted);
-        connect(modbusRTUMaster, &ModbusRTUMaster::requestError, this, &IntegrationPluginModbusCommander::onRequestError);
-        connect(modbusRTUMaster, &ModbusRTUMaster::receivedCoil, this, &IntegrationPluginModbusCommander::onReceivedCoil);
-        connect(modbusRTUMaster, &ModbusRTUMaster::receivedDiscreteInput, this, &IntegrationPluginModbusCommander::onReceivedDiscreteInput);
-        connect(modbusRTUMaster, &ModbusRTUMaster::receivedHoldingRegister, this, &IntegrationPluginModbusCommander::onReceivedHoldingRegister);
-        connect(modbusRTUMaster, &ModbusRTUMaster::receivedInputRegister, this, &IntegrationPluginModbusCommander::onReceivedInputRegister);
-        connect(modbusRTUMaster, &ModbusRTUMaster::connectionStateChanged, info, [info, modbusRTUMaster, this] (bool connected) {
-            if (connected) {
-                info->finish(Thing::ThingErrorNoError);
-                m_modbusRTUMasters.insert(info->thing(), modbusRTUMaster);
-            }
-        });
-        modbusRTUMaster->connectDevice();
-
-    } else if ((thing->thingClassId() == coilThingClassId)
-               || (thing->thingClassId() == discreteInputThingClassId)
-               || (thing->thingClassId() == holdingRegisterThingClassId)
-               || (thing->thingClassId() == inputRegisterThingClassId)) {
-        info->finish(Thing::ThingErrorNoError);
-
-    } else {
-        Q_ASSERT_X(false, "setupThing", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
-    }
-}
-
 void IntegrationPluginModbusCommander::discoverThings(ThingDiscoveryInfo *info)
 {
     ThingClassId thingClassId = info->thingClassId();
@@ -145,7 +44,7 @@ void IntegrationPluginModbusCommander::discoverThings(ThingDiscoveryInfo *info)
     if (thingClassId == modbusRTUClientThingClassId) {
         Q_FOREACH(QSerialPortInfo port, QSerialPortInfo::availablePorts()) {
             //Serial port is not yet used, create now a new one
-            qCDebug(dcModbusCommander()) << "Found serial port:" << port.systemLocation();
+            qCDebug(dcModbusCommander()) << "Found serial port:" << port.systemLocation() << "manufacturer" << port.manufacturer() << "description" << port.description() << "serial number" << port.serialNumber();
             QString description = port.manufacturer() + " " + port.description();
             ThingDescriptor thingDescriptor(thingClassId, "Modbus RTU interface "+port.portName(), description);
             ParamList parameters;
@@ -153,6 +52,10 @@ void IntegrationPluginModbusCommander::discoverThings(ThingDiscoveryInfo *info)
             foreach (Thing *existingThing, myThings()) {
                 if (existingThing->paramValue(modbusRTUClientThingSerialPortParamTypeId).toString() == serialPort) {
                     thingDescriptor.setThingId(existingThing->id());
+                    // TODO fix rediscovery of USB to SerialPort converters
+                    // QSerialPort doesn't give any information to rediscover the device
+                    // Un and re-plugging an USB device changes the system location
+                    // detecting if the device is usb and using libsub to get the serialnumber may be a solution
                     break;
                 }
             }
@@ -229,11 +132,151 @@ void IntegrationPluginModbusCommander::discoverThings(ThingDiscoveryInfo *info)
     }
 }
 
-void IntegrationPluginModbusCommander::postSetupThing(Thing *info)
+void IntegrationPluginModbusCommander::init()
 {
+    connect(this, &IntegrationPluginModbusCommander::configValueChanged, this, &IntegrationPluginModbusCommander::onPluginConfigurationChanged);
+
+    m_slaveAddressParamTypeId.insert(coilThingClassId, coilThingSlaveAddressParamTypeId);
+    m_slaveAddressParamTypeId.insert(inputRegisterThingClassId, inputRegisterThingSlaveAddressParamTypeId);
+    m_slaveAddressParamTypeId.insert(discreteInputThingClassId, discreteInputThingSlaveAddressParamTypeId);
+    m_slaveAddressParamTypeId.insert(holdingRegisterThingClassId, holdingRegisterThingSlaveAddressParamTypeId);
+
+    m_registerAddressParamTypeId.insert(coilThingClassId, coilThingRegisterAddressParamTypeId);
+    m_registerAddressParamTypeId.insert(inputRegisterThingClassId, inputRegisterThingRegisterAddressParamTypeId);
+    m_registerAddressParamTypeId.insert(discreteInputThingClassId, discreteInputThingRegisterAddressParamTypeId);
+    m_registerAddressParamTypeId.insert(holdingRegisterThingClassId, holdingRegisterThingRegisterAddressParamTypeId);
+
+    m_connectedStateTypeId.insert(modbusRTUClientThingClassId, modbusRTUClientConnectedStateTypeId);
+    m_connectedStateTypeId.insert(modbusTCPClientThingClassId, modbusTCPClientConnectedStateTypeId);
+    m_connectedStateTypeId.insert(coilThingClassId, coilConnectedStateTypeId);
+    m_connectedStateTypeId.insert(inputRegisterThingClassId, inputRegisterConnectedStateTypeId);
+    m_connectedStateTypeId.insert(discreteInputThingClassId, discreteInputConnectedStateTypeId);
+    m_connectedStateTypeId.insert(holdingRegisterThingClassId, holdingRegisterConnectedStateTypeId);
+
+    m_valueStateTypeId.insert(coilThingClassId, coilValueStateTypeId);
+    m_valueStateTypeId.insert(inputRegisterThingClassId, inputRegisterValueStateTypeId);
+    m_valueStateTypeId.insert(discreteInputThingClassId, discreteInputValueStateTypeId);
+    m_valueStateTypeId.insert(holdingRegisterThingClassId, holdingRegisterValueStateTypeId);
+}
+
+void IntegrationPluginModbusCommander::setupThing(ThingSetupInfo *info)
+{
+    Thing *thing = info->thing();
+
+    if (thing->thingClassId() == modbusTCPClientThingClassId) {
+        QHostAddress hostAddress = QHostAddress(thing->paramValue(modbusTCPClientThingIpAddressParamTypeId).toString());
+        uint port = thing->paramValue(modbusTCPClientThingPortParamTypeId).toUInt();
+        uint numberOfRetries = thing->setting(modbusTCPClientSettingsNumberOfRetriesParamTypeId).toUInt();
+        uint timeout = thing->setting(modbusTCPClientSettingsTimeoutParamTypeId).toUInt();
+
+        foreach (ModbusTCPMaster *modbusTCPMaster, m_modbusTCPMasters.values()) {
+            if ((modbusTCPMaster->hostAddress() == hostAddress) && (modbusTCPMaster->port() == port)){
+                m_modbusTCPMasters.insert(thing, modbusTCPMaster);
+                return info->finish(Thing::ThingErrorNoError);
+            }
+        }
+
+        qCDebug(dcModbusCommander()) << "Setting up RTU client";
+        qCDebug(dcModbusCommander()) << "      address:" << hostAddress.toString();
+        qCDebug(dcModbusCommander()) << "      port:" << port;
+        qCDebug(dcModbusCommander()) << "      number of retires:" << numberOfRetries;
+        qCDebug(dcModbusCommander()) << "      timeout:" << timeout;
+
+        ModbusTCPMaster *modbusTCPMaster = new ModbusTCPMaster(hostAddress, port, this);
+        connect(modbusTCPMaster, &ModbusTCPMaster::connectionStateChanged, this, &IntegrationPluginModbusCommander::onConnectionStateChanged);
+        connect(modbusTCPMaster, &ModbusTCPMaster::writeRequestExecuted, this, &IntegrationPluginModbusCommander::onRequestExecuted);
+        connect(modbusTCPMaster, &ModbusTCPMaster::writeRequestError, this, &IntegrationPluginModbusCommander::onRequestError);
+        connect(modbusTCPMaster, &ModbusTCPMaster::receivedCoil, this, &IntegrationPluginModbusCommander::onReceivedCoil);
+        connect(modbusTCPMaster, &ModbusTCPMaster::receivedDiscreteInput, this, &IntegrationPluginModbusCommander::onReceivedDiscreteInput);
+        connect(modbusTCPMaster, &ModbusTCPMaster::receivedHoldingRegister, this, &IntegrationPluginModbusCommander::onReceivedHoldingRegister);
+        connect(modbusTCPMaster, &ModbusTCPMaster::receivedInputRegister, this, &IntegrationPluginModbusCommander::onReceivedInputRegister);
+        connect(modbusTCPMaster, &ModbusTCPMaster::connectionStateChanged, info, [info, modbusTCPMaster, this] (bool connected) {
+            if (connected) {
+                info->finish(Thing::ThingErrorNoError);
+                m_modbusTCPMasters.insert(info->thing(), modbusTCPMaster);
+            }
+        });
+        connect(thing, &Thing::settingChanged, thing, [thing, modbusTCPMaster] (const ParamTypeId &paramTypeId, const QVariant &value) {
+             if (paramTypeId == modbusTCPClientSettingsNumberOfRetriesParamTypeId) {
+                 qCDebug(dcModbusCommander()) << "Set number of reties" << thing->name() << value.toUInt();
+                 modbusTCPMaster->setNumberOfRetries(value.toUInt());
+             } else if (paramTypeId == modbusTCPClientSettingsTimeoutParamTypeId) {
+                 qCDebug(dcModbusCommander()) << "Set timeout " << thing->name() << value.toUInt();
+                 modbusTCPMaster->setTimeout(value.toUInt());
+             }
+         });
+        modbusTCPMaster->connectDevice();
+
+    } else if (thing->thingClassId() == modbusRTUClientThingClassId) {
+
+        QString serialPort = thing->paramValue(modbusRTUClientThingSerialPortParamTypeId).toString();
+        uint baudrate = thing->paramValue(modbusRTUClientThingBaudRateParamTypeId).toUInt();
+        uint stopBits = thing->paramValue(modbusRTUClientThingStopBitsParamTypeId).toUInt();
+        uint dataBits = thing->paramValue(modbusRTUClientThingDataBitsParamTypeId).toUInt();
+        uint numberOfRetries = thing->setting(modbusRTUClientSettingsNumberOfRetriesParamTypeId).toUInt();
+        uint timeout = thing->setting(modbusRTUClientSettingsTimeoutParamTypeId).toUInt();
+        QSerialPort::Parity parity = QSerialPort::Parity::NoParity;
+        QString parityString = thing->paramValue(modbusRTUClientThingParityParamTypeId).toString();
+        if (parityString.contains("No")) {
+            parity = QSerialPort::Parity::NoParity;
+        } else if (parityString.contains("Even")) {
+            parity = QSerialPort::Parity::EvenParity;
+        } else if (parityString.contains("Odd")) {
+            parity = QSerialPort::Parity::OddParity;
+        }
+        qCDebug(dcModbusCommander()) << "Setting up RTU client";
+        qCDebug(dcModbusCommander()) << "      baud:" << baudrate;
+        qCDebug(dcModbusCommander()) << "      stop bits:" << baudrate;
+        qCDebug(dcModbusCommander()) << "      data bits:" << baudrate;
+        qCDebug(dcModbusCommander()) << "      parity:" << parityString;
+        qCDebug(dcModbusCommander()) << "      number of retires:" << numberOfRetries;
+        qCDebug(dcModbusCommander()) << "      timeout:" << timeout;
+
+        ModbusRTUMaster *modbusRTUMaster = new ModbusRTUMaster(serialPort, baudrate, parity, dataBits, stopBits, this);
+        modbusRTUMaster->setTimeout(timeout);
+        modbusRTUMaster->setNumberOfRetries(numberOfRetries);
+        connect(modbusRTUMaster, &ModbusRTUMaster::connectionStateChanged, this, &IntegrationPluginModbusCommander::onConnectionStateChanged);
+        connect(modbusRTUMaster, &ModbusRTUMaster::requestExecuted, this, &IntegrationPluginModbusCommander::onRequestExecuted);
+        connect(modbusRTUMaster, &ModbusRTUMaster::requestError, this, &IntegrationPluginModbusCommander::onRequestError);
+        connect(modbusRTUMaster, &ModbusRTUMaster::receivedCoil, this, &IntegrationPluginModbusCommander::onReceivedCoil);
+        connect(modbusRTUMaster, &ModbusRTUMaster::receivedDiscreteInput, this, &IntegrationPluginModbusCommander::onReceivedDiscreteInput);
+        connect(modbusRTUMaster, &ModbusRTUMaster::receivedHoldingRegister, this, &IntegrationPluginModbusCommander::onReceivedHoldingRegister);
+        connect(modbusRTUMaster, &ModbusRTUMaster::receivedInputRegister, this, &IntegrationPluginModbusCommander::onReceivedInputRegister);
+        connect(modbusRTUMaster, &ModbusRTUMaster::connectionStateChanged, info, [info, modbusRTUMaster, this] (bool connected) {
+            if (connected) {
+                info->finish(Thing::ThingErrorNoError);
+                m_modbusRTUMasters.insert(info->thing(), modbusRTUMaster);
+            }
+        });
+        connect(thing, &Thing::settingChanged, thing, [thing, modbusRTUMaster] (const ParamTypeId &paramTypeId, const QVariant &value) {
+             if (paramTypeId == modbusRTUClientSettingsNumberOfRetriesParamTypeId) {
+                 qCDebug(dcModbusCommander()) << "Set number of reties" << thing->name() << value.toUInt();
+                 modbusRTUMaster->setNumberOfRetries(value.toUInt());
+             } else if (paramTypeId == modbusRTUClientSettingsTimeoutParamTypeId) {
+                 qCDebug(dcModbusCommander()) << "Set timeout " << thing->name() << value.toUInt();
+                 modbusRTUMaster->setTimeout(value.toUInt());
+             }
+         });
+        modbusRTUMaster->connectDevice();
+
+    } else if ((thing->thingClassId() == coilThingClassId)
+               || (thing->thingClassId() == discreteInputThingClassId)
+               || (thing->thingClassId() == holdingRegisterThingClassId)
+               || (thing->thingClassId() == inputRegisterThingClassId)) {
+        info->finish(Thing::ThingErrorNoError);
+
+    } else {
+        Q_ASSERT_X(false, "setupThing", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
+    }
+}
+
+
+void IntegrationPluginModbusCommander::postSetupThing(Thing *thing)
+{
+    qCDebug(dcModbusCommander()) << "Post setup thing" << thing->name();
     if (!m_refreshTimer) {
-        // Refresh timer for TCP read
         int refreshTime = configValue(modbusCommanderPluginUpdateIntervalParamTypeId).toInt();
+        qCDebug(dcModbusCommander()) << "Starting refresh timer with interval" << refreshTime << "s";
         m_refreshTimer = hardwareManager()->pluginTimerManager()->registerTimer(refreshTime);
         connect(m_refreshTimer, &PluginTimer::timeout, this, [this] {
             foreach (Thing *thing, myThings()) {
@@ -247,11 +290,16 @@ void IntegrationPluginModbusCommander::postSetupThing(Thing *info)
         });
     }
 
-    if ((info->thingClassId() == coilThingClassId) ||
-            (info->thingClassId() == discreteInputThingClassId) ||
-            (info->thingClassId() == holdingRegisterThingClassId) ||
-            (info->thingClassId() == inputRegisterThingClassId)) {
-        readRegister(info);
+    if ((thing->thingClassId() == modbusRTUClientThingClassId) ||
+            (thing->thingClassId() == modbusTCPClientThingClassId)) {
+        thing->setStateValue(m_connectedStateTypeId.value(thing->thingClassId()), true);
+    } else if ((thing->thingClassId() == coilThingClassId) ||
+               (thing->thingClassId() == discreteInputThingClassId) ||
+               (thing->thingClassId() == holdingRegisterThingClassId) ||
+               (thing->thingClassId() == inputRegisterThingClassId)) {
+        readRegister(thing);
+    } else {
+        Q_ASSERT_X(false, "postSetupThing", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
     }
 }
 
@@ -259,27 +307,33 @@ void IntegrationPluginModbusCommander::postSetupThing(Thing *info)
 void IntegrationPluginModbusCommander::executeAction(ThingActionInfo *info)
 {
     Thing *thing = info->thing();
+    Action action = info->action();
 
     if (thing->thingClassId() == coilThingClassId) {
 
-        if (info->action().actionTypeId() == coilValueActionTypeId) {
+        if (action.actionTypeId() == coilValueActionTypeId) {
             writeRegister(thing, info);
             return;
+        } else {
+            Q_ASSERT_X(false, "Execute action", QString("Unhandled action type id: %1").arg(action.actionTypeId().toString()).toUtf8());
         }
     } else if (thing->thingClassId() == holdingRegisterThingClassId) {
 
-        if (info->action().actionTypeId() == holdingRegisterValueActionTypeId) {
+        if (action.actionTypeId() == holdingRegisterValueActionTypeId) {
             writeRegister(thing, info);
             return;
+        } else {
+            Q_ASSERT_X(false, "Execute action", QString("Unhandled action type id: %1").arg(action.actionTypeId().toString()).toUtf8());
         }
+    } else {
+        Q_ASSERT_X(false, "Execute action", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
     }
-    qCWarning(dcModbusCommander()) << "Unhandled deviceclass/actiontype in executeAction!";
-    info->finish(Thing::ThingErrorThingClassNotFound);
 }
 
 
 void IntegrationPluginModbusCommander::thingRemoved(Thing *thing)
 {
+    qCDebug(dcModbusCommander()) << "Removing thing" << thing->name();
     if (thing->thingClassId() == modbusTCPClientThingClassId) {
         ModbusTCPMaster *modbus = m_modbusTCPMasters.take(thing);
         modbus->deleteLater();
@@ -289,6 +343,7 @@ void IntegrationPluginModbusCommander::thingRemoved(Thing *thing)
     }
 
     if (myThings().empty()) {
+        qCDebug(dcModbusCommander()) << "No more Modbus commander things, stopping timer";
         hardwareManager()->pluginTimerManager()->unregisterTimer(m_refreshTimer);
         m_refreshTimer = nullptr;
     }
@@ -298,10 +353,13 @@ void IntegrationPluginModbusCommander::onPluginConfigurationChanged(const ParamT
 {
     // Check refresh schedule
     if (paramTypeId == modbusCommanderPluginUpdateIntervalParamTypeId) {;
+        qCDebug(dcModbusCommander()) << "Update interval has changed to" << value.toUInt() << "s";
         if (m_refreshTimer) {
             uint refreshTime = value.toUInt();
             m_refreshTimer->stop();
             m_refreshTimer->startTimer(refreshTime);
+        } else {
+            qCWarning(dcModbusCommander()) << "Update interval changed but refresh timer is not initialized";
         }
     }
 }
@@ -312,9 +370,11 @@ void IntegrationPluginModbusCommander::onConnectionStateChanged(bool status)
 
     if (m_modbusRTUMasters.values().contains(static_cast<ModbusRTUMaster *>(modbus))) {
         Thing *thing = m_modbusRTUMasters.key(static_cast<ModbusRTUMaster *>(modbus));
+        qCDebug(dcModbusCommander()) << "Connections state changed" << thing->name() << status;
         thing->setStateValue(modbusRTUClientConnectedStateTypeId, status);
     } else if (m_modbusTCPMasters.values().contains(static_cast<ModbusTCPMaster *>(modbus))) {
         Thing *thing = m_modbusTCPMasters.key(static_cast<ModbusTCPMaster *>(modbus));
+        qCDebug(dcModbusCommander()) << "Connections state changed" << thing->name() << status;
         thing->setStateValue(modbusTCPClientConnectedStateTypeId, status);
     }
 }

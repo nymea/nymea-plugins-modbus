@@ -24,6 +24,22 @@
                     "displayName": "Modbus TCP client",
                     "createMethods": ["user"],
                     "interfaces": ["connectable"],
+                    "settingsTypes": [
+                        {
+                            "id": "a6aa4eff-205b-426d-ad05-90971a122138",
+                            "name": "timeout",
+                            "displayName": "Timeout",
+                            "type": "uint",
+                            "defaultValue": 100
+                        },
+                        {
+                            "id": "b27c95c9-7584-46e1-9e62-89890c7bde67",
+                            "name": "numberOfRetries",
+                            "displayName": "Number of retries",
+                            "type": "uint",
+                            "defaultValue": 3
+                        }
+                    ],
                     "paramTypes": [
                         {
                             "id": "2a3fcb23-931b-4ba1-b134-c49b656c76f7",
@@ -57,6 +73,22 @@
                     "displayName": "Modbus RTU client",
                     "createMethods": ["discovery", "user"],
                     "interfaces": ["connectable"],
+                    "settingsTypes": [
+                        {
+                            "id": "b0af32f0-b8cc-4642-af5a-576732522b2c",
+                            "name": "timeout",
+                            "displayName": "Timeout",
+                            "type": "uint",
+                            "defaultValue": 100
+                        },
+                        {
+                            "id": "c4f16d6c-c1f2-4862-b0bd-6fae7193eaa8",
+                            "name": "numberOfRetries",
+                            "displayName": "Number of retries",
+                            "type": "uint",
+                            "defaultValue": 3
+                        }
+                    ],
                     "paramTypes": [
                         {
                             "id": "ed49f7d8-ab18-4c37-9b80-1004b75dcb91",
@@ -98,7 +130,7 @@
                                 "Even Parity",
                                 "Odd Parity"
                             ],
-                            "defaultValue": "Even Parity"
+                            "defaultValue": "No Parity"
                         }
                     ],
                     "stateTypes": [
