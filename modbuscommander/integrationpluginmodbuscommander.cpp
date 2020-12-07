@@ -177,6 +177,7 @@ void IntegrationPluginModbusCommander::setupThing(ThingSetupInfo *info)
     Thing *thing = info->thing();
 
     if (thing->thingClassId() == modbusTCPClientThingClassId) {
+
         QHostAddress hostAddress = QHostAddress(thing->paramValue(modbusTCPClientThingIpAddressParamTypeId).toString());
         uint port = thing->paramValue(modbusTCPClientThingPortParamTypeId).toUInt();
         uint numberOfRetries = thing->setting(modbusTCPClientSettingsNumberOfRetriesParamTypeId).toUInt();
@@ -189,7 +190,7 @@ void IntegrationPluginModbusCommander::setupThing(ThingSetupInfo *info)
             }
         }
 
-        qCDebug(dcModbusCommander()) << "Setting up TCP client";
+        qCDebug(dcModbusCommander()) << "Setting up TCP client" << thing->name();
         qCDebug(dcModbusCommander()) << "      address:" << hostAddress.toString();
         qCDebug(dcModbusCommander()) << "      port:" << port;
         qCDebug(dcModbusCommander()) << "      number of retries:" << numberOfRetries;
@@ -211,7 +212,7 @@ void IntegrationPluginModbusCommander::setupThing(ThingSetupInfo *info)
         });
         connect(thing, &Thing::settingChanged, thing, [thing, modbusTCPMaster] (const ParamTypeId &paramTypeId, const QVariant &value) {
              if (paramTypeId == modbusTCPClientSettingsNumberOfRetriesParamTypeId) {
-                 qCDebug(dcModbusCommander()) << "Set number of reties" << thing->name() << value.toUInt();
+                 qCDebug(dcModbusCommander()) << "Set number of retries" << thing->name() << value.toUInt();
                  modbusTCPMaster->setNumberOfRetries(value.toUInt());
              } else if (paramTypeId == modbusTCPClientSettingsTimeoutParamTypeId) {
                  qCDebug(dcModbusCommander()) << "Set timeout " << thing->name() << value.toUInt();
@@ -237,7 +238,7 @@ void IntegrationPluginModbusCommander::setupThing(ThingSetupInfo *info)
         } else if (parityString.contains("Odd")) {
             parity = QSerialPort::Parity::OddParity;
         }
-        qCDebug(dcModbusCommander()) << "Setting up RTU client";
+        qCDebug(dcModbusCommander()) << "Setting up RTU client" << thing->name();
         qCDebug(dcModbusCommander()) << "      baud:" << baudrate;
         qCDebug(dcModbusCommander()) << "      stop bits:" << stopBits;
         qCDebug(dcModbusCommander()) << "      data bits:" << dataBits;
@@ -263,7 +264,7 @@ void IntegrationPluginModbusCommander::setupThing(ThingSetupInfo *info)
         });
         connect(thing, &Thing::settingChanged, thing, [thing, modbusRTUMaster] (const ParamTypeId &paramTypeId, const QVariant &value) {
              if (paramTypeId == modbusRTUClientSettingsNumberOfRetriesParamTypeId) {
-                 qCDebug(dcModbusCommander()) << "Set number of reties" << thing->name() << value.toUInt();
+                 qCDebug(dcModbusCommander()) << "Set number of retries" << thing->name() << value.toUInt();
                  modbusRTUMaster->setNumberOfRetries(value.toUInt());
              } else if (paramTypeId == modbusRTUClientSettingsTimeoutParamTypeId) {
                  qCDebug(dcModbusCommander()) << "Set timeout " << thing->name() << value.toUInt();
@@ -276,6 +277,7 @@ void IntegrationPluginModbusCommander::setupThing(ThingSetupInfo *info)
                || (thing->thingClassId() == discreteInputThingClassId)
                || (thing->thingClassId() == holdingRegisterThingClassId)
                || (thing->thingClassId() == inputRegisterThingClassId)) {
+        qCDebug(dcModbusCommander()) << "Setting up modbus register" << thing->name();
         info->finish(Thing::ThingErrorNoError);
 
     } else {

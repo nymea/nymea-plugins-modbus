@@ -49,7 +49,7 @@ public:
     void setTimeout(int timeout);
 
     int timeout();
-    int numberOfReties();
+    int numberOfRetries();
 
     QUuid readCoil(uint slaveAddress, uint registerAddress, uint size = 1);
     QUuid readDiscreteInput(uint slaveAddress, uint registerAddress, uint size = 1);

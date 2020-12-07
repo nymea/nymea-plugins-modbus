@@ -92,7 +92,7 @@ int ModbusRTUMaster::timeout()
     return m_modbusRtuSerialMaster->timeout();
 }
 
-int ModbusRTUMaster::numberOfReties()
+int ModbusRTUMaster::numberOfRetries()
 {
     return m_modbusRtuSerialMaster->numberOfRetries();
 }
