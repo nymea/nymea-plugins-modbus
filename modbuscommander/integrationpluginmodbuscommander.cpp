@@ -568,6 +568,9 @@ void IntegrationPluginModbusCommander::readRegister(Thing *thing)
         if (!modbus)
             return;
 
+        if (!modbus->connected())
+            return; // Send requests only if the modbus interface is connected
+
         if (thing->thingClassId() == coilThingClassId) {
             requestId = modbus->readCoil(slaveAddress, registerAddress);
         } else if (thing->thingClassId() == discreteInputThingClassId) {
@@ -582,6 +585,9 @@ void IntegrationPluginModbusCommander::readRegister(Thing *thing)
         ModbusRTUMaster *modbus = m_modbusRTUMasters.value(parent);
         if (!modbus)
             return;
+
+        if (!modbus->connected())
+            return; // Send requests only if the modbus interface is connected
 
         if (thing->thingClassId() == coilThingClassId) {
             requestId = modbus->readCoil(slaveAddress, registerAddress);

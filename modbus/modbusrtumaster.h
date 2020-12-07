@@ -45,6 +45,7 @@ public:
     ~ModbusRTUMaster();
 
     bool connectDevice();
+    bool connected();
     void setNumberOfRetries(int number);
     void setTimeout(int timeout);
 
