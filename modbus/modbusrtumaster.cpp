@@ -77,6 +77,11 @@ bool ModbusRTUMaster::connectDevice()
     return m_modbusRtuSerialMaster->connectDevice();
 }
 
+bool ModbusRTUMaster::connected()
+{
+    return (m_modbusRtuSerialMaster->state() == QModbusDevice::State::ConnectedState);
+}
+
 void ModbusRTUMaster::setNumberOfRetries(int number)
 {
     m_modbusRtuSerialMaster->setNumberOfRetries(number);
