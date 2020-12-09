@@ -67,7 +67,6 @@ void IntegrationPluginModbusCommander::init()
 void IntegrationPluginModbusCommander::discoverThings(ThingDiscoveryInfo *info)
 {
     ThingClassId thingClassId = info->thingClassId();
-
     if (thingClassId == modbusRTUClientThingClassId) {
         Q_FOREACH(QSerialPortInfo port, QSerialPortInfo::availablePorts()) {
             qCDebug(dcModbusCommander()) << "Found serial port:" << port.systemLocation() << "manufacturer" << port.manufacturer() << "description" << port.description() << "serial number" << port.serialNumber();
@@ -91,7 +90,7 @@ void IntegrationPluginModbusCommander::discoverThings(ThingDiscoveryInfo *info)
             qCDebug(dcModbusCommander()) << "    - Serial number" << serialnumber;
             Q_FOREACH (Thing *exisingThing, myThings().filterByParam(modbusRTUClientThingClassId)) {
                 thingDescriptor.setThingId(exisingThing->id());
-                // Rediscovery is broken because of an missing unique device id
+                // Rediscovery is broken because of a missing unique device id
                 // This is a workaround and doesnt work if multiple uart converters are attached.
                 // ThingDiscoveryInfo may be extended to distinquish between discovery and rediscovery
                 break;
@@ -183,8 +182,13 @@ void IntegrationPluginModbusCommander::setupThing(ThingSetupInfo *info)
         uint numberOfRetries = thing->setting(modbusTCPClientSettingsNumberOfRetriesParamTypeId).toUInt();
         uint timeout = thing->setting(modbusTCPClientSettingsTimeoutParamTypeId).toUInt();
 
+        if (m_modbusTCPMasters.contains(thing)) {
+            // In case of a rediscovery
+            m_modbusTCPMasters.take(thing)->deleteLater();
+        }
+
         foreach (ModbusTCPMaster *modbusTCPMaster, m_modbusTCPMasters.values()) {
-            if ((modbusTCPMaster->hostAddress() == hostAddress) && (modbusTCPMaster->port() == port)){
+            if ((modbusTCPMaster->hostAddress() == hostAddress) && (modbusTCPMaster->port() == port)) {
                 m_modbusTCPMasters.insert(thing, modbusTCPMaster);
                 return info->finish(Thing::ThingErrorNoError);
             }
@@ -245,6 +249,12 @@ void IntegrationPluginModbusCommander::setupThing(ThingSetupInfo *info)
         qCDebug(dcModbusCommander()) << "      parity:" << parityString;
         qCDebug(dcModbusCommander()) << "      number of retries:" << numberOfRetries;
         qCDebug(dcModbusCommander()) << "      timeout:" << timeout;
+
+
+        if (m_modbusRTUMasters.contains(thing)) {
+            // In case of a rediscovery
+            m_modbusRTUMasters.take(thing)->deleteLater();
+        }
 
         ModbusRTUMaster *modbusRTUMaster = new ModbusRTUMaster(serialPort, baudrate, parity, dataBits, stopBits, this);
         modbusRTUMaster->setTimeout(timeout);
