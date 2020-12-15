@@ -71,6 +71,11 @@ bool ModbusTCPMaster::connectDevice() {
     return m_modbusTcpClient->connectDevice();
 }
 
+bool ModbusTCPMaster::connected()
+{
+    return (m_modbusTcpClient->state() == QModbusDevice::State::ConnectedState);
+}
+
 void ModbusTCPMaster::setNumberOfRetries(int number)
 {
     m_modbusTcpClient->setNumberOfRetries(number);

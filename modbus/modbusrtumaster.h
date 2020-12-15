@@ -45,8 +45,12 @@ public:
     ~ModbusRTUMaster();
 
     bool connectDevice();
+    bool connected();
     void setNumberOfRetries(int number);
     void setTimeout(int timeout);
+
+    int timeout();
+    int numberOfRetries();
 
     QUuid readCoil(uint slaveAddress, uint registerAddress, uint size = 1);
     QUuid readDiscreteInput(uint slaveAddress, uint registerAddress, uint size = 1);

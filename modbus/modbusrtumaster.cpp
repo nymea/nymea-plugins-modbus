@@ -45,8 +45,7 @@ ModbusRTUMaster::ModbusRTUMaster(QString serialPort, uint baudrate, QSerialPort:
     m_modbusRtuSerialMaster->setConnectionParameter(QModbusDevice::SerialDataBitsParameter, dataBits);
     m_modbusRtuSerialMaster->setConnectionParameter(QModbusDevice::SerialStopBitsParameter, stopBits);
     m_modbusRtuSerialMaster->setConnectionParameter(QModbusDevice::SerialParityParameter, parity);
-    //m_modbusRtuSerialMaster->setTimeout(100);
-    //m_modbusRtuSerialMaster->setNumberOfRetries(1);
+
     connect(m_modbusRtuSerialMaster, &QModbusTcpClient::stateChanged, this, &ModbusRTUMaster::onModbusStateChanged);
     connect(m_modbusRtuSerialMaster, &QModbusRtuSerialMaster::errorOccurred, this, &ModbusRTUMaster::onModbusErrorOccurred);
 
@@ -70,12 +69,17 @@ ModbusRTUMaster::~ModbusRTUMaster()
 
 bool ModbusRTUMaster::connectDevice()
 {
-    qCDebug(dcModbusRTU()) << "Setting up TCP connecion";
+    qCDebug(dcModbusRTU()) << "Setting up RTU client connecion";
 
     if (!m_modbusRtuSerialMaster)
         return false;
 
     return m_modbusRtuSerialMaster->connectDevice();
+}
+
+bool ModbusRTUMaster::connected()
+{
+    return (m_modbusRtuSerialMaster->state() == QModbusDevice::State::ConnectedState);
 }
 
 void ModbusRTUMaster::setNumberOfRetries(int number)
@@ -86,6 +90,16 @@ void ModbusRTUMaster::setNumberOfRetries(int number)
 void ModbusRTUMaster::setTimeout(int timeout)
 {
     m_modbusRtuSerialMaster->setTimeout(timeout);
+}
+
+int ModbusRTUMaster::timeout()
+{
+    return m_modbusRtuSerialMaster->timeout();
+}
+
+int ModbusRTUMaster::numberOfRetries()
+{
+    return m_modbusRtuSerialMaster->numberOfRetries();
 }
 
 QString ModbusRTUMaster::serialPort()
@@ -380,15 +394,18 @@ QUuid ModbusRTUMaster::readHoldingRegister(uint slaveAddress, uint registerAddre
 void ModbusRTUMaster::onModbusErrorOccurred(QModbusDevice::Error error)
 {
     qCWarning(dcModbusRTU()) << "An error occured" << error;
+    if (error == QModbusDevice::Error::ConnectionError) {
+        emit connectionStateChanged(false);
+    }
 }
 
 
 void ModbusRTUMaster::onModbusStateChanged(QModbusDevice::State state)
 {
-    bool connected = (state != QModbusDevice::UnconnectedState);
-    if (!connected) {
+        qCWarning(dcModbusRTU()) << "State changed" << state;
+    if (state == QModbusDevice::UnconnectedState) {
         //try to reconnect in 10 seconds
         m_reconnectTimer->start(10000);
     }
-    emit connectionStateChanged(connected);
+    emit connectionStateChanged(state == QModbusDevice::ConnectedState);
 }
