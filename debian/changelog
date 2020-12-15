@@ -1,3 +1,10 @@
+nymea-plugins-modbus (0.24.1) xenial; urgency=medium
+
+  [ Bernhard Trinnes ]
+  * Modbus Commander: improve setup
+
+ -- Jenkins <jenkins@nymea.io>  Tue, 15 Dec 2020 11:05:43 +0100
+
 nymea-plugins-modbus (0.24.0) xenial; urgency=medium  * Add first plugins
 
  -- Jenkins <jenkins@nymea.io>  Fri, 23 Oct 2020 13:13:47 +0200
