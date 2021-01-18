@@ -55,6 +55,14 @@ bool SunSpec::connectModbus()
     return m_modbusTcpClient->connectDevice();;
 }
 
+void SunSpec::setHostAddress(const QHostAddress &hostAddress)
+{
+    if (m_hostAddress != hostAddress) {
+        m_hostAddress = hostAddress;
+        m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkAddressParameter, m_hostAddress.toString());
+    }
+}
+
 QString SunSpec::manufacturer()
 {
     return m_manufacturer;

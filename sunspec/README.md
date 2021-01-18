@@ -1,5 +1,7 @@
 # SunSpec
 
+Connect to SunSpec devices.
+
 ## Supported Things
 
 * SunSpec Inverter

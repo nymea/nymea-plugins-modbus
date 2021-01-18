@@ -172,6 +172,7 @@ public:
     explicit SunSpec(const QHostAddress &hostAddress, uint port = 502, QObject *parent = 0);
     ~SunSpec();
     bool connectModbus();
+    void setHostAddress(const QHostAddress &hostAddress);
     QString manufacturer();
     QString deviceModel();
     QString serialNumber();
