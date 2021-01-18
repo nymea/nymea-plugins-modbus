@@ -166,6 +166,8 @@ QList<QString> Neuron::userLEDs()
 
 bool Neuron::loadModbusMap()
 {
+    qCDebug(dcUniPi()) << "Neuron Extension: load modbus map";
+
     QStringList fileCoilList;
     QStringList fileRegisterList;
 
@@ -236,7 +238,7 @@ bool Neuron::loadModbusMap()
 
     foreach(QString relativeFilePath, fileCoilList) {
         QString absoluteFilePath = QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation).last() + "/nymea/modbus" + relativeFilePath;
-        qDebug(dcUniPi()) << "Open CSV File:" << absoluteFilePath;
+        qDebug(dcUniPi()) << "Neuron: Open CSV File:" << absoluteFilePath;
         QFile *csvFile = new QFile(absoluteFilePath);
         if (!csvFile->open(QIODevice::ReadOnly | QIODevice::Text)) {
             qCWarning(dcUniPi()) << csvFile->errorString() << "Path:" << absoluteFilePath;
@@ -248,7 +250,7 @@ bool Neuron::loadModbusMap()
             QString line = textStream->readLine();
             QStringList list = line.split(',');
             if (list.length() <= 4) {
-                qCWarning(dcUniPi()) << "currupted CSV file:" << csvFile->fileName();
+                qCWarning(dcUniPi()) << "Neuron: Currupted CSV file:" << csvFile->fileName();
                 csvFile->deleteLater();
                 return false;
             }
@@ -256,16 +258,16 @@ bool Neuron::loadModbusMap()
                 QString circuit = list[3].split(" ").last();
                 if (list[3].contains("Digital Input", Qt::CaseSensitivity::CaseInsensitive)) {
                     m_modbusDigitalInputRegisters.insert(circuit, list[0].toInt());
-                    qDebug(dcUniPi()) << "Found input register" << circuit << list[0].toInt();
+                    qDebug(dcUniPi()) << "Neuron: Found input register" << circuit << list[0].toInt();
                 } else if (list[3].contains("Digital Output", Qt::CaseSensitivity::CaseInsensitive)) {
                     m_modbusDigitalOutputRegisters.insert(circuit, list[0].toInt());
-                    qDebug(dcUniPi()) << "Found output register" << circuit << list[0].toInt();
+                    qDebug(dcUniPi()) << "Neuron: Found output register" << circuit << list[0].toInt();
                 } else if (list[3].contains("Relay Output", Qt::CaseSensitivity::CaseInsensitive)) {
                     m_modbusDigitalOutputRegisters.insert(circuit, list[0].toInt());
-                    qDebug(dcUniPi()) << "Found relay register" << circuit << list[0].toInt();
+                    qDebug(dcUniPi()) << "Neuron: Found relay register" << circuit << list[0].toInt();
                 } else if (list[3].contains("User Programmable LED", Qt::CaseSensitivity::CaseInsensitive)) {
                     m_modbusUserLEDRegisters.insert(circuit, list[0].toInt());
-                    qDebug(dcUniPi()) << "Found user programmable led" << circuit << list[0].toInt();
+                    qDebug(dcUniPi()) << "Neuron: Found user programmable led" << circuit << list[0].toInt();
                 }
             }
         }
@@ -339,10 +341,10 @@ bool Neuron::loadModbusMap()
     }
     foreach (QString relativeFilePath, fileRegisterList) {
         QString absoluteFilePath = QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation).last() + "/nymea/modbus" + relativeFilePath;
-        qDebug(dcUniPi()) << "Open CSV File:" << absoluteFilePath;
+        qDebug(dcUniPi()) << "Neuron: Open CSV File:" << absoluteFilePath;
         QFile *csvFile = new QFile(absoluteFilePath);
         if (!csvFile->open(QIODevice::ReadOnly | QIODevice::Text)) {
-            qCWarning(dcUniPi()) << csvFile->errorString() << "Path:" << absoluteFilePath;
+            qCWarning(dcUniPi()) << "Neuron:" << csvFile->errorString() << "Path:" << absoluteFilePath;
             csvFile->deleteLater();
             return false;
         }
@@ -351,7 +353,7 @@ bool Neuron::loadModbusMap()
             QString line = textStream->readLine();
             QStringList list = line.split(',');
             if (list.length() <= 5) {
-                qCWarning(dcUniPi()) << "currupted CSV file:" << csvFile->fileName();
+                qCWarning(dcUniPi()) << "Neuron: Currupted CSV file:" << csvFile->fileName();
                 csvFile->deleteLater();
                 return false;
             }
@@ -359,10 +361,10 @@ bool Neuron::loadModbusMap()
                 QString circuit = list[5].split(" ").last();
                 if (list[5].contains("Analog Input Value", Qt::CaseSensitivity::CaseInsensitive)) {
                     m_modbusAnalogInputRegisters.insert(circuit, list[0].toInt());
-                    qDebug(dcUniPi()) << "Found analog input register" << circuit << list[0].toInt();
+                    qDebug(dcUniPi()) << "Neuron: Found analog input register" << circuit << list[0].toInt();
                 } else if (list[5].contains("Analog Output Value", Qt::CaseSensitivity::CaseInsensitive)) {
                     m_modbusAnalogOutputRegisters.insert(circuit, list[0].toInt());
-                    qDebug(dcUniPi()) << "Found analog output register" << circuit << list[0].toInt();
+                    qDebug(dcUniPi()) << "Neuron: Found analog output register" << circuit << list[0].toInt();
                 }
             }
         }
@@ -403,7 +405,7 @@ bool Neuron::modbusWriteRequest(const Request &request)
                     }
                 } else {
                     requestExecuted(request.id, false);
-                    qCWarning(dcUniPi()) << "Write response error:" << reply->error();
+                    qCWarning(dcUniPi()) << "Neuron: Write response error:" << reply->error();
                     emit requestError(request.id, reply->errorString());
                 }
             });
@@ -413,7 +415,7 @@ bool Neuron::modbusWriteRequest(const Request &request)
             return false;
         }
     } else {
-        qCWarning(dcUniPi()) << "Read error: " << m_modbusInterface->errorString();
+        qCWarning(dcUniPi()) << "Neuron: Read error: " << m_modbusInterface->errorString();
         return false;
     }
     return true;
@@ -462,7 +464,7 @@ bool Neuron::modbusReadRequest(const QModbusDataUnit &request)
                                 circuit = m_modbusUserLEDRegisters.key(modbusAddress);
                                 emit userLEDStatusChanged(circuit, unit.value(i));
                             } else {
-                                qCWarning(dcUniPi()) << "Received unrecorgnised modbus register" << modbusAddress;
+                                qCWarning(dcUniPi()) << "Neuron: Received unrecorgnised modbus register" << modbusAddress;
                             }
                             break;
 
@@ -471,7 +473,7 @@ bool Neuron::modbusReadRequest(const QModbusDataUnit &request)
                                 circuit = m_modbusAnalogOutputRegisters.key(modbusAddress);
                                 emit analogOutputStatusChanged(circuit, (unit.value(i) << 16 | unit.value(i+1)));
                             } else {
-                                qCWarning(dcUniPi()) << "Received unrecognised modbus register" << modbusAddress;
+                                qCWarning(dcUniPi()) << "Neuron: Received unrecognised modbus register" << modbusAddress;
                             }
                             break;
                         case QModbusDataUnit::RegisterType::InputRegisters:
@@ -479,19 +481,19 @@ bool Neuron::modbusReadRequest(const QModbusDataUnit &request)
                                 circuit = m_modbusAnalogInputRegisters.key(modbusAddress);
                                 emit analogInputStatusChanged(circuit, (unit.value(i) << 16 | unit.value(i+1)));
                             } else {
-                                qCWarning(dcUniPi()) << "Received unrecognised modbus register" << modbusAddress;
+                                qCWarning(dcUniPi()) << "Neuron: Received unrecognised modbus register" << modbusAddress;
                             }
                             break;
                         case QModbusDataUnit::RegisterType::DiscreteInputs:
                         case QModbusDataUnit::RegisterType::Invalid:
-                            qCWarning(dcUniPi()) << "Invalide register type";
+                            qCWarning(dcUniPi()) << "Neuron: Invalide register type";
                             break;
                         }
                     }
                 } else if (reply->error() == QModbusDevice::ProtocolError) {
-                    qCWarning(dcUniPi()) << "Read response error:" << reply->errorString() << reply->rawResult().exceptionCode();
+                    qCWarning(dcUniPi()) << "Neuron: Read response error:" << reply->errorString() << reply->rawResult().exceptionCode();
                 } else {
-                    qCWarning(dcUniPi()) << "Read response error:" << reply->error() << reply->errorString();
+                    qCWarning(dcUniPi()) << "Neuron: Read response error:" << reply->error() << reply->errorString();
                 }
             });
             QTimer::singleShot(m_responseTimeoutTime, reply, &QModbusReply::deleteLater);
@@ -500,7 +502,7 @@ bool Neuron::modbusReadRequest(const QModbusDataUnit &request)
             return false;
         }
     } else {
-        qCWarning(dcUniPi()) << "Read error: " << m_modbusInterface->errorString();
+        qCWarning(dcUniPi()) << "Neuron: Read error: " << m_modbusInterface->errorString();
         return false;
     }
     return true;
@@ -539,7 +541,7 @@ bool Neuron::getInputRegisters(QList<int> registerList)
         if (m_readRequestQueue.isEmpty()) {
             modbusReadRequest(request);
         } else if (m_readRequestQueue.length() > 100) {
-            qCWarning(dcUniPi()) << "Neuron extension: too many pending read requests";
+            qCWarning(dcUniPi()) << "Neuron: Too many pending read requests";
         } else {
             m_readRequestQueue.append(request);
         }
@@ -614,7 +616,7 @@ bool Neuron::getCoils(QList<int> registerList)
         if (m_readRequestQueue.isEmpty()) {
             modbusReadRequest(request);
         } else if (m_readRequestQueue.length() > 100) {
-            qCWarning(dcUniPi()) << "Neuron extension: too many pending read requests";
+            qCWarning(dcUniPi()) << "Neuron: Too many pending read requests";
         } else {
             m_readRequestQueue.append(request);
         }
@@ -626,7 +628,7 @@ bool Neuron::getCoils(QList<int> registerList)
 bool Neuron::getAllDigitalInputs()
 {
     if (!m_modbusInterface) {
-        qCWarning(dcUniPi()) << "Neuron modbus interface not initialized";
+        qCWarning(dcUniPi()) << "Neuron: ;Ḿodbus interface not initialized";
         return false;
     }
     return getCoils(m_modbusDigitalInputRegisters.values());
@@ -635,7 +637,7 @@ bool Neuron::getAllDigitalInputs()
 bool Neuron::getAllDigitalOutputs()
 {
     if (!m_modbusInterface) {
-        qCWarning(dcUniPi()) << "Neuron modbus interface not initialized";
+        qCWarning(dcUniPi()) << "Neuron: Modbus interface not initialized";
         return false;
     }
     return getCoils(m_modbusDigitalOutputRegisters.values());
@@ -656,7 +658,7 @@ bool Neuron::getAllAnalogInputs()
 bool Neuron::getAllAnalogOutputs()
 {
     if (!m_modbusInterface) {
-        qCWarning(dcUniPi()) << "Neuron modbus interface not initialized";
+        qCWarning(dcUniPi()) << "Neuron: Modbus interface not initialized";
         return false;
     }
     foreach(QString circuit, m_modbusAnalogOutputRegisters.keys()) {
@@ -668,7 +670,7 @@ bool Neuron::getAllAnalogOutputs()
 bool Neuron::getDigitalInput(const QString &circuit)
 {
     int modbusAddress = m_modbusDigitalInputRegisters.value(circuit);
-    //qDebug(dcUniPi()) << "Reading digital Input" << circuit << modbusAddress;
+    //qDebug(dcUniPi()) << "Neuron: Reading digital Input" << circuit << modbusAddress;
 
     if (!m_modbusInterface)
         return false;
@@ -677,7 +679,7 @@ bool Neuron::getDigitalInput(const QString &circuit)
     if (m_readRequestQueue.isEmpty()) {
         //return modbusReadRequest(request);
     } else if (m_readRequestQueue.length() > 100) {
-        qCWarning(dcUniPi()) << "Neuron extension: too many pending read requests";
+        qCWarning(dcUniPi()) << "Neuron: Too many pending read requests";
         return false;
     } else {
         //m_readRequestQueue.append(request); //FIXME
@@ -688,7 +690,7 @@ bool Neuron::getDigitalInput(const QString &circuit)
 bool Neuron::getAnalogOutput(const QString &circuit)
 {
     int modbusAddress = m_modbusAnalogInputRegisters.value(circuit);
-    qDebug(dcUniPi()) << "Reading analog Input" << circuit << modbusAddress;
+    qDebug(dcUniPi()) << "Neuron: Reading analog input" << circuit << modbusAddress;
 
     if (!m_modbusInterface)
         return false;
@@ -709,7 +711,7 @@ bool Neuron::getAnalogOutput(const QString &circuit)
 QUuid Neuron::setDigitalOutput(const QString &circuit, bool value)
 {
     int modbusAddress = m_modbusDigitalOutputRegisters.value(circuit);
-    //qDebug(dcUniPi()) << "Setting digital ouput" << circuit << modbusAddress << value;
+    //qDebug(dcUniPi()) << "Neuron: Setting digital ouput" << circuit << modbusAddress << value;
 
     Request request;
     request.data = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
@@ -739,7 +741,7 @@ bool Neuron::getDigitalOutput(const QString &circuit)
     if (m_readRequestQueue.isEmpty()) {
         return modbusReadRequest(request);
     } else if (m_readRequestQueue.length() > 100) {
-        qCWarning(dcUniPi()) << "Neuron extension: too many pending read requests";
+        qCWarning(dcUniPi()) << "Neuron: Too many pending read requests";
         return false;
     } else {
         m_readRequestQueue.append(request);
@@ -751,7 +753,7 @@ bool Neuron::getDigitalOutput(const QString &circuit)
 QUuid Neuron::setAnalogOutput(const QString &circuit, double value)
 {
     int modbusAddress = m_modbusAnalogOutputRegisters.value(circuit);
-    qDebug(dcUniPi()) << "Writing analog Output" << circuit << modbusAddress;
+    qDebug(dcUniPi()) << "Neuron: Writing analog Output" << circuit << modbusAddress;
 
     if (!m_modbusInterface)
         return "";
@@ -777,7 +779,7 @@ QUuid Neuron::setAnalogOutput(const QString &circuit, double value)
 bool Neuron::getAnalogInput(const QString &circuit)
 {
     int modbusAddress = m_modbusAnalogInputRegisters.value(circuit);
-    qDebug(dcUniPi()) << "Reading analog Input" << circuit << modbusAddress;
+    qDebug(dcUniPi()) << "Neuron: Reading analog Input" << circuit << modbusAddress;
 
     if (!m_modbusInterface)
         return false;
@@ -786,7 +788,7 @@ bool Neuron::getAnalogInput(const QString &circuit)
     if (m_readRequestQueue.isEmpty()) {
         return modbusReadRequest(request);
     } else if (m_readRequestQueue.length() > 100) {
-        qCWarning(dcUniPi()) << "Neuron extension: too many pending read requests";
+        qCWarning(dcUniPi()) << "Neuron: Too many pending read requests";
         return false;
     } else {
         m_readRequestQueue.append(request);
@@ -797,7 +799,7 @@ bool Neuron::getAnalogInput(const QString &circuit)
 QUuid Neuron::setUserLED(const QString &circuit, bool value)
 {
     int modbusAddress = m_modbusUserLEDRegisters.value(circuit);
-    //qDebug(dcUniPi()) << "Setting digital ouput" << circuit << modbusAddress << value;
+    //qDebug(dcUniPi()) << "Neuron: Setting digital ouput" << circuit << modbusAddress << value;
 
     if (!m_modbusInterface)
         return "";
@@ -823,7 +825,7 @@ QUuid Neuron::setUserLED(const QString &circuit, bool value)
 bool Neuron::getUserLED(const QString &circuit)
 {
     int modbusAddress = m_modbusUserLEDRegisters.value(circuit);
-    //qDebug(dcUniPi()) << "Reading digital Output" << circuit << modbusAddress;
+    //qDebug(dcUniPi()) << "Neuron: Reading digital Output" << circuit << modbusAddress;
 
     if (!m_modbusInterface)
         return false;
@@ -832,7 +834,7 @@ bool Neuron::getUserLED(const QString &circuit)
     if (m_readRequestQueue.isEmpty()) {
         //return modbusReadRequest(request);
     } else if (m_readRequestQueue.length() > 100) {
-        qCWarning(dcUniPi()) << "Neuron extension: too many pending read requests";
+        qCWarning(dcUniPi()) << "Neuron: Too many pending read requests";
         return false;
     } else {
         //m_readRequestQueue.append(request);
