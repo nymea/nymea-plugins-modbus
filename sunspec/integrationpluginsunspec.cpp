@@ -40,62 +40,66 @@ IntegrationPluginSunSpec::IntegrationPluginSunSpec()
 
 void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
 {
-    if (info->thing()->thingClassId() == sunspecConnectionThingClassId) {
+    Thing *thing = info->thing();
+    qCDebug(dcSunSpec()) << "Setup thing" << thing->name();
+    if (thing->thingClassId() == sunspecConnectionThingClassId) {
+
         QHostAddress address = QHostAddress(info->thing()->paramValue(sunspecConnectionThingIpAddressParamTypeId).toString());
-        SunSpec *sunSpec = new SunSpec(address, 502, this);
-        m_sunSpecConnections.insert(info->thing(), sunSpec);
+        SunSpec *sunSpec;
+        if (m_sunSpecConnections.contains(thing)) {
+            qCDebug(dcSunSpec()) << "Reconfigure SunSpec connection with new address" << address;
+            sunSpec = m_sunSpecConnections.value(thing);
+            sunSpec->setHostAddress(address);
+        } else {
+            sunSpec = new SunSpec(address, 502, this);
+            m_sunSpecConnections.insert(info->thing(), sunSpec);
+        }
+
         if (!sunSpec->connectModbus()) {
-            QTimer::singleShot(2000, info, [this, info] {
-                setupThing(info);
-            });
             qCWarning(dcSunSpec()) << "Error connecting to SunSpec device";
-            return;
+            return info->finish(Thing::ThingErrorHardwareNotAvailable);
         }
         connect(sunSpec, &SunSpec::connectionStateChanged, info, [info] (bool status) {
             qCDebug(dcSunSpec()) << "Modbus Inverter init finished" << status;
             if (status) {
                 info->finish(Thing::ThingErrorNoError);
-            } else {
-                info->finish(Thing::ThingErrorHardwareFailure);
             }
         });
 
-        connect(info, &ThingSetupInfo::aborted, sunSpec, [info, this] {
-            m_sunSpecConnections.take(info->thing())->deleteLater();
+        connect(info, &ThingSetupInfo::aborted, sunSpec, &SunSpec::deleteLater);
+        connect(sunSpec, &SunSpec::destroyed, [this, info] {
+            m_sunSpecConnections.remove(info->thing());
         });
         //connect(sunSpec, &SunSpecInverter::inverterDataReceived, this, &IntegrationPluginSunSpec::onInverterDataReceived);
 
-    } else if (info->thing()->thingClassId() == sunspecInverterThingClassId) {
+    } else if (thing->thingClassId() == sunspecInverterThingClassId) {
         QHostAddress address = QHostAddress(info->thing()->paramValue(sunspecInverterThingIpAddressParamTypeId).toString());
         SunSpecInverter *sunSpecInverter = new SunSpecInverter(address, 502, this);
-        m_sunSpecInverters.insert(info->thing(), sunSpecInverter);
+
         if (!sunSpecInverter->connectModbus()) {
-            QTimer::singleShot(2000, info, [this, info] {
-                setupThing(info);
-            });
             qCWarning(dcSunSpec()) << "Error connecting to SunSpec device";
-            return;
+            return info->finish(Thing::ThingErrorHardwareNotAvailable);
         }
-        connect(sunSpecInverter, &SunSpecInverter::initFinished, info, [info] {
+        connect(sunSpecInverter, &SunSpecInverter::initFinished, info, [this, sunSpecInverter, info] {
             qCDebug(dcSunSpec()) << "Modbus Inverter init finished";
+            m_sunSpecInverters.insert(info->thing(), sunSpecInverter);
             info->finish(Thing::ThingErrorNoError);
         });
 
-        connect(info, &ThingSetupInfo::aborted, sunSpecInverter, [info, this] {
-            m_sunSpecInverters.take(info->thing())->deleteLater();
-        });
+        connect(info, &ThingSetupInfo::aborted, sunSpecInverter, &SunSpecInverter::deleteLater);
+        connect(sunSpecInverter, &SunSpecInverter::destroyed, [info, this] {m_sunSpecInverters.remove(info->thing());});
         connect(sunSpecInverter, &SunSpecInverter::inverterDataReceived, this, &IntegrationPluginSunSpec::onInverterDataReceived);
 
-    } else if (info->thing()->thingClassId() == sunspecMeterThingClassId) {
+    } else if (thing->thingClassId() == sunspecMeterThingClassId) {
         QHostAddress address = QHostAddress(info->thing()->paramValue(sunspecMeterThingIpAddressParamTypeId).toString());
         SunSpecMeter *sunSpecMeter = new SunSpecMeter(address, 502, this);
-        m_sunSpecMeters.insert(info->thing(), sunSpecMeter);
-        if (!sunSpecMeter->connectModbus()) {
-            QTimer::singleShot(2000, info, [this, info] {
-                setupThing(info);
-            });
-        }
 
+        if (!sunSpecMeter->connectModbus()) {
+            sunSpecMeter->deleteLater();
+            qCDebug(dcSunSpec()) << "Could not connect";
+            return info->finish(Thing::ThingErrorHardwareNotAvailable);
+        }
+        m_sunSpecMeters.insert(info->thing(), sunSpecMeter);
         connect(info, &ThingSetupInfo::aborted, sunSpecMeter, [info, this] {
             m_sunSpecMeters.take(info->thing())->deleteLater();
         });
@@ -103,11 +107,10 @@ void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
     } else if (info->thing()->thingClassId() == sunspecTrackerThingClassId) {
         QHostAddress address = QHostAddress(info->thing()->paramValue(sunspecTrackerThingIpAddressParamTypeId).toString());
         SunSpecTracker *sunSpecTracker = new SunSpecTracker(address, 502, this);
-        m_sunSpecTrackers.insert(info->thing(), sunSpecTracker);
         if (!sunSpecTracker->connectModbus()) {
-            QTimer::singleShot(2000, info, [this, info] {
-                setupThing(info);
-            });
+            sunSpecTracker->deleteLater();
+            qCDebug(dcSunSpec()) << "Could not connect";
+            return info->finish(Thing::ThingErrorHardwareNotAvailable);
         }
         connect(info, &ThingSetupInfo::aborted, sunSpecTracker, [info, this] {
             m_sunSpecTrackers.take(info->thing())->deleteLater();
@@ -116,12 +119,12 @@ void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
     } else if (info->thing()->thingClassId() == sunspecStorageThingClassId) {
         QHostAddress address = QHostAddress(info->thing()->paramValue(sunspecStorageThingIpAddressParamTypeId).toString());
         SunSpecStorage *sunSpecStorage = new SunSpecStorage(address, 502, this);
-        m_sunSpecStorages.insert(info->thing(), sunSpecStorage);
         if (!sunSpecStorage->connectModbus()) {
-            QTimer::singleShot(2000, info, [this, info] {
-                setupThing(info);
-            });
+            sunSpecStorage->deleteLater();
+            qCDebug(dcSunSpec()) << "Could not connect";
+            return info->finish(Thing::ThingErrorHardwareNotAvailable);
         }
+        m_sunSpecStorages.insert(info->thing(), sunSpecStorage);
         connect(info, &ThingSetupInfo::aborted, sunSpecStorage, [info, this] {
             m_sunSpecStorages.take(info->thing())->deleteLater();
         });
@@ -133,9 +136,10 @@ void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
 
 void IntegrationPluginSunSpec::postSetupThing(Thing *thing)
 {
-    Q_UNUSED(thing)
+    qCDebug(dcSunSpec()) << "Post setup thing" << thing->name();
 
     if (!m_refreshTimer) {
+        qCDebug(dcSunSpec()) << "Starting refresh timer";
         int refreshTime = configValue(sunSpecPluginUpdateIntervalParamTypeId).toInt();
         m_refreshTimer = hardwareManager()->pluginTimerManager()->registerTimer(refreshTime);
         connect(m_refreshTimer, &PluginTimer::timeout, this, &IntegrationPluginSunSpec::onRefreshTimer);
@@ -185,7 +189,7 @@ void IntegrationPluginSunSpec::postSetupThing(Thing *thing)
 
 void IntegrationPluginSunSpec::thingRemoved(Thing *thing)
 {
-    Q_UNUSED(thing)
+    qCDebug(dcSunSpec()) << "Thing removed" << thing->name();
 
     if (thing->thingClassId() == sunspecInverterThingClassId) {
         SunSpecInverter *sunSpecInverter = m_sunSpecInverters.take(thing);
@@ -212,6 +216,7 @@ void IntegrationPluginSunSpec::thingRemoved(Thing *thing)
     }
 
     if (myThings().isEmpty()) {
+        qCDebug(dcSunSpec()) << "Stopping refresh timer";
         hardwareManager()->pluginTimerManager()->unregisterTimer(m_refreshTimer);
         m_refreshTimer = nullptr;
     }
@@ -297,6 +302,7 @@ void IntegrationPluginSunSpec::executeAction(ThingActionInfo *info)
 
 void IntegrationPluginSunSpec::onRefreshTimer()
 {
+    qCDebug(dcSunSpec()) << "On refresh timer";
     //get data
     foreach (SunSpecInverter *inverter, m_sunSpecInverters) {
         inverter->getInverterMap();
@@ -316,29 +322,32 @@ void IntegrationPluginSunSpec::onPluginConfigurationChanged(const ParamTypeId &p
 {
     // Check refresh schedule
     if (paramTypeId == sunSpecPluginUpdateIntervalParamTypeId) {
+        qCDebug(dcSunSpec()) << "Update interval has changed" << value.toInt();
         if (m_refreshTimer) {
             int refreshTime = value.toInt();
             m_refreshTimer->stop();
             m_refreshTimer->startTimer(refreshTime);
         }
+    } else {
+        qCWarning(dcSunSpec()) << "Unknown plugin configuration" << paramTypeId << "Value" << value;
     }
 }
 
 void IntegrationPluginSunSpec::onConnectionStateChanged(bool status)
 {
-    Q_UNUSED(status)
+    qCDebug(dcSunSpec()) << "Connection state changed" << status;
 }
 
 void IntegrationPluginSunSpec::onWriteRequestExecuted(QUuid requestId, bool success)
 {
-    Q_UNUSED(requestId)
-    Q_UNUSED(success)
+    qCDebug(dcSunSpec()) << "Write request executed" << requestId << success;
 }
 
 void IntegrationPluginSunSpec::onWriteRequestError(QUuid requestId, const QString &error)
 {
     Q_UNUSED(requestId)
     Q_UNUSED(error)
+    qCDebug(dcSunSpec()) << "Write request error" << error;
 }
 
 void IntegrationPluginSunSpec::onInverterDataReceived(const SunSpecInverter::InverterData &inverterData)

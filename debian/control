@@ -74,7 +74,7 @@ Description: nymea.io plugin for SunSpec Modbus devices.
  With the powerful rule engine you are able to connect any device available
  in the system and create individual scenes and behaviors for your environment.
  .
- This package will install the nymea.io plugin for manufactor independent sunspec devices.
+ This package will install the nymea.io plugin for SunSpec.
 
 
 Package: nymea-plugin-wallbe
