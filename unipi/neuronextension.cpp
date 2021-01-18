@@ -164,6 +164,8 @@ QList<QString> NeuronExtension::userLEDs()
 
 bool NeuronExtension::loadModbusMap()
 {
+    qCDebug(dcUniPi()) << "Neuron Extension: load modbus map";
+
     QStringList fileCoilList;
     QStringList fileRegisterList;
 
@@ -193,7 +195,7 @@ bool NeuronExtension::loadModbusMap()
 
     foreach (QString relativeFilePath, fileCoilList) {
         QString absoluteFilePath = QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation).last() + "/nymea/modbus" + relativeFilePath;
-        qDebug(dcUniPi()) << "Open CSV File:" << absoluteFilePath;
+        qDebug(dcUniPi()) << "Neuron Extension: Open CSV File:" << absoluteFilePath;
         QFile *csvFile = new QFile(absoluteFilePath);
         if (!csvFile->open(QIODevice::ReadOnly | QIODevice::Text)) {
             qCWarning(dcUniPi()) << csvFile->errorString() << absoluteFilePath;
@@ -205,7 +207,7 @@ bool NeuronExtension::loadModbusMap()
             QString line = textStream->readLine();
             QStringList list = line.split(',');
             if (list.length() <= 4) {
-                qCWarning(dcUniPi()) << "currupted CSV file:" << csvFile->fileName();
+                qCWarning(dcUniPi()) << "Neuron Extension: currupted CSV file:" << csvFile->fileName();
                 csvFile->deleteLater();
                 return false;
             }
@@ -256,7 +258,7 @@ bool NeuronExtension::loadModbusMap()
 
     foreach (QString relativeFilePath, fileRegisterList) {
         QString absoluteFilePath = QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation).last() + "/nymea/modbus" + relativeFilePath;
-        qDebug(dcUniPi()) << "Open CSV File:" << absoluteFilePath;
+        qDebug(dcUniPi()) << "Neuron Extension: Open CSV File:" << absoluteFilePath;
         QFile *csvFile = new QFile(absoluteFilePath);
         if (!csvFile->open(QIODevice::ReadOnly | QIODevice::Text)) {
             qCWarning(dcUniPi()) << csvFile->errorString() << absoluteFilePath;
@@ -268,13 +270,13 @@ bool NeuronExtension::loadModbusMap()
             QString line = textStream->readLine();
             QStringList list = line.split(',');
             if (list.length() <= 5) {
-                qCWarning(dcUniPi()) << "currupted CSV file:" << csvFile->fileName();
+                qCWarning(dcUniPi()) << "Neuron Extension: Currupted CSV file:" << csvFile->fileName();
                 csvFile->deleteLater();
                 return false;
             }
             if (list.last() == "Basic" && list[5].split(" ").length() > 3) {
                 if (list[5].split(" ").length() <= 3) {
-                    qCWarning(dcUniPi()) << "currupted CSV file:" << csvFile->fileName();
+                    qCWarning(dcUniPi()) << "Neuron Extension: Currupted CSV file:" << csvFile->fileName();
                     csvFile->deleteLater();
                     return false;
                 }
@@ -284,7 +286,7 @@ bool NeuronExtension::loadModbusMap()
                     qDebug(dcUniPi()) << "Found analog input register" << circuit << list[0].toInt();
                 } else if (list[5].contains("Analog Output Value", Qt::CaseSensitivity::CaseInsensitive)) {
                     m_modbusAnalogOutputRegisters.insert(circuit, list[0].toInt());
-                    qDebug(dcUniPi()) << "Found analog output register" << circuit << list[0].toInt();
+                    qDebug(dcUniPi()) << "FNeuron Extension: Found analog output register" << circuit << list[0].toInt();
                 }
             }
         }
@@ -314,7 +316,7 @@ bool NeuronExtension::modbusReadRequest(const QModbusDataUnit &request)
                     const QModbusDataUnit unit = reply->result();
 
                     for (int i = 0; i < static_cast<int>(unit.valueCount()); i++) {
-                        //qCDebug(dcUniPi()) << "Start Address:" << unit.startAddress() << "Register Type:" << unit.registerType() << "Value:" << unit.value(i);
+                        //qCDebug(dcUniPi()) << "Neuron Extension: Start Address:" << unit.startAddress() << "Register Type:" << unit.registerType() << "Value:" << unit.value(i);
                         modbusAddress = unit.startAddress() + i;
 
                         if (m_previousModbusRegisterValue.contains(modbusAddress)) {
@@ -360,15 +362,15 @@ bool NeuronExtension::modbusReadRequest(const QModbusDataUnit &request)
                             break;
                         case QModbusDataUnit::RegisterType::DiscreteInputs:
                         case QModbusDataUnit::RegisterType::Invalid:
-                            qCWarning(dcUniPi()) << "Invalide register type";
+                            qCWarning(dcUniPi()) << "Neuron Extension: Invalide register type";
                             break;
                         }
                     }
 
                 } else if (reply->error() == QModbusDevice::ProtocolError) {
-                    qCWarning(dcUniPi()) << "Read response error:" << reply->errorString() << reply->rawResult().exceptionCode();
+                    qCWarning(dcUniPi()) << "Neuron Extension: Read response error:" << reply->errorString() << reply->rawResult().exceptionCode();
                 } else {
-                    qCWarning(dcUniPi()) << "Read response error:" << reply->error();
+                    qCWarning(dcUniPi()) << "Neuron Extension: Read response error:" << reply->error();
                 }
             });
             QTimer::singleShot(m_responseTimeoutTime, reply, &QModbusReply::deleteLater);
@@ -377,7 +379,7 @@ bool NeuronExtension::modbusReadRequest(const QModbusDataUnit &request)
             return false;
         }
     } else {
-        qCWarning(dcUniPi()) << "Read error: " << m_modbusInterface->errorString();
+        qCWarning(dcUniPi()) << "Neuron Extension: Read error: " << m_modbusInterface->errorString();
         return false;
     }
     return true;
@@ -414,7 +416,7 @@ bool NeuronExtension::modbusWriteRequest(const Request &request)
                     }
                 } else {
                     requestExecuted(request.id, false);
-                    qCWarning(dcUniPi()) << "Read response error:" << reply->error();
+                    qCWarning(dcUniPi()) << "Neuron Extension: Read response error:" << reply->error();
                     emit requestError(request.id, reply->errorString());
                 }
             });
@@ -424,7 +426,7 @@ bool NeuronExtension::modbusWriteRequest(const Request &request)
             return false;
         }
     } else {
-        qCWarning(dcUniPi()) << "Read error: " << m_modbusInterface->errorString();
+        qCWarning(dcUniPi()) << "Neuron Extension: Read error: " << m_modbusInterface->errorString();
         return false;
     }
     return true;

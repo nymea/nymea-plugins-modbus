@@ -73,6 +73,7 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
     ThingClassId ThingClassId = info->thingClassId();
 
     if (ThingClassId == digitalInputThingClassId) {
+        qCDebug(dcUniPi()) << "Discovering digital inputs";
         foreach(Thing *parent, myThings()) {
             if (((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) && m_unipi) {
                 foreach (QString circuit, m_unipi->digitalInputs()) {
@@ -130,6 +131,7 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         }
         return info->finish(Thing::ThingErrorNoError);
     } else if (ThingClassId == digitalOutputThingClassId) {
+        qCDebug(dcUniPi()) << "Discovering digital outputs";
         foreach(Thing *parent, myThings()) {
             if (((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) && m_unipi) {
                 foreach (QString circuit, m_unipi->digitalOutputs()) {
@@ -187,6 +189,7 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         }
         return info->finish(Thing::ThingErrorNoError);
     } else if (ThingClassId == analogInputThingClassId) {
+        qCDebug(dcUniPi()) << "Discovering analog inputs";
         foreach(Thing *parent, myThings()) {
             if (((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) && m_unipi) {
                 foreach (QString circuit, m_unipi->analogInputs()) {
@@ -244,6 +247,7 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         }
         return info->finish(Thing::ThingErrorNoError);
     } else if (ThingClassId == analogOutputThingClassId) {
+        qCDebug(dcUniPi()) << "Discovering analog outputs";
         foreach(Thing *parent, myThings()) {
             if (((parent->thingClassId() == uniPi1ThingClassId) || (parent->thingClassId() == uniPi1LiteThingClassId)) && m_unipi) {
                 foreach (QString circuit, m_unipi->analogOutputs()) {
@@ -301,6 +305,7 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         }
         return info->finish(Thing::ThingErrorNoError);
     } else if (ThingClassId == userLEDThingClassId) {
+        qCDebug(dcUniPi()) << "Discovering user LEDs";
         QList<ThingDescriptor> ThingDescriptors;
         foreach (NeuronExtension *neuronExtension, m_neuronExtensions) {
             ThingId parentId = m_neuronExtensions.key(neuronExtension);
@@ -351,8 +356,12 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
     if(thing->thingClassId() == uniPi1ThingClassId
             || thing->thingClassId() == uniPi1LiteThingClassId) {
 
-        if (m_unipi)
+        qCDebug(dcUniPi()) << "Setting up UniPi 1 thing" << thing->name();
+
+        if (m_unipi) {
+            qCWarning(dcUniPi()) << "UniPi 1 already setted up, only one thing allowed";
             return info->finish(Thing::ThingErrorSetupFailed, QT_TR_NOOP("There is already a UniPi gateway in the system.")); //only one parent Thing allowed
+        }
 
         if(thing->thingClassId() == uniPi1ThingClassId) {
             m_unipi = new UniPi(hardwareManager()->i2cManager(), UniPi::UniPiType::UniPi1, this);
@@ -371,8 +380,8 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
         connect(m_unipi, &UniPi::analogInputStatusChanged, this, &IntegrationPluginUniPi::onUniPiAnalogInputStatusChanged);
         connect(m_unipi, &UniPi::analogOutputStatusChanged, this, &IntegrationPluginUniPi::onUniPiAnalogOutputStatusChanged);
         thing->setStateValue(m_connectionStateTypeIds.value(thing->thingClassId()), true);
-
         return info->finish(Thing::ThingErrorNoError);
+
     } else if(thing->thingClassId() == neuronS103ThingClassId ||
               thing->thingClassId() == neuronM103ThingClassId ||
               thing->thingClassId() == neuronM203ThingClassId ||
@@ -383,9 +392,12 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
               thing->thingClassId() == neuronL403ThingClassId ||
               thing->thingClassId() == neuronL503ThingClassId ||
               thing->thingClassId() == neuronL513ThingClassId) {
+        qCDebug(dcUniPi()) << "Setting up Neuron thing" << thing->name();
 
-        if (!neuronDeviceInit())
+        if (!neuronDeviceInit()) {
+            qCWarning(dcUniPi()) << "Error initializing neuron thing";
             return info->finish(Thing::ThingErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron."));
+        }
 
         Neuron *neuron;
         if (thing->thingClassId() == neuronS103ThingClassId) {
@@ -411,6 +423,7 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
         } else  if (thing->thingClassId() == neuronL513ThingClassId) {
             neuron = new Neuron(Neuron::NeuronTypes::L513, m_modbusTCPMaster, this);
         } else {
+            qCWarning(dcUniPi()) << "Neuron type not supported";
             return info->finish(Thing::ThingErrorSetupFailed, QT_TR_NOOP("Error unrecognized Neuron type."));
         }
 
@@ -431,8 +444,8 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
         connect(neuron, &Neuron::userLEDStatusChanged, this, &IntegrationPluginUniPi::onNeuronUserLEDStatusChanged);
 
         thing->setStateValue(m_connectionStateTypeIds.value(thing->thingClassId()), (m_modbusTCPMaster->state() == QModbusDevice::ConnectedState));
-
         return info->finish(Thing::ThingErrorNoError);
+
     } else if(thing->thingClassId() == neuronXS10ThingClassId ||
               thing->thingClassId() == neuronXS20ThingClassId ||
               thing->thingClassId() == neuronXS30ThingClassId ||
@@ -440,9 +453,11 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
               thing->thingClassId() == neuronXS50ThingClassId ||
               thing->thingClassId() == neuronXS11ThingClassId ||
               thing->thingClassId() == neuronXS51ThingClassId) {
+        qCDebug(dcUniPi()) << "Setting up Neuron extension thing" << thing->name();
 
-        if (!neuronExtensionInterfaceInit())
+        if (!neuronExtensionInterfaceInit()) {
             return info->finish(Thing::ThingErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron."));
+        }
 
         int slaveAddress;
         NeuronExtension *neuronExtension;
@@ -508,9 +523,10 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
 
 void IntegrationPluginUniPi::postSetupThing(Thing *thing)
 {
-    Q_UNUSED(thing)
+    qCDebug(dcUniPi()) << "Post setup" << thing->name();
 
     if (!m_reconnectTimer) {
+        qCDebug(dcUniPi()) << "Creating reconnect timer";
         m_reconnectTimer = new QTimer(this);
         m_reconnectTimer->setSingleShot(true);
         connect(m_reconnectTimer, &QTimer::timeout, this, &IntegrationPluginUniPi::onReconnectTimer);
@@ -556,7 +572,7 @@ void IntegrationPluginUniPi::executeAction(ThingActionInfo *info)
                 }
                 return;
             } else {
-                qCWarning(dcUniPi()) << "Hardware not initilized" << thing->name();
+                qCWarning(dcUniPi()) << "Hardware not initialized" << thing->name();
                 return info->finish(Thing::ThingErrorHardwareFailure);
             }
         } else {
@@ -596,7 +612,7 @@ void IntegrationPluginUniPi::executeAction(ThingActionInfo *info)
                 }
                 return;
             } else {
-                qCWarning(dcUniPi()) << "Hardware not initilized" << thing->name();
+                qCWarning(dcUniPi()) << "Hardware not initialized" << thing->name();
                 return info->finish(Thing::ThingErrorHardwareFailure);
             }
         } else {
@@ -644,6 +660,7 @@ void IntegrationPluginUniPi::executeAction(ThingActionInfo *info)
 
 void IntegrationPluginUniPi::thingRemoved(Thing *thing)
 {
+    qCDebug(dcUniPi()) << "Deleting thing" << thing->name();
     if(m_neurons.contains(thing->id())) {
         Neuron *neuron = m_neurons.take(thing->id());
         neuron->deleteLater();
@@ -658,6 +675,7 @@ void IntegrationPluginUniPi::thingRemoved(Thing *thing)
     }
 
     if (myThings().isEmpty()) {
+        qCDebug(dcUniPi()) << "Stopping timers";
         if (m_reconnectTimer) {
             m_reconnectTimer->stop();
             m_reconnectTimer->deleteLater();
@@ -723,6 +741,7 @@ void IntegrationPluginUniPi::onNeuronConnectionStateChanged(bool state)
         qCWarning(dcUniPi()) << "Could not find any Thing associated to Neuron obejct";
         return;
     }
+    qCDebug(dcUniPi()) << "Neuron connection state changed" << thing->name() << state;
     thing->setStateValue(m_connectionStateTypeIds.value(thing->thingClassId()), state);
 }
 
@@ -868,11 +887,14 @@ void IntegrationPluginUniPi::onNeuronExtensionConnectionStateChanged(bool state)
         qCWarning(dcUniPi()) << "Could not find any Thing associated to NeuronExtension obejct";
         return;
     }
+    qCDebug(dcUniPi()) << "Neuron extension connection state changed" << thing->name() << state;
     thing->setStateValue(m_connectionStateTypeIds.value(thing->thingClassId()), state);
 }
 
 void IntegrationPluginUniPi::onRequestExecuted(const QUuid &requestId, bool success)
 {
+    qCDebug(dcUniPi()) << "Request executed, pending requests:" << m_asyncActions.size();
+
     if (m_asyncActions.contains(requestId)){
         ThingActionInfo *info = m_asyncActions.take(requestId);
         if (success){
@@ -885,6 +907,7 @@ void IntegrationPluginUniPi::onRequestExecuted(const QUuid &requestId, bool succ
 
 void IntegrationPluginUniPi::onRequestError(const QUuid &requestId, const QString &error)
 {
+    qCDebug(dcUniPi()) << "Request error:" << error;
     if (m_asyncActions.contains(requestId)){
         ThingActionInfo *info = m_asyncActions.take(requestId);
         info->finish(Thing::ThingErrorHardwareNotAvailable, error);
@@ -910,16 +933,20 @@ void IntegrationPluginUniPi::onReconnectTimer()
 {
     if(m_modbusRTUMaster) {
         if (!m_modbusRTUMaster->connectDevice()) {
-            qCWarning(dcUniPi()) << "Reconnecing to modbus RTU master failed, trying again in 10 seconds";
-            if (m_reconnectTimer)
+            qCWarning(dcUniPi()) << "Reconnecing to modbus RTU master failed";
+            if (m_reconnectTimer) {
+                qCDebug(dcUniPi()) << "     - Starting reconnect timer";
                 m_reconnectTimer->start(10000);
+            }
         }
     }
     if(m_modbusTCPMaster) {
         if (!m_modbusTCPMaster->connectDevice()) {
             qCWarning(dcUniPi()) << "Reconnecing to modbus TCP master failed, trying again in 10 seconds";
-            if (m_reconnectTimer)
+            if (m_reconnectTimer) {
+                qCDebug(dcUniPi()) << "     - Starting reconnect timer";
                 m_reconnectTimer->start(10000);
+            }
         }
     }
 }
@@ -927,25 +954,29 @@ void IntegrationPluginUniPi::onReconnectTimer()
 void IntegrationPluginUniPi::onModbusTCPStateChanged(QModbusDevice::State state)
 {
     bool connected = (state == QModbusDevice::State::ConnectedState);
+    qCDebug(dcUniPi()) << "Modbus TCP status changed:" << state;
 
     if (!connected) {
         //try to reconnect in 10 seconds
-        if (m_reconnectTimer)
+        if (m_reconnectTimer) {
+            qCDebug(dcUniPi()) << "     - Starting reconnect timer";
             m_reconnectTimer->start(10000);
+        }
     }
-    qCDebug(dcUniPi()) << "Connection status changed:" << connected;
 }
 
 void IntegrationPluginUniPi::onModbusRTUStateChanged(QModbusDevice::State state)
 {
     bool connected = (state == QModbusDevice::State::ConnectedState);
+    qCDebug(dcUniPi()) << "Modbus RTU status changed:" << state;
 
     if (!connected) {
         //try to reconnect in 10 seconds
-        if (m_reconnectTimer)
+        if (m_reconnectTimer) {
+            qCDebug(dcUniPi()) << "     - Starting reconnect timer";
             m_reconnectTimer->start(10000);
+        }
     }
-    qCDebug(dcUniPi()) << "Connection status changed:" << connected;
 }
 
 void IntegrationPluginUniPi::onUniPiDigitalInputStatusChanged(const QString &circuit, bool value)
@@ -993,6 +1024,7 @@ void IntegrationPluginUniPi::onUniPiAnalogOutputStatusChanged(double value)
 
 bool IntegrationPluginUniPi::neuronDeviceInit()
 {
+    qCDebug(dcUniPi()) << "Neuron device init, creating Modbus TCP Master";
     if(!m_modbusTCPMaster) {
         int port = configValue(uniPiPluginPortParamTypeId).toInt();;
         QHostAddress ipAddress = QHostAddress(configValue(uniPiPluginAddressParamTypeId).toString());
@@ -1011,12 +1043,15 @@ bool IntegrationPluginUniPi::neuronDeviceInit()
             m_modbusTCPMaster = nullptr;
             return false;
         }
+    } else {
+        qCDebug(dcUniPi()) << "Neuron Modbus TCP Master is already created";
     }
     return true;
 }
 
 bool IntegrationPluginUniPi::neuronExtensionInterfaceInit()
 {
+    qCDebug(dcUniPi()) << "Neuron extension interface init, creating Modbus RTU Master";
     if(!m_modbusRTUMaster) {
         QString serialPort = configValue(uniPiPluginSerialPortParamTypeId).toString();
         int baudrate = configValue(uniPiPluginBaudrateParamTypeId).toInt();
@@ -1043,6 +1078,8 @@ bool IntegrationPluginUniPi::neuronExtensionInterfaceInit()
             m_modbusRTUMaster = nullptr;
             return false;
         }
+    } else {
+        qCDebug(dcUniPi()) << "Neuron Extension Modbus RTU Master is already created";
     }
     return true;
 }
