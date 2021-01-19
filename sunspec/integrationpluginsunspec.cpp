@@ -45,13 +45,16 @@ void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
     if (thing->thingClassId() == sunspecConnectionThingClassId) {
 
         QHostAddress address = QHostAddress(info->thing()->paramValue(sunspecConnectionThingIpAddressParamTypeId).toString());
+        int port = info->thing()->paramValue(sunspecConnectionThingPortParamTypeId).toInt();
+        //int slaveId = info->thing()->paramValue(sunspecConnectionThingSlaveIdParamTypeId).toInt();
+
         SunSpec *sunSpec;
         if (m_sunSpecConnections.contains(thing)) {
             qCDebug(dcSunSpec()) << "Reconfigure SunSpec connection with new address" << address;
             sunSpec = m_sunSpecConnections.value(thing);
             sunSpec->setHostAddress(address);
         } else {
-            sunSpec = new SunSpec(address, 502, this);
+            sunSpec = new SunSpec(address, port, this);
             m_sunSpecConnections.insert(info->thing(), sunSpec);
         }
 
@@ -59,18 +62,24 @@ void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
             qCWarning(dcSunSpec()) << "Error connecting to SunSpec device";
             return info->finish(Thing::ThingErrorHardwareNotAvailable);
         }
-        connect(sunSpec, &SunSpec::connectionStateChanged, info, [info] (bool status) {
-            qCDebug(dcSunSpec()) << "Modbus Inverter init finished" << status;
-            if (status) {
+        connect(sunSpec, &SunSpec::connectionStateChanged, info, [sunSpec, info] (bool status) {
+            qCDebug(dcSunSpec()) << "Modbus connection init finished" << status;
+            sunSpec->findBaseRegister();
+            connect(sunSpec, &SunSpec::foundBaseRegister, info, [info] (uint modbusAddress) {
+                qCDebug(dcSunSpec()) << "Found base register" << modbusAddress;
                 info->finish(Thing::ThingErrorNoError);
-            }
+            });
         });
 
         connect(info, &ThingSetupInfo::aborted, sunSpec, &SunSpec::deleteLater);
         connect(sunSpec, &SunSpec::destroyed, [this, info] {
             m_sunSpecConnections.remove(info->thing());
         });
-        //connect(sunSpec, &SunSpecInverter::inverterDataReceived, this, &IntegrationPluginSunSpec::onInverterDataReceived);
+        connect(sunSpec, &SunSpec::connectionStateChanged, this, [thing] (bool status) {
+            thing->setStateValue(sunspecConnectionThingClassId, status);
+        });
+        connect(sunSpec, &SunSpec::mapHeaderReceived, this, &IntegrationPluginSunSpec::onMapHeaderReceived);
+        connect(sunSpec, &SunSpec::mapReceived, this, &IntegrationPluginSunSpec::onMapReceived);
 
     } else if (thing->thingClassId() == sunspecInverterThingClassId) {
         QHostAddress address = QHostAddress(info->thing()->paramValue(sunspecInverterThingIpAddressParamTypeId).toString());
@@ -145,7 +154,17 @@ void IntegrationPluginSunSpec::postSetupThing(Thing *thing)
         connect(m_refreshTimer, &PluginTimer::timeout, this, &IntegrationPluginSunSpec::onRefreshTimer);
     }
 
-    if (thing->thingClassId() == sunspecInverterThingClassId) {
+    if (thing->thingClassId() == sunspecConnectionThingClassId) {
+        SunSpec *connection = m_sunSpecConnections.take(thing);
+        if (!connection)
+            return;
+        connection->readCommonMap();
+        thing->setParamValue(sunspecConnectionManufacturerStateTypeId, connection->manufacturer());
+        thing->setParamValue(sunspecInverterThingSerialNumberParamTypeId, connection->serialNumber());
+        thing->setParamValue(sunspecInverterThingDeviceModelParamTypeId, connection->deviceModel());
+
+
+    } else if (thing->thingClassId() == sunspecInverterThingClassId) {
         SunSpecInverter *sunSpecInverter = m_sunSpecInverters.take(thing);
         if (!sunSpecInverter)
             return;
@@ -304,6 +323,9 @@ void IntegrationPluginSunSpec::onRefreshTimer()
 {
     qCDebug(dcSunSpec()) << "On refresh timer";
     //get data
+    foreach (SunSpec *connections, m_sunSpecConnections) {
+        connections->readCommonMap();
+    }
     foreach (SunSpecInverter *inverter, m_sunSpecInverters) {
         inverter->getInverterMap();
     }
@@ -336,6 +358,27 @@ void IntegrationPluginSunSpec::onPluginConfigurationChanged(const ParamTypeId &p
 void IntegrationPluginSunSpec::onConnectionStateChanged(bool status)
 {
     qCDebug(dcSunSpec()) << "Connection state changed" << status;
+}
+
+void IntegrationPluginSunSpec::onMapHeaderReceived(uint modbusAddress, SunSpec::BlockId mapId, uint mapLength)
+{
+    qCDebug(dcSunSpec()) << "On map header received" << modbusAddress << mapId << mapLength;
+}
+
+void IntegrationPluginSunSpec::onMapReceived(SunSpec::BlockId mapId, uint mapLength, QVector<quint16> data)
+{
+    Q_UNUSED(data)
+    SunSpec *connection = static_cast<SunSpec *>(sender());
+    Thing *thing = m_sunSpecConnections.key(connection);
+    if (!thing)
+        return;
+
+     qCDebug(dcSunSpec()) << "On map received" << mapId << mapLength;
+     if (mapId == SunSpec::BlockIdCommon && thing->thingClassId() == sunspecConnectionThingClassId) {
+            thing->setStateValue(sunspecConnectionManufacturerStateTypeId, connection->manufacturer());
+            thing->setStateValue(sunspecConnectionSerialNumberStateTypeId, connection->serialNumber());
+            thing->setStateValue(sunspecConnectionDeviceModelStateTypeId, connection->deviceModel());
+     }
 }
 
 void IntegrationPluginSunSpec::onWriteRequestExecuted(QUuid requestId, bool success)
