@@ -10,6 +10,23 @@
             "type": "int",
             "unit": "Seconds",
             "defaultValue": 15
+        },
+        {
+            "id": "1a8895a0-c746-48af-9307-3a4636f24cc2",
+            "name": "timeout",
+            "displayName": "Timout",
+            "type": "uint",
+            "unit": "MilliSeconds",
+            "defaultValue": 500
+        },
+        {
+            "id": "9a4bfe01-315f-4ee7-98a9-f16b08ba12ad",
+            "name": "numberOfRetries",
+            "displayName": "Number of retries",
+            "type": "uint",
+            "defaultValue": 3,
+            "minValue": 1,
+            "maxValue": 10
         }
     ],
     "vendors": [
@@ -32,28 +49,18 @@
                             "type": "QString"
                         },
                         {
-                            "id": "04970315-ed3a-45ce-98fc-35ae3c4eb27b",
-                            "name":"manufacturer",
-                            "displayName": "Manufacturer",
-                            "type": "QString",
-                            "readOnly": true,
-                            "defaultValue": "Unkown"
+                            "id": "1fa4fc9c-f6be-47c7-928a-bcefc1142eec",
+                            "name":"port",
+                            "displayName": "Port",
+                            "type": "int",
+                            "defaultValue": 502
                         },
                         {
-                            "id": "58146c26-17d3-458e-a13f-d7f306c20c44",
-                            "name":"deviceModel",
-                            "displayName": "Device model",
-                            "type": "QString",
-                            "readOnly": true,
-                            "defaultValue": "Unkown"
-                        },
-                        {
-                            "id": "6ed498e1-37ca-4bb7-bac7-463509c7784e",
-                            "name":"serialNumber",
-                            "displayName": "Serial number",
-                            "type": "QString",
-                            "readOnly": true,
-                            "defaultValue": "Unkown"
+                            "id": "953064e0-4675-4538-a9a2-fa22ce2f347c",
+                            "name":"slaveId",
+                            "displayName": "Slave ID",
+                            "type": "int",
+                            "defaultValue": 1
                         }
                     ],
                     "stateTypes":[
@@ -65,6 +72,30 @@
                             "type": "bool",
                             "defaultValue": false,
                             "cached": false
+                        },
+                        {
+                            "id": "04970315-ed3a-45ce-98fc-35ae3c4eb27b",
+                            "name":"manufacturer",
+                            "displayName": "Manufacturer",
+                            "displayNameEvent": "Manufacturer changed",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "58146c26-17d3-458e-a13f-d7f306c20c44",
+                            "name":"deviceModel",
+                            "displayName": "Device model",
+                            "displayNameEvent": "Device model changed",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "6ed498e1-37ca-4bb7-bac7-463509c7784e",
+                            "name":"serialNumber",
+                            "displayName": "Serial number",
+                            "displayNameEvent": "Serial number changed",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
                         }
                     ]
                 },

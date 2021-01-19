@@ -173,6 +173,11 @@ public:
     ~SunSpec();
     bool connectModbus();
     void setHostAddress(const QHostAddress &hostAddress);
+    void setPort(uint port);
+    void setSlaveId(uint slaveId);
+    void setTimeout(uint milliSeconds);
+    void setNumberOfRetries(uint retries);
+
     QString manufacturer();
     QString deviceModel();
     QString serialNumber();
@@ -207,6 +212,7 @@ signals:
     void connectionStateChanged(bool status);
     void requestExecuted(QUuid requetId, bool success);
 
+    void foundBaseRegister(int modbusAddress);
     void foundModbusMap(BlockId mapId, int modbusStartRegister);
     void modbusMapSearchFinished(const QList<BlockId> &mapIds, uint modbusStartRegister, const QString &error);
 

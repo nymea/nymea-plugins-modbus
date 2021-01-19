@@ -73,6 +73,10 @@ private slots:
     void onPluginConfigurationChanged(const ParamTypeId &paramTypeId, const QVariant &value);
 
     void onConnectionStateChanged(bool status);
+
+    void onMapHeaderReceived(uint modbusAddress, SunSpec::BlockId mapId, uint mapLength);
+    void onMapReceived(SunSpec::BlockId mapId, uint mapLength, QVector<quint16> data);
+
     void onWriteRequestExecuted(QUuid requestId, bool success);
     void onWriteRequestError(QUuid requestId, const QString &error);
 
