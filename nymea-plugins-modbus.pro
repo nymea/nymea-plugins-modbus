@@ -1,6 +1,7 @@
 TEMPLATE = subdirs
 
 PLUGIN_DIRS = \
+    bgetech                 \
     drexelundweiss          \
     modbuscommander         \
     mypv                    \

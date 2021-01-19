@@ -1,0 +1,287 @@
+{
+    "name": "BGetech",
+    "displayName": "B+G e-tech",
+    "id": "56e95111-fb6b-4f63-9a0a-a5ee001e89ed",
+    "paramTypes":[
+        {
+            "id": "eaa84c3c-06b8-4642-a40b-c2efbe6aae66",
+            "name": "updateInterval",
+            "displayName": "Update interval",
+            "type": "uint",
+            "unit": "MilliSeconds",
+            "defaultValue": 300
+        }
+    ],
+    "vendors": [
+        {
+            "name": "bgetech",
+            "displayName": "B+G e-tech",
+            "id": "215035fe-95e8-43d8-a52e-0a31b787d902",
+            "thingClasses": [
+                {
+                    "name": "threePhase",
+                    "displayName": "3-phase electricity meter",
+                    "id": "f37597bb-35fe-48f2-9617-343dd54c0903",
+                    "createMethods": ["user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                        {
+                            "id": "33aeda0c-b07a-4510-b45e-0a386867a2df",
+                            "name": "serialPort",
+                            "displayName": "Serial port",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": "ttyAMA0"
+                        },
+                        {
+                            "id": "b34d5d72-64d2-48f4-884b-d8c3e5c4d39c",
+                            "name": "baudRate",
+                            "displayName": "Baud rate",
+                            "type": "int",
+                            "defaultValue": 9600
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "8050bd0b-1dad-4a7e-b632-c71ead3c9f8b",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "59264dd2-5304-491e-be15-e15ae905d923",
+                            "name": "voltage",
+                            "displayName": "Voltage",
+                            "displayNameEvent": "Voltage changed",
+                            "type": "double",
+                            "unit": "Voltage",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "8d597784-92ac-4fb2-a72c-3185c86630b4",
+                            "name": "current",
+                            "displayName": "Current",
+                            "displayNameEvent": "Current changed",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "c824e97b-a6d1-4030-9d7a-00af6fb8e1c3",
+                            "name": "power",
+                            "displayName": "Active power",
+                            "displayNameEvent": "Active power changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "93bb7bbf-4c61-4ccf-afaf-cb34b1a3bd7a",
+                            "name": "apparentPower",
+                            "displayName": "Apparent power",
+                            "displayNameEvent": "Apparent power changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "d4b171a2-c6f7-427c-b1b7-227a7052200f",
+                            "name": "reactivePower",
+                            "displayName": "Reactive power",
+                            "displayNameEvent": "Reactive power changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "31b9032f-f994-472b-94bd-44f9fb094801",
+                            "name": "powerFactor",
+                            "displayName": "Power factor",
+                            "displayNameEvent": "Power factor changed",
+                            "type": "double",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "801da19c-0c87-411e-b35e-280d09e4c1d2",
+                            "name": "phaseAngle",
+                            "displayName": "Phase angle",
+                            "displayNameEvent": "Phase angle changed",
+                            "type": "double",
+                            "unit": "Degree",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "ab24f26c-dc15-4ec3-8d76-06a48285440b",
+                            "name": "frequency",
+                            "displayName": "Frequency",
+                            "displayNameEvent": "Frequency changed",
+                            "type": "double",
+                            "unit": "Herz",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "b46706c8-d478-4729-9d1f-f14d204a480e",
+                            "name": "importActiveEnergy",
+                            "displayName": "Import active energy",
+                            "displayNameEvent": "Import active energy changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "7cb15dee-c589-4937-845a-185262de4d41",
+                            "name": "exportActiveEnergy",
+                            "displayName": "Export active energy",
+                            "displayNameEvent": "Export active energy changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "da871d40-a246-43a1-92a4-9ebfeb30135c",
+                            "name": "importReactiveEnergy",
+                            "displayName": "Import reactive energy",
+                            "displayNameEvent": "Import reactive energy changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "ff677f01-a3e4-4c0f-b188-56deb40fb5d0",
+                            "name": "exportReactiveEnergy",
+                            "displayName": "Export reactive energy",
+                            "displayNameEvent": "Export reactive energy changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "98d858a8-22e8-4262-b5c7-25bb027942ad",
+                            "name": "totalActiveEnergy",
+                            "displayName": "Total active energy",
+                            "displayNameEvent": "Total active energy changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "e469b3ff-a4c2-42da-af35-ccafaef214af",
+                            "name": "totalReactiveEnergy",
+                            "displayName": "Total reactive energy",
+                            "displayNameEvent": "Total reactive energy changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "6ee8a652-14c4-484b-9253-675444fb2c48",
+                            "name": "relayPulseWidth",
+                            "displayName": "Relay pulse width",
+                            "displayNameEvent": "Relay pulse width changed",
+                            "displayNameAction": "Set relay pulse width",
+                            "type": "int",
+                            "writable": true,
+                            "unit": "MilliSeconds",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "81b96122-32b9-4622-903f-d9775536415c",
+                            "name": "networkParity",
+                            "displayName": "Network parity",
+                            "displayNameEvent": "Network parity changed",
+                            "displayNameAction": "Set network parity",
+                            "type": "QString",
+                            "writable": true,
+                            "defaultValue": "One stop bit and no parity",
+                            "possibleValues": [
+                                "One stop bit and no parity",
+                                "One stop bit and even parity",
+                                "One stop bit and odd parity",
+                                "Two stop bits and no parity"
+                            ]
+                        },
+                        {
+                            "id": "35a93049-fe89-43cc-ac5a-16da71cb4e88",
+                            "name": "networkPortNode",
+                            "displayName": "Network port node",
+                            "displayNameEvent": "Network port node changed",
+                            "displayNameAction": "Set network port node",
+                            "type": "uint",
+                            "writable": true,
+                            "defaultValue": 1,
+                            "minValue": 1,
+                            "maxValue": 247
+                        },
+                        {
+                            "id": "5e03d566-e547-43a5-9331-ba76d89ea7b7",
+                            "name": "networkBaudRate",
+                            "displayName": "Network baud rate",
+                            "displayNameEvent": "Network baud rate changed",
+                            "displayNameAction": "Set network baud rate",
+                            "type": "uint",
+                            "writable": true,
+                            "defaultValue": 9600,
+                            "possibleValues": [
+                                1200,
+                                2400,
+                                4800,
+                                9600
+                            ]
+                        },
+                        {
+                            "id": "abe95394-2132-4911-9b74-42cd4b075e04",
+                            "name": "pulse1Output",
+                            "displayName": "Pulse 1 output",
+                            "displayNameEvent": "Pulse 1 output changed",
+                            "displayNameAction": "Set pulse 1 output",
+                            "type": "QString",
+                            "writable": true,
+                            "defaultValue": "Export active energy",
+                            "possibleValues": [
+                                "Import active energy",
+                                "Import + export active energy",
+                                "Export active energy",
+                                "Import reactive energy",
+                                "Import + export reactive energy",
+                                "Export reactiveenergy"
+                            ]
+                        },
+                        {
+                            "id": "a690bab5-83b8-4d97-bbb6-b32ef2fd4a17",
+                            "name": "pulse1Constant",
+                            "displayName": "Pulse 1 constant",
+                            "displayNameEvent": "Pulse 1 constant changed",
+                            "displayNameAction": "Set pulse 1 constant",
+                            "type": "QString",
+                            "writable": true,
+                            "defaultValue": "0.001kwh（kvarh）/imp",
+                            "possibleValues": [
+                                "0.001kwh（kvarh）/imp",
+                                "0.01kwh（kvarh）/imp",
+                                "0.1kwh（kvarh）/imp",
+                                "1kwh（kvarh）/imp"
+                            ]
+                        },
+                        {
+                            "id": "ba6f31b0-f018-4811-b495-a465ba9fb272",
+                            "name": "measurementMode",
+                            "displayName": "Measurement mode",
+                            "displayNameEvent": "Measurement mode changed",
+                            "displayNameAction": "Set measurement mode",
+                            "type": "QString",
+                            "writable": true,
+                            "defaultValue": "total = import + export",
+                            "possibleValues": [
+                                "total = export",
+                                "total = import + export",
+                                "total = import - export"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
