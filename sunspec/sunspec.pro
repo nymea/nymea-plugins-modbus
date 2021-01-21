@@ -9,15 +9,11 @@ SOURCES += \
     sunspec.cpp \
     sunspecinverter.cpp \
     sunspecmeter.cpp \
-    sunspecstorage.cpp \
-    sunspectracker.cpp \
-    sunspecstringcombiner.cpp \
+    sunspecstorage.cpp
 
 HEADERS += \
     integrationpluginsunspec.h \
     sunspec.h \
     sunspecinverter.h \
     sunspecmeter.h \
-    sunspecstorage.h \
-    sunspectracker.h \
-    sunspecstringcombiner.h \
+    sunspecstorage.h

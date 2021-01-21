@@ -34,32 +34,31 @@
 #include <QObject>
 #include "sunspec.h"
 
-class SunSpecInverter : public SunSpec
+class SunSpecInverter : public QObject
 {
     Q_OBJECT
 public:
-    SunSpecInverter(const QHostAddress &hostAddress, uint port = 502, QObject *parent = 0);
 
     enum Model10X { // Mandatory register
-        Model10XAcCurrent            = 2,
-        Model10XPhaseACurrent        = 3,
-        Model10XPhaseBCurrent        = 4,
-        Model10XPhaseCCurrent        = 5,
-        Model10XAmpereScaleFactor    = 6,
-        Model10XPhaseVoltageAN       = 10,
-        Model10XPhaseVoltageBN       = 11,
-        Model10XPhaseVoltageCN       = 12,
-        Model10XVoltageScaleFactor   = 13,
-        Model10XACPower              = 14,
-        Model10XWattScaleFactor      = 15,
-        Model10XLineFrequency        = 16,
-        Model10XHerzScaleFactor      = 17,
-        Model10XAcEnergy             = 24,
-        Model10XWattHoursScaleFactor = 25,
-        Model10XCabinetTemperature   = 33,
-        Model10XTemperatureScaleFactor = 37,
-        Model10XOperatingState       = 38,
-        Model10XEvent1               = 40
+        Model10XAcCurrent            = 0,
+        Model10XPhaseACurrent        = 1,
+        Model10XPhaseBCurrent        = 2,
+        Model10XPhaseCCurrent        = 3,
+        Model10XAmpereScaleFactor    = 4,
+        Model10XPhaseVoltageAN       = 8,
+        Model10XPhaseVoltageBN       = 9,
+        Model10XPhaseVoltageCN       = 10,
+        Model10XVoltageScaleFactor   = 11,
+        Model10XACPower              = 12,
+        Model10XWattScaleFactor      = 13,
+        Model10XLineFrequency        = 14,
+        Model10XHerzScaleFactor      = 15,
+        Model10XAcEnergy             = 22,
+        Model10XWattHoursScaleFactor = 24,
+        Model10XCabinetTemperature   = 31,
+        Model10XTemperatureScaleFactor = 35,
+        Model10XOperatingState       = 36,
+        Model10XEvent1               = 38
     };
 
     enum Model11X { // Mandatory register
@@ -93,24 +92,29 @@ public:
         float lineFrequency;
         float acEnergy;
         float cabinetTemperature; // in degree Celsius
-        SunSpecEvent1 event;
-        SunSpecOperatingState operatingState;
+        SunSpec::SunSpecEvent1 event;
+        SunSpec::SunSpecOperatingState operatingState;
     };
 
+    SunSpecInverter(SunSpec *sunspec, SunSpec::BlockId blockId, int modbusAddress);
+    SunSpec::BlockId blockId();
+    void init();
     void getInverterMap();
 
 private:
-    BlockId m_id = BlockIdInverterThreePhase; //e.g. 103 for three phase inverter, 113 for three phase inverter with floating point representation
+    SunSpec *m_connection = nullptr;
+    SunSpec::BlockId m_id; //e.g. 103 for three phase inverter, 113 for three phase inverter with floating point representation
     uint m_mapLength = 0;
     uint m_mapModbusStartRegister = 40000;
+    bool m_initFinishedSuccess = false;
 
     void readInverterBlockHeader();
 
 private slots:
-    void onModbusMapReceived(BlockId mapId, uint mapLength, QVector<quint16> data);
+    void onModbusMapReceived(SunSpec::BlockId mapId, uint mapLength, QVector<quint16> data);
 
 signals:
-    void initFinished();
+    void initFinished(bool success);
     void inverterDataReceived(InverterData data);
 };
 

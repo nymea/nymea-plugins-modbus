@@ -34,17 +34,20 @@
 #include <QObject>
 #include "sunspec.h"
 
-class SunSpecStorage : public SunSpec
+class SunSpecStorage : public QObject
 {
     Q_OBJECT
 public:
-    SunSpecStorage(const QHostAddress &hostAddress, uint port = 502, QObject *parent = 0);
+    SunSpecStorage(SunSpec *sunspec, SunSpec::BlockId blockId, int modbusAddress);
+
+    SunSpec::BlockId blockId();
+    void init();
+    void getStorageMap();
 
     QUuid setGridCharging(bool enabled);
     QUuid setDischargingRate(int rate);
     QUuid setChargingRate(int rate);
     QUuid setStorageControlMode(bool chargingEnabled, bool dischargingEnabled);
-
 
     enum StorageControlBitField {
         StorageControlBitFieldCharge    = 0,
@@ -88,20 +91,20 @@ public:
         bool gridChargingEnabled;
     };
 
-    void getStorageMap();
-
 private:
-    BlockId m_id = BlockIdEnergyStorageBaseModel;
+    SunSpec *m_connection = nullptr;
+    SunSpec::BlockId m_id = SunSpec::BlockIdEnergyStorageBaseModel;
     uint m_mapLength = 0;
     uint m_mapModbusStartRegister = 40000;
+    bool m_initFinishedSuccess = false;
 
     void readStorageBlockHeader();
 
 private slots:
-    void onModbusMapReceived(BlockId mapId, uint mapLength, const QVector<quint16> &data);
+    void onModbusMapReceived(SunSpec::BlockId mapId, uint mapLength, const QVector<quint16> &data);
 
 signals:
-    void initFinished();
+    void initFinished(bool success);
     void storageDataReceived(const StorageData &data);
 };
 

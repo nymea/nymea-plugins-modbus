@@ -178,6 +178,9 @@ public:
     void setTimeout(uint milliSeconds);
     void setNumberOfRetries(uint retries);
 
+    QHostAddress hostAddress() const;
+    uint port();
+    uint slaveId();
     QString manufacturer();
     QString deviceModel();
     QString serialNumber();
@@ -191,13 +194,14 @@ public:
     QString m_manufacturer = "Unknown";
     QString m_deviceModel  = "Unknown";
     QString m_serialNumber = "Unknown";
+    QHash<BlockId, int> m_mapList;
 
     void findBaseRegister();
-    void findModbusMap(const QList<BlockId> &mapIds, uint modbusAddressOffset = 69);
+    void findModbusMap(const QList<BlockId> &mapIds, uint modbusAddressOffset = 2);
 
+    void readCommonMap();
     void readMapHeader(uint modbusAddress);
     void readMap(uint modbusAddress, uint modelLength); //modbusAddress = model start address, model length is without header
-    void readCommonMap();
 
     float convertValueWithSSF(quint16 rawValue, quint16 sunssf);
     float convertFloatValues(quint16 rawValue0, quint16 rawValue1);
@@ -205,16 +209,18 @@ public:
     QBitArray convertModbusRegisterBits(const uint16_t &modbusData);
     QByteArray convertModbusRegisters(const QVector<quint16> &modbusData, int offset, int size);
 
-    QUuid writeHoldingRegister(uint slaveAddress, uint registerAddress, quint16 value);
-    QUuid writeHoldingRegisters(uint slaveAddress, uint registerAddress, const QVector<quint16> &values);
+    QUuid writeHoldingRegister(uint registerAddress, quint16 value);
+    QUuid writeHoldingRegisters(uint registerAddress, const QVector<quint16> &values);
 
 signals:
     void connectionStateChanged(bool status);
     void requestExecuted(QUuid requetId, bool success);
 
     void foundBaseRegister(int modbusAddress);
+    void commonMapReceived(const QString &manufacturer, const QString &deviceModel, const QString &serialNumber);
+
     void foundModbusMap(BlockId mapId, int modbusStartRegister);
-    void modbusMapSearchFinished(const QList<BlockId> &mapIds, uint modbusStartRegister, const QString &error);
+    void modbusMapSearchFinished(const QHash<BlockId, int> &mapIds);
 
     void mapHeaderReceived(uint modbusAddress, BlockId mapId, uint mapLength);
     void mapReceived(BlockId mapId, uint mapLength, QVector<quint16> data);

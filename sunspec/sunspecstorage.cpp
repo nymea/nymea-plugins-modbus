@@ -31,39 +31,47 @@
 #include "sunspecstorage.h"
 #include "extern-plugininfo.h"
 
-SunSpecStorage::SunSpecStorage(const QHostAddress &hostAddress, uint port, QObject *parent) : SunSpec(hostAddress, port, parent)
+SunSpecStorage::SunSpecStorage(SunSpec *sunspec, SunSpec::BlockId blockId, int modbusAddress) :
+    QObject(sunspec),
+    m_connection(sunspec),
+    m_id(blockId),
+    m_mapModbusStartRegister(modbusAddress)
 {
-    connect(m_modbusTcpClient, &QModbusClient::stateChanged, this, [this] (QModbusDevice::State state) {
-        if (state == QModbusDevice::ConnectedState) {
-            qCDebug(dcSunSpec()) << "Inverter connected successfully";
-            QList<BlockId> mapIds;
-            mapIds.append(BlockIdStorage);
-            findModbusMap(mapIds);
-        }
-    });
-    connect(this, &SunSpec::foundModbusMap, this, [this] (BlockId mapId, uint modbusRegisterAddress) {
-        qCDebug(dcSunSpec()) << "Read map header for mapId" << mapId << "and modbus register" << modbusRegisterAddress;
-        readMapHeader(modbusRegisterAddress);
-    });
+    qCDebug(dcSunSpec()) << "SunSpecStorage: Setting up storage";
+    connect(m_connection, &SunSpec::mapReceived, this, &SunSpecStorage::onModbusMapReceived);
+}
 
-    connect(this, &SunSpec::mapHeaderReceived, this, [this] (uint modbusAddress, BlockId mapId, uint mapLength) {
-        m_id = mapId;
+SunSpec::BlockId SunSpecStorage::blockId()
+{
+    return m_id;
+
+}
+
+void SunSpecStorage::init()
+{
+    qCDebug(dcSunSpec()) << "SunSpecInverter: Init";
+    m_connection->readMapHeader(m_mapModbusStartRegister);
+    connect(m_connection, &SunSpec::mapHeaderReceived, this, [this] (uint modbusAddress, SunSpec::BlockId mapId, uint mapLength) {
+        qCDebug(dcSunSpec()) << "SunSpecInverter: Map Header received, modbus address:" << modbusAddress << "map Id:" << mapId << "map length:" << mapLength;
         m_mapLength = mapLength;
-        m_mapModbusStartRegister = modbusAddress;
-        readMap(modbusAddress, mapLength);
+        emit initFinished(true);
+        m_initFinishedSuccess = true;
     });
-
-    connect(this, &SunSpec::mapReceived, this, &SunSpecStorage::onModbusMapReceived);
+    QTimer::singleShot(10000, this,[this] {
+       if (!m_initFinishedSuccess) {
+           emit initFinished(false);
+       }
+    });
 }
 
 void SunSpecStorage::getStorageMap()
 {
-    readMap(m_mapModbusStartRegister, m_mapLength);
+    m_connection->readMap(m_mapModbusStartRegister, m_mapLength);
 }
 
 void SunSpecStorage::readStorageBlockHeader()
 {
-    readMapHeader(m_mapModbusStartRegister);
+    m_connection->readMapHeader(m_mapModbusStartRegister);
 }
 
 QUuid SunSpecStorage::setGridCharging(bool enabled)
@@ -76,7 +84,7 @@ QUuid SunSpecStorage::setGridCharging(bool enabled)
 
     uint registerAddress = m_mapModbusStartRegister + Model124::Model124ChaGriSet;
     quint16 value = enabled;
-    return writeHoldingRegister(m_slaveId, registerAddress, value);
+    return m_connection->writeHoldingRegister(registerAddress, value);
 }
 
 QUuid SunSpecStorage::setStorageControlMode(bool chargingEnabled, bool dischargingEnabled)
@@ -86,7 +94,7 @@ QUuid SunSpecStorage::setStorageControlMode(bool chargingEnabled, bool dischargi
                      (static_cast<quint16>(dischargingEnabled) << StorageControlBitFieldDischarge)) ;
 
     uint modbusRegister = m_mapModbusStartRegister + Model124::Model124ActivateStorageControlMode;
-    return writeHoldingRegister(m_slaveId, modbusRegister, value);
+    return m_connection->writeHoldingRegister(modbusRegister, value);
 }
 
 QUuid SunSpecStorage::setChargingRate(int rate)
@@ -96,7 +104,7 @@ QUuid SunSpecStorage::setChargingRate(int rate)
 
     uint modbusRegister = m_mapModbusStartRegister + Model124::Model124SetpointMaximumChargingRate;
     int16_t value = rate * 100;
-    return writeHoldingRegister(m_slaveId, modbusRegister, value);
+    return m_connection->writeHoldingRegister(modbusRegister, value);
 }
 
 QUuid SunSpecStorage::setDischargingRate(int charging)
@@ -105,14 +113,14 @@ QUuid SunSpecStorage::setDischargingRate(int charging)
     /* Defines the maximum discharge rate (discharge limit). Default is 100% */
     uint modbusRegister = m_mapModbusStartRegister + Model124::Model124SetpointMaximumDischargeRate;
     quint16 value = charging * 100;
-    return writeHoldingRegister(m_slaveId, modbusRegister, value);
+    return m_connection->writeHoldingRegister(modbusRegister, value);
 }
 
 void SunSpecStorage::onModbusMapReceived(SunSpec::BlockId mapId, uint mapLength, const QVector<quint16> &data)
 {
     Q_UNUSED(mapLength)
     switch (mapId) {
-    case BlockIdStorage: {
+    case SunSpec::BlockIdStorage: {
         StorageData storageData;
         storageData.chargingState = ChargingState(data[Model124::Model124ChargeStatus]);
         emit storageDataReceived(storageData);

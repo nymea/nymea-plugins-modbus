@@ -52,20 +52,26 @@ class IntegrationPluginSunSpec: public IntegrationPlugin
 
 public:
     explicit IntegrationPluginSunSpec();
+    void init() override;
     void setupThing(ThingSetupInfo *info) override;
     void postSetupThing(Thing *thing) override;
     void thingRemoved(Thing *thing) override;
     void executeAction(ThingActionInfo *info) override;
 
 private:
+    QHash<ThingClassId, ParamTypeId> m_mapIdParamTypeIds;
+    QHash<ThingClassId, ParamTypeId> m_modbusAddressParamTypeIds;
+
+    QHash<ThingClassId, StateTypeId> m_connectedStateTypeIds;
     PluginTimer *m_refreshTimer = nullptr;
     QHash<QUuid, ThingActionInfo *> m_asyncActions;
-    QHash<Thing *, SunSpec *> m_sunSpecConnections;
+    QHash<ThingId, SunSpec *> m_sunSpecConnections;
 
     QHash<Thing *, SunSpecInverter *> m_sunSpecInverters;
     QHash<Thing *, SunSpecStorage *> m_sunSpecStorages;
     QHash<Thing *, SunSpecMeter *> m_sunSpecMeters;
-    QHash<Thing *, SunSpecTracker *> m_sunSpecTrackers;
+
+    bool checkIfThingExists(uint mapId, uint modbusAddress);
 
 private slots:
     void onRefreshTimer();
@@ -77,13 +83,15 @@ private slots:
     void onMapHeaderReceived(uint modbusAddress, SunSpec::BlockId mapId, uint mapLength);
     void onMapReceived(SunSpec::BlockId mapId, uint mapLength, QVector<quint16> data);
 
+    void onFoundModbusMap(SunSpec::BlockId mapId, int modbusStartRegister);
+    void onModbusMapSearchFinished(const QHash<SunSpec::BlockId, int> &mapIds);
+
     void onWriteRequestExecuted(QUuid requestId, bool success);
     void onWriteRequestError(QUuid requestId, const QString &error);
 
     void onInverterDataReceived(const SunSpecInverter::InverterData &inverterData);
     void onStorageDataReceived(const SunSpecStorage::StorageData &storageData);
     void onMeterDataReceived(const SunSpecMeter::MeterData &meterData);
-    void onTrackerDataReceived(const SunSpecTracker::TrackerData &trackerData);
 };
 
 #endif // INTEGRATIONPLUGINSUNSPEC_H
