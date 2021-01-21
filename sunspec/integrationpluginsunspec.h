@@ -63,6 +63,12 @@ private:
     QHash<ThingClassId, ParamTypeId> m_modbusAddressParamTypeIds;
 
     QHash<ThingClassId, StateTypeId> m_connectedStateTypeIds;
+    QHash<ThingClassId, StateTypeId> m_frequencyStateTypeIds;
+    QHash<ThingClassId, StateTypeId> m_acPowerStateTypeIds;
+    QHash<ThingClassId, StateTypeId> m_acEnergyStateTypeIds;
+    QHash<ThingClassId, StateTypeId> m_inverterOperatingStateTypeIds;
+    QHash<ThingClassId, StateTypeId> m_inverterErrorStateTypeIds;
+
     PluginTimer *m_refreshTimer = nullptr;
     QHash<QUuid, ThingActionInfo *> m_asyncActions;
     QHash<ThingId, SunSpec *> m_sunSpecConnections;

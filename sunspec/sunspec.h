@@ -203,7 +203,7 @@ public:
     void readMapHeader(uint modbusAddress);
     void readMap(uint modbusAddress, uint modelLength); //modbusAddress = model start address, model length is without header
 
-    float convertValueWithSSF(quint16 rawValue, quint16 sunssf);
+    float convertValueWithSSF(quint32 rawValue, quint16 sunssf);
     float convertFloatValues(quint16 rawValue0, quint16 rawValue1);
     QByteArray convertModbusRegister(const uint16_t &modbusData);
     QBitArray convertModbusRegisterBits(const uint16_t &modbusData);

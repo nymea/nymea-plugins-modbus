@@ -64,6 +64,30 @@ void IntegrationPluginSunSpec::init()
     m_modbusAddressParamTypeIds.insert(sunspecSinglePhaseMeterThingClassId, sunspecSinglePhaseMeterThingModbusAddressParamTypeId);
     m_modbusAddressParamTypeIds.insert(sunspecSplitPhaseMeterThingClassId, sunspecSplitPhaseMeterThingModbusAddressParamTypeId);
     m_modbusAddressParamTypeIds.insert(sunspecThreePhaseMeterThingClassId, sunspecThreePhaseMeterThingModbusAddressParamTypeId);
+
+    m_acPowerStateTypeIds.insert(sunspecSinglePhaseInverterThingClassId, sunspecSinglePhaseInverterAcPowerStateTypeId);
+    m_acPowerStateTypeIds.insert(sunspecSplitPhaseInverterThingClassId, sunspecSplitPhaseInverterAcPowerStateTypeId);
+    m_acPowerStateTypeIds.insert(sunspecThreePhaseInverterThingClassId, sunspecThreePhaseInverterAcPowerStateTypeId);
+
+    m_acEnergyStateTypeIds.insert(sunspecSinglePhaseInverterThingClassId, sunspecSinglePhaseInverterAcEnergyStateTypeId);
+    m_acEnergyStateTypeIds.insert(sunspecSplitPhaseInverterThingClassId, sunspecSplitPhaseInverterAcEnergyStateTypeId);
+    m_acEnergyStateTypeIds.insert(sunspecThreePhaseInverterThingClassId, sunspecThreePhaseInverterAcEnergyStateTypeId);
+
+    m_inverterOperatingStateTypeIds.insert(sunspecSinglePhaseMeterThingClassId, sunspecSinglePhaseInverterOperatingStateStateTypeId);
+    m_inverterOperatingStateTypeIds.insert(sunspecSplitPhaseMeterThingClassId, sunspecSplitPhaseInverterOperatingStateStateTypeId);
+    m_inverterOperatingStateTypeIds.insert(sunspecThreePhaseMeterThingClassId, sunspecThreePhaseInverterOperatingStateStateTypeId);
+
+    m_inverterErrorStateTypeIds.insert(sunspecSinglePhaseMeterThingClassId, sunspecSinglePhaseInverterErrorStateTypeId);
+    m_inverterErrorStateTypeIds.insert(sunspecSplitPhaseMeterThingClassId, sunspecSplitPhaseInverterErrorStateTypeId);
+    m_inverterErrorStateTypeIds.insert(sunspecThreePhaseMeterThingClassId, sunspecThreePhaseInverterErrorStateTypeId);
+
+    m_frequencyStateTypeIds.insert(sunspecSinglePhaseInverterThingClassId, sunspecSinglePhaseInverterFrequencyStateTypeId);
+    m_frequencyStateTypeIds.insert(sunspecSplitPhaseInverterThingClassId, sunspecSplitPhaseInverterFrequencyStateTypeId);
+    m_frequencyStateTypeIds.insert(sunspecThreePhaseInverterThingClassId, sunspecThreePhaseInverterFrequencyStateTypeId);
+
+    m_frequencyStateTypeIds.insert(sunspecSinglePhaseMeterThingClassId, sunspecSinglePhaseMeterFrequencyStateTypeId);
+    m_frequencyStateTypeIds.insert(sunspecSplitPhaseMeterThingClassId, sunspecSplitPhaseMeterFrequencyStateTypeId);
+    m_frequencyStateTypeIds.insert(sunspecThreePhaseMeterThingClassId, sunspecThreePhaseMeterFrequencyStateTypeId);
 }
 
 void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
@@ -436,11 +460,10 @@ void IntegrationPluginSunSpec::onFoundModbusMap(SunSpec::BlockId mapId, int modb
     if (checkIfThingExists(mapId, modbusStartRegister)) {
         return;
     }
-
+    QString model = thing->stateValue(sunspecConnectionDeviceModelStateTypeId).toString();
     switch (mapId) {
     case SunSpec::BlockId::BlockIdInverterSinglePhase:
     case SunSpec::BlockId::BlockIdInverterSinglePhaseFloat: {
-        QString model = thing->stateValue(sunspecConnectionDeviceModelStateTypeId).toString();
         ThingDescriptor descriptor(sunspecSinglePhaseInverterThingClassId, model+tr(" single phase inverter"), "", thing->id());
         ParamList params;
         params.append(Param(sunspecSinglePhaseInverterThingMapIdParamTypeId, mapId));
@@ -450,7 +473,6 @@ void IntegrationPluginSunSpec::onFoundModbusMap(SunSpec::BlockId mapId, int modb
     } break;
     case SunSpec::BlockId::BlockIdInverterSplitPhase:
     case SunSpec::BlockId::BlockIdInverterSplitPhaseFloat: {
-        QString model = thing->stateValue(sunspecConnectionDeviceModelStateTypeId).toString();
         ThingDescriptor descriptor(sunspecSplitPhaseInverterThingClassId, model+tr(" split phase inverter"), "", thing->id());
         ParamList params;
         params.append(Param(sunspecSplitPhaseInverterThingMapIdParamTypeId, mapId));
@@ -460,7 +482,6 @@ void IntegrationPluginSunSpec::onFoundModbusMap(SunSpec::BlockId mapId, int modb
     } break;
     case SunSpec::BlockId::BlockIdInverterThreePhase:
     case SunSpec::BlockId::BlockIdInverterThreePhaseFloat: {
-        QString model = thing->stateValue(sunspecConnectionDeviceModelStateTypeId).toString();
         ThingDescriptor descriptor(sunspecThreePhaseInverterThingClassId, model+tr(" three phase inverter"), "", thing->id());
         ParamList params;
         params.append(Param(sunspecThreePhaseInverterThingMapIdParamTypeId, mapId));
@@ -471,16 +492,33 @@ void IntegrationPluginSunSpec::onFoundModbusMap(SunSpec::BlockId mapId, int modb
 
     case SunSpec::BlockIdSinglePhaseMeter:
     case SunSpec::BlockIdSinglePhaseMeterFloat: {
+        ThingDescriptor descriptor(sunspecSinglePhaseMeterThingClassId, model+tr(" Meter"), "", thing->id());
+        ParamList params;
+        params.append(Param(sunspecSinglePhaseMeterThingMapIdParamTypeId, mapId));
+        params.append(Param(sunspecSinglePhaseMeterThingModbusAddressParamTypeId, modbusStartRegister));
+        descriptor.setParams(params);
+        emit autoThingsAppeared({descriptor});
     } break;
     case SunSpec::BlockIdSplitSinglePhaseMeter:
     case SunSpec::BlockIdSplitSinglePhaseMeterFloat: {
+        ThingDescriptor descriptor(sunspecSplitPhaseMeterThingClassId, model+tr(" Meter"), "", thing->id());
+        ParamList params;
+        params.append(Param(sunspecSplitPhaseMeterThingMapIdParamTypeId, mapId));
+        params.append(Param(sunspecSplitPhaseMeterThingModbusAddressParamTypeId, modbusStartRegister));
+        descriptor.setParams(params);
+        emit autoThingsAppeared({descriptor});
     } break;
     case SunSpec::BlockIdWyeConnectThreePhaseMeterFloat:
     case SunSpec::BlockIdDeltaConnectThreePhaseMeterFloat: {
+        ThingDescriptor descriptor(sunspecThreePhaseMeterThingClassId, model+" Meter", "", thing->id());
+        ParamList params;
+        params.append(Param(sunspecThreePhaseMeterThingMapIdParamTypeId, mapId));
+        params.append(Param(sunspecThreePhaseMeterThingModbusAddressParamTypeId, modbusStartRegister));
+        descriptor.setParams(params);
+        emit autoThingsAppeared({descriptor});
     } break;
     case SunSpec::BlockIdStorage: {
-        QString model = thing->stateValue(sunspecConnectionDeviceModelStateTypeId).toString();
-        ThingDescriptor descriptor(sunspecStorageThingClassId, model+" Storage", "Storage", thing->id());
+        ThingDescriptor descriptor(sunspecStorageThingClassId, model+" Storage", "", thing->id());
         ParamList params;
         params.append(Param(sunspecStorageThingMapIdParamTypeId, mapId));
         params.append(Param(sunspecThreePhaseInverterThingModbusAddressParamTypeId, modbusStartRegister));
@@ -526,19 +564,33 @@ void IntegrationPluginSunSpec::onInverterDataReceived(const SunSpecInverter::Inv
         return;
     }
     thing->setStateValue(m_connectedStateTypeIds.value(thing->thingClassId()), true);
-    thing->setStateValue(sunspecThreePhaseInverterAcPowerStateTypeId, inverterData.acPower/1000.00);
-    thing->setStateValue(sunspecThreePhaseInverterAcEnergyStateTypeId, inverterData.acEnergy/1000.00);
-    thing->setStateValue(sunspecThreePhaseInverterLineFrequencyStateTypeId, inverterData.lineFrequency);
+    thing->setStateValue(m_acPowerStateTypeIds.value(thing->thingClassId()), inverterData.acPower/1000.00);
+    thing->setStateValue(m_acEnergyStateTypeIds.value(thing->thingClassId()), inverterData.acEnergy/1000.00);
+    thing->setStateValue(m_frequencyStateTypeIds.value(thing->thingClassId()), inverterData.lineFrequency);
+
     thing->setStateValue(sunspecThreePhaseInverterTotalCurrentStateTypeId, inverterData.acCurrent);
     thing->setStateValue(sunspecThreePhaseInverterCabinetTemperatureStateTypeId, inverterData.cabinetTemperature);
 
-    thing->setStateValue(sunspecThreePhaseInverterPhaseACurrentStateTypeId, inverterData.phaseACurrent);
-    thing->setStateValue(sunspecThreePhaseInverterPhaseBCurrentStateTypeId, inverterData.phaseBCurrent);
-    thing->setStateValue(sunspecThreePhaseInverterPhaseCCurrentStateTypeId, inverterData.phaseCCurrent);
 
-    thing->setStateValue(sunspecThreePhaseInverterPhaseANVoltageStateTypeId, inverterData.phaseVoltageAN);
-    thing->setStateValue(sunspecThreePhaseInverterPhaseBNVoltageStateTypeId, inverterData.phaseVoltageBN);
-    thing->setStateValue(sunspecThreePhaseInverterPhaseCNVoltageStateTypeId, inverterData.phaseVoltageCN);
+    if (thing->thingClassId() == sunspecSplitPhaseMeterThingClassId) {
+
+        thing->setStateValue(sunspecSplitPhaseInverterPhaseANVoltageStateTypeId, inverterData.phaseVoltageAN);
+        thing->setStateValue(sunspecSplitPhaseInverterPhaseBNVoltageStateTypeId, inverterData.phaseVoltageBN);
+
+        thing->setStateValue(sunspecSplitPhaseInverterPhaseACurrentStateTypeId, inverterData.phaseACurrent);
+        thing->setStateValue(sunspecSplitPhaseInverterPhaseBCurrentStateTypeId, inverterData.phaseBCurrent);
+
+    } else if (thing->thingClassId() == sunspecThreePhaseMeterThingClassId) {
+
+        thing->setStateValue(sunspecThreePhaseInverterPhaseANVoltageStateTypeId, inverterData.phaseVoltageAN);
+        thing->setStateValue(sunspecThreePhaseInverterPhaseBNVoltageStateTypeId, inverterData.phaseVoltageBN);
+        thing->setStateValue(sunspecThreePhaseInverterPhaseCNVoltageStateTypeId, inverterData.phaseVoltageCN);
+
+        thing->setStateValue(sunspecThreePhaseInverterPhaseACurrentStateTypeId, inverterData.phaseACurrent);
+        thing->setStateValue(sunspecThreePhaseInverterPhaseBCurrentStateTypeId, inverterData.phaseBCurrent);
+        thing->setStateValue(sunspecThreePhaseInverterPhaseCCurrentStateTypeId, inverterData.phaseCCurrent);
+    }
+
 
     switch(inverterData.operatingState) {
     case SunSpec::SunSpecOperatingState::Off:
