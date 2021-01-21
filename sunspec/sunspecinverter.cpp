@@ -93,13 +93,6 @@ void SunSpecInverter::onModbusMapReceived(SunSpec::BlockId mapId, uint mapLength
     case SunSpec::BlockIdInverterSplitPhase:
     case SunSpec::BlockIdInverterThreePhase: {
 
-        qCDebug(dcSunSpec()) << "Inverter with SSF values:";
-        qCDebug(dcSunSpec()) << "   -   AC Current:" << data[Model10X::Model10XAcCurrent];
-        qCDebug(dcSunSpec()) << "   -   Phase A Current:" << data[Model10X::Model10XPhaseACurrent];
-        qCDebug(dcSunSpec()) << "   -   Phase B Current:" << data[Model10X::Model10XPhaseBCurrent];
-        qCDebug(dcSunSpec()) << "   -   Phase C Current:" << data[Model10X::Model10XPhaseCCurrent];
-        qCDebug(dcSunSpec()) << "   -   Ampere scale factor:" << static_cast<qint16>(data[Model10X::Model10XAmpereScaleFactor]);
-
         inverterData.acCurrent= m_connection->convertValueWithSSF(data[Model10X::Model10XAcCurrent], data[Model10X::Model10XAmpereScaleFactor]);
         inverterData.acPower = m_connection->convertValueWithSSF(data[Model10X::Model10XACPower], data[Model10X::Model10XWattScaleFactor]);
         inverterData.lineFrequency = m_connection->convertValueWithSSF(data[Model10X::Model10XLineFrequency], data[Model10X::Model10XHerzScaleFactor]);
@@ -112,11 +105,15 @@ void SunSpecInverter::onModbusMapReceived(SunSpec::BlockId mapId, uint mapLength
         inverterData.phaseVoltageBN = m_connection->convertValueWithSSF(data[Model10X::Model10XPhaseVoltageBN], data[Model10X::Model10XVoltageScaleFactor]);
         inverterData.phaseVoltageCN = m_connection->convertValueWithSSF(data[Model10X::Model10XPhaseVoltageCN], data[Model10X::Model10XVoltageScaleFactor]);
 
-        qCDebug(dcSunSpec()) << "AC energy converting:";
-        qCDebug(dcSunSpec()) << "   - Origin" << data[Model10X::Model10XAcEnergy];
-        qCDebug(dcSunSpec()) << "   - SSF" << static_cast<qint16>(data[Model10X::Model10XWattHoursScaleFactor]);
-        qCDebug(dcSunSpec()) << "   - Converted "<< m_connection->convertValueWithSSF(data[Model10X::Model10XAcEnergy], data[Model10X::Model10XWattHoursScaleFactor]);
-        inverterData.acEnergy = m_connection->convertValueWithSSF(data[Model10X::Model10XAcEnergy], data[Model10X::Model10XWattHoursScaleFactor]);
+
+        qCDebug(dcSunSpec()) << "Energy with SSF values:";
+        qCDebug(dcSunSpec()) << "   -   AC Energy 1:" << data[Model10X::Model10XAcEnergy];
+        qCDebug(dcSunSpec()) << "   -   AC Energy 2" << data[Model10X::Model10XAcEnergy+1];
+        quint32 acEnergy = ((static_cast<quint32>(data.value(Model10X::Model10XAcEnergy))<<16)|static_cast<quint32>(data.value(Model10X::Model10XAcEnergy+1)));
+        qCDebug(dcSunSpec()) << "   -   AC Energy combined" << acEnergy;
+        qCDebug(dcSunSpec()) << "   -   Scale factor:" << data[Model10X::Model10XWattHoursScaleFactor];
+
+        inverterData.acEnergy = m_connection->convertValueWithSSF(acEnergy, data[Model10X::Model10XWattHoursScaleFactor]);
 
         inverterData.cabinetTemperature = m_connection->convertValueWithSSF(data[Model10X::Model10XCabinetTemperature], data[Model10X::Model10XTemperatureScaleFactor]);
         inverterData.event = SunSpec::SunSpecEvent1(data[Model10X::Model10XEvent1]);
