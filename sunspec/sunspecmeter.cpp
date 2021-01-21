@@ -31,31 +31,54 @@
 #include "sunspecmeter.h"
 #include "extern-plugininfo.h"
 
-SunSpecMeter::SunSpecMeter(const QHostAddress &hostAddress, uint port, QObject *parent) : SunSpec(hostAddress, port, parent)
+SunSpecMeter::SunSpecMeter(SunSpec *sunspec, SunSpec::BlockId blockId, int modbusAddress) :
+    QObject(sunspec),
+    m_connection(sunspec),
+    m_id(blockId),
+    m_mapModbusStartRegister(modbusAddress)
 {
-    connect(m_modbusTcpClient, &QModbusClient::stateChanged, this, [this] (QModbusDevice::State state) {
-        if (state == QModbusDevice::ConnectedState) {
-            qCDebug(dcSunSpec()) << "Meter connected successfully";
-            QList<BlockId> mapIds;
-            mapIds.append(BlockIdSinglePhaseMeter);
-            mapIds.append(BlockIdSplitSinglePhaseMeter);
-            mapIds.append(BlockIdWyeConnectThreePhaseMeter);
-            mapIds.append(BlockIdDeltaConnectThreePhaseMeter);
-            mapIds.append(BlockIdSinglePhaseMeterFloat);
-            mapIds.append(BlockIdSplitSinglePhaseMeterFloat);
-            mapIds.append(BlockIdWyeConnectThreePhaseMeterFloat);
-            mapIds.append(BlockIdDeltaConnectThreePhaseMeterFloat);
-            findModbusMap(mapIds);
-        }
+    qCDebug(dcSunSpec()) << "SunSpecMeter: Setting up meter";
+    connect(m_connection, &SunSpec::mapReceived, this, &SunSpecMeter::onModbusMapReceived);
+}
+
+SunSpec::BlockId SunSpecMeter::blockId()
+{
+    return m_id;
+}
+
+void SunSpecMeter::init()
+{
+    qCDebug(dcSunSpec()) << "SunSpecInverter: Init";
+    m_connection->readMapHeader(m_mapModbusStartRegister);
+    connect(m_connection, &SunSpec::mapHeaderReceived, this, [this] (uint modbusAddress, SunSpec::BlockId mapId, uint mapLength) {
+        qCDebug(dcSunSpec()) << "SunSpecInverter: Map Header received, modbus address:" << modbusAddress << "map Id:" << mapId << "map length:" << mapLength;
+        m_mapLength = mapLength;
+        emit initFinished(true);
+        m_initFinishedSuccess = true;
+    });
+    QTimer::singleShot(10000, this,[this] {
+       if (!m_initFinishedSuccess) {
+           emit initFinished(false);
+       }
     });
 }
 
-void SunSpecMeter::geMeterMap()
+void SunSpecMeter::getMeterMap()
 {
-    readMap(m_mapModbusStartRegister, m_mapLength);
+   m_connection->readMap(m_mapModbusStartRegister, m_mapLength);
 }
 
 void SunSpecMeter::readMeterBlockHeader()
 {
 
+}
+
+void SunSpecMeter::onModbusMapReceived(SunSpec::BlockId mapId, uint mapLength, QVector<quint16> data)
+{
+    Q_UNUSED(mapLength)
+    Q_UNUSED(data)
+    switch (mapId) {
+    default:
+        break;
+    }
 }

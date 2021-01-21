@@ -1,13 +1,11 @@
 # SunSpec
 
-Connect to SunSpec devices.
+Connect to SunSpec devices over Modbus TCP
 
 ## Supported Things
 
 * SunSpec Inverter
-* SunSpec PV Modules
 * SunSpec Meter
-* SunSpec Tracker
 * SunSpec Storage
 
 ## Requirements

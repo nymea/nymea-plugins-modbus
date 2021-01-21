@@ -34,7 +34,7 @@
 #include <QObject>
 #include "sunspec.h"
 
-class SunSpecMeter : public SunSpec
+class SunSpecMeter : public QObject
 {
     Q_OBJECT
 public:
@@ -64,26 +64,29 @@ public:
     };
 
     struct MeterData {
-        SunSpecEvent1 event;
-        SunSpecOperatingState operatingState;
+        SunSpec::SunSpecEvent1 event;
+        SunSpec::SunSpecOperatingState operatingState;
     };
 
-    SunSpecMeter(const QHostAddress &hostAddress, uint port = 502, QObject *parent = 0);
-
-    void geMeterMap();
+    SunSpecMeter(SunSpec *sunspec, SunSpec::BlockId blockId, int modbusAddress);
+    SunSpec::BlockId blockId();
+    void init();
+    void getMeterMap();
 
 private:
-    BlockId m_id = BlockIdDeltaConnectThreePhaseMeter;
+    SunSpec *m_connection = nullptr;
+    SunSpec::BlockId m_id = SunSpec::BlockIdDeltaConnectThreePhaseMeter;
     uint m_mapLength = 0;
     uint m_mapModbusStartRegister = 40000;
+    bool m_initFinishedSuccess = false;
 
     void readMeterBlockHeader();
 
 private slots:
-   // void onModbusMapReceived(BlockId mapId, uint mapLength, QVector<quint16> data);
+   void onModbusMapReceived(SunSpec::BlockId mapId, uint mapLength, QVector<quint16> data);
 
 signals:
-    void initFinished();
+    void initFinished(bool success);
     void meterDataReceived(const MeterData &data);
 };
 

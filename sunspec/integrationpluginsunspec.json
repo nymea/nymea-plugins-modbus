@@ -46,7 +46,8 @@
                             "id": "6be6abc4-e2b2-4687-9343-0e5164ed0ab2",
                             "name":"ipAddress",
                             "displayName": "IP address",
-                            "type": "QString"
+                            "type": "QString",
+                            "defaultValue": "127.0.0.1"
                         },
                         {
                             "id": "1fa4fc9c-f6be-47c7-928a-bcefc1142eec",
@@ -100,41 +101,96 @@
                     ]
                 },
                 {
-                    "name": "sunspecInverter",
-                    "displayName": "SunSpec Inverter",
+                    "name": "sunspecSinglePhaseInverter",
+                    "displayName": "SunSpec single phase inverter",
+                    "id": "c5d5204e-3375-4b92-8128-fab77a671fed",
+                    "createMethods": [ "Auto" ],
+                    "interfaces": ["connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "41715d00-a947-4f43-a475-cea05790e01d",
+                            "name":"mapId",
+                            "displayName": "Map id",
+                            "type": "int",
+                            "readOnly": true
+                        },
+                        {
+                            "id": "26ae9050-7090-453a-85a3-307bfebe6fed",
+                            "name":"modbusAddress",
+                            "displayName": "Modbus address",
+                            "type": "uint",
+                            "readOnly": true,
+                            "defaultValue": 0
+                        }
+                    ],
+                    "stateTypes":[
+                        {
+                            "id": "48bf31c4-fda7-41e5-a3ef-3011bf96e104",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        }
+                    ]
+                },
+                {
+                    "name": "sunspecSplitPhaseInverter",
+                    "displayName": "SunSpec split phase inverter",
+                    "id": "61b38f93-d331-42bf-b1ef-d3fb16ad1230",
+                    "createMethods": [ "Auto" ],
+                    "interfaces": ["connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "c42fb50e-210f-4b53-88eb-fa216e15f88f",
+                            "name":"mapId",
+                            "displayName": "Map id",
+                            "type": "int",
+                            "readOnly": true
+                        },
+                        {
+                            "id": "37582a96-f2f2-4845-abef-973c7dd0ad57",
+                            "name":"modbusAddress",
+                            "displayName": "Modbus address",
+                            "type": "uint",
+                            "readOnly": true,
+                            "defaultValue": 0
+                        }
+                    ],
+                    "stateTypes":[
+                        {
+                            "id": "27b49640-f58b-466e-a225-a4663cf3ed96",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        }
+                    ]
+                },
+                {
+                    "name": "sunspecThreePhaseInverter",
+                    "displayName": "SunSpec three phase inverter",
                     "id": "2e4122ea-96a5-415c-b5e2-7d6012265a83",
                     "createMethods": [ "Auto" ],
                     "interfaces": ["connectable"],
                     "paramTypes": [
                         {
-                            "id": "6ffaa694-a4f2-4936-b043-37679449a34b",
-                            "name":"ipAddress",
-                            "displayName": "IP address",
-                            "type": "QString"
+                            "id": "8d5b2b58-ce46-406d-844e-f53136afcf09",
+                            "name":"mapId",
+                            "displayName": "Map id",
+                            "type": "int",
+                            "readOnly": true
                         },
                         {
-                            "id": "418d90eb-16e9-47e4-83e3-a116a8fa4de7",
-                            "name":"manufacturer",
-                            "displayName": "Manufacturer",
-                            "type": "QString",
+                            "id": "e5465ede-9d3d-4558-b614-40dda743ddae",
+                            "name":"modbusAddress",
+                            "displayName": "Modbus address",
+                            "type": "uint",
                             "readOnly": true,
-                            "defaultValue": "Unkown"
-                        },
-                        {
-                            "id": "edf1bc0f-d143-4b75-a11f-635339fb30bf",
-                            "name":"deviceModel",
-                            "displayName": "Device model",
-                            "type": "QString",
-                            "readOnly": true,
-                            "defaultValue": "Unkown"
-                        },
-                        {
-                            "id": "d5181377-c746-4352-8683-6d90a4a83e6e",
-                            "name":"serialNumber",
-                            "displayName": "Serial number",
-                            "type": "QString",
-                            "readOnly": true,
-                            "defaultValue": "Unkown"
+                            "defaultValue": 0
                         }
                     ],
                     "stateTypes":[
@@ -162,54 +218,54 @@
                             "name": "totalCurrent",
                             "displayName": "Total AC current",
                             "displayNameEvent": "Total AC current changed",
-                            "type": "int",
+                            "type": "double",
                             "unit": "Ampere",
-                            "defaultValue": 0
+                            "defaultValue": 0.00
                         },
                         {
                             "id": "3140ccd3-40cf-46c8-8bb2-8c3ea4582f84",
                             "name": "phaseACurrent",
                             "displayName": "Phase A current",
                             "displayNameEvent": "Phase A current changed",
-                            "type": "int",
+                            "type": "double",
                             "unit": "Ampere",
-                            "defaultValue": 0
+                            "defaultValue": 0.00
                         },
                         {
                             "id": "7ea1a53a-6fd9-4914-8283-b57aa1aaaebf",
                             "name": "phaseBCurrent",
                             "displayName": "Phase B current",
                             "displayNameEvent": "Phase B current changed",
-                            "type": "int",
+                            "type": "double",
                             "unit": "Ampere",
-                            "defaultValue": 0
+                            "defaultValue": 0.00
                         },
                         {
                             "id": "aa4b4cf5-43d0-4be5-9505-403918b5371d",
                             "name": "phaseCCurrent",
                             "displayName": "Phase C current",
                             "displayNameEvent": "Phase C current changed",
-                            "type": "int",
+                            "type": "double",
                             "unit": "Ampere",
-                            "defaultValue": 0
+                            "defaultValue": 0.00
                         },
                         {
                             "id": "f08521aa-9c38-4c31-95e1-acb616f6e9c6",
                             "name": "phaseANVoltage",
                             "displayName": "Phase AN voltage",
                             "displayNameEvent": "Phase AN volatage changed",
-                            "type": "int",
+                            "type": "double",
                             "unit": "Volt",
-                            "defaultValue": 0
+                            "defaultValue": 0.00
                         },
                         {
                             "id": "739b8805-d522-4406-bede-d1e4200a3aa9",
                             "name": "phaseBNVoltage",
                             "displayName": "Phase BN voltage",
                             "displayNameEvent": "Phase BN voltage changed",
-                            "type": "int",
+                            "type": "double",
                             "unit": "Volt",
-                            "defaultValue": 0
+                            "defaultValue": 0.00
                         },
                         {
                             "id": "949b797d-5566-4667-8982-e430d23548e2",
@@ -225,36 +281,36 @@
                             "name": "acPower",
                             "displayName": "AC power",
                             "displayNameEvent": "AC power changed",
-                            "type": "int",
+                            "type": "double",
                             "unit": "KiloWatt",
-                            "defaultValue": 0
+                            "defaultValue": 0.00
                         },
                         {
                             "id": "faa45cae-ed28-4150-9036-fceddf9d6776",
                             "name": "lineFrequency",
                             "displayName": "Line frequency",
                             "displayNameEvent": "Line frequency changed",
-                            "type": "int",
+                            "type": "double",
                             "unit": "Hertz",
-                            "defaultValue": 0
+                            "defaultValue": 0.00
                         },
                         {
                             "id": "d493880d-eb58-4530-8010-8ea4f6d63387",
                             "name": "acEnergy",
                             "displayName": "AC energy",
                             "displayNameEvent": "AC energy changed",
-                            "type": "int",
+                            "type": "double",
                             "unit": "KiloWattHour",
-                            "defaultValue": 0
+                            "defaultValue": 0.00
                         },
                         {
                             "id": "44b0320f-89a7-4248-bad4-288ef898a5cc",
                             "name": "cabinetTemperature",
                             "displayName": "Cabinet temperature",
                             "displayNameEvent": "Cabinet temperature changed",
-                            "type": "int",
+                            "type": "double",
                             "unit": "DegreeCelsius",
-                            "defaultValue": 0
+                            "defaultValue": 0.00
                         },
                         {
                             "id": "cebdce98-42d1-4a28-8834-8960efc0e83f",
@@ -304,41 +360,99 @@
                     ]
                 },
                 {
-                    "name": "sunspecMeter",
-                    "displayName": "SunSpec Meter",
+                    "name": "sunspecSinglePhaseMeter",
+                    "displayName": "SunSpec single phase meter",
+                    "id": "7ffa43b8-b56f-4435-8509-980e9d81dfa8",
+                    "createMethods": [ "Auto" ],
+                    "interfaces": ["connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "7d6fcafb-c62e-4a21-aae2-f4041c487149",
+                            "name":"mapId",
+                            "displayName": "Map id",
+                            "type": "int",
+                            "readOnly": true,
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "30b90ec0-429b-4e6c-88e9-155aa4bcad47",
+                            "name":"modbusAddress",
+                            "displayName": "Modbus address",
+                            "type": "uint",
+                            "readOnly": true,
+                            "defaultValue": 0
+                        }
+                    ],
+                    "stateTypes":[
+                        {
+                            "id": "d960e7b1-d4aa-4cab-8f54-6bcfdbb8be36",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        }
+                    ]
+                },
+                {
+                    "name": "sunspecSplitPhaseMeter",
+                    "displayName": "SunSpec split phase meter",
+                    "id": "b8a18e45-5ff5-4f43-915f-04ee216c809d",
+                    "createMethods": [ "Auto" ],
+                    "interfaces": ["connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "89aeec6d-abeb-48b5-9594-214ad5db2d03",
+                            "name":"mapId",
+                            "displayName": "Map id",
+                            "type": "int",
+                            "readOnly": true,
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "a56f198d-ed86-429f-b839-8e11a32da8c1",
+                            "name":"modbusAddress",
+                            "displayName": "Modbus address",
+                            "type": "uint",
+                            "readOnly": true,
+                            "defaultValue": 0
+                        }
+                    ],
+                    "stateTypes":[
+                        {
+                            "id": "34e34ec9-dab0-438c-9493-a3068bc401de",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        }
+                    ]
+                },
+                {
+                    "name": "sunspecThreePhaseMeter",
+                    "displayName": "SunSpec three phase meter",
                     "id": "68f822f9-ff30-4275-b229-39a3674fead7",
                     "createMethods": [ "Auto" ],
                     "interfaces": ["connectable"],
                     "paramTypes": [
                         {
-                            "id": "66bdb89b-bbd4-4edf-96df-649014d94c42",
-                            "name":"ipAddress",
-                            "displayName": "IP address",
-                            "type": "QString"
+                            "id": "a1960821-155c-4176-86fa-974429039182",
+                            "name":"mapId",
+                            "displayName": "Map id",
+                            "type": "int",
+                            "readOnly": true,
+                            "defaultValue": 0
                         },
                         {
-                            "id": "aa1ca51d-5e9c-4a1a-a4ec-e479d4f702d5",
-                            "name":"manufacturer",
-                            "displayName": "Manufacturer",
-                            "type": "QString",
+                            "id": "6d5dbd35-1bf6-46db-bee9-90c679421b89",
+                            "name":"modbusAddress",
+                            "displayName": "Modbus address",
+                            "type": "uint",
                             "readOnly": true,
-                            "defaultValue": "Unkown"
-                        },
-                        {
-                            "id": "52da5388-28d7-48a2-8ad6-4c1e852a4348",
-                            "name":"deviceModel",
-                            "displayName": "Device model",
-                            "type": "QString",
-                            "readOnly": true,
-                            "defaultValue": "Unkown"
-                        },
-                        {
-                            "id": "9fa7288c-e7a1-4163-baa1-6f484e1feb55",
-                            "name":"serialNumber",
-                            "displayName": "Serial number",
-                            "type": "QString",
-                            "readOnly": true,
-                            "defaultValue": "Unkown"
+                            "defaultValue": 0
                         }
                     ],
                     "stateTypes":[
@@ -442,8 +556,7 @@
                             "defaultValue": 0
                         },
                         {
-                            "id": "73ebf57f-1ad2-4d19-bfd9-9e0a514c1243
-",
+                            "id": "73ebf57f-1ad2-4d19-bfd9-9e0a514c1243",
                             "name": "energyExported",
                             "displayName": "Total real energy exported",
                             "displayNameEvent": "Total real energy exported changed",
@@ -463,66 +576,6 @@
                     ]
                 },
                 {
-                    "name": "sunspecTracker",
-                    "displayName": "SunSpec Tracker",
-                    "id": "9941da30-a6d6-475d-8244-3c2145b419e6",
-                    "createMethods": [ "Auto" ],
-                    "interfaces": ["connectable"],
-                    "paramTypes": [
-                        {
-                            "id": "ccdcca78-7efa-4253-8fdb-8731e6880e9b",
-                            "name":"ipAddress",
-                            "displayName": "IP address",
-                            "type": "QString"
-                        },
-                        {
-                            "id": "2795052c-5d63-423d-b44e-fdf02dfaac37",
-                            "name":"manufacturer",
-                            "displayName": "Manufacturer",
-                            "type": "QString",
-                            "readOnly": true,
-                            "defaultValue": "Unkown"
-                        },
-                        {
-                            "id": "7528c840-da8c-40ba-ab82-914cfc686a49",
-                            "name":"deviceModel",
-                            "displayName": "Device model",
-                            "type": "QString",
-                            "readOnly": true,
-                            "defaultValue": "Unkown"
-                        },
-                        {
-                            "id": "ce9cc598-947c-4efc-b04f-21e784c5d2df",
-                            "name":"serialNumber",
-                            "displayName": "Serial number",
-                            "type": "QString",
-                            "readOnly": true,
-                            "defaultValue": "Unkown"
-                        }
-                    ],
-                    "stateTypes":[
-                        {
-                            "id": "fe57e465-e49e-4d50-b880-6d9a243783ff",
-                            "name": "connected",
-                            "displayName": "Connected",
-                            "displayNameEvent": "Connected changed",
-                            "type": "bool",
-                            "defaultValue": false,
-                            "cached": false
-                        },
-                        {
-                            "id": "d2bbba4b-998f-444e-935f-f958927afddd",
-                            "name": "power",
-                            "displayName": "Power",
-                            "displayNameEvent": "Power changed",
-                            "displayNameAction": "Change power",
-                            "type": "bool",
-                            "defaultValue": 0,
-                            "writable": true
-                        }
-                    ]
-                },
-                {
                     "name": "sunspecStorage",
                     "displayName": "SunSpec Storage",
                     "id": "9a643ba8-346c-4127-a2f8-956a7133d75e",
@@ -530,34 +583,20 @@
                     "interfaces": ["connectable"],
                     "paramTypes": [
                         {
-                            "id": "421cacb9-a94d-4ba9-923c-3bc30d8b94c8",
-                            "name":"ipAddress",
-                            "displayName": "IP address",
-                            "type": "QString"
+                            "id": "219beb96-b9fe-4dd2-a386-ecfbbab8786d",
+                            "name":"mapId",
+                            "displayName": "Map id",
+                            "type": "int",
+                            "readOnly": true,
+                            "defaultValue": 0
                         },
                         {
-                            "id": "1d8f1ef7-33ad-40ed-99dd-ec54f87c2f17",
-                            "name":"manufacturer",
-                            "displayName": "Manufacturer",
-                            "type": "QString",
+                            "id": "3f107844-00c5-4f39-86e5-485b3d1f5c1a",
+                            "name":"modbusAddress",
+                            "displayName": "Modbus address",
+                            "type": "uint",
                             "readOnly": true,
-                            "defaultValue": "Unkown"
-                        },
-                        {
-                            "id": "2a7f8464-6f03-4113-ac1d-d8ebd8705695",
-                            "name":"deviceModel",
-                            "displayName": "Device model",
-                            "type": "QString",
-                            "readOnly": true,
-                            "defaultValue": "Unkown"
-                        },
-                        {
-                            "id": "2003acdb-38ad-4184-baf8-9ef8e67fc452",
-                            "name":"serialNumber",
-                            "displayName": "Serial number",
-                            "type": "QString",
-                            "readOnly": true,
-                            "defaultValue": "Unkown"
+                            "defaultValue": 0
                         }
                     ],
                     "stateTypes":[
@@ -661,56 +700,6 @@
                             "defaultValue": false,
                             "writable": true,
                             "displayNameAction": "Set discharging rate"
-                        }
-                    ]
-                },
-                {
-                    "name": "sunspecStringCombiner",
-                    "displayName": "SunSpec String Combiner",
-                    "id": "7787f238-f5a3-4ba5-b3ec-7d513b87bf71",
-                    "createMethods": [ "Auto" ],
-                    "interfaces": ["connectable"],
-                    "paramTypes": [
-                        {
-                            "id": "226697c3-37bd-49c7-8c0e-40537573c18e",
-                            "name":"ipAddress",
-                            "displayName": "IP address",
-                            "type": "QString"
-                        },
-                        {
-                            "id": "3f126e65-05e2-46a3-aeeb-bfacc0bdd9b0",
-                            "name":"manufacturer",
-                            "displayName": "Manufacturer",
-                            "type": "QString",
-                            "readOnly": true,
-                            "defaultValue": "Unkown"
-                        },
-                        {
-                            "id": "40666030-3609-467f-b26c-3a42d1c6dca1",
-                            "name":"deviceModel",
-                            "displayName": "Device model",
-                            "type": "QString",
-                            "readOnly": true,
-                            "defaultValue": "Unkown"
-                        },
-                        {
-                            "id": "f5046138-9271-4a91-a3eb-c2ecfa755ef5",
-                            "name":"serialNumber",
-                            "displayName": "Serial number",
-                            "type": "QString",
-                            "readOnly": true,
-                            "defaultValue": "Unkown"
-                        }
-                    ],
-                    "stateTypes":[
-                        {
-                            "id": "3f791612-50fd-4a3c-ac19-27e01dd8c63a",
-                            "name": "connected",
-                            "displayName": "Connected",
-                            "displayNameEvent": "Connected changed",
-                            "type": "bool",
-                            "defaultValue": false,
-                            "cached": false
                         }
                     ]
                 }
