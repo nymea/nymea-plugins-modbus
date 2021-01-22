@@ -87,89 +87,89 @@ public:
     };
     Q_ENUM(SunSpecEvent1)
 
-    enum BlockId {
-        BlockIdCommon          = 1,
-        BlockIdBasicAggregator = 2,
-        BlockIdSecureDatasetReadRequest     = 3,
-        BlockIdSecureDatasetReadResponse    = 4,
-        BlockIdSecureWriteRequest           = 5,
-        BlockIdSecureWriteSequentialRequest = 6,
-        BlockIdSecureWriteResponseModel     = 7,
-        BlockIdGetDeviceSecurityCertificate = 8,
-        BlockIdSetOperatorSecurityCertificate = 9,
-        BlockIdCommunicationInterfaceHeader = 10,
-        BlockIdEthernetLinkLayer        = 11,
-        BlockIdIPv4                     = 12,
-        BlockIdIPv6                     = 13,
-        BlockIdProxyServer              = 14,
-        BlockIdInterfaceCountersModel   = 15,
-        BlockIdSimpleIpNetwork          = 16,
-        BlockIdSerialInterface          = 17,
-        BlockIdCellularLink             = 18,
-        BlockIdPPPLink                  = 19,
-        BlockIdInverterSinglePhase      = 101,
-        BlockIdInverterSplitPhase       = 102,
-        BlockIdInverterThreePhase       = 103,
-        BlockIdInverterSinglePhaseFloat = 111,
-        BlockIdInverterSplitPhaseFloat  = 112,
-        BlockIdInverterThreePhaseFloat  = 113,
-        BlockIdNameplate                = 120,
-        BlockIdBasicSettings            = 121,
-        BlockIdMeasurementsStatus       = 122,
-        BlockIdImmediateControls        = 123,
-        BlockIdStorage                  = 124,
-        BlockIdPricing                  = 125,
-        BlockIdStaticVoltVAR            = 126,
-        BlockIdFreqWattParam            = 127,
-        BlockIdDynamicReactiveCurrent   = 128,
-        BlockIdLVRTD                    = 129,
-        BlockIdHVRTD                    = 130,
-        BlockIdWattPF                   = 131,
-        BlockIdVoltWatt                 = 132,
-        BlockIdBasicScheduling          = 133,
-        BlockIdFreqWattCrv              = 134,
-        BlockIdLFRT                     = 135,
-        BlockIdHFRT                     = 136,
-        BlockIdLVRTC                    = 137,
-        BlockIdHVRTC                    = 138,
-        BlockIdMultipleMPPTInverterExtensionModel = 160,
-        BlockIdSinglePhaseMeter                 = 201,
-        BlockIdSplitSinglePhaseMeter            = 202,
-        BlockIdWyeConnectThreePhaseMeter        = 203,
-        BlockIdDeltaConnectThreePhaseMeter      = 204,
-        BlockIdSinglePhaseMeterFloat            = 211,
-        BlockIdSplitSinglePhaseMeterFloat       = 212,
-        BlockIdWyeConnectThreePhaseMeterFloat   = 213,
-        BlockIdDeltaConnectThreePhaseMeterFloat = 214,
-        BlockIdSecureACMeterSelectedReadings   = 220,
-        BlockIdIrradianceModel                 = 302,
-        BlockIdBackOfModuleTemperatureModel    = 303,
-        BlockIdInclinometerModel               = 304,
-        BlockIdGPS                             = 305,
-        BlockIdReferencePointModel             = 306,
-        BlockIdBaseMet                         = 307,
-        BlockIdMiniMetModel                    = 308,
-        BlockIdStringCombiner                  = 401,
-        BlockIdStringCombinerAdvanced        = 402,
-        BlockIdStringCombinerCurrent         = 403,
-        BlockIdStringCombinerCurrentAdvanced = 404,
-        BlockIdSolarModuleFloat          = 501,
-        BlockIdSolarModule               = 502,
-        BlockIdTrackerController         = 601,
-        BlockIdEnergyStorageBaseModel    = 801,
-        BlockIdBatteryBaseModel          = 802,
-        BlockIdLithiumIonBatteryModel    = 803,
-        BlockIdVerisStatusConfiguration  = 64001,
-        BlockIdMersenGreenString         = 64020,
-        BlockIdEltekInverterExtension    = 64101,
-        BlockIdOutBackAXSDevice          = 64110,
-        BlockIdBasicChargeController     = 64111,
-        BlockIdOutBackFMChargeController = 64112,
-        BlockIdEnd                       = 65535
+    enum ModelId {
+        ModelIdCommon          = 1,
+        ModelIdBasicAggregator = 2,
+        ModelIdSecureDatasetReadRequest     = 3,
+        ModelIdSecureDatasetReadResponse    = 4,
+        ModelIdSecureWriteRequest           = 5,
+        ModelIdSecureWriteSequentialRequest = 6,
+        ModelIdSecureWriteResponseModel     = 7,
+        ModelIdGetDeviceSecurityCertificate = 8,
+        ModelIdSetOperatorSecurityCertificate = 9,
+        ModelIdCommunicationInterfaceHeader = 10,
+        ModelIdEthernetLinkLayer        = 11,
+        ModelIdIPv4                     = 12,
+        ModelIdIPv6                     = 13,
+        ModelIdProxyServer              = 14,
+        ModelIdInterfaceCountersModel   = 15,
+        ModelIdSimpleIpNetwork          = 16,
+        ModelIdSerialInterface          = 17,
+        ModelIdCellularLink             = 18,
+        ModelIdPPPLink                  = 19,
+        ModelIdInverterSinglePhase      = 101,
+        ModelIdInverterSplitPhase       = 102,
+        ModelIdInverterThreePhase       = 103,
+        ModelIdInverterSinglePhaseFloat = 111,
+        ModelIdInverterSplitPhaseFloat  = 112,
+        ModelIdInverterThreePhaseFloat  = 113,
+        ModelIdNameplate                = 120,
+        ModelIdBasicSettings            = 121,
+        ModelIdMeasurementsStatus       = 122,
+        ModelIdImmediateControls        = 123,
+        ModelIdStorage                  = 124,
+        ModelIdPricing                  = 125,
+        ModelIdStaticVoltVAR            = 126,
+        ModelIdFreqWattParam            = 127,
+        ModelIdDynamicReactiveCurrent   = 128,
+        ModelIdLVRTD                    = 129,
+        ModelIdHVRTD                    = 130,
+        ModelIdWattPF                   = 131,
+        ModelIdVoltWatt                 = 132,
+        ModelIdBasicScheduling          = 133,
+        ModelIdFreqWattCrv              = 134,
+        ModelIdLFRT                     = 135,
+        ModelIdHFRT                     = 136,
+        ModelIdLVRTC                    = 137,
+        ModelIdHVRTC                    = 138,
+        ModelIdMultipleMPPTInverterExtensionModel = 160,
+        ModelIdSinglePhaseMeter                 = 201,
+        ModelIdSplitSinglePhaseMeter            = 202,
+        ModelIdWyeConnectThreePhaseMeter        = 203,
+        ModelIdDeltaConnectThreePhaseMeter      = 204,
+        ModelIdSinglePhaseMeterFloat            = 211,
+        ModelIdSplitSinglePhaseMeterFloat       = 212,
+        ModelIdWyeConnectThreePhaseMeterFloat   = 213,
+        ModelIdDeltaConnectThreePhaseMeterFloat = 214,
+        ModelIdSecureACMeterSelectedReadings   = 220,
+        ModelIdIrradianceModel                 = 302,
+        ModelIdBackOfModuleTemperatureModel    = 303,
+        ModelIdInclinometerModel               = 304,
+        ModelIdGPS                             = 305,
+        ModelIdReferencePointModel             = 306,
+        ModelIdBaseMet                         = 307,
+        ModelIdMiniMetModel                    = 308,
+        ModelIdStringCombiner                  = 401,
+        ModelIdStringCombinerAdvanced        = 402,
+        ModelIdStringCombinerCurrent         = 403,
+        ModelIdStringCombinerCurrentAdvanced = 404,
+        ModelIdSolarModuleFloat          = 501,
+        ModelIdSolarModule               = 502,
+        ModelIdTrackerController         = 601,
+        ModelIdEnergyStorageBaseModel    = 801,
+        ModelIdBatteryBaseModel          = 802,
+        ModelIdLithiumIonBatteryModel    = 803,
+        ModelIdVerisStatusConfiguration  = 64001,
+        ModelIdMersenGreenString         = 64020,
+        ModelIdEltekInverterExtension    = 64101,
+        ModelIdOutBackAXSDevice          = 64110,
+        ModelIdBasicChargeController     = 64111,
+        ModelIdOutBackFMChargeController = 64112,
+        ModelIdEnd                       = 65535
     };
-    Q_ENUM(BlockId)
+    Q_ENUM(ModelId)
 
-    explicit SunSpec(const QHostAddress &hostAddress, uint port = 502, QObject *parent = 0);
+    explicit SunSpec(const QHostAddress &hostAddress, uint port = 502, uint slaveId = 1, QObject *parent = 0);
     ~SunSpec();
     bool connectModbus();
     void setHostAddress(const QHostAddress &hostAddress);
@@ -194,14 +194,14 @@ public:
     QString m_manufacturer = "Unknown";
     QString m_deviceModel  = "Unknown";
     QString m_serialNumber = "Unknown";
-    QHash<BlockId, int> m_mapList;
+    QHash<ModelId, int> m_modelList;
 
     void findBaseRegister();
-    void findModbusMap(const QList<BlockId> &mapIds, uint modbusAddressOffset = 2);
+    void findSunSpecModels(const QList<ModelId> &modelIds, uint modbusAddressOffset = 2);
 
-    void readCommonMap();
-    void readMapHeader(uint modbusAddress);
-    void readMap(uint modbusAddress, uint modelLength); //modbusAddress = model start address, model length is without header
+    void readCommonModel();
+    void readModelHeader(uint modbusAddress);
+    void readModelDataBlock(uint modbusAddress, uint modelLength); //modbusAddress = model start address, model length is without header
 
     float convertValueWithSSF(quint32 rawValue, quint16 sunssf);
     float convertFloatValues(quint16 rawValue0, quint16 rawValue1);
@@ -214,20 +214,19 @@ public:
 
 signals:
     void connectionStateChanged(bool status);
-    void requestExecuted(QUuid requetId, bool success);
+    void requestExecuted(const QUuid &requestId, bool success);
 
     void foundBaseRegister(int modbusAddress);
-    void commonMapReceived(const QString &manufacturer, const QString &deviceModel, const QString &serialNumber);
+    void commonModelReceived(const QString &manufacturer, const QString &deviceModel, const QString &serialNumber);
 
-    void foundModbusMap(BlockId mapId, int modbusStartRegister);
-    void modbusMapSearchFinished(const QHash<BlockId, int> &mapIds);
+    void foundSunSpecModel(ModelId modelId, int modbusStartRegister);
+    void sunspecModelSearchFinished(const QHash<ModelId, int> &mapIds);
 
-    void mapHeaderReceived(uint modbusAddress, BlockId mapId, uint mapLength);
-    void mapReceived(BlockId mapId, uint mapLength, QVector<quint16> data);
+    void modelHeaderReceived(uint modbusAddress, ModelId mapId, uint mapLength);
+    void modelDataBlockReceived(ModelId id, uint ength, QVector<quint16> data);
 
 private slots:
     void onModbusStateChanged(QModbusDevice::State state);
-    void onReceivedHoldingRegister(quint32 slaveAddress, quint32 modbusRegister, const QVector<quint16> &values);
 };
 
 #endif // SUNSPEC_H

@@ -60,7 +60,7 @@ public:
     void getTrackerMap();
 
 private:
-    BlockId m_id = BlockIdTrackerController;
+    ModelId m_id = ModelIdTrackerController;
     uint m_mapLength = 0;
     uint m_mapModbusStartRegister = 40000;
 

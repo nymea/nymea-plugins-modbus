@@ -32,10 +32,11 @@
 #include "extern-plugininfo.h"
 #include  <QtEndian>
 
-SunSpec::SunSpec(const QHostAddress &hostAddress, uint port, QObject *parent) :
+SunSpec::SunSpec(const QHostAddress &hostAddress, uint port, uint slaveId, QObject *parent) :
     QObject(parent),
     m_hostAddress(hostAddress),
-    m_port(port)
+    m_port(port),
+    m_slaveId(slaveId)
 {
     qCDebug(dcSunSpec()) << "SunSpec: Creating SunSpec connection";
     m_modbusTcpClient = new QModbusTcpClient(this);
@@ -143,8 +144,8 @@ void SunSpec::findBaseRegister()
                     if (reply->error() == QModbusDevice::NoError) {
                         const QModbusDataUnit unit = reply->result();
                         if ((unit.value(0) << 16 | unit.value(1)) == 0x53756e53) {
-                            //Well-known value. Uniquely identifies this as a SunSpec Modbus Map
-                            qCDebug(dcSunSpec()) << "SunSpec: Found start of modbus map" << baseRegister;
+                            //Well-known value. Uniquely identifies this as a SunSpec Modbus model
+                            qCDebug(dcSunSpec()) << "SunSpec: Found start of modbus model" << baseRegister;
                             m_baseRegister = baseRegister;
                             emit foundBaseRegister(baseRegister);
                         } else {
@@ -162,9 +163,9 @@ void SunSpec::findBaseRegister()
     }
 }
 
-void SunSpec::findModbusMap(const QList<BlockId> &ids, uint modbusAddressOffset)
+void SunSpec::findSunSpecModels(const QList<ModelId> &ids, uint modbusAddressOffset)
 {
-    qCDebug(dcSunSpec()) << "SunSpec: Find modbus map. Start register" << m_baseRegister+modbusAddressOffset;
+    qCDebug(dcSunSpec()) << "SunSpec: Find modbus model. Start register" << m_baseRegister+modbusAddressOffset;
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_baseRegister+modbusAddressOffset, 2);
 
     if (QModbusReply *reply = m_modbusTcpClient->sendReadRequest(request, m_slaveId)) {
@@ -175,23 +176,23 @@ void SunSpec::findModbusMap(const QList<BlockId> &ids, uint modbusAddressOffset)
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
                     uint modbusAddress = unit.startAddress();
-                    BlockId blockId    = BlockId(unit.value(0));
-                    int blockLength = unit.value(1);
-                    if (blockId == BlockIdEnd) {
-                        qCDebug(dcSunSpec()) << "SunSpec: Block Id End";
-                        modbusMapSearchFinished(m_mapList);
+                    ModelId modelId    = ModelId(unit.value(0));
+                    int modelLength = unit.value(1);
+                    if (modelId == ModelIdEnd) {
+                        qCDebug(dcSunSpec()) << "SunSpec: Model Id End";
+                        sunspecModelSearchFinished(m_modelList);
                         return;
                     }
 
-                    if (ids.isEmpty() || ids.contains(blockId)) {
-                        // If ids is empty then emit all blocks
-                        qCDebug(dcSunSpec()) << "SunSpec: Found block" << BlockId(blockId) << "with block length" << blockLength;
-                        m_mapList.insert(BlockId(blockId), modbusAddress);
-                        foundModbusMap(BlockId(blockId), modbusAddress);
+                    if (ids.isEmpty() || ids.contains(modelId)) {
+                        // If ids is empty then emit all models
+                        qCDebug(dcSunSpec()) << "SunSpec: Found model" << ModelId(modelId) << "with length" << modelLength;
+                        m_modelList.insert(ModelId(modelId), modbusAddress);
+                        foundSunSpecModel(ModelId(modelId), modbusAddress);
                     }
-                    findModbusMap(ids, modbusAddress+2+blockLength-m_baseRegister); //read next block
+                    findSunSpecModels(ids, modbusAddress+2+modelLength-m_baseRegister); //read next model
                 } else {
-                    qCWarning(dcSunSpec()) << "SunSpec: Find modbus map, read response error:" << reply->error();
+                    qCWarning(dcSunSpec()) << "SunSpec: Find modbus model, read response error:" << reply->error();
                 }
             });
         } else {
@@ -204,9 +205,9 @@ void SunSpec::findModbusMap(const QList<BlockId> &ids, uint modbusAddressOffset)
     }
 }
 
-void SunSpec::readMapHeader(uint modbusAddress)
+void SunSpec::readModelHeader(uint modbusAddress)
 {
-    qCDebug(dcSunSpec()) << "SunSpec: Read map header, modbus address:" << modbusAddress << "Slave ID" << m_slaveId;
+    qCDebug(dcSunSpec()) << "SunSpec: Read model header, modbus address:" << modbusAddress << "Slave ID" << m_slaveId;
     if (modbusAddress == 0 || modbusAddress == 40000 || modbusAddress == 50000)
         modbusAddress += 2;
 
@@ -220,34 +221,34 @@ void SunSpec::readMapHeader(uint modbusAddress)
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
                     uint modbusAddress = unit.startAddress();
-                    BlockId mapId = BlockId(unit.value(0));
-                    int mapLength = unit.value(1);
-                    qCDebug(dcSunSpec()) << "Received block header response. Map ID:" << mapId << "Map length" << mapLength;
-                    mapHeaderReceived(modbusAddress, mapId, mapLength);
+                    ModelId modelId = ModelId(unit.value(0));
+                    int length = unit.value(1);
+                    qCDebug(dcSunSpec()) << "SunSpec: Received model header response. Model ID:" << modelId << "length" << length;
+                    modelHeaderReceived(modbusAddress, modelId, length);
                 } else {
-                    qCWarning(dcSunSpec()) << "Read response error:" << reply->error();
+                    qCWarning(dcSunSpec()) << "SunSpec: Read response error:" << reply->error();
                 }
             });
             connect(reply, &QModbusReply::errorOccurred, this, [reply] (QModbusDevice::Error error) {
-                qCWarning(dcSunSpec()) << "Modbus reply error:" << error;
+                qCWarning(dcSunSpec()) << "SunSpec: Modbus reply error:" << error;
                 reply->finished(); // To make sure it will be deleted
             });
         } else {
-            qCWarning(dcSunSpec()) << "Read error: " << m_modbusTcpClient->errorString();
+            qCWarning(dcSunSpec()) << "SunSpec: Read error: " << m_modbusTcpClient->errorString();
             delete reply; // broadcast replies return immediately
             return;
         }
     } else {
-        qCWarning(dcSunSpec()) << "Read error: " << m_modbusTcpClient->errorString();
+        qCWarning(dcSunSpec()) << "SunSpec: Read error: " << m_modbusTcpClient->errorString();
         return;
     }
 }
 
-void SunSpec::readMap(uint modbusAddress, uint modelLength)
+void SunSpec::readModelDataBlock(uint modbusAddress, uint length)
 {
-    qCDebug(dcSunSpec()) << "SunSpec: Read map, modbus address" << modbusAddress << "model length" << modelLength << ", Slave ID" << m_slaveId;
+    qCDebug(dcSunSpec()) << "SunSpec: Read model, modbus address" << modbusAddress << "length" << length << ", Slave ID" << m_slaveId;
 
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, modelLength+2);
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, length+2);
 
     if (QModbusReply *reply = m_modbusTcpClient->sendReadRequest(request, m_slaveId)) {
         if (!reply->isFinished()) {
@@ -257,32 +258,32 @@ void SunSpec::readMap(uint modbusAddress, uint modelLength)
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
                     uint modbusAddress = unit.startAddress();
-                    BlockId mapId = BlockId(unit.value(0));
-                    uint mapLength = unit.value(1);
-                    qCDebug(dcSunSpec()) << "Received map. Modbus address" << modbusAddress << "Map ID" << mapId << "Map Length" << mapLength;
-                    emit mapReceived(mapId, mapLength, unit.values().mid(2));
+                    ModelId modelId = ModelId(unit.value(0));
+                    uint length = unit.value(1);
+                    qCDebug(dcSunSpec()) << "SunSpec: Received model. Modbus address" << modbusAddress << "model ID" << modelId << "length" << length;
+                    emit modelDataBlockReceived(modelId, length, unit.values().mid(2));
                 } else {
-                    qCWarning(dcSunSpec()) << "Read response error:" << reply->error();
+                    qCWarning(dcSunSpec()) << "SunSpec: Read response error:" << reply->error();
                 }
             });
             connect(reply, &QModbusReply::errorOccurred, this, [reply] (QModbusDevice::Error error) {
-                qCWarning(dcSunSpec()) << "Modbus reply error:" << error;
+                qCWarning(dcSunSpec()) << "SunSpec: Modbus reply error:" << error;
                 reply->finished(); // To make sure it will be deleted
             });
         } else {
-            qCWarning(dcSunSpec()) << "Read error: " << m_modbusTcpClient->errorString();
+            qCWarning(dcSunSpec()) << "SunSpec: Read error: " << m_modbusTcpClient->errorString();
             delete reply; // broadcast replies return immediately
             return;
         }
     } else {
-        qCWarning(dcSunSpec()) << "Read error: " << m_modbusTcpClient->errorString();
+        qCWarning(dcSunSpec()) << "SunSpec: Read error: " << m_modbusTcpClient->errorString();
         return;
     }
 }
 
-void SunSpec::readCommonMap()
+void SunSpec::readCommonModel()
 {
-    qCDebug(dcSunSpec()) << "SunSpec: Read common block header. Modbus Address" << m_baseRegister+2 << ", Slave ID" << m_slaveId;
+    qCDebug(dcSunSpec()) << "SunSpec: Read common model header. Modbus Address" << m_baseRegister+2 << ", Slave ID" << m_slaveId;
 
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_baseRegister+2, 66);
 
@@ -293,9 +294,6 @@ void SunSpec::readCommonMap()
 
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    //uint modbusAddress = unit.startAddress();
-                    //BlockId mapId = BlockId(unit.value(0));
-                    //int mapLength = unit.value(1);
                     m_manufacturer = convertModbusRegisters(unit.values(), MandatoryRegistersModel1::Manufacturer, 16);
                     m_manufacturer.remove('\x00');
                     m_deviceModel  = convertModbusRegisters(unit.values(), MandatoryRegistersModel1::Model, 16);
@@ -303,59 +301,21 @@ void SunSpec::readCommonMap()
                     m_serialNumber = convertModbusRegisters(unit.values(), MandatoryRegistersModel1::SerialNumber, 16);
                     m_serialNumber.remove('\x00');
                     qCDebug(dcSunSpec()) << "SunSpec: Received common block response. Manufacturer" << m_manufacturer << "Model" << m_deviceModel << "Serial number" << m_serialNumber;
-                    commonMapReceived(m_manufacturer, m_deviceModel, m_serialNumber);
+                    commonModelReceived(m_manufacturer, m_deviceModel, m_serialNumber);
                 } else {
-                    qCWarning(dcSunSpec()) << "SunSpec: Read common map, read response error:" << reply->error();
+                    qCWarning(dcSunSpec()) << "SunSpec: Read common model, read response error:" << reply->error();
                 }
             });
         } else {
-            qCWarning(dcSunSpec()) << "Sunspec: Read common map read error: " << m_modbusTcpClient->errorString();
+            qCWarning(dcSunSpec()) << "Sunspec: Read common model read error: " << m_modbusTcpClient->errorString();
             delete reply; // broadcast replies return immediately
             return;
         }
     } else {
-        qCWarning(dcSunSpec()) << "Read error: " << m_modbusTcpClient->errorString();
+        qCWarning(dcSunSpec()) << "SunSpec: Read error: " << m_modbusTcpClient->errorString();
         return;
     }
 }
-
-void SunSpec::onReceivedHoldingRegister(quint32 slaveAddress, quint32 modbusRegister, const QVector<quint16> &data)
-{
-    if (modbusRegister == 00000 || modbusRegister == 40000 || modbusRegister == 50000) {
-        // Common block, 66 registers long + 2 header registers
-
-        qCDebug(dcSunSpec()) << "Sunspec Identification:" << convertModbusRegisters(data, 0, 2);
-
-        if (convertModbusRegisters(data, 0, 2) != "SunS") {
-            qCWarning(dcSunSpec()) << "Could not find SunS value at" << modbusRegister << "at Slave" << slaveAddress;
-            return;
-        }
-        m_baseRegister = modbusRegister;
-
-        //Mandatory SunSpec Registers
-        // ID: 40003
-        qCDebug(dcSunSpec()) << "Id:" << data[MandatoryRegistersModel1::Manufacturer];
-
-        // Manufacturer: 40005 | 16
-        qCDebug(dcSunSpec()) << "Manufacturer:" << QString::fromLatin1(convertModbusRegisters(data, MandatoryRegistersModel1::Manufacturer, 16));
-
-        // Thing model: 40021 | 16
-        qCDebug(dcSunSpec()) << "Thing model:" << QString::fromLatin1(convertModbusRegisters(data, MandatoryRegistersModel1::Model, 16));
-
-        // Data manager version: 40037 | 8
-        qCDebug(dcSunSpec()) << "Data manager version:" << QString::fromLatin1(convertModbusRegisters(data, 36, 8));
-
-        // Inverter Version: 40045 | 8
-        qCDebug(dcSunSpec()) << "Inverter version:" << QString::fromLatin1(convertModbusRegisters(data, 44, 8));
-
-        // Serial Number: 40053 | 16
-        qCDebug(dcSunSpec()) << "Serial number:" << QString::fromLatin1(convertModbusRegisters(data, MandatoryRegistersModel1::SerialNumber, 16));
-
-        // Modbus thing address : 40069 | 1
-        qCDebug(dcSunSpec()) << "Thing modbus address:" << data[67];
-    };
-}
-
 
 QByteArray SunSpec::convertModbusRegister(const uint16_t &modbusData)
 {
@@ -438,22 +398,18 @@ QUuid SunSpec::writeHoldingRegisters(uint registerAddress, const QVector<quint16
             connect(reply, &QModbusReply::finished, this, [reply, requestId, this] {
 
                 if (reply->error() != QModbusDevice::NoError) {
-                    qCWarning(dcSunSpec()) << "Read response error:" << reply->error();
+                    qCWarning(dcSunSpec()) << "SunSpec: Read response error:" << reply->error();
+                    emit requestExecuted(requestId, false);
+                    return;
                 }
-                reply->deleteLater();
+                emit requestExecuted(requestId, true);
             });
-            connect(reply, &QModbusReply::errorOccurred, this, [reply, requestId, this] (QModbusDevice::Error error){
-
-                qCWarning(dcSunSpec()) << "Modbus reply error:" << error;
-                reply->finished(); // To make sure it will be deleted
-            });
-            QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
             return "";
         }
     } else {
-        qCWarning(dcSunSpec()) << "Read error: " << m_modbusTcpClient->errorString();
+        qCWarning(dcSunSpec()) << "SunSpec: Read error: " << m_modbusTcpClient->errorString();
         return "";
     }
     return requestId;

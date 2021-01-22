@@ -59,7 +59,7 @@ public:
     void executeAction(ThingActionInfo *info) override;
 
 private:
-    QHash<ThingClassId, ParamTypeId> m_mapIdParamTypeIds;
+    QHash<ThingClassId, ParamTypeId> m_modelIdParamTypeIds;
     QHash<ThingClassId, ParamTypeId> m_modbusAddressParamTypeIds;
 
     QHash<ThingClassId, StateTypeId> m_connectedStateTypeIds;
@@ -77,7 +77,7 @@ private:
     QHash<Thing *, SunSpecStorage *> m_sunSpecStorages;
     QHash<Thing *, SunSpecMeter *> m_sunSpecMeters;
 
-    bool checkIfThingExists(uint mapId, uint modbusAddress);
+    bool checkIfThingExists(uint modelId, uint modbusAddress);
 
 private slots:
     void onRefreshTimer();
@@ -86,11 +86,8 @@ private slots:
 
     void onConnectionStateChanged(bool status);
 
-    void onMapHeaderReceived(uint modbusAddress, SunSpec::BlockId mapId, uint mapLength);
-    void onMapReceived(SunSpec::BlockId mapId, uint mapLength, QVector<quint16> data);
-
-    void onFoundModbusMap(SunSpec::BlockId mapId, int modbusStartRegister);
-    void onModbusMapSearchFinished(const QHash<SunSpec::BlockId, int> &mapIds);
+    void onFoundSunSpecModel(SunSpec::ModelId modelId, int modbusStartRegister);
+    void onSunSpecModelSearchFinished(const QHash<SunSpec::ModelId, int> &modelIds);
 
     void onWriteRequestExecuted(QUuid requestId, bool success);
     void onWriteRequestError(QUuid requestId, const QString &error);
@@ -99,6 +96,5 @@ private slots:
     void onStorageDataReceived(const SunSpecStorage::StorageData &storageData);
     void onMeterDataReceived(const SunSpecMeter::MeterData &meterData);
 };
-
 #endif // INTEGRATIONPLUGINSUNSPEC_H
 

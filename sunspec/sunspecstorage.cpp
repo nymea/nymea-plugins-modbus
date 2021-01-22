@@ -31,29 +31,28 @@
 #include "sunspecstorage.h"
 #include "extern-plugininfo.h"
 
-SunSpecStorage::SunSpecStorage(SunSpec *sunspec, SunSpec::BlockId blockId, int modbusAddress) :
+SunSpecStorage::SunSpecStorage(SunSpec *sunspec, SunSpec::ModelId modelId, int modbusAddress) :
     QObject(sunspec),
     m_connection(sunspec),
-    m_id(blockId),
-    m_mapModbusStartRegister(modbusAddress)
+    m_id(modelId),
+    m_modelModbusStartRegister(modbusAddress)
 {
     qCDebug(dcSunSpec()) << "SunSpecStorage: Setting up storage";
-    connect(m_connection, &SunSpec::mapReceived, this, &SunSpecStorage::onModbusMapReceived);
+    connect(m_connection, &SunSpec::modelDataBlockReceived, this, &SunSpecStorage::onModelDataBlockReceived);
 }
 
-SunSpec::BlockId SunSpecStorage::blockId()
+SunSpec::ModelId SunSpecStorage::modelId()
 {
     return m_id;
-
 }
 
 void SunSpecStorage::init()
 {
-    qCDebug(dcSunSpec()) << "SunSpecInverter: Init";
-    m_connection->readMapHeader(m_mapModbusStartRegister);
-    connect(m_connection, &SunSpec::mapHeaderReceived, this, [this] (uint modbusAddress, SunSpec::BlockId mapId, uint mapLength) {
-        qCDebug(dcSunSpec()) << "SunSpecInverter: Map Header received, modbus address:" << modbusAddress << "map Id:" << mapId << "map length:" << mapLength;
-        m_mapLength = mapLength;
+    qCDebug(dcSunSpec()) << "SunSpecStorage: Init";
+    m_connection->readModelHeader(m_modelModbusStartRegister);
+    connect(m_connection, &SunSpec::modelHeaderReceived, this, [this] (uint modbusAddress, SunSpec::ModelId modelId, uint length) {
+        qCDebug(dcSunSpec()) << "SunSpecStorager: Model header received, modbus address:" << modbusAddress << "model Id:" << modelId << "length:" << length;
+        m_modelLength = length;
         emit initFinished(true);
         m_initFinishedSuccess = true;
     });
@@ -64,14 +63,14 @@ void SunSpecStorage::init()
     });
 }
 
-void SunSpecStorage::getStorageMap()
+void SunSpecStorage::getStorageModelDataBlock()
 {
-    m_connection->readMap(m_mapModbusStartRegister, m_mapLength);
+    m_connection->readModelDataBlock(m_modelModbusStartRegister, m_modelLength);
 }
 
-void SunSpecStorage::readStorageBlockHeader()
+void SunSpecStorage::getStorageModelHeader()
 {
-    m_connection->readMapHeader(m_mapModbusStartRegister);
+    m_connection->readModelHeader(m_modelModbusStartRegister);
 }
 
 QUuid SunSpecStorage::setGridCharging(bool enabled)
@@ -82,7 +81,7 @@ QUuid SunSpecStorage::setGridCharging(bool enabled)
     PV (charging from grid 0 disabled)
     GRID (charging from 1 grid enabled*/
 
-    uint registerAddress = m_mapModbusStartRegister + Model124::Model124ChaGriSet;
+    uint registerAddress = m_modelModbusStartRegister + Model124::Model124ChaGriSet;
     quint16 value = enabled;
     return m_connection->writeHoldingRegister(registerAddress, value);
 }
@@ -93,7 +92,7 @@ QUuid SunSpecStorage::setStorageControlMode(bool chargingEnabled, bool dischargi
     quint16 value = ((static_cast<quint16>(chargingEnabled) << StorageControlBitFieldCharge) |
                      (static_cast<quint16>(dischargingEnabled) << StorageControlBitFieldDischarge)) ;
 
-    uint modbusRegister = m_mapModbusStartRegister + Model124::Model124ActivateStorageControlMode;
+    uint modbusRegister = m_modelModbusStartRegister + Model124::Model124ActivateStorageControlMode;
     return m_connection->writeHoldingRegister(modbusRegister, value);
 }
 
@@ -102,7 +101,7 @@ QUuid SunSpecStorage::setChargingRate(int rate)
     //Register Name InWRte
     /* Defines the maximum charge rate (charge limit). Default is 100% */
 
-    uint modbusRegister = m_mapModbusStartRegister + Model124::Model124SetpointMaximumChargingRate;
+    uint modbusRegister = m_modelModbusStartRegister + Model124::Model124SetpointMaximumChargingRate;
     int16_t value = rate * 100;
     return m_connection->writeHoldingRegister(modbusRegister, value);
 }
@@ -111,20 +110,37 @@ QUuid SunSpecStorage::setDischargingRate(int charging)
 {
     //Register Name OutWRte
     /* Defines the maximum discharge rate (discharge limit). Default is 100% */
-    uint modbusRegister = m_mapModbusStartRegister + Model124::Model124SetpointMaximumDischargeRate;
+    uint modbusRegister = m_modelModbusStartRegister + Model124::Model124SetpointMaximumDischargeRate;
     quint16 value = charging * 100;
     return m_connection->writeHoldingRegister(modbusRegister, value);
 }
 
-void SunSpecStorage::onModbusMapReceived(SunSpec::BlockId mapId, uint mapLength, const QVector<quint16> &data)
+void SunSpecStorage::onModelDataBlockReceived(SunSpec::ModelId modelId, uint length, const QVector<quint16> &data)
 {
-    Q_UNUSED(mapLength)
-    switch (mapId) {
-    case SunSpec::BlockIdStorage: {
+    Q_UNUSED(length)
+    if (modelId != m_id) {
+        return;
+    }
+
+    switch (modelId) {
+    case SunSpec::ModelIdStorage: {
         StorageData storageData;
+        qCDebug(dcSunSpec()) << "SunSpecStorage: Storage model received:";
+        qCDebug(dcSunSpec()) << "   - Setpoint maximum charge" << data[Model124SetpointMaximumCharge];
+        qCDebug(dcSunSpec()) << "   - Setpoint maximum charging rate" << data[Model124SetpointMaximumChargingRate];
+        qCDebug(dcSunSpec()) << "   - Setpoint maximum discharge rate" << data[Model124SetpointMaximumDischargeRate];
+        qCDebug(dcSunSpec()) << "   - Active storage control mode" << data[Model124ActivateStorageControlMode];
+        qCDebug(dcSunSpec()) << "   - Currently available energy" << data[Model124CurrentlyAvailableEnergy];
         storageData.chargingState = ChargingState(data[Model124::Model124ChargeStatus]);
+        qCDebug(dcSunSpec()) << "   - Setpoint maximum charging rate" << data[Model124ChaGriSet];
+        qCDebug(dcSunSpec()) << "   - Setpoint maximum charging rate" << data[Model124ScaleFactorMaximumCharge];
+        qCDebug(dcSunSpec()) << "   - Setpoint maximum charging rate" << data[Model124ScaleFactorMaximumChargeDischargeRate];
+        qCDebug(dcSunSpec()) << "   - Setpoint maximum charging rate" << data[Model124ScaleFactorAvailableEnergyPercent];
         emit storageDataReceived(storageData);
     } break;
+        case SunSpec::ModelIdBatteryBaseModel:
+    case SunSpec::ModelIdLithiumIonBatteryModel: {
+    }
     default:
         break;
     }

@@ -31,28 +31,29 @@
 #include "sunspecmeter.h"
 #include "extern-plugininfo.h"
 
-SunSpecMeter::SunSpecMeter(SunSpec *sunspec, SunSpec::BlockId blockId, int modbusAddress) :
+SunSpecMeter::SunSpecMeter(SunSpec *sunspec, SunSpec::ModelId modelId, int modbusAddress) :
     QObject(sunspec),
     m_connection(sunspec),
-    m_id(blockId),
-    m_mapModbusStartRegister(modbusAddress)
+    m_id(modelId),
+    m_modelModbusStartRegister(modbusAddress)
 {
     qCDebug(dcSunSpec()) << "SunSpecMeter: Setting up meter";
-    connect(m_connection, &SunSpec::mapReceived, this, &SunSpecMeter::onModbusMapReceived);
+    connect(m_connection, &SunSpec::modelDataBlockReceived, this, &SunSpecMeter::onModelDataBlockReceived);
 }
 
-SunSpec::BlockId SunSpecMeter::blockId()
+SunSpec::ModelId SunSpecMeter::modelId()
 {
+
     return m_id;
 }
 
 void SunSpecMeter::init()
 {
-    qCDebug(dcSunSpec()) << "SunSpecInverter: Init";
-    m_connection->readMapHeader(m_mapModbusStartRegister);
-    connect(m_connection, &SunSpec::mapHeaderReceived, this, [this] (uint modbusAddress, SunSpec::BlockId mapId, uint mapLength) {
-        qCDebug(dcSunSpec()) << "SunSpecInverter: Map Header received, modbus address:" << modbusAddress << "map Id:" << mapId << "map length:" << mapLength;
-        m_mapLength = mapLength;
+    qCDebug(dcSunSpec()) << "SunSpecMeter: Init";
+    m_connection->readModelHeader(m_modelModbusStartRegister);
+    connect(m_connection, &SunSpec::modelHeaderReceived, this, [this] (uint modbusAddress, SunSpec::ModelId modelId, uint length) {
+        qCDebug(dcSunSpec()) << "SunSpecMeter: Model Header received, modbus address:" << modbusAddress << "model Id:" << modelId << "length:" << length;
+        m_modelLength = length;
         emit initFinished(true);
         m_initFinishedSuccess = true;
     });
@@ -63,21 +64,37 @@ void SunSpecMeter::init()
     });
 }
 
-void SunSpecMeter::getMeterMap()
+void SunSpecMeter::getMeterModelDataBlock()
 {
-   m_connection->readMap(m_mapModbusStartRegister, m_mapLength);
+   m_connection->readModelDataBlock(m_modelModbusStartRegister, m_modelLength);
 }
 
-void SunSpecMeter::readMeterBlockHeader()
+void SunSpecMeter::getMeterModelHeader()
 {
 
 }
 
-void SunSpecMeter::onModbusMapReceived(SunSpec::BlockId mapId, uint mapLength, QVector<quint16> data)
+void SunSpecMeter::onModelDataBlockReceived(SunSpec::ModelId modelId, uint length, QVector<quint16> data)
 {
-    Q_UNUSED(mapLength)
+    if (modelId != m_id) {
+        return;
+    }
+    Q_UNUSED(length)
     Q_UNUSED(data)
-    switch (mapId) {
+    switch (modelId) {
+
+    case SunSpec::ModelIdSinglePhaseMeter:
+    case SunSpec::ModelIdSinglePhaseMeterFloat: {
+
+    } break;
+    case SunSpec::ModelIdSplitSinglePhaseMeter:
+    case SunSpec::ModelIdSplitSinglePhaseMeterFloat: {
+
+    } break;
+    case SunSpec::ModelIdWyeConnectThreePhaseMeterFloat:
+    case SunSpec::ModelIdDeltaConnectThreePhaseMeterFloat: {
+
+    } break;
     default:
         break;
     }

@@ -33,17 +33,17 @@
 
 #include <QTimer>
 
-SunSpecInverter::SunSpecInverter(SunSpec *sunspec, SunSpec::BlockId mapId, int modbusAddress) :
+SunSpecInverter::SunSpecInverter(SunSpec *sunspec, SunSpec::ModelId modelId, int modbusAddress) :
     QObject(sunspec),
     m_connection(sunspec),
-    m_id(mapId),
-    m_mapModbusStartRegister(modbusAddress)
+    m_id(modelId),
+    m_modelModbusStartRegister(modbusAddress)
 {
     qCDebug(dcSunSpec()) << "SunSpecInverter: Setting up inverter";
-    connect(m_connection, &SunSpec::mapReceived, this, &SunSpecInverter::onModbusMapReceived);
+    connect(m_connection, &SunSpec::modelDataBlockReceived, this, &SunSpecInverter::onModelDataBlockReceived);
 }
 
-SunSpec::BlockId SunSpecInverter::blockId()
+SunSpec::ModelId SunSpecInverter::modelId()
 {
     return m_id;
 }
@@ -51,10 +51,10 @@ SunSpec::BlockId SunSpecInverter::blockId()
 void SunSpecInverter::init()
 {
     qCDebug(dcSunSpec()) << "SunSpecInverter: Init";
-    m_connection->readMapHeader(m_mapModbusStartRegister);
-    connect(m_connection, &SunSpec::mapHeaderReceived, this, [this] (uint modbusAddress, SunSpec::BlockId mapId, uint mapLength) {
-        qCDebug(dcSunSpec()) << "SunSpecInverter: Map Header received, modbus address:" << modbusAddress << "map Id:" << mapId << "map length:" << mapLength;
-        m_mapLength = mapLength;
+    m_connection->readModelHeader(m_modelModbusStartRegister);
+    connect(m_connection, &SunSpec::modelHeaderReceived, this, [this] (uint modbusAddress, SunSpec::ModelId modelId, uint length) {
+        qCDebug(dcSunSpec()) << "SunSpecInverter: Model Header received, modbus address:" << modbusAddress << "model Id:" << modelId << "length:" << length;
+        m_modelLength = length;
         emit initFinished(true);
         m_initFinishedSuccess = true;
     });
@@ -65,33 +65,33 @@ void SunSpecInverter::init()
     });
 }
 
-void SunSpecInverter::getInverterMap()
+void SunSpecInverter::getInverterModelDataBlock()
 {
     // TODO check map length to modbus max value
-    m_connection->readMap(m_mapModbusStartRegister, m_mapLength);
+    m_connection->readModelDataBlock(m_modelModbusStartRegister, m_modelLength);
 }
 
-void SunSpecInverter::readInverterBlockHeader()
+void SunSpecInverter::getInverterModelHeader()
 {
-    m_connection->readMapHeader(m_mapModbusStartRegister);
+    m_connection->readModelHeader(m_modelModbusStartRegister);
 }
 
-void SunSpecInverter::onModbusMapReceived(SunSpec::BlockId mapId, uint mapLength, QVector<quint16> data)
+void SunSpecInverter::onModelDataBlockReceived(SunSpec::ModelId mapId, uint mapLength, QVector<quint16> data)
 {
     Q_UNUSED(mapLength)
     if (mapId != m_id) {
         return;
     }
-    if (mapLength < m_mapLength) {
+    if (mapLength < m_modelLength) {
         qCDebug(dcSunSpec()) << "SunSpecInverter: on modbus map received, map length ist too short" << mapLength;
         //return;
     }
     InverterData inverterData;
 
     switch (mapId) {
-    case SunSpec::BlockIdInverterSinglePhase:
-    case SunSpec::BlockIdInverterSplitPhase:
-    case SunSpec::BlockIdInverterThreePhase: {
+    case SunSpec::ModelIdInverterSinglePhase:
+    case SunSpec::ModelIdInverterSplitPhase:
+    case SunSpec::ModelIdInverterThreePhase: {
 
         inverterData.acCurrent= m_connection->convertValueWithSSF(data[Model10X::Model10XAcCurrent], data[Model10X::Model10XAmpereScaleFactor]);
         inverterData.acPower = m_connection->convertValueWithSSF(data[Model10X::Model10XACPower], data[Model10X::Model10XWattScaleFactor]);
@@ -105,14 +105,7 @@ void SunSpecInverter::onModbusMapReceived(SunSpec::BlockId mapId, uint mapLength
         inverterData.phaseVoltageBN = m_connection->convertValueWithSSF(data[Model10X::Model10XPhaseVoltageBN], data[Model10X::Model10XVoltageScaleFactor]);
         inverterData.phaseVoltageCN = m_connection->convertValueWithSSF(data[Model10X::Model10XPhaseVoltageCN], data[Model10X::Model10XVoltageScaleFactor]);
 
-
-        qCDebug(dcSunSpec()) << "Energy with SSF values:";
-        qCDebug(dcSunSpec()) << "   -   AC Energy 1:" << data[Model10X::Model10XAcEnergy];
-        qCDebug(dcSunSpec()) << "   -   AC Energy 2" << data[Model10X::Model10XAcEnergy+1];
         quint32 acEnergy = ((static_cast<quint32>(data.value(Model10X::Model10XAcEnergy))<<16)|static_cast<quint32>(data.value(Model10X::Model10XAcEnergy+1)));
-        qCDebug(dcSunSpec()) << "   -   AC Energy combined" << acEnergy;
-        qCDebug(dcSunSpec()) << "   -   Scale factor:" << data[Model10X::Model10XWattHoursScaleFactor];
-
         inverterData.acEnergy = m_connection->convertValueWithSSF(acEnergy, data[Model10X::Model10XWattHoursScaleFactor]);
 
         inverterData.cabinetTemperature = m_connection->convertValueWithSSF(data[Model10X::Model10XCabinetTemperature], data[Model10X::Model10XTemperatureScaleFactor]);
@@ -121,9 +114,9 @@ void SunSpecInverter::onModbusMapReceived(SunSpec::BlockId mapId, uint mapLength
         emit inverterDataReceived(inverterData);
 
     } break;
-    case SunSpec::BlockIdInverterThreePhaseFloat:
-    case SunSpec::BlockIdInverterSplitPhaseFloat:
-    case SunSpec::BlockIdInverterSinglePhaseFloat: {
+    case SunSpec::ModelIdInverterThreePhaseFloat:
+    case SunSpec::ModelIdInverterSplitPhaseFloat:
+    case SunSpec::ModelIdInverterSinglePhaseFloat: {
 
         inverterData.acCurrent = m_connection->convertFloatValues(data[Model11X::Model11XAcCurrent], data[Model11X::Model11XAcCurrent+1]);
 

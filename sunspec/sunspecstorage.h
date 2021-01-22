@@ -38,11 +38,12 @@ class SunSpecStorage : public QObject
 {
     Q_OBJECT
 public:
-    SunSpecStorage(SunSpec *sunspec, SunSpec::BlockId blockId, int modbusAddress);
+    SunSpecStorage(SunSpec *sunspec, SunSpec::ModelId modelId, int modbusAddress);
 
-    SunSpec::BlockId blockId();
+    SunSpec::ModelId modelId();
     void init();
-    void getStorageMap();
+    void getStorageModelHeader();
+    void getStorageModelDataBlock();
 
     QUuid setGridCharging(bool enabled);
     QUuid setDischargingRate(int rate);
@@ -93,15 +94,13 @@ public:
 
 private:
     SunSpec *m_connection = nullptr;
-    SunSpec::BlockId m_id = SunSpec::BlockIdEnergyStorageBaseModel;
-    uint m_mapLength = 0;
-    uint m_mapModbusStartRegister = 40000;
+    SunSpec::ModelId m_id = SunSpec::ModelIdEnergyStorageBaseModel;
+    uint m_modelLength = 0;
+    uint m_modelModbusStartRegister = 40000;
     bool m_initFinishedSuccess = false;
 
-    void readStorageBlockHeader();
-
 private slots:
-    void onModbusMapReceived(SunSpec::BlockId mapId, uint mapLength, const QVector<quint16> &data);
+    void onModelDataBlockReceived(SunSpec::ModelId modelId, uint length, const QVector<quint16> &data);
 
 signals:
     void initFinished(bool success);

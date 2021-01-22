@@ -96,22 +96,22 @@ public:
         SunSpec::SunSpecOperatingState operatingState;
     };
 
-    SunSpecInverter(SunSpec *sunspec, SunSpec::BlockId blockId, int modbusAddress);
-    SunSpec::BlockId blockId();
+    SunSpecInverter(SunSpec *sunspec, SunSpec::ModelId modelId, int modbusAddress);
+    SunSpec::ModelId modelId();
     void init();
-    void getInverterMap();
+    void getInverterModelDataBlock();
 
 private:
     SunSpec *m_connection = nullptr;
-    SunSpec::BlockId m_id; //e.g. 103 for three phase inverter, 113 for three phase inverter with floating point representation
-    uint m_mapLength = 0;
-    uint m_mapModbusStartRegister = 40000;
+    SunSpec::ModelId m_id; //e.g. 103 for three phase inverter, 113 for three phase inverter with floating point representation
+    uint m_modelLength = 0;
+    uint m_modelModbusStartRegister = 40000;
     bool m_initFinishedSuccess = false;
 
-    void readInverterBlockHeader();
+    void getInverterModelHeader();
 
 private slots:
-    void onModbusMapReceived(SunSpec::BlockId mapId, uint mapLength, QVector<quint16> data);
+    void onModelDataBlockReceived(SunSpec::ModelId mapId, uint mapLength, QVector<quint16> data);
 
 signals:
     void initFinished(bool success);

@@ -68,22 +68,21 @@ public:
         SunSpec::SunSpecOperatingState operatingState;
     };
 
-    SunSpecMeter(SunSpec *sunspec, SunSpec::BlockId blockId, int modbusAddress);
-    SunSpec::BlockId blockId();
+    SunSpecMeter(SunSpec *sunspec, SunSpec::ModelId modelId, int modbusAddress);
+    SunSpec::ModelId modelId();
     void init();
-    void getMeterMap();
+    void getMeterModelHeader();
+    void getMeterModelDataBlock();
 
 private:
     SunSpec *m_connection = nullptr;
-    SunSpec::BlockId m_id = SunSpec::BlockIdDeltaConnectThreePhaseMeter;
-    uint m_mapLength = 0;
-    uint m_mapModbusStartRegister = 40000;
+    SunSpec::ModelId m_id = SunSpec::ModelIdDeltaConnectThreePhaseMeter;
+    uint m_modelLength = 0;
+    uint m_modelModbusStartRegister = 40000;
     bool m_initFinishedSuccess = false;
 
-    void readMeterBlockHeader();
-
 private slots:
-   void onModbusMapReceived(SunSpec::BlockId mapId, uint mapLength, QVector<quint16> data);
+   void onModelDataBlockReceived(SunSpec::ModelId modelId, uint length, QVector<quint16> data);
 
 signals:
     void initFinished(bool success);
