@@ -37,7 +37,7 @@
             "thingClasses": [
                 {
                     "name": "sunspecConnection",
-                    "displayName": "SunSpec Device",
+                    "displayName": "SunSpec connection",
                     "id": "f51853f3-8815-4cf3-b337-45cda1f3e6d5",
                     "createMethods": [ "User" ],
                     "interfaces": ["connectable"],
@@ -109,8 +109,8 @@
                     "paramTypes": [
                         {
                             "id": "41715d00-a947-4f43-a475-cea05790e01d",
-                            "name":"mapId",
-                            "displayName": "Map id",
+                            "name":"modelId",
+                            "displayName": "Model",
                             "type": "int",
                             "readOnly": true
                         },
@@ -243,8 +243,8 @@
                     "paramTypes": [
                         {
                             "id": "c42fb50e-210f-4b53-88eb-fa216e15f88f",
-                            "name":"mapId",
-                            "displayName": "Map id",
+                            "name":"modelId",
+                            "displayName": "Model",
                             "type": "int",
                             "readOnly": true
                         },
@@ -404,8 +404,8 @@
                     "paramTypes": [
                         {
                             "id": "8d5b2b58-ce46-406d-844e-f53136afcf09",
-                            "name":"mapId",
-                            "displayName": "Map id",
+                            "name":"modelId",
+                            "displayName": "Model",
                             "type": "int",
                             "readOnly": true
                         },
@@ -583,8 +583,8 @@
                     "paramTypes": [
                         {
                             "id": "7d6fcafb-c62e-4a21-aae2-f4041c487149",
-                            "name":"mapId",
-                            "displayName": "Map id",
+                            "name":"modelId",
+                            "displayName": "Model",
                             "type": "int",
                             "readOnly": true,
                             "defaultValue": 0
@@ -682,8 +682,8 @@
                     "paramTypes": [
                         {
                             "id": "89aeec6d-abeb-48b5-9594-214ad5db2d03",
-                            "name":"mapId",
-                            "displayName": "Map id",
+                            "name":"modelId",
+                            "displayName": "Model",
                             "type": "int",
                             "readOnly": true,
                             "defaultValue": 0
@@ -808,8 +808,8 @@
                     "paramTypes": [
                         {
                             "id": "a1960821-155c-4176-86fa-974429039182",
-                            "name":"mapId",
-                            "displayName": "Map id",
+                            "name":"modelId",
+                            "displayName": "Model",
                             "type": "int",
                             "readOnly": true,
                             "defaultValue": 0
@@ -952,8 +952,8 @@
                     "paramTypes": [
                         {
                             "id": "219beb96-b9fe-4dd2-a386-ecfbbab8786d",
-                            "name":"mapId",
-                            "displayName": "Map id",
+                            "name":"modelId",
+                            "displayName": "Model",
                             "type": "int",
                             "readOnly": true,
                             "defaultValue": 0

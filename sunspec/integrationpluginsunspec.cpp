@@ -49,13 +49,13 @@ void IntegrationPluginSunSpec::init()
     m_connectedStateTypeIds.insert(sunspecSplitPhaseMeterThingClassId, sunspecSplitPhaseMeterConnectedStateTypeId);
     m_connectedStateTypeIds.insert(sunspecThreePhaseMeterThingClassId, sunspecThreePhaseMeterConnectedStateTypeId);
 
-    m_mapIdParamTypeIds.insert(sunspecSinglePhaseInverterThingClassId, sunspecSinglePhaseInverterThingMapIdParamTypeId);
-    m_mapIdParamTypeIds.insert(sunspecSplitPhaseInverterThingClassId, sunspecSplitPhaseInverterThingMapIdParamTypeId);
-    m_mapIdParamTypeIds.insert(sunspecThreePhaseInverterThingClassId, sunspecThreePhaseInverterThingMapIdParamTypeId);
-    m_mapIdParamTypeIds.insert(sunspecStorageThingClassId, sunspecStorageThingMapIdParamTypeId);
-    m_mapIdParamTypeIds.insert(sunspecSinglePhaseMeterThingClassId, sunspecSinglePhaseMeterThingMapIdParamTypeId);
-    m_mapIdParamTypeIds.insert(sunspecSplitPhaseMeterThingClassId, sunspecSplitPhaseMeterThingMapIdParamTypeId);
-    m_mapIdParamTypeIds.insert(sunspecThreePhaseMeterThingClassId, sunspecThreePhaseMeterThingMapIdParamTypeId);
+    m_modelIdParamTypeIds.insert(sunspecSinglePhaseInverterThingClassId, sunspecSinglePhaseInverterThingModelIdParamTypeId);
+    m_modelIdParamTypeIds.insert(sunspecSplitPhaseInverterThingClassId, sunspecSplitPhaseInverterThingModelIdParamTypeId);
+    m_modelIdParamTypeIds.insert(sunspecThreePhaseInverterThingClassId, sunspecThreePhaseInverterThingModelIdParamTypeId);
+    m_modelIdParamTypeIds.insert(sunspecStorageThingClassId, sunspecStorageThingModelIdParamTypeId);
+    m_modelIdParamTypeIds.insert(sunspecSinglePhaseMeterThingClassId, sunspecSinglePhaseMeterThingModelIdParamTypeId);
+    m_modelIdParamTypeIds.insert(sunspecSplitPhaseMeterThingClassId, sunspecSplitPhaseMeterThingModelIdParamTypeId);
+    m_modelIdParamTypeIds.insert(sunspecThreePhaseMeterThingClassId, sunspecThreePhaseMeterThingModelIdParamTypeId);
 
     m_modbusAddressParamTypeIds.insert(sunspecSinglePhaseInverterThingClassId, sunspecSinglePhaseInverterThingModbusAddressParamTypeId);
     m_modbusAddressParamTypeIds.insert(sunspecSplitPhaseInverterThingClassId, sunspecSplitPhaseInverterThingModbusAddressParamTypeId);
@@ -98,17 +98,17 @@ void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
 
         QHostAddress address = QHostAddress(info->thing()->paramValue(sunspecConnectionThingIpAddressParamTypeId).toString());
         int port = info->thing()->paramValue(sunspecConnectionThingPortParamTypeId).toInt();
-        //int slaveId = info->thing()->paramValue(sunspecConnectionThingSlaveIdParamTypeId).toInt();
+        int slaveId = info->thing()->paramValue(sunspecConnectionThingSlaveIdParamTypeId).toInt();
 
-        SunSpec *sunSpec;
         if (m_sunSpecConnections.contains(thing->id())) {
             qCDebug(dcSunSpec()) << "Reconfigure SunSpec connection with new address" << address;
-            sunSpec = m_sunSpecConnections.value(thing->id());
-            sunSpec->setHostAddress(address);
-        } else {
-            sunSpec = new SunSpec(address, port, this);
-            m_sunSpecConnections.insert(thing->id(), sunSpec);
+            m_sunSpecConnections.take(thing->id())->deleteLater();
         }
+        SunSpec *sunSpec;
+        sunSpec = new SunSpec(address, port, slaveId, this);
+        sunSpec->setTimeout(configValue(sunSpecPluginTimeoutParamTypeId).toUInt());
+        sunSpec->setNumberOfRetries(configValue(sunSpecPluginNumberOfRetriesParamTypeId).toUInt());
+        m_sunSpecConnections.insert(thing->id(), sunSpec);
 
         if (!sunSpec->connectModbus()) {
             qCWarning(dcSunSpec()) << "Error connecting to SunSpec device";
@@ -127,9 +127,9 @@ void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
         connect(sunSpec, &SunSpec::destroyed, [this, thing] {
             m_sunSpecConnections.remove(thing->id());
         });
-        connect(sunSpec, &SunSpec::foundModbusMap, this, &IntegrationPluginSunSpec::onFoundModbusMap);
-        connect(sunSpec, &SunSpec::modbusMapSearchFinished, this, &IntegrationPluginSunSpec::onModbusMapSearchFinished);
-        connect(sunSpec, &SunSpec::commonMapReceived, thing, [thing] (const QString &manufacturer, const QString &deviceModel, const QString &serielNumber) {
+        connect(sunSpec, &SunSpec::foundSunSpecModel, this, &IntegrationPluginSunSpec::onFoundSunSpecModel);
+        connect(sunSpec, &SunSpec::sunspecModelSearchFinished, this, &IntegrationPluginSunSpec::onSunSpecModelSearchFinished);
+        connect(sunSpec, &SunSpec::commonModelReceived, thing, [thing] (const QString &manufacturer, const QString &deviceModel, const QString &serielNumber) {
             thing->setStateValue(sunspecConnectionConnectedStateTypeId, true);
             thing->setStateValue(sunspecConnectionManufacturerStateTypeId, manufacturer);
             thing->setStateValue(sunspecConnectionDeviceModelStateTypeId, deviceModel);
@@ -140,14 +140,14 @@ void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
                thing->thingClassId() == sunspecSplitPhaseInverterThingClassId ||
                thing->thingClassId() == sunspecSinglePhaseInverterThingClassId ) {
 
-        uint mapId = thing->paramValue(m_mapIdParamTypeIds.value(thing->thingClassId())).toInt();
+        uint modelId = thing->paramValue(m_modelIdParamTypeIds.value(thing->thingClassId())).toInt();
         int modbusAddress = thing->paramValue(m_modbusAddressParamTypeIds.value(thing->thingClassId())).toInt();
         SunSpec *connection = m_sunSpecConnections.value(thing->parentId());
         if (!connection) {
             qCWarning(dcSunSpec()) << "Could not find SunSpec connection";
             return info->finish(Thing::ThingErrorHardwareNotAvailable);
         }
-        SunSpecInverter *sunSpecInverter = new SunSpecInverter(connection, SunSpec::BlockId(mapId), modbusAddress);
+        SunSpecInverter *sunSpecInverter = new SunSpecInverter(connection, SunSpec::ModelId(modelId), modbusAddress);
         sunSpecInverter->init();
         connect(sunSpecInverter, &SunSpecInverter::initFinished, info, [this, sunSpecInverter, info] (bool success){
             qCDebug(dcSunSpec()) << "Modbus Inverter init finished, success:" << success;
@@ -167,14 +167,14 @@ void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
                thing->thingClassId() == sunspecSplitPhaseMeterThingClassId ||
                thing->thingClassId() == sunspecThreePhaseMeterThingClassId) {
 
-        uint mapId = thing->paramValue(m_mapIdParamTypeIds.value(thing->thingClassId())).toInt();
+        uint modelId = thing->paramValue(m_modelIdParamTypeIds.value(thing->thingClassId())).toInt();
         int modbusAddress = thing->paramValue(m_modbusAddressParamTypeIds.value(thing->thingClassId())).toInt();
         SunSpec *connection = m_sunSpecConnections.value(thing->parentId());
         if (!connection) {
             qCWarning(dcSunSpec()) << "Could not find SunSpec connection";
             return info->finish(Thing::ThingErrorHardwareNotAvailable);
         }
-        SunSpecMeter *sunSpecMeter = new SunSpecMeter(connection, SunSpec::BlockId(mapId), modbusAddress);
+        SunSpecMeter *sunSpecMeter = new SunSpecMeter(connection, SunSpec::ModelId(modelId), modbusAddress);
         sunSpecMeter->init();
         connect(sunSpecMeter, &SunSpecMeter::initFinished, info, [this, sunSpecMeter, info] (bool success){
             qCDebug(dcSunSpec()) << "Modbus meter init finished, success:" << success;
@@ -192,6 +192,28 @@ void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
 
     } else if (info->thing()->thingClassId() == sunspecStorageThingClassId) {
 
+        uint modelId = thing->paramValue(m_modelIdParamTypeIds.value(thing->thingClassId())).toInt();
+        int modbusAddress = thing->paramValue(m_modbusAddressParamTypeIds.value(thing->thingClassId())).toInt();
+        SunSpec *connection = m_sunSpecConnections.value(thing->parentId());
+        if (!connection) {
+            qCWarning(dcSunSpec()) << "Could not find SunSpec connection";
+            return info->finish(Thing::ThingErrorHardwareNotAvailable);
+        }
+        SunSpecStorage *sunSpecStorage = new SunSpecStorage(connection, SunSpec::ModelId(modelId), modbusAddress);
+        sunSpecStorage->init();
+        connect(sunSpecStorage, &SunSpecStorage::initFinished, info, [this, sunSpecStorage, info] (bool success){
+            qCDebug(dcSunSpec()) << "Modbus storage init finished, success:" << success;
+            if (success) {
+                m_sunSpecStorages.insert(info->thing(), sunSpecStorage);
+                info->finish(Thing::ThingErrorNoError);
+            } else {
+                info->finish(Thing::ThingErrorHardwareNotAvailable);
+            }
+        });
+
+        connect(info, &ThingSetupInfo::aborted, sunSpecStorage, &SunSpecStorage::deleteLater);
+        connect(sunSpecStorage, &SunSpecStorage::destroyed, thing, [thing, this] {m_sunSpecStorages.remove(thing);});
+        connect(sunSpecStorage, &SunSpecStorage::storageDataReceived, this, &IntegrationPluginSunSpec::onStorageDataReceived);
 
     } else {
         Q_ASSERT_X(false, "setupThing", QString("Unhandled thingClassId: %1").arg(info->thing()->thingClassId().toString()).toUtf8());
@@ -215,8 +237,8 @@ void IntegrationPluginSunSpec::postSetupThing(Thing *thing)
             qCDebug(dcSunSpec()) << "SunSpecConnection not found";
             return;
         }
-        connection->readCommonMap();
-        connection->findModbusMap(QList<SunSpec::BlockId>()); // Discover all maps, without filter
+        connection->readCommonModel();
+        connection->findSunSpecModels(QList<SunSpec::ModelId>()); // Discover all models, without filter
 
     } else if (thing->thingClassId() == sunspecSinglePhaseInverterThingClassId ||
                thing->thingClassId() == sunspecSplitPhaseInverterThingClassId ||
@@ -227,7 +249,7 @@ void IntegrationPluginSunSpec::postSetupThing(Thing *thing)
             qCDebug(dcSunSpec()) << "SunSpecInverter not found";
             return;
         }
-        sunSpecInverter->getInverterMap();
+        sunSpecInverter->getInverterModelDataBlock();
 
     } else if (thing->thingClassId() == sunspecSinglePhaseMeterThingClassId ||
                thing->thingClassId() == sunspecSplitPhaseMeterThingClassId ||
@@ -238,7 +260,7 @@ void IntegrationPluginSunSpec::postSetupThing(Thing *thing)
             qCDebug(dcSunSpec()) << "SunSpecMeter not found";
             return;
         }
-        sunSpecMeter->getMeterMap();
+        sunSpecMeter->getMeterModelDataBlock();
 
     } else if (thing->thingClassId() == sunspecStorageThingClassId) {
         SunSpecStorage *sunSpecStorage = m_sunSpecStorages.value(thing);
@@ -246,7 +268,7 @@ void IntegrationPluginSunSpec::postSetupThing(Thing *thing)
             qCDebug(dcSunSpec()) << "SunSpecStorage not found";
             return;
         }
-        sunSpecStorage->getStorageMap();
+        sunSpecStorage->getStorageModelDataBlock();
 
     } else {
         Q_ASSERT_X(false, "postSetupThing", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
@@ -373,11 +395,11 @@ void IntegrationPluginSunSpec::executeAction(ThingActionInfo *info)
     }
 }
 
-bool IntegrationPluginSunSpec::checkIfThingExists(uint mapId, uint modbusAddress)
+bool IntegrationPluginSunSpec::checkIfThingExists(uint modelId, uint modbusAddress)
 {
     Q_FOREACH(Thing *thing, myThings()) {
-        if (thing->paramValue(m_mapIdParamTypeIds.value(thing->thingClassId())).toUInt() == mapId &&
-             thing->paramValue(m_modbusAddressParamTypeIds.value(thing->thingClassId())).toUInt() == modbusAddress) {
+        if (thing->paramValue(m_modelIdParamTypeIds.value(thing->thingClassId())).toUInt() == modelId &&
+                thing->paramValue(m_modbusAddressParamTypeIds.value(thing->thingClassId())).toUInt() == modbusAddress) {
             return true;
         }
     }
@@ -387,16 +409,16 @@ bool IntegrationPluginSunSpec::checkIfThingExists(uint mapId, uint modbusAddress
 void IntegrationPluginSunSpec::onRefreshTimer()
 {
     foreach (SunSpec *connection, m_sunSpecConnections) {
-        connection->readCommonMap(); //check connection
+        connection->readCommonModel(); //check connection
     }
     foreach (SunSpecInverter *inverter, m_sunSpecInverters) {
-        inverter->getInverterMap();
+        inverter->getInverterModelDataBlock();
     }
     foreach (SunSpecMeter *meter, m_sunSpecMeters) {
-        meter->getMeterMap();
+        meter->getMeterModelDataBlock();
     }
     foreach (SunSpecStorage *storage, m_sunSpecStorages) {
-        storage->getStorageMap();
+        storage->getStorageModelDataBlock();
     }
 }
 
@@ -410,6 +432,18 @@ void IntegrationPluginSunSpec::onPluginConfigurationChanged(const ParamTypeId &p
             m_refreshTimer->stop();
             m_refreshTimer->startTimer(refreshTime);
         }
+    } else if (paramTypeId == sunSpecPluginNumberOfRetriesParamTypeId) {
+        qCDebug(dcSunSpec()) << "Updating number of retires" << value.toUInt();
+        Q_FOREACH(SunSpec *connection, m_sunSpecConnections) {
+            connection->setNumberOfRetries(value.toUInt());
+        }
+
+    } else if (paramTypeId == sunSpecPluginTimeoutParamTypeId) {
+        qCDebug(dcSunSpec()) << "Updating timeout" << value.toUInt() << "[ms]";
+        Q_FOREACH(SunSpec *connection, m_sunSpecConnections) {
+            connection->setTimeout(value.toUInt());
+        }
+
     } else {
         qCWarning(dcSunSpec()) << "Unknown plugin configuration" << paramTypeId << "Value" << value;
     }
@@ -431,23 +465,7 @@ void IntegrationPluginSunSpec::onConnectionStateChanged(bool status)
     }
 }
 
-void IntegrationPluginSunSpec::onMapHeaderReceived(uint modbusAddress, SunSpec::BlockId mapId, uint mapLength)
-{
-    qCDebug(dcSunSpec()) << "On map header received" << modbusAddress << mapId << mapLength;
-}
-
-void IntegrationPluginSunSpec::onMapReceived(SunSpec::BlockId mapId, uint mapLength, QVector<quint16> data)
-{
-    Q_UNUSED(data)
-    SunSpec *connection = static_cast<SunSpec *>(sender());
-    Thing *thing = myThings().findById(m_sunSpecConnections.key(connection));
-    if (!thing)
-        return;
-
-    qCDebug(dcSunSpec()) << "On map received" << mapId << "Map length" << mapLength << "Thing:" << thing->name();
-}
-
-void IntegrationPluginSunSpec::onFoundModbusMap(SunSpec::BlockId mapId, int modbusStartRegister)
+void IntegrationPluginSunSpec::onFoundSunSpecModel(SunSpec::ModelId modelId, int modbusStartRegister)
 {
     SunSpec *connection = static_cast<SunSpec *>(sender());
     Thing *thing = myThings().findById(m_sunSpecConnections.key(connection));
@@ -456,71 +474,71 @@ void IntegrationPluginSunSpec::onFoundModbusMap(SunSpec::BlockId mapId, int modb
         return;
     }
 
-    qCDebug(dcSunSpec()) << "On map received" << mapId << "Map length" << modbusStartRegister << "Thing:" << thing->name();
-    if (checkIfThingExists(mapId, modbusStartRegister)) {
+    qCDebug(dcSunSpec()) << "On model received" << modelId << "length" << modbusStartRegister << "Thing:" << thing->name();
+    if (checkIfThingExists(modelId, modbusStartRegister)) {
         return;
     }
     QString model = thing->stateValue(sunspecConnectionDeviceModelStateTypeId).toString();
-    switch (mapId) {
-    case SunSpec::BlockId::BlockIdInverterSinglePhase:
-    case SunSpec::BlockId::BlockIdInverterSinglePhaseFloat: {
+    switch (modelId) {
+    case SunSpec::ModelId::ModelIdInverterSinglePhase:
+    case SunSpec::ModelId::ModelIdInverterSinglePhaseFloat: {
         ThingDescriptor descriptor(sunspecSinglePhaseInverterThingClassId, model+tr(" single phase inverter"), "", thing->id());
         ParamList params;
-        params.append(Param(sunspecSinglePhaseInverterThingMapIdParamTypeId, mapId));
+        params.append(Param(sunspecSinglePhaseInverterThingModelIdParamTypeId, modelId));
         params.append(Param(sunspecSinglePhaseInverterThingModbusAddressParamTypeId, modbusStartRegister));
         descriptor.setParams(params);
         emit autoThingsAppeared({descriptor});
     } break;
-    case SunSpec::BlockId::BlockIdInverterSplitPhase:
-    case SunSpec::BlockId::BlockIdInverterSplitPhaseFloat: {
+    case SunSpec::ModelId::ModelIdInverterSplitPhase:
+    case SunSpec::ModelId::ModelIdInverterSplitPhaseFloat: {
         ThingDescriptor descriptor(sunspecSplitPhaseInverterThingClassId, model+tr(" split phase inverter"), "", thing->id());
         ParamList params;
-        params.append(Param(sunspecSplitPhaseInverterThingMapIdParamTypeId, mapId));
+        params.append(Param(sunspecSplitPhaseInverterThingModelIdParamTypeId, modelId));
         params.append(Param(sunspecSplitPhaseInverterThingModbusAddressParamTypeId, modbusStartRegister));
         descriptor.setParams(params);
         emit autoThingsAppeared({descriptor});
     } break;
-    case SunSpec::BlockId::BlockIdInverterThreePhase:
-    case SunSpec::BlockId::BlockIdInverterThreePhaseFloat: {
+    case SunSpec::ModelId::ModelIdInverterThreePhase:
+    case SunSpec::ModelId::ModelIdInverterThreePhaseFloat: {
         ThingDescriptor descriptor(sunspecThreePhaseInverterThingClassId, model+tr(" three phase inverter"), "", thing->id());
         ParamList params;
-        params.append(Param(sunspecThreePhaseInverterThingMapIdParamTypeId, mapId));
+        params.append(Param(sunspecThreePhaseInverterThingModelIdParamTypeId, modelId));
         params.append(Param(sunspecThreePhaseInverterThingModbusAddressParamTypeId, modbusStartRegister));
         descriptor.setParams(params);
         emit autoThingsAppeared({descriptor});
     } break;
 
-    case SunSpec::BlockIdSinglePhaseMeter:
-    case SunSpec::BlockIdSinglePhaseMeterFloat: {
+    case SunSpec::ModelIdSinglePhaseMeter:
+    case SunSpec::ModelIdSinglePhaseMeterFloat: {
         ThingDescriptor descriptor(sunspecSinglePhaseMeterThingClassId, model+tr(" Meter"), "", thing->id());
         ParamList params;
-        params.append(Param(sunspecSinglePhaseMeterThingMapIdParamTypeId, mapId));
+        params.append(Param(sunspecSinglePhaseMeterThingModelIdParamTypeId, modelId));
         params.append(Param(sunspecSinglePhaseMeterThingModbusAddressParamTypeId, modbusStartRegister));
         descriptor.setParams(params);
         emit autoThingsAppeared({descriptor});
     } break;
-    case SunSpec::BlockIdSplitSinglePhaseMeter:
-    case SunSpec::BlockIdSplitSinglePhaseMeterFloat: {
+    case SunSpec::ModelIdSplitSinglePhaseMeter:
+    case SunSpec::ModelIdSplitSinglePhaseMeterFloat: {
         ThingDescriptor descriptor(sunspecSplitPhaseMeterThingClassId, model+tr(" Meter"), "", thing->id());
         ParamList params;
-        params.append(Param(sunspecSplitPhaseMeterThingMapIdParamTypeId, mapId));
+        params.append(Param(sunspecSplitPhaseMeterThingModelIdParamTypeId, modelId));
         params.append(Param(sunspecSplitPhaseMeterThingModbusAddressParamTypeId, modbusStartRegister));
         descriptor.setParams(params);
         emit autoThingsAppeared({descriptor});
     } break;
-    case SunSpec::BlockIdWyeConnectThreePhaseMeterFloat:
-    case SunSpec::BlockIdDeltaConnectThreePhaseMeterFloat: {
+    case SunSpec::ModelIdWyeConnectThreePhaseMeterFloat:
+    case SunSpec::ModelIdDeltaConnectThreePhaseMeterFloat: {
         ThingDescriptor descriptor(sunspecThreePhaseMeterThingClassId, model+" Meter", "", thing->id());
         ParamList params;
-        params.append(Param(sunspecThreePhaseMeterThingMapIdParamTypeId, mapId));
+        params.append(Param(sunspecThreePhaseMeterThingModelIdParamTypeId, modelId));
         params.append(Param(sunspecThreePhaseMeterThingModbusAddressParamTypeId, modbusStartRegister));
         descriptor.setParams(params);
         emit autoThingsAppeared({descriptor});
     } break;
-    case SunSpec::BlockIdStorage: {
+    case SunSpec::ModelIdStorage: {
         ThingDescriptor descriptor(sunspecStorageThingClassId, model+" Storage", "", thing->id());
         ParamList params;
-        params.append(Param(sunspecStorageThingMapIdParamTypeId, mapId));
+        params.append(Param(sunspecStorageThingModelIdParamTypeId, modelId));
         params.append(Param(sunspecThreePhaseInverterThingModbusAddressParamTypeId, modbusStartRegister));
         descriptor.setParams(params);
         emit autoThingsAppeared({descriptor});
@@ -530,7 +548,7 @@ void IntegrationPluginSunSpec::onFoundModbusMap(SunSpec::BlockId mapId, int modb
     }
 }
 
-void IntegrationPluginSunSpec::onModbusMapSearchFinished(const QHash<SunSpec::BlockId, int> &mapIds)
+void IntegrationPluginSunSpec::onSunSpecModelSearchFinished(const QHash<SunSpec::ModelId, int> &modelIds)
 {
     SunSpec *connection = static_cast<SunSpec *>(sender());
     Thing *thing = myThings().findById(m_sunSpecConnections.key(connection));
@@ -539,7 +557,7 @@ void IntegrationPluginSunSpec::onModbusMapSearchFinished(const QHash<SunSpec::Bl
         return;
     }
 
-    qCDebug(dcSunSpec()) << "On modbus map search finished, maps:" << mapIds.count();
+    qCDebug(dcSunSpec()) << "On sunspec model search finished, models:" << modelIds.count();
 
 }
 
@@ -679,6 +697,7 @@ void IntegrationPluginSunSpec::onStorageDataReceived(const SunSpecStorage::Stora
     if(!thing) {
         return;
     }
+    thing->setStateValue(m_connectedStateTypeIds.value(thing->thingClassId()), true);
     thing->setStateValue(sunspecStorageStorageStateStateTypeId, storageData.chargingState);
 }
 
@@ -688,8 +707,8 @@ void IntegrationPluginSunSpec::onMeterDataReceived(const SunSpecMeter::MeterData
     SunSpecMeter *meter = static_cast<SunSpecMeter *>(sender());
     Thing *thing = m_sunSpecMeters.key(meter);
 
-    if(!thing) {
+    if (!thing) {
         return;
     }
-    //thing->setStateValue(sunspecMeterStorageStateStateTypeId, meterData.event);
+    thing->setStateValue(m_connectedStateTypeIds.value(thing->thingClassId()), true);
 }
