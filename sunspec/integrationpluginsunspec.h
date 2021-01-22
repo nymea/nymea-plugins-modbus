@@ -79,6 +79,10 @@ private:
 
     bool checkIfThingExists(uint modelId, uint modbusAddress);
 
+    void setupInverter(ThingSetupInfo *info);
+    void setupMeter(ThingSetupInfo *info);
+    void setupStorage(ThingSetupInfo *info);
+
 private slots:
     void onRefreshTimer();
 
@@ -93,7 +97,7 @@ private slots:
     void onWriteRequestError(QUuid requestId, const QString &error);
 
     void onInverterDataReceived(const SunSpecInverter::InverterData &inverterData);
-    void onStorageDataReceived(const SunSpecStorage::StorageData &storageData);
+    void onStorageDataReceived(const SunSpecStorage::StorageData &mandatory, const SunSpecStorage::StorageDataOptional &optional);
     void onMeterDataReceived(const SunSpecMeter::MeterData &meterData);
 };
 #endif // INTEGRATIONPLUGINSUNSPEC_H

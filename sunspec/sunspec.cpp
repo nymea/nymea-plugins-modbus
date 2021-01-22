@@ -226,20 +226,20 @@ void SunSpec::readModelHeader(uint modbusAddress)
                     qCDebug(dcSunSpec()) << "SunSpec: Received model header response. Model ID:" << modelId << "length" << length;
                     modelHeaderReceived(modbusAddress, modelId, length);
                 } else {
-                    qCWarning(dcSunSpec()) << "SunSpec: Read response error:" << reply->error();
+                    qCWarning(dcSunSpec()) << "SunSpec: Read model header response error:" << reply->error();
                 }
             });
             connect(reply, &QModbusReply::errorOccurred, this, [reply] (QModbusDevice::Error error) {
-                qCWarning(dcSunSpec()) << "SunSpec: Modbus reply error:" << error;
+                qCWarning(dcSunSpec()) << "SunSpec: Read model header, modbus reply error:" << error;
                 reply->finished(); // To make sure it will be deleted
             });
         } else {
-            qCWarning(dcSunSpec()) << "SunSpec: Read error: " << m_modbusTcpClient->errorString();
+            qCWarning(dcSunSpec()) << "SunSpec: Read model header error: " << m_modbusTcpClient->errorString();
             delete reply; // broadcast replies return immediately
             return;
         }
     } else {
-        qCWarning(dcSunSpec()) << "SunSpec: Read error: " << m_modbusTcpClient->errorString();
+        qCWarning(dcSunSpec()) << "SunSpec: Read model header error: " << m_modbusTcpClient->errorString();
         return;
     }
 }
@@ -247,6 +247,11 @@ void SunSpec::readModelHeader(uint modbusAddress)
 void SunSpec::readModelDataBlock(uint modbusAddress, uint length)
 {
     qCDebug(dcSunSpec()) << "SunSpec: Read model, modbus address" << modbusAddress << "length" << length << ", Slave ID" << m_slaveId;
+
+    if (length > 125) { //Modbus register limit is 125
+      qCWarning(dcSunSpec()) << "SunSpec: Data block length is too long, max 125 register";
+      return;
+    }
 
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, length+2);
 

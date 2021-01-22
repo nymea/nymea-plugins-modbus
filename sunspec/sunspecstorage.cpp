@@ -49,27 +49,31 @@ SunSpec::ModelId SunSpecStorage::modelId()
 void SunSpecStorage::init()
 {
     qCDebug(dcSunSpec()) << "SunSpecStorage: Init";
-    m_connection->readModelHeader(m_modelModbusStartRegister);
+    getStorageModelHeader();
     connect(m_connection, &SunSpec::modelHeaderReceived, this, [this] (uint modbusAddress, SunSpec::ModelId modelId, uint length) {
-        qCDebug(dcSunSpec()) << "SunSpecStorager: Model header received, modbus address:" << modbusAddress << "model Id:" << modelId << "length:" << length;
-        m_modelLength = length;
-        emit initFinished(true);
-        m_initFinishedSuccess = true;
+        if (modelId == m_id) {
+            qCDebug(dcSunSpec()) << "SunSpecStorager: Model header received, modbus address:" << modbusAddress << "model Id:" << modelId << "length:" << length;
+            m_modelLength = length;
+            emit initFinished(true);
+            m_initFinishedSuccess = true;
+        }
     });
-    QTimer::singleShot(10000, this,[this] {
-       if (!m_initFinishedSuccess) {
-           emit initFinished(false);
-       }
+    QTimer::singleShot(10000, this, [this] {
+        if (!m_initFinishedSuccess) {
+            emit initFinished(false);
+        }
     });
 }
 
 void SunSpecStorage::getStorageModelDataBlock()
 {
+    qCDebug(dcSunSpec()) << "SunSpecStorage: get storage model data block, modbus register" << m_modelModbusStartRegister << "length" << m_modelLength;
     m_connection->readModelDataBlock(m_modelModbusStartRegister, m_modelLength);
 }
 
 void SunSpecStorage::getStorageModelHeader()
 {
+    qCDebug(dcSunSpec()) << "SunSpecStorage: get storage model header, modbus register" << m_modelModbusStartRegister << "length" << m_modelLength;
     m_connection->readModelHeader(m_modelModbusStartRegister);
 }
 
@@ -81,7 +85,7 @@ QUuid SunSpecStorage::setGridCharging(bool enabled)
     PV (charging from grid 0 disabled)
     GRID (charging from 1 grid enabled*/
 
-    uint registerAddress = m_modelModbusStartRegister + Model124::Model124ChaGriSet;
+    uint registerAddress = m_modelModbusStartRegister + Model124Optional::Model124ChargeGridSet;
     quint16 value = enabled;
     return m_connection->writeHoldingRegister(registerAddress, value);
 }
@@ -89,8 +93,8 @@ QUuid SunSpecStorage::setGridCharging(bool enabled)
 QUuid SunSpecStorage::setStorageControlMode(bool chargingEnabled, bool dischargingEnabled)
 {
     // Set charge bit to enable charge limit, set discharge bit to enable discharge limit, set both bits to enable both limits
-    quint16 value = ((static_cast<quint16>(chargingEnabled) << StorageControlBitFieldCharge) |
-                     (static_cast<quint16>(dischargingEnabled) << StorageControlBitFieldDischarge)) ;
+    quint16 value = ((static_cast<quint16>(chargingEnabled)) |
+                     (static_cast<quint16>(dischargingEnabled) << 1)) ;
 
     uint modbusRegister = m_modelModbusStartRegister + Model124::Model124ActivateStorageControlMode;
     return m_connection->writeHoldingRegister(modbusRegister, value);
@@ -124,22 +128,38 @@ void SunSpecStorage::onModelDataBlockReceived(SunSpec::ModelId modelId, uint len
 
     switch (modelId) {
     case SunSpec::ModelIdStorage: {
-        StorageData storageData;
+        StorageData mandatory;
         qCDebug(dcSunSpec()) << "SunSpecStorage: Storage model received:";
         qCDebug(dcSunSpec()) << "   - Setpoint maximum charge" << data[Model124SetpointMaximumCharge];
         qCDebug(dcSunSpec()) << "   - Setpoint maximum charging rate" << data[Model124SetpointMaximumChargingRate];
         qCDebug(dcSunSpec()) << "   - Setpoint maximum discharge rate" << data[Model124SetpointMaximumDischargeRate];
         qCDebug(dcSunSpec()) << "   - Active storage control mode" << data[Model124ActivateStorageControlMode];
-        qCDebug(dcSunSpec()) << "   - Currently available energy" << data[Model124CurrentlyAvailableEnergy];
-        storageData.chargingState = ChargingState(data[Model124::Model124ChargeStatus]);
-        qCDebug(dcSunSpec()) << "   - Setpoint maximum charging rate" << data[Model124ChaGriSet];
-        qCDebug(dcSunSpec()) << "   - Setpoint maximum charging rate" << data[Model124ScaleFactorMaximumCharge];
-        qCDebug(dcSunSpec()) << "   - Setpoint maximum charging rate" << data[Model124ScaleFactorMaximumChargeDischargeRate];
-        qCDebug(dcSunSpec()) << "   - Setpoint maximum charging rate" << data[Model124ScaleFactorAvailableEnergyPercent];
-        emit storageDataReceived(storageData);
+        qCDebug(dcSunSpec()) << "   - ChaGriSet" << data[Model124ChargeGridSet];
+        qCDebug(dcSunSpec()) << "   - Scale factor max charge" << data[Model124ScaleFactorMaximumCharge];
+        qCDebug(dcSunSpec()) << "   - Scale factor max charge/discharge rate" << data[Model124ScaleFactorMaximumChargeDischargeRate];
+        qCDebug(dcSunSpec()) << "   - Scale factor" << data[Model124ScaleFactorAvailableEnergyPercent];
+        mandatory.maxCharge = m_connection->convertValueWithSSF(data[Model124SetpointMaximumCharge], data[Model124ScaleFactorMaximumChargeDischargeRate]);
+        mandatory.maxChargeRate = m_connection->convertValueWithSSF(data[Model124SetpointMaximumChargingRate], data[Model124ScaleFactorPercentChargeDischargeRate]);
+        mandatory.chargingEnabled = data[Model124ActivateStorageControlMode]&0x01;
+        mandatory.dischargingEnabled = data[Model124ActivateStorageControlMode]&0x02;
+        mandatory.maxDischargeRate = m_connection->convertValueWithSSF(data[Model124SetpointMaximumDischargeRate], data[Model124ScaleFactorPercentChargeDischargeRate]);
+
+        StorageDataOptional optional;
+        optional.chargeSatus = ChargingStatus(data[Model124ChargeStatus]);
+        optional.batteryVoltage = m_connection->convertValueWithSSF(data[Model124InternalBatteryVoltage], data[Model124ScaleFactorBatteryVoltage]);
+        optional.storageAvailable = m_connection->convertValueWithSSF(data[Model124StorageAvailableAH], data[Model124ScaleFactorMaximumChargingVA]);
+        optional.gridChargingEnabled = (data[Model124ChargeGridSet] == 1);
+        optional.currentlyAvailableEnergy = m_connection->convertValueWithSSF(data[Model124CurrentlyAvailableEnergyPercent], data[Model124ScaleFactorAvailableEnergyPercent]);
+        //qCDebug(dcSunSpec()) << "   - Currently available energy" << data[Model124CurrentlyAvailableEnergy];
+        //mandatory.chargingState = ChargingStatus(data[Model124ChargeStatus]);
+        //qCDebug(dcSunSpec()) << "   - Charging state" << mandatory.chargingState;
+
+        emit storageDataReceived(mandatory, optional);
+
     } break;
-        case SunSpec::ModelIdBatteryBaseModel:
+    case SunSpec::ModelIdBatteryBaseModel:
     case SunSpec::ModelIdLithiumIonBatteryModel: {
+        qCDebug(dcSunSpec()) << "Model not yet supported";
     }
     default:
         break;
