@@ -998,9 +998,9 @@
                         },
                         {
                             "id": "da2b19c5-0f48-49d1-93f0-abdc0051407d",
-                            "name": "storageState",
-                            "displayName": "State",
-                            "displayNameEvent": "State changed",
+                            "name": "storageStatus",
+                            "displayName": "Status",
+                            "displayNameEvent": "Status changed",
                             "type": "QString",
                             "possibleValues": [
                                 "Off",
@@ -1025,13 +1025,23 @@
                         },
                         {
                             "id": "1f530f79-c0d2-466b-90e1-79149e34d92f",
-                            "name": "enableChargingLimit",
-                            "displayName": "Charging limit",
-                            "displayNameEvent": "Charging limit changed",
+                            "name": "enableCharging",
+                            "displayName": "Charging",
+                            "displayNameEvent": "Charging changed",
+                            "displayNameAction": "Enable charging",
                             "type": "bool",
                             "defaultValue": false,
-                            "writable": true,
-                            "displayNameAction": "Enable Charging Limit"
+                            "writable": true
+                        },
+                        {
+                            "id": "bc99a159-815a-40ab-a6e8-b46f315305f7",
+                            "name": "enableDischarging",
+                            "displayName": "Discharging",
+                            "displayNameEvent": "Discharging changed",
+                            "displayNameAction": "Enable discharging",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "writable": true
                         },
                         {
                             "id": "7f469bbc-64a5-4045-8d5f-9a1a85039851",
@@ -1039,7 +1049,7 @@
                             "displayName": "Charging rate",
                             "displayNameEvent": "Charging rate changed",
                             "type": "int",
-                            "minValue": -100,
+                            "minValue": 0,
                             "maxValue": 100,
                             "unit": "Percentage",
                             "defaultValue": false,
@@ -1047,22 +1057,12 @@
                             "displayNameAction": "Set charging rate"
                         },
                         {
-                            "id": "bc99a159-815a-40ab-a6e8-b46f315305f7",
-                            "name": "enableDischargingLimit",
-                            "displayName": "Discharging limit",
-                            "displayNameEvent": "Discharging limit changed",
-                            "displayNameAction": "Enable Discharging Limit",
-                            "type": "bool",
-                            "defaultValue": false,
-                            "writable": true
-                        },
-                        {
                             "id": "6068f030-acce-44a2-b95f-bd00dd5ca760",
                             "name": "dischargingRate",
                             "displayName": "Discharging rate",
                             "displayNameEvent": "Discharging rate changed",
                             "type": "int",
-                            "minValue": -100,
+                            "minValue": 0,
                             "maxValue": 100,
                             "unit": "Percentage",
                             "defaultValue": false,

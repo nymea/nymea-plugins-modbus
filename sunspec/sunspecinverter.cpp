@@ -53,10 +53,12 @@ void SunSpecInverter::init()
     qCDebug(dcSunSpec()) << "SunSpecInverter: Init";
     m_connection->readModelHeader(m_modelModbusStartRegister);
     connect(m_connection, &SunSpec::modelHeaderReceived, this, [this] (uint modbusAddress, SunSpec::ModelId modelId, uint length) {
-        qCDebug(dcSunSpec()) << "SunSpecInverter: Model Header received, modbus address:" << modbusAddress << "model Id:" << modelId << "length:" << length;
-        m_modelLength = length;
-        emit initFinished(true);
-        m_initFinishedSuccess = true;
+        if (modelId == m_id) {
+            qCDebug(dcSunSpec()) << "SunSpecInverter: Model Header received, modbus address:" << modbusAddress << "model Id:" << modelId << "length:" << length;
+            m_modelLength = length;
+            emit initFinished(true);
+            m_initFinishedSuccess = true;
+        }
     });
     QTimer::singleShot(10000, this,[this] {
         if (!m_initFinishedSuccess) {
@@ -67,12 +69,13 @@ void SunSpecInverter::init()
 
 void SunSpecInverter::getInverterModelDataBlock()
 {
-    // TODO check map length to modbus max value
+    qCDebug(dcSunSpec()) << "SunSpecInverter: get inverter model data block, modbus register" << m_modelModbusStartRegister << "length" << m_modelLength;
     m_connection->readModelDataBlock(m_modelModbusStartRegister, m_modelLength);
 }
 
 void SunSpecInverter::getInverterModelHeader()
 {
+    qCDebug(dcSunSpec()) << "SunSpecInverter: get inverter model header, modbus register" << m_modelModbusStartRegister;
     m_connection->readModelHeader(m_modelModbusStartRegister);
 }
 
@@ -83,7 +86,7 @@ void SunSpecInverter::onModelDataBlockReceived(SunSpec::ModelId mapId, uint mapL
         return;
     }
     if (mapLength < m_modelLength) {
-        qCDebug(dcSunSpec()) << "SunSpecInverter: on modbus map received, map length ist too short" << mapLength;
+        qCDebug(dcSunSpec()) << "SunSpecInverter: on modbus map received, map length is too short" << mapLength;
         //return;
     }
     InverterData inverterData;

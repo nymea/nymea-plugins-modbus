@@ -52,26 +52,30 @@ void SunSpecMeter::init()
     qCDebug(dcSunSpec()) << "SunSpecMeter: Init";
     m_connection->readModelHeader(m_modelModbusStartRegister);
     connect(m_connection, &SunSpec::modelHeaderReceived, this, [this] (uint modbusAddress, SunSpec::ModelId modelId, uint length) {
-        qCDebug(dcSunSpec()) << "SunSpecMeter: Model Header received, modbus address:" << modbusAddress << "model Id:" << modelId << "length:" << length;
-        m_modelLength = length;
-        emit initFinished(true);
-        m_initFinishedSuccess = true;
+        if (modelId == m_id) {
+            qCDebug(dcSunSpec()) << "SunSpecMeter: Model Header received, modbus address:" << modbusAddress << "model Id:" << modelId << "length:" << length;
+            m_modelLength = length;
+            emit initFinished(true);
+            m_initFinishedSuccess = true;
+        }
     });
     QTimer::singleShot(10000, this,[this] {
-       if (!m_initFinishedSuccess) {
-           emit initFinished(false);
-       }
+        if (!m_initFinishedSuccess) {
+            emit initFinished(false);
+        }
     });
 }
 
 void SunSpecMeter::getMeterModelDataBlock()
 {
-   m_connection->readModelDataBlock(m_modelModbusStartRegister, m_modelLength);
+    qCDebug(dcSunSpec()) << "SunSpecMeter: get meter model data block, modbus register" << m_modelModbusStartRegister << "length" << m_modelLength;
+    m_connection->readModelDataBlock(m_modelModbusStartRegister, m_modelLength);
 }
 
 void SunSpecMeter::getMeterModelHeader()
 {
-
+    qCDebug(dcSunSpec()) << "SunSpecMeter: get meter model header, modbus register" << m_modelModbusStartRegister << "length" << m_modelLength;
+    m_connection->readModelHeader(m_modelModbusStartRegister);
 }
 
 void SunSpecMeter::onModelDataBlockReceived(SunSpec::ModelId modelId, uint length, QVector<quint16> data)
