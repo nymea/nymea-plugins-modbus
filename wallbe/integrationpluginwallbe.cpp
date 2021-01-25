@@ -144,12 +144,12 @@ void IntegrationPluginWallbe::executeAction(ThingActionInfo *info)
             m_asyncActions.insert(requestId, info);
             connect(info, &ThingActionInfo::aborted, this, [this, requestId] {m_asyncActions.remove(requestId);});
 
-        } else if(action.actionTypeId() == wallbeEcoChargeCurrentActionTypeId){
+        } else if(action.actionTypeId() == wallbeEcoMaxChargingCurrentActionTypeId){
 
-            uint16_t current = action.param(wallbeEcoChargeCurrentEventChargeCurrentParamTypeId).value().toUInt();
+            uint16_t current = action.param(wallbeEcoMaxChargingCurrentEventMaxChargingCurrentParamTypeId).value().toUInt();
             qCDebug(dcWallbe) << "Charging power set to" << current;
             QUuid requestId = modbusTcpMaster->writeCoil(0xff, WallbeRegisterAddress::ChargingCurrent, current);
-            thing->setStateValue(wallbeEcoChargeCurrentStateTypeId, current);
+            thing->setStateValue(wallbeEcoMaxChargingCurrentStateTypeId, current);
             m_asyncActions.insert(requestId, info);
             connect(info, &ThingActionInfo::aborted, this, [this, requestId] {m_asyncActions.remove(requestId);});
 
@@ -241,7 +241,7 @@ void IntegrationPluginWallbe::onReceivedHoldingRegister(int slaveAddress, int mo
     }
         break;
     case WallbeRegisterAddress::ChargingCurrent:
-        thing->setStateValue(wallbeEcoChargeCurrentStateTypeId, value[0]);
+        thing->setStateValue(wallbeEcoMaxChargingCurrentStateTypeId, value[0]);
         break;
     case WallbeRegisterAddress::ErrorCode:
         qCDebug(dcWallbe()) << "Received Error Code modbus register" << value[0];
