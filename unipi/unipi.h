@@ -32,7 +32,6 @@
 #define UNIPI_H
 
 #include <QObject>
-#include "gpiodescriptor.h"
 #include "mcp23008.h"
 #include "mcp342xchannel.h"
 #include "unipipwm.h"
