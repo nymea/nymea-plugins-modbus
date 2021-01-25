@@ -13,7 +13,7 @@
                     "displayName": "Wallbe eco 2.0",
                     "name": "wallbeEco",
                     "createMethods": ["discovery"],
-                    "interfaces": ["evcharger", "connectable"],
+                    "interfaces": ["extendedevcharger", "connectable"],
                     "paramTypes": [
                         {
                             "id": "95f297a7-56a5-4789-9b14-6735717344b5",
@@ -77,14 +77,11 @@
                         },
                         {
                             "id": "60b5b6b8-bcd3-4c3f-8501-f15af94bc8c1",
-                            "name": "chargeCurrent",
+                            "name": "maxChargingCurrent",
                             "displayName": "Charging current",
-                            "displayNameAction": "Set charging current",
                             "displayNameEvent": "Charging current changed",
-                            "unit": "Ampere",
-                            "type": "int",
-                            "defaultValue": 0,
-                            "type": "int",
+                            "displayNameAction": "Set charging current",
+                            "type": "double",
                             "unit": "Ampere",
                             "minValue": 6,
                             "maxValue": 80,
