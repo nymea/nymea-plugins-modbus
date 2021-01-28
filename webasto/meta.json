@@ -1,0 +1,13 @@
+{
+    "title": "webasto",
+    "tagline": "Integrates Webasto Live DC wallbox into nymea.",
+    "icon": "webasto.png",
+    "stability": "consumer",
+    "offline": true,
+    "technologies": [
+        "network"
+    ],
+    "categories": [
+        "tool"
+    ]
+}
