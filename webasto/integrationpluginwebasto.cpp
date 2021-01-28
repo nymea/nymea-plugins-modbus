@@ -356,11 +356,15 @@ void IntegrationPluginWebasto::onReceivedRegister(Webasto::TqModbusRegister modb
             thing->setStateValue(liveWallboxCurrentPhase3StateTypeId, data[0]);
             break;
         case Webasto::TqActivePower: {
+            if (data.count() < 2)
+                return;
             int power = (static_cast<quint32>(data[0])<<16 | data[1]);
             qCDebug(dcWebasto()) << "   - Active power:" << power;
             thing->setStateValue(liveWallboxPowerConsumptionStateTypeId, power);
         } break;
         case Webasto::TqEnergyMeter: {
+            if (data.count() < 2)
+                return;
             int energy = (static_cast<quint32>(data[0])<<16 | data[1]);
             qCDebug(dcWebasto()) << "   - Energy meter:" << energy << "Wh";
             thing->setStateValue(liveWallboxTotalEnergyConsumedStateTypeId, energy);
@@ -387,15 +391,21 @@ void IntegrationPluginWebasto::onReceivedRegister(Webasto::TqModbusRegister modb
         case Webasto::TqEVBatteryState:
             qCDebug(dcWebasto()) << "   - Battery state" << data[0];
             break;
-        case Webasto::TqEVBatteryCapacity:
-            qCDebug(dcWebasto()) << "   - Battery capacity" << data[0];
-            break;
+        case Webasto::TqEVBatteryCapacity: {
+            if (data.count() < 2)
+                return;
+            uint batteryCapacity = (static_cast<quint32>(data[0])<<16 | data[1]);
+            qCDebug(dcWebasto()) << "   - Battery capacity" << batteryCapacity << "Wh";
+        } break;
         case Webasto::TqScheduleType:
             qCDebug(dcWebasto()) << "   - Schedule type" << data[0];
             break;
-        case Webasto::TqRequiredEnergy:
-            qCDebug(dcWebasto()) << "   - Required energy" << data[0];
-            break;
+        case Webasto::TqRequiredEnergy: {
+            if (data.count() < 2)
+                return;
+            uint requiredEnergy = (static_cast<quint32>(data[0])<<16 | data[1]);
+            qCDebug(dcWebasto()) << "   - Required energy" << requiredEnergy;
+        } break;
         case Webasto::TqRequiredBatteryState:
             qCDebug(dcWebasto()) << "   - Required battery state" << data[0];
             break;
@@ -410,16 +420,26 @@ void IntegrationPluginWebasto::onReceivedRegister(Webasto::TqModbusRegister modb
             thing->setStateValue(liveWallboxSessionEnergyStateTypeId, data[0]/1000.00); // Charged energy in kWh
             break;
         case Webasto::TqStartTime:
-            qCDebug(dcWebasto()) << "   - Start time" << data[0];
+            qCDebug(dcWebasto()) << "   - Start time" << (static_cast<quint32>(data[0])<<16 | data[1]);
             break;
-        case Webasto::TqChargingTime:
-            qCDebug(dcWebasto()) << "   - Charging time" << data[0];
-            thing->setStateValue(liveWallboxSessionTimeStateTypeId, data[0]/60.00); // Charging time in minutes
-            break;
-        case Webasto::TqEndTime:
-            qCDebug(dcWebasto()) << "   - End time" << data[0];
-            break;
+        case Webasto::TqChargingTime: {
+            if (data.count() < 2)
+                return;
+            uint seconds = (static_cast<quint32>(data[0])<<16 | data[1]);
+            qCDebug(dcWebasto()) << "   - Charging time" << seconds << "s";
+            thing->setStateValue(liveWallboxSessionTimeStateTypeId, seconds/60.00); // Charging time in minutes
+        } break;
+        case Webasto::TqEndTime: {
+            if (data.count() < 2)
+                return;
+            uint hour =    ((static_cast<quint32>(data[0])<<16 | data[1])&0xff0000)>>16;
+            uint minutes = ((static_cast<quint32>(data[0])<<16 | data[1])&0x00ff00)>>8;
+            uint seconds=  (static_cast<quint32>(data[0])<<16 | data[1])&0x0000ff;
+            qCDebug(dcWebasto()) << "   - End time" << hour << "h" << minutes << "m" << seconds << "s";
+        } break;
         case Webasto::TqUserId: {
+            if (data.count() < 10)
+                return;
             QByteArray userID;
             Q_FOREACH(quint16 i, data) {
                 userID.append(i>>16);
