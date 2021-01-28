@@ -1,0 +1,116 @@
+{
+    "id": "9fa369ab-c225-4447-9a23-f4911d9b056c",
+    "name": "Webasto",
+    "displayName": "webasto",
+    "vendors": [
+        {
+            "id": "274f4453-6acf-4204-be21-379abbe3b5a7",
+            "name": "webasto",
+            "displayName": "Webasto",
+            "thingClasses": [
+                {
+                    "id": "48472124-3199-4827-990a-b72069bd5658",
+                    "displayName": "Live Wallbox",
+                    "name": "liveWallbox",
+                    "createMethods": ["discovery"],
+                    "interfaces": ["evcharger", "connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "51fa3ea8-e819-46ca-b975-1bee6285441c",
+                            "name": "ipAddress",
+                            "displayName": "IP address",
+                            "type": "QString",
+                            "defaultValue": "0.0.0.0"
+                        },
+                        {
+                            "id": "4aa97965-fc1c-488a-92a6-848c214564bc",
+                            "name": "macAddress",
+                            "displayName": "MAC address",
+                            "type": "QString",
+                            "defaultValue": "",
+                            "readOnly": true
+                        }
+                    ],
+                    "stateTypes":[
+                        {
+                            "id": "7e6ed2b4-aa8a-4bf6-b20b-84ecc6cc1508",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "name": "connected",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "537e01ac-9290-421d-a5cb-987d9e088941",
+                            "name": "chargeTime",
+                            "displayName": "Charging Time",
+                            "unit": "Minutes",
+                            "type": "int",
+                            "defaultValue": 0,
+                            "displayNameEvent": "Charging time changed"
+                        },
+                        {
+                            "id": "b076353b-e911-444f-80ad-3f78c4075d1a",
+                            "name": "chargePointState",
+                            "displayName": "Charge point state",
+                            "displayNameEvent": "Charge point state changed",
+                            "type": "QString",
+                            "possibleValues": [
+                                "No vehicle attached",
+                                "Vehicle attached, no permission",
+                                "Charging authorized",
+                                "Charging",
+                                "Charging paused",
+                                "Charge successful (car still attached)",
+                                "Charging stopped by user (car still attached)",
+                                "Charging error (car still attached)",
+                                "Charging station reserved (No car attached)",
+                                "User not authorized (car attached)"
+                            ],
+                            "defaultValue": "No vehicle attached"
+                        },
+                        {
+                            "id": "a1a452f9-de93-4c31-b71b-c74264f85a3e",
+                            "name": "cableState",
+                            "displayName": "Cable state",
+                            "displayNameEvent": "Cable state changed",
+                            "type": "QString",
+                            "possibleValues": [
+                                "No cable attached",
+                                "Cable attached but no car attached)",
+                                "Cable attached and car attached",
+                                "Cable attached,car attached and lock active"
+                            ],
+                            "defaultValue": "No cable attached"
+                        },
+                        {
+                            "id": "3c054603-d933-4e30-a2cc-2177beaaffdb",
+                            "name": "power",
+                            "displayName": "Charging",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "displayNameAction": "Start charging",
+                            "displayNameEvent": "Charging status changed",
+                            "writable": true
+                        },
+                        {
+                            "id": "96ed77ce-c5cf-4981-8a72-b619f5702724",
+                            "name": "chargeCurrent",
+                            "displayName": "Charging current",
+                            "displayNameAction": "Set charging current",
+                            "displayNameEvent": "Charging current changed",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "minValue": 6.00,
+                            "maxValue": 80.00,
+                            "defaultValue": 6.00,
+                            "writable": true
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+

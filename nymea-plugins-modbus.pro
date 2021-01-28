@@ -7,6 +7,7 @@ PLUGIN_DIRS = \
     sunspec                 \
     unipi                   \
     wallbe                  \
+    webasto                 \
 
 message(============================================)
 message("Qt version:" $$[QT_VERSION])
