@@ -34,53 +34,91 @@
 Webasto::Webasto(const QHostAddress &address, uint port, QObject *parent) :
     QObject(parent)
 {
-    m_modbusConnection = new QModbusTcpClient(this);
-    m_modbusConnection->setConnectionParameter(QModbusDevice::NetworkPortParameter, port);
-    m_modbusConnection->setConnectionParameter(QModbusDevice::NetworkAddressParameter, address.toString());
+    qCDebug(dcWebasto()) << "Webasto: Webasto connection created" << address.toString() << port;
+    m_modbusConnection = new ModbusTCPMaster(address, port, this);
     m_modbusConnection->setNumberOfRetries(3);
     m_modbusConnection->setTimeout(1000);
+    connect(m_modbusConnection, &ModbusTCPMaster::connectionStateChanged, this, &Webasto::connectionStateChanged);
+    connect(m_modbusConnection, &ModbusTCPMaster::receivedHoldingRegister, this, &Webasto::onReceivedHoldingRegister);
+    connect(m_modbusConnection, &ModbusTCPMaster::writeRequestExecuted, this, &Webasto::writeRequestExecuted);
+    connect(m_modbusConnection, &ModbusTCPMaster::writeRequestError, this, &Webasto::writeRequestError);
+
+    m_lifeBitTimer = new QTimer(this);
+    m_lifeBitTimer->start(10000);
+    connect(m_lifeBitTimer, &QTimer::timeout, this, [this] {
+        setLiveBit();
+    });
 }
 
 void Webasto::setAddress(const QHostAddress &address)
 {
     qCDebug(dcWebasto()) << "Webasto: set address" << address;
-    m_modbusConnection->setConnectionParameter(QModbusDevice::NetworkAddressParameter, address.toString());
+    m_modbusConnection->setHostAddress(address);
 }
 
 QHostAddress Webasto::address() const
 {
-    return QHostAddress(m_modbusConnection->connectionParameter(QModbusDevice::NetworkAddressParameter).toString());
+    return m_modbusConnection->hostAddress();
 }
 
 bool Webasto::connected()
 {
-    return (m_modbusConnection->state() == QModbusTcpClient::State::ConnectedState);
+    return m_modbusConnection->connected();
 }
 
-void Webasto::getBasicInformation()
+bool Webasto::connectDevice()
 {
-
+    return m_modbusConnection->connectDevice();
 }
 
-void Webasto::getUserId()
+void Webasto::setLivebitInterval(uint seconds)
 {
-
+    qCDebug(dcWebasto()) << "Webasto: Live bit interval set to" << seconds << "[s]";
+    m_lifeBitTimer->setInterval(seconds*1000);
 }
 
-void Webasto::getSessionInformation()
+void Webasto::getRegister(Webasto::TqModbusRegister modbusRegister, uint length)
 {
+    qCDebug(dcWebasto()) << "Webasto: Get register" << modbusRegister << length;
+    if (length < 1 && length > 10) {
+        qCWarning(dcWebasto()) << "Invalide register length, allowed values [1,10]";
+        return;
+    }
 
+    m_modbusConnection->readHoldingRegister(m_unitId, modbusRegister, length);
+}
+
+QUuid Webasto::setSafeCurrent(quint16 ampere) const
+{
+    return m_modbusConnection->writeHoldingRegister(m_unitId, TqSafeCurrent, ampere);
+}
+
+QUuid Webasto::seComTimeout(quint16 seconds) const
+{
+    return m_modbusConnection->writeHoldingRegister(m_unitId, TqComTimeout, seconds);
+}
+
+QUuid Webasto::setChargePower(quint32 watt) const
+{
+    QVector<quint16> data;
+    data.append(watt>>16);
+    data.append(watt&0xff);
+    return m_modbusConnection->writeHoldingRegisters(m_unitId, TqChargePower, data);
+}
+
+QUuid Webasto::setChargeCurrent(quint16 ampere) const
+{
+   return m_modbusConnection->writeHoldingRegister(m_unitId, TqChargeCurrent, ampere);
 }
 
 void Webasto::setLiveBit()
 {
-
+    qCDebug(dcWebasto()) << "Webasto: Set live bit";
+    m_modbusConnection->writeHoldingRegister(m_unitId, TqLifeBit, 0x0001);
 }
 
-QUuid Webasto::writeHoldingRegister()
+void Webasto::onReceivedHoldingRegister(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values)
 {
-    QUuid request = QUuid::createUuid();
-
-
-    return request;
+    Q_UNUSED(slaveAddress)
+    emit receivedRegister(TqModbusRegister(modbusRegister), values);
 }
