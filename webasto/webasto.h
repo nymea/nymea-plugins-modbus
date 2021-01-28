@@ -137,7 +137,8 @@ private:
 
 private:
     QTimer *m_lifeBitTimer = nullptr;
-
+    bool m_connected = false;
+    bool m_awaitingLiveBitResponse = false;
 signals:
     void connectionStateChanged(bool state);
     void writeRequestExecuted(const QUuid &requestId, bool success);

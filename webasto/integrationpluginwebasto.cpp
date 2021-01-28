@@ -149,7 +149,8 @@ void IntegrationPluginWebasto::postSetupThing(Thing *thing)
         m_pluginTimer = hardwareManager()->pluginTimerManager()->registerTimer(1);
         connect(m_pluginTimer, &PluginTimer::timeout, this, [this] {
             Q_FOREACH(Webasto *connection, m_webastoConnections) {
-                update(connection);
+                if (connection->connected())
+                    update(connection);
             }
         });
     }
@@ -159,6 +160,7 @@ void IntegrationPluginWebasto::postSetupThing(Thing *thing)
         if (!connection) {
             qCWarning(dcWebasto()) << "Can't find connection to thing";
         }
+        update(connection);
 
     } else {
         Q_ASSERT_X(false, "postSetupThing", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());

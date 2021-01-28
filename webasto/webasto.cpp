@@ -38,7 +38,7 @@ Webasto::Webasto(const QHostAddress &address, uint port, QObject *parent) :
     m_modbusConnection = new ModbusTCPMaster(address, port, this);
     m_modbusConnection->setNumberOfRetries(3);
     m_modbusConnection->setTimeout(1000);
-    connect(m_modbusConnection, &ModbusTCPMaster::connectionStateChanged, this, &Webasto::connectionStateChanged);
+
     connect(m_modbusConnection, &ModbusTCPMaster::receivedHoldingRegister, this, &Webasto::onReceivedHoldingRegister);
     connect(m_modbusConnection, &ModbusTCPMaster::writeRequestExecuted, this, &Webasto::writeRequestExecuted);
     connect(m_modbusConnection, &ModbusTCPMaster::writeRequestError, this, &Webasto::writeRequestError);
@@ -115,10 +115,27 @@ void Webasto::setLiveBit()
 {
     qCDebug(dcWebasto()) << "Webasto: Set live bit";
     m_modbusConnection->writeHoldingRegister(m_unitId, TqLifeBit, 0x0001);
+    if (m_awaitingLiveBitResponse) {
+        // Live bit response has not been received, setting connection as disconnected
+        // The live bit acts as heartbeat for both sides, client and server
+        if (m_connected) {
+            m_connected = false;
+            emit connectionStateChanged(false);
+        }
+    } else {
+        m_awaitingLiveBitResponse = true;
+    }
 }
 
 void Webasto::onReceivedHoldingRegister(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values)
 {
     Q_UNUSED(slaveAddress)
+    if (modbusRegister == TqLifeBit) {
+        m_awaitingLiveBitResponse = false;
+        if (!m_connected) {
+            m_connected = true;
+            emit connectionStateChanged(true);
+        }
+    }
     emit receivedRegister(TqModbusRegister(modbusRegister), values);
 }
