@@ -36,6 +36,7 @@
 #include "webasto.h"
 #include "../discovery/discovery.h"
 #include "../discovery/host.h"
+#include "../modbus/modbustcpmaster.h"
 
 #include <QObject>
 #include <QHostAddress>
@@ -59,11 +60,18 @@ public:
 
 private:
     Discovery *m_discovery = nullptr;
+    PluginTimer *m_pluginTimer = nullptr;
     QHash<Thing *, Webasto *> m_webastoConnections;
     QHash<QUuid, ThingActionInfo *> m_asyncActions;
 
+    void update(Webasto *webasto);
+
 private slots:
     void onConnectionChanged(bool connected);
+    void onWriteRequestExecuted(const QUuid &requestId, bool success);
+    void onWriteRequestError(const QUuid &requestId, const QString &error);
+
+    void onReceivedRegister(Webasto::TqModbusRegister registerAddress, const QVector<quint16> &data);
 };
 
 #endif // INTEGRATIONPLUGINWEBASTO_H
