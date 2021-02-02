@@ -51,7 +51,6 @@ public:
     /** Constructor */
     explicit IntegrationPluginIdm();
 
-    void discoverThings(ThingDiscoveryInfo *info) override;
     void setupThing(ThingSetupInfo *info) override;
     void postSetupThing(Thing *thing) override;
     void thingRemoved(Thing *thing) override;

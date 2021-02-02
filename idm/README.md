@@ -1,15 +1,18 @@
 # iDM
 
+Connect nymea to iDM heat pumps.
+
 ## Supported Things
+
+* Navigator 2.0 based heat pump models
+
+## Requirements
+
+* The package 'nymea-plugin-idm' must be installed
+* Navigator 2.0 settings
+	* "Modbus TCP" must be selected in the "Building Management System" menu? 
+* Both devices must be in the same local area network.
 
 ## More
 
 https://www.idm-energie.at/en/
-
-** Modbus TCP communication not working **
-	* Is "Modbus TCP" selected in the "Building Management System" menu? 
-	* Is the Modbus TCP device and the heat pump in the same network?
-	* Is there an IP address conflict?
-	* Has the heat pump set the IP address manually? IP address should be set manually, because with "DHCP" the IP address can change (e.g. after a power failure).
-	* Was the connection made via a switch, possibly blocking this communication? If so, integrate the Modbus TCP device directly (without a switch).
-
