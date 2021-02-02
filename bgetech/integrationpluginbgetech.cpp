@@ -64,8 +64,6 @@ void IntegrationPluginBGetech::setupThing(ThingSetupInfo *info)
     Thing *thing = info->thing();
     qCDebug(dcBGetech()) << "Setup thing" << thing->name();
 
-
-
     if (thing->thingClassId() == threePhaseThingClassId) {
         QString serialPort = thing->paramValue(modbusConnectionThingSerialPortParamTypeId).toString();
         int baudRate = thing->paramValue(modbusConnectionThingBaudRateParamTypeId).toInt();
@@ -106,7 +104,8 @@ void IntegrationPluginBGetech::executeAction(ThingActionInfo *info)
     Thing *thing = info->thing();
     Action action = info->action();
 
-    if (thing->thingClassId() == threePhaseThingClassId) {
+    if (thing->thingClassId() == singlePhaseThingClassId) {
+    } else if (thing->thingClassId() == threePhaseThingClassId) {
         if (action.actionTypeId() == threePhase) {
 
         } else {

@@ -2,12 +2,12 @@ include(../plugins.pri)
 
 QT += \ 
     serialport \
-    serialbus
+    serialbus \
 
 SOURCES += \
     integrationpluginbgetech.cpp \
-    ../modbus/modbusrtumaster.cpp
+    ../modbus/modbusrtumaster.cpp \
 
 HEADERS += \
     integrationpluginbgetech.h \
-    ../modbus/modbusrtumaster.cpp
+    ../modbus/modbusrtumaster.h \

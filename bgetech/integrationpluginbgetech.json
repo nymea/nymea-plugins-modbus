@@ -19,11 +19,57 @@
             "id": "215035fe-95e8-43d8-a52e-0a31b787d902",
             "thingClasses": [
                 {
+                    "name": "singlePhase",
+                    "displayName": "Single-phase electricity meter",
+                    "id": "1c3e730f-16a1-4508-9a57-f74effd2f32c",
+                    "createMethods": ["discovery"],
+                    "interfaces": ["extendedsmartmeterconsumer"],
+                    "paramTypes": [
+                        {
+                            "id": "7f64fddc-5f5b-4dc3-8796-76b1db0d6c24",
+                            "name": "serialPort",
+                            "displayName": "Serial port",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": "ttyAMA0",
+                            "readOnly": true
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "d065ca48-276a-4b56-8394-7138056325a5",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "c2d86798-d642-4333-863f-ae6289430ccc",
+                            "name": "totalEnergyConsumed",
+                            "displayName": "Total energy consumed",
+                            "displayNameEvent": "Total energy consumed changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "08cd7cbe-738b-49a0-88ee-afcdabc4643b",
+                            "name": "currentPower",
+                            "displayName": "Current power",
+                            "displayNameEvent": "Current power changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0.00
+                        }
+                    ]
+                },
+                {
                     "name": "threePhase",
-                    "displayName": "3-phase electricity meter",
+                    "displayName": "Three-phase electricity meter",
                     "id": "f37597bb-35fe-48f2-9617-343dd54c0903",
-                    "createMethods": ["user"],
-                    "interfaces": ["gateway"],
+                    "createMethods": ["discovery"],
+                    "interfaces": ["extendedsmartmeterconsumer"],
                     "paramTypes": [
                         {
                             "id": "33aeda0c-b07a-4510-b45e-0a386867a2df",
@@ -31,14 +77,8 @@
                             "displayName": "Serial port",
                             "type": "QString",
                             "inputType": "TextLine",
-                            "defaultValue": "ttyAMA0"
-                        },
-                        {
-                            "id": "b34d5d72-64d2-48f4-884b-d8c3e5c4d39c",
-                            "name": "baudRate",
-                            "displayName": "Baud rate",
-                            "type": "int",
-                            "defaultValue": 9600
+                            "defaultValue": "ttyAMA0",
+                            "readOnly": true
                         }
                     ],
                     "stateTypes": [
@@ -48,34 +88,35 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connected changed",
                             "type": "bool",
+                            "cached": false,
                             "defaultValue": false
                         },
                         {
-                            "id": "59264dd2-5304-491e-be15-e15ae905d923",
+                            "id": "c824e97b-a6d1-4030-9d7a-00af6fb8e1c3",
+                            "name": "currentPower",
+                            "displayName": "Active power",
+                            "displayNameEvent": "Active power changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "4636ec5c-fcb9-45b7-ad68-2818cb615ce1",
                             "name": "voltage",
                             "displayName": "Voltage",
                             "displayNameEvent": "Voltage changed",
                             "type": "double",
-                            "unit": "Voltage",
-                            "defaultValue": 0.00
+                            "unit": "Volt",
+                            "defaultValue": 0
                         },
                         {
-                            "id": "8d597784-92ac-4fb2-a72c-3185c86630b4",
+                            "id": "96bc65ce-5bde-4a69-9ebf-711d65c6501c",
                             "name": "current",
                             "displayName": "Current",
                             "displayNameEvent": "Current changed",
                             "type": "double",
                             "unit": "Ampere",
-                            "defaultValue": 0.00
-                        },
-                        {
-                            "id": "c824e97b-a6d1-4030-9d7a-00af6fb8e1c3",
-                            "name": "power",
-                            "displayName": "Active power",
-                            "displayNameEvent": "Active power changed",
-                            "type": "double",
-                            "unit": "Watt",
-                            "defaultValue": 0.00
+                            "defaultValue": 0
                         },
                         {
                             "id": "93bb7bbf-4c61-4ccf-afaf-cb34b1a3bd7a",
@@ -118,7 +159,7 @@
                             "displayName": "Frequency",
                             "displayNameEvent": "Frequency changed",
                             "type": "double",
-                            "unit": "Herz",
+                            "unit": "Hertz",
                             "defaultValue": 0.00
                         },
                         {
@@ -159,7 +200,7 @@
                         },
                         {
                             "id": "98d858a8-22e8-4262-b5c7-25bb027942ad",
-                            "name": "totalActiveEnergy",
+                            "name": "totalEnergyConsumed",
                             "displayName": "Total active energy",
                             "displayNameEvent": "Total active energy changed",
                             "type": "double",

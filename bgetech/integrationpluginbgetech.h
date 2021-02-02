@@ -48,17 +48,6 @@ class IntegrationPluginBGetech : public IntegrationPlugin
     Q_INTERFACES(IntegrationPlugin)
 
 public:
-
-    explicit IntegrationPluginBGetech();
-
-    void discoverThings(ThingDiscoveryInfo *info) override;
-    void setupThing(ThingSetupInfo *info) override;
-    void postSetupThing(Thing *thing) override;
-    void executeAction(ThingActionInfo *info) override;
-    void thingRemoved(Thing *thing) override;
-
-private:
-
     enum InputRegisters {
         Phase1ToNeutralVolts   = 1,
         Phase2ToNeutralVolts   = 3,
@@ -101,6 +90,16 @@ private:
         MeasurementMode     = 63776
     };
     Q_ENUM(HoldingRegisters)
+
+    explicit IntegrationPluginBGetech();
+
+    void discoverThings(ThingDiscoveryInfo *info) override;
+    void setupThing(ThingSetupInfo *info) override;
+    void postSetupThing(Thing *thing) override;
+    void executeAction(ThingActionInfo *info) override;
+    void thingRemoved(Thing *thing) override;
+
+private:
 
     QHash<Thing *, ModbusRTUMaster *> m_connections;
     PluginTimer *m_pluginTimer = nullptr;
