@@ -62,7 +62,6 @@ private:
 
     PluginTimer *m_refreshTimer = nullptr;
     QHash<Thing *, Idm *> m_idmConnections;
-    QHash<Thing *, ThingSetupInfo *> m_idmInfos;
     QHash<QUuid, ThingActionInfo *> m_asyncActions;
 
     void onRefreshTimer();

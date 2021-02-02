@@ -51,69 +51,63 @@ void IntegrationPluginIdm::discoverThings(ThingDiscoveryInfo *info)
         // Just report no error for now, until the above question
         // is clarified
         info->finish(Thing::ThingErrorNoError);
+    } else {
+        Q_ASSERT_X(false, "discoverThings", QString("Unhandled thingClassId: %1").arg(info->thingClassId().toString()).toUtf8());
     }
 }
 
 void IntegrationPluginIdm::setupThing(ThingSetupInfo *info)
 {
-    qCDebug(dcIdm()) << "setupThing called";
-
     Thing *thing = info->thing();
+    qCDebug(dcIdm()) << "setupThing called" << thing->name();
 
     if (thing->thingClassId() == navigator2ThingClassId) {
         QHostAddress hostAddress = QHostAddress(thing->paramValue(navigator2ThingIpAddressParamTypeId).toString());
 
-        if (hostAddress.isNull() == false) {
-            QString msg = "User entered address: ";
-            msg += hostAddress.toString();
-
-            qCDebug(dcIdm()) << msg;
-
-            /* Check, if address is already in use for another device */
-            bool found = false;
-
-            for (QHash<Thing *, Idm *>::iterator item=m_idmConnections.begin(); item != m_idmConnections.end(); item++) {
-                if (hostAddress.isEqual(item.value()->getIdmAddress())) {
-                    msg = "Addr of thing: ";
-                    msg += item.value()->getIdmAddress().toString();
-                    qCDebug(dcIdm()) << msg;
-
-                    qCDebug(dcIdm()) << "Address in use already";
-                    found = true;
-                } else {
-                    msg = "Different addr of other thing: ";
-                    msg += item.value()->getIdmAddress().toString();
-                    qCDebug(dcIdm()) << msg;
-                }
-            }
-
-            if (found == false) {
-                qCDebug(dcIdm()) << "Creating Idm object";
-                
-                /* Create new Idm object and store it in hash table */
-                Idm *idm = new Idm(hostAddress, this);
-                m_idmConnections.insert(thing, idm);
-
-                /* Store thing info in hash table */
-                m_idmInfos.insert(thing, info);
-
-                msg = "Added IDM heatpump with address ";
-                msg += hostAddress.toString();
-
-                info->thing()->setStateValue(navigator2ConnectedStateTypeId, true);
-                info->finish(Thing::ThingErrorNoError, msg.toStdString().c_str());
-            } else {
-                info->finish(Thing::ThingErrorThingInUse, "IP address already in use");
-            }
-        } else {
+        if (hostAddress.isNull()) {
+            qCWarning(dcIdm()) << "Setup failed, IP address not valid";
             info->finish(Thing::ThingErrorInvalidParameter, "No IP address given");
+            return;
         }
+
+        if (m_idmConnections.contains(thing)) {
+            qCDebug(dcIdm()) << "Cleaning up after reconfiguration";
+            m_idmConnections.take(thing)->deleteLater();
+        }
+
+        qCDebug(dcIdm()) << "User entered address: " << hostAddress.toString();
+
+        /* Check, if address is already in use for another device */
+        Q_FOREACH (Idm *idm, m_idmConnections) {
+            if (hostAddress.isEqual(idm->getIdmAddress())) {
+
+                qCWarning(dcIdm()) << "Address already in use";
+                info->finish(Thing::ThingErrorSetupFailed, "IP address already in use");
+                return;
+            }
+        }
+
+        qCDebug(dcIdm()) << "Creating Idm object";
+        /* Create new Idm object and store it in hash table */
+        Idm *idm = new Idm(hostAddress, this);
+        m_idmConnections.insert(thing, idm);
+        connect(idm, &Idm::statusUpdated, info, [info] (IdmInfo *idmInfo) {
+            if (idmInfo->connected) {
+                info->finish(Thing::ThingErrorNoError);
+            }
+        });
+        connect(idm, &Idm::destroyed, this, [thing, this] {m_idmConnections.remove(thing);});
+        connect(info, &ThingSetupInfo::aborted, idm, &Idm::deleteLater);
+        connect(idm, &Idm::statusUpdated, this, &IntegrationPluginIdm::onStatusUpdated);
+
+    } else {
+        Q_ASSERT_X(false, "setupThing", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
     }
 }
 
 void IntegrationPluginIdm::postSetupThing(Thing *thing)
 {
-    qCDebug(dcIdm()) << "postSetupThing called";
+    qCDebug(dcIdm()) << "postSetupThing called" << thing->name();
 
     if (!m_refreshTimer) {
         m_refreshTimer = hardwareManager()->pluginTimerManager()->registerTimer(10);
@@ -125,7 +119,6 @@ void IntegrationPluginIdm::postSetupThing(Thing *thing)
         Idm *idm = m_idmConnections.value(thing);
 
         if (idm != nullptr) {
-            connect(idm, &Idm::statusUpdated, this, &IntegrationPluginIdm::onStatusUpdated);
 
             qCDebug(dcIdm()) << "Thing set up, calling update";
             update(thing);
@@ -137,8 +130,12 @@ void IntegrationPluginIdm::postSetupThing(Thing *thing)
 
 void IntegrationPluginIdm::thingRemoved(Thing *thing)
 {
-    if (m_idmConnections.contains(thing)) {
-        m_idmConnections.take(thing)->deleteLater();
+    qCDebug(dcIdm()) << "thingRemoved called" << thing->name();
+
+    if (thing->thingClassId() == navigator2ThingClassId) {
+        if (m_idmConnections.contains(thing)) {
+            m_idmConnections.take(thing)->deleteLater();
+        }
     }
 }
 
@@ -148,10 +145,10 @@ void IntegrationPluginIdm::executeAction(ThingActionInfo *info)
     Action action = info->action();
 
     if (thing->thingClassId() == navigator2ThingClassId) {
-      if (action.actionTypeId() == navigator2PowerActionTypeId) {
-          
-      } else {
-        Q_ASSERT_X(false, "executeAction", QString("Unhandled action: %1").arg(action.actionTypeId().toString()).toUtf8());
+        if (action.actionTypeId() == navigator2PowerActionTypeId) {
+
+        } else {
+            Q_ASSERT_X(false, "executeAction", QString("Unhandled action: %1").arg(action.actionTypeId().toString()).toUtf8());
         }
     } else {
         Q_ASSERT_X(false, "executeAction", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
@@ -164,11 +161,11 @@ void IntegrationPluginIdm::update(Thing *thing)
         qCDebug(dcIdm()) << "Updating thing";
 
         Idm *idm = m_idmConnections.value(thing);
-        Q_UNUSED(idm);
 
         if (idm != nullptr) {
             idm->onRequestStatus();
         }
+<<<<<<< HEAD
 
         if (m_idmInfos.contains(thing)) {
 <<<<<<< HEAD
@@ -180,6 +177,8 @@ void IntegrationPluginIdm::update(Thing *thing)
             /* info->finish(Thing::ThingErrorNoError); */
 >>>>>>> 3b5ab5c... Another fix for previous commit
         }
+=======
+>>>>>>> 27a88b6... Removed thread delay and used Timer instead
     }
 }
 
@@ -199,16 +198,16 @@ void IntegrationPluginIdm::onStatusUpdated(IdmInfo *info)
 
     /* Received a structure holding the status info of the
      * heat pump. Update the thing states with the individual fields. */
-    thing->setStateValue(navigator2ConnectedStateTypeId, info->m_connected);
-    thing->setStateValue(navigator2PowerStateTypeId, info->m_power);
-    thing->setStateValue(navigator2TemperatureStateTypeId, info->m_roomTemperature);
-    thing->setStateValue(navigator2OutsideAirTemperatureStateTypeId, info->m_outsideTemperature);
-    thing->setStateValue(navigator2WaterTemperatureStateTypeId, info->m_waterTemperature);
-    thing->setStateValue(navigator2TargetTemperatureStateTypeId, info->m_targetRoomTemperature);
-    thing->setStateValue(navigator2TargetWaterTemperatureStateTypeId, info->m_targetWaterTemperature);
-    thing->setStateValue(navigator2CurrentPowerConsumptionHeatPumpStateTypeId, info->m_powerConsumptionHeatPump);
-    thing->setStateValue(navigator2ModeStateTypeId, info->m_mode);
-    thing->setStateValue(navigator2ErrorStateTypeId, info->m_error);
+    thing->setStateValue(navigator2ConnectedStateTypeId, info->connected);
+    thing->setStateValue(navigator2PowerStateTypeId, info->power);
+    thing->setStateValue(navigator2TemperatureStateTypeId, info->roomTemperature);
+    thing->setStateValue(navigator2OutsideAirTemperatureStateTypeId, info->outsideTemperature);
+    thing->setStateValue(navigator2WaterTemperatureStateTypeId, info->waterTemperature);
+    thing->setStateValue(navigator2TargetTemperatureStateTypeId, info->targetRoomTemperature);
+    thing->setStateValue(navigator2TargetWaterTemperatureStateTypeId, info->targetWaterTemperature);
+    thing->setStateValue(navigator2CurrentPowerConsumptionHeatPumpStateTypeId, info->powerConsumptionHeatPump);
+    thing->setStateValue(navigator2ModeStateTypeId, info->mode);
+    thing->setStateValue(navigator2ErrorStateTypeId, info->error);
 }
 
 void IntegrationPluginIdm::onRefreshTimer()
