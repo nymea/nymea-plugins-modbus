@@ -12,7 +12,7 @@
                     "name": "navigator2",
                     "displayName": "Navigator 2.0",
                     "id": "1c95ac91-4eca-4cbf-b0f4-d60d35d069ed",
-                    "createMethods": ["User"],
+                    "createMethods": ["user"],
                     "interfaces": ["temperaturesensor", "connectable"],
                     "paramTypes": [
                         {
