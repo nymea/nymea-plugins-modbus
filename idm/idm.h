@@ -68,12 +68,10 @@ class Idm : public QObject
 {
     Q_OBJECT
 public:
-    /** Constructor */
     explicit Idm(const QHostAddress &address, QObject *parent = nullptr);
-
-    /** Destructor */
     ~Idm();
 
+    bool connectDevice();
     QHostAddress getIdmAddress() const {return m_hostAddress;};
 
 private:

@@ -85,18 +85,18 @@
                             "displayNameEvent": "Target water temperature changed",
                             "type": "double",
                             "unit": "DegreeCelsius",
-                            "defaultValue": 46.00
+                            "defaultValue": 0.00
                         },
                         {
 
                             "id": "b98fb325-100d-4eae-bf8d-97e8f7e1eb00",
                             "name": "currentPowerConsumptionHeatPump",
-                            "displayName": "Curr. power consumption",
+                            "displayName": "Current power consumption",
                             "displayNameEvent": "Current power consumption heat pump changed",
                             "displayNameAction": "Change current power consumption het pump",
                             "type": "double",
                             "unit": "KiloWatt",
-                            "defaultValue": 0
+                            "defaultValue": 0.00
                         },
                         {
                             "id": "e539366b-44da-4119-b11b-497bcdb1f522",
@@ -121,8 +121,6 @@
                             "type": "bool",
                             "defaultValue": false
                         }
-                    ],
-                    "actionTypes": [
                     ]
                 }
             ]

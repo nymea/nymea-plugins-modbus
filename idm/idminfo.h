@@ -40,37 +40,37 @@
 struct IdmInfo {
     /** Set to true, if register values can be read,
      *  false in case of communication problems */
-    bool    m_connected;
+    bool connected;
 
-    bool    m_power;
+    bool power;
 
     /** RegisterList::OutsideTemperature */
-    double  m_roomTemperature;
+    double roomTemperature;
 
     /** RegisterList::ExternalOutsideTemperature */
-    double  m_outsideTemperature;
+    double outsideTemperature;
 
     /** RegisterList::HeatStorageTemperature */
-    double  m_waterTemperature;
+    double waterTemperature;
 
     /** RegisterList::TargetRoomTemperatureZ1R1 (zone 1, room 1) */
-    double  m_targetRoomTemperature;
+    double targetRoomTemperature;
 
     /** RegisterList::TargetHotWaterTemperature */
-    double  m_targetWaterTemperature;
+    double targetWaterTemperature;
 
     /** RegisterList::HumiditySensor */
-    double  m_humidity;
+    double humidity;
 
     /** RegisterList::CurrentPowerConsumptionHeatPump */
-    double  m_powerConsumptionHeatPump;
+    double powerConsumptionHeatPump;
 
     /** RegisterList::OperationModeSystem */
-    QString m_mode;
+    QString  mode;
 
     /** True if there is an error code set 
      *  (RegisterList::CurrentFaultNumber != 0) */
-    bool    m_error;
+    bool error;
 };
 
 Q_DECLARE_METATYPE(IdmInfo);
