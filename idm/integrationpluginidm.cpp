@@ -36,26 +36,6 @@ IntegrationPluginIdm::IntegrationPluginIdm()
 
 }
 
-void IntegrationPluginIdm::discoverThings(ThingDiscoveryInfo *info)
-{
-    qCDebug(dcIdm()) << "discoverThings called";
-
-    if (info->thingClassId() == navigator2ThingClassId) {
-        // TODO Is a discovery method actually possible?
-        // The plugin has a parameter for the IP address
-
-        QString description = "Navigator 2";
-        ThingDescriptor descriptor(info->thingClassId(), "Idm", description);
-        info->addThingDescriptor(descriptor);
-        
-        // Just report no error for now, until the above question
-        // is clarified
-        info->finish(Thing::ThingErrorNoError);
-    } else {
-        Q_ASSERT_X(false, "discoverThings", QString("Unhandled thingClassId: %1").arg(info->thingClassId().toString()).toUtf8());
-    }
-}
-
 void IntegrationPluginIdm::setupThing(ThingSetupInfo *info)
 {
     Thing *thing = info->thing();
@@ -80,7 +60,6 @@ void IntegrationPluginIdm::setupThing(ThingSetupInfo *info)
         /* Check, if address is already in use for another device */
         Q_FOREACH (Idm *idm, m_idmConnections) {
             if (hostAddress.isEqual(idm->getIdmAddress())) {
-
                 qCWarning(dcIdm()) << "Address already in use";
                 info->finish(Thing::ThingErrorSetupFailed, "IP address already in use");
                 return;
@@ -90,6 +69,11 @@ void IntegrationPluginIdm::setupThing(ThingSetupInfo *info)
         qCDebug(dcIdm()) << "Creating Idm object";
         /* Create new Idm object and store it in hash table */
         Idm *idm = new Idm(hostAddress, this);
+        if (idm->connectDevice()) {
+            qCWarning(dcIdm()) << "Could not connect to thing";
+            info->finish(Thing::ThingErrorHardwareNotAvailable);
+            return;
+        }
         m_idmConnections.insert(thing, idm);
         connect(idm, &Idm::statusUpdated, info, [info] (IdmInfo *idmInfo) {
             if (idmInfo->connected) {
