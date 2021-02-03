@@ -38,34 +38,109 @@ class SunSpecMeter : public QObject
 {
     Q_OBJECT
 public:
-    //Model 203 = Three phase meter
-    enum MandatoryRegistersModel20X {
-        TotalAcCurrent          = 2,
-        PhaseACurrent           = 3,
-        PhaseBCurrent           = 4,
-        PhaseCCurrent           = 5,
-        CurrentScaleFactor      = 6,
-        VoltageLN               = 7,
-        PhaseVoltageAN          = 8,
-        PhaseVoltageBN          = 9,
-        PhaseVoltageCN          = 10,
-        VoltageLL               = 11,
-        PhaseVoltageAB          = 12,
-        PhaseVoltageBC          = 13,
-        PhaseVoltageCA          = 14,
-        VoltageScaleFactor      = 15,
-        Frequency               = 16,
-        TotalRealPower          = 18,
-        RealPowerScaleFactor    = 22,
-        TotalRealEnergyExported = 38,
-        TotalRealEnergyImported = 46,
-        RealEnergyScaleFactor   = 54,
-        MeterEventFlags         = 105
+
+    enum MeterEventFlags {
+        MeterEventPowerFailure = 2,
+        MeterEventUnderVoltage,
+        MeterEventLowPF,
+        MeterEventOverCurrent,
+        MeterEventOverVoltage,
+        MeterEventMissing_Sensor,
+        MeterEventReserved1,
+        MeterEventReserved2,
+        MeterEventReserved3,
+        MeterEventReserved4,
+        MeterEventReserved5,
+        MeterEventReserved6,
+        MeterEventReserved7,
+        MeterEventReserved8,
+        MeterEventOEM01,
+        MeterEventOEM02,
+        MeterEventOEM03,
+        MeterEventOEM04,
+        MeterEventOEM05,
+        MeterEventOEM06,
+        MeterEventOEM07,
+        MeterEventOEM08,
+        MeterEventOEM09,
+        MeterEventOEM10,
+        MeterEventOEM11,
+        MeterEventOEM12,
+        MeterEventOEM13,
+        MeterEventOEM14,
+        MeterEventOEM15
+    };
+
+    //Model 201 = Single phase meter SF
+    //Model 202 = Split phase meter SF
+    //Model 203 = Three phase meter SF
+    //Note: For example single phase inverters, Phase B current is optional then.
+    enum Model20X {
+        Model20XTotalAcCurrent          = 0,
+        Model20XPhaseACurrent           = 1,
+        Model20XPhaseBCurrent           = 2,
+        Model20XPhaseCCurrent           = 3,
+        Model20XCurrentScaleFactor      = 4,
+        Model20XVoltageLN               = 5,
+        Model20XPhaseVoltageAN          = 6,
+        Model20XPhaseVoltageBN          = 7,
+        Model20XPhaseVoltageCN          = 8,
+        Model20XVoltageLL               = 9,
+        Model20XPhaseVoltageAB          = 10,
+        Model20XPhaseVoltageBC          = 11,
+        Model20XPhaseVoltageCA          = 12,
+        Model20XVoltageScaleFactor      = 13,
+        Model20XFrequency               = 14,
+        Model20XFrequencyScaleFactor    = 15,
+        Model20XTotalRealPower          = 16,
+        Model20XRealPowerScaleFactor    = 20,
+        Model20XTotalRealEnergyExported = 36,
+        Model20XTotalRealEnergyImported = 44,
+        Model20XRealEnergyScaleFactor   = 52,
+        Model20XMeterEventFlags         = 103
+    };
+
+    //Model 211 = Single phase meter float
+    //Model 212 = Split phase meter float
+    //Model 213 = Three phase meter float
+    enum Model21X {
+        Model21XTotalAcCurrent          = 0,
+        Model21XPhaseACurrent           = 2,
+        Model21XPhaseBCurrent           = 4,
+        Model21XPhaseCCurrent           = 6,
+        Model21XVoltageLN               = 8,
+        Model21XPhaseVoltageAN          = 10,
+        Model21XPhaseVoltageBN          = 12,
+        Model21XPhaseVoltageCN          = 14,
+        Model21XVoltageLL               = 16,
+        Model21XPhaseVoltageAB          = 18,
+        Model21XPhaseVoltageBC          = 20,
+        Model21XPhaseVoltageCA          = 22,
+        Model21XFrequency               = 24,
+        Model21XTotalRealPower          = 26,
+        Model21XTotalRealEnergyExported = 58,
+        Model21XTotalRealEnergyImported = 66,
+        Model21XMeterEventFlags         = 122
     };
 
     struct MeterData {
-        SunSpec::SunSpecEvent1 event;
-        SunSpec::SunSpecOperatingState operatingState;
+        double totalAcCurrent; // [A]
+        double phaseACurrent;  // [A]
+        double phaseBCurrent;  // [A]
+        double phaseCCurrent;  // [A]
+        double voltageLN; // [V]
+        double phaseVoltageAN; // [V]
+        double phaseVoltageBN; // [V]
+        double phaseVoltageCN; // [V]
+        double voltageLL;      // [V]
+        double phaseVoltageAB; // [V]
+        double phaseVoltageBC; // [V]
+        double phaseVoltageCA; // [V]
+        double frequency;      // [Hz]
+        double totalRealPower; // [W]
+        double totalRealEnergyExported; // [kWh]
+        double totalRealEnergyImported; // [kWh]
+        quint32 meterEventFlags;        // MeterEventFlags
     };
 
     SunSpecMeter(SunSpec *sunspec, SunSpec::ModelId modelId, int modbusAddress);

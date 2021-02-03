@@ -77,6 +77,71 @@ public:
         Model11XEvent1               = 48
     };
 
+    enum Model10XOptional { // Optional register
+        Model10XPhaseVoltageAB      = 5,
+        Model10XPhaseVoltageBC      = 6,
+        Model10XPhaseVoltageCA      = 7,
+        Model10XACApparentPower     = 16,
+        Model10XACApparentPowerSF   = 17,
+        Model10XACReactivePower     = 18,
+        Model10XACReactivePowerSF   = 19,
+        Model10XACPowerFactor       = 20,
+        Model10XACPowerFactorSF     = 21,
+        Model10XDCCurrent           = 25,
+        Model10XDCCurrentSF         = 26,
+        Model10XDCVoltage           = 27,
+        Model10XDCVoltageSF         = 28,
+        Model10XDCPower             = 29,
+        Model10XDCPowerSF           = 30,
+        Model10XHeatSinkTemperature = 32,
+        Model10XTransformerTemperature = 33,
+        Model10XOtherTemperature       = 34,
+        Model10XVendorOperatingState   = 37,
+        Model10XVendorEventBitfield1   = 42,
+        Model10XVendorEventBitfield2   = 44,
+        Model10XVendorEventBitfield3   = 46,
+        Model10XVendorEventBitfield4   = 48
+    };
+
+    enum Model11XOptional { // Optinal registers
+        Model11XPhaseVoltageAB      = 8,
+        Model11XPhaseVoltageBC      = 10,
+        Model11XPhaseVoltageCA      = 12,
+        Model11XACApparentPower     = 24,
+        Model11XACReactivePower     = 26,
+        Model11XACPowerFactor       = 28,
+        Model11XDCCurrent           = 32,
+        Model11XDCVoltage           = 34,
+        Model11XDCPower             = 36,
+        Model11XHeatSinkTemperature     = 40,
+        Model11XTransformerTemperature  = 42,
+        Model11XOtherTemperature        = 44,
+        Model11XVendorOperatingState    = 47,
+        Model11XVendorEventBitfield1    = 52,
+        Model11XVendorEventBitfield2    = 54,
+        Model11XVendorEventBitfield3    = 56,
+        Model11XVendorEventBitfield4    = 58
+    };
+
+    struct SunSpecEvent1 {
+        bool groundFault;
+        bool dcOverVoltage;
+        bool acDisconnect;
+        bool dcDicconnect;
+        bool gridDisconnect;
+        bool cabinetOpen;
+        bool manualShutdown;
+        bool overTemperature;
+        bool overFrequency;
+        bool underFrequency;
+        bool acOverVolt;
+        bool acUnderVolt;
+        bool blownStringFuse;
+        bool underTemperature;
+        bool memoryLoss;
+        bool hwTestFailure;
+    };
+
     struct InverterData {
         float acCurrent; //in ampere
         float phaseACurrent;
@@ -92,7 +157,7 @@ public:
         float lineFrequency;
         float acEnergy;
         float cabinetTemperature; // in degree Celsius
-        SunSpec::SunSpecEvent1 event;
+        SunSpecEvent1 event1;
         SunSpec::SunSpecOperatingState operatingState;
     };
 
@@ -108,6 +173,7 @@ private:
     uint m_modelModbusStartRegister = 40000;
     bool m_initFinishedSuccess = false;
 
+    SunSpecEvent1 bitfieldToSunSpecEvent1(quint16 register1, quint16 register2);
     void getInverterModelHeader();
 
 private slots:

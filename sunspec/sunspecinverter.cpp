@@ -73,46 +73,70 @@ void SunSpecInverter::getInverterModelDataBlock()
     m_connection->readModelDataBlock(m_modelModbusStartRegister, m_modelLength);
 }
 
+SunSpecInverter::SunSpecEvent1 SunSpecInverter::bitfieldToSunSpecEvent1(quint16 register1, quint16 register2)
+{
+    SunSpecEvent1 event1;
+    Q_UNUSED(register2);
+    event1.groundFault      = ((register1 & (0x01 << 0)) != 0);
+    event1.dcOverVoltage    = ((register1 & (0x01 << 1)) != 0);
+    event1.acDisconnect     = ((register1 & (0x01 << 2)) != 0);
+    event1.dcDicconnect     = ((register1 & (0x01 << 3)) != 0);
+    event1.gridDisconnect   = ((register1 & (0x01 << 4)) != 0);
+    event1.cabinetOpen      = ((register1 & (0x01 << 5)) != 0);
+    event1.manualShutdown   = ((register1 & (0x01 << 6)) != 0);
+    event1.overTemperature  = ((register1 & (0x01 << 7)) != 0);
+    event1.overFrequency    = ((register1 & (0x01 << 8)) != 0);
+    event1.underFrequency   = ((register1 & (0x01 << 9)) != 0);
+    event1.acOverVolt       = ((register1 & (0x01 << 10)) != 0);
+    event1.acUnderVolt      = ((register1 & (0x01 << 11)) != 0);
+    event1.blownStringFuse  = ((register1 & (0x01 << 12)) != 0);
+    event1.underTemperature = ((register1 & (0x01 << 13)) != 0);
+    event1.memoryLoss       = ((register1 & (0x01 << 14)) != 0);
+    event1.hwTestFailure    = ((register1 & (0x01 << 15)) != 0);
+    return event1;
+}
+
 void SunSpecInverter::getInverterModelHeader()
 {
     qCDebug(dcSunSpec()) << "SunSpecInverter: get inverter model header, modbus register" << m_modelModbusStartRegister;
     m_connection->readModelHeader(m_modelModbusStartRegister);
 }
 
-void SunSpecInverter::onModelDataBlockReceived(SunSpec::ModelId mapId, uint mapLength, QVector<quint16> data)
+void SunSpecInverter::onModelDataBlockReceived(SunSpec::ModelId modelId, uint length, QVector<quint16> data)
 {
-    Q_UNUSED(mapLength)
-    if (mapId != m_id) {
+    Q_UNUSED(length)
+    if (modelId != m_id) {
         return;
     }
-    if (mapLength < m_modelLength) {
-        qCDebug(dcSunSpec()) << "SunSpecInverter: on modbus map received, map length is too short" << mapLength;
-        //return;
+    if (length < m_modelLength) {
+        qCDebug(dcSunSpec()) << "SunSpecInverter: on model data block received, model length is too short" << length;
+        return;
     }
     InverterData inverterData;
 
-    switch (mapId) {
+    qCDebug(dcSunSpec()) << "SunSpecInverter: Received" << modelId;
+    switch (modelId) {
     case SunSpec::ModelIdInverterSinglePhase:
     case SunSpec::ModelIdInverterSplitPhase:
     case SunSpec::ModelIdInverterThreePhase: {
-
         inverterData.acCurrent= m_connection->convertValueWithSSF(data[Model10X::Model10XAcCurrent], data[Model10X::Model10XAmpereScaleFactor]);
         inverterData.acPower = m_connection->convertValueWithSSF(data[Model10X::Model10XACPower], data[Model10X::Model10XWattScaleFactor]);
         inverterData.lineFrequency = m_connection->convertValueWithSSF(data[Model10X::Model10XLineFrequency], data[Model10X::Model10XHerzScaleFactor]);
 
-        inverterData.phaseACurrent = m_connection->convertValueWithSSF(data[Model10X::Model10XPhaseACurrent], data[Model10X::Model10XAmpereScaleFactor]);
-        inverterData.phaseBCurrent = m_connection->convertValueWithSSF(data[Model10X::Model10XPhaseBCurrent], data[Model10X::Model10XAmpereScaleFactor]);
-        inverterData.phaseCCurrent = m_connection->convertValueWithSSF(data[Model10X::Model10XPhaseCCurrent], data[Model10X::Model10XAmpereScaleFactor]);
-
-        inverterData.phaseVoltageAN = m_connection->convertValueWithSSF(data[Model10X::Model10XPhaseVoltageAN], data[Model10X::Model10XVoltageScaleFactor]);
-        inverterData.phaseVoltageBN = m_connection->convertValueWithSSF(data[Model10X::Model10XPhaseVoltageBN], data[Model10X::Model10XVoltageScaleFactor]);
-        inverterData.phaseVoltageCN = m_connection->convertValueWithSSF(data[Model10X::Model10XPhaseVoltageCN], data[Model10X::Model10XVoltageScaleFactor]);
+        quint16 ampereScaleFactor =  data[Model10X::Model10XAmpereScaleFactor];
+        inverterData.phaseACurrent = m_connection->convertValueWithSSF(data[Model10X::Model10XPhaseACurrent], ampereScaleFactor);
+        inverterData.phaseBCurrent = m_connection->convertValueWithSSF(data[Model10X::Model10XPhaseBCurrent], ampereScaleFactor);
+        inverterData.phaseCCurrent = m_connection->convertValueWithSSF(data[Model10X::Model10XPhaseCCurrent], ampereScaleFactor);
+        quint16 voltageScaleFactor = data[Model10X::Model10XVoltageScaleFactor];
+        inverterData.phaseVoltageAN = m_connection->convertValueWithSSF(data[Model10X::Model10XPhaseVoltageAN], voltageScaleFactor);
+        inverterData.phaseVoltageBN = m_connection->convertValueWithSSF(data[Model10X::Model10XPhaseVoltageBN], voltageScaleFactor);
+        inverterData.phaseVoltageCN = m_connection->convertValueWithSSF(data[Model10X::Model10XPhaseVoltageCN], voltageScaleFactor);
 
         quint32 acEnergy = ((static_cast<quint32>(data.value(Model10X::Model10XAcEnergy))<<16)|static_cast<quint32>(data.value(Model10X::Model10XAcEnergy+1)));
         inverterData.acEnergy = m_connection->convertValueWithSSF(acEnergy, data[Model10X::Model10XWattHoursScaleFactor]);
 
         inverterData.cabinetTemperature = m_connection->convertValueWithSSF(data[Model10X::Model10XCabinetTemperature], data[Model10X::Model10XTemperatureScaleFactor]);
-        inverterData.event = SunSpec::SunSpecEvent1(data[Model10X::Model10XEvent1]);
+        inverterData.event1 = bitfieldToSunSpecEvent1(data[Model10X::Model10XEvent1], data[Model10X::Model10XEvent1+1]);
         inverterData.operatingState = SunSpec::SunSpecOperatingState(data[Model10X::Model10XOperatingState]);
         emit inverterDataReceived(inverterData);
 
@@ -123,21 +147,20 @@ void SunSpecInverter::onModelDataBlockReceived(SunSpec::ModelId mapId, uint mapL
 
         inverterData.acCurrent = m_connection->convertFloatValues(data[Model11X::Model11XAcCurrent], data[Model11X::Model11XAcCurrent+1]);
 
-        inverterData.phaseCCurrent = m_connection->convertFloatValues(data[Model11X::Model11XPhaseCCurrent], data[Model11X::Model11XPhaseCCurrent+1]);
+        inverterData.phaseVoltageAN = m_connection->convertFloatValues(data[Model11X::Model11XPhaseVoltageAN], data[Model11X::Model11XPhaseVoltageAN+1]);
+        inverterData.phaseVoltageBN = m_connection->convertFloatValues(data[Model11X::Model11XPhaseVoltageBN], data[Model11X::Model11XPhaseVoltageBN+1]);
         inverterData.phaseVoltageCN = m_connection->convertFloatValues(data[Model11X::Model11XPhaseVoltageCN], data[Model11X::Model11XPhaseVoltageCN+1]);
 
-        inverterData.phaseBCurrent = m_connection->convertFloatValues(data[Model11X::Model11XPhaseBCurrent], data[Model11X::Model11XPhaseBCurrent+1]);
-        inverterData.phaseVoltageBN = m_connection->convertFloatValues(data[Model11X::Model11XPhaseVoltageBN], data[Model11X::Model11XPhaseVoltageBN+1]);
+        inverterData.phaseACurrent  = m_connection->convertFloatValues(data[Model11X::Model11XPhaseACurrent], data[Model11X::Model11XPhaseACurrent+1]);
+        inverterData.phaseBCurrent  = m_connection->convertFloatValues(data[Model11X::Model11XPhaseBCurrent], data[Model11X::Model11XPhaseBCurrent+1]);
+        inverterData.phaseCCurrent  = m_connection->convertFloatValues(data[Model11X::Model11XPhaseCCurrent], data[Model11X::Model11XPhaseCCurrent+1]);
 
-        inverterData.phaseACurrent = m_connection->convertFloatValues(data[Model11X::Model11XPhaseACurrent], data[Model11X::Model11XPhaseACurrent+1]);
-        inverterData.phaseVoltageAN = m_connection->convertFloatValues(data[Model11X::Model11XPhaseVoltageAN], data[Model11X::Model11XPhaseVoltageAN+1]);
+        inverterData.acPower        = m_connection->convertFloatValues(data[Model11X::Model11XACPower], data[Model11X::Model11XACPower+1]);
+        inverterData.lineFrequency  = m_connection->convertFloatValues(data[Model11X::Model11XLineFrequency], data[Model11X::Model11XLineFrequency+1]);
 
-        inverterData.acPower = m_connection->convertFloatValues(data[Model11X::Model11XACPower], data[Model11X::Model11XACPower+1]);
-        inverterData.lineFrequency = m_connection->convertFloatValues(data[Model11X::Model11XLineFrequency], data[Model11X::Model11XLineFrequency+1]);
-
-        inverterData.acEnergy = m_connection->convertFloatValues(data[Model11X::Model11XAcEnergy], data[Model11X::Model11XAcEnergy+1]);
-        inverterData.cabinetTemperature =m_connection->convertFloatValues(data[Model11X::Model11XCabinetTemperature], data[Model11X::Model11XCabinetTemperature+1]);
-        inverterData.event = SunSpec::SunSpecEvent1(data[Model11X::Model11XEvent1]);
+        inverterData.acEnergy       = m_connection->convertFloatValues(data[Model11X::Model11XAcEnergy], data[Model11X::Model11XAcEnergy+1]);
+        inverterData.cabinetTemperature = m_connection->convertFloatValues(data[Model11X::Model11XCabinetTemperature], data[Model11X::Model11XCabinetTemperature+1]);
+        inverterData.event1 = bitfieldToSunSpecEvent1(data[Model11X::Model11XEvent1], data[Model11X::Model11XEvent1+1]);
         inverterData.operatingState = SunSpec::SunSpecOperatingState(data[Model11X::Model11XOperatingState]);
         emit inverterDataReceived(inverterData);
     } break;
