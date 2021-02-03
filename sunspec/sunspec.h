@@ -42,6 +42,12 @@ class SunSpec : public QObject
 
 public:
 
+    typedef union {
+        int32_t s;
+        uint32_t u;
+        float f;
+    } suns_modbus_v32_t;
+
     enum MandatoryRegistersModel1 {
         Manufacturer = 2,
         Model = 18,

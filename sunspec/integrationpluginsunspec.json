@@ -40,7 +40,7 @@
                     "displayName": "SunSpec connection",
                     "id": "f51853f3-8815-4cf3-b337-45cda1f3e6d5",
                     "createMethods": [ "User" ],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["gateway"],
                     "paramTypes": [
                         {
                             "id": "6be6abc4-e2b2-4687-9343-0e5164ed0ab2",
@@ -105,7 +105,7 @@
                     "displayName": "SunSpec single phase inverter",
                     "id": "c5d5204e-3375-4b92-8128-fab77a671fed",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["extendedsmartmeterproducer", "connectable"],
                     "paramTypes": [
                         {
                             "id": "41715d00-a947-4f43-a475-cea05790e01d",
@@ -153,11 +153,11 @@
                         },
                         {
                             "id": "f49591d6-d759-4be3-bafc-b6a7a72cf023",
-                            "name": "acPower",
+                            "name": "currentPower",
                             "displayName": "AC power",
                             "displayNameEvent": "AC power changed",
                             "type": "double",
-                            "unit": "KiloWatt",
+                            "unit": "Watt",
                             "defaultValue": 0.00
                         },
                         {
@@ -171,7 +171,7 @@
                         },
                         {
                             "id": "4c0407b3-5cd5-438d-bfa8-9a8d6695b458",
-                            "name": "acEnergy",
+                            "name": "totalEnergyProduced",
                             "displayName": "AC energy",
                             "displayNameEvent": "AC energy changed",
                             "type": "double",
@@ -239,7 +239,7 @@
                     "displayName": "SunSpec split phase inverter",
                     "id": "61b38f93-d331-42bf-b1ef-d3fb16ad1230",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["extendedsmartmeterproducer", "connectable"],
                     "paramTypes": [
                         {
                             "id": "c42fb50e-210f-4b53-88eb-fa216e15f88f",
@@ -314,11 +314,11 @@
                         },
                         {
                             "id": "9235eb4b-906c-4557-8e18-bca268a367cc",
-                            "name": "acPower",
+                            "name": "currentPower",
                             "displayName": "AC power",
                             "displayNameEvent": "AC power changed",
                             "type": "double",
-                            "unit": "KiloWatt",
+                            "unit": "Watt",
                             "defaultValue": 0.00
                         },
                         {
@@ -332,7 +332,7 @@
                         },
                         {
                             "id": "fe3f8a65-121a-4ae1-b22a-ae325dc3e7e6",
-                            "name": "acEnergy",
+                            "name": "totalEnergyProduced",
                             "displayName": "AC energy",
                             "displayNameEvent": "AC energy changed",
                             "type": "double",
@@ -400,7 +400,7 @@
                     "displayName": "SunSpec three phase inverter",
                     "id": "2e4122ea-96a5-415c-b5e2-7d6012265a83",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["extendedsmartmeterproducer", "connectable"],
                     "paramTypes": [
                         {
                             "id": "8d5b2b58-ce46-406d-844e-f53136afcf09",
@@ -493,11 +493,11 @@
                         },
                         {
                             "id": "14036f44-25fd-4e93-8e8c-c677b06a2c34",
-                            "name": "acPower",
+                            "name": "currentPower",
                             "displayName": "AC power",
                             "displayNameEvent": "AC power changed",
                             "type": "double",
-                            "unit": "KiloWatt",
+                            "unit": "Watt",
                             "defaultValue": 0.00
                         },
                         {
@@ -511,7 +511,7 @@
                         },
                         {
                             "id": "d493880d-eb58-4530-8010-8ea4f6d63387",
-                            "name": "acEnergy",
+                            "name": "totalEnergyProduced",
                             "displayName": "AC energy",
                             "displayNameEvent": "AC energy changed",
                             "type": "double",
@@ -579,7 +579,7 @@
                     "displayName": "SunSpec single phase meter",
                     "id": "7ffa43b8-b56f-4435-8509-980e9d81dfa8",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["extendedsmartmeterconsumer", "connectable"],
                     "paramTypes": [
                         {
                             "id": "7d6fcafb-c62e-4a21-aae2-f4041c487149",
@@ -646,16 +646,16 @@
                         },
                         {
                             "id": "93cf8c6a-2620-42ed-9070-e0726d7b1dbc",
-                            "name": "totalRealPower",
+                            "name": "currentPower",
                             "displayName": "Total real power",
                             "displayNameEvent": "Total real power changed",
                             "type": "double",
-                            "unit": "KiloWatt",
+                            "unit": "Watt",
                             "defaultValue": 0.00
                         },
                         {
                             "id": "ba275bdf-f418-4ef0-afbe-ac425c6f6783",
-                            "name": "energyExported",
+                            "name": "totalEnergyProduced",
                             "displayName": "Total real energy exported",
                             "displayNameEvent": "Total real energy exported changed",
                             "type": "double",
@@ -664,7 +664,7 @@
                         },
                         {
                             "id": "c51dc6cb-5c05-4078-b11a-26afb2f85541",
-                            "name": "energyImported",
+                            "name": "totalEnergyConsumed",
                             "displayName": "Total real energy imported",
                             "displayNameEvent": "Total real energy imported changed",
                             "type": "double",
@@ -678,7 +678,7 @@
                     "displayName": "SunSpec split phase meter",
                     "id": "b8a18e45-5ff5-4f43-915f-04ee216c809d",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["extendedsmartmeterconsumer", "connectable"],
                     "paramTypes": [
                         {
                             "id": "89aeec6d-abeb-48b5-9594-214ad5db2d03",
@@ -772,16 +772,16 @@
                         },
                         {
                             "id": "ef4bc0f8-f516-49b7-aba8-d5f987485aca",
-                            "name": "totalRealPower",
+                            "name": "currentPower",
                             "displayName": "Total real power",
                             "displayNameEvent": "Total real power changed",
                             "type": "double",
-                            "unit": "KiloWatt",
+                            "unit": "Watt",
                             "defaultValue": 0.00
                         },
                         {
                             "id": "8a63bd73-0546-4636-8da2-23238cc06fb2",
-                            "name": "energyExported",
+                            "name": "totalEnergyProduced",
                             "displayName": "Total real energy exported",
                             "displayNameEvent": "Total real energy exported changed",
                             "type": "double",
@@ -790,7 +790,7 @@
                         },
                         {
                             "id": "51ffb2ae-3920-40df-8290-bbf5b6e1a68f",
-                            "name": "energyImported",
+                            "name": "totalEnergyConsumed",
                             "displayName": "Total real energy imported",
                             "displayNameEvent": "Total real energy imported changed",
                             "type": "double",
@@ -804,7 +804,7 @@
                     "displayName": "SunSpec three phase meter",
                     "id": "68f822f9-ff30-4275-b229-39a3674fead7",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["extendedsmartmeterconsumer", "connectable"],
                     "paramTypes": [
                         {
                             "id": "a1960821-155c-4176-86fa-974429039182",
@@ -916,16 +916,16 @@
                         },
                         {
                             "id": "c28c642f-46da-44de-ba0d-c4cbfadbf2cd",
-                            "name": "totalRealPower",
+                            "name": "currentPower",
                             "displayName": "Total real power",
                             "displayNameEvent": "Total real power changed",
                             "type": "double",
-                            "unit": "KiloWatt",
+                            "unit": "Watt",
                             "defaultValue": 0.00
                         },
                         {
                             "id": "73ebf57f-1ad2-4d19-bfd9-9e0a514c1243",
-                            "name": "energyExported",
+                            "name": "totalEnergyProduced",
                             "displayName": "Total real energy exported",
                             "displayNameEvent": "Total real energy exported changed",
                             "type": "double",
@@ -934,7 +934,7 @@
                         },
                         {
                             "id": "63fa4721-1b0a-458c-b66c-17c161107f0d",
-                            "name": "energyImported",
+                            "name": "totalEnergyConsumed",
                             "displayName": "Total real energy imported",
                             "displayNameEvent": "Total real energy imported changed",
                             "type": "double",
