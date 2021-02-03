@@ -67,25 +67,6 @@ public:
     };
     Q_ENUM(SunSpecOperatingState)
 
-    enum SunSpecEvent1 {
-        GroundFault = 0,
-        DcOverVolatage,
-        AC_DISCONNECT,
-        DC_DISCONNECT,
-        GRID_DISCONNECT,
-        CABINET_OPEN,
-        MANUAL_SHUTDOWN,
-        OVER_TEMP,
-        OVER_FREQUENCY,
-        UNDER_FREQUENCY,
-        AC_OVER_VOLT,
-        AC_UNDER_VOLT,
-        BLOWN_STRING_FUSE,
-        UNDER_TEMP,
-        MEMORY_LOSS,
-        HW_TEST_FAILURE
-    };
-    Q_ENUM(SunSpecEvent1)
 
     enum ModelId {
         ModelIdCommon          = 1,

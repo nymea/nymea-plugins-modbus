@@ -564,6 +564,8 @@ void IntegrationPluginSunSpec::onFoundSunSpecModel(SunSpec::ModelId modelId, int
         descriptor.setParams(params);
         emit autoThingsAppeared({descriptor});
     } break;
+    case SunSpec::ModelIdWyeConnectThreePhaseMeter:
+    case SunSpec::ModelIdDeltaConnectThreePhaseMeter:
     case SunSpec::ModelIdWyeConnectThreePhaseMeterFloat:
     case SunSpec::ModelIdDeltaConnectThreePhaseMeterFloat: {
         ThingDescriptor descriptor(sunspecThreePhaseMeterThingClassId, model+" meter", "", thing->id());
@@ -617,6 +619,24 @@ void IntegrationPluginSunSpec::onInverterDataReceived(const SunSpecInverter::Inv
     if(!thing) {
         return;
     }
+
+    qCDebug(dcSunSpec()) << "Inverter data received";
+    qCDebug(dcSunSpec()) << "   - Total AC Current" << inverterData.acCurrent << "[A]";
+    qCDebug(dcSunSpec()) << "   - Phase A Current" << inverterData.phaseACurrent << "[A]";
+    qCDebug(dcSunSpec()) << "   - Phase B Current" << inverterData.phaseBCurrent << "[A]";
+    qCDebug(dcSunSpec()) << "   - Phase C Current" << inverterData.phaseCCurrent << "[A]";
+    qCDebug(dcSunSpec()) << "   - Phase voltage AB" << inverterData.phaseVoltageAB << "[V]";
+    qCDebug(dcSunSpec()) << "   - Phase voltage BC" << inverterData.phaseVoltageBC << "[V]";
+    qCDebug(dcSunSpec()) << "   - Phase voltage CA" << inverterData.phaseVoltageCA << "[V]";
+    qCDebug(dcSunSpec()) << "   - Phase voltage AN" << inverterData.phaseVoltageAN << "[V]";
+    qCDebug(dcSunSpec()) << "   - Phase voltage BN" << inverterData.phaseVoltageBN << "[V]";
+    qCDebug(dcSunSpec()) << "   - Phase voltage CN" << inverterData.phaseVoltageCN << "[V]";
+    qCDebug(dcSunSpec()) << "   - AC Power" << inverterData.acPower << "[W]";
+    qCDebug(dcSunSpec()) << "   - Line frequency" << inverterData.lineFrequency << "[Hz]";
+    qCDebug(dcSunSpec()) << "   - AC energy" << inverterData.acEnergy << "[Wh]";
+    qCDebug(dcSunSpec()) << "   - Cabinet temperature" << inverterData.cabinetTemperature << "[°C]";
+    qCDebug(dcSunSpec()) << "   - Operating state" << inverterData.operatingState;
+
     thing->setStateValue(m_connectedStateTypeIds.value(thing->thingClassId()), true);
     thing->setStateValue(m_acPowerStateTypeIds.value(thing->thingClassId()), inverterData.acPower/1000.00);
     thing->setStateValue(m_acEnergyStateTypeIds.value(thing->thingClassId()), inverterData.acEnergy/1000.00);
@@ -625,7 +645,7 @@ void IntegrationPluginSunSpec::onInverterDataReceived(const SunSpecInverter::Inv
     thing->setStateValue(sunspecThreePhaseInverterTotalCurrentStateTypeId, inverterData.acCurrent);
     thing->setStateValue(sunspecThreePhaseInverterCabinetTemperatureStateTypeId, inverterData.cabinetTemperature);
 
-    if (thing->thingClassId() == sunspecSplitPhaseMeterThingClassId) {
+    if (thing->thingClassId() == sunspecSplitPhaseInverterThingClassId) {
 
         thing->setStateValue(sunspecSplitPhaseInverterPhaseANVoltageStateTypeId, inverterData.phaseVoltageAN);
         thing->setStateValue(sunspecSplitPhaseInverterPhaseBNVoltageStateTypeId, inverterData.phaseVoltageBN);
@@ -633,7 +653,7 @@ void IntegrationPluginSunSpec::onInverterDataReceived(const SunSpecInverter::Inv
         thing->setStateValue(sunspecSplitPhaseInverterPhaseACurrentStateTypeId, inverterData.phaseACurrent);
         thing->setStateValue(sunspecSplitPhaseInverterPhaseBCurrentStateTypeId, inverterData.phaseBCurrent);
 
-    } else if (thing->thingClassId() == sunspecThreePhaseMeterThingClassId) {
+    } else if (thing->thingClassId() == sunspecThreePhaseInverterThingClassId) {
 
         thing->setStateValue(sunspecThreePhaseInverterPhaseANVoltageStateTypeId, inverterData.phaseVoltageAN);
         thing->setStateValue(sunspecThreePhaseInverterPhaseBNVoltageStateTypeId, inverterData.phaseVoltageBN);
@@ -671,55 +691,41 @@ void IntegrationPluginSunSpec::onInverterDataReceived(const SunSpecInverter::Inv
         break;
     }
 
-    switch(inverterData.event) {
-    case SunSpec::SunSpecEvent1::OVER_TEMP:
+    //FIXME: Event1 may have multiple states at once. Only one is stated in nymea
+    if (inverterData.event1.overTemperature) {
         thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "Over temperature");
-        break;
-    case SunSpec::SunSpecEvent1::UNDER_TEMP:
+    } else if (inverterData.event1.underTemperature) {
         thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "Under temperature");
-        break;
-    case SunSpec::SunSpecEvent1::GroundFault:
+    } else if (inverterData.event1.groundFault) {
         thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "Ground fault");
-        break;
-    case SunSpec::SunSpecEvent1::MEMORY_LOSS:
+    } else if (inverterData.event1.memoryLoss) {
         thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "Memory loss");
-        break;
-    case SunSpec::SunSpecEvent1::AC_OVER_VOLT:
+    } else if (inverterData.event1.acOverVolt) {
         thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "AC voltage above limit");
-        break;
-    case SunSpec::SunSpecEvent1::CABINET_OPEN:
+    } else if (inverterData.event1.cabinetOpen) {
         thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "Cabinet open");
-        break;
-    case SunSpec::SunSpecEvent1::AC_DISCONNECT:
+    } else if (inverterData.event1.acDisconnect) {
         thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "AC disconnect open");
-        break;
-    case SunSpec::SunSpecEvent1::AC_UNDER_VOLT:
+    } else if (inverterData.event1.acUnderVolt) {
         thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "AC voltage under limit");
-        break;
-    case SunSpec::SunSpecEvent1::DC_DISCONNECT:
+    } else if (inverterData.event1.dcDicconnect) {
         thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "DC disconnect open");
-        break;
-    case SunSpec::SunSpecEvent1::DcOverVolatage:
+    } else if (inverterData.event1.dcOverVoltage) {
         thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "DC over voltage");
-        break;
-    case SunSpec::SunSpecEvent1::OVER_FREQUENCY:
+    } else if (inverterData.event1.overFrequency) {
         thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "Frequency above limit");
-        break;
-    case SunSpec::SunSpecEvent1::GRID_DISCONNECT:
+    } else if (inverterData.event1.gridDisconnect) {
         thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "Grid disconnect");
-        break;
-    case SunSpec::SunSpecEvent1::HW_TEST_FAILURE:
+    } else if (inverterData.event1.hwTestFailure) {
         thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "Hardware test failure");
-        break;
-    case SunSpec::SunSpecEvent1::MANUAL_SHUTDOWN:
+    } else if (inverterData.event1.manualShutdown) {
         thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "Manual shutdown");
-        break;
-    case SunSpec::SunSpecEvent1::UNDER_FREQUENCY:
+    } else if (inverterData.event1.underFrequency) {
         thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "Frequency under limit");
-        break;
-    case SunSpec::SunSpecEvent1::BLOWN_STRING_FUSE:
+    } else if (inverterData.event1.blownStringFuse) {
         thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "Blown string fuse on input");
-        break;
+    } else {
+        thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "None");
     }
 }
 
@@ -774,5 +780,34 @@ void IntegrationPluginSunSpec::onMeterDataReceived(const SunSpecMeter::MeterData
     if (!thing) {
         return;
     }
+
     thing->setStateValue(m_connectedStateTypeIds.value(thing->thingClassId()), true);
+
+    qCDebug(dcSunSpec()) << "Meter data received";
+    qCDebug(dcSunSpec()) << "   - Total AC Current" << meterData.totalAcCurrent << "[A]";
+    qCDebug(dcSunSpec()) << "   - Phase A current" << meterData.phaseACurrent << "[A]";
+    qCDebug(dcSunSpec()) << "   - Phase B current" << meterData.phaseBCurrent << "[A]";
+    qCDebug(dcSunSpec()) << "   - Phase C current" << meterData.phaseCCurrent << "[A]";
+    qCDebug(dcSunSpec()) << "   - Voltage LN" << meterData.voltageLN << "[V]";
+    qCDebug(dcSunSpec()) << "   - Phase voltage AN" << meterData.phaseVoltageAN << "[V]";
+    qCDebug(dcSunSpec()) << "   - Phase voltage BN" << meterData.phaseVoltageBN << "[V]";
+    qCDebug(dcSunSpec()) << "   - Phase voltage CN" << meterData.phaseVoltageCN<< "[V]";
+    qCDebug(dcSunSpec()) << "   - Voltage LL" << meterData.voltageLL << "[V]";
+    qCDebug(dcSunSpec()) << "   - Phase voltage AB" << meterData.phaseVoltageAB << "[V]";
+    qCDebug(dcSunSpec()) << "   - Phase voltage BC" << meterData.phaseVoltageBC << "[V]";
+    qCDebug(dcSunSpec()) << "   - Phase voltage CA" << meterData.phaseVoltageCA<< "[V]";
+    qCDebug(dcSunSpec()) << "   - Frequency" << meterData.frequency << "[Hz]";
+    qCDebug(dcSunSpec()) << "   - Total real power" << meterData.totalRealPower << "[W]";
+    qCDebug(dcSunSpec()) << "   - Total real energy exported" << meterData.totalRealEnergyExported<< "[kWH]";
+    qCDebug(dcSunSpec()) << "   - Total real energy imported" << meterData.totalRealEnergyImported<< "[kWH]";
+
+    thing->setStateValue(sunspecThreePhaseMeterTotalCurrentStateTypeId, meterData.totalAcCurrent);
+    thing->setStateValue(sunspecThreePhaseMeterPhaseACurrentStateTypeId, meterData.phaseACurrent);
+    thing->setStateValue(sunspecThreePhaseMeterPhaseBCurrentStateTypeId, meterData.phaseBCurrent);
+    thing->setStateValue(sunspecThreePhaseMeterPhaseCCurrentStateTypeId, meterData.phaseCCurrent);
+    thing->setStateValue(sunspecThreePhaseMeterLnACVoltageStateTypeId, meterData.voltageLN);
+    thing->setStateValue(sunspecThreePhaseMeterTotalRealPowerEventTypeId, meterData.totalRealPower);
+    thing->setStateValue(sunspecThreePhaseMeterEnergyExportedStateTypeId, meterData.totalRealEnergyExported);
+    thing->setStateValue(sunspecThreePhaseMeterEnergyImportedStateTypeId, meterData.totalRealEnergyImported);
+    thing->setStateValue(m_frequencyStateTypeIds.value(thing->thingClassId()), meterData.frequency);
 }

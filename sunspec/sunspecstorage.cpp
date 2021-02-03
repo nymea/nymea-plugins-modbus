@@ -121,15 +121,19 @@ QUuid SunSpecStorage::setDischargingRate(int charging)
 
 void SunSpecStorage::onModelDataBlockReceived(SunSpec::ModelId modelId, uint length, const QVector<quint16> &data)
 {
-    Q_UNUSED(length)
     if (modelId != m_id) {
         return;
     }
 
+    if (length < m_modelLength) {
+        qCDebug(dcSunSpec()) << "SunSpecMeter: on model data block received, model length is too short" << length;
+        //return;
+    }
+
+    qCDebug(dcSunSpec()) << "SunSpecStorage: Received" << modelId;
     switch (modelId) {
     case SunSpec::ModelIdStorage: {
         StorageData mandatory;
-        qCDebug(dcSunSpec()) << "SunSpecStorage: Storage model received:";
         qCDebug(dcSunSpec()) << "   - Setpoint maximum charge" << data[Model124SetpointMaximumCharge];
         qCDebug(dcSunSpec()) << "   - Setpoint maximum charging rate" << data[Model124SetpointMaximumChargingRate];
         qCDebug(dcSunSpec()) << "   - Setpoint maximum discharge rate" << data[Model124SetpointMaximumDischargeRate];
@@ -150,9 +154,6 @@ void SunSpecStorage::onModelDataBlockReceived(SunSpec::ModelId modelId, uint len
         optional.storageAvailable = m_connection->convertValueWithSSF(data[Model124StorageAvailableAH], data[Model124ScaleFactorMaximumChargingVA]);
         optional.gridChargingEnabled = (data[Model124ChargeGridSet] == 1);
         optional.currentlyAvailableEnergy = m_connection->convertValueWithSSF(data[Model124CurrentlyAvailableEnergyPercent], data[Model124ScaleFactorAvailableEnergyPercent]);
-        //qCDebug(dcSunSpec()) << "   - Currently available energy" << data[Model124CurrentlyAvailableEnergy];
-        //mandatory.chargingState = ChargingStatus(data[Model124ChargeStatus]);
-        //qCDebug(dcSunSpec()) << "   - Charging state" << mandatory.chargingState;
 
         emit storageDataReceived(mandatory, optional);
 

@@ -39,7 +39,6 @@
 #include "sunspecinverter.h"
 #include "sunspecstorage.h"
 #include "sunspecmeter.h"
-#include "sunspectracker.h"
 
 #include <QUuid>
 
