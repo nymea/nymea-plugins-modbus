@@ -65,21 +65,29 @@ void IntegrationPluginSunSpec::init()
     m_modbusAddressParamTypeIds.insert(sunspecSplitPhaseMeterThingClassId, sunspecSplitPhaseMeterThingModbusAddressParamTypeId);
     m_modbusAddressParamTypeIds.insert(sunspecThreePhaseMeterThingClassId, sunspecThreePhaseMeterThingModbusAddressParamTypeId);
 
-    m_acPowerStateTypeIds.insert(sunspecSinglePhaseInverterThingClassId, sunspecSinglePhaseInverterAcPowerStateTypeId);
-    m_acPowerStateTypeIds.insert(sunspecSplitPhaseInverterThingClassId, sunspecSplitPhaseInverterAcPowerStateTypeId);
-    m_acPowerStateTypeIds.insert(sunspecThreePhaseInverterThingClassId, sunspecThreePhaseInverterAcPowerStateTypeId);
+    m_inverterCurrentPowerStateTypeIds.insert(sunspecSinglePhaseInverterThingClassId, sunspecSinglePhaseInverterCurrentPowerStateTypeId);
+    m_inverterCurrentPowerStateTypeIds.insert(sunspecSplitPhaseInverterThingClassId, sunspecSplitPhaseInverterCurrentPowerStateTypeId);
+    m_inverterCurrentPowerStateTypeIds.insert(sunspecThreePhaseInverterThingClassId, sunspecThreePhaseInverterCurrentPowerStateTypeId);
 
-    m_acEnergyStateTypeIds.insert(sunspecSinglePhaseInverterThingClassId, sunspecSinglePhaseInverterAcEnergyStateTypeId);
-    m_acEnergyStateTypeIds.insert(sunspecSplitPhaseInverterThingClassId, sunspecSplitPhaseInverterAcEnergyStateTypeId);
-    m_acEnergyStateTypeIds.insert(sunspecThreePhaseInverterThingClassId, sunspecThreePhaseInverterAcEnergyStateTypeId);
+    m_inverterTotalEnergyProducedStateTypeIds.insert(sunspecSinglePhaseInverterThingClassId, sunspecSinglePhaseInverterTotalEnergyProducedStateTypeId);
+    m_inverterTotalEnergyProducedStateTypeIds.insert(sunspecSplitPhaseInverterThingClassId, sunspecSplitPhaseInverterTotalEnergyProducedStateTypeId);
+    m_inverterTotalEnergyProducedStateTypeIds.insert(sunspecThreePhaseInverterThingClassId, sunspecThreePhaseInverterTotalEnergyProducedStateTypeId);
 
-    m_inverterOperatingStateTypeIds.insert(sunspecSinglePhaseMeterThingClassId, sunspecSinglePhaseInverterOperatingStateStateTypeId);
-    m_inverterOperatingStateTypeIds.insert(sunspecSplitPhaseMeterThingClassId, sunspecSplitPhaseInverterOperatingStateStateTypeId);
-    m_inverterOperatingStateTypeIds.insert(sunspecThreePhaseMeterThingClassId, sunspecThreePhaseInverterOperatingStateStateTypeId);
+    m_inverterOperatingStateTypeIds.insert(sunspecSinglePhaseInverterThingClassId, sunspecSinglePhaseInverterOperatingStateStateTypeId);
+    m_inverterOperatingStateTypeIds.insert(sunspecSplitPhaseInverterThingClassId, sunspecSplitPhaseInverterOperatingStateStateTypeId);
+    m_inverterOperatingStateTypeIds.insert(sunspecThreePhaseInverterThingClassId, sunspecThreePhaseInverterOperatingStateStateTypeId);
 
-    m_inverterErrorStateTypeIds.insert(sunspecSinglePhaseMeterThingClassId, sunspecSinglePhaseInverterErrorStateTypeId);
-    m_inverterErrorStateTypeIds.insert(sunspecSplitPhaseMeterThingClassId, sunspecSplitPhaseInverterErrorStateTypeId);
-    m_inverterErrorStateTypeIds.insert(sunspecThreePhaseMeterThingClassId, sunspecThreePhaseInverterErrorStateTypeId);
+    m_inverterErrorStateTypeIds.insert(sunspecSinglePhaseInverterThingClassId, sunspecSinglePhaseInverterErrorStateTypeId);
+    m_inverterErrorStateTypeIds.insert(sunspecSplitPhaseInverterThingClassId, sunspecSplitPhaseInverterErrorStateTypeId);
+    m_inverterErrorStateTypeIds.insert(sunspecThreePhaseInverterThingClassId, sunspecThreePhaseInverterErrorStateTypeId);
+
+    m_inverterCabinetTemperatureStateTypeIds.insert(sunspecSinglePhaseInverterThingClassId, sunspecSinglePhaseInverterCabinetTemperatureStateTypeId);
+    m_inverterCabinetTemperatureStateTypeIds.insert(sunspecSplitPhaseInverterThingClassId, sunspecSplitPhaseInverterCabinetTemperatureStateTypeId);
+    m_inverterCabinetTemperatureStateTypeIds.insert(sunspecThreePhaseInverterThingClassId, sunspecThreePhaseInverterCabinetTemperatureStateTypeId);
+
+    m_inverterAcCurrentStateTypeIds.insert(sunspecSinglePhaseInverterThingClassId, sunspecSinglePhaseInverterTotalCurrentStateTypeId);
+    m_inverterAcCurrentStateTypeIds.insert(sunspecSplitPhaseInverterThingClassId, sunspecSplitPhaseInverterTotalCurrentStateTypeId);
+    m_inverterAcCurrentStateTypeIds.insert(sunspecThreePhaseInverterThingClassId, sunspecThreePhaseInverterTotalCurrentStateTypeId);
 
     m_frequencyStateTypeIds.insert(sunspecSinglePhaseInverterThingClassId, sunspecSinglePhaseInverterFrequencyStateTypeId);
     m_frequencyStateTypeIds.insert(sunspecSplitPhaseInverterThingClassId, sunspecSplitPhaseInverterFrequencyStateTypeId);
@@ -638,14 +646,18 @@ void IntegrationPluginSunSpec::onInverterDataReceived(const SunSpecInverter::Inv
     qCDebug(dcSunSpec()) << "   - Operating state" << inverterData.operatingState;
 
     thing->setStateValue(m_connectedStateTypeIds.value(thing->thingClassId()), true);
-    thing->setStateValue(m_acPowerStateTypeIds.value(thing->thingClassId()), inverterData.acPower/1000.00);
-    thing->setStateValue(m_acEnergyStateTypeIds.value(thing->thingClassId()), inverterData.acEnergy/1000.00);
+    thing->setStateValue(m_inverterCurrentPowerStateTypeIds.value(thing->thingClassId()), inverterData.acPower/1000.00);
+    thing->setStateValue(m_inverterTotalEnergyProducedStateTypeIds.value(thing->thingClassId()), inverterData.acEnergy/1000.00);
     thing->setStateValue(m_frequencyStateTypeIds.value(thing->thingClassId()), inverterData.lineFrequency);
 
-    thing->setStateValue(sunspecThreePhaseInverterTotalCurrentStateTypeId, inverterData.acCurrent);
-    thing->setStateValue(sunspecThreePhaseInverterCabinetTemperatureStateTypeId, inverterData.cabinetTemperature);
+    thing->setStateValue(m_inverterAcCurrentStateTypeIds.value(thing->thingClassId()), inverterData.acCurrent);
+    thing->setStateValue(m_inverterCabinetTemperatureStateTypeIds.value(thing->thingClassId()), inverterData.cabinetTemperature);
 
-    if (thing->thingClassId() == sunspecSplitPhaseInverterThingClassId) {
+    if (thing->thingClassId() == sunspecSinglePhaseInverterThingClassId)  {
+
+        thing->setStateValue(sunspecSinglePhaseInverterPhaseVoltageStateTypeId, inverterData.phaseVoltageAN);
+
+    } else if (thing->thingClassId() == sunspecSplitPhaseInverterThingClassId) {
 
         thing->setStateValue(sunspecSplitPhaseInverterPhaseANVoltageStateTypeId, inverterData.phaseVoltageAN);
         thing->setStateValue(sunspecSplitPhaseInverterPhaseBNVoltageStateTypeId, inverterData.phaseVoltageBN);
@@ -693,39 +705,39 @@ void IntegrationPluginSunSpec::onInverterDataReceived(const SunSpecInverter::Inv
 
     //FIXME: Event1 may have multiple states at once. Only one is stated in nymea
     if (inverterData.event1.overTemperature) {
-        thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "Over temperature");
+        thing->setStateValue(m_inverterErrorStateTypeIds.value(thing->thingClassId()), "Over temperature");
     } else if (inverterData.event1.underTemperature) {
-        thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "Under temperature");
+        thing->setStateValue(m_inverterErrorStateTypeIds.value(thing->thingClassId()), "Under temperature");
     } else if (inverterData.event1.groundFault) {
-        thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "Ground fault");
+        thing->setStateValue(m_inverterErrorStateTypeIds.value(thing->thingClassId()), "Ground fault");
     } else if (inverterData.event1.memoryLoss) {
-        thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "Memory loss");
+        thing->setStateValue(m_inverterErrorStateTypeIds.value(thing->thingClassId()), "Memory loss");
     } else if (inverterData.event1.acOverVolt) {
-        thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "AC voltage above limit");
+        thing->setStateValue(m_inverterErrorStateTypeIds.value(thing->thingClassId()), "AC voltage above limit");
     } else if (inverterData.event1.cabinetOpen) {
-        thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "Cabinet open");
+        thing->setStateValue(m_inverterErrorStateTypeIds.value(thing->thingClassId()), "Cabinet open");
     } else if (inverterData.event1.acDisconnect) {
-        thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "AC disconnect open");
+        thing->setStateValue(m_inverterErrorStateTypeIds.value(thing->thingClassId()), "AC disconnect open");
     } else if (inverterData.event1.acUnderVolt) {
-        thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "AC voltage under limit");
+        thing->setStateValue(m_inverterErrorStateTypeIds.value(thing->thingClassId()), "AC voltage under limit");
     } else if (inverterData.event1.dcDicconnect) {
-        thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "DC disconnect open");
+        thing->setStateValue(m_inverterErrorStateTypeIds.value(thing->thingClassId()), "DC disconnect open");
     } else if (inverterData.event1.dcOverVoltage) {
-        thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "DC over voltage");
+        thing->setStateValue(m_inverterErrorStateTypeIds.value(thing->thingClassId()), "DC over voltage");
     } else if (inverterData.event1.overFrequency) {
-        thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "Frequency above limit");
+        thing->setStateValue(m_inverterErrorStateTypeIds.value(thing->thingClassId()), "Frequency above limit");
     } else if (inverterData.event1.gridDisconnect) {
-        thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "Grid disconnect");
+        thing->setStateValue(m_inverterErrorStateTypeIds.value(thing->thingClassId()), "Grid disconnect");
     } else if (inverterData.event1.hwTestFailure) {
-        thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "Hardware test failure");
+        thing->setStateValue(m_inverterErrorStateTypeIds.value(thing->thingClassId()), "Hardware test failure");
     } else if (inverterData.event1.manualShutdown) {
-        thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "Manual shutdown");
+        thing->setStateValue(m_inverterErrorStateTypeIds.value(thing->thingClassId()), "Manual shutdown");
     } else if (inverterData.event1.underFrequency) {
-        thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "Frequency under limit");
+        thing->setStateValue(m_inverterErrorStateTypeIds.value(thing->thingClassId()), "Frequency under limit");
     } else if (inverterData.event1.blownStringFuse) {
-        thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "Blown string fuse on input");
+        thing->setStateValue(m_inverterErrorStateTypeIds.value(thing->thingClassId()), "Blown string fuse on input");
     } else {
-        thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, "None");
+        thing->setStateValue(m_inverterErrorStateTypeIds.value(thing->thingClassId()), "None");
     }
 }
 
@@ -801,13 +813,29 @@ void IntegrationPluginSunSpec::onMeterDataReceived(const SunSpecMeter::MeterData
     qCDebug(dcSunSpec()) << "   - Total real energy exported" << meterData.totalRealEnergyExported<< "[kWH]";
     qCDebug(dcSunSpec()) << "   - Total real energy imported" << meterData.totalRealEnergyImported<< "[kWH]";
 
+        thing->setStateValue(m_frequencyStateTypeIds.value(thing->thingClassId()), meterData.frequency);
     thing->setStateValue(sunspecThreePhaseMeterTotalCurrentStateTypeId, meterData.totalAcCurrent);
-    thing->setStateValue(sunspecThreePhaseMeterPhaseACurrentStateTypeId, meterData.phaseACurrent);
-    thing->setStateValue(sunspecThreePhaseMeterPhaseBCurrentStateTypeId, meterData.phaseBCurrent);
-    thing->setStateValue(sunspecThreePhaseMeterPhaseCCurrentStateTypeId, meterData.phaseCCurrent);
-    thing->setStateValue(sunspecThreePhaseMeterLnACVoltageStateTypeId, meterData.voltageLN);
-    thing->setStateValue(sunspecThreePhaseMeterTotalRealPowerEventTypeId, meterData.totalRealPower);
-    thing->setStateValue(sunspecThreePhaseMeterEnergyExportedStateTypeId, meterData.totalRealEnergyExported);
-    thing->setStateValue(sunspecThreePhaseMeterEnergyImportedStateTypeId, meterData.totalRealEnergyImported);
-    thing->setStateValue(m_frequencyStateTypeIds.value(thing->thingClassId()), meterData.frequency);
+
+    if (thing->thingClassId() == sunspecSinglePhaseMeterThingClassId) {
+        thing->setStateValue(sunspecSinglePhaseMeterPhaseACurrentStateTypeId, meterData.phaseACurrent);
+        thing->setStateValue(sunspecSinglePhaseMeterCurrentPowerEventTypeId, meterData.totalRealPower);
+        thing->setStateValue(sunspecSinglePhaseMeterLnACVoltageStateTypeId, meterData.voltageLN);
+        thing->setStateValue(sunspecSinglePhaseMeterTotalEnergyProducedStateTypeId, meterData.totalRealEnergyExported);
+        thing->setStateValue(sunspecSinglePhaseMeterTotalEnergyConsumedStateTypeId, meterData.totalRealEnergyImported);
+    } else if (thing->thingClassId() == sunspecSplitPhaseMeterThingClassId) {
+        thing->setStateValue(sunspecSplitPhaseMeterPhaseACurrentStateTypeId, meterData.phaseACurrent);
+        thing->setStateValue(sunspecSplitPhaseMeterPhaseBCurrentStateTypeId, meterData.phaseBCurrent);
+        thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerEventTypeId, meterData.totalRealPower);
+        thing->setStateValue(sunspecSplitPhaseMeterLnACVoltageStateTypeId, meterData.voltageLN);
+        thing->setStateValue(sunspecSplitPhaseMeterTotalEnergyProducedStateTypeId, meterData.totalRealEnergyExported);
+        thing->setStateValue(sunspecSplitPhaseMeterTotalEnergyConsumedStateTypeId, meterData.totalRealEnergyImported);
+    } else if (thing->thingClassId() == sunspecThreePhaseMeterThingClassId) {
+        thing->setStateValue(sunspecThreePhaseMeterPhaseACurrentStateTypeId, meterData.phaseACurrent);
+        thing->setStateValue(sunspecThreePhaseMeterPhaseBCurrentStateTypeId, meterData.phaseBCurrent);
+        thing->setStateValue(sunspecThreePhaseMeterPhaseCCurrentStateTypeId, meterData.phaseCCurrent);
+        thing->setStateValue(sunspecThreePhaseMeterLnACVoltageStateTypeId, meterData.voltageLN);
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerEventTypeId, meterData.totalRealPower);
+        thing->setStateValue(sunspecThreePhaseMeterTotalEnergyProducedStateTypeId, meterData.totalRealEnergyExported);
+        thing->setStateValue(sunspecThreePhaseMeterTotalEnergyConsumedStateTypeId, meterData.totalRealEnergyImported);
+    }
 }

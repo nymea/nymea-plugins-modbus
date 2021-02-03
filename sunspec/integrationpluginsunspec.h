@@ -63,10 +63,13 @@ private:
 
     QHash<ThingClassId, StateTypeId> m_connectedStateTypeIds;
     QHash<ThingClassId, StateTypeId> m_frequencyStateTypeIds;
-    QHash<ThingClassId, StateTypeId> m_acPowerStateTypeIds;
-    QHash<ThingClassId, StateTypeId> m_acEnergyStateTypeIds;
+
+    QHash<ThingClassId, StateTypeId> m_inverterCurrentPowerStateTypeIds;
+    QHash<ThingClassId, StateTypeId> m_inverterTotalEnergyProducedStateTypeIds;
     QHash<ThingClassId, StateTypeId> m_inverterOperatingStateTypeIds;
     QHash<ThingClassId, StateTypeId> m_inverterErrorStateTypeIds;
+    QHash<ThingClassId, StateTypeId> m_inverterCabinetTemperatureStateTypeIds;
+    QHash<ThingClassId, StateTypeId> m_inverterAcCurrentStateTypeIds;
 
     PluginTimer *m_refreshTimer = nullptr;
     QHash<QUuid, ThingActionInfo *> m_asyncActions;

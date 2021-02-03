@@ -76,23 +76,24 @@ void SunSpecInverter::getInverterModelDataBlock()
 SunSpecInverter::SunSpecEvent1 SunSpecInverter::bitfieldToSunSpecEvent1(quint16 register1, quint16 register2)
 {
     SunSpecEvent1 event1;
-    Q_UNUSED(register2);
-    event1.groundFault      = ((register1 & (0x01 << 0)) != 0);
-    event1.dcOverVoltage    = ((register1 & (0x01 << 1)) != 0);
-    event1.acDisconnect     = ((register1 & (0x01 << 2)) != 0);
-    event1.dcDicconnect     = ((register1 & (0x01 << 3)) != 0);
-    event1.gridDisconnect   = ((register1 & (0x01 << 4)) != 0);
-    event1.cabinetOpen      = ((register1 & (0x01 << 5)) != 0);
-    event1.manualShutdown   = ((register1 & (0x01 << 6)) != 0);
-    event1.overTemperature  = ((register1 & (0x01 << 7)) != 0);
-    event1.overFrequency    = ((register1 & (0x01 << 8)) != 0);
-    event1.underFrequency   = ((register1 & (0x01 << 9)) != 0);
-    event1.acOverVolt       = ((register1 & (0x01 << 10)) != 0);
-    event1.acUnderVolt      = ((register1 & (0x01 << 11)) != 0);
-    event1.blownStringFuse  = ((register1 & (0x01 << 12)) != 0);
-    event1.underTemperature = ((register1 & (0x01 << 13)) != 0);
-    event1.memoryLoss       = ((register1 & (0x01 << 14)) != 0);
-    event1.hwTestFailure    = ((register1 & (0x01 << 15)) != 0);
+    quint32 value = (static_cast<quint32>(register1)<<16 | register2);
+    //qCDebug(dcSunSpec()) << "Event1" << QString::number(value, 16);
+    event1.groundFault      = ((value & (0x01 << 0)) != 0);
+    event1.dcOverVoltage    = ((value & (0x01 << 1)) != 0);
+    event1.acDisconnect     = ((value & (0x01 << 2)) != 0);
+    event1.dcDicconnect     = ((value & (0x01 << 3)) != 0);
+    event1.gridDisconnect   = ((value & (0x01 << 4)) != 0);
+    event1.cabinetOpen      = ((value & (0x01 << 5)) != 0);
+    event1.manualShutdown   = ((value & (0x01 << 6)) != 0);
+    event1.overTemperature  = ((value & (0x01 << 7)) != 0);
+    event1.overFrequency    = ((value & (0x01 << 8)) != 0);
+    event1.underFrequency   = ((value & (0x01 << 9)) != 0);
+    event1.acOverVolt       = ((value & (0x01 << 10)) != 0);
+    event1.acUnderVolt      = ((value & (0x01 << 11)) != 0);
+    event1.blownStringFuse  = ((value & (0x01 << 12)) != 0);
+    event1.underTemperature = ((value & (0x01 << 13)) != 0);
+    event1.memoryLoss       = ((value & (0x01 << 14)) != 0);
+    event1.hwTestFailure    = ((value & (0x01 << 15)) != 0);
     return event1;
 }
 

@@ -363,10 +363,9 @@ float SunSpec::convertValueWithSSF(quint32 rawValue, quint16 sunssf)
 
 float SunSpec::convertFloatValues(quint16 rawValue0, quint16 rawValue1)
 {
-    float value;
-    uint32_t i = qFromLittleEndian(((uint32_t)rawValue0 << 16) + rawValue1);
-    memcpy(&value, &i, sizeof(float));
-    return value;
+    suns_modbus_v32_t value;
+    value.u = (static_cast<uint32_t>(rawValue0) << 16) + rawValue1;
+    return value.f;
 }
 
 void SunSpec::onModbusStateChanged(QModbusDevice::State state)
