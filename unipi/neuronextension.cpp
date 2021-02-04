@@ -314,28 +314,21 @@ bool NeuronExtension::modbusReadRequest(const QModbusDataUnit &request)
                         //qCDebug(dcUniPi()) << "Neuron Extension: Start Address:" << unit.startAddress() << "Register Type:" << unit.registerType() << "Value:" << unit.value(i);
                         modbusAddress = unit.startAddress() + i;
 
-                        if (m_previousModbusRegisterValue.contains(modbusAddress)) {
-                            if (m_previousModbusRegisterValue.value(modbusAddress) == unit.value(i)) {
-                                continue;
-                            } else  {
-                                m_previousModbusRegisterValue.insert(modbusAddress, unit.value(i)); //update existing value
-                            }
-                        } else {
-                            m_previousModbusRegisterValue.insert(modbusAddress, unit.value(i));
-                        }
-
                         QString circuit;
                         switch (unit.registerType()) {
                         case QModbusDataUnit::RegisterType::Coils:
                             if(m_modbusDigitalInputRegisters.values().contains(modbusAddress)){
                                 circuit = m_modbusDigitalInputRegisters.key(modbusAddress);
-                                emit digitalInputStatusChanged(circuit, unit.value(i));
+                                if (circuitValueChanged(circuit, unit.value(i)))
+                                    emit digitalInputStatusChanged(circuit, unit.value(i));
                             } else if(m_modbusDigitalOutputRegisters.values().contains(modbusAddress)){
                                 circuit = m_modbusDigitalOutputRegisters.key(modbusAddress);
-                                emit digitalOutputStatusChanged(circuit, unit.value(i));
+                                if (circuitValueChanged(circuit, unit.value(i)))
+                                    emit digitalOutputStatusChanged(circuit, unit.value(i));
                             } else if(m_modbusUserLEDRegisters.values().contains(modbusAddress)){
                                 circuit = m_modbusUserLEDRegisters.key(modbusAddress);
-                                emit userLEDStatusChanged(circuit, unit.value(i));
+                                if (circuitValueChanged(circuit, unit.value(i)))
+                                    emit userLEDStatusChanged(circuit, unit.value(i));
                             } else {
                                 qCWarning(dcUniPi()) << "Neuron Extension: Received unrecorgnised coil register" << modbusAddress;
                             }
@@ -344,7 +337,9 @@ bool NeuronExtension::modbusReadRequest(const QModbusDataUnit &request)
                         case QModbusDataUnit::RegisterType::InputRegisters:
                             if(m_modbusAnalogInputRegisters.values().contains(modbusAddress)){
                                 circuit = m_modbusAnalogInputRegisters.key(modbusAddress);
-                                emit analogInputStatusChanged(circuit, ((unit.value(i) << 16) | unit.value(i+1)));
+                                quint32 value = ((unit.value(i) << 16) | unit.value(i+1));
+                                if (circuitValueChanged(circuit, value))
+                                    emit analogInputStatusChanged(circuit, value);
                                 i++;
                             } else {
                                 qCWarning(dcUniPi()) << "Neuron Extension: Received unrecorgnised input register" << modbusAddress;
@@ -353,7 +348,8 @@ bool NeuronExtension::modbusReadRequest(const QModbusDataUnit &request)
                         case QModbusDataUnit::RegisterType::HoldingRegisters:
                             if(m_modbusAnalogOutputRegisters.values().contains(modbusAddress)){
                                 circuit = m_modbusAnalogOutputRegisters.key(modbusAddress);
-                                emit analogOutputStatusChanged(circuit, unit.value(i));
+                                if (circuitValueChanged(circuit, unit.value(i)))
+                                    emit analogOutputStatusChanged(circuit, unit.value(i));
                             } else {
                                 qCWarning(dcUniPi()) << "Neuron Extension: Received unrecorgnised holding register" << modbusAddress;
                             }
@@ -430,6 +426,21 @@ bool NeuronExtension::modbusWriteRequest(const Request &request)
     return true;
 }
 
+bool NeuronExtension::circuitValueChanged(const QString &circuit, quint32 value)
+{
+    if (m_previousCircuitValue.contains(circuit)) {
+        if (m_previousCircuitValue.value(circuit) == value) {
+            // Only emit status change of the circuit value has changed
+            return false;
+        } else  {
+            m_previousCircuitValue.insert(circuit, value); //update existing value
+            return true;
+        }
+    } else {
+        m_previousCircuitValue.insert(circuit, value);
+        return true;
+    }
+}
 
 bool NeuronExtension::getDigitalInput(const QString &circuit)
 {
