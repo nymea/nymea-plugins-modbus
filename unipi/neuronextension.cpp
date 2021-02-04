@@ -77,7 +77,7 @@ NeuronExtension::NeuronExtension(ExtensionTypes extensionType, QModbusRtuSerialM
 
 NeuronExtension::~NeuronExtension()
 {
-    qCDebug(dcUniPi()) << "Neuron Extension: Deleting extension";
+    qCDebug(dcUniPi()) << "Neuron Extension: Deleting extension" << m_extensionType;
 }
 
 bool NeuronExtension::init()
@@ -210,16 +210,16 @@ bool NeuronExtension::loadModbusMap()
                 QString circuit = list[3].split(" ").last();
                 if (list[3].contains("Digital Input", Qt::CaseSensitivity::CaseInsensitive)) {
                     m_modbusDigitalInputRegisters.insert(circuit, list[0].toInt());
-                    qDebug(dcUniPi()) << "Found input register" << circuit << list[0].toInt();
+                    qDebug(dcUniPi()) << "Neuron Extension: Found input register" << circuit << list[0].toInt();
                 } else if (list[3].contains("Digital Output", Qt::CaseSensitivity::CaseInsensitive)) {
                     m_modbusDigitalOutputRegisters.insert(circuit, list[0].toInt());
-                    qDebug(dcUniPi()) << "Found output register" << circuit << list[0].toInt();
+                    qDebug(dcUniPi()) << "Neuron Extension: Found output register" << circuit << list[0].toInt();
                 } else if (list[3].contains("Relay Output", Qt::CaseSensitivity::CaseInsensitive)) {
                     m_modbusDigitalOutputRegisters.insert(circuit, list[0].toInt());
-                    qDebug(dcUniPi()) << "Found relay register" << circuit << list[0].toInt();
+                    qDebug(dcUniPi()) << "Neuron Extension: Found relay register" << circuit << list[0].toInt();
                 }  else if (list[3].contains("User Programmable LED", Qt::CaseSensitivity::CaseInsensitive)) {
                     m_modbusUserLEDRegisters.insert(circuit, list[0].toInt());
-                    qDebug(dcUniPi()) << "Found user programmable led" << circuit << list[0].toInt();
+                    qDebug(dcUniPi()) << "Neuron Extension: Found user programmable led" << circuit << list[0].toInt();
                 }
             }
         }
@@ -278,10 +278,10 @@ bool NeuronExtension::loadModbusMap()
                 QString circuit = list[5].split(" ").at(3);
                 if (list[5].contains("Analog Input Value", Qt::CaseSensitivity::CaseInsensitive)) {
                     m_modbusAnalogInputRegisters.insert(circuit, list[0].toInt());
-                    qDebug(dcUniPi()) << "Found analog input register" << circuit << list[0].toInt();
+                    qDebug(dcUniPi()) << "Neuron Extension: Found analog input register" << circuit << list[0].toInt();
                 } else if (list[5].contains("Analog Output Value", Qt::CaseSensitivity::CaseInsensitive)) {
                     m_modbusAnalogOutputRegisters.insert(circuit, list[0].toInt());
-                    qDebug(dcUniPi()) << "FNeuron Extension: Found analog output register" << circuit << list[0].toInt();
+                    qDebug(dcUniPi()) << "Neuron Extension: Found analog output register" << circuit << list[0].toInt();
                 }
             }
         }
@@ -330,16 +330,14 @@ bool NeuronExtension::modbusReadRequest(const QModbusDataUnit &request)
                             if(m_modbusDigitalInputRegisters.values().contains(modbusAddress)){
                                 circuit = m_modbusDigitalInputRegisters.key(modbusAddress);
                                 emit digitalInputStatusChanged(circuit, unit.value(i));
-                            }
-
-                            if(m_modbusDigitalOutputRegisters.values().contains(modbusAddress)){
+                            } else if(m_modbusDigitalOutputRegisters.values().contains(modbusAddress)){
                                 circuit = m_modbusDigitalOutputRegisters.key(modbusAddress);
                                 emit digitalOutputStatusChanged(circuit, unit.value(i));
-                            }
-
-                            if(m_modbusUserLEDRegisters.values().contains(modbusAddress)){
+                            } else if(m_modbusUserLEDRegisters.values().contains(modbusAddress)){
                                 circuit = m_modbusUserLEDRegisters.key(modbusAddress);
                                 emit userLEDStatusChanged(circuit, unit.value(i));
+                            } else {
+                                qCWarning(dcUniPi()) << "Neuron Extension: Received unrecorgnised coil register" << modbusAddress;
                             }
                             break;
 
@@ -347,12 +345,17 @@ bool NeuronExtension::modbusReadRequest(const QModbusDataUnit &request)
                             if(m_modbusAnalogInputRegisters.values().contains(modbusAddress)){
                                 circuit = m_modbusAnalogInputRegisters.key(modbusAddress);
                                 emit analogInputStatusChanged(circuit, ((unit.value(i) << 16) | unit.value(i+1)));
+                                i++;
+                            } else {
+                                qCWarning(dcUniPi()) << "Neuron Extension: Received unrecorgnised input register" << modbusAddress;
                             }
                             break;
                         case QModbusDataUnit::RegisterType::HoldingRegisters:
                             if(m_modbusAnalogOutputRegisters.values().contains(modbusAddress)){
                                 circuit = m_modbusAnalogOutputRegisters.key(modbusAddress);
                                 emit analogOutputStatusChanged(circuit, unit.value(i));
+                            } else {
+                                qCWarning(dcUniPi()) << "Neuron Extension: Received unrecorgnised holding register" << modbusAddress;
                             }
                             break;
                         case QModbusDataUnit::RegisterType::DiscreteInputs:
