@@ -75,58 +75,57 @@ public:
     Q_ENUM(ChargingStatus)
 
     enum Model124 { // Mandatory registers
-        Model124SetpointMaximumCharge           = 0,
-        Model124SetpointMaximumChargingRate     = 1,
-        Model124SetpointMaximumDischargeRate    = 2,
-        Model124ActivateStorageControlMode      = 3,
-        Model124ScaleFactorMaximumCharge        = 16,
-        Model124ScaleFactorMaximumChargeDischargeRate = 17,
+        Model124WChaMax      = 0,
+        Model124WChaGra      = 1,
+        Model124WDisChaGra   = 2,
+        Model124StorCtl_Mod  = 3,
+        Model124WChaMax_SF        = 16,
+        Model124WChaDisChaGra_SF = 17,
     };
-    Q_ENUM(Model124)
 
     enum Model124Optional { // Optional registers
-        Model124MaximumChargingVA               = 4, // VAChaMax
-        Model124MinimumReserveStoragePercent    = 5, // MinRsvPct
-        Model124CurrentlyAvailableEnergyPercent = 6, // ChaState
-        Model124StorageAvailableAH              = 7, // StorAval
-        Model124InternalBatteryVoltage          = 8, // InBatV
-        Model124ChargeStatus                    = 9, // ChaSt
-        Model124MaxDischargingRatePercent       = 10, // OutWRte
-        Model124MaxChargingRatePercent          = 11,
-        Model124ChargeDischargeTimeWindow       = 12,
-        Model124ChargeDischargeTimeout          = 13,
-        Model124RampTime                        = 14, // InOutWRte_RmpTms
-        Model124ChargeGridSet                   = 15,  // ChGriSet
-        Model124ScaleFactorMaximumChargingVA    = 18,
-        Model124ScaleFactorMinimumReservePercentage = 19,
-        Model124ScaleFactorAvailableEnergyPercent = 20,
-        Model124ScaleFactorStateCharge          = 21,
-        Model124ScaleFactorBatteryVoltage       = 22,
-        Model124ScaleFactorPercentChargeDischargeRate = 23
+        Model124VAChaMax                  = 4,
+        Model124MinRsvPct                 = 5,
+        Model124ChaState                  = 6,
+        Model124StorAval                  = 7,
+        Model124InBatV                    = 8,
+        Model124ChaSt                     = 9,
+        Model124OutWRte                   = 10,
+        Model124InWRte                    = 11,
+        Model124InOutWRte_WinTms          = 12,
+        Model124InOutWRte_RvrtTms         = 13,
+        Model124InOutWRte_RmpTms          = 14,
+        Model124ChaGriSet                 = 15,
+        Model124VAChaMax_SF               = 18,
+        Model124MinRsvPct_SF              = 19,
+        Model124ChaState_SF               = 20,
+        Model124StorAval_SF               = 21,
+        Model124InBatV_SF                 = 22,
+        Model124InOutWRte_SF              = 23
     };
     Q_ENUM(Model124Optional)
 
     struct StorageData {
-        double maxCharge; // [W] Setpoint for maximum charge.
-        double maxChargeRate; // [%] Setpoint for maximum charging rate. Default is MaxChaRte.
-        double maxDischargeRate; // [%] Setpoint for maximum discharge rate. Default is MaxDisChaRte.
-        bool chargingEnabled;
-        bool dischargingEnabled;
+        double WChaMax;         // [W] Setpoint for maximum charge.
+        double WChaGra;         // [%] Setpoint for maximum charging rate. Default is MaxChaRte.
+        double WDisChaGra;      // [%] Setpoint for maximum discharge rate. Default is MaxDisChaRte.
+        bool StorCtl_Mod_ChargingEnabled;
+        bool StorCtl_Mod_DischargingEnabled;
     };
 
     struct StorageDataOptional {
-        // [VA] Setpoint for maximum charging VA.
-        // [& ]Setpoint for minimum reserve for storage as a percentage of the nominal maximum storage.
-        double currentlyAvailableEnergy; // [%] Currently available energy as a percent of the capacity rating.
-        double storageAvailable; // [Ah] State of charge (ChaState) minus storage reserve (MinRsvPct) times capacity rating (AhrRtg).
-        double batteryVoltage; // [V] Internal battery voltage.
-        ChargingStatus chargeSatus; // Charge status of storage device. Enumerated value.
-        // [%] Percent of max discharge rate.
-        // [%] Percent of max charging rate.
-        // [s] Time window for charge/discharge rate change.
-        // [s] Timeout period for charge/discharge rate.
-        // [s] Ramp time for moving from current setpoint to new setpoint.
-        bool gridChargingEnabled;
+        double VAChaMax;        // [VA] Setpoint for maximum charging VA.
+        double MinRsvPct;       // [%]Setpoint for minimum reserve for storage as a percentage of the nominal maximum storage.
+        double ChaState;        // [%] Currently available energy as a percent of the capacity rating.
+        double StorAval;        // [Ah] State of charge (ChaState) minus storage reserve (MinRsvPct) times capacity rating (AhrRtg).
+        double InBatV;          // [V] Internal battery voltage.
+        ChargingStatus ChaSt;   // Charge status of storage device. Enumerated value.
+        double OutWRte;         // [%] Percent of max discharge rate.
+        double InWRte;          // [%] Percent of max charging rate.
+        uint InOutWRte_WinTms;  // [s] Time window for charge/discharge rate change.
+        uint InOutWRte_RvrtTms; // [s] Timeout period for charge/discharge rate.
+        uint InOutWRte_RmpTms;  // [s] Ramp time for moving from current setpoint to new setpoint.
+        GridCharge ChaGriSet;   // 0 = PV, 1 = Grid
     };
 
 private:

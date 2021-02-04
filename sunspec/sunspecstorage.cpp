@@ -85,7 +85,7 @@ QUuid SunSpecStorage::setGridCharging(bool enabled)
     PV (charging from grid 0 disabled)
     GRID (charging from 1 grid enabled*/
 
-    uint registerAddress = m_modelModbusStartRegister + Model124Optional::Model124ChargeGridSet;
+    uint registerAddress = m_modelModbusStartRegister + Model124Optional::Model124ChaGriSet;
     quint16 value = enabled;
     return m_connection->writeHoldingRegister(registerAddress, value);
 }
@@ -96,7 +96,7 @@ QUuid SunSpecStorage::setStorageControlMode(bool chargingEnabled, bool dischargi
     quint16 value = ((static_cast<quint16>(chargingEnabled)) |
                      (static_cast<quint16>(dischargingEnabled) << 1)) ;
 
-    uint modbusRegister = m_modelModbusStartRegister + Model124::Model124ActivateStorageControlMode;
+    uint modbusRegister = m_modelModbusStartRegister + Model124::Model124StorCtl_Mod;
     return m_connection->writeHoldingRegister(modbusRegister, value);
 }
 
@@ -105,7 +105,7 @@ QUuid SunSpecStorage::setChargingRate(int rate)
     //Register Name InWRte
     /* Defines the maximum charge rate (charge limit). Default is 100% */
 
-    uint modbusRegister = m_modelModbusStartRegister + Model124::Model124SetpointMaximumChargingRate;
+    uint modbusRegister = m_modelModbusStartRegister + Model124::Model124WChaGra;
     int16_t value = rate * 100;
     return m_connection->writeHoldingRegister(modbusRegister, value);
 }
@@ -114,7 +114,7 @@ QUuid SunSpecStorage::setDischargingRate(int charging)
 {
     //Register Name OutWRte
     /* Defines the maximum discharge rate (discharge limit). Default is 100% */
-    uint modbusRegister = m_modelModbusStartRegister + Model124::Model124SetpointMaximumDischargeRate;
+    uint modbusRegister = m_modelModbusStartRegister + Model124::Model124WDisChaGra;
     quint16 value = charging * 100;
     return m_connection->writeHoldingRegister(modbusRegister, value);
 }
@@ -134,20 +134,26 @@ void SunSpecStorage::onModelDataBlockReceived(SunSpec::ModelId modelId, uint len
     switch (modelId) {
     case SunSpec::ModelIdStorage: {
         StorageData mandatory;
-        mandatory.maxCharge = m_connection->convertValueWithSSF(data[Model124SetpointMaximumCharge], data[Model124ScaleFactorMaximumChargeDischargeRate]);
-        mandatory.maxChargeRate = m_connection->convertValueWithSSF(data[Model124SetpointMaximumChargingRate], data[Model124ScaleFactorPercentChargeDischargeRate]);
-        mandatory.chargingEnabled = data[Model124ActivateStorageControlMode]&0x01;
-        mandatory.dischargingEnabled = data[Model124ActivateStorageControlMode]&0x02;
-        mandatory.maxDischargeRate = m_connection->convertValueWithSSF(data[Model124SetpointMaximumDischargeRate], data[Model124ScaleFactorPercentChargeDischargeRate]);
+        mandatory.WChaMax = m_connection->convertValueWithSSF(data[Model124WChaMax], data[Model124WChaMax_SF]);
+        mandatory.WChaGra = m_connection->convertValueWithSSF(data[Model124WChaGra], data[Model124WChaDisChaGra_SF]);
+        mandatory.WDisChaGra = m_connection->convertValueWithSSF(data[Model124WDisChaGra], data[Model124WChaDisChaGra_SF]);
+        mandatory.StorCtl_Mod_ChargingEnabled = data[Model124StorCtl_Mod]&0x01;
+        mandatory.StorCtl_Mod_DischargingEnabled = data[Model124StorCtl_Mod]&0x02;
 
         StorageDataOptional optional;
-        optional.chargeSatus = ChargingStatus(data[Model124ChargeStatus]);
-        optional.batteryVoltage = m_connection->convertValueWithSSF(data[Model124InternalBatteryVoltage], data[Model124ScaleFactorBatteryVoltage]);
-        optional.storageAvailable = m_connection->convertValueWithSSF(data[Model124StorageAvailableAH], data[Model124ScaleFactorMaximumChargingVA]);
-        optional.gridChargingEnabled = (data[Model124ChargeGridSet] == 1);
-        optional.currentlyAvailableEnergy = m_connection->convertValueWithSSF(data[Model124CurrentlyAvailableEnergyPercent], data[Model124ScaleFactorAvailableEnergyPercent]);
+        optional.VAChaMax  = m_connection->convertValueWithSSF(data[Model124VAChaMax], data[Model124VAChaMax_SF]);
+        optional.MinRsvPct = m_connection->convertValueWithSSF(data[Model124MinRsvPct], data[Model124MinRsvPct_SF]);
+        optional.ChaState  = m_connection->convertValueWithSSF(data[Model124ChaState], data[Model124ChaState_SF]);
+        optional.StorAval  = m_connection->convertValueWithSSF(data[Model124StorAval], data[Model124StorAval_SF]);
+        optional.InBatV    = m_connection->convertValueWithSSF(data[Model124InBatV], data[Model124InBatV_SF]);
+        optional.ChaSt     = ChargingStatus(data[Model124ChaSt]);
+        optional.OutWRte   = m_connection->convertValueWithSSF(data[Model124OutWRte], data[Model124InOutWRte_SF]);
+        optional.InWRte    = m_connection->convertValueWithSSF(data[Model124InWRte], data[Model124InOutWRte_SF]);
+        optional.InOutWRte_WinTms  = data[Model124InOutWRte_WinTms];
+        optional.InOutWRte_RvrtTms = data[Model124InOutWRte_RvrtTms];
+        optional.InOutWRte_RmpTms  = data[Model124InOutWRte_RmpTms];
+        optional.ChaGriSet = GridCharge(data[Model124ChaGriSet]);
         emit storageDataReceived(mandatory, optional);
-
     } break;
     case SunSpec::ModelIdBatteryBaseModel:
     case SunSpec::ModelIdLithiumIonBatteryModel: {
