@@ -757,24 +757,24 @@ void IntegrationPluginSunSpec::onStorageDataReceived(const SunSpecStorage::Stora
     }
 
     qCDebug(dcSunSpec()) << "Storage data received";
-    qCDebug(dcSunSpec()) << "   - Setpoint for maximum charge" << mandatory.maxCharge  << "[W]";
-    qCDebug(dcSunSpec()) << "   - Setpoint for maximum charging rate." << mandatory.maxChargeRate  << "[%]";
-    qCDebug(dcSunSpec()) << "   - Setpoint for maximum discharging rate." << mandatory.maxDischargeRate  << "[%]";
-    qCDebug(dcSunSpec()) << "   - Charging enabled" << mandatory.chargingEnabled;
-    qCDebug(dcSunSpec()) << "   - Discharging enabled" << mandatory.dischargingEnabled;
-    qCDebug(dcSunSpec()) << "   - Storage status" << optional.chargeSatus;
-    qCDebug(dcSunSpec()) << "   - Currently available energy" << optional.currentlyAvailableEnergy << "[%]";
-    qCDebug(dcSunSpec()) << "   - Grid charging enabled" << optional.gridChargingEnabled;
+    qCDebug(dcSunSpec()) << "   - Setpoint for maximum charge" << mandatory.WChaMax  << "[W]";
+    qCDebug(dcSunSpec()) << "   - Setpoint for maximum charging rate." << mandatory.WChaGra  << "[%]";
+    qCDebug(dcSunSpec()) << "   - Setpoint for maximum discharging rate." << mandatory.WDisChaGra  << "[%]";
+    qCDebug(dcSunSpec()) << "   - Charging enabled" << mandatory.StorCtl_Mod_ChargingEnabled;
+    qCDebug(dcSunSpec()) << "   - Discharging enabled" << mandatory.StorCtl_Mod_DischargingEnabled;
+    qCDebug(dcSunSpec()) << "   - Storage status" << optional.ChaSt;
+    qCDebug(dcSunSpec()) << "   - Currently available energy" << optional.ChaState << "[%]";
+    qCDebug(dcSunSpec()) << "   - Grid charging enabled" << optional.ChaGriSet;
 
     thing->setStateValue(m_connectedStateTypeIds.value(thing->thingClassId()), true);
-    thing->setStateValue(sunspecStorageChargingRateStateTypeId, mandatory.maxChargeRate);
-    thing->setStateValue(sunspecStorageDischargingRateStateTypeId, mandatory.maxDischargeRate);
-    thing->setStateValue(sunspecStorageEnableChargingStateTypeId, mandatory.chargingEnabled);
-    thing->setStateValue(sunspecStorageEnableDischargingStateTypeId, mandatory.dischargingEnabled);
-    thing->setStateValue(sunspecStorageGridChargingStateTypeId, optional.gridChargingEnabled);
+    thing->setStateValue(sunspecStorageChargingRateStateTypeId, mandatory.WChaGra);
+    thing->setStateValue(sunspecStorageDischargingRateStateTypeId, mandatory.WDisChaGra);
+    thing->setStateValue(sunspecStorageEnableChargingStateTypeId, mandatory.StorCtl_Mod_ChargingEnabled);
+    thing->setStateValue(sunspecStorageEnableDischargingStateTypeId, mandatory.StorCtl_Mod_DischargingEnabled);
+    thing->setStateValue(sunspecStorageGridChargingStateTypeId, optional.ChaGriSet);
 
     bool charging = false;
-    switch (optional.chargeSatus) {
+    switch (optional.ChaSt) {
     case SunSpecStorage::ChargingStatusOff:
         thing->setStateValue(sunspecStorageStorageStatusStateTypeId, "Off");
         break;
@@ -797,7 +797,7 @@ void IntegrationPluginSunSpec::onStorageDataReceived(const SunSpecStorage::Stora
         thing->setStateValue(sunspecStorageStorageStatusStateTypeId, "Discharging");
         break;
     };
-    double batteryLevel = optional.currentlyAvailableEnergy;
+    double batteryLevel = optional.ChaState;
     thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, batteryLevel);
     thing->setStateValue(sunspecStorageBatteryCriticalStateTypeId, (batteryLevel < 5 && !charging));
 }
