@@ -56,6 +56,7 @@ public:
         xS11,
         xS51
     };
+    Q_ENUM(ExtensionTypes)
 
     explicit NeuronExtension(ExtensionTypes extensionType, QModbusRtuSerialMaster *modbusInterface, int slaveAddress, QObject *parent = nullptr);
     ~NeuronExtension();

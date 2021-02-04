@@ -63,6 +63,7 @@ public:
         L523,
         L533
     };
+    Q_ENUM(NeuronTypes)
 
     explicit Neuron(NeuronTypes neuronType, QModbusTcpClient *modbusInterface, QObject *parent = nullptr);
     ~Neuron();
