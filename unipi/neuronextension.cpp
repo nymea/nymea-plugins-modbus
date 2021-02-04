@@ -546,7 +546,7 @@ bool NeuronExtension::getAllDigitalInputs()
         if (m_readRequestQueue.isEmpty()) {
             modbusReadRequest(request);
         } else if (m_readRequestQueue.length() > 100) {
-            qCWarning(dcUniPi()) << "Neuron extension: too many pending read requests";
+            qCWarning(dcUniPi()) << "Neuron extension: Too many pending read requests";
         } else {
             m_readRequestQueue.append(request);
         }
@@ -614,7 +614,7 @@ bool NeuronExtension::getAllDigitalOutputs()
         if (m_readRequestQueue.isEmpty()) {
             modbusReadRequest(request);
         } else if (m_readRequestQueue.length() > 100) {
-            qCWarning(dcUniPi()) << "Neuron extension: too many pending read requests";
+            qCWarning(dcUniPi()) << "Neuron extension: Too many pending read requests";
         } else {
             m_readRequestQueue.append(request);
         }
@@ -656,7 +656,7 @@ bool NeuronExtension::getAnalogOutput(const QString &circuit)
     if (m_readRequestQueue.isEmpty()) {
         return modbusReadRequest(request);
     } else if (m_readRequestQueue.length() > 100) {
-        qCWarning(dcUniPi()) << "Neuron extension: too many pending read requests";
+        qCWarning(dcUniPi()) << "Neuron extension: Too many pending read requests";
         return false;
     } else {
         m_readRequestQueue.append(request);
@@ -667,7 +667,7 @@ bool NeuronExtension::getAnalogOutput(const QString &circuit)
 
 bool NeuronExtension::getAnalogInput(const QString &circuit)
 {
-    int modbusAddress =  m_modbusAnalogInputRegisters.value(circuit);
+    int modbusAddress = m_modbusAnalogInputRegisters.value(circuit);
 
     if (!m_modbusInterface)
         return false;
@@ -676,7 +676,7 @@ bool NeuronExtension::getAnalogInput(const QString &circuit)
     if (m_readRequestQueue.isEmpty()) {
         return modbusReadRequest(request);
     } else if (m_readRequestQueue.length() > 100) {
-        qCWarning(dcUniPi()) << "Neuron extension: too many pending read requests";
+        qCWarning(dcUniPi()) << "Neuron extension: Too many pending read requests";
         return false;
     } else {
         m_readRequestQueue.append(request);
@@ -687,7 +687,7 @@ bool NeuronExtension::getAnalogInput(const QString &circuit)
 QUuid NeuronExtension::setUserLED(const QString &circuit, bool value)
 {
     int modbusAddress = m_modbusUserLEDRegisters.value(circuit);
-    //qDebug(dcUniPi()) << "Setting digital ouput" << circuit << modbusAddress << value;
+    //qDebug(dcUniPi()) << "Neuron Extension: Setting user LED" << circuit << modbusAddress << value;
 
     if (!m_modbusInterface)
         return "";
@@ -713,7 +713,7 @@ QUuid NeuronExtension::setUserLED(const QString &circuit, bool value)
 bool NeuronExtension::getUserLED(const QString &circuit)
 {
     int modbusAddress = m_modbusUserLEDRegisters.value(circuit);
-    //qDebug(dcUniPi()) << "Reading digital Output" << circuit << modbusAddress;
+    //qDebug(dcUniPi()) << "Neuron Extension: Get user LED" << circuit << modbusAddress;
 
     if (!m_modbusInterface)
         return false;
@@ -722,7 +722,7 @@ bool NeuronExtension::getUserLED(const QString &circuit)
     if (m_readRequestQueue.isEmpty()) {
         return modbusReadRequest(request);
     } else if (m_readRequestQueue.length() > 100) {
-        qCWarning(dcUniPi()) << "Neuron extension: too many pending read requests";
+        qCWarning(dcUniPi()) << "Neuron extension: Too many pending read requests";
         return false;
     } else {
         m_readRequestQueue.append(request);
