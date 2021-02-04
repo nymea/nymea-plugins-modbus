@@ -893,10 +893,9 @@ void IntegrationPluginUniPi::onNeuronExtensionConnectionStateChanged(bool state)
 
 void IntegrationPluginUniPi::onRequestExecuted(const QUuid &requestId, bool success)
 {
-    qCDebug(dcUniPi()) << "Request executed, pending requests:" << m_asyncActions.size();
-
     if (m_asyncActions.contains(requestId)){
         ThingActionInfo *info = m_asyncActions.take(requestId);
+        qCDebug(dcUniPi()) << "Request executed, pending requests:" << m_asyncActions.count();
         if (success){
             info->finish(Thing::ThingErrorNoError);
         } else {

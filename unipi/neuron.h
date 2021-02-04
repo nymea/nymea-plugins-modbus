@@ -31,21 +31,18 @@
 #ifndef NEURON_H
 #define NEURON_H
 
+#include "neuroncommon.h"
+
 #include <QObject>
 #include <QHash>
 #include <QTimer>
-#include <QtSerialBus>
 #include <QUuid>
 
-class Neuron : public QObject
+
+class Neuron : public NeuronCommon
 {
     Q_OBJECT
 public:
-
-    struct Request {
-        QUuid id;
-        QModbusDataUnit data;
-    };
 
     enum NeuronTypes {
         S103,
@@ -71,12 +68,6 @@ public:
     bool init();
     QString type();
 
-    QList<QString> digitalInputs();
-    QList<QString> digitalOutputs();
-    QList<QString> analogInputs();
-    QList<QString> analogOutputs();
-    QList<QString> userLEDs();
-
     QUuid setDigitalOutput(const QString &circuit, bool value);
     QUuid setAnalogOutput(const QString &circuit, double value);
     QUuid setUserLED(const QString &circuit, bool value);
@@ -93,26 +84,10 @@ public:
     bool getAllAnalogOutputs();
 
     bool getUserLED(const QString &circuit);
+
 private:
-    int m_slaveAddress = 0;
-    uint m_responseTimeoutTime = 2000;
-
-    QTimer *m_inputPollingTimer = nullptr;
-    QTimer *m_outputPollingTimer = nullptr;
-
     QModbusTcpClient *m_modbusInterface = nullptr;
-
-    QHash<QString, int> m_modbusDigitalOutputRegisters;
-    QHash<QString, int> m_modbusDigitalInputRegisters;
-    QHash<QString, int> m_modbusAnalogInputRegisters;
-    QHash<QString, int> m_modbusAnalogOutputRegisters;
-    QHash<QString, int> m_modbusUserLEDRegisters;
-    QList<Request> m_writeRequestQueue;
-    QList<QModbusDataUnit> m_readRequestQueue;
-
     NeuronTypes m_neuronType = NeuronTypes::S103;
-
-    QHash<QString, uint16_t> m_previousCircuitValue;
 
     bool loadModbusMap();
     bool modbusReadRequest(const QModbusDataUnit &request);
@@ -122,17 +97,7 @@ private:
     bool getHoldingRegisters(QList<int> registers);
     bool getCoils(QList<int> registers);
 
-    bool circuitValueChanged(const QString &circuit, quint32 value);
-
-signals:
-    void requestExecuted(const QUuid &requestId, bool success);
-    void requestError(const QUuid &requestId, const QString &error);
-    void digitalInputStatusChanged(const QString &circuit, bool value);
-    void digitalOutputStatusChanged(const QString &circuit, bool value);
-    void analogInputStatusChanged(const QString &circuit, double value);
-    void analogOutputStatusChanged(const QString &circuit, double value);
-    void userLEDStatusChanged(const QString &circuit, bool value);
-    void connectionStateChanged(bool state);
+    bool getAnalogIO(const RegisterDescriptor &descriptor);
 
 public slots:
     void onOutputPollingTimer();

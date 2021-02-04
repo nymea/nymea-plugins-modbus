@@ -37,7 +37,7 @@
 #include <QStandardPaths>
 
 NeuronExtension::NeuronExtension(ExtensionTypes extensionType, QModbusRtuSerialMaster *modbusInterface, int slaveAddress, QObject *parent) :
-    QObject(parent),
+    NeuronCommon(parent),
     m_modbusInterface(modbusInterface),
     m_slaveAddress(slaveAddress),
     m_extensionType(extensionType)
@@ -130,31 +130,6 @@ void NeuronExtension::setSlaveAddress(int slaveAddress)
 {
     qCDebug(dcUniPi()) << "Neuron Extension: Set slave address" << slaveAddress;
     m_slaveAddress = slaveAddress;
-}
-
-QList<QString> NeuronExtension::digitalInputs()
-{
-    return m_modbusDigitalInputRegisters.keys();
-}
-
-QList<QString> NeuronExtension::digitalOutputs()
-{
-    return m_modbusDigitalOutputRegisters.keys();
-}
-
-QList<QString> NeuronExtension::analogInputs()
-{
-    return m_modbusAnalogInputRegisters.keys();
-}
-
-QList<QString> NeuronExtension::analogOutputs()
-{
-    return m_modbusAnalogOutputRegisters.keys();
-}
-
-QList<QString> NeuronExtension::userLEDs()
-{
-    return m_modbusUserLEDRegisters.keys();
 }
 
 bool NeuronExtension::loadModbusMap()
@@ -275,13 +250,13 @@ bool NeuronExtension::loadModbusMap()
                     csvFile->deleteLater();
                     return false;
                 }
-                QString circuit = list[5].split(" ").at(3);
+                int modbusAddress = list[0].toInt();
                 if (list[5].contains("Analog Input Value", Qt::CaseSensitivity::CaseInsensitive)) {
-                    m_modbusAnalogInputRegisters.insert(circuit, list[0].toInt());
-                    qDebug(dcUniPi()) << "Neuron Extension: Found analog input register" << circuit << list[0].toInt();
+                    m_modbusAnalogInputRegisters.insert(modbusAddress, registerDescriptorFromStringList(list));
+                    qDebug(dcUniPi()) << "Neuron Extension: Found analog input register" << modbusAddress;
                 } else if (list[5].contains("Analog Output Value", Qt::CaseSensitivity::CaseInsensitive)) {
-                    m_modbusAnalogOutputRegisters.insert(circuit, list[0].toInt());
-                    qDebug(dcUniPi()) << "Neuron Extension: Found analog output register" << circuit << list[0].toInt();
+                    m_modbusAnalogOutputRegisters.insert(modbusAddress, registerDescriptorFromStringList(list));
+                    qDebug(dcUniPi()) << "Neuron Extension: Found analog output register" << modbusAddress;
                 }
             }
         }
@@ -330,28 +305,28 @@ bool NeuronExtension::modbusReadRequest(const QModbusDataUnit &request)
                                 if (circuitValueChanged(circuit, unit.value(i)))
                                     emit userLEDStatusChanged(circuit, unit.value(i));
                             } else {
-                                qCWarning(dcUniPi()) << "Neuron Extension: Received unrecorgnised coil register" << modbusAddress;
+                                qCWarning(dcUniPi()) << "Neuron Extension: Received unrecognised coil register" << modbusAddress;
                             }
                             break;
 
                         case QModbusDataUnit::RegisterType::InputRegisters:
-                            if(m_modbusAnalogInputRegisters.values().contains(modbusAddress)){
-                                circuit = m_modbusAnalogInputRegisters.key(modbusAddress);
+                            if(m_modbusAnalogInputRegisters.contains(modbusAddress)){
+                                circuit = m_modbusAnalogInputRegisters.value(modbusAddress).circuit;
                                 quint32 value = ((unit.value(i) << 16) | unit.value(i+1));
                                 if (circuitValueChanged(circuit, value))
                                     emit analogInputStatusChanged(circuit, value);
                                 i++;
                             } else {
-                                qCWarning(dcUniPi()) << "Neuron Extension: Received unrecorgnised input register" << modbusAddress;
+                                qCWarning(dcUniPi()) << "Neuron Extension: Received unrecognised input register" << modbusAddress;
                             }
                             break;
                         case QModbusDataUnit::RegisterType::HoldingRegisters:
-                            if(m_modbusAnalogOutputRegisters.values().contains(modbusAddress)){
-                                circuit = m_modbusAnalogOutputRegisters.key(modbusAddress);
+                            if(m_modbusAnalogOutputRegisters.contains(modbusAddress)){
+                                circuit = m_modbusAnalogOutputRegisters.value(modbusAddress).circuit;
                                 if (circuitValueChanged(circuit, unit.value(i)))
                                     emit analogOutputStatusChanged(circuit, unit.value(i));
                             } else {
-                                qCWarning(dcUniPi()) << "Neuron Extension: Received unrecorgnised holding register" << modbusAddress;
+                                qCWarning(dcUniPi()) << "Neuron Extension: Received unrecognised holding register" << modbusAddress;
                             }
                             break;
                         case QModbusDataUnit::RegisterType::DiscreteInputs:
@@ -401,8 +376,8 @@ bool NeuronExtension::modbusWriteRequest(const Request &request)
                     if(m_modbusDigitalOutputRegisters.values().contains(modbusAddress)){
                         QString circuit = m_modbusDigitalOutputRegisters.key(modbusAddress);
                         emit digitalOutputStatusChanged(circuit, unit.value(0));
-                    } else if(m_modbusAnalogOutputRegisters.values().contains(modbusAddress)){
-                        QString circuit = m_modbusAnalogOutputRegisters.key(modbusAddress);
+                    } else if(m_modbusAnalogOutputRegisters.contains(modbusAddress)){
+                        QString circuit = m_modbusAnalogOutputRegisters.value(modbusAddress).circuit;
                         emit analogOutputStatusChanged(circuit, unit.value(0));
                     } else if(m_modbusUserLEDRegisters.values().contains(modbusAddress)){
                         QString circuit = m_modbusUserLEDRegisters.key(modbusAddress);
@@ -426,20 +401,18 @@ bool NeuronExtension::modbusWriteRequest(const Request &request)
     return true;
 }
 
-bool NeuronExtension::circuitValueChanged(const QString &circuit, quint32 value)
+bool NeuronExtension::getAnalogIO(const RegisterDescriptor &descriptor)
 {
-    if (m_previousCircuitValue.contains(circuit)) {
-        if (m_previousCircuitValue.value(circuit) == value) {
-            // Only emit status change of the circuit value has changed
-            return false;
-        } else  {
-            m_previousCircuitValue.insert(circuit, value); //update existing value
-            return true;
-        }
+    QModbusDataUnit request = QModbusDataUnit(descriptor.registerType, descriptor.address, descriptor.count);
+    if (m_readRequestQueue.isEmpty()) {
+        return modbusReadRequest(request);
+    } else if (m_readRequestQueue.length() > 100) {
+        qCWarning(dcUniPi()) << "Neuron: Too many pending read requests";
+        return false;
     } else {
-        m_previousCircuitValue.insert(circuit, value);
-        return true;
+        m_readRequestQueue.append(request);
     }
+    return true;
 }
 
 bool NeuronExtension::getDigitalInput(const QString &circuit)
@@ -556,22 +529,24 @@ bool NeuronExtension::getAllDigitalInputs()
 
 bool NeuronExtension::getAllAnalogOutputs()
 {
-    if (!m_modbusInterface)
+    if (!m_modbusInterface) {
+        qCWarning(dcUniPi()) << "Neuron: Modbus interface not initialized";
         return false;
-
-    foreach (QString circuit, m_modbusAnalogOutputRegisters.keys()) {
-        getAnalogOutput(circuit);
+    }
+    Q_FOREACH(RegisterDescriptor descriptor, m_modbusAnalogOutputRegisters.values()) {
+        getAnalogIO(descriptor);
     }
     return true;
 }
 
 bool NeuronExtension::getAllAnalogInputs()
 {
-    if (!m_modbusInterface)
+    if (!m_modbusInterface) {
+        qCWarning(dcUniPi()) << "Neuron: Modbus interface not initialized";
         return false;
-
-    foreach (QString circuit, m_modbusAnalogInputRegisters.keys()) {
-        getAnalogInput(circuit);
+    }
+    Q_FOREACH(RegisterDescriptor descriptor, m_modbusAnalogInputRegisters.values()) {
+        getAnalogIO(descriptor);
     }
     return true;
 }
@@ -624,64 +599,57 @@ bool NeuronExtension::getAllDigitalOutputs()
 
 QUuid NeuronExtension::setAnalogOutput(const QString &circuit, double value)
 {
-    int modbusAddress = m_modbusAnalogOutputRegisters.value(circuit);
+    qDebug(dcUniPi()) << "Neuron Extension: Set analog output" << circuit << value;
     if (!m_modbusInterface)
         return "";
 
-    Request request;
-    request.id = QUuid::createUuid();
-    request.data = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, 1);
-    request.data.setValue(0, static_cast<uint16_t>(value));
+    Q_FOREACH(RegisterDescriptor descriptor, m_modbusAnalogOutputRegisters) {
+        if (descriptor.circuit == circuit) {
+            Request request;
+            request.id = QUuid::createUuid();
+            request.data = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, descriptor.address, descriptor.count);
+            if (descriptor.count == 1) {
+                request.data.setValue(0, (static_cast<uint>(value*400))); // 0 to 4000 = 0 to 10.0 V
+            } else if (descriptor.count == 2) {
+                request.data.setValue(0, (static_cast<uint32_t>(value) >> 16));
+                request.data.setValue(1, (static_cast<uint32_t>(value) & 0xffff));
+            }
 
-    if (m_writeRequestQueue.isEmpty()) {
-        modbusWriteRequest(request);
-    } else if (m_writeRequestQueue.length() > 100) {
-        return "";
-    } else {
-        m_writeRequestQueue.append(request);
+            if (m_writeRequestQueue.isEmpty()) {
+                modbusWriteRequest(request);
+            } else if (m_writeRequestQueue.length() > 100) {
+                return "";
+            } else {
+                m_writeRequestQueue.append(request);
+            }
+            return request.id;
+        }
     }
-
-    return request.id;
+    return "";
 }
 
 
 bool NeuronExtension::getAnalogOutput(const QString &circuit)
 {
-    int modbusAddress = m_modbusAnalogOutputRegisters.value(circuit);
-
-    if (!m_modbusInterface)
-        return false;
-
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, 1);
-    if (m_readRequestQueue.isEmpty()) {
-        return modbusReadRequest(request);
-    } else if (m_readRequestQueue.length() > 100) {
-        qCWarning(dcUniPi()) << "Neuron extension: Too many pending read requests";
-        return false;
-    } else {
-        m_readRequestQueue.append(request);
+    //qDebug(dcUniPi()) << "Neuron Extension: Get analog output" << circuit;
+    Q_FOREACH(RegisterDescriptor descriptor, m_modbusAnalogOutputRegisters.values()) {
+        if (descriptor.circuit == circuit) {
+            return getAnalogIO(descriptor);
+        }
     }
-    return true;
+    return false;
 }
 
 
 bool NeuronExtension::getAnalogInput(const QString &circuit)
 {
-    int modbusAddress = m_modbusAnalogInputRegisters.value(circuit);
-
-    if (!m_modbusInterface)
-        return false;
-
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::InputRegisters, modbusAddress, 2);
-    if (m_readRequestQueue.isEmpty()) {
-        return modbusReadRequest(request);
-    } else if (m_readRequestQueue.length() > 100) {
-        qCWarning(dcUniPi()) << "Neuron extension: Too many pending read requests";
-        return false;
-    } else {
-        m_readRequestQueue.append(request);
+    //qDebug(dcUniPi()) << "Neuron Extension: Get analog input" << circuit;
+    Q_FOREACH(RegisterDescriptor descriptor, m_modbusAnalogInputRegisters.values()) {
+        if (descriptor.circuit == circuit) {
+            return getAnalogIO(descriptor);
+        }
     }
-    return true;
+    return false;
 }
 
 QUuid NeuronExtension::setUserLED(const QString &circuit, bool value)

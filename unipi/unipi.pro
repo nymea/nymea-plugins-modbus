@@ -11,6 +11,7 @@ QT += \
 SOURCES += \
     integrationpluginunipi.cpp \
     neuron.cpp \
+    neuroncommon.cpp \
     neuronextension.cpp \
     mcp23008.cpp \
     i2cport.cpp \
@@ -21,6 +22,7 @@ SOURCES += \
 HEADERS += \
     integrationpluginunipi.h \
     neuron.h \
+    neuroncommon.h \
     neuronextension.h \
     mcp23008.h \
     i2cport.h \
