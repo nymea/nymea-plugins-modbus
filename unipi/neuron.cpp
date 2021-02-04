@@ -40,6 +40,7 @@ Neuron::Neuron(NeuronTypes neuronType, QModbusTcpClient *modbusInterface,  QObje
     m_modbusInterface(modbusInterface),
     m_neuronType(neuronType)
 {
+    qCDebug(dcUniPi()) << "Neuron: Creating Neuron connection" << neuronType;
     m_inputPollingTimer = new QTimer(this);
     connect(m_inputPollingTimer, &QTimer::timeout, this, &Neuron::onInputPollingTimer);
     m_inputPollingTimer->setTimerType(Qt::TimerType::PreciseTimer);
@@ -57,12 +58,14 @@ Neuron::Neuron(NeuronTypes neuronType, QModbusTcpClient *modbusInterface,  QObje
 
     connect(m_modbusInterface, &QModbusDevice::stateChanged, this, [this] (QModbusDevice::State state) {
         if (state == QModbusDevice::State::ConnectedState) {
+            qCDebug(dcUniPi()) << "Neuron: Starting polling timer";
             if (m_inputPollingTimer)
                 m_inputPollingTimer->start();
             if (m_outputPollingTimer)
                 m_outputPollingTimer->start();
             emit connectionStateChanged(true);
         } else {
+            qCDebug(dcUniPi()) << "Neuron: Stopping polling timer";
             if (m_inputPollingTimer)
                 m_inputPollingTimer->stop();
             if (m_outputPollingTimer)
@@ -72,32 +75,25 @@ Neuron::Neuron(NeuronTypes neuronType, QModbusTcpClient *modbusInterface,  QObje
     });
 }
 
-Neuron::~Neuron(){
-    if (m_inputPollingTimer) {
-        m_inputPollingTimer->stop();
-        m_inputPollingTimer->deleteLater();
-        m_inputPollingTimer = nullptr;
-    }
-    if (m_outputPollingTimer) {
-        m_outputPollingTimer->stop();
-        m_outputPollingTimer->deleteLater();
-        m_outputPollingTimer = nullptr;
-    }
+Neuron::~Neuron()
+{
+    qCDebug(dcUniPi()) << "Neuron: Deleting Neuron connection" << m_neuronType;
 }
 
 bool Neuron::init()
 {
+    qCDebug(dcUniPi()) << "Neuron: Init";
     if (!loadModbusMap()) {
         return false;
     }
 
     if (!m_modbusInterface) {
-        qWarning(dcUniPi()) << "Modbus TCP interface not available";
+        qWarning(dcUniPi()) << "Neuron: Modbus TCP interface not available";
         return false;
     }
 
     if (m_modbusInterface->connectDevice()) {
-        qWarning(dcUniPi()) << "Could not connect to modbus TCP device";
+        qWarning(dcUniPi()) << "Neuron: Could not connect to modbus TCP device";
         return false;
     }
     return true;
@@ -166,7 +162,7 @@ QList<QString> Neuron::userLEDs()
 
 bool Neuron::loadModbusMap()
 {
-    qCDebug(dcUniPi()) << "Neuron Extension: load modbus map";
+    qCDebug(dcUniPi()) << "Neuron: Load modbus map";
 
     QStringList fileCoilList;
     QStringList fileRegisterList;
@@ -628,7 +624,7 @@ bool Neuron::getCoils(QList<int> registerList)
 bool Neuron::getAllDigitalInputs()
 {
     if (!m_modbusInterface) {
-        qCWarning(dcUniPi()) << "Neuron: ;Ḿodbus interface not initialized";
+        qCWarning(dcUniPi()) << "Neuron: Ḿodbus interface not initialized";
         return false;
     }
     return getCoils(m_modbusDigitalInputRegisters.values());
@@ -646,7 +642,7 @@ bool Neuron::getAllDigitalOutputs()
 bool Neuron::getAllAnalogInputs()
 {
     if (!m_modbusInterface) {
-        qCWarning(dcUniPi()) << "Neuron modbus interface not initialized";
+        qCWarning(dcUniPi()) << "Neuron: Modbus interface not initialized";
         return false;
     }
     foreach(QString circuit, m_modbusAnalogInputRegisters.keys()) {

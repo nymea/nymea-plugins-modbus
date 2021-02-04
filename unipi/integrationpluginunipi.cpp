@@ -1032,8 +1032,8 @@ bool IntegrationPluginUniPi::neuronDeviceInit()
         m_modbusTCPMaster = new QModbusTcpClient(this);
         m_modbusTCPMaster->setConnectionParameter(QModbusDevice::NetworkPortParameter, port);
         m_modbusTCPMaster->setConnectionParameter(QModbusDevice::NetworkAddressParameter, ipAddress.toString());
-        m_modbusTCPMaster->setTimeout(1000);
-        m_modbusTCPMaster->setNumberOfRetries(3);
+        m_modbusTCPMaster->setTimeout(200);
+        m_modbusTCPMaster->setNumberOfRetries(1);
 
         connect(m_modbusTCPMaster, &QModbusTcpClient::stateChanged, this, &IntegrationPluginUniPi::onModbusTCPStateChanged);
 
@@ -1067,8 +1067,8 @@ bool IntegrationPluginUniPi::neuronExtensionInterfaceInit()
         m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialBaudRateParameter, baudrate);
         m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialDataBitsParameter, 8);
         m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialStopBitsParameter, 1);
-        //m_modbusRTUMaster->setTimeout(100);
-        //m_modbusRTUMaster->setNumberOfRetries(1);
+        m_modbusRTUMaster->setTimeout(400);
+        m_modbusRTUMaster->setNumberOfRetries(1);
 
         connect(m_modbusRTUMaster, &QModbusRtuSerialMaster::stateChanged, this, &IntegrationPluginUniPi::onModbusRTUStateChanged);
 

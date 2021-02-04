@@ -42,6 +42,7 @@ NeuronExtension::NeuronExtension(ExtensionTypes extensionType, QModbusRtuSerialM
     m_slaveAddress(slaveAddress),
     m_extensionType(extensionType)
 {
+    qCDebug(dcUniPi()) << "NeuronExtension: Creating extension" << extensionType;
     m_inputPollingTimer = new QTimer(this);
     connect(m_inputPollingTimer, &QTimer::timeout, this, &NeuronExtension::onInputPollingTimer);
     m_inputPollingTimer->setTimerType(Qt::TimerType::PreciseTimer);
@@ -74,32 +75,25 @@ NeuronExtension::NeuronExtension(ExtensionTypes extensionType, QModbusRtuSerialM
     });
 }
 
-NeuronExtension::~NeuronExtension(){
-    if (m_inputPollingTimer) {
-        m_inputPollingTimer->stop();
-        m_inputPollingTimer->deleteLater();
-        m_inputPollingTimer = nullptr;
-    }
-    if (m_outputPollingTimer) {
-        m_outputPollingTimer->stop();
-        m_outputPollingTimer->deleteLater();
-        m_outputPollingTimer = nullptr;
-    }
+NeuronExtension::~NeuronExtension()
+{
+    qCDebug(dcUniPi()) << "Neuron Extension: Deleting extension";
 }
 
-bool NeuronExtension::init() {
-
+bool NeuronExtension::init()
+{
+    qCDebug(dcUniPi()) << "Neuron Extension: Init";
     if (!loadModbusMap()) {
         return false;
     }
 
     if (!m_modbusInterface) {
-        qWarning(dcUniPi()) << "Modbus RTU interface not available";
+        qWarning(dcUniPi()) << "Neuron Extension: Modbus RTU interface not available";
         return false;
     }
 
     if (m_modbusInterface->connectDevice()) {
-        qWarning(dcUniPi()) << "Could not connect to RTU device";
+        qWarning(dcUniPi()) << "Neuron Extension: Could not connect to RTU device";
         return  false;
     }
     return true;
@@ -134,6 +128,7 @@ int NeuronExtension::slaveAddress()
 
 void NeuronExtension::setSlaveAddress(int slaveAddress)
 {
+    qCDebug(dcUniPi()) << "Neuron Extension: Set slave address" << slaveAddress;
     m_slaveAddress = slaveAddress;
 }
 
@@ -164,7 +159,7 @@ QList<QString> NeuronExtension::userLEDs()
 
 bool NeuronExtension::loadModbusMap()
 {
-    qCDebug(dcUniPi()) << "Neuron Extension: load modbus map";
+    qCDebug(dcUniPi()) << "Neuron Extension: Load modbus map";
 
     QStringList fileCoilList;
     QStringList fileRegisterList;
@@ -490,7 +485,7 @@ bool NeuronExtension::getDigitalOutput(const QString &circuit)
     if (m_readRequestQueue.isEmpty()) {
         return modbusReadRequest(request);
     } else if (m_readRequestQueue.length() > 100) {
-        qCWarning(dcUniPi()) << "Neuron extension: too many pending read requests";
+        qCWarning(dcUniPi()) << "Neuron extension: Too many pending read requests";
         return false;
     } else {
         m_readRequestQueue.append(request);
