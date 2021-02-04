@@ -437,28 +437,21 @@ bool Neuron::modbusReadRequest(const QModbusDataUnit &request)
                         //qCDebug(dcUniPi()) << "Start Address:" << unit.startAddress() << "Register Type:" << unit.registerType() << "Value:" << unit.value(i);
                         modbusAddress = unit.startAddress() + i;
 
-                        if (m_previousModbusRegisterValue.contains(modbusAddress)) {
-                            if (m_previousModbusRegisterValue.value(modbusAddress) == unit.value(i)) {
-                                continue;
-                            } else  {
-                                m_previousModbusRegisterValue.insert(modbusAddress, unit.value(i)); //update existing value
-                            }
-                        } else {
-                            m_previousModbusRegisterValue.insert(modbusAddress, unit.value(i));
-                        }
-
                         QString circuit;
                         switch (unit.registerType()) {
                         case QModbusDataUnit::RegisterType::Coils:
                             if(m_modbusDigitalInputRegisters.values().contains(modbusAddress)){
                                 circuit = m_modbusDigitalInputRegisters.key(modbusAddress);
-                                emit digitalInputStatusChanged(circuit, unit.value(i));
+                                if (circuitValueChanged(circuit, unit.value(i)))
+                                    emit digitalInputStatusChanged(circuit, unit.value(i));
                             } else if(m_modbusDigitalOutputRegisters.values().contains(modbusAddress)){
                                 circuit = m_modbusDigitalOutputRegisters.key(modbusAddress);
-                                emit digitalOutputStatusChanged(circuit, unit.value(i));
+                                if (circuitValueChanged(circuit, unit.value(i)))
+                                    emit digitalOutputStatusChanged(circuit, unit.value(i));
                             } else if(m_modbusUserLEDRegisters.values().contains(modbusAddress)){
                                 circuit = m_modbusUserLEDRegisters.key(modbusAddress);
-                                emit userLEDStatusChanged(circuit, unit.value(i));
+                                if (circuitValueChanged(circuit, unit.value(i)))
+                                    emit userLEDStatusChanged(circuit, unit.value(i));
                             } else {
                                 qCWarning(dcUniPi()) << "Neuron: Received unrecorgnised coil register" << modbusAddress;
                             }
@@ -467,7 +460,8 @@ bool Neuron::modbusReadRequest(const QModbusDataUnit &request)
                         case QModbusDataUnit::RegisterType::HoldingRegisters:
                             if(m_modbusAnalogOutputRegisters.values().contains(modbusAddress)){
                                 circuit = m_modbusAnalogOutputRegisters.key(modbusAddress);
-                                emit analogOutputStatusChanged(circuit, unit.value(i));
+                                if (circuitValueChanged(circuit, unit.value(i)))
+                                    emit analogOutputStatusChanged(circuit, unit.value(i));
                             } else {
                                 qCWarning(dcUniPi()) << "Neuron: Received unrecognised holding register" << modbusAddress;
                             }
@@ -475,8 +469,9 @@ bool Neuron::modbusReadRequest(const QModbusDataUnit &request)
                         case QModbusDataUnit::RegisterType::InputRegisters:
                             if(m_modbusAnalogInputRegisters.values().contains(modbusAddress)){
                                 circuit = m_modbusAnalogInputRegisters.key(modbusAddress);
-                                // Analog inputs consist out of 2 registers
-                                emit analogInputStatusChanged(circuit, (unit.value(i) << 16 | unit.value(i+1)));
+                                quint32 value = (unit.value(i) << 16 | unit.value(i+1));
+                                if (circuitValueChanged(circuit, value))
+                                    emit analogInputStatusChanged(circuit, value);
                                 i++;
                             } else {
                                 qCWarning(dcUniPi()) << "Neuron: Received unrecognised input register" << modbusAddress;
@@ -622,6 +617,22 @@ bool Neuron::getCoils(QList<int> registerList)
     return true;
 }
 
+bool Neuron::circuitValueChanged(const QString &circuit, quint32 value)
+{
+    if (m_previousCircuitValue.contains(circuit)) {
+        if (m_previousCircuitValue.value(circuit) == value) {
+            // Only emit status change of the circuit value has changed
+            return false;
+        } else  {
+            m_previousCircuitValue.insert(circuit, value); //update existing value
+            return true;
+        }
+    } else {
+        m_previousCircuitValue.insert(circuit, value);
+        return true;
+    }
+}
+
 
 bool Neuron::getAllDigitalInputs()
 {
@@ -675,12 +686,12 @@ bool Neuron::getDigitalInput(const QString &circuit)
 
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
     if (m_readRequestQueue.isEmpty()) {
-        //return modbusReadRequest(request);
+        return modbusReadRequest(request);
     } else if (m_readRequestQueue.length() > 100) {
         qCWarning(dcUniPi()) << "Neuron: Too many pending read requests";
         return false;
     } else {
-        //m_readRequestQueue.append(request); //FIXME
+        m_readRequestQueue.append(request);
     }
     return true;
 }
@@ -688,19 +699,19 @@ bool Neuron::getDigitalInput(const QString &circuit)
 bool Neuron::getAnalogOutput(const QString &circuit)
 {
     int modbusAddress = m_modbusAnalogInputRegisters.value(circuit);
-    //qDebug(dcUniPi()) << "Neuron: Reading analog input" << circuit << modbusAddress;
+    //qDebug(dcUniPi()) << "Neuron: Reading analog output" << circuit << modbusAddress;
 
     if (!m_modbusInterface)
         return false;
 
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, 1);
     if (m_readRequestQueue.isEmpty()) {
-        //return modbusReadRequest(request);
+        return modbusReadRequest(request);
     } else if (m_readRequestQueue.length() > 100) {
-        qCWarning(dcUniPi()) << "Neuron extension: too many pending read requests";
+        qCWarning(dcUniPi()) << "Neuron: Too many pending read requests";
         return false;
     } else {
-        //m_readRequestQueue.append(request); //FIXME
+        m_readRequestQueue.append(request);
     }
     return true;
 }
@@ -777,7 +788,7 @@ QUuid Neuron::setAnalogOutput(const QString &circuit, double value)
 bool Neuron::getAnalogInput(const QString &circuit)
 {
     int modbusAddress = m_modbusAnalogInputRegisters.value(circuit);
-    qDebug(dcUniPi()) << "Neuron: Reading analog Input" << circuit << modbusAddress;
+    //qDebug(dcUniPi()) << "Neuron: Reading analog Input" << circuit << modbusAddress;
 
     if (!m_modbusInterface)
         return false;

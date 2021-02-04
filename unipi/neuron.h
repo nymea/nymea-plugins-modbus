@@ -112,7 +112,7 @@ private:
 
     NeuronTypes m_neuronType = NeuronTypes::S103;
 
-    QHash<int, uint16_t> m_previousModbusRegisterValue;
+    QHash<QString, uint16_t> m_previousCircuitValue;
 
     bool loadModbusMap();
     bool modbusReadRequest(const QModbusDataUnit &request);
@@ -121,6 +121,8 @@ private:
     bool getInputRegisters(QList<int> registers);
     bool getHoldingRegisters(QList<int> registers);
     bool getCoils(QList<int> registers);
+
+    bool circuitValueChanged(const QString &circuit, quint32 value);
 
 signals:
     void requestExecuted(const QUuid &requestId, bool success);

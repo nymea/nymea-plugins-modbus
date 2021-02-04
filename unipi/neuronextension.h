@@ -104,11 +104,13 @@ private:
     QModbusRtuSerialMaster *m_modbusInterface = nullptr;
     int m_slaveAddress = 0;
     ExtensionTypes m_extensionType = ExtensionTypes::xS10;
-    QHash<int, uint16_t> m_previousModbusRegisterValue;
+    QHash<QString, uint16_t> m_previousCircuitValue;
 
     bool loadModbusMap();
     bool modbusWriteRequest(const Request &request);
     bool modbusReadRequest(const QModbusDataUnit &request);
+
+    bool circuitValueChanged(const QString &circuit, quint32 value);
 
 signals:
     void requestExecuted(const QUuid &requestId, bool success);
