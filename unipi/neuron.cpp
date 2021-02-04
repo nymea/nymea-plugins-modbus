@@ -698,7 +698,7 @@ bool Neuron::getDigitalInput(const QString &circuit)
 
 bool Neuron::getAnalogOutput(const QString &circuit)
 {
-    int modbusAddress = m_modbusAnalogInputRegisters.value(circuit);
+    int modbusAddress = m_modbusAnalogOutputRegisters.value(circuit);
     //qDebug(dcUniPi()) << "Neuron: Reading analog output" << circuit << modbusAddress;
 
     if (!m_modbusInterface)
