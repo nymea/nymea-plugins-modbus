@@ -73,10 +73,10 @@ void SunSpecInverter::getInverterModelDataBlock()
     m_connection->readModelDataBlock(m_modelModbusStartRegister, m_modelLength);
 }
 
-SunSpecInverter::SunSpecEvent1 SunSpecInverter::bitfieldToSunSpecEvent1(quint16 register1, quint16 register2)
+SunSpecInverter::SunSpecEvent1 SunSpecInverter::bitfieldToSunSpecEvent1(quint16 register0, quint16 register1)
 {
     SunSpecEvent1 event1;
-    quint32 value = (static_cast<quint32>(register1)<<16 | register2);
+    quint32 value = (static_cast<quint32>(register0)<<16 | register1);
     //qCDebug(dcSunSpec()) << "Event1" << QString::number(value, 16);
     event1.groundFault      = ((value & (0x01 << 0)) != 0);
     event1.dcOverVoltage    = ((value & (0x01 << 1)) != 0);

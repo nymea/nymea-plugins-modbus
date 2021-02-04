@@ -127,21 +127,13 @@ void SunSpecStorage::onModelDataBlockReceived(SunSpec::ModelId modelId, uint len
 
     if (length < m_modelLength) {
         qCDebug(dcSunSpec()) << "SunSpecMeter: on model data block received, model length is too short" << length;
-        //return;
+        return;
     }
 
     qCDebug(dcSunSpec()) << "SunSpecStorage: Received" << modelId;
     switch (modelId) {
     case SunSpec::ModelIdStorage: {
         StorageData mandatory;
-        qCDebug(dcSunSpec()) << "   - Setpoint maximum charge" << data[Model124SetpointMaximumCharge];
-        qCDebug(dcSunSpec()) << "   - Setpoint maximum charging rate" << data[Model124SetpointMaximumChargingRate];
-        qCDebug(dcSunSpec()) << "   - Setpoint maximum discharge rate" << data[Model124SetpointMaximumDischargeRate];
-        qCDebug(dcSunSpec()) << "   - Active storage control mode" << data[Model124ActivateStorageControlMode];
-        qCDebug(dcSunSpec()) << "   - ChaGriSet" << data[Model124ChargeGridSet];
-        qCDebug(dcSunSpec()) << "   - Scale factor max charge" << data[Model124ScaleFactorMaximumCharge];
-        qCDebug(dcSunSpec()) << "   - Scale factor max charge/discharge rate" << data[Model124ScaleFactorMaximumChargeDischargeRate];
-        qCDebug(dcSunSpec()) << "   - Scale factor" << data[Model124ScaleFactorAvailableEnergyPercent];
         mandatory.maxCharge = m_connection->convertValueWithSSF(data[Model124SetpointMaximumCharge], data[Model124ScaleFactorMaximumChargeDischargeRate]);
         mandatory.maxChargeRate = m_connection->convertValueWithSSF(data[Model124SetpointMaximumChargingRate], data[Model124ScaleFactorPercentChargeDischargeRate]);
         mandatory.chargingEnabled = data[Model124ActivateStorageControlMode]&0x01;
@@ -154,7 +146,6 @@ void SunSpecStorage::onModelDataBlockReceived(SunSpec::ModelId modelId, uint len
         optional.storageAvailable = m_connection->convertValueWithSSF(data[Model124StorageAvailableAH], data[Model124ScaleFactorMaximumChargingVA]);
         optional.gridChargingEnabled = (data[Model124ChargeGridSet] == 1);
         optional.currentlyAvailableEnergy = m_connection->convertValueWithSSF(data[Model124CurrentlyAvailableEnergyPercent], data[Model124ScaleFactorAvailableEnergyPercent]);
-
         emit storageDataReceived(mandatory, optional);
 
     } break;

@@ -168,12 +168,12 @@ public:
 
 private:
     SunSpec *m_connection = nullptr;
-    SunSpec::ModelId m_id; //e.g. 103 for three phase inverter, 113 for three phase inverter with floating point representation
+    SunSpec::ModelId m_id;
     uint m_modelLength = 0;
     uint m_modelModbusStartRegister = 40000;
     bool m_initFinishedSuccess = false;
 
-    SunSpecEvent1 bitfieldToSunSpecEvent1(quint16 register1, quint16 register2);
+    SunSpecEvent1 bitfieldToSunSpecEvent1(quint16 register0, quint16 register1);
     void getInverterModelHeader();
 
 private slots:

@@ -64,7 +64,7 @@ public:
     Q_ENUM(GridCharge)
 
     enum ChargingStatus {
-        ChargingStatusOff,
+        ChargingStatusOff = 1,
         ChargingStatusEmpty,
         ChargingStatusDischarging,
         ChargingStatusCharging,
