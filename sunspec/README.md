@@ -1,18 +1,19 @@
 # SunSpec
 
-Connect to SunSpec devices over Modbus TCP
+Connect nymea to SunSpec devices over Modbus TCP
 
 ## Supported Things
 
 * SunSpec Inverter
-	* 101 & 111 Single phase inverter
-	* 102 & 112 Split phase inverter
-	* 103 & 113 Three phase inverter
+	* Model ID 101 & 111 Single phase inverter
+	* Model ID 102 & 112 Split phase inverter
+	* Model ID 103 & 113 Three phase inverter
 * SunSpec Meter
-	* Single phase meter
-	* Split phase meter
-	* 203 Three phase meter
-* SunSpec Storage [124]
+	* Model ID 201 & 211 Single phase meter
+	* Model ID 202 & 212 Split phase meter
+	* Model ID 203 & 213 Three phase meter
+* SunSpec Storage 
+	* Model ID 124
 
 ## Requirements
 
