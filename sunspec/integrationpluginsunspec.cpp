@@ -284,24 +284,7 @@ void IntegrationPluginSunSpec::executeAction(ThingActionInfo *info)
     Thing *thing = info->thing();
     Action action = info->action();
 
-    if (thing->thingClassId() == sunspecSinglePhaseInverterThingClassId ||
-            thing->thingClassId() == sunspecSplitPhaseInverterThingClassId ||
-            thing->thingClassId() == sunspecThreePhaseInverterThingClassId) {
-
-        SunSpecInverter *sunSpecInverter = m_sunSpecInverters.value(thing);
-        if (!sunSpecInverter) {
-            qWarning(dcSunSpec()) << "Could not find SunSpec inverter for thing" << thing->name();
-            info->finish(Thing::ThingErrorHardwareNotAvailable);
-            return;
-        }
-        info->finish(Thing::ThingErrorActionTypeNotFound);
-
-    } else if (thing->thingClassId() == sunspecSinglePhaseMeterThingClassId ||
-               thing->thingClassId() == sunspecSplitPhaseMeterThingClassId ||
-               thing->thingClassId() == sunspecThreePhaseMeterThingClassId) {
-        info->finish(Thing::ThingErrorActionTypeNotFound);
-
-    } else if (thing->thingClassId() == sunspecStorageThingClassId) {
+    if (thing->thingClassId() == sunspecStorageThingClassId) {
         SunSpecStorage *sunSpecStorage = m_sunSpecStorages.value(thing);
         if (!sunSpecStorage) {
             qWarning(dcSunSpec()) << "Could not find sunspec instance for thing";
@@ -481,7 +464,7 @@ void IntegrationPluginSunSpec::onPluginConfigurationChanged(const ParamTypeId &p
             m_refreshTimer->startTimer(refreshTime);
         }
     } else if (paramTypeId == sunSpecPluginNumberOfRetriesParamTypeId) {
-        qCDebug(dcSunSpec()) << "Updating number of retires" << value.toUInt();
+        qCDebug(dcSunSpec()) << "Updating number of retries" << value.toUInt();
         Q_FOREACH(SunSpec *connection, m_sunSpecConnections) {
             connection->setNumberOfRetries(value.toUInt());
         }
@@ -592,7 +575,7 @@ void IntegrationPluginSunSpec::onFoundSunSpecModel(SunSpec::ModelId modelId, int
         emit autoThingsAppeared({descriptor});
     } break;
     default:
-        qCDebug(dcSunSpec()) << "Block Id not handled";
+        qCDebug(dcSunSpec()) << "Model Id not handled";
     }
 }
 
@@ -823,7 +806,7 @@ void IntegrationPluginSunSpec::onMeterDataReceived(const SunSpecMeter::MeterData
     qCDebug(dcSunSpec()) << "   - Voltage LL" << meterData.voltageLL << "[V]";
     qCDebug(dcSunSpec()) << "   - Phase voltage AB" << meterData.phaseVoltageAB << "[V]";
     qCDebug(dcSunSpec()) << "   - Phase voltage BC" << meterData.phaseVoltageBC << "[V]";
-    qCDebug(dcSunSpec()) << "   - Phase voltage CA" << meterData.phaseVoltageCA<< "[V]";
+    qCDebug(dcSunSpec()) << "   - Phase voltage CA" << meterData.phaseVoltageCA << "[V]";
     qCDebug(dcSunSpec()) << "   - Frequency" << meterData.frequency << "[Hz]";
     qCDebug(dcSunSpec()) << "   - Total real power" << meterData.totalRealPower << "[W]";
     qCDebug(dcSunSpec()) << "   - Total real energy exported" << meterData.totalRealEnergyExported<< "[kWH]";

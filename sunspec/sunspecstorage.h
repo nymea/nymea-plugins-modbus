@@ -46,8 +46,8 @@ public:
     void getStorageModelDataBlock();
 
     QUuid setGridCharging(bool enabled);
-    QUuid setDischargingRate(int rate);
-    QUuid setChargingRate(int rate);
+    QUuid setDischargingRate(float rate);
+    QUuid setChargingRate(float rate);
     QUuid setStorageControlMode(bool chargingEnabled, bool dischargingEnabled);
 
     enum StorageControl {
@@ -79,7 +79,7 @@ public:
         Model124WChaGra      = 1,
         Model124WDisChaGra   = 2,
         Model124StorCtl_Mod  = 3,
-        Model124WChaMax_SF        = 16,
+        Model124WChaMax_SF       = 16,
         Model124WChaDisChaGra_SF = 17,
     };
 
@@ -134,6 +134,14 @@ private:
     uint m_modelLength = 0;
     uint m_modelModbusStartRegister = 40000;
     bool m_initFinishedSuccess = false;
+
+    // Scale factors needed to perform write requests
+    bool m_scaleFactorsSet = false;
+    quint16 m_WChaMax_SF        = 0;
+    quint16 m_WChaDisChaGra_SF  = 0;
+    quint16 m_VAChaMax_SF       = 0;
+    quint16 m_MinRsvPct_SF      = 0;
+    quint16 m_InOutWRte_SF      = 0;
 
 private slots:
     void onModelDataBlockReceived(SunSpec::ModelId modelId, uint length, const QVector<quint16> &data);

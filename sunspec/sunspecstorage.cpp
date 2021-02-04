@@ -100,22 +100,32 @@ QUuid SunSpecStorage::setStorageControlMode(bool chargingEnabled, bool dischargi
     return m_connection->writeHoldingRegister(modbusRegister, value);
 }
 
-QUuid SunSpecStorage::setChargingRate(int rate)
+QUuid SunSpecStorage::setChargingRate(float rate)
 {
-    //Register Name InWRte
-    /* Defines the maximum charge rate (charge limit). Default is 100% */
-
+    if (!m_scaleFactorsSet) {
+        qCWarning(dcSunSpec()) << "SunSpecStorage: Set charging rate, scale factors are not set";
+        return "";
+    }
+    if (rate < 0.00 || rate > 100.00) {
+        qCWarning(dcSunSpec()) << "SunSpecStorage: Set charging rate, rate out of boundaries [0, 100]";
+        return "";
+    }
     uint modbusRegister = m_modelModbusStartRegister + Model124::Model124WChaGra;
-    int16_t value = rate * 100;
+    quint16 value = m_connection->convertFromFloatWithSSF(rate, m_WChaDisChaGra_SF);
     return m_connection->writeHoldingRegister(modbusRegister, value);
 }
 
-QUuid SunSpecStorage::setDischargingRate(int charging)
+QUuid SunSpecStorage::setDischargingRate(float rate)
 {
-    //Register Name OutWRte
-    /* Defines the maximum discharge rate (discharge limit). Default is 100% */
+    if (!m_scaleFactorsSet) {
+        qCWarning(dcSunSpec()) << "SunSpecStorage: Set discharging rate, scale factors are not set";
+    }
+    if (rate < 0.00 || rate > 100.00) {
+        qCWarning(dcSunSpec()) << "SunSpecStorage: Set doscharging rate, rate out of boundaries [0, 100]";
+        return "";
+    }
     uint modbusRegister = m_modelModbusStartRegister + Model124::Model124WDisChaGra;
-    quint16 value = charging * 100;
+    quint16 value = m_connection->convertFromFloatWithSSF(rate, m_WChaDisChaGra_SF);
     return m_connection->writeHoldingRegister(modbusRegister, value);
 }
 
@@ -134,21 +144,21 @@ void SunSpecStorage::onModelDataBlockReceived(SunSpec::ModelId modelId, uint len
     switch (modelId) {
     case SunSpec::ModelIdStorage: {
         StorageData mandatory;
-        mandatory.WChaMax = m_connection->convertValueWithSSF(data[Model124WChaMax], data[Model124WChaMax_SF]);
-        mandatory.WChaGra = m_connection->convertValueWithSSF(data[Model124WChaGra], data[Model124WChaDisChaGra_SF]);
-        mandatory.WDisChaGra = m_connection->convertValueWithSSF(data[Model124WDisChaGra], data[Model124WChaDisChaGra_SF]);
+        mandatory.WChaMax = m_connection->convertToFloatWithSSF(data[Model124WChaMax], data[Model124WChaMax_SF]);
+        mandatory.WChaGra = m_connection->convertToFloatWithSSF(data[Model124WChaGra], data[Model124WChaDisChaGra_SF]);
+        mandatory.WDisChaGra = m_connection->convertToFloatWithSSF(data[Model124WDisChaGra], data[Model124WChaDisChaGra_SF]);
         mandatory.StorCtl_Mod_ChargingEnabled = data[Model124StorCtl_Mod]&0x01;
         mandatory.StorCtl_Mod_DischargingEnabled = data[Model124StorCtl_Mod]&0x02;
 
         StorageDataOptional optional;
-        optional.VAChaMax  = m_connection->convertValueWithSSF(data[Model124VAChaMax], data[Model124VAChaMax_SF]);
-        optional.MinRsvPct = m_connection->convertValueWithSSF(data[Model124MinRsvPct], data[Model124MinRsvPct_SF]);
-        optional.ChaState  = m_connection->convertValueWithSSF(data[Model124ChaState], data[Model124ChaState_SF]);
-        optional.StorAval  = m_connection->convertValueWithSSF(data[Model124StorAval], data[Model124StorAval_SF]);
-        optional.InBatV    = m_connection->convertValueWithSSF(data[Model124InBatV], data[Model124InBatV_SF]);
+        optional.VAChaMax  = m_connection->convertToFloatWithSSF(data[Model124VAChaMax], data[Model124VAChaMax_SF]);
+        optional.MinRsvPct = m_connection->convertToFloatWithSSF(data[Model124MinRsvPct], data[Model124MinRsvPct_SF]);
+        optional.ChaState  = m_connection->convertToFloatWithSSF(data[Model124ChaState], data[Model124ChaState_SF]);
+        optional.StorAval  = m_connection->convertToFloatWithSSF(data[Model124StorAval], data[Model124StorAval_SF]);
+        optional.InBatV    = m_connection->convertToFloatWithSSF(data[Model124InBatV], data[Model124InBatV_SF]);
         optional.ChaSt     = ChargingStatus(data[Model124ChaSt]);
-        optional.OutWRte   = m_connection->convertValueWithSSF(data[Model124OutWRte], data[Model124InOutWRte_SF]);
-        optional.InWRte    = m_connection->convertValueWithSSF(data[Model124InWRte], data[Model124InOutWRte_SF]);
+        optional.OutWRte   = m_connection->convertToFloatWithSSF(data[Model124OutWRte], data[Model124InOutWRte_SF]);
+        optional.InWRte    = m_connection->convertToFloatWithSSF(data[Model124InWRte], data[Model124InOutWRte_SF]);
         optional.InOutWRte_WinTms  = data[Model124InOutWRte_WinTms];
         optional.InOutWRte_RvrtTms = data[Model124InOutWRte_RvrtTms];
         optional.InOutWRte_RmpTms  = data[Model124InOutWRte_RmpTms];
