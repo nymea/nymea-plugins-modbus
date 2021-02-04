@@ -610,13 +610,19 @@ void IntegrationPluginSunSpec::onSunSpecModelSearchFinished(const QHash<SunSpec:
 void IntegrationPluginSunSpec::onWriteRequestExecuted(QUuid requestId, bool success)
 {
     qCDebug(dcSunSpec()) << "Write request executed" << requestId << success;
+    if (m_asyncActions.contains(requestId)) {
+        ThingActionInfo *info = m_asyncActions.take(requestId);
+        if (success) {
+            info->finish(Thing::ThingErrorNoError);
+        } else {
+            info->finish(Thing::ThingErrorHardwareFailure);
+        }
+    }
 }
 
 void IntegrationPluginSunSpec::onWriteRequestError(QUuid requestId, const QString &error)
 {
-    Q_UNUSED(requestId)
-    Q_UNUSED(error)
-    qCDebug(dcSunSpec()) << "Write request error" << error;
+    qCDebug(dcSunSpec()) << "Write request error" << requestId << error;
 }
 
 void IntegrationPluginSunSpec::onInverterDataReceived(const SunSpecInverter::InverterData &inverterData)
@@ -646,7 +652,7 @@ void IntegrationPluginSunSpec::onInverterDataReceived(const SunSpecInverter::Inv
     qCDebug(dcSunSpec()) << "   - Operating state" << inverterData.operatingState;
 
     thing->setStateValue(m_connectedStateTypeIds.value(thing->thingClassId()), true);
-    thing->setStateValue(m_inverterCurrentPowerStateTypeIds.value(thing->thingClassId()), inverterData.acPower/1000.00);
+    thing->setStateValue(m_inverterCurrentPowerStateTypeIds.value(thing->thingClassId()), inverterData.acPower);
     thing->setStateValue(m_inverterTotalEnergyProducedStateTypeIds.value(thing->thingClassId()), inverterData.acEnergy/1000.00);
     thing->setStateValue(m_frequencyStateTypeIds.value(thing->thingClassId()), inverterData.lineFrequency);
 
@@ -749,10 +755,23 @@ void IntegrationPluginSunSpec::onStorageDataReceived(const SunSpecStorage::Stora
     if(!thing) {
         return;
     }
-    thing->setStateValue(m_connectedStateTypeIds.value(thing->thingClassId()), true);
 
+    qCDebug(dcSunSpec()) << "Storage data received";
+    qCDebug(dcSunSpec()) << "   - Setpoint for maximum charge" << mandatory.maxCharge  << "[W]";
+    qCDebug(dcSunSpec()) << "   - Setpoint for maximum charging rate." << mandatory.maxChargeRate  << "[%]";
+    qCDebug(dcSunSpec()) << "   - Setpoint for maximum discharging rate." << mandatory.maxDischargeRate  << "[%]";
+    qCDebug(dcSunSpec()) << "   - Charging enabled" << mandatory.chargingEnabled;
+    qCDebug(dcSunSpec()) << "   - Discharging enabled" << mandatory.dischargingEnabled;
+    qCDebug(dcSunSpec()) << "   - Storage status" << optional.chargeSatus;
+    qCDebug(dcSunSpec()) << "   - Currently available energy" << optional.currentlyAvailableEnergy << "[%]";
+    qCDebug(dcSunSpec()) << "   - Grid charging enabled" << optional.gridChargingEnabled;
+
+    thing->setStateValue(m_connectedStateTypeIds.value(thing->thingClassId()), true);
     thing->setStateValue(sunspecStorageChargingRateStateTypeId, mandatory.maxChargeRate);
     thing->setStateValue(sunspecStorageDischargingRateStateTypeId, mandatory.maxDischargeRate);
+    thing->setStateValue(sunspecStorageEnableChargingStateTypeId, mandatory.chargingEnabled);
+    thing->setStateValue(sunspecStorageEnableDischargingStateTypeId, mandatory.dischargingEnabled);
+    thing->setStateValue(sunspecStorageGridChargingStateTypeId, optional.gridChargingEnabled);
 
     bool charging = false;
     switch (optional.chargeSatus) {
@@ -785,15 +804,12 @@ void IntegrationPluginSunSpec::onStorageDataReceived(const SunSpecStorage::Stora
 
 void IntegrationPluginSunSpec::onMeterDataReceived(const SunSpecMeter::MeterData &meterData)
 {
-    Q_UNUSED(meterData)
     SunSpecMeter *meter = static_cast<SunSpecMeter *>(sender());
     Thing *thing = m_sunSpecMeters.key(meter);
 
     if (!thing) {
         return;
     }
-
-    thing->setStateValue(m_connectedStateTypeIds.value(thing->thingClassId()), true);
 
     qCDebug(dcSunSpec()) << "Meter data received";
     qCDebug(dcSunSpec()) << "   - Total AC Current" << meterData.totalAcCurrent << "[A]";
@@ -813,8 +829,8 @@ void IntegrationPluginSunSpec::onMeterDataReceived(const SunSpecMeter::MeterData
     qCDebug(dcSunSpec()) << "   - Total real energy exported" << meterData.totalRealEnergyExported<< "[kWH]";
     qCDebug(dcSunSpec()) << "   - Total real energy imported" << meterData.totalRealEnergyImported<< "[kWH]";
 
-        thing->setStateValue(m_frequencyStateTypeIds.value(thing->thingClassId()), meterData.frequency);
-    thing->setStateValue(sunspecThreePhaseMeterTotalCurrentStateTypeId, meterData.totalAcCurrent);
+    thing->setStateValue(m_connectedStateTypeIds.value(thing->thingClassId()), true);
+    thing->setStateValue(m_frequencyStateTypeIds.value(thing->thingClassId()), meterData.frequency);
 
     if (thing->thingClassId() == sunspecSinglePhaseMeterThingClassId) {
         thing->setStateValue(sunspecSinglePhaseMeterPhaseACurrentStateTypeId, meterData.phaseACurrent);
@@ -822,18 +838,25 @@ void IntegrationPluginSunSpec::onMeterDataReceived(const SunSpecMeter::MeterData
         thing->setStateValue(sunspecSinglePhaseMeterLnACVoltageStateTypeId, meterData.voltageLN);
         thing->setStateValue(sunspecSinglePhaseMeterTotalEnergyProducedStateTypeId, meterData.totalRealEnergyExported);
         thing->setStateValue(sunspecSinglePhaseMeterTotalEnergyConsumedStateTypeId, meterData.totalRealEnergyImported);
+
     } else if (thing->thingClassId() == sunspecSplitPhaseMeterThingClassId) {
         thing->setStateValue(sunspecSplitPhaseMeterPhaseACurrentStateTypeId, meterData.phaseACurrent);
         thing->setStateValue(sunspecSplitPhaseMeterPhaseBCurrentStateTypeId, meterData.phaseBCurrent);
         thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerEventTypeId, meterData.totalRealPower);
         thing->setStateValue(sunspecSplitPhaseMeterLnACVoltageStateTypeId, meterData.voltageLN);
+        thing->setStateValue(sunspecSplitPhaseMeterPhaseANVoltageStateTypeId, meterData.phaseVoltageAN);
+        thing->setStateValue(sunspecSplitPhaseMeterPhaseBNVoltageStateTypeId, meterData.phaseVoltageBN);
         thing->setStateValue(sunspecSplitPhaseMeterTotalEnergyProducedStateTypeId, meterData.totalRealEnergyExported);
         thing->setStateValue(sunspecSplitPhaseMeterTotalEnergyConsumedStateTypeId, meterData.totalRealEnergyImported);
+
     } else if (thing->thingClassId() == sunspecThreePhaseMeterThingClassId) {
         thing->setStateValue(sunspecThreePhaseMeterPhaseACurrentStateTypeId, meterData.phaseACurrent);
         thing->setStateValue(sunspecThreePhaseMeterPhaseBCurrentStateTypeId, meterData.phaseBCurrent);
         thing->setStateValue(sunspecThreePhaseMeterPhaseCCurrentStateTypeId, meterData.phaseCCurrent);
         thing->setStateValue(sunspecThreePhaseMeterLnACVoltageStateTypeId, meterData.voltageLN);
+        thing->setStateValue(sunspecThreePhaseMeterPhaseANVoltageStateTypeId, meterData.phaseVoltageAN);
+        thing->setStateValue(sunspecThreePhaseMeterPhaseBNVoltageStateTypeId, meterData.phaseVoltageBN);
+        thing->setStateValue(sunspecThreePhaseMeterPhaseCNVoltageStateTypeId, meterData.phaseVoltageCN);
         thing->setStateValue(sunspecThreePhaseMeterCurrentPowerEventTypeId, meterData.totalRealPower);
         thing->setStateValue(sunspecThreePhaseMeterTotalEnergyProducedStateTypeId, meterData.totalRealEnergyExported);
         thing->setStateValue(sunspecThreePhaseMeterTotalEnergyConsumedStateTypeId, meterData.totalRealEnergyImported);
