@@ -38,13 +38,33 @@ class NeuronCommon : public QObject
 {
     Q_OBJECT
 public:
-    explicit NeuronCommon(QObject *parent = nullptr);
+    explicit NeuronCommon(QModbusClient *modbusInterface, int slaveAddress, QObject *parent = nullptr);
+    bool init();
+    int slaveAddress();
+    void setSlaveAddress(int slaveAddress);
 
     QList<QString> digitalInputs();
     QList<QString> digitalOutputs();
     QList<QString> analogInputs();
     QList<QString> analogOutputs();
     QList<QString> userLEDs();
+
+    QUuid setDigitalOutput(const QString &circuit, bool value);
+    QUuid setAnalogOutput(const QString &circuit, double value);
+    QUuid setUserLED(const QString &circuit, bool value);
+
+    bool getDigitalOutput(const QString &circuit);
+    bool getDigitalInput(const QString &circuit);
+
+    bool getAnalogOutput(const QString &circuit);
+    bool getAnalogInput(const QString &circuit);
+
+    void getAllDigitalOutputs();
+    void getAllDigitalInputs();
+    void getAllAnalogInputs();
+    void getAllAnalogOutputs();
+
+    bool getUserLED(const QString &circuit);
 
 protected:
     enum RWPermission {
@@ -63,19 +83,8 @@ protected:
         QModbusDataUnit::RegisterType registerType;
     };
 
-    struct Request {
-        QUuid id;
-        QModbusDataUnit data;
-    };
-
-    int m_slaveAddress = 0;
-    uint m_responseTimeoutTime = 2000;
-
-    QTimer *m_inputPollingTimer = nullptr;
-    QTimer *m_outputPollingTimer = nullptr;
-
-    QList<Request> m_writeRequestQueue;
-    QList<QModbusDataUnit> m_readRequestQueue;
+    virtual bool loadModbusMap() = 0;
+    RegisterDescriptor registerDescriptorFromStringList(const QStringList &data);
 
     QHash<QString, int> m_modbusDigitalOutputRegisters;
     QHash<QString, int> m_modbusDigitalInputRegisters;
@@ -83,10 +92,29 @@ protected:
     QHash<int, RegisterDescriptor> m_modbusAnalogInputRegisters;
     QHash<int, RegisterDescriptor> m_modbusAnalogOutputRegisters;
 
+private:
+    struct Request {
+        QUuid id;
+        QModbusDataUnit data;
+    };
+
+    int m_slaveAddress = 0;
+    uint m_responseTimeoutTime = 2000;
+    QModbusClient *m_modbusInterface = nullptr;
+
+    QTimer *m_inputPollingTimer = nullptr;
+    QTimer *m_outputPollingTimer = nullptr;
+
+    QList<Request> m_writeRequestQueue;
+    QList<QModbusDataUnit> m_readRequestQueue;
+
     QHash<QString, uint16_t> m_previousCircuitValue;
 
-    RegisterDescriptor registerDescriptorFromStringList(const QStringList &data);
     bool circuitValueChanged(const QString &circuit, quint32 value);
+    bool getAnalogIO(const RegisterDescriptor &descriptor);
+    bool modbusReadRequest(const QModbusDataUnit &request);
+    bool modbusWriteRequest(const Request &request);
+    void getCoils(QList<int> registers);
 
 signals:
     void requestExecuted(const QUuid &requestId, bool success);
@@ -101,6 +129,9 @@ signals:
 
     void connectionStateChanged(bool state);
 
+private slots:
+    void onOutputPollingTimer();
+    void onInputPollingTimer();
 };
 
 #endif // NEURONCOMMON_H

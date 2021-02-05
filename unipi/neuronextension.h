@@ -54,46 +54,12 @@ public:
     };
     Q_ENUM(ExtensionTypes)
 
-    explicit NeuronExtension(ExtensionTypes extensionType, QModbusRtuSerialMaster *modbusInterface, int slaveAddress, QObject *parent = nullptr);
+    explicit NeuronExtension(ExtensionTypes extensionType, QModbusClient *modbusInterface, int slaveAddress, QObject *parent = nullptr);
     ~NeuronExtension();
-
-    bool init();
     QString type();
-    int slaveAddress();
-    void setSlaveAddress(int slaveAddress);
-
-    QUuid setDigitalOutput(const QString &circuit, bool value);
-    bool getDigitalOutput(const QString &circuit);
-    bool getDigitalInput(const QString &circuit);
-
-    QUuid setAnalogOutput(const QString &circuit, double value);
-    bool getAnalogOutput(const QString &circuit);
-    bool getAnalogInput(const QString &circuit);
-
-    bool getAllDigitalOutputs();
-    bool getAllDigitalInputs();
-    bool getAllAnalogOutputs();
-    bool getAllAnalogInputs();
-
-    QUuid setUserLED(const QString &circuit, bool value);
-    bool getUserLED(const QString &circuit);
 
 private:
-
-    QModbusRtuSerialMaster *m_modbusInterface = nullptr;
-    int m_slaveAddress = 0;
     ExtensionTypes m_extensionType = ExtensionTypes::xS10;
-    QHash<QString, uint16_t> m_previousCircuitValue;
-
-    bool loadModbusMap();
-    bool modbusWriteRequest(const Request &request);
-    bool modbusReadRequest(const QModbusDataUnit &request);
-
-    bool getAnalogIO(const RegisterDescriptor &descriptor);
-
-private slots:
-    void onOutputPollingTimer();
-    void onInputPollingTimer();
+    bool loadModbusMap() override;
 };
-
 #endif // NEURONEXTENSION_H
