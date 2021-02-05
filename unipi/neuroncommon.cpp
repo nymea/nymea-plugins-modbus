@@ -199,7 +199,7 @@ void NeuronCommon::getAllAnalogOutputs()
 
 bool NeuronCommon::getDigitalInput(const QString &circuit)
 {
-    if (m_modbusDigitalInputRegisters.contains(circuit)) {
+    if (!m_modbusDigitalInputRegisters.contains(circuit)) {
         qCWarning(dcUniPi()) << "Neuron: Digital input circuit not found" << circuit;
         return "";
     }
@@ -233,7 +233,7 @@ bool NeuronCommon::getAnalogOutput(const QString &circuit)
 
 QUuid NeuronCommon::setDigitalOutput(const QString &circuit, bool value)
 {
-    if (m_modbusDigitalOutputRegisters.contains(circuit)) {
+    if (!m_modbusDigitalOutputRegisters.contains(circuit)) {
         qCWarning(dcUniPi()) << "Neuron: Digital output circuit not found" << circuit;
         return "";
     }
@@ -258,7 +258,7 @@ QUuid NeuronCommon::setDigitalOutput(const QString &circuit, bool value)
 
 bool NeuronCommon::getDigitalOutput(const QString &circuit)
 {
-    if (m_modbusDigitalOutputRegisters.contains(circuit)) {
+    if (!m_modbusDigitalOutputRegisters.contains(circuit)) {
         qCWarning(dcUniPi()) << "Neuron: Digital output circuit not found" << circuit;
         return false;
     }
