@@ -1,1 +1,1 @@
-usr/lib/@DEB_HOST_MULTIARCH@/nymea/plugins/libnymea_devicepluginidm.so
+usr/lib/@DEB_HOST_MULTIARCH@/nymea/plugins/libnymea_integrationpluginidm.so
