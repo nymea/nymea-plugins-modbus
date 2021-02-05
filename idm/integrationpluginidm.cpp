@@ -149,20 +149,6 @@ void IntegrationPluginIdm::update(Thing *thing)
         if (idm != nullptr) {
             idm->onRequestStatus();
         }
-<<<<<<< HEAD
-
-        if (m_idmInfos.contains(thing)) {
-<<<<<<< HEAD
-            ThingSetupInfo *info = m_idmInfos.take(thing);
-            info->finish(Thing::ThingErrorNoError);
-=======
-            /* ThingSetupInfo *info = m_idmInfos.take(thing); */
-            /* qCDebug(dcIdm()) << "Finishing setup 4!"; */
-            /* info->finish(Thing::ThingErrorNoError); */
->>>>>>> 3b5ab5c... Another fix for previous commit
-        }
-=======
->>>>>>> 27a88b6... Removed thread delay and used Timer instead
     }
 }
 
