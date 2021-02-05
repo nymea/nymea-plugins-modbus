@@ -83,6 +83,7 @@ Section: libs
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          wiringpi,
+         nymea-plugins-modbus-translations
 Replaces: nymea-plugin-unipi
 Description: nymea.io plugin for UniPi devices
  The nymea daemon is a plugin based IoT (Internet of Things) server. The
