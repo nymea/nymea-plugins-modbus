@@ -35,7 +35,6 @@ Section: libs
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          nymea-plugins-modbus-translations
-         nymea-plugins-translations
 Description: nymea.io plugin to send and receive generic modbus commands
  The nymea daemon is a plugin based IoT (Internet of Things) server. The
  server works like a translator for devices, things and services and
