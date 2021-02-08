@@ -72,74 +72,15 @@
                     "id": "776df314-6186-4eb5-b824-f0d916f6d9c3",
                     "name": "modbusRTUClient",
                     "displayName": "Modbus RTU client",
-                    "createMethods": ["discovery", "user"],
+                    "createMethods": ["discovery"],
                     "interfaces": ["connectable"],
-                    "settingsTypes": [
-                        {
-                            "id": "b0af32f0-b8cc-4642-af5a-576732522b2c",
-                            "name": "timeout",
-                            "displayName": "Timeout",
-                            "type": "uint",
-                            "minValue": 10,
-                            "defaultValue": 100
-                        },
-                        {
-                            "id": "c4f16d6c-c1f2-4862-b0bd-6fae7193eaa8",
-                            "name": "numberOfRetries",
-                            "displayName": "Number of retries",
-                            "type": "uint",
-                            "defaultValue": 3
-                        }
-                    ],
                     "paramTypes": [
                         {
                             "id": "ed49f7d8-ab18-4c37-9b80-1004b75dcb91",
-                            "name": "serialPort",
-                            "displayName": "Serial port",
-                            "type": "QString",
-                            "inputType": "TextLine",
-                            "defaultValue": "ttyAMA0"
-                        },
-                        {
-                            "id": "9908b01f-a76b-4b21-8242-b507c9252254",
-                            "name": "serialnumber",
-                            "displayName": "Serial number",
-                            "type": "QString",
+                            "name": "modbusMasterUuid",
+                            "displayName": "Modbus RTU master",
+                            "type": "QUuid",
                             "defaultValue": ""
-                        },
-                        {
-                            "id": "45dfc828-f238-4263-89a3-9b35cf5dea39",
-                            "name": "baudRate",
-                            "displayName": "Baud rate",
-                            "type": "uint",
-                            "defaultValue": 9600
-                        },
-                        {
-                            "id": "a27c664b-9f43-4573-a2cc-f65a8fa1a069",
-                            "name": "dataBits",
-                            "displayName": "Data bits",
-                            "type": "uint",
-                            "defaultValue": 8
-                        },
-                        {
-                            "id": "4ea8bcdf-d4c5-45a4-a54f-f10ac3f08a78",
-                            "name": "stopBits",
-                            "displayName": "Stop bits",
-                            "type": "uint",
-                            "defaultValue": 1
-                        },
-                        {
-                            "id": "72de1b08-2a27-49c5-90e0-8788c3ea1da3",
-                            "name": "parity",
-                            "displayName": "Parity",
-                            "type": "QString",
-                            "inputType": "TextLine",
-                            "allowedValues": [
-                                "No Parity",
-                                "Even Parity",
-                                "Odd Parity"
-                            ],
-                            "defaultValue": "No Parity"
                         }
                     ],
                     "stateTypes": [
