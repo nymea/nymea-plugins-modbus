@@ -7,11 +7,9 @@ QT += \
 
 SOURCES += \
     integrationpluginmodbuscommander.cpp \
-    ../modbus/modbustcpmaster.cpp \
-    ../modbus/modbusrtumaster.cpp \
+    ../modbus/modbustcpmaster.cpp
 
 HEADERS += \
     integrationpluginmodbuscommander.h \
-    ../modbus/modbustcpmaster.h \
-    ../modbus/modbusrtumaster.h \
+    ../modbus/modbustcpmaster.h
 
