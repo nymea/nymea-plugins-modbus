@@ -67,7 +67,7 @@ void IntegrationPluginModbusCommander::init()
     m_valueStateTypeId.insert(discreteInputThingClassId, discreteInputValueStateTypeId);
     m_valueStateTypeId.insert(holdingRegisterThingClassId, holdingRegisterValueStateTypeId);
 
-    connect(hardwareManager()->modbusRtuResource(), &ModbusRtuHardwareResource::modbusRtuMasterRemoved, [=](const QUuid &modbusUuid){
+    connect(hardwareManager()->modbusRtuResource(), &ModbusRtuHardwareResource::modbusRtuMasterRemoved, this, [=](const QUuid &modbusUuid){
         qCDebug(dcModbusCommander()) << "Modbus RTU master has been removed" << modbusUuid.toString();
 
         // Check if there is any device using this resource
@@ -240,7 +240,7 @@ void IntegrationPluginModbusCommander::setupThing(ThingSetupInfo *info)
 
         if (!hardwareManager()->modbusRtuResource()->hasModbusRtuMaster(modbusUuid)) {
             qCWarning(dcModbusCommander()) << "Cannot set up thing" << thing << ". The modbus RTU hardware resource" << modbusUuid.toString() << "does not exist any more. Reconfiguration required.";
-            info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("Configured modbus master could not be found. Please reconfigure the client and assign a new valid modbus master."));
+            info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("Configured modbus RTU master could not be found. Please reconfigure the client and assign a new valid modbus RTU master."));
             return;
         }
 
@@ -251,10 +251,14 @@ void IntegrationPluginModbusCommander::setupThing(ThingSetupInfo *info)
         connect(modbusMaster, &ModbusRtuMaster::connectedChanged, thing, [=](bool connected){
             qCDebug(dcModbusCommander()) << "Modbus RTU client" << modbusMaster << "connected changed" << connected;
             thing->setStateValue(modbusRTUClientConnectedStateTypeId, connected);
-            // Set all child thing connected states
-            foreach (Thing *childThing, myThings()) {
-                if (childThing->parentId() == thing->id()) {
-                    thing->setStateValue(m_connectedStateTypeId[childThing->thingClassId()], connected);
+
+            // Note: only set the connected state for the child things if disconnected.
+            // The child things will be evaluated upon read requests if the slave is connected or not.
+            if (!connected) {
+                foreach (Thing *childThing, myThings()) {
+                    if (childThing->parentId() == thing->id()) {
+                        thing->setStateValue(m_connectedStateTypeId[childThing->thingClassId()], connected);
+                    }
                 }
             }
         });
@@ -522,6 +526,7 @@ void IntegrationPluginModbusCommander::readRegister(Thing *thing)
             connect(reply, &ModbusRtuReply::finished, modbusMaster, [=](){
                 if (reply->error() != ModbusRtuReply::NoError) {
                     qCWarning(dcModbusCommander()) << "Failed to read coil from" << modbusMaster << "slave:" << slaveAddress << "register:" << registerAddress;
+                    thing->setStateValue(m_connectedStateTypeId[thing->thingClassId()], false);
                     return;
                 }
 
@@ -535,6 +540,7 @@ void IntegrationPluginModbusCommander::readRegister(Thing *thing)
             connect(reply, &ModbusRtuReply::finished, modbusMaster, [=](){
                 if (reply->error() != ModbusRtuReply::NoError) {
                     qCWarning(dcModbusCommander()) << "Failed to read discrete input from" << modbusMaster << "slave:" << slaveAddress << "register:" << registerAddress;
+                    thing->setStateValue(m_connectedStateTypeId[thing->thingClassId()], false);
                     return;
                 }
 
@@ -548,6 +554,7 @@ void IntegrationPluginModbusCommander::readRegister(Thing *thing)
             connect(reply, &ModbusRtuReply::finished, modbusMaster, [=](){
                 if (reply->error() != ModbusRtuReply::NoError) {
                     qCWarning(dcModbusCommander()) << "Failed to read holding register from" << modbusMaster << "slave:" << slaveAddress << "register:" << registerAddress;
+                    thing->setStateValue(m_connectedStateTypeId[thing->thingClassId()], false);
                     return;
                 }
 
@@ -561,6 +568,7 @@ void IntegrationPluginModbusCommander::readRegister(Thing *thing)
             connect(reply, &ModbusRtuReply::finished, modbusMaster, [=](){
                 if (reply->error() != ModbusRtuReply::NoError) {
                     qCWarning(dcModbusCommander()) << "Failed to read input register from" << modbusMaster << "slave:" << slaveAddress << "register:" << registerAddress;
+                    thing->setStateValue(m_connectedStateTypeId[thing->thingClassId()], false);
                     return;
                 }
 
@@ -590,8 +598,10 @@ void IntegrationPluginModbusCommander::writeRegister(Thing *thing, ThingActionIn
     Thing *parent = myThings().findById(thing->parentId());
     if (!parent) {
         qCWarning(dcModbusCommander()) << "Could not find parent device" << thing->name();
+        info->finish(Thing::ThingErrorHardwareNotAvailable);
         return;
     }
+
     uint registerAddress = thing->paramValue(m_registerAddressParamTypeId.value(thing->thingClassId())).toUInt();;
     uint slaveAddress = thing->paramValue(m_slaveAddressParamTypeId.value(thing->thingClassId())).toUInt();
 
@@ -600,8 +610,11 @@ void IntegrationPluginModbusCommander::writeRegister(Thing *thing, ThingActionIn
 
     if (parent->thingClassId() == modbusTCPClientThingClassId) {
         ModbusTCPMaster *modbus = m_modbusTCPMasters.value(parent);
-        if (!modbus)
+        if (!modbus) {
+            qCWarning(dcModbusCommander()) << "Could not find modbus TCP master for" << thing;
+            info->finish(Thing::ThingErrorHardwareNotAvailable);
             return;
+        }
 
         if (thing->thingClassId() == coilThingClassId) {
             requestId = modbus->writeCoil(slaveAddress, registerAddress, action.param(coilValueActionValueParamTypeId).value().toBool());
@@ -611,14 +624,18 @@ void IntegrationPluginModbusCommander::writeRegister(Thing *thing, ThingActionIn
 
     } else if (parent->thingClassId() == modbusRTUClientThingClassId) {
         ModbusRtuMaster *modbusMaster = m_modbusRtuMasters.value(parent);
-        if (!modbusMaster)
+        if (!modbusMaster) {
+            qCWarning(dcModbusCommander()) << "Could not find modbus RTU master for" << thing;
+            info->finish(Thing::ThingErrorHardwareNotAvailable);
             return;
+        }
 
         if (thing->thingClassId() == coilThingClassId) {
             QVector<quint16> values;
             values.append(static_cast<quint16>(action.param(coilValueActionValueParamTypeId).value().toBool()));
 
             ModbusRtuReply *reply = modbusMaster->writeCoils(slaveAddress, registerAddress, values);
+            connect(info, &ThingActionInfo::aborted, reply, &ModbusRtuReply::deleteLater);
             connect(reply, &ModbusRtuReply::finished, modbusMaster, [=](){
                 if (reply->error() != ModbusRtuReply::NoError) {
                     qCWarning(dcModbusCommander()) << "Failed to write coils from" << modbusMaster << "slave:" << slaveAddress << "register:" << registerAddress << values << reply->errorString();
@@ -633,6 +650,7 @@ void IntegrationPluginModbusCommander::writeRegister(Thing *thing, ThingActionIn
             values.append(static_cast<quint16>(action.param(holdingRegisterValueActionValueParamTypeId).value().toUInt()));
 
             ModbusRtuReply *reply = modbusMaster->writeHoldingRegisters(slaveAddress, registerAddress, values);
+            connect(info, &ThingActionInfo::aborted, reply, &ModbusRtuReply::deleteLater);
             connect(reply, &ModbusRtuReply::finished, modbusMaster, [=](){
                 if (reply->error() != ModbusRtuReply::NoError) {
                     qCWarning(dcModbusCommander()) << "Failed to write holding registers from" << modbusMaster << "slave:" << slaveAddress << "register:" << registerAddress << values << reply->errorString();
