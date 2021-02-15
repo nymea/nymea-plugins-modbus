@@ -87,7 +87,7 @@
                         },
                         {
                             "id": "96ed77ce-c5cf-4981-8a72-b619f5702724",
-                            "name": "chargeCurrent",
+                            "name": "maxChargingCurrent",
                             "displayName": "Charging current",
                             "displayNameAction": "Set charging current",
                             "displayNameEvent": "Charging current changed",
