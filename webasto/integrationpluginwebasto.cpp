@@ -185,7 +185,7 @@ void IntegrationPluginWebasto::executeAction(ThingActionInfo *info)
             thing->setStateValue(liveWallboxPowerActionTypeId, enabled);
             int ampere = 0;
             if (enabled) {
-                ampere = thing->stateValue(liveWallboxChargeCurrentStateTypeId).toInt();
+                ampere = thing->stateValue(liveWallboxMaxChargingCurrentStateTypeId).toInt();
             }
             QUuid requestId = connection->setChargeCurrent(ampere);
             if (requestId.isNull()) {
@@ -193,9 +193,9 @@ void IntegrationPluginWebasto::executeAction(ThingActionInfo *info)
             } else {
                 m_asyncActions.insert(requestId, info);
             }
-        } else if (action.actionTypeId() == liveWallboxChargeCurrentActionTypeId) {
-            int ampere = action.paramValue(liveWallboxChargeCurrentActionChargeCurrentParamTypeId).toInt();
-            thing->setStateValue(liveWallboxChargeCurrentStateTypeId, ampere);
+        } else if (action.actionTypeId() == liveWallboxMaxChargingCurrentActionTypeId) {
+            int ampere = action.paramValue(liveWallboxMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toInt();
+            thing->setStateValue(liveWallboxMaxChargingCurrentStateTypeId, ampere);
             QUuid requestId = connection->setChargeCurrent(ampere);
             if (requestId.isNull()) {
                 info->finish(Thing::ThingErrorHardwareFailure);
