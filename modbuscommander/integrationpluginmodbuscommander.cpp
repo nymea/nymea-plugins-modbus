@@ -43,8 +43,6 @@ IntegrationPluginModbusCommander::IntegrationPluginModbusCommander()
 
 void IntegrationPluginModbusCommander::init()
 {
-    connect(this, &IntegrationPluginModbusCommander::configValueChanged, this, &IntegrationPluginModbusCommander::onPluginConfigurationChanged);
-
     m_slaveAddressParamTypeId.insert(coilThingClassId, coilThingSlaveAddressParamTypeId);
     m_slaveAddressParamTypeId.insert(inputRegisterThingClassId, inputRegisterThingSlaveAddressParamTypeId);
     m_slaveAddressParamTypeId.insert(discreteInputThingClassId, discreteInputThingSlaveAddressParamTypeId);
@@ -67,6 +65,10 @@ void IntegrationPluginModbusCommander::init()
     m_valueStateTypeId.insert(discreteInputThingClassId, discreteInputValueStateTypeId);
     m_valueStateTypeId.insert(holdingRegisterThingClassId, holdingRegisterValueStateTypeId);
 
+    // Plugin configuration
+    connect(this, &IntegrationPluginModbusCommander::configValueChanged, this, &IntegrationPluginModbusCommander::onPluginConfigurationChanged);
+
+    // Modbus RTU hardware resource
     connect(hardwareManager()->modbusRtuResource(), &ModbusRtuHardwareResource::modbusRtuMasterRemoved, this, [=](const QUuid &modbusUuid){
         qCDebug(dcModbusCommander()) << "Modbus RTU master has been removed" << modbusUuid.toString();
 
@@ -92,12 +94,11 @@ void IntegrationPluginModbusCommander::discoverThings(ThingDiscoveryInfo *info)
 {
     ThingClassId thingClassId = info->thingClassId();
     if (thingClassId == modbusRTUClientThingClassId) {
-
         foreach (ModbusRtuMaster *modbusMaster, hardwareManager()->modbusRtuResource()->modbusRtuMasters()) {
             qCDebug(dcModbusCommander()) << "Found RTU master resource" << modbusMaster;
             if (modbusMaster->connected()) {
                 ParamList parameters;
-                ThingDescriptor thingDescriptor(thingClassId, "Modbus RTU interface", modbusMaster->serialPort());
+                ThingDescriptor thingDescriptor(thingClassId, "Modbus RTU master", modbusMaster->serialPort());
                 parameters.append(Param(modbusRTUClientThingModbusMasterUuidParamTypeId, modbusMaster->modbusUuid()));
                 thingDescriptor.setParams(parameters);
                 info->addThingDescriptor(thingDescriptor);
@@ -262,6 +263,8 @@ void IntegrationPluginModbusCommander::setupThing(ThingSetupInfo *info)
                 }
             }
         });
+
+        info->finish(Thing::ThingErrorNoError);
     } else if ((thing->thingClassId() == coilThingClassId)
                || (thing->thingClassId() == discreteInputThingClassId)
                || (thing->thingClassId() == holdingRegisterThingClassId)
