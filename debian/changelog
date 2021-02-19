@@ -1,3 +1,16 @@
+nymea-plugins-modbus (0.24.2) xenial; urgency=medium
+
+  [ Bernhard Trinnes ]
+  * New plugin: SunSpec
+  * New Plug-In: UniPi (moved repo nymea-plugin-unipi)
+  * Wallbe: Updated extendevcharger interface
+  * New plugin: Webasto
+
+  [ Michael Zanetti ]
+  * Update dependency to renamed libnymea-dev package
+
+ -- Jenkins <jenkins@nymea.io>  Fri, 19 Feb 2021 01:34:32 +0100
+
 nymea-plugins-modbus (0.24.1) xenial; urgency=medium
 
   [ Bernhard Trinnes ]
