@@ -35,7 +35,7 @@
 #include "plugintimer.h"
 
 #include "host.h"
-#include "discover.h"
+#include "discovery.h"
 #include "../modbus/modbustcpmaster.h"
 
 #include <QObject>
@@ -52,10 +52,16 @@ public:
     enum WallbeRegisterAddress {
         EVStatus        = 100,
         ChargingTime    = 102,
+        FirmwareVersion = 105,
         ErrorCode       = 107,
         ChargingCurrent = 300,
-        ChargingStatus  = 400,
+        EnableCharging  = 400,
+        Output1         = 405,
+        Output2         = 406,
+        Output3         = 407,
+        Output4         = 408
     };
+    Q_ENUM(WallbeRegisterAddress)
 
     explicit IntegrationPluginWallbe();
     void init() override;
@@ -66,14 +72,18 @@ public:
     void thingRemoved(Thing *thing) override;
 
 private:
+    Discovery *m_discovery = nullptr;
     QHash<Thing *, ModbusTCPMaster *> m_connections;
     PluginTimer *m_pluginTimer = nullptr;
     QHash<QUuid, ThingActionInfo *> m_asyncActions;
+    int m_slaveAddress = 180;
 
     void update(Thing *thing);
 
 private slots:
     void onConnectionStateChanged(bool status);
+        void onReceivedInputRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value);
+            void onReceivedCoil(int slaveAddress, int modbusRegister, const QVector<quint16> &value);
     void onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value);
 
     void onWriteRequestExecuted(const QUuid &requestId, bool success);

@@ -88,6 +88,14 @@
                             "maxValue": 80,
                             "defaultValue": 6,
                             "writable": true
+                        },
+                        {
+                            "id": "f4c822a0-454b-4782-85d2-8c60bacb4fe8",
+                            "displayName": "Firmware version",
+                            "displayNameEvent": "Firmware version changed",
+                            "name": "firmwareVersion",
+                            "type": "QString",
+                            "defaultValue": ""
                         }
                     ]
                 }
