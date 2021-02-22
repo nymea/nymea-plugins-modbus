@@ -45,26 +45,30 @@ IntegrationPluginWallbe::IntegrationPluginWallbe()
 
 void IntegrationPluginWallbe::init() {
 
-    m_discovery = new Discover(QStringList("-xO" "-p 502"));
+    m_discovery = new Discovery();
     connect(m_discovery, &Discovery::finished, this, [this](const QList<Host> &hosts) {
+        foreach (const Host &host, hosts) {
+            if (!host.vendor().contains("Phoenix", Qt::CaseSensitivity::CaseInsensitive))
+                continue;
 
-        Q_FOREACH(Thing *existingThing, myThings()) {
-            if (existingThing->paramValue(wallbeEcoThingMacAddressParamTypeId).toString().isEmpty()) {
-                //This device got probably manually setup, to enable auto rediscovery the MAC address needs to setup
-                if (existingThing->paramValue(wallbeEcoThingIpParamTypeId).toString() == host.address()) {
-                    qCDebug(dcWallbe()) << "Wallbe Wallbox MAC Address has been discovered" << existingThing->name() << host.macAddress();
-                    existingThing->setParamValue(wallbeEcoThingMacParamTypeId, host.macAddress());
+            Q_FOREACH(Thing *existingThing, myThings()) {
+                if (existingThing->paramValue(wallbeEcoThingMacParamTypeId).toString().isEmpty()) {
+                    //This device got probably manually setup, to enable auto rediscovery the MAC address needs to setup
+                    if (existingThing->paramValue(wallbeEcoThingIpParamTypeId).toString() == host.address()) {
+                        qCDebug(dcWallbe()) << "Wallbe Wallbox MAC Address has been discovered" << existingThing->name() << host.macAddress();
+                        existingThing->setParamValue(wallbeEcoThingMacParamTypeId, host.macAddress());
 
+                    }
+                } else if (existingThing->paramValue(wallbeEcoThingMacParamTypeId).toString() == host.macAddress())  {
+                    if (existingThing->paramValue(wallbeEcoThingIpParamTypeId).toString() != host.address()) {
+                        qCDebug(dcWallbe()) << "Wallbe Wallbox IP Address has changed, from"  << existingThing->paramValue(wallbeEcoThingIpParamTypeId).toString() << "to" << host.address();
+                        existingThing->setParamValue(wallbeEcoThingIpParamTypeId, host.address());
+
+                    } else {
+                        qCDebug(dcWallbe()) << "Wallbe Wallbox" << existingThing->name() << "IP address has not changed" << host.address();
+                    }
+                    break;
                 }
-            } else if (existingThing->paramValue(wallbeEcoThingMacParamTypeId).toString() == host.macAddress())  {
-                if (existingThing->paramValue(wallbeEcoThingIpParamTypeId).toString() != host.address()) {
-                    qCDebug(dcWallbe()) << "Wallbe Wallbox IP Address has changed, from"  << existingThing->paramValue(wallbeEcoThingIpParamTypeId).toString() << "to" << host.address();
-                    existingThing->setParamValue(wallbeEcoThingIpParamTypeId, host.address());
-
-                } else {
-                    qCDebug(dcWallbe()) << "Wallbe Wallbox" << existingThing->name() << "IP address has not changed" << host.address();
-                }
-                break;
             }
         }
     });
@@ -76,15 +80,24 @@ void IntegrationPluginWallbe::discoverThings(ThingDiscoveryInfo *info)
     if (info->thingClassId() == wallbeEcoThingClassId){
         qCDebug(dcWallbe) << "Start Wallbe eco discovery";
 
-        m_discovery->discoverHosts(25);
-        connect(discover, &Discover::devicesDiscovered, this, [info, this](QList<Host> hosts){
-            foreach (Host host, hosts) {
-                ThingDescriptor descriptor;
-                foreach(Thing *thing, myThings().filterByParam(wallbeEcoThingMacParamTypeId, host.macAddress())) {
-                    descriptor.setThingId(thing->id());
-                    break;
+        m_discovery->discoverHosts(50);
+        connect(m_discovery, &Discovery::finished, info, [this, info] (const QList<Host> &hosts) {
+
+            foreach (const Host &host, hosts) {
+                if (!host.vendor().contains("Phoenix", Qt::CaseSensitivity::CaseInsensitive))
+                    continue;
+
+                ThingDescriptor descriptor(wallbeEcoThingClassId);
+                // Rediscovery
+                foreach (Thing *existingThing, myThings()) {
+                    if (existingThing->paramValue(wallbeEcoThingMacParamTypeId).toString() == host.macAddress()) {
+                        qCDebug(dcWallbe()) << "     - Device is already added";
+                        descriptor.setThingId(existingThing->id());
+                        break;
+                    }
                 }
-                descriptor.setTitle(host.hostName());
+                descriptor.setTitle(host.hostName().remove(".localdomain"));
+                descriptor.setDescription(host.address());
                 ParamList params;
                 params.append(Param(wallbeEcoThingIpParamTypeId, host.address()));
                 params.append(Param(wallbeEcoThingMacParamTypeId, host.macAddress()));
@@ -104,12 +117,12 @@ void IntegrationPluginWallbe::setupThing(ThingSetupInfo *info)
     Thing *thing = info->thing();
     qCDebug(dcWallbe) << "Setting up a new device:" << thing->params();
 
-    if (info->thingClassId() == wallbeEcoThingClassId) {
+    if (thing->thingClassId() == wallbeEcoThingClassId) {
         QHostAddress address(thing->paramValue(wallbeEcoThingIpParamTypeId).toString());
 
         if (m_connections.contains(thing)) {
             qCDebug(dcWallbe()) << "Setup after reconfiguration, cleaning up ...";
-            m_connnections.take(thing).deleteLater();)
+            m_connections.take(thing)->deleteLater();
         }
         if (address.isNull()){
             qCWarning(dcWallbe) << "IP address is not valid";
@@ -118,34 +131,43 @@ void IntegrationPluginWallbe::setupThing(ThingSetupInfo *info)
         }
         ModbusTCPMaster *modbusTcpMaster = new ModbusTCPMaster(address, 502, this);
         connect(modbusTcpMaster, &ModbusTCPMaster::connectionStateChanged, this, &IntegrationPluginWallbe::onConnectionStateChanged);
+        connect(modbusTcpMaster, &ModbusTCPMaster::receivedCoil, this, &IntegrationPluginWallbe::onReceivedCoil);
+        connect(modbusTcpMaster, &ModbusTCPMaster::receivedInputRegister, this, &IntegrationPluginWallbe::onReceivedInputRegister);
         connect(modbusTcpMaster, &ModbusTCPMaster::receivedHoldingRegister, this, &IntegrationPluginWallbe::onReceivedHoldingRegister);
         connect(modbusTcpMaster, &ModbusTCPMaster::writeRequestExecuted, this, &IntegrationPluginWallbe::onWriteRequestExecuted);
         connect(modbusTcpMaster, &ModbusTCPMaster::writeRequestError, this, &IntegrationPluginWallbe::onWriteRequestError);
+        connect(info, &ThingSetupInfo::aborted, modbusTcpMaster, &ModbusTCPMaster::deleteLater);
 
-        m_connections.insert(thing, modbusTcpMaster);
         connect(modbusTcpMaster, &ModbusTCPMaster::connectionStateChanged, info, [this, info, modbusTcpMaster](bool connected) {
+            qCDebug(dcWallbe()) << "Modbus TCP connection changed, connected" << connected;
             if(connected) {
+                m_connections.insert(info->thing(), modbusTcpMaster);
                 info->finish(Thing::ThingErrorNoError);
-            } else {
-                info->finish(Thing::ThingErrorHardwareNotAvailable);
             }
         });
+        if (!modbusTcpMaster->connectDevice()) {
+            qCWarning(dcWallbe()) << "Could not connect device";
+            return info->finish(Thing::ThingErrorHardwareNotAvailable);
+        }
     }
 }
 
 
 void IntegrationPluginWallbe::postSetupThing(Thing *thing)
 {
-    if (!m_pluginTimer) {
-        m_pluginTimer = hardwareManager()->pluginTimerManager()->registerTimer(120);
-        connect(m_pluginTimer, &PluginTimer::timeout, this, [this] {
-            foreach(Thing *thing, m_connections.keys()) {
-                update(thing);
-            }
-        });
-    }
+    qCDebug(dcWallbe()) << "Post setup thing" << thing->name();
 
     if (thing->thingClassId() == wallbeEcoThingClassId){
+        if (!m_pluginTimer) {
+            qCDebug(dcWallbe()) << "Starting plugin timer";
+            m_pluginTimer = hardwareManager()->pluginTimerManager()->registerTimer(10);
+            connect(m_pluginTimer, &PluginTimer::timeout, this, [this] {
+                foreach(Thing *thing, m_connections.keys()) {
+                    update(thing);
+                }
+            });
+        }
+        thing->setStateValue(wallbeEcoConnectedStateTypeId, true);
         update(thing);
     } else {
         Q_ASSERT_X(false, "postSetupThing", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
@@ -172,10 +194,8 @@ void IntegrationPluginWallbe::executeAction(ThingActionInfo *info)
 
             // get the param value of the charging action
             bool charging =  action.param(wallbeEcoPowerActionPowerParamTypeId).value().toBool();
-            qCDebug(dcWallbe) << "start Charging button" << thing->name() << "set power to" << charging;
-            QUuid requestId = modbusTcpMaster->writeCoil(0xff, WallbeRegisterAddress::ChargingStatus, charging);
-            // Set the "power" state
-            thing->setStateValue(wallbeEcoPowerStateTypeId, charging);
+            qCDebug(dcWallbe) << "Start Charging button" << thing->name() << "set power to" << charging;
+            QUuid requestId = modbusTcpMaster->writeCoil(m_slaveAddress, WallbeRegisterAddress::EnableCharging, charging);
             m_asyncActions.insert(requestId, info);
             connect(info, &ThingActionInfo::aborted, this, [this, requestId] {m_asyncActions.remove(requestId);});
 
@@ -183,8 +203,7 @@ void IntegrationPluginWallbe::executeAction(ThingActionInfo *info)
 
             uint16_t current = action.param(wallbeEcoMaxChargingCurrentEventMaxChargingCurrentParamTypeId).value().toUInt();
             qCDebug(dcWallbe) << "Charging power set to" << current;
-            QUuid requestId = modbusTcpMaster->writeCoil(0xff, WallbeRegisterAddress::ChargingCurrent, current);
-            thing->setStateValue(wallbeEcoMaxChargingCurrentStateTypeId, current);
+            QUuid requestId = modbusTcpMaster->writeHoldingRegister(m_slaveAddress, WallbeRegisterAddress::ChargingCurrent, current);
             m_asyncActions.insert(requestId, info);
             connect(info, &ThingActionInfo::aborted, this, [this, requestId] {m_asyncActions.remove(requestId);});
 
@@ -215,12 +234,16 @@ void IntegrationPluginWallbe::thingRemoved(Thing *thing)
 void IntegrationPluginWallbe::update(Thing *thing)
 {
     ModbusTCPMaster *modbusTCPMaster = m_connections.value(thing);
-    if(!modbusTCPMaster)
+    if(!modbusTCPMaster) {
+        qCWarning(dcWallbe()) << "Modbus TCP connection not found for" << thing->name();
         return;
-    modbusTCPMaster->readHoldingRegister(0xff, WallbeRegisterAddress::EVStatus);
-    modbusTCPMaster->readHoldingRegister(0xff, WallbeRegisterAddress::ChargingCurrent);
-    modbusTCPMaster->readHoldingRegister(0xff, WallbeRegisterAddress::ChargingStatus);
-    modbusTCPMaster->readHoldingRegister(0xff, WallbeRegisterAddress::ChargingTime);
+    }
+    modbusTCPMaster->readInputRegister(m_slaveAddress, WallbeRegisterAddress::EVStatus, 1);
+    modbusTCPMaster->readInputRegister(m_slaveAddress, WallbeRegisterAddress::FirmwareVersion, 2);
+    modbusTCPMaster->readInputRegister(m_slaveAddress, WallbeRegisterAddress::ChargingTime, 2);
+
+    modbusTCPMaster->readHoldingRegister(m_slaveAddress, WallbeRegisterAddress::ChargingCurrent, 1);
+    modbusTCPMaster->readCoil(m_slaveAddress, WallbeRegisterAddress::EnableCharging, 1);
 }
 
 void IntegrationPluginWallbe::onConnectionStateChanged(bool status)
@@ -232,16 +255,14 @@ void IntegrationPluginWallbe::onConnectionStateChanged(bool status)
     thing->setStateValue(wallbeEcoConnectedStateTypeId, status);
 }
 
-void IntegrationPluginWallbe::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value)
+void IntegrationPluginWallbe::onReceivedInputRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value)
 {
     Q_UNUSED(slaveAddress)
     ModbusTCPMaster *modbusTCPMaster = static_cast<ModbusTCPMaster *>(sender());
     Thing *thing = m_connections.key(modbusTCPMaster);
     if (!thing)
         return;
-
-    switch (WallbeRegisterAddress(modbusRegister)) {
-    case WallbeRegisterAddress::EVStatus:
+    if (WallbeRegisterAddress(modbusRegister) == WallbeRegisterAddress::EVStatus) {
         //EV state - 16 bit ASCII (8bit)
         switch (value[0]) {
         case 65:
@@ -265,21 +286,56 @@ void IntegrationPluginWallbe::onReceivedHoldingRegister(int slaveAddress, int mo
         default:
             thing->setStateValue(wallbeEcoEvStatusStateTypeId, "F - Supply equipment not available");
         }
-        break;
-    case WallbeRegisterAddress::ChargingStatus:
-        thing->setStateValue(wallbeEcoPowerStateTypeId, value[0]);
-        break;
-    case WallbeRegisterAddress::ChargingTime: {
+    } else if (WallbeRegisterAddress(modbusRegister) == WallbeRegisterAddress::ChargingTime) {
         // Extract Input Register 102 - load time - 32bit integer
-        int minutes = (((uint32_t)(value[0]<<16)|(uint32_t)(value[1]))/60); //Converts to minutes
-        thing->setStateValue(wallbeEcoChargeTimeStateTypeId, minutes);
+
+        if (value.length() >= 2) {
+            int minutes = (((uint32_t)(value[1]<<16)|(uint32_t)(value[0]))/60); //Converts to minutes
+            qCDebug(dcWallbe()) << "    - Charging time:"  << minutes << "[min]";
+            thing->setStateValue(wallbeEcoChargeTimeStateTypeId, minutes);
+        }
+    } else if (WallbeRegisterAddress(modbusRegister) == WallbeRegisterAddress::FirmwareVersion) {
+        int firmware = (uint32_t)(value[1]<<16)|(uint32_t)(value[0]);
+        uint major = firmware/10000;
+                uint minor = (firmware%10000)/100;
+                uint patch = firmware%100;
+        QString firmwarestring = QString::number(major)+'.'+QString::number(minor)+'.'+QString::number(patch);
+        thing->setStateValue(wallbeEcoFirmwareVersionStateTypeId, firmwarestring);
     }
-        break;
-    case WallbeRegisterAddress::ChargingCurrent:
+}
+
+void IntegrationPluginWallbe::onReceivedCoil(int slaveAddress, int modbusRegister, const QVector<quint16> &value)
+{
+    Q_UNUSED(slaveAddress)
+    ModbusTCPMaster *modbusTCPMaster = static_cast<ModbusTCPMaster *>(sender());
+    Thing *thing = m_connections.key(modbusTCPMaster);
+    if (!thing)
+        return;
+    if (WallbeRegisterAddress(modbusRegister) == WallbeRegisterAddress::EnableCharging) {
+        qCDebug(dcWallbe()) << "    - Enable charging:" << (value[0] != 0);
+        thing->setStateValue(wallbeEcoPowerStateTypeId, (value[0] != 0));
+    }
+}
+
+void IntegrationPluginWallbe::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value)
+{
+    Q_UNUSED(slaveAddress)
+    ModbusTCPMaster *modbusTCPMaster = static_cast<ModbusTCPMaster *>(sender());
+    Thing *thing = m_connections.key(modbusTCPMaster);
+    if (!thing)
+        return;
+
+    switch (WallbeRegisterAddress(modbusRegister)) {
+
+    case WallbeRegisterAddress::ChargingCurrent: {
+        qCDebug(dcWallbe()) << "    - Charging current:" << value[0] << "[A]";
         thing->setStateValue(wallbeEcoMaxChargingCurrentStateTypeId, value[0]);
-        break;
-    case WallbeRegisterAddress::ErrorCode:
+    } break;
+    case WallbeRegisterAddress::ErrorCode: {
         qCDebug(dcWallbe()) << "Received Error Code modbus register" << value[0];
+        break;
+    }
+    default:
         break;
     }
 }
@@ -287,6 +343,7 @@ void IntegrationPluginWallbe::onReceivedHoldingRegister(int slaveAddress, int mo
 void IntegrationPluginWallbe::onWriteRequestExecuted(const QUuid &requestId, bool success)
 {
     if (m_asyncActions.contains(requestId)) {
+        qCDebug(dcWallbe()) << "Write request executed" << requestId << success;
         ThingActionInfo *info = m_asyncActions.value(requestId);
         if (success) {
             info->finish(Thing::ThingErrorNoError);

@@ -143,7 +143,7 @@ void Discovery::discoveryFinished(int exitCode, QProcess::ExitStatus exitStatus)
 
             if (isUp) {
                 foundHosts++;
-                qCDebug(dcWallbe()) << "     - host:" << address;
+                qCDebug(dcWallbe()) << "     - host:" << vendor << address << macAddress;
 
                 Host *host = new Host();
                 host->setAddress(address);
@@ -157,7 +157,7 @@ void Discovery::discoveryFinished(int exitCode, QProcess::ExitStatus exitStatus)
                     arpLookup->start("arp", {"-vn"});
                 }
 
-                host->setHostName(vendor);
+                host->setVendor(vendor);
                 QHostInfo::lookupHost(address, this, SLOT(hostLookupDone(QHostInfo)));
                 m_pendingNameLookups.insert(address, host);
 

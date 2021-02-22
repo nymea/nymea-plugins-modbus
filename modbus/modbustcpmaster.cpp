@@ -38,7 +38,7 @@ ModbusTCPMaster::ModbusTCPMaster(const QHostAddress &hostAddress, uint port, QOb
     m_modbusTcpClient = new QModbusTcpClient(this);
     m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkPortParameter, port);
     m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkAddressParameter, hostAddress.toString());
-    m_modbusTcpClient->setTimeout(100);
+    m_modbusTcpClient->setTimeout(1000);
     m_modbusTcpClient->setNumberOfRetries(3);
 
     connect(m_modbusTcpClient, &QModbusTcpClient::stateChanged, this, &ModbusTCPMaster::onModbusStateChanged);
@@ -190,7 +190,7 @@ QUuid ModbusTCPMaster::writeHoldingRegisters(uint slaveAddress, uint registerAdd
                 emit writeRequestError(requestId, reply->errorString());
                 reply->finished(); // To make sure it will be deleted
             });
-            QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
+            QTimer::singleShot(2000, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
             return "";
@@ -234,7 +234,7 @@ QUuid ModbusTCPMaster::readDiscreteInput(uint slaveAddress, uint registerAddress
                 emit writeRequestError(requestId, reply->errorString());
                 reply->finished(); // To make sure it will be deleted
             });
-            QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
+            QTimer::singleShot(2000, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
             return "";
@@ -277,7 +277,7 @@ QUuid ModbusTCPMaster::readInputRegister(uint slaveAddress, uint registerAddress
                 emit writeRequestError(requestId, reply->errorString());
                 reply->finished(); // To make sure it will be deleted
             });
-            QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
+            QTimer::singleShot(2000, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
             return "";
@@ -321,7 +321,7 @@ QUuid ModbusTCPMaster::readHoldingRegister(uint slaveAddress, uint registerAddre
                 emit writeRequestError(requestId, reply->errorString());
                 reply->finished(); // To make sure it will be deleted
             });
-            QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
+            QTimer::singleShot(2000, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
             return "";
@@ -371,7 +371,7 @@ QUuid ModbusTCPMaster::writeCoils(uint slaveAddress, uint registerAddress, const
                 emit writeRequestError(requestId, reply->errorString());
                 reply->finished(); // To make sure it will be deleted
             });
-            QTimer::singleShot(200, reply, &QModbusReply::deleteLater);
+            QTimer::singleShot(2000, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
             return "";
@@ -397,7 +397,7 @@ void ModbusTCPMaster::onModbusErrorOccurred(QModbusDevice::Error error)
 
 void ModbusTCPMaster::onModbusStateChanged(QModbusDevice::State state)
 {
-    bool connected = (state != QModbusDevice::UnconnectedState);
+    bool connected = (state == QModbusDevice::ConnectedState);
     if (!connected) {
         //try to reconnect in 10 seconds
         m_reconnectTimer->start(10000);
