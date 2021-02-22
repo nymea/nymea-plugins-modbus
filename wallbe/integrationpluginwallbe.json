@@ -12,7 +12,7 @@
                     "id": "e66c84f6-b398-47e9-8aeb-33840e7b4492",
                     "displayName": "Wallbe eco 2.0",
                     "name": "wallbeEco",
-                    "createMethods": ["discovery"],
+                    "createMethods": ["discovery", "user"],
                     "interfaces": ["evcharger", "connectable"],
                     "paramTypes": [
                         {
@@ -27,7 +27,8 @@
                             "displayName": "MAC address",
                             "name": "mac",
                             "type": "QString",
-                            "defaultValue": ""
+                            "defaultValue": "",
+                            "readOnly": true
                         }
                     ],
                     "stateTypes":[
