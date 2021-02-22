@@ -43,31 +43,29 @@ IntegrationPluginWallbe::IntegrationPluginWallbe()
 {
 }
 
+void IntegrationPluginWallbe::init() {
 
-void IntegrationPluginWallbe::setupThing(ThingSetupInfo *info)
-{
-    Thing *thing = info->thing();
-    qCDebug(dcWallbe) << "Setting up a new device:" << thing->params();
+    m_discovery = new Discover(QStringList("-xO" "-p 502"));
+    connect(m_discovery, &Discovery::finished, this, [this](const QList<Host> &hosts) {
 
-    QHostAddress address(thing->paramValue(wallbeEcoThingIpParamTypeId).toString());
+        Q_FOREACH(Thing *existingThing, myThings()) {
+            if (existingThing->paramValue(wallbeEcoThingMacAddressParamTypeId).toString().isEmpty()) {
+                //This device got probably manually setup, to enable auto rediscovery the MAC address needs to setup
+                if (existingThing->paramValue(wallbeEcoThingIpParamTypeId).toString() == host.address()) {
+                    qCDebug(dcWallbe()) << "Wallbe Wallbox MAC Address has been discovered" << existingThing->name() << host.macAddress();
+                    existingThing->setParamValue(wallbeEcoThingMacParamTypeId, host.macAddress());
 
-    if (address.isNull()){
-        qCWarning(dcWallbe) << "IP address is not valid";
-        info->finish(Thing::ThingErrorSetupFailed, tr("Invalid IP address"));
-        return;
-    }
-    ModbusTCPMaster *modbusTcpMaster = new ModbusTCPMaster(address, 502, this);
-    connect(modbusTcpMaster, &ModbusTCPMaster::connectionStateChanged, this, &IntegrationPluginWallbe::onConnectionStateChanged);
-    connect(modbusTcpMaster, &ModbusTCPMaster::receivedHoldingRegister, this, &IntegrationPluginWallbe::onReceivedHoldingRegister);
-    connect(modbusTcpMaster, &ModbusTCPMaster::writeRequestExecuted, this, &IntegrationPluginWallbe::onWriteRequestExecuted);
-    connect(modbusTcpMaster, &ModbusTCPMaster::writeRequestError, this, &IntegrationPluginWallbe::onWriteRequestError);
+                }
+            } else if (existingThing->paramValue(wallbeEcoThingMacParamTypeId).toString() == host.macAddress())  {
+                if (existingThing->paramValue(wallbeEcoThingIpParamTypeId).toString() != host.address()) {
+                    qCDebug(dcWallbe()) << "Wallbe Wallbox IP Address has changed, from"  << existingThing->paramValue(wallbeEcoThingIpParamTypeId).toString() << "to" << host.address();
+                    existingThing->setParamValue(wallbeEcoThingIpParamTypeId, host.address());
 
-    m_connections.insert(thing, modbusTcpMaster);
-    connect(modbusTcpMaster, &ModbusTCPMaster::connectionStateChanged, info, [this, info, modbusTcpMaster](bool connected) {
-        if(connected) {
-            info->finish(Thing::ThingErrorNoError);
-        } else {
-            info->finish(Thing::ThingErrorHardwareNotAvailable);
+                } else {
+                    qCDebug(dcWallbe()) << "Wallbe Wallbox" << existingThing->name() << "IP address has not changed" << host.address();
+                }
+                break;
+            }
         }
     });
 }
@@ -76,8 +74,9 @@ void IntegrationPluginWallbe::setupThing(ThingSetupInfo *info)
 void IntegrationPluginWallbe::discoverThings(ThingDiscoveryInfo *info)
 {
     if (info->thingClassId() == wallbeEcoThingClassId){
+        qCDebug(dcWallbe) << "Start Wallbe eco discovery";
 
-        Discover *discover = new Discover(QStringList("-xO" "-p 502"));
+        m_discovery->discoverHosts(25);
         connect(discover, &Discover::devicesDiscovered, this, [info, this](QList<Host> hosts){
             foreach (Host host, hosts) {
                 ThingDescriptor descriptor;
@@ -98,6 +97,42 @@ void IntegrationPluginWallbe::discoverThings(ThingDiscoveryInfo *info)
         Q_ASSERT_X(false, "discoverThings", QString("Unhandled thingClassId: %1").arg(info->thingClassId().toString()).toUtf8());
     }
 }
+
+
+void IntegrationPluginWallbe::setupThing(ThingSetupInfo *info)
+{
+    Thing *thing = info->thing();
+    qCDebug(dcWallbe) << "Setting up a new device:" << thing->params();
+
+    if (info->thingClassId() == wallbeEcoThingClassId) {
+        QHostAddress address(thing->paramValue(wallbeEcoThingIpParamTypeId).toString());
+
+        if (m_connections.contains(thing)) {
+            qCDebug(dcWallbe()) << "Setup after reconfiguration, cleaning up ...";
+            m_connnections.take(thing).deleteLater();)
+        }
+        if (address.isNull()){
+            qCWarning(dcWallbe) << "IP address is not valid";
+            info->finish(Thing::ThingErrorSetupFailed, tr("Invalid IP address"));
+            return;
+        }
+        ModbusTCPMaster *modbusTcpMaster = new ModbusTCPMaster(address, 502, this);
+        connect(modbusTcpMaster, &ModbusTCPMaster::connectionStateChanged, this, &IntegrationPluginWallbe::onConnectionStateChanged);
+        connect(modbusTcpMaster, &ModbusTCPMaster::receivedHoldingRegister, this, &IntegrationPluginWallbe::onReceivedHoldingRegister);
+        connect(modbusTcpMaster, &ModbusTCPMaster::writeRequestExecuted, this, &IntegrationPluginWallbe::onWriteRequestExecuted);
+        connect(modbusTcpMaster, &ModbusTCPMaster::writeRequestError, this, &IntegrationPluginWallbe::onWriteRequestError);
+
+        m_connections.insert(thing, modbusTcpMaster);
+        connect(modbusTcpMaster, &ModbusTCPMaster::connectionStateChanged, info, [this, info, modbusTcpMaster](bool connected) {
+            if(connected) {
+                info->finish(Thing::ThingErrorNoError);
+            } else {
+                info->finish(Thing::ThingErrorHardwareNotAvailable);
+            }
+        });
+    }
+}
+
 
 void IntegrationPluginWallbe::postSetupThing(Thing *thing)
 {

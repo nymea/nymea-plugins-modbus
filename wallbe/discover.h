@@ -28,49 +28,48 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef DISCOVER_H
-#define DISCOVER_H
+#ifndef DISCOVERY_H
+#define DISCOVERY_H
 
 #include <QObject>
 #include <QProcess>
-#include <QXmlStreamReader>
+#include <QHostInfo>
 #include <QTimer>
-#include <QHostAddress>
 
 #include "host.h"
 
-class Discover : public QObject
+class Discovery : public QObject
 {
     Q_OBJECT
 public:
+    explicit Discovery(QObject *parent = nullptr);
 
-    explicit Discover(QStringList arguments, QObject *parent = nullptr);
-    ~Discover();
-    bool getProcessStatus();
-
-private:
-    QTimer *m_timer;
-    QStringList m_arguments;
-
-    QProcess * m_discoveryProcess;
-    QProcess * m_scanProcess;
-
-    QXmlStreamReader m_reader;
-
-    bool m_aboutToQuit;
-
-    QStringList getDefaultTargets();
-    void processFinished(int exitCode, QProcess::ExitStatus exitStatus);
-
-    // Process parsing
-    QList<Host> parseProcessOutput(const QByteArray &processData);
-    Host parseHost();
+    void discoverHosts(int timeout);
+    void abort();
+    bool isRunning() const;
 
 signals:
-    void devicesDiscovered(QList<Host>);
+    void finished(const QList<Host> &hosts);
+
+private:
+    QStringList getDefaultTargets();
+
+    void finishDiscovery();
 
 private slots:
+    void discoveryFinished(int exitCode, QProcess::ExitStatus exitStatus);
+    void hostLookupDone(const QHostInfo &info);
+    void arpLookupDone(int exitCode, QProcess::ExitStatus exitStatus);
     void onTimeout();
+
+private:
+    QList<QProcess*> m_discoveryProcesses;
+    QTimer m_timeoutTimer;
+
+    QHash<QProcess*, Host*> m_pendingArpLookups;
+    QHash<QString, Host*> m_pendingNameLookups;
+    QList<Host*> m_scanResults;
 };
 
-#endif // DISCOVER_H
+#endif // DISCOVERY_H
+
