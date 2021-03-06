@@ -64,7 +64,7 @@ public:
 
 private:
     UniPi *m_unipi = nullptr;
-    QHash<ThingId, Neuron *> m_neurons;
+    Neuron *m_neuron;
     QHash<ThingId, NeuronExtension *> m_neuronExtensions;
 
     QModbusTcpClient *m_modbusTCPMaster = nullptr;

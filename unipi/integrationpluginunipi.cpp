@@ -122,11 +122,11 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
             }
         }
 
-        foreach (Neuron *neuron, m_neurons) {
-            ThingId parentId = m_neurons.key(neuron);
-            foreach (QString circuit, neuron->digitalInputs()) {
-                ThingDescriptor ThingDescriptor(digitalInputThingClassId, QString("Digital input %1").arg(circuit), QString("Neuron %1").arg(neuron->type()), parentId);
-                foreach(Thing *thing, myThings().filterByParentId(m_neurons.key(neuron))) {
+        if (!myThings().filterByThingClassId(neuronThingClassId).isEmpty()) {
+            ThingId parentId = myThings().filterByThingClassId(neuronThingClassId).first()->id();
+            foreach (QString circuit, m_neuron->digitalInputs()) {
+                ThingDescriptor ThingDescriptor(digitalInputThingClassId, QString("Digital input %1").arg(circuit), QString("Neuron %1").arg(m_neuron->type()), parentId);
+                foreach (Thing *thing, myThings().filterByParentId(parentId)) {
                     if (thing->paramValue(digitalInputThingCircuitParamTypeId) == circuit) {
                         qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parentId;
                         ThingDescriptor.setThingId(thing->id());
@@ -179,11 +179,10 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
                 info->addThingDescriptor(ThingDescriptor);
             }
         }
-
-        foreach (Neuron *neuron, m_neurons) {
-            ThingId parentId = m_neurons.key(neuron);
-            foreach (QString circuit, neuron->digitalOutputs()) {
-                ThingDescriptor ThingDescriptor(digitalOutputThingClassId, QString("Digital output %1").arg(circuit), QString("Neuron %1").arg(neuron->type()), parentId);
+        if (!myThings().filterByThingClassId(neuronThingClassId).isEmpty()) {
+            ThingId parentId = myThings().filterByThingClassId(neuronThingClassId).first()->id();
+            foreach (QString circuit, m_neuron->digitalOutputs()) {
+                ThingDescriptor ThingDescriptor(digitalOutputThingClassId, QString("Digital output %1").arg(circuit), QString("Neuron %1").arg(m_neuron->type()), parentId);
                 foreach(Thing *thing, myThings().filterByParentId(parentId)) {
                     if (thing->paramValue(digitalOutputThingCircuitParamTypeId) == circuit) {
                         qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parentId;
@@ -237,11 +236,10 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
                 info->addThingDescriptor(ThingDescriptor);
             }
         }
-
-        foreach (Neuron *neuron, m_neurons) {
-            ThingId parentId = m_neurons.key(neuron);
-            foreach (QString circuit, neuron->analogInputs()) {
-                ThingDescriptor ThingDescriptor(analogInputThingClassId, QString("Analog input %1").arg(circuit), QString("Neuron %1").arg(neuron->type()), parentId);
+        if (!myThings().filterByThingClassId(neuronThingClassId).isEmpty()) {
+            ThingId parentId = myThings().filterByThingClassId(neuronThingClassId).first()->id();
+            foreach (QString circuit, m_neuron->analogInputs()) {
+                ThingDescriptor ThingDescriptor(analogInputThingClassId, QString("Analog input %1").arg(circuit), QString("Neuron %1").arg(m_neuron->type()), parentId);
                 foreach(Thing *thing, myThings().filterByParentId(parentId)) {
                     if (thing->paramValue(analogInputThingCircuitParamTypeId) == circuit) {
                         qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parentId;
@@ -295,11 +293,10 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
                 info->addThingDescriptor(ThingDescriptor);
             }
         }
-
-        foreach (Neuron *neuron, m_neurons) {
-            ThingId parentId = m_neurons.key(neuron);
-            foreach (QString circuit, neuron->analogOutputs()) {
-                ThingDescriptor ThingDescriptor(analogOutputThingClassId, QString("Analog output %1").arg(circuit), QString("Neuron %1").arg(neuron->type()), parentId);
+        if (!myThings().filterByThingClassId(neuronThingClassId).isEmpty()) {
+            ThingId parentId = myThings().filterByThingClassId(neuronThingClassId).first()->id();
+            foreach (QString circuit, m_neuron->analogOutputs()) {
+                ThingDescriptor ThingDescriptor(analogOutputThingClassId, QString("Analog output %1").arg(circuit), QString("Neuron %1").arg(m_neuron->type()), parentId);
                 foreach(Thing *thing, myThings().filterByParentId(parentId)) {
                     if (thing->paramValue(analogOutputThingCircuitParamTypeId) == circuit) {
                         qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parentId;
@@ -335,11 +332,11 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
             }
         }
 
-        foreach (Neuron *neuron, m_neurons) {
-            ThingId parentId = m_neurons.key(neuron);
-            foreach (QString circuit, neuron->userLEDs()) {
-                ThingDescriptor ThingDescriptor(userLEDThingClassId, QString("User programmable LED %1").arg(circuit), QString("Neuron %1").arg(neuron->type()), parentId);
-                foreach(Thing *thing, myThings().filterByParentId(m_neurons.key(neuron))) {
+        if (!myThings().filterByThingClassId(neuronThingClassId).isEmpty()) {
+            ThingId parentId = myThings().filterByThingClassId(neuronThingClassId).first()->id();
+            foreach (QString circuit, m_neuron->userLEDs()) {
+                ThingDescriptor ThingDescriptor(userLEDThingClassId, QString("User programmable LED %1").arg(circuit), QString("Neuron %1").arg(m_neuron->type()), parentId);
+                foreach(Thing *thing, myThings().filterByParentId(parentId)) {
                     if (thing->paramValue(userLEDThingCircuitParamTypeId) == circuit) {
                         qCDebug(dcUniPi()) << "Found already added Circuit:" << circuit << parentId;
                         ThingDescriptor.setThingId(thing->id());
@@ -438,6 +435,24 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
     } else if(thing->thingClassId() == neuronThingClassId) {
         qCDebug(dcUniPi()) << "Setting up Neuron thing" << thing->name();
 
+        foreach (Thing *existingThing, myThings().filterByThingClassId(neuronThingClassId)) {
+            if (existingThing->id() != thing->id()) {
+                qCWarning(dcUniPi()) << "Only one neuron device is allowed";
+                return info->finish(Thing::ThingErrorSetupFailed, QT_TR_NOOP("Neuron is already setted up."));
+            }
+        }
+
+        if (m_neuron) {
+            qCDebug(dcUniPi()) << "Setup after reconnection, cleaning up ...";
+            m_neuron->deleteLater();
+            m_neuron = nullptr;
+
+            if (m_modbusTCPMaster) {
+                m_modbusTCPMaster->deleteLater();
+                m_modbusTCPMaster = nullptr;
+            }
+        }
+
         if (!neuronDeviceInit()) {
             qCWarning(dcUniPi()) << "Error initializing neuron thing";
             return info->finish(Thing::ThingErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron."));
@@ -466,9 +481,8 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
 
             thing->setStateValue(neuronModelIdEventTypeId, result[4]);
 
-            Neuron *neuron;
             int model = result[4];
-            neuron = new Neuron(Neuron::NeuronTypes(model), m_modbusTCPMaster, this);
+            m_neuron = new Neuron(Neuron::NeuronTypes(model), m_modbusTCPMaster, this);
 
             //TODO check if model exists;
             /*if (Neuron::NeuronTypes)
@@ -477,21 +491,20 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
                 return info->finish(Thing::ThingErrorSetupFailed, QT_TR_NOOP("Error unrecognized Neuron type."));
             }*/
 
-            if (!neuron->init()) {
+            if (!m_neuron->init()) {
                 qCWarning(dcUniPi()) << "Could not load the modbus map";
-                neuron->deleteLater();
-                neuron = nullptr;
+                m_neuron->deleteLater();
+                m_neuron = nullptr;
                 return info->finish(Thing::ThingErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron Thing."));
             }
-            m_neurons.insert(thing->id(), neuron);
-            connect(neuron, &Neuron::requestExecuted, this, &IntegrationPluginUniPi::onRequestExecuted);
-            connect(neuron, &Neuron::requestError, this, &IntegrationPluginUniPi::onRequestError);
-            connect(neuron, &Neuron::connectionStateChanged, this, &IntegrationPluginUniPi::onNeuronConnectionStateChanged);
-            connect(neuron, &Neuron::digitalInputStatusChanged, this, &IntegrationPluginUniPi::onNeuronDigitalInputStatusChanged);
-            connect(neuron, &Neuron::digitalOutputStatusChanged, this, &IntegrationPluginUniPi::onNeuronDigitalOutputStatusChanged);
-            connect(neuron, &Neuron::analogInputStatusChanged, this, &IntegrationPluginUniPi::onNeuronAnalogInputStatusChanged);
-            connect(neuron, &Neuron::analogOutputStatusChanged, this, &IntegrationPluginUniPi::onNeuronAnalogOutputStatusChanged);
-            connect(neuron, &Neuron::userLEDStatusChanged, this, &IntegrationPluginUniPi::onNeuronUserLEDStatusChanged);
+            connect(m_neuron, &Neuron::requestExecuted, this, &IntegrationPluginUniPi::onRequestExecuted);
+            connect(m_neuron, &Neuron::requestError, this, &IntegrationPluginUniPi::onRequestError);
+            connect(m_neuron, &Neuron::connectionStateChanged, this, &IntegrationPluginUniPi::onNeuronConnectionStateChanged);
+            connect(m_neuron, &Neuron::digitalInputStatusChanged, this, &IntegrationPluginUniPi::onNeuronDigitalInputStatusChanged);
+            connect(m_neuron, &Neuron::digitalOutputStatusChanged, this, &IntegrationPluginUniPi::onNeuronDigitalOutputStatusChanged);
+            connect(m_neuron, &Neuron::analogInputStatusChanged, this, &IntegrationPluginUniPi::onNeuronAnalogInputStatusChanged);
+            connect(m_neuron, &Neuron::analogOutputStatusChanged, this, &IntegrationPluginUniPi::onNeuronAnalogOutputStatusChanged);
+            connect(m_neuron, &Neuron::userLEDStatusChanged, this, &IntegrationPluginUniPi::onNeuronUserLEDStatusChanged);
 
             thing->setStateValue(m_connectionStateTypeIds.value(thing->thingClassId()), (m_modbusTCPMaster->state() == QModbusDevice::ConnectedState));
             return info->finish(Thing::ThingErrorNoError);
@@ -511,7 +524,7 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
         int model =  thing->paramValue(neuronExtensionThingModelIdParamTypeId).toInt();
         neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes(model), modbusRtuMaster, slaveAddress, this);
 
-            /*
+        /*
         } else {
             return info->finish(Thing::ThingErrorSetupFailed, QT_TR_NOOP("Error unrecognized extension type."));
         }
@@ -574,16 +587,23 @@ void IntegrationPluginUniPi::executeAction(ThingActionInfo *info)
         if (action.actionTypeId() == digitalOutputPowerActionTypeId) {
             QString digitalOutputNumber = thing->paramValue(digitalOutputThingCircuitParamTypeId).toString();
             bool stateValue = action.param(digitalOutputPowerActionPowerParamTypeId).value().toBool();
+            ThingClassId parentThingClassId = myThings().findById(thing->parentId())->thingClassId();
 
-            if (m_unipi) {
+            if (parentThingClassId == uniPi1ThingClassId ||
+                    parentThingClassId == uniPi1LiteThingClassId) {
+                if (!m_unipi) {
+                    return info->finish(Thing::ThingErrorHardwareFailure);
+                }
                 if(m_unipi->setDigitalOutput(digitalOutputNumber, stateValue)) {
                     info->finish(Thing::ThingErrorNoError);
                 } else {
                     info->finish(Thing::ThingErrorHardwareFailure);
                 }
-            } else if (m_neurons.contains(thing->parentId())) {
-                Neuron *neuron = m_neurons.value(thing->parentId());
-                QUuid requestId = neuron->setDigitalOutput(digitalOutputNumber, stateValue);
+            } else if (parentThingClassId == neuronThingClassId) {
+                if (!m_neuron) {
+                    return info->finish(Thing::ThingErrorHardwareFailure);
+                }
+                QUuid requestId = m_neuron->setDigitalOutput(digitalOutputNumber, stateValue);
                 if (requestId.isNull()) {
                     info->finish(Thing::ThingErrorHardwareFailure);
                 } else {
@@ -591,8 +611,11 @@ void IntegrationPluginUniPi::executeAction(ThingActionInfo *info)
                     connect(info, &ThingActionInfo::aborted, this, [requestId, this](){m_asyncActions.remove(requestId);});
                 }
                 return;
-            } else if (m_neuronExtensions.contains(thing->parentId())) {
+            } else if (parentThingClassId == neuronExtensionThingClassId) {
                 NeuronExtension *neuronExtension = m_neuronExtensions.value(thing->parentId());
+                if (!neuronExtension) {
+                    return info->finish(Thing::ThingErrorHardwareFailure);
+                }
                 QUuid requestId = neuronExtension->setDigitalOutput(digitalOutputNumber, stateValue);
                 if (requestId.isNull()) {
                     info->finish(Thing::ThingErrorHardwareFailure);
@@ -601,9 +624,6 @@ void IntegrationPluginUniPi::executeAction(ThingActionInfo *info)
                     connect(info, &ThingActionInfo::aborted, this, [requestId, this](){m_asyncActions.remove(requestId);});
                 }
                 return;
-            } else {
-                qCWarning(dcUniPi()) << "Hardware not initialized" << thing->name();
-                return info->finish(Thing::ThingErrorHardwareFailure);
             }
         } else {
             qCWarning(dcUniPi()) << "Unhandled ActionTypeId" << action.actionTypeId();
@@ -614,16 +634,23 @@ void IntegrationPluginUniPi::executeAction(ThingActionInfo *info)
         if (action.actionTypeId() == analogOutputOutputValueActionTypeId) {
             QString analogOutputNumber = thing->paramValue(analogOutputThingCircuitParamTypeId).toString();
             double analogValue = action.param(analogOutputOutputValueActionOutputValueParamTypeId).value().toDouble();
+            ThingClassId parentThingClassId = myThings().findById(thing->parentId())->thingClassId();
 
-            if (m_unipi) {
+            if (parentThingClassId == uniPi1ThingClassId ||
+                    parentThingClassId == uniPi1LiteThingClassId) {
+                if (!m_unipi) {
+                    return info->finish(Thing::ThingErrorHardwareFailure);
+                }
                 if(m_unipi->setAnalogOutput(analogValue)) {
                     info->finish(Thing::ThingErrorNoError);
                 } else {
                     info->finish(Thing::ThingErrorHardwareFailure);
                 }
-            } else if (m_neurons.contains(thing->parentId())) {
-                Neuron *neuron = m_neurons.value(thing->parentId());
-                QUuid requestId = neuron->setAnalogOutput(analogOutputNumber, analogValue);
+             } else if (parentThingClassId == neuronThingClassId) {
+                if (!m_neuron) {
+                    return info->finish(Thing::ThingErrorHardwareFailure);
+                }
+                QUuid requestId = m_neuron->setAnalogOutput(analogOutputNumber, analogValue);
                 if (requestId.isNull()) {
                     info->finish(Thing::ThingErrorHardwareFailure);
                 } else {
@@ -631,8 +658,11 @@ void IntegrationPluginUniPi::executeAction(ThingActionInfo *info)
                     connect(info, &ThingActionInfo::aborted, this, [requestId, this](){m_asyncActions.remove(requestId);});
                 }
                 return;
-            } else if (m_neuronExtensions.contains(thing->parentId())) {
+             } else if (parentThingClassId == neuronExtensionThingClassId) {
                 NeuronExtension *neuronExtension = m_neuronExtensions.value(thing->parentId());
+                if (!neuronExtension) {
+                    return info->finish(Thing::ThingErrorHardwareFailure);
+                }
                 QUuid requestId = neuronExtension->setAnalogOutput(analogOutputNumber, analogValue);
                 if (requestId.isNull()) {
                     info->finish(Thing::ThingErrorHardwareFailure);
@@ -641,9 +671,6 @@ void IntegrationPluginUniPi::executeAction(ThingActionInfo *info)
                     connect(info, &ThingActionInfo::aborted, this, [requestId, this](){m_asyncActions.remove(requestId);});
                 }
                 return;
-            } else {
-                qCWarning(dcUniPi()) << "Hardware not initialized" << thing->name();
-                return info->finish(Thing::ThingErrorHardwareFailure);
             }
         } else {
             qCWarning(dcUniPi()) << "Unhandled ActionTypeId" << action.actionTypeId();
@@ -653,9 +680,13 @@ void IntegrationPluginUniPi::executeAction(ThingActionInfo *info)
         if (action.actionTypeId() == userLEDPowerActionTypeId) {
             QString userLED = thing->paramValue(userLEDThingCircuitParamTypeId).toString();
             bool stateValue = action.param(userLEDPowerActionPowerParamTypeId).value().toBool();
-            if (m_neurons.contains(thing->parentId())) {
-                Neuron *neuron = m_neurons.value(thing->parentId());
-                QUuid requestId = neuron->setUserLED(userLED, stateValue);
+            ThingClassId parentThingClassId = myThings().findById(thing->parentId())->thingClassId();
+
+            if (parentThingClassId == neuronThingClassId) {
+                if (!m_neuron) {
+                    return info->finish(Thing::ThingErrorHardwareFailure);
+                }
+                QUuid requestId = m_neuron->setUserLED(userLED, stateValue);
                 if (requestId.isNull()) {
                     info->finish(Thing::ThingErrorHardwareFailure);
                 } else {
@@ -663,8 +694,11 @@ void IntegrationPluginUniPi::executeAction(ThingActionInfo *info)
                     connect(info, &ThingActionInfo::aborted, this, [requestId, this](){m_asyncActions.remove(requestId);});
                 }
                 return;
-            } else if (m_neuronExtensions.contains(thing->parentId())) {
+           } else if (parentThingClassId == neuronExtensionThingClassId) {
                 NeuronExtension *neuronExtension = m_neuronExtensions.value(thing->parentId());
+                if (!neuronExtension) {
+                    return info->finish(Thing::ThingErrorHardwareFailure);
+                }
                 QUuid requestId = neuronExtension->setUserLED(userLED, stateValue);
                 if (requestId.isNull()) {
                     info->finish(Thing::ThingErrorHardwareFailure);
@@ -673,9 +707,6 @@ void IntegrationPluginUniPi::executeAction(ThingActionInfo *info)
                     connect(info, &ThingActionInfo::aborted, this, [requestId, this](){m_asyncActions.remove(requestId);});
                 }
                 return;
-            } else {
-                qCWarning(dcUniPi()) << "Hardware not initilized" << thing->name();
-                return info->finish(Thing::ThingErrorHardwareFailure);
             }
         } else {
             qCWarning(dcUniPi()) << "Unhandled ActionTypeId" << action.actionTypeId();
@@ -691,12 +722,12 @@ void IntegrationPluginUniPi::executeAction(ThingActionInfo *info)
 void IntegrationPluginUniPi::thingRemoved(Thing *thing)
 {
     qCDebug(dcUniPi()) << "Deleting thing" << thing->name();
-    if(m_neurons.contains(thing->id())) {
-        Neuron *neuron = m_neurons.take(thing->id());
-        neuron->deleteLater();
-    } else if(m_neuronExtensions.contains(thing->id())) {
+    if(m_neuronExtensions.contains(thing->id())) {
         NeuronExtension *neuronExtension = m_neuronExtensions.take(thing->id());
         neuronExtension->deleteLater();
+    } else if (thing->thingClassId() == neuronThingClassId) {
+        m_neuron->deleteLater();
+        m_neuron = nullptr;
     } else if ((thing->thingClassId() == uniPi1ThingClassId) || (thing->thingClassId() == uniPi1LiteThingClassId)) {
         if(m_unipi) {
             m_unipi->deleteLater();
@@ -734,35 +765,34 @@ void IntegrationPluginUniPi::onPluginConfigurationChanged(const ParamTypeId &par
             m_modbusTCPMaster->setConnectionParameter(QModbusDevice::NetworkPortParameter, value.toInt());
         }
     }
-/*
-    if (paramTypeId == uniPiPluginSerialPortParamTypeId) {
-        if (m_modbusRTUMaster) {
-            m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialPortNameParameter, value.toString());
-        }
-    }
+    /*
+               if (paramTypeId == uniPiPluginSerialPortParamTypeId) {
+                   if (m_modbusRTUMaster) {
+                       m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialPortNameParameter, value.toString());
+                   }
+               }
 
-    if (paramTypeId == uniPiPluginBaudrateParamTypeId) {
-        if (m_modbusRTUMaster) {
-            m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialBaudRateParameter, value.toInt());
-        }
-    }
+               if (paramTypeId == uniPiPluginBaudrateParamTypeId) {
+                   if (m_modbusRTUMaster) {
+                       m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialBaudRateParameter, value.toInt());
+                   }
+               }
 
-    if (paramTypeId == uniPiPluginParityParamTypeId) {
-        if (m_modbusRTUMaster) {
-            if (value == "Even") {
-                m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialParityParameter, QSerialPort::Parity::EvenParity);
-            } else {
-                m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialParityParameter, QSerialPort::Parity::NoParity);
-            }
-        }
-    }
-*/
+               if (paramTypeId == uniPiPluginParityParamTypeId) {
+                   if (m_modbusRTUMaster) {
+                       if (value == "Even") {
+                           m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialParityParameter, QSerialPort::Parity::EvenParity);
+                       } else {
+                           m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialParityParameter, QSerialPort::Parity::NoParity);
+                       }
+                   }
+               }
+           */
 }
 
 void IntegrationPluginUniPi::onNeuronConnectionStateChanged(bool state)
 {
-    Neuron *neuron = static_cast<Neuron *>(sender());
-    Thing *thing = myThings().findById(m_neurons.key(neuron));
+    Thing *thing = myThings().filterByThingClassId(neuronThingClassId).first();
     if (!thing) {
         qCWarning(dcUniPi()) << "Could not find any Thing associated to Neuron obejct";
         return;
@@ -773,9 +803,13 @@ void IntegrationPluginUniPi::onNeuronConnectionStateChanged(bool state)
 
 void IntegrationPluginUniPi::onNeuronDigitalInputStatusChanged(const QString &circuit, bool value)
 {
-    Neuron *neuron = static_cast<Neuron *>(sender());
+    Thing *neuronThing = myThings().filterByThingClassId(neuronThingClassId).first();
+    if (!neuronThing) {
+        qCWarning(dcUniPi()) << "Could not find any Thing associated to Neuron obejct";
+        return;
+    }
 
-    foreach(Thing *thing, myThings().filterByParentId(m_neurons.key(neuron))) {
+    foreach(Thing *thing, myThings().filterByParentId(neuronThing->id())) {
         if (thing->thingClassId() == digitalInputThingClassId) {
             if (thing->paramValue(digitalInputThingCircuitParamTypeId).toString() == circuit) {
 
@@ -803,9 +837,13 @@ void IntegrationPluginUniPi::onNeuronExtensionDigitalInputStatusChanged(const QS
 
 void IntegrationPluginUniPi::onNeuronDigitalOutputStatusChanged(const QString &circuit, bool value)
 {
-    Neuron *neuron = static_cast<Neuron *>(sender());
+    Thing *neuronThing = myThings().filterByThingClassId(neuronThingClassId).first();
+    if (!neuronThing) {
+        qCWarning(dcUniPi()) << "Could not find any Thing associated to Neuron obejct";
+        return;
+    }
 
-    foreach(Thing *thing, myThings().filterByParentId(m_neurons.key(neuron))) {
+    foreach(Thing *thing, myThings().filterByParentId(neuronThing->id())) {
         if (thing->thingClassId() == digitalOutputThingClassId) {
             if (thing->paramValue(digitalOutputThingCircuitParamTypeId).toString() == circuit) {
 
@@ -833,9 +871,13 @@ void IntegrationPluginUniPi::onNeuronExtensionDigitalOutputStatusChanged(const Q
 
 void IntegrationPluginUniPi::onNeuronAnalogInputStatusChanged(const QString &circuit, double value)
 {
-    Neuron *neuron = static_cast<Neuron *>(sender());
+    Thing *neuronThing = myThings().filterByThingClassId(neuronThingClassId).first();
+    if (!neuronThing) {
+        qCWarning(dcUniPi()) << "Could not find any Thing associated to Neuron obejct";
+        return;
+    }
 
-    foreach(Thing *thing, myThings().filterByParentId(m_neurons.key(neuron))) {
+    foreach(Thing *thing, myThings().filterByParentId(neuronThing->id())) {
         if (thing->thingClassId() == analogInputThingClassId) {
             if (thing->paramValue(analogInputThingCircuitParamTypeId).toString() == circuit) {
 
@@ -862,9 +904,13 @@ void IntegrationPluginUniPi::onNeuronExtensionAnalogInputStatusChanged(const QSt
 
 void IntegrationPluginUniPi::onNeuronAnalogOutputStatusChanged(const QString &circuit, double value)
 {
-    Neuron *neuron = static_cast<Neuron *>(sender());
+    Thing *neuronThing = myThings().filterByThingClassId(neuronThingClassId).first();
+    if (!neuronThing) {
+        qCWarning(dcUniPi()) << "Could not find any Thing associated to Neuron obejct";
+        return;
+    }
 
-    foreach(Thing *thing, myThings().filterByParentId(m_neurons.key(neuron))) {
+    foreach(Thing *thing, myThings().filterByParentId(neuronThing->id())) {
         if (thing->thingClassId() == analogOutputThingClassId) {
             if (thing->paramValue(analogOutputThingCircuitParamTypeId).toString() == circuit) {
 
@@ -892,9 +938,13 @@ void IntegrationPluginUniPi::onNeuronExtensionAnalogOutputStatusChanged(const QS
 
 void IntegrationPluginUniPi::onNeuronUserLEDStatusChanged(const QString &circuit, bool value)
 {
-    Neuron *neuron = static_cast<Neuron *>(sender());
+    Thing *neuronThing = myThings().filterByThingClassId(neuronThingClassId).first();
+    if (!neuronThing) {
+        qCWarning(dcUniPi()) << "Could not find any Thing associated to Neuron obejct";
+        return;
+    }
 
-    foreach(Thing *thing, myThings().filterByParentId(m_neurons.key(neuron))) {
+    foreach(Thing *thing, myThings().filterByParentId(neuronThing->id())) {
         if (thing->thingClassId() == userLEDThingClassId) {
             if (thing->paramValue(userLEDThingCircuitParamTypeId).toString() == circuit) {
 
@@ -957,16 +1007,16 @@ void IntegrationPluginUniPi::onNeuronExtensionUserLEDStatusChanged(const QString
 void IntegrationPluginUniPi::onReconnectTimer()
 {
     /*if(m_modbusRTUMaster) {
-        if (m_modbusRTUMaster->state() != QModbusDevice::State::ConnectedState) {
-            if (!m_modbusRTUMaster->connectDevice()) {
-                qCWarning(dcUniPi()) << "Reconnecing to modbus RTU master failed";
-                if (m_reconnectTimer) {
-                    qCDebug(dcUniPi()) << "     - Starting reconnect timer";
-                    m_reconnectTimer->start(5000);
-                }
-            }
-        }
-    }*/
+                   if (m_modbusRTUMaster->state() != QModbusDevice::State::ConnectedState) {
+                       if (!m_modbusRTUMaster->connectDevice()) {
+                           qCWarning(dcUniPi()) << "Reconnecing to modbus RTU master failed";
+                           if (m_reconnectTimer) {
+                               qCDebug(dcUniPi()) << "     - Starting reconnect timer";
+                               m_reconnectTimer->start(5000);
+                           }
+                       }
+                   }
+               }*/
     if(m_modbusTCPMaster) {
         if (m_modbusTCPMaster->state() != QModbusDevice::State::ConnectedState) {
             if (!m_modbusTCPMaster->connectDevice()) {
@@ -1082,33 +1132,33 @@ bool IntegrationPluginUniPi::neuronExtensionInterfaceInit()
 {
     qCDebug(dcUniPi()) << "Neuron extension interface init, creating Modbus RTU Master";
     /*if(!m_modbusRTUMaster) {
-        QString serialPort = configValue(uniPiPluginSerialPortParamTypeId).toString();
-        int baudrate = configValue(uniPiPluginBaudrateParamTypeId).toInt();
-        QString parity = configValue(uniPiPluginParityParamTypeId).toString();
+                   QString serialPort = configValue(uniPiPluginSerialPortParamTypeId).toString();
+                   int baudrate = configValue(uniPiPluginBaudrateParamTypeId).toInt();
+                   QString parity = configValue(uniPiPluginParityParamTypeId).toString();
 
-        m_modbusRTUMaster = new QModbusRtuSerialMaster(this);
-        m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialPortNameParameter, serialPort);
-        if (parity == "Even") {
-            m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialParityParameter, QSerialPort::Parity::EvenParity);
-        } else {
-            m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialParityParameter, QSerialPort::Parity::NoParity);
-        }
-        m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialBaudRateParameter, baudrate);
-        m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialDataBitsParameter, 8);
-        m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialStopBitsParameter, 1);
-        m_modbusRTUMaster->setTimeout(400);
-        m_modbusRTUMaster->setNumberOfRetries(2);
+                   m_modbusRTUMaster = new QModbusRtuSerialMaster(this);
+                   m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialPortNameParameter, serialPort);
+                   if (parity == "Even") {
+                       m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialParityParameter, QSerialPort::Parity::EvenParity);
+                   } else {
+                       m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialParityParameter, QSerialPort::Parity::NoParity);
+                   }
+                   m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialBaudRateParameter, baudrate);
+                   m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialDataBitsParameter, 8);
+                   m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialStopBitsParameter, 1);
+                   m_modbusRTUMaster->setTimeout(400);
+                   m_modbusRTUMaster->setNumberOfRetries(2);
 
-        connect(m_modbusRTUMaster, &QModbusRtuSerialMaster::stateChanged, this, &IntegrationPluginUniPi::onModbusRTUStateChanged);
+                   connect(m_modbusRTUMaster, &QModbusRtuSerialMaster::stateChanged, this, &IntegrationPluginUniPi::onModbusRTUStateChanged);
 
-        if (!m_modbusRTUMaster->connectDevice()) {
-            qCWarning(dcUniPi()) << "Connect failed:" << m_modbusRTUMaster->errorString();
-            m_modbusRTUMaster->deleteLater();
-            m_modbusRTUMaster = nullptr;
-            return false;
-        }
-    } else {
-        qCDebug(dcUniPi()) << "Neuron Extension Modbus RTU Master is already created";
-    }*/
+                   if (!m_modbusRTUMaster->connectDevice()) {
+                       qCWarning(dcUniPi()) << "Connect failed:" << m_modbusRTUMaster->errorString();
+                       m_modbusRTUMaster->deleteLater();
+                       m_modbusRTUMaster = nullptr;
+                       return false;
+                   }
+               } else {
+                   qCDebug(dcUniPi()) << "Neuron Extension Modbus RTU Master is already created";
+               }*/
     return true;
 }
