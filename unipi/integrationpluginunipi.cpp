@@ -31,10 +31,14 @@
 #include "integrationpluginunipi.h"
 #include "plugininfo.h"
 #include "hardware/i2c/i2cmanager.h"
+#include "hardwaremanager.h"
+#include "hardware/modbus/modbusrtumaster.h"
+#include "hardware/modbus/modbusrtuhardwareresource.h"
 
 #include <QJsonDocument>
 #include <QTimer>
 #include <QSerialPort>
+#include <QModbusTcpClient>
 
 IntegrationPluginUniPi::IntegrationPluginUniPi()
 {
@@ -66,6 +70,28 @@ void IntegrationPluginUniPi::init()
     m_connectionStateTypeIds.insert(neuronXS50ThingClassId, neuronXS50ConnectedStateTypeId);
     m_connectionStateTypeIds.insert(neuronXS11ThingClassId, neuronXS11ConnectedStateTypeId);
     m_connectionStateTypeIds.insert(neuronXS51ThingClassId, neuronXS51ConnectedStateTypeId);
+
+
+    // Modbus RTU hardware resource
+    connect(hardwareManager()->modbusRtuResource(), &ModbusRtuHardwareResource::modbusRtuMasterRemoved, this, [=](const QUuid &modbusUuid){
+        qCDebug(dcUniPi()) << "Modbus RTU master has been removed" << modbusUuid.toString();
+
+        // Check if there is any device using this resource
+        foreach (Thing *thing, m_modbusRtuMasters.keys()) {
+            if (m_modbusRtuMasters.value(thing)->modbusUuid() == modbusUuid) {
+                qCWarning(dcUniPi()) << "Hardware resource removed for" << thing << ". The thing will not be functional any more until a new resource has been configured for it.";
+                m_modbusRtuMasters.remove(thing);
+                thing->setStateValue(m_connectionStateTypeIds[thing->thingClassId()], false);
+
+                // Set all child things disconnected
+                foreach (Thing *childThing, myThings()) {
+                    if (childThing->parentId() == thing->id()) {
+                        thing->setStateValue(m_connectionStateTypeIds[childThing->thingClassId()], false);
+                    }
+                }
+            }
+        }
+    });
 }
 
 void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
@@ -343,6 +369,85 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
             }
         }
         return info->finish(Thing::ThingErrorNoError);
+    } else if (ThingClassId == neuronThingClassId) {
+        QModbusTcpClient *modbus = new QModbusTcpClient(this);
+        int port = configValue(uniPiPluginPortParamTypeId).toInt();;
+        QHostAddress ipAddress = QHostAddress(configValue(uniPiPluginAddressParamTypeId).toString());
+        modbus->setConnectionParameter(QModbusDevice::NetworkPortParameter, port);
+        modbus->setConnectionParameter(QModbusDevice::NetworkAddressParameter, ipAddress.toString());
+        if (!modbus->connectDevice()) {
+            info->finish(Thing::ThingErrorHardwareNotAvailable, tr("Neuron modbus TCP server not available."));
+        }
+        QModbusDataUnit unit(QModbusDataUnit::RegisterType::HoldingRegisters, 1000, 7);
+        QModbusReply *reply = modbus->sendReadRequest(unit, 0);
+        connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+        connect(reply, &QModbusReply::finished, info, [info, reply, this] {
+            if (reply->error() != QModbusDevice::NoError) {
+                return;
+            }
+            QVector<quint16> result = reply->result();
+            if (result.length() < 7) {
+                return;
+            }
+            descriptor.slaveAddress = reply->slaveAddress();
+            descriptor.firmwareVersion = result[0];
+            descriptor.numberOfIOs = result[1];
+            descriptor.numberOfPeripherals = result[2];
+            descriptor.firmwareId = result[3];
+            descriptor.hardwareId = result[4];
+            descriptor.serialNumber = (static_cast<quint32>(result[6])<<16 | result[5]);
+
+            ParamList parameters;
+            ThingDescriptor thingDescriptor(neuronThingClassId, "Neuron", modbusMaster->serialPort());
+            parameters.append(Param(neuronThingModbusMasterUuidParamTypeId, modbusMaster->modbusUuid()));
+            thingDescriptor.setParams(parameters);
+            info->addThingDescriptor(thingDescriptor);
+
+        });
+        //TODO read modbus register for
+
+
+    } else if (ThingClassId == neuronExtensionThingClassId) {
+        if (hardwareManager()->modbusRtuResource()->modbusRtuMasters().isEmpty()) {
+            info->finish(Thing::ThingErrorHardwareNotAvailable, tr("No Modbus RTU interface available."));
+        }
+        foreach (ModbusRtuMaster *modbusMaster, hardwareManager()->modbusRtuResource()->modbusRtuMasters()) {
+            qCDebug(dcUniPi()) << "Found RTU master resource" << modbusMaster;
+            if (modbusMaster->connected()) {
+
+                for (int i = 0; i <= 16; i++) {
+                    ModbusRtuReply *reply = modbusMaster->readHoldingRegister(i, 1000, 7);
+                    connect(reply, &ModbusRtuReply::finished, reply, &ModbusRtuReply::deleteLater);
+                    connect(reply, &ModbusRtuReply::finished, this, [this, reply] {
+
+                        if (reply->error() != ModbusRtuReply::Error::NoError) {
+                            return;
+                        }
+                        NeuronExtensionDescriptor descriptor;
+                        QVector<quint16> result = reply->result();
+                        if (result.length() < 7) {
+                            return;
+                        }
+                        descriptor.slaveAddress = reply->slaveAddress();
+                        descriptor.firmwareVersion = result[0];
+                        descriptor.numberOfIOs = result[1];
+                        descriptor.numberOfPeripherals = result[2];
+                        descriptor.firmwareId = result[3];
+                        descriptor.hardwareId = result[4];
+                        descriptor.serialNumber = (static_cast<quint32>(result[6])<<16 | result[5]);
+
+                        ParamList parameters;
+                        ThingDescriptor thingDescriptor(neuronExtensionThingClassId, "Neuron extension", modbusMaster->serialPort());
+                        parameters.append(Param(neuronExtensionThingModbusMasterUuidParamTypeId, modbusMaster->modbusUuid()));
+                        thingDescriptor.setParams(parameters);
+                        info->addThingDescriptor(thingDescriptor);
+                    });
+                }
+            } else {
+                qCWarning(dcUniPi()) << "Found configured resource" << modbusMaster << "but it is not connected. Skipping.";
+            }
+        }
+        QTimer::singleShot(5000, info, [info] {info->finish(Thing::ThingErrorNoError);});
     } else {
         qCWarning(dcUniPi()) << "Unhandled Thing class in discoverThing" << ThingClassId;
         return info->finish(Thing::ThingErrorThingClassNotFound);
@@ -931,20 +1036,24 @@ void IntegrationPluginUniPi::onNeuronExtensionUserLEDStatusChanged(const QString
 void IntegrationPluginUniPi::onReconnectTimer()
 {
     if(m_modbusRTUMaster) {
-        if (!m_modbusRTUMaster->connectDevice()) {
-            qCWarning(dcUniPi()) << "Reconnecing to modbus RTU master failed";
-            if (m_reconnectTimer) {
-                qCDebug(dcUniPi()) << "     - Starting reconnect timer";
-                m_reconnectTimer->start(10000);
+        if (m_modbusRTUMaster->state() != QModbusDevice::State::ConnectedState) {
+            if (!m_modbusRTUMaster->connectDevice()) {
+                qCWarning(dcUniPi()) << "Reconnecing to modbus RTU master failed";
+                if (m_reconnectTimer) {
+                    qCDebug(dcUniPi()) << "     - Starting reconnect timer";
+                    m_reconnectTimer->start(5000);
+                }
             }
         }
     }
     if(m_modbusTCPMaster) {
-        if (!m_modbusTCPMaster->connectDevice()) {
-            qCWarning(dcUniPi()) << "Reconnecing to modbus TCP master failed, trying again in 10 seconds";
-            if (m_reconnectTimer) {
-                qCDebug(dcUniPi()) << "     - Starting reconnect timer";
-                m_reconnectTimer->start(10000);
+        if (m_modbusTCPMaster->state() != QModbusDevice::State::ConnectedState) {
+            if (!m_modbusTCPMaster->connectDevice()) {
+                qCWarning(dcUniPi()) << "Reconnecing to modbus TCP master failed, trying again in 5 seconds";
+                if (m_reconnectTimer) {
+                    qCDebug(dcUniPi()) << "     - Starting reconnect timer";
+                    m_reconnectTimer->start(5000);
+                }
             }
         }
     }
@@ -959,7 +1068,7 @@ void IntegrationPluginUniPi::onModbusTCPStateChanged(QModbusDevice::State state)
         //try to reconnect in 10 seconds
         if (m_reconnectTimer) {
             qCDebug(dcUniPi()) << "     - Starting reconnect timer";
-            m_reconnectTimer->start(10000);
+            m_reconnectTimer->start(5000);
         }
     }
 }
@@ -973,7 +1082,7 @@ void IntegrationPluginUniPi::onModbusRTUStateChanged(QModbusDevice::State state)
         //try to reconnect in 10 seconds
         if (m_reconnectTimer) {
             qCDebug(dcUniPi()) << "     - Starting reconnect timer";
-            m_reconnectTimer->start(10000);
+            m_reconnectTimer->start(5000);
         }
     }
 }
@@ -1032,7 +1141,7 @@ bool IntegrationPluginUniPi::neuronDeviceInit()
         m_modbusTCPMaster->setConnectionParameter(QModbusDevice::NetworkPortParameter, port);
         m_modbusTCPMaster->setConnectionParameter(QModbusDevice::NetworkAddressParameter, ipAddress.toString());
         m_modbusTCPMaster->setTimeout(200);
-        m_modbusTCPMaster->setNumberOfRetries(1);
+        m_modbusTCPMaster->setNumberOfRetries(2);
 
         connect(m_modbusTCPMaster, &QModbusTcpClient::stateChanged, this, &IntegrationPluginUniPi::onModbusTCPStateChanged);
 
@@ -1067,7 +1176,7 @@ bool IntegrationPluginUniPi::neuronExtensionInterfaceInit()
         m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialDataBitsParameter, 8);
         m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialStopBitsParameter, 1);
         m_modbusRTUMaster->setTimeout(400);
-        m_modbusRTUMaster->setNumberOfRetries(1);
+        m_modbusRTUMaster->setNumberOfRetries(2);
 
         connect(m_modbusRTUMaster, &QModbusRtuSerialMaster::stateChanged, this, &IntegrationPluginUniPi::onModbusRTUStateChanged);
 

@@ -16,31 +16,6 @@
             "displayName": "Address",
             "type": "QString",
             "defaultValue": "127.0.0.1"
-        },
-        {
-            "id": "1e34aec6-0ff4-400d-80ff-32094612b325",
-            "name": "serialPort",
-            "displayName": "Serial port",
-            "type": "QString",
-            "defaultValue": "/dev/extcomm/0/0"
-        },
-        {
-            "id": "a05aaedf-5345-4ab4-b471-8c7d106b473e",
-            "name": "baudrate",
-            "displayName": "Baudrate",
-            "type": "int",
-            "defaultValue": 19200
-        },
-        {
-            "id": "24323f2c-87f9-4b46-aca9-9c98ca731008",
-            "name": "parity",
-            "displayName": "Parity",
-            "type": "QString",
-            "allowedValues": [
-                "None",
-                "Even"
-            ],
-            "defaultValue": "None"
         }
     ],
     "vendors": [
@@ -455,6 +430,13 @@
                             "displayName": "Modbus slave address",
                             "type": "int",
                             "defaultValue": 1
+                        },
+                        {
+                            "id": "e2e94574-fedf-4b0d-8385-401f975a8917",
+                            "name": "modbusMasterUuid",
+                            "displayName": "Modbus RTU master",
+                            "type": "QUuid",
+                            "defaultValue": ""
                         }
                     ],
                     "stateTypes": [
@@ -493,6 +475,156 @@
                             "type": "bool",
                             "cached": false,
                             "defaultValue": false
+                        }
+                    ]
+                },
+                {
+                    "id": "8f14002d-e369-4286-b427-e3e1bca88e4f",
+                    "name": "neuron",
+                    "displayName": "Neuron",
+                    "createMethods": ["user"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                        {
+                            "id": "93d72250-566f-4016-b83d-a7dd79c57dd9",
+                            "name": "model",
+                            "displayName": "Model",
+                            "type": "QString",
+                            "defaultValue": "",
+                            "readOnly": true
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "5d11bb59-da27-42ac-a176-27215068bd6d",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connection changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "54b18c4d-b18a-42a0-9043-88e3dbbc04fa",
+                            "name": "numberOfDigitalOutputs",
+                            "displayName": "Number of digital outputs",
+                            "displayNameEvent": "Number of digital outputs changed",
+                            "type": "uint",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "ee375874-56ef-40cb-9727-982b2c672d19",
+                            "name": "numberOfDigitalInputs",
+                            "displayName": "Number of digital inputs",
+                            "displayNameEvent": "Number of digital inputs changed",
+                            "type": "uint",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "968315b5-078f-4a24-8549-27dbe88e0255",
+                            "name": "numberOfAnalogOutputs",
+                            "displayName": "Number of analog outputs",
+                            "displayNameEvent": "Number of analog outputs changed",
+                            "type": "uint",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "2f379583-fe25-4afa-9abd-d65dcbf0aa9c",
+                            "name": "numberOfAnalogInputs",
+                            "displayName": "Number of analog inputs",
+                            "displayNameEvent": "Number of analog inputs changed",
+                            "type": "uint",
+                            "defaultValue": 0
+                        }
+                    ]
+                },
+                {
+                    "id": "05539a73-a035-485b-a2e9-e9933b6a10f6",
+                    "name": "neuronExtension",
+                    "displayName": "Neuron extension",
+                    "createMethods": ["discovery"],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                        {
+                            "id": "8f40b075-ebed-4ce1-b9e7-a37bb31656c4",
+                            "name": "slaveAddress",
+                            "displayName": "Modbus slave address",
+                            "type": "int",
+                            "defaultValue": 1
+                        },
+                        {
+                            "id": "e2e94574-fedf-4b0d-8385-401f975a8917",
+                            "name": "modbusMasterUuid",
+                            "displayName": "Modbus RTU master",
+                            "type": "QUuid",
+                            "defaultValue": "",
+                            "readOnly": true
+                        },
+                        {
+                            "id": "c1f865c5-39b9-4509-9ba0-12b17a0d82f7",
+                            "name": "serialNumber",
+                            "displayName": "Serial number",
+                            "type": "QUuid",
+                            "defaultValue": ""
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "f95875de-d5d5-4e7f-8873-3fe2615a0b11",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connection changed",
+                            "type": "bool",
+                            "cached": false,
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "06f013d2-43f6-4a7a-9d63-52fd4ff58635",
+                            "name": "model",
+                            "displayName": "Model",
+                            "displayNameEvent": "Model changed",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "3ae7b327-2a89-49d4-9cc7-50c9a17166d5",
+                            "name": "firmware",
+                            "displayName": "Firmware",
+                            "displayNameEvent": "Firmware changed",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "1364e094-2904-4620-a9b0-6aefe6352860",
+                            "name": "numberOfDigitalOutputs",
+                            "displayName": "Number of digital outputs",
+                            "displayNameEvent": "Number of digital outputs changed",
+                            "type": "uint",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "567a5b51-a7f9-4744-bfce-affc66d11f38",
+                            "name": "numberOfDigitalInputs",
+                            "displayName": "Number of digital inputs",
+                            "displayNameEvent": "Number of digital inputs changed",
+                            "type": "uint",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "36117ea5-d45a-4ed3-89d2-88dd691e20d5",
+                            "name": "numberOfAnalogOutputs",
+                            "displayName": "Number of analog outputs",
+                            "displayNameEvent": "Number of analog outputs changed",
+                            "type": "uint",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "72e1ed21-7182-4fcb-be3a-1af8a72d61d9",
+                            "name": "numberOfAnalogInputs",
+                            "displayName": "Number of analog inputs",
+                            "displayNameEvent": "Number of analog inputs changed",
+                            "type": "uint",
+                            "defaultValue": 0
                         }
                     ]
                 },

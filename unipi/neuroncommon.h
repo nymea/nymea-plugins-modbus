@@ -112,8 +112,12 @@ private:
 
     bool circuitValueChanged(const QString &circuit, quint32 value);
     bool getAnalogIO(const RegisterDescriptor &descriptor);
-    bool modbusReadRequest(const QModbusDataUnit &request);
-    bool modbusWriteRequest(const Request &request);
+
+    bool readRequest(const QModbusDataUnit &request);
+    bool sendModbusReadRequest(const QModbusDataUnit &request);
+
+    bool writeRequest(const Request &request);
+    bool sendModbusWriteRequest(const Request &request);
     void getCoils(QList<int> registers);
 
 signals:
