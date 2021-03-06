@@ -70,16 +70,6 @@
                     "displayName": "Neuron",
                     "createMethods": ["user"],
                     "interfaces": ["gateway"],
-                    "paramTypes": [
-                        {
-                            "id": "9827d01e-c86b-4c7b-9ade-49d0884b82e8",
-                            "name": "modelId",
-                            "displayName": "Model ID",
-                            "type": "int",
-                            "defaultValue": 0,
-                            "readOnly": true
-                        }
-                    ],
                     "stateTypes": [
                         {
                             "id": "8bc2c391-1375-4b0d-87d0-6e8b62f33fb8",
@@ -89,6 +79,14 @@
                             "type": "bool",
                             "defaultValue": false,
                             "cached": false
+                        },
+                        {
+                            "id": "9827d01e-c86b-4c7b-9ade-49d0884b82e8",
+                            "name": "modelId",
+                            "displayName": "Model ID",
+                             "displayNameEvent": "Model ID changed",
+                            "type": "int",
+                            "defaultValue": 0
                         },
                         {
                             "id": "54b18c4d-b18a-42a0-9043-88e3dbbc04fa",
