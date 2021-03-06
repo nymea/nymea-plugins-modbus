@@ -31,42 +31,165 @@
 #ifndef NEURON_H
 #define NEURON_H
 
-#include "neuroncommon.h"
+#include <QThread>
+#include <QMutex>
 
 #include <QObject>
 #include <QHash>
 #include <QTimer>
 #include <QUuid>
+#include <QFile>
+#include <QSocketNotifier>
 
-class Neuron : public NeuronCommon
+class NeuronIO : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit NeuronIO(QObject *parent = nullptr);
+
+    bool isAvailable();
+    QString directory() const;
+
+protected:
+    QFile m_valueFile;
+    QSocketNotifier *m_notifier = nullptr;
+};
+
+class NeuronDigitalOutput : public NeuronIO
 {
     Q_OBJECT
 public:
 
-    enum NeuronTypes {
-        S103,
-        M103,
-        M203,
-        M303,
-        M403,
-        M503,
-        M523,
-        L203,
-        L303,
-        L403,
-        L503,
-        L513,
-        L523,
-        L533
+    enum OutputType {
+        OutputTypeDigital,
+        OutputTypeRelay,
+        OutputTypeLed
     };
-    Q_ENUM(NeuronTypes)
+    Q_ENUM(OutputType)
+    explicit NeuronDigitalOutput(uint8_t ioGroup, uint8_t output, OutputType outputType = OutputTypeDigital, QObject *parent = nullptr);
 
-    explicit Neuron(NeuronTypes neuronType, QModbusClient *modbusInterface, QObject *parent = nullptr);
-    ~Neuron();
-    QString type();
+    void setValue(bool value);
+    bool getValue();
 
 private:
-    NeuronTypes m_neuronType = NeuronTypes::S103;
-    bool loadModbusMap() override;
+    bool m_currentValue = false;
+signals:
+    void valueChanged(bool value);
+};
+
+class NeuronDigitalInput : public NeuronIO
+{
+    Q_OBJECT
+public:
+    explicit NeuronDigitalInput(uint8_t ioGroup, uint8_t input, QObject *parent = nullptr);
+
+    bool getValue();
+
+private:
+   bool m_currentValue = false;
+signals:
+    void valueChanged(bool value);
+};
+
+class NeuronAnalogInput : public NeuronIO
+{
+    Q_OBJECT
+public:
+    explicit NeuronAnalogInput(uint8_t ioGroup, uint8_t input, QObject *parent = nullptr);
+
+    double getValue();
+
+private:
+    double m_currentValue = 0.00;
+
+signals:
+    void valueChanged(double value);
+};
+
+class NeuronAnalogOutput : public NeuronIO
+{
+    Q_OBJECT
+public:
+    explicit NeuronAnalogOutput(uint8_t ioGroup, uint8_t output, QObject *parent = nullptr);
+
+    void setValue(double value);
+    double getValue();
+
+private:
+    double m_currentValue = 0.00;
+
+signals:
+    void valueChanged(double value);
+};
+
+class Neuron : public QThread
+{
+    Q_OBJECT
+public:
+
+    explicit Neuron(QObject *parent = nullptr);
+    ~Neuron();
+
+    bool init();
+    void startPolling(uint milliseconds = 200);
+
+    QList<QString> digitalInputs();
+    QList<QString> relayOutputs();
+    QList<QString> digitalOutputs();
+    QList<QString> analogInputs();
+    QList<QString> analogOutputs();
+    QList<QString> userLEDs();
+
+    bool setRelayOutput(const QString &circuit, bool value);
+    bool setDigitalOutput(const QString &circuit, bool value);
+    bool setAnalogOutput(const QString &circuit, double value);
+    bool setUserLED(const QString &circuit, bool value);
+
+    /*bool relayOutputValue(const QString &circuit);
+    bool digitalOutputValue(const QString &circuit);
+    bool userLEDValue(const QString &circuit);
+    bool digitalInputValue(const QString &circuit);
+    double analogOutputValue(const QString &circuit);
+    double analogInputValue(const QString &circuit);*/
+
+    //QUuid setAnalogOutputConfiguration(const QString &circuit, NeuronCommon::AnalogIOConfiguration value);
+    //QUuid setAnalogInputConfiguration(const QString &circuit, NeuronCommon::AnalogIOConfiguration value);
+
+protected:
+    void run() override;
+
+private:
+    QMutex m_valueMutex;
+    QMutex m_stopMutex;
+
+    QTimer *m_pollingTimer = nullptr;
+    QTimer *m_outputPollingTimer = nullptr;
+
+    QHash<QString, NeuronDigitalOutput *> m_userLeds;
+    QHash<QString, NeuronDigitalOutput *> m_relayOutputs;
+    QHash<QString, NeuronDigitalOutput *> m_digitalOutputs;
+    QHash<QString, NeuronDigitalInput *> m_digitalInputs;
+    QHash<QString, NeuronAnalogOutput *> m_analogOutputs;
+    QHash<QString, NeuronAnalogInput *> m_analogInputs;
+
+    QHash<QString, bool> m_previousDigitalInputValue;
+    QHash<QString, bool> m_previousDigitalOutputValue;
+    QHash<QString, bool> m_previousRelayOutputValue;
+    QHash<QString, bool> m_previousUserLEDValue;
+    QHash<QString, double> m_previousAnalogInputValue;
+    QHash<QString, double> m_previousAnalogOutputValue;
+
+    QList<QPair<uint8_t, uint8_t>> discoverIOs(const QString &filter);
+
+signals:
+    void relayOutputStatusChanged(const QString &circuit, bool value);
+    void digitalOutputStatusChanged(const QString &circuit, bool value);
+    void digitalInputStatusChanged(const QString &circuit, bool value);
+
+    void analogInputStatusChanged(const QString &circuit, double value);
+    void analogOutputStatusChanged(const QString &circuit, double value);
+
+    void userLEDStatusChanged(const QString &circuit, bool value);
 };
 #endif // NEURON_H

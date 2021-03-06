@@ -1,0 +1,157 @@
+#include "mbconnection.h"
+
+ModbusConnection::ModbusConnection(modbus_t *ctxt, ModbusThreadedConnManager *threadMgr):
+    m_lastRequestId(0),
+    m_ctxt(ctxt),
+    m_threadMgr(threadMgr)
+{
+    if (0 != m_threadMgr) {
+        m_threadMgr->registerConnection(this);
+    }
+}
+
+ModbusConnection::~ModbusConnection()
+{
+    if (0 != m_threadMgr) {
+        m_threadMgr->unregisterConnection(this);
+    }
+    modbus_free(m_ctxt);
+    m_ctxt = 0;
+}
+
+
+ModbusConnection *ModbusConnection::newRtuConnection(const QString &device, int baudRate, ModbusConnection::Parity parity, int dataBitsNo, int stopBitsNo, ModbusThreadedConnManager *threadedConnManager)
+{
+    char parChar;
+
+    switch (parity) {
+    case (ParityNone): {
+        parChar = 'N';
+        break;
+    }
+    case (ParityEven): {
+        parChar = 'E';
+        break;
+    }
+    case (ParityOdd):
+    default:
+        parChar = 'O';
+    }
+
+    modbus_t *ctxt = modbus_new_rtu(device.toLatin1(), baudRate, parChar, dataBitsNo, stopBitsNo);
+    return new ModbusConnection(ctxt, threadedConnManager);
+}
+
+int ModbusConnection::connectAsync()
+{
+    if (0 != m_threadMgr) {
+        incrementReqId();
+        m_threadMgr->mbConnectAsync(this, m_lastRequestId);
+        return m_lastRequestId;
+    }
+    return -1;
+}
+
+int ModbusConnection::closeAsync(bool prioritize)
+{
+    if (0 != m_threadMgr) {
+        incrementReqId();
+        m_threadMgr->closeAsync(this, prioritize, m_lastRequestId);
+        return m_lastRequestId;
+    }
+    return -1;
+}
+
+int ModbusConnection::readBitsAsync(int slaveId, int addr, QVector<quint8> *result)
+{
+    if (0 != m_threadMgr) {
+        incrementReqId();
+        m_threadMgr->readBitsAsync(this, slaveId, addr, result, m_lastRequestId);
+        return m_lastRequestId;
+    }
+    return -1;
+}
+
+int ModbusConnection::setErrorRecovery(ModbusConnection::ErrorRecovery erMode) {
+    //@todo : not thread safe. This should be done only when the connection is not executing any request currelntly.
+    modbus_error_recovery_mode mode;
+    switch (erMode) {
+    case (ERLink):
+        mode = MODBUS_ERROR_RECOVERY_LINK;
+        break;
+    case (ERProtocol):
+        mode = MODBUS_ERROR_RECOVERY_PROTOCOL;
+        break;
+    case (ERNone)://fall through
+    default:
+        mode = MODBUS_ERROR_RECOVERY_NONE;
+        break;
+    }
+
+    return modbus_set_error_recovery(m_ctxt, mode);
+}
+
+void ModbusConnection::setResponseTimeout(int timeout_ms) {
+    //@todo : not thread safe. This should be done only when the connection is not executing any request currently.
+    Q_ASSERT(timeout_ms > 0);
+
+    modbus_set_response_timeout(m_ctxt, timeout_ms / 1000, (timeout_ms % 1000) * 100 );
+}
+
+
+int ModbusConnection::responseTimeout()
+{
+    uint32_t tvSec, tvUSec;
+    modbus_get_response_timeout(m_ctxt, &tvSec, &tvUSec);
+    return ((tvSec * 1000) + (tvUSec / 1000));
+}
+
+void ModbusConnection::setByteTimeout(int timeout_ms)
+{
+    //@todo : not thread safe. This should be done only when the connection is not executing any request currently.
+    uint32_t tvSec, tvUSec;
+    if (timeout_ms < 0) {
+        tvSec = -1;
+        tvUSec = -1;
+    }
+    else {
+        tvSec = timeout_ms / 1000;
+        tvUSec = (timeout_ms % 1000) * 1000;
+    }
+    modbus_set_byte_timeout(m_ctxt, tvSec, tvUSec);
+}
+
+int ModbusConnection::byteTimeout()
+{
+    uint32_t tvSec, tvUSec;
+    modbus_get_byte_timeout(m_ctxt, &tvSec, &tvUSec);
+    return ((tvSec * 1000) + (tvUSec / 1000));
+}
+
+int ModbusConnection::headerLength()
+{
+    return modbus_get_header_length(m_ctxt);
+}
+
+int ModbusConnection::flush()
+{
+    return modbus_flush(m_ctxt);
+}
+
+void ModbusConnection::setDebug(bool debug)
+{
+    modbus_set_debug(m_ctxt, debug);
+}
+
+const char *ModbusConnection::errorStr(int errnum)
+{
+    return modbus_strerror(errnum);
+}
+
+bool ModbusConnection::cancelRequest(int invokeId)
+{
+    if (0 != m_threadMgr) {
+        return m_threadMgr->cancelRequest(this, invokeId);
+    }
+    return false;
+}

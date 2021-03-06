@@ -32,13 +32,16 @@
 #define INTEGRATIONPLUGINUNIPI_H
 
 #include "integrations/integrationplugin.h"
+#include "hardware/modbus/modbusrtumaster.h"
 #include "plugintimer.h"
+
 #include "unipi.h"
 #include "neuron.h"
-#include "neuronextension.h"
+#include "neuronextension/neuronextension.h"
+#include "neuronextension/neuronextensionbus.h"
+#include "neuronextension/neuronextensiondiscovery.h"
 
 #include <QTimer>
-#include <QtSerialBus>
 #include <QHostAddress>
 #include <QUuid>
 
@@ -62,43 +65,31 @@ public:
 
 private:
     UniPi *m_unipi = nullptr;
-    QHash<ThingId, Neuron *> m_neurons;
+    Neuron *m_neuron = nullptr;
     QHash<ThingId, NeuronExtension *> m_neuronExtensions;
-    QModbusTcpClient *m_modbusTCPMaster = nullptr;
-    QModbusRtuSerialMaster *m_modbusRTUMaster = nullptr;
+    QHash<ThingId, NeuronExtensionBus *> m_neuronExtensionBus;
 
-    QHash<Thing *, QTimer *> m_unlatchTimer;
     QTimer *m_reconnectTimer = nullptr;
     QHash<QUuid, ThingActionInfo *> m_asyncActions;
     QHash<ThingClassId, StateTypeId> m_connectionStateTypeIds;
-
-    bool neuronDeviceInit();
-    bool neuronExtensionInterfaceInit();
+    QHash<ThingClassId, QString> m_neuronMigration;
+    QHash<ThingClassId, QString> m_neuronExtensionMigration;
 
 private slots:
-    void onPluginConfigurationChanged(const ParamTypeId &paramTypeId, const QVariant &value);
 
-    void onRequestExecuted(const QUuid &requestId, bool success);
-    void onRequestError(const QUuid &requestId, const QString &error);
-
-    void onNeuronConnectionStateChanged(bool state);
+    void onNeuronRelayOutputStatusChanged(const QString &circuit, bool value);
     void onNeuronDigitalInputStatusChanged(const QString &circuit, bool value);
     void onNeuronDigitalOutputStatusChanged(const QString &circuit, bool value);
     void onNeuronAnalogInputStatusChanged(const QString &circuit, double value);
     void onNeuronAnalogOutputStatusChanged(const QString &circuit,double value);
-    void onNeuronUserLEDStatusChanged(const QString &circuit, bool value);
 
     void onNeuronExtensionConnectionStateChanged(bool state);
+
     void onNeuronExtensionDigitalInputStatusChanged(const QString &circuit, bool value);
     void onNeuronExtensionDigitalOutputStatusChanged(const QString &circuit, bool value);
+    void onNeuronExtensionRelayOutputStatusChanged(const QString &circuit, bool value);
     void onNeuronExtensionAnalogInputStatusChanged(const QString &circuit, double value);
     void onNeuronExtensionAnalogOutputStatusChanged(const QString &circuit,double value);
-    void onNeuronExtensionUserLEDStatusChanged(const QString &circuit, bool value);
-
-    void onReconnectTimer();
-
-    void onModbusTCPStateChanged(QModbusDevice::State state);
-    void onModbusRTUStateChanged(QModbusDevice::State state);
 
     void onUniPiDigitalInputStatusChanged(const QString &circuit, bool value);
     void onUniPiDigitalOutputStatusChanged(const QString &circuit, bool value);
