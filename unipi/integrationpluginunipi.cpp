@@ -52,24 +52,8 @@ void IntegrationPluginUniPi::init()
 
     m_connectionStateTypeIds.insert(uniPi1ThingClassId, uniPi1ConnectedStateTypeId);
     m_connectionStateTypeIds.insert(uniPi1LiteThingClassId, uniPi1LiteConnectedStateTypeId);
-    m_connectionStateTypeIds.insert(neuronS103ThingClassId, neuronS103ConnectedStateTypeId);
-    m_connectionStateTypeIds.insert(neuronM103ThingClassId, neuronM103ConnectedStateTypeId);
-    m_connectionStateTypeIds.insert(neuronM203ThingClassId, neuronM203ConnectedStateTypeId);
-    m_connectionStateTypeIds.insert(neuronM303ThingClassId, neuronM303ConnectedStateTypeId);
-    m_connectionStateTypeIds.insert(neuronM403ThingClassId, neuronM403ConnectedStateTypeId);
-    m_connectionStateTypeIds.insert(neuronM503ThingClassId, neuronM503ConnectedStateTypeId);
-    m_connectionStateTypeIds.insert(neuronL203ThingClassId, neuronL203ConnectedStateTypeId);
-    m_connectionStateTypeIds.insert(neuronL303ThingClassId, neuronL303ConnectedStateTypeId);
-    m_connectionStateTypeIds.insert(neuronL403ThingClassId, neuronL403ConnectedStateTypeId);
-    m_connectionStateTypeIds.insert(neuronL503ThingClassId, neuronL503ConnectedStateTypeId);
-    m_connectionStateTypeIds.insert(neuronL513ThingClassId, neuronL513ConnectedStateTypeId);
-    m_connectionStateTypeIds.insert(neuronXS10ThingClassId, neuronXS10ConnectedStateTypeId);
-    m_connectionStateTypeIds.insert(neuronXS20ThingClassId, neuronXS20ConnectedStateTypeId);
-    m_connectionStateTypeIds.insert(neuronXS30ThingClassId, neuronXS30ConnectedStateTypeId);
-    m_connectionStateTypeIds.insert(neuronXS40ThingClassId, neuronXS40ConnectedStateTypeId);
-    m_connectionStateTypeIds.insert(neuronXS50ThingClassId, neuronXS50ConnectedStateTypeId);
-    m_connectionStateTypeIds.insert(neuronXS11ThingClassId, neuronXS11ConnectedStateTypeId);
-    m_connectionStateTypeIds.insert(neuronXS51ThingClassId, neuronXS51ConnectedStateTypeId);
+    m_connectionStateTypeIds.insert(neuronThingClassId, neuronConnectedStateTypeId);
+    m_connectionStateTypeIds.insert(neuronExtensionThingClassId, neuronExtensionConnectedStateTypeId);
 
 
     // Modbus RTU hardware resource
@@ -381,31 +365,30 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         QModbusDataUnit unit(QModbusDataUnit::RegisterType::HoldingRegisters, 1000, 7);
         QModbusReply *reply = modbus->sendReadRequest(unit, 0);
         connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
-        connect(reply, &QModbusReply::finished, info, [info, reply, this] {
+        connect(reply, &QModbusReply::finished, info, [info, reply, modbus] {
             if (reply->error() != QModbusDevice::NoError) {
                 return;
             }
-            QVector<quint16> result = reply->result();
+            QVector<quint16> result = reply->result().values();
             if (result.length() < 7) {
                 return;
             }
-            descriptor.slaveAddress = reply->slaveAddress();
-            descriptor.firmwareVersion = result[0];
-            descriptor.numberOfIOs = result[1];
-            descriptor.numberOfPeripherals = result[2];
-            descriptor.firmwareId = result[3];
-            descriptor.hardwareId = result[4];
-            descriptor.serialNumber = (static_cast<quint32>(result[6])<<16 | result[5]);
+            qCDebug(dcUniPi()) << "Found Neuron";
+            qCDebug(dcUniPi()) << "     - Slave Address" << reply->serverAddress();
+            qCDebug(dcUniPi()) << "     - Firmware version" << result[0];
+            qCDebug(dcUniPi()) << "     - Number of IOs" << result[1];
+            qCDebug(dcUniPi()) << "     - Number of peripherals" << result[2];
+            qCDebug(dcUniPi()) << "     - Firmware Id" << result[3];
+            qCDebug(dcUniPi()) << "     - Hardware Id" << result[4];
+            qCDebug(dcUniPi()) << "     - Serial number" << (static_cast<quint32>(result[6])<<16 | result[5]);
 
             ParamList parameters;
-            ThingDescriptor thingDescriptor(neuronThingClassId, "Neuron", modbusMaster->serialPort());
-            parameters.append(Param(neuronThingModbusMasterUuidParamTypeId, modbusMaster->modbusUuid()));
+            ThingDescriptor thingDescriptor(neuronThingClassId, "Neuron", "");
+            parameters.append(Param(neuronThingModelIdParamTypeId, result[4]));
             thingDescriptor.setParams(parameters);
             info->addThingDescriptor(thingDescriptor);
 
         });
-        //TODO read modbus register for
-
 
     } else if (ThingClassId == neuronExtensionThingClassId) {
         if (hardwareManager()->modbusRtuResource()->modbusRtuMasters().isEmpty()) {
@@ -418,27 +401,28 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
                 for (int i = 0; i <= 16; i++) {
                     ModbusRtuReply *reply = modbusMaster->readHoldingRegister(i, 1000, 7);
                     connect(reply, &ModbusRtuReply::finished, reply, &ModbusRtuReply::deleteLater);
-                    connect(reply, &ModbusRtuReply::finished, this, [this, reply] {
+                    connect(reply, &ModbusRtuReply::finished, this, [info, modbusMaster, reply] {
 
                         if (reply->error() != ModbusRtuReply::Error::NoError) {
                             return;
                         }
-                        NeuronExtensionDescriptor descriptor;
                         QVector<quint16> result = reply->result();
                         if (result.length() < 7) {
                             return;
                         }
-                        descriptor.slaveAddress = reply->slaveAddress();
-                        descriptor.firmwareVersion = result[0];
-                        descriptor.numberOfIOs = result[1];
-                        descriptor.numberOfPeripherals = result[2];
-                        descriptor.firmwareId = result[3];
-                        descriptor.hardwareId = result[4];
-                        descriptor.serialNumber = (static_cast<quint32>(result[6])<<16 | result[5]);
+                        qCDebug(dcUniPi()) << "Found Neuron Extension";
+                        qCDebug(dcUniPi()) << "     - Slave Address" << reply->slaveAddress();
+                        qCDebug(dcUniPi()) << "     - Firmware version" << result[0];
+                        qCDebug(dcUniPi()) << "     - Number of IOs" << result[1];
+                        qCDebug(dcUniPi()) << "     - Number of peripherals" << result[2];
+                        qCDebug(dcUniPi()) << "     - Firmware Id" << result[3];
+                        qCDebug(dcUniPi()) << "     - Hardware Id" << result[4];
+                        qCDebug(dcUniPi()) << "     - Serial number" << (static_cast<quint32>(result[6])<<16 | result[5]);
 
                         ParamList parameters;
                         ThingDescriptor thingDescriptor(neuronExtensionThingClassId, "Neuron extension", modbusMaster->serialPort());
                         parameters.append(Param(neuronExtensionThingModbusMasterUuidParamTypeId, modbusMaster->modbusUuid()));
+                        parameters.append(Param(neuronExtensionThingModelIdParamTypeId, result[4]));
                         thingDescriptor.setParams(parameters);
                         info->addThingDescriptor(thingDescriptor);
                     });
@@ -487,16 +471,7 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
         thing->setStateValue(m_connectionStateTypeIds.value(thing->thingClassId()), true);
         return info->finish(Thing::ThingErrorNoError);
 
-    } else if(thing->thingClassId() == neuronS103ThingClassId ||
-              thing->thingClassId() == neuronM103ThingClassId ||
-              thing->thingClassId() == neuronM203ThingClassId ||
-              thing->thingClassId() == neuronM303ThingClassId ||
-              thing->thingClassId() == neuronM403ThingClassId ||
-              thing->thingClassId() == neuronL203ThingClassId ||
-              thing->thingClassId() == neuronL303ThingClassId ||
-              thing->thingClassId() == neuronL403ThingClassId ||
-              thing->thingClassId() == neuronL503ThingClassId ||
-              thing->thingClassId() == neuronL513ThingClassId) {
+    } else if(thing->thingClassId() == neuronThingClassId) {
         qCDebug(dcUniPi()) << "Setting up Neuron thing" << thing->name();
 
         if (!neuronDeviceInit()) {
@@ -505,32 +480,15 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
         }
 
         Neuron *neuron;
-        if (thing->thingClassId() == neuronS103ThingClassId) {
-            neuron = new Neuron(Neuron::NeuronTypes::S103, m_modbusTCPMaster, this);
-        } else  if (thing->thingClassId() == neuronM103ThingClassId) {
-            neuron = new Neuron(Neuron::NeuronTypes::M103, m_modbusTCPMaster, this);
-        } else if (thing->thingClassId() == neuronM203ThingClassId) {
-            neuron = new Neuron(Neuron::NeuronTypes::M203, m_modbusTCPMaster, this);
-        } else if (thing->thingClassId() == neuronM303ThingClassId) {
-            neuron = new Neuron(Neuron::NeuronTypes::M303, m_modbusTCPMaster, this);
-        } else if (thing->thingClassId() == neuronM403ThingClassId) {
-            neuron = new Neuron(Neuron::NeuronTypes::M403, m_modbusTCPMaster, this);
-        } else if (thing->thingClassId() == neuronM503ThingClassId) {
-            neuron = new Neuron(Neuron::NeuronTypes::M503, m_modbusTCPMaster, this);
-        } else if (thing->thingClassId() == neuronL203ThingClassId) {
-            neuron = new Neuron(Neuron::NeuronTypes::L203, m_modbusTCPMaster, this);
-        } else if (thing->thingClassId() == neuronL303ThingClassId) {
-            neuron = new Neuron(Neuron::NeuronTypes::L303, m_modbusTCPMaster, this);
-        } else if (thing->thingClassId() == neuronL403ThingClassId) {
-            neuron = new Neuron(Neuron::NeuronTypes::L403, m_modbusTCPMaster, this);
-        } else if (thing->thingClassId() == neuronL503ThingClassId) {
-            neuron = new Neuron(Neuron::NeuronTypes::L503, m_modbusTCPMaster, this);
-        } else  if (thing->thingClassId() == neuronL513ThingClassId) {
-            neuron = new Neuron(Neuron::NeuronTypes::L513, m_modbusTCPMaster, this);
+        int model = thing->paramValue(neuronThingModelIdParamTypeId).toInt();
+        neuron = new Neuron(Neuron::NeuronTypes(model), m_modbusTCPMaster, this);
+
+        //TODO check if model exists;
+        /*if (Neuron::NeuronTypes)
         } else {
             qCWarning(dcUniPi()) << "Neuron type not supported";
             return info->finish(Thing::ThingErrorSetupFailed, QT_TR_NOOP("Error unrecognized Neuron type."));
-        }
+        }*/
 
         if (!neuron->init()) {
             qCWarning(dcUniPi()) << "Could not load the modbus map";
@@ -551,43 +509,21 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
         thing->setStateValue(m_connectionStateTypeIds.value(thing->thingClassId()), (m_modbusTCPMaster->state() == QModbusDevice::ConnectedState));
         return info->finish(Thing::ThingErrorNoError);
 
-    } else if(thing->thingClassId() == neuronXS10ThingClassId ||
-              thing->thingClassId() == neuronXS20ThingClassId ||
-              thing->thingClassId() == neuronXS30ThingClassId ||
-              thing->thingClassId() == neuronXS40ThingClassId ||
-              thing->thingClassId() == neuronXS50ThingClassId ||
-              thing->thingClassId() == neuronXS11ThingClassId ||
-              thing->thingClassId() == neuronXS51ThingClassId) {
+    } else if(thing->thingClassId() == neuronExtensionThingClassId) {
         qCDebug(dcUniPi()) << "Setting up Neuron extension thing" << thing->name();
 
         if (!neuronExtensionInterfaceInit()) {
             return info->finish(Thing::ThingErrorSetupFailed, QT_TR_NOOP("Error setting up Neuron."));
         }
 
-        int slaveAddress;
         NeuronExtension *neuronExtension;
+        int slaveAddress = thing->paramValue(neuronExtensionThingSlaveAddressParamTypeId).toInt();
+        QUuid modbusRtuMasterUuid = thing->paramValue(neuronExtensionThingModbusMasterUuidParamTypeId).toString();
+        ModbusRtuMaster *modbusRtuMaster = hardwareManager()->modbusRtuResource()->getModbusRtuMaster(modbusRtuMasterUuid);
+        int model =  thing->paramValue(neuronExtensionThingModelIdParamTypeId).toInt();
+        neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes(model), modbusRtuMaster, slaveAddress, this);
 
-        if(thing->thingClassId() == neuronXS10ThingClassId) {
-            slaveAddress = thing->paramValue(neuronXS10ThingSlaveAddressParamTypeId).toInt();
-            neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS10, m_modbusRTUMaster, slaveAddress, this);
-        } else if (thing->thingClassId() == neuronXS20ThingClassId) {
-            slaveAddress = thing->paramValue(neuronXS20ThingSlaveAddressParamTypeId).toInt();
-            neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS20, m_modbusRTUMaster, slaveAddress, this);
-        } else if (thing->thingClassId() == neuronXS30ThingClassId) {
-            slaveAddress = thing->paramValue(neuronXS30ThingSlaveAddressParamTypeId).toInt();
-            neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS30, m_modbusRTUMaster, slaveAddress, this);
-        } else if (thing->thingClassId() == neuronXS40ThingClassId) {
-            slaveAddress = thing->paramValue(neuronXS40ThingSlaveAddressParamTypeId).toInt();
-            neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS40, m_modbusRTUMaster, slaveAddress, this);
-        } else if (thing->thingClassId() == neuronXS50ThingClassId) {
-            slaveAddress = thing->paramValue(neuronXS50ThingSlaveAddressParamTypeId).toInt();
-            neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS50, m_modbusRTUMaster, slaveAddress, this);
-        } else if (thing->thingClassId() == neuronXS11ThingClassId) {
-            slaveAddress = thing->paramValue(neuronXS11ThingSlaveAddressParamTypeId).toInt();
-            neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS11, m_modbusRTUMaster, slaveAddress, this);
-        } else if (thing->thingClassId() == neuronXS51ThingClassId) {
-            slaveAddress = thing->paramValue(neuronXS51ThingSlaveAddressParamTypeId).toInt();
-            neuronExtension = new NeuronExtension(NeuronExtension::ExtensionTypes::xS51, m_modbusRTUMaster, slaveAddress, this);
+            /*
         } else {
             return info->finish(Thing::ThingErrorSetupFailed, QT_TR_NOOP("Error unrecognized extension type."));
         }
@@ -596,7 +532,8 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
             neuronExtension->deleteLater();
             neuronExtension = nullptr;
             return info->finish(Thing::ThingErrorSetupFailed, QT_TR_NOOP("Error loading modbus map."));
-        }
+        }*/
+
         connect(neuronExtension, &NeuronExtension::requestExecuted, this, &IntegrationPluginUniPi::onRequestExecuted);
         connect(neuronExtension, &NeuronExtension::requestError, this, &IntegrationPluginUniPi::onRequestError);
         connect(neuronExtension, &NeuronExtension::connectionStateChanged, this, &IntegrationPluginUniPi::onNeuronExtensionConnectionStateChanged);
@@ -607,7 +544,7 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
         connect(neuronExtension, &NeuronExtension::userLEDStatusChanged, this, &IntegrationPluginUniPi::onNeuronExtensionUserLEDStatusChanged);
 
         m_neuronExtensions.insert(thing->id(), neuronExtension);
-        thing->setStateValue(m_connectionStateTypeIds.value(thing->thingClassId()), (m_modbusRTUMaster->state() == QModbusDevice::ConnectedState));
+        //thing->setStateValue(m_connectionStateTypeIds.value(thing->thingClassId()), (m_modbusRTUMaster->state() == QModbusDevice::ConnectedState));
 
         return info->finish(Thing::ThingErrorNoError);
     } else if (thing->thingClassId() == digitalOutputThingClassId) {
@@ -792,11 +729,6 @@ void IntegrationPluginUniPi::thingRemoved(Thing *thing)
             m_modbusTCPMaster->deleteLater();
             m_modbusTCPMaster = nullptr;
         }
-        if (m_modbusRTUMaster) {
-            m_modbusRTUMaster->disconnectDevice();
-            m_modbusRTUMaster->deleteLater();
-            m_modbusRTUMaster = nullptr;
-        }
     }
 }
 
@@ -814,7 +746,7 @@ void IntegrationPluginUniPi::onPluginConfigurationChanged(const ParamTypeId &par
             m_modbusTCPMaster->setConnectionParameter(QModbusDevice::NetworkPortParameter, value.toInt());
         }
     }
-
+/*
     if (paramTypeId == uniPiPluginSerialPortParamTypeId) {
         if (m_modbusRTUMaster) {
             m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialPortNameParameter, value.toString());
@@ -836,6 +768,7 @@ void IntegrationPluginUniPi::onPluginConfigurationChanged(const ParamTypeId &par
             }
         }
     }
+*/
 }
 
 void IntegrationPluginUniPi::onNeuronConnectionStateChanged(bool state)
@@ -1035,7 +968,7 @@ void IntegrationPluginUniPi::onNeuronExtensionUserLEDStatusChanged(const QString
 
 void IntegrationPluginUniPi::onReconnectTimer()
 {
-    if(m_modbusRTUMaster) {
+    /*if(m_modbusRTUMaster) {
         if (m_modbusRTUMaster->state() != QModbusDevice::State::ConnectedState) {
             if (!m_modbusRTUMaster->connectDevice()) {
                 qCWarning(dcUniPi()) << "Reconnecing to modbus RTU master failed";
@@ -1045,7 +978,7 @@ void IntegrationPluginUniPi::onReconnectTimer()
                 }
             }
         }
-    }
+    }*/
     if(m_modbusTCPMaster) {
         if (m_modbusTCPMaster->state() != QModbusDevice::State::ConnectedState) {
             if (!m_modbusTCPMaster->connectDevice()) {
@@ -1160,7 +1093,7 @@ bool IntegrationPluginUniPi::neuronDeviceInit()
 bool IntegrationPluginUniPi::neuronExtensionInterfaceInit()
 {
     qCDebug(dcUniPi()) << "Neuron extension interface init, creating Modbus RTU Master";
-    if(!m_modbusRTUMaster) {
+    /*if(!m_modbusRTUMaster) {
         QString serialPort = configValue(uniPiPluginSerialPortParamTypeId).toString();
         int baudrate = configValue(uniPiPluginBaudrateParamTypeId).toInt();
         QString parity = configValue(uniPiPluginParityParamTypeId).toString();
@@ -1188,6 +1121,6 @@ bool IntegrationPluginUniPi::neuronExtensionInterfaceInit()
         }
     } else {
         qCDebug(dcUniPi()) << "Neuron Extension Modbus RTU Master is already created";
-    }
+    }*/
     return true;
 }
