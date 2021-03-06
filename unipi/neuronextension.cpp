@@ -36,7 +36,7 @@
 #include <QModbusDataUnit>
 #include <QStandardPaths>
 
-NeuronExtension::NeuronExtension(ExtensionTypes extensionType, QModbusClient *modbusInterface, int slaveAddress, QObject *parent) :
+NeuronExtension::NeuronExtension(ExtensionTypes extensionType, ModbusRtuMaster *modbusInterface, int slaveAddress, QObject *parent) :
     NeuronCommon(modbusInterface, slaveAddress, parent),
     m_extensionType(extensionType)
 {

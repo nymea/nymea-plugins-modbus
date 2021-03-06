@@ -34,11 +34,15 @@
 #include <QObject>
 #include <QtSerialBus>
 
+#include "hardware/modbus/modbusrtumaster.h"
+
 class NeuronCommon : public QObject
 {
     Q_OBJECT
 public:
     explicit NeuronCommon(QModbusClient *modbusInterface, int slaveAddress, QObject *parent = nullptr);
+    explicit NeuronCommon(ModbusRtuMaster *modbusInterface, int slaveAddress, QObject *parent = nullptr);
+
     bool init();
     int slaveAddress();
     void setSlaveAddress(int slaveAddress);
@@ -100,7 +104,8 @@ private:
 
     int m_slaveAddress = 0;
     uint m_responseTimeoutTime = 2000;
-    QModbusClient *m_modbusInterface = nullptr;
+    QModbusClient *m_modbusTcpInterface = nullptr;
+    ModbusRtuMaster *m_modbusRtuInterface = nullptr;
 
     QTimer *m_inputPollingTimer = nullptr;
     QTimer *m_outputPollingTimer = nullptr;
@@ -109,6 +114,8 @@ private:
     QList<QModbusDataUnit> m_readRequestQueue;
 
     QHash<QString, uint16_t> m_previousCircuitValue;
+
+    void initTimers();
 
     bool circuitValueChanged(const QString &circuit, quint32 value);
     bool getAnalogIO(const RegisterDescriptor &descriptor);

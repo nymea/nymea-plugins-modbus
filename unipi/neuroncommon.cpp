@@ -34,38 +34,17 @@
 NeuronCommon::NeuronCommon(QModbusClient *modbusInterface, int slaveAddress, QObject *parent) :
     QObject(parent),
     m_slaveAddress(slaveAddress),
-    m_modbusInterface(modbusInterface)
+    m_modbusTcpInterface(modbusInterface)
 {
-    m_inputPollingTimer = new QTimer(this);
-    connect(m_inputPollingTimer, &QTimer::timeout, this, &NeuronCommon::onInputPollingTimer);
-    m_inputPollingTimer->setTimerType(Qt::TimerType::PreciseTimer);
-    m_inputPollingTimer->setInterval(200);
+    initTimers();
+}
 
-    m_outputPollingTimer = new QTimer(this);
-    connect(m_outputPollingTimer, &QTimer::timeout, this, &NeuronCommon::onOutputPollingTimer);
-    m_outputPollingTimer->setTimerType(Qt::TimerType::PreciseTimer);
-    m_outputPollingTimer->setInterval(1000);
-
-    if (m_modbusInterface->state() == QModbusDevice::State::ConnectedState) {
-        m_inputPollingTimer->start();
-        m_outputPollingTimer->start();
-    }
-
-    connect(m_modbusInterface, &QModbusDevice::stateChanged, this, [this] (QModbusDevice::State state) {
-        if (state == QModbusDevice::State::ConnectedState) {
-            if (m_inputPollingTimer)
-                m_inputPollingTimer->start();
-            if (m_outputPollingTimer)
-                m_outputPollingTimer->start();
-            emit connectionStateChanged(true);
-        } else {
-            if (m_inputPollingTimer)
-                m_inputPollingTimer->stop();
-            if (m_outputPollingTimer)
-                m_outputPollingTimer->stop();
-            emit connectionStateChanged(false);
-        }
-    });
+NeuronCommon::NeuronCommon(ModbusRtuMaster *modbusInterface, int slaveAddress, QObject *parent) :
+    QObject(parent),
+    m_slaveAddress(slaveAddress),
+    m_modbusRtuInterface(modbusInterface)
+{
+    initTimers();
 }
 
 bool NeuronCommon::init()
@@ -75,12 +54,12 @@ bool NeuronCommon::init()
         return false;
     }
 
-    if (!m_modbusInterface) {
+    if (!m_modbusTcpInterface) {
         qWarning(dcUniPi()) << "Neuron: Modbus interface not available";
         return false;
     }
 
-    if (m_modbusInterface->connectDevice()) {
+    if (m_modbusTcpInterface->connectDevice()) {
         qWarning(dcUniPi()) << "Neuron: Could not connect to modbus device";
         return  false;
     }
@@ -155,6 +134,40 @@ NeuronCommon::RegisterDescriptor NeuronCommon::registerDescriptorFromStringList(
         descriptor.registerType = QModbusDataUnit::RegisterType::HoldingRegisters;
     }
     return descriptor;
+}
+
+void NeuronCommon::initTimers()
+{
+    m_inputPollingTimer = new QTimer(this);
+    connect(m_inputPollingTimer, &QTimer::timeout, this, &NeuronCommon::onInputPollingTimer);
+    m_inputPollingTimer->setTimerType(Qt::TimerType::PreciseTimer);
+    m_inputPollingTimer->setInterval(200);
+
+    m_outputPollingTimer = new QTimer(this);
+    connect(m_outputPollingTimer, &QTimer::timeout, this, &NeuronCommon::onOutputPollingTimer);
+    m_outputPollingTimer->setTimerType(Qt::TimerType::PreciseTimer);
+    m_outputPollingTimer->setInterval(1000);
+
+    if (m_modbusTcpInterface->state() == QModbusDevice::State::ConnectedState) {
+        m_inputPollingTimer->start();
+        m_outputPollingTimer->start();
+    }
+
+    connect(m_modbusTcpInterface, &QModbusDevice::stateChanged, this, [this] (QModbusDevice::State state) {
+        if (state == QModbusDevice::State::ConnectedState) {
+            if (m_inputPollingTimer)
+                m_inputPollingTimer->start();
+            if (m_outputPollingTimer)
+                m_outputPollingTimer->start();
+            emit connectionStateChanged(true);
+        } else {
+            if (m_inputPollingTimer)
+                m_inputPollingTimer->stop();
+            if (m_outputPollingTimer)
+                m_outputPollingTimer->stop();
+            emit connectionStateChanged(false);
+        }
+    });
 }
 
 bool NeuronCommon::circuitValueChanged(const QString &circuit, quint32 value)
@@ -331,10 +344,10 @@ bool NeuronCommon::getUserLED(const QString &circuit)
 
 bool NeuronCommon::getAnalogIO(const RegisterDescriptor &descriptor)
 {
-    if (!m_modbusInterface)
+    if (!m_modbusTcpInterface)
         return false;
 
-    if (m_modbusInterface->state() != QModbusDevice::State::ConnectedState)
+    if (m_modbusTcpInterface->state() != QModbusDevice::State::ConnectedState)
         return false;
 
     QModbusDataUnit request = QModbusDataUnit(descriptor.registerType, descriptor.address, descriptor.count);
@@ -356,18 +369,18 @@ bool NeuronCommon::writeRequest(const Request &request)
 
 bool NeuronCommon::sendModbusWriteRequest(const Request &request)
 {
-    if (!m_modbusInterface) {
+    if (!m_modbusTcpInterface) {
         emit requestExecuted(request.id, false);
         emit requestError(request.id, "Modbus interface not available");
         return false;
     }
-    if (m_modbusInterface->state() != QModbusDevice::State::ConnectedState) {
+    if (m_modbusTcpInterface->state() != QModbusDevice::State::ConnectedState) {
         emit requestExecuted(request.id, false);
         emit requestError(request.id, "Device not connected");
         return false;
     };
 
-    if (QModbusReply *reply = m_modbusInterface->sendWriteRequest(request.data, m_slaveAddress)) {
+    if (QModbusReply *reply = m_modbusTcpInterface->sendWriteRequest(request.data, m_slaveAddress)) {
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
             connect(reply, &QModbusReply::finished, this, [reply, request, this] {
@@ -402,7 +415,7 @@ bool NeuronCommon::sendModbusWriteRequest(const Request &request)
             return false;
         }
     } else {
-        qCWarning(dcUniPi()) << "Neuron: Read error: " << m_modbusInterface->errorString();
+        qCWarning(dcUniPi()) << "Neuron: Read error: " << m_modbusTcpInterface->errorString();
         return false;
     }
     return true;
@@ -423,13 +436,13 @@ bool NeuronCommon::readRequest(const QModbusDataUnit &request)
 
 bool NeuronCommon::sendModbusReadRequest(const QModbusDataUnit &request)
 {
-    if (!m_modbusInterface) {
+    if (!m_modbusTcpInterface) {
         return false;
     }
-    if (m_modbusInterface->state() != QModbusDevice::State::ConnectedState)
+    if (m_modbusTcpInterface->state() != QModbusDevice::State::ConnectedState)
         return false;
 
-    if (QModbusReply *reply = m_modbusInterface->sendReadRequest(request, m_slaveAddress)) {
+    if (QModbusReply *reply = m_modbusTcpInterface->sendReadRequest(request, m_slaveAddress)) {
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
             connect(reply, &QModbusReply::finished, this, [reply, this] {
@@ -525,7 +538,7 @@ bool NeuronCommon::sendModbusReadRequest(const QModbusDataUnit &request)
             return false;
         }
     } else {
-        qCWarning(dcUniPi()) << "Neuron: Read error: " << m_modbusInterface->errorString();
+        qCWarning(dcUniPi()) << "Neuron: Read error: " << m_modbusTcpInterface->errorString();
         return false;
     }
     return true;

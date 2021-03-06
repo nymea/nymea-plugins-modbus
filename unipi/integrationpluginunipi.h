@@ -66,11 +66,10 @@ private:
     UniPi *m_unipi = nullptr;
     QHash<ThingId, Neuron *> m_neurons;
     QHash<ThingId, NeuronExtension *> m_neuronExtensions;
+
     QModbusTcpClient *m_modbusTCPMaster = nullptr;
     QHash<Thing *, ModbusRtuMaster *> m_modbusRtuMasters;
-    QModbusRtuSerialMaster *m_modbusRTUMaster = nullptr;
 
-    QHash<Thing *, QTimer *> m_unlatchTimer;
     QTimer *m_reconnectTimer = nullptr;
     QHash<QUuid, ThingActionInfo *> m_asyncActions;
     QHash<ThingClassId, StateTypeId> m_connectionStateTypeIds;

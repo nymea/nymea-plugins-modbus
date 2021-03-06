@@ -32,6 +32,7 @@
 #define NEURONEXTENSION_H
 
 #include "neuroncommon.h"
+#include "hardware/modbus/modbusrtumaster.h"
 
 #include <QObject>
 #include <QHash>
@@ -54,7 +55,7 @@ public:
     };
     Q_ENUM(ExtensionTypes)
 
-    explicit NeuronExtension(ExtensionTypes extensionType, QModbusClient *modbusInterface, int slaveAddress, QObject *parent = nullptr);
+    explicit NeuronExtension(ExtensionTypes extensionType, ModbusRtuMaster *modbusInterface, int slaveAddress, QObject *parent = nullptr);
     ~NeuronExtension();
     QString type();
 
