@@ -207,15 +207,7 @@ bool NeuronCommon::getDigitalInput(const QString &circuit)
     //qDebug(dcUniPi()) << "Neuron: Reading digital Input" << circuit << modbusAddress;
 
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
-    if (m_readRequestQueue.isEmpty()) {
-        return modbusReadRequest(request);
-    } else if (m_readRequestQueue.length() > 100) {
-        qCWarning(dcUniPi()) << "Neuron: Too many pending read requests";
-        return false;
-    } else {
-        m_readRequestQueue.append(request);
-    }
-    return true;
+    return readRequest(request);
 }
 
 bool NeuronCommon::getAnalogOutput(const QString &circuit)
@@ -245,13 +237,8 @@ QUuid NeuronCommon::setDigitalOutput(const QString &circuit, bool value)
     request.data.setValue(0, static_cast<uint16_t>(value));
     request.id = QUuid::createUuid();
 
-    if (m_writeRequestQueue.isEmpty()) {
-        modbusWriteRequest(request);
-    } else if (m_writeRequestQueue.length() > 100) {
+    if (!writeRequest(request))
         return "";
-    } else {
-        m_writeRequestQueue.append(request);
-    }
     return request.id;
 }
 
@@ -266,15 +253,7 @@ bool NeuronCommon::getDigitalOutput(const QString &circuit)
     //qDebug(dcUniPi()) << "Reading digital Output" << circuit << modbusAddress;
 
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, 1);
-    if (m_readRequestQueue.isEmpty()) {
-        return modbusReadRequest(request);
-    } else if (m_readRequestQueue.length() > 100) {
-        qCWarning(dcUniPi()) << "Neuron: Too many pending read requests";
-        return false;
-    } else {
-        m_readRequestQueue.append(request);
-    }
-    return true;
+    return readRequest(request);
 }
 
 
@@ -294,13 +273,8 @@ QUuid NeuronCommon::setAnalogOutput(const QString &circuit, double value)
                 request.data.setValue(1, (static_cast<uint32_t>(value) & 0xffff));
             }
 
-            if (m_writeRequestQueue.isEmpty()) {
-                modbusWriteRequest(request);
-            } else if (m_writeRequestQueue.length() > 100) {
+            if (!writeRequest(request))
                 return "";
-            } else {
-                m_writeRequestQueue.append(request);
-            }
             return request.id;
         }
     }
@@ -323,27 +297,20 @@ bool NeuronCommon::getAnalogInput(const QString &circuit)
 
 QUuid NeuronCommon::setUserLED(const QString &circuit, bool value)
 {
+    if (!m_modbusUserLEDRegisters.contains(circuit)) {
+        qCWarning(dcUniPi()) << "Neuron: User LED circuit not found" << circuit;
+        return "";
+    }
     int modbusAddress = m_modbusUserLEDRegisters.value(circuit);
     //qDebug(dcUniPi()) << "Neuron: Setting user led" << circuit << modbusAddress << value;
-
-    if (!m_modbusInterface)
-        return "";
 
     Request request;
     request.id = QUuid::createUuid();
 
     request.data = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
     request.data.setValue(0, static_cast<uint16_t>(value));
-
-    if (m_writeRequestQueue.isEmpty()) {
-        if (!modbusWriteRequest(request)) {
-            return "";
-        }
-    } else if (m_writeRequestQueue.length() > 100) {
+    if (!writeRequest(request))
         return "";
-    } else {
-        m_writeRequestQueue.append(request);
-    }
 
     return request.id;
 }
@@ -351,19 +318,15 @@ QUuid NeuronCommon::setUserLED(const QString &circuit, bool value)
 
 bool NeuronCommon::getUserLED(const QString &circuit)
 {
+    if (!m_modbusUserLEDRegisters.contains(circuit)) {
+        qCWarning(dcUniPi()) << "Neuron: User LED circuit not found" << circuit;
+        return false;
+    }
     int modbusAddress = m_modbusUserLEDRegisters.value(circuit);
     //qDebug(dcUniPi()) << "Neuron: Get user LED" << circuit << modbusAddress;
 
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
-    if (m_readRequestQueue.isEmpty()) {
-        return modbusReadRequest(request);
-    } else if (m_readRequestQueue.length() > 100) {
-        qCWarning(dcUniPi()) << "Neuron: Too many pending read requests";
-        return false;
-    } else {
-        m_readRequestQueue.append(request);
-    }
-    return true;
+    return readRequest(request);
 }
 
 bool NeuronCommon::getAnalogIO(const RegisterDescriptor &descriptor)
@@ -375,18 +338,23 @@ bool NeuronCommon::getAnalogIO(const RegisterDescriptor &descriptor)
         return false;
 
     QModbusDataUnit request = QModbusDataUnit(descriptor.registerType, descriptor.address, descriptor.count);
-    if (m_readRequestQueue.isEmpty()) {
-        return modbusReadRequest(request);
-    } else if (m_readRequestQueue.length() > 100) {
-        qCWarning(dcUniPi()) << "Neuron: Too many pending read requests";
+    return readRequest(request);
+}
+
+
+bool NeuronCommon::writeRequest(const Request &request)
+{
+    if (m_writeRequestQueue.isEmpty()) {
+        return sendModbusWriteRequest(request);
+    } else if (m_writeRequestQueue.length() > 200) {
         return false;
     } else {
-        m_readRequestQueue.append(request);
+        m_writeRequestQueue.append(request);
     }
     return true;
 }
 
-bool NeuronCommon::modbusWriteRequest(const Request &request)
+bool NeuronCommon::sendModbusWriteRequest(const Request &request)
 {
     if (!m_modbusInterface) {
         emit requestExecuted(request.id, false);
@@ -405,7 +373,7 @@ bool NeuronCommon::modbusWriteRequest(const Request &request)
             connect(reply, &QModbusReply::finished, this, [reply, request, this] {
 
                 if (!m_writeRequestQueue.isEmpty()) {
-                    modbusWriteRequest(m_writeRequestQueue.takeFirst());
+                    sendModbusWriteRequest(m_writeRequestQueue.takeFirst());
                 }
 
                 if (reply->error() == QModbusDevice::NoError) {
@@ -428,7 +396,7 @@ bool NeuronCommon::modbusWriteRequest(const Request &request)
                     emit requestError(request.id, reply->errorString());
                 }
             });
-            QTimer::singleShot(m_responseTimeoutTime, reply, &QModbusReply::deleteLater);
+            //QTimer::singleShot(m_responseTimeoutTime, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
             return false;
@@ -440,8 +408,20 @@ bool NeuronCommon::modbusWriteRequest(const Request &request)
     return true;
 }
 
+bool NeuronCommon::readRequest(const QModbusDataUnit &request)
+{
+    if (m_readRequestQueue.isEmpty()) {
+        return sendModbusReadRequest(request);
+    } else if (m_readRequestQueue.length() > 200) {
+        qCWarning(dcUniPi()) << "Neuron: Too many pending read requests";
+        return false;
+    } else {
+        m_readRequestQueue.append(request);
+    }
+    return true;
+}
 
-bool NeuronCommon::modbusReadRequest(const QModbusDataUnit &request)
+bool NeuronCommon::sendModbusReadRequest(const QModbusDataUnit &request)
 {
     if (!m_modbusInterface) {
         return false;
@@ -539,7 +519,7 @@ bool NeuronCommon::modbusReadRequest(const QModbusDataUnit &request)
                     qCWarning(dcUniPi()) << "Neuron: Read response error:" << reply->error() << reply->errorString();
                 }
             });
-            QTimer::singleShot(m_responseTimeoutTime, reply, &QModbusReply::deleteLater);
+            //QTimer::singleShot(m_responseTimeoutTime, reply, &QModbusReply::deleteLater);
         } else {
             delete reply; // broadcast replies return immediately
             return false;
@@ -580,13 +560,7 @@ void NeuronCommon::getCoils(QList<int> registerList)
 
     foreach (int startAddress, registerGroups.keys()) {
         QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, startAddress, registerGroups.value(startAddress));
-        if (m_readRequestQueue.isEmpty()) {
-            modbusReadRequest(request);
-        } else if (m_readRequestQueue.length() > 100) {
-            qCWarning(dcUniPi()) << "Neuron: Too many pending read requests";
-        } else {
-            m_readRequestQueue.append(request);
-        }
+        readRequest(request);
     }
 }
 

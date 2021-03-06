@@ -32,7 +32,9 @@
 #define INTEGRATIONPLUGINUNIPI_H
 
 #include "integrations/integrationplugin.h"
+#include "hardware/modbus/modbusrtumaster.h"
 #include "plugintimer.h"
+
 #include "unipi.h"
 #include "neuron.h"
 #include "neuronextension.h"
@@ -65,6 +67,7 @@ private:
     QHash<ThingId, Neuron *> m_neurons;
     QHash<ThingId, NeuronExtension *> m_neuronExtensions;
     QModbusTcpClient *m_modbusTCPMaster = nullptr;
+    QHash<Thing *, ModbusRtuMaster *> m_modbusRtuMasters;
     QModbusRtuSerialMaster *m_modbusRTUMaster = nullptr;
 
     QHash<Thing *, QTimer *> m_unlatchTimer;
