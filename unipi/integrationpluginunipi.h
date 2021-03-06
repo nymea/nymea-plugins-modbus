@@ -64,7 +64,7 @@ public:
 
 private:
     UniPi *m_unipi = nullptr;
-    Neuron *m_neuron;
+    Neuron *m_neuron = nullptr;
     QHash<ThingId, NeuronExtension *> m_neuronExtensions;
 
     QModbusTcpClient *m_modbusTCPMaster = nullptr;
@@ -73,9 +73,8 @@ private:
     QTimer *m_reconnectTimer = nullptr;
     QHash<QUuid, ThingActionInfo *> m_asyncActions;
     QHash<ThingClassId, StateTypeId> m_connectionStateTypeIds;
-
-    bool neuronDeviceInit();
-    bool neuronExtensionInterfaceInit();
+    QHash<ThingClassId, QString> m_neuronMigration;
+    QHash<ThingClassId, QString> m_neuronExtensionMigration;
 
 private slots:
     void onPluginConfigurationChanged(const ParamTypeId &paramTypeId, const QVariant &value);

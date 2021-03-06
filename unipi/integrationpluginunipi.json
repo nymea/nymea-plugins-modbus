@@ -70,6 +70,30 @@
                     "displayName": "Neuron",
                     "createMethods": ["user"],
                     "interfaces": ["gateway"],
+                    "paramTypes": [
+                        {
+                            "id": "4423bb43-10cf-4313-b29a-1402b9e75733",
+                            "name": "model",
+                            "displayName": "Model",
+                            "type": "QString",
+                            "allowedValues": [
+                                "S103",
+                                "M103",
+                                "M203",
+                                "M303",
+                                "M403",
+                                "M503",
+                                "M523",
+                                "L203",
+                                "L303",
+                                "L403",
+                                "L503",
+                                "L513",
+                                "L523",
+                                "L533"
+                            ]
+                        }
+                    ],
                     "stateTypes": [
                         {
                             "id": "8bc2c391-1375-4b0d-87d0-6e8b62f33fb8",
@@ -79,46 +103,6 @@
                             "type": "bool",
                             "defaultValue": false,
                             "cached": false
-                        },
-                        {
-                            "id": "9827d01e-c86b-4c7b-9ade-49d0884b82e8",
-                            "name": "modelId",
-                            "displayName": "Model ID",
-                             "displayNameEvent": "Model ID changed",
-                            "type": "int",
-                            "defaultValue": 0
-                        },
-                        {
-                            "id": "54b18c4d-b18a-42a0-9043-88e3dbbc04fa",
-                            "name": "numberOfDigitalOutputs",
-                            "displayName": "Number of digital outputs",
-                            "displayNameEvent": "Number of digital outputs changed",
-                            "type": "uint",
-                            "defaultValue": 0
-                        },
-                        {
-                            "id": "ee375874-56ef-40cb-9727-982b2c672d19",
-                            "name": "numberOfDigitalInputs",
-                            "displayName": "Number of digital inputs",
-                            "displayNameEvent": "Number of digital inputs changed",
-                            "type": "uint",
-                            "defaultValue": 0
-                        },
-                        {
-                            "id": "968315b5-078f-4a24-8549-27dbe88e0255",
-                            "name": "numberOfAnalogOutputs",
-                            "displayName": "Number of analog outputs",
-                            "displayNameEvent": "Number of analog outputs changed",
-                            "type": "uint",
-                            "defaultValue": 0
-                        },
-                        {
-                            "id": "2f379583-fe25-4afa-9abd-d65dcbf0aa9c",
-                            "name": "numberOfAnalogInputs",
-                            "displayName": "Number of analog inputs",
-                            "displayNameEvent": "Number of analog inputs changed",
-                            "type": "uint",
-                            "defaultValue": 0
                         }
                     ]
                 },
