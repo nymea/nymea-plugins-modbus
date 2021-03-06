@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2020, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -150,19 +150,13 @@ bool UniPi::init()
     return true;
 }
 
-QString UniPi::type()
+QString UniPi::type() const
 {
-    QString type;
-    switch (m_unipiType) {
-    case UniPiType::UniPi1:
-        type = "UniPi 1";
-        break;
-    case UniPiType::UniPi1Lite:
-        type = "UniPi 1 Lite";
-        break;
-    }
-    return type;
-}
+    if (m_unipiType == UniPiType::UniPi1)
+        return "UniPi 1";
+    else
+        return "UniPi 1 Lite";
+ }
 
 QList<QString> UniPi::digitalInputs()
 {
@@ -227,9 +221,9 @@ QList<QString> UniPi::analogOutputs()
 
 int UniPi::getPinFromCircuit(const QString &circuit)
 {
-    int pin = 0;
+    int pin = -1;
     if (circuit.startsWith("DI")) { //Raspberry Pi Input Pins
-        switch (circuit.mid(2, 2).toInt()) {
+        switch (circuit.midRef(2, 2).toInt()) {
         case 1: //DI01 GPIO04 Digital input
             pin = 4;
             break;
@@ -273,46 +267,52 @@ int UniPi::getPinFromCircuit(const QString &circuit)
             pin = 30;
             break;
         default:
-            return 0;
+            return -1;
         }
     }
     if (circuit.startsWith("DO")) { //MCP23008 Output Pins
-        switch (circuit.mid(2, 2).toInt()) {
-        case 01: //DO1 GP07 Digital Output
+        switch (circuit.midRef(2, 2).toInt()) {
+        case 1: //DO1
             pin = 7;
             break;
-        case 02: //DO1 GP07 Digital Output
+        case 2: //DO2
             pin = 6;
             break;
-        case 03: //DO1 GP07 Digital Output
+        case 3: //DO3
             pin = 5;
             break;
-        case 04: //DO1 GP07 Digital Output
+        case 4: //DO4
             pin = 4;
             break;
-        case 05: //DO1 GP07 Digital Output
+        case 5: //DO5
             pin = 3;
             break;
-        case 06: //DO1 GP07 Digital Output
+        case 6: //DO6
             pin = 2;
             break;
+        case 7: //DO7
+            pin = 1;
+            break;
+        case 8: //DO8
+            pin = 0;
+            break;
         default:
-            return 0;
+            return -1;
         }
     }
 
     if (circuit.startsWith("AO")) { //Raspberry Pi Analog Output
-        switch (circuit.mid(2, 2).toInt()) {
+        switch (circuit.midRef(2, 2).toInt()) {
         case 0: //AO GPIO18 PWM Analog Output 0-10V
             pin = 18;
             break;
         default:
-            return 0;
+            return -1;
         }
     }
 
     if (circuit.startsWith("AI")) { //MCP3422 analog input channels
-        switch (circuit.mid(2, 2).toInt()) {
+        switch (circuit.midRef(2, 2).toInt()) {
         case 1:
             pin = 1; //MCP3422 Channel 1
             break;
@@ -320,7 +320,7 @@ int UniPi::getPinFromCircuit(const QString &circuit)
             pin = 2; //MCP3422 Channel 2
             break;
         default:
-            return 0;
+            return -1;
         }
     }
     return pin;
@@ -329,7 +329,7 @@ int UniPi::getPinFromCircuit(const QString &circuit)
 bool UniPi::setDigitalOutput(const QString &circuit, bool status)
 {
     int pin = getPinFromCircuit(circuit);
-    if (pin == 0) {
+    if (pin == -1) {
         qWarning(dcUniPi()) << "Out of range pin number";
         return false;
     }
@@ -353,7 +353,7 @@ bool UniPi::setDigitalOutput(const QString &circuit, bool status)
 bool UniPi::getDigitalOutput(const QString &circuit)
 {
     int pin = getPinFromCircuit(circuit);
-    if (pin > 7)
+    if (pin == -1)
         return false;
 
     uint8_t registerValue;
@@ -367,7 +367,7 @@ bool UniPi::getDigitalOutput(const QString &circuit)
 bool UniPi::getDigitalInput(const QString &circuit)
 {
     int pin = getPinFromCircuit(circuit);
-    if (pin == 0) {
+    if (pin == -1) {
         qCWarning(dcUniPi()) << "Out of range pin number";
         return false;
     }

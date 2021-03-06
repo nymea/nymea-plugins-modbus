@@ -57,7 +57,7 @@ public:
     ~UniPi() override;
 
     bool init();
-    QString type();
+    QString type() const;
 
     bool setDigitalOutput(const QString &cicuit, bool status);
     bool getDigitalOutput(const QString &circuit);

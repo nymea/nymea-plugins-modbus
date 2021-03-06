@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2020, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -28,38 +28,39 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef NEURONEXTENSION_H
-#define NEURONEXTENSION_H
+#ifndef NEURONEXTENSIONDISCOVERY_H
+#define NEURONEXTENSIONDISCOVERY_H
 
-#include "neuroncommon.h"
-
+#include "neuronextension.h"
+#include "neuronextensionbus.h"
 #include <QObject>
-#include <QHash>
-#include <QTimer>
-#include <QUuid>
 
-class NeuronExtension : public NeuronCommon
+class NeuronExtensionDiscovery : public QObject
 {
     Q_OBJECT
 public:
+    NeuronExtensionDiscovery(NeuronExtensionBus *neuronExtensionBus, int startAddress = 1, int endAddress = 7);
 
-    enum ExtensionTypes {
-        xS10,
-        xS20,
-        xS30,
-        xS40,
-        xS50,
-        xS11,
-        xS51
-    };
-    Q_ENUM(ExtensionTypes)
-
-    explicit NeuronExtension(ExtensionTypes extensionType, QModbusClient *modbusInterface, int slaveAddress, QObject *parent = nullptr);
-    ~NeuronExtension();
-    QString type();
+    bool startDiscovery();
+    void stopDiscovery();
 
 private:
-    ExtensionTypes m_extensionType = ExtensionTypes::xS10;
-    bool loadModbusMap() override;
+    NeuronExtensionBus *m_neuronExtensionBus;
+    QHash<int, NeuronExtension::ExtensionTypes> m_discoveredExtensions;
+
+    int m_startAddress;
+    int m_endAddress;
+    int m_sweepingAddress = 1;
+    bool m_discoveryOngoing = false;
+
+    void getNext(int address);
+
+private slots:
+    void processResponse(NeuronExtensionReply *reply);
+
+signals:
+    void deviceFound(int address, NeuronExtension::ExtensionTypes model);
+    void finished(QHash<int, NeuronExtension::ExtensionTypes> devices);
 };
-#endif // NEURONEXTENSION_H
+
+#endif // NEURONEXTENSIONDISCOVERY_H
