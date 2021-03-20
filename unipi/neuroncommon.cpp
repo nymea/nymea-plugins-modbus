@@ -125,7 +125,7 @@ NeuronCommon::RegisterDescriptor NeuronCommon::registerDescriptorFromStringList(
     } else if (data[3] == "R") {
         descriptor.readWrite = RWPermissionRead;
     }
-    descriptor.circuit = data[5].split(" ").last();
+    descriptor.circuit = data[5].split(" ").value(4);
     descriptor.category = data.last();
 
     if (data[5].contains("Analog Input Value", Qt::CaseSensitivity::CaseInsensitive)) {
@@ -295,6 +295,46 @@ QUuid NeuronCommon::setAnalogOutput(const QString &circuit, double value)
     return "";
 }
 
+
+QUuid NeuronCommon::setAnalogOutputConfiguration(const QString &circuit, AnalogIOConfiguration value)
+{
+    qDebug(dcUniPi()) << "Neuron: Set analog output configuration" << circuit << value;
+    if (!m_modbusAnalogOutputConfigurationRegisters.contains(circuit)) {
+        qCWarning(dcUniPi()) << "Neuron: Analog output configuration register not found" << circuit;
+        return "";
+    }
+    int modbusAddress = m_modbusAnalogOutputConfigurationRegisters.value(circuit);
+    Request request;
+    request.id = QUuid::createUuid();
+
+    request.data = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, 1);
+    request.data.setValue(0, static_cast<uint16_t>(value));
+    if (!writeRequest(request))
+        return "";
+
+    return request.id;
+    return "";
+}
+
+QUuid NeuronCommon::setAnalogInputConfiguration(const QString &circuit, AnalogIOConfiguration value)
+{
+    qDebug(dcUniPi()) << "Neuron: Set analog input configuration" << circuit << value;
+    if (!m_modbusAnalogInputConfigurationRegisters.contains(circuit)) {
+        qCWarning(dcUniPi()) << "Neuron: Analog input configuration register not found" << circuit;
+        return "";
+    }
+    int modbusAddress = m_modbusAnalogInputConfigurationRegisters.value(circuit);
+    Request request;
+    request.id = QUuid::createUuid();
+
+    request.data = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, modbusAddress, 1);
+    request.data.setValue(0, static_cast<uint16_t>(value));
+    if (!writeRequest(request))
+        return "";
+
+    return request.id;
+    return "";
+}
 
 bool NeuronCommon::getAnalogInput(const QString &circuit)
 {

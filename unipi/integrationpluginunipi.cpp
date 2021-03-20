@@ -430,8 +430,8 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
         //TODO
     }
 
-    if(thing->thingClassId() == uniPi1ThingClassId
-            || thing->thingClassId() == uniPi1LiteThingClassId) {
+    if(thing->thingClassId() == uniPi1ThingClassId ||
+            thing->thingClassId() == uniPi1LiteThingClassId) {
 
         qCDebug(dcUniPi()) << "Setting up UniPi 1 thing" << thing->name();
 
@@ -473,11 +473,8 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
             qCDebug(dcUniPi()) << "Setup after reconnection, cleaning up ...";
             m_neuron->deleteLater();
             m_neuron = nullptr;
-
-
         }
 
-        qCDebug(dcUniPi()) << "Creating Modbus TCP Master";
         if (m_modbusTCPMaster) {
             m_modbusTCPMaster->deleteLater();
             m_modbusTCPMaster = nullptr;
@@ -486,6 +483,7 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
         int port = configValue(uniPiPluginPortParamTypeId).toInt();;
         QHostAddress ipAddress = QHostAddress(configValue(uniPiPluginAddressParamTypeId).toString());
 
+        qCDebug(dcUniPi()) << "Creating Modbus TCP Master";
         m_modbusTCPMaster = new QModbusTcpClient(this);
         m_modbusTCPMaster->setConnectionParameter(QModbusDevice::NetworkPortParameter, port);
         m_modbusTCPMaster->setConnectionParameter(QModbusDevice::NetworkAddressParameter, ipAddress.toString());
@@ -626,9 +624,23 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
     } else if (thing->thingClassId() == userLEDThingClassId) {
         return info->finish(Thing::ThingErrorNoError);
     } else if (thing->thingClassId() == analogInputThingClassId) {
-        return info->finish(Thing::ThingErrorNoError);
+        Thing *parent = myThings().findById(thing->parentId());
+        if (parent->setupComplete()) {
+            return info->finish(Thing::ThingErrorNoError);
+        } else {
+            connect(parent, &Thing::setupStatusChanged, info, [info] {
+                return info->finish(Thing::ThingErrorNoError);
+            });
+        }
     } else if (thing->thingClassId() == analogOutputThingClassId) {
-        return info->finish(Thing::ThingErrorNoError);
+        Thing *parent = myThings().findById(thing->parentId());
+        if (parent->setupComplete()) {
+            return info->finish(Thing::ThingErrorNoError);
+        } else {
+            connect(parent, &Thing::setupStatusChanged, info, [info] {
+                return info->finish(Thing::ThingErrorNoError);
+            });
+        }
     } else {
         qCWarning(dcUniPi()) << "Unhandled Thing class in setupThing:" << thing->thingClassId();
         return info->finish(Thing::ThingErrorThingClassNotFound);
@@ -638,6 +650,34 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
 void IntegrationPluginUniPi::postSetupThing(Thing *thing)
 {
     qCDebug(dcUniPi()) << "Post setup" << thing->name();
+
+    if (thing->thingClassId() == analogInputThingClassId) {
+        ThingClassId parentThingClassId = myThings().findById(thing->parentId())->thingClassId();
+        QString circuit = thing->paramValue(analogInputThingCircuitParamTypeId).toString();
+        connect(thing, &Thing::settingChanged, thing, [parentThingClassId, circuit, this] (const ParamTypeId &paramTypeId, const QVariant &value) {
+            if (paramTypeId == analogInputConfigurationParamTypeId) {
+                if (parentThingClassId == neuronThingClassId) {
+                    if (!m_neuron) {
+                        return;
+                    }
+                    NeuronCommon::AnalogIOConfiguration config;
+                    if (value.toString() == "Voltage") {
+                        m_neuron->setAnalogInputConfiguration(circuit, NeuronCommon::AnalogIOConfiguration::Voltage);
+                    } else if (value.toString() == "Current") {
+                        m_neuron->setAnalogInputConfiguration(circuit, NeuronCommon::AnalogIOConfiguration::Current);
+                    }
+                    return;
+            } else if (parentThingClassId == neuronExtensionThingClassId) {
+                NeuronExtension *neuronExtension = m_neuronExtensions.value(thing->parentId());
+                if (!neuronExtension) {
+                    return;
+                }
+                neuronExtension->setAnalogInputConfiguration();
+                return;
+            }
+        });
+    } else if (thing->thingClassId() == analogInputThingClassId) {
+    }
 
     if (!m_reconnectTimer) {
         qCDebug(dcUniPi()) << "Creating reconnect timer";

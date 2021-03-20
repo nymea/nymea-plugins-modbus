@@ -40,6 +40,14 @@ class NeuronCommon : public QObject
 {
     Q_OBJECT
 public:
+
+    enum AnalogIOConfiguration {
+        Voltage,
+        Current,
+        Resistance
+    };
+    Q_ENUM(AnalogIOConfiguration)
+
     explicit NeuronCommon(QModbusClient *modbusInterface, int slaveAddress, QObject *parent = nullptr);
     explicit NeuronCommon(ModbusRtuMaster *modbusInterface, int slaveAddress, QObject *parent = nullptr);
 
@@ -56,6 +64,9 @@ public:
     QUuid setDigitalOutput(const QString &circuit, bool value);
     QUuid setAnalogOutput(const QString &circuit, double value);
     QUuid setUserLED(const QString &circuit, bool value);
+
+    QUuid setAnalogOutputConfiguration(const QString &circuit, AnalogIOConfiguration value);
+    QUuid setAnalogInputConfiguration(const QString &circuit, AnalogIOConfiguration value);
 
     bool getDigitalOutput(const QString &circuit);
     bool getDigitalInput(const QString &circuit);
@@ -95,6 +106,8 @@ protected:
     QHash<QString, int> m_modbusUserLEDRegisters;
     QHash<int, RegisterDescriptor> m_modbusAnalogInputRegisters;
     QHash<int, RegisterDescriptor> m_modbusAnalogOutputRegisters;
+    QHash<QString, int> m_modbusAnalogOutputConfigurationRegisters;
+    QHash<QString, int> m_modbusAnalogInputConfigurationRegisters;
 
 private:
     struct Request {
