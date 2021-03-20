@@ -279,6 +279,18 @@
                             "defaultValue": 0.00,
                             "writable": true,
                             "ioType": "analogOutput"
+                        },
+                        {
+                            "id": "d677fbdc-e8c0-4208-b206-4fda2e06d9dc",
+                            "name": "percentage",
+                            "displayName": "Percentage",
+                            "displayNameEvent": "Percentage changed",
+                            "type": "double",
+                            "unit": "Percentage",
+                            "defaultValue": 0.00,
+                            "minValue": 0.00,
+                            "maxValue": 100.00,
+                            "ioType": "analogOutput"
                         }
                     ]
                 },
@@ -288,6 +300,19 @@
                     "displayName": "Analog Input",
                     "createMethods": ["discovery"],
                     "interfaces": [ ],
+                    "settingTypes": [
+                        {
+                            "id": "7196436a-49d9-4f17-a89f-9362a8fa58b4",
+                            "name": "configuration",
+                            "displayName": "Configuration",
+                            "type": "QString",
+                            "defaultValue": "Voltage",
+                            "possibleValues": [
+                                "Voltage",
+                                "Current"
+                            ]
+                        }
+                    ],
                     "paramTypes": [
                         {
                             "id": "cc6eb664-9fd2-457d-9d0d-0eb9703db4a2",
@@ -307,6 +332,18 @@
                             "defaultValue": 0.00,
                             "minValue": 0.00,
                             "maxValue": 10.00,
+                            "ioType": "analogInput"
+                        },
+                        {
+                            "id": "0963bec1-e62b-448d-8b12-7f851261d5e5",
+                            "name": "percentage",
+                            "displayName": "Percentage",
+                            "displayNameEvent": "Percentage changed",
+                            "type": "double",
+                            "unit": "Percentage",
+                            "defaultValue": 0.00,
+                            "minValue": 0.00,
+                            "maxValue": 100.00,
                             "ioType": "analogInput"
                         }
                     ]
