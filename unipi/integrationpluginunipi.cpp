@@ -650,11 +650,11 @@ void IntegrationPluginUniPi::postSetupThing(Thing *thing)
     qCDebug(dcUniPi()) << "Post setup" << thing->name();
 
     if (thing->thingClassId() == analogInputThingClassId) {
-        ThingClassId parentThingClassId = myThings().findById(thing->parentId())->thingClassId();
+        Thing *parentThing = myThings().findById(thing->parentId());
         QString circuit = thing->paramValue(analogInputThingCircuitParamTypeId).toString();
-        connect(thing, &Thing::settingChanged, thing, [parentThingClassId, circuit, thing, this] (const ParamTypeId &paramTypeId, const QVariant &value) {
+        connect(thing, &Thing::settingChanged, thing, [parentThing, circuit, thing, this] (const ParamTypeId &paramTypeId, const QVariant &value) {
             if (paramTypeId == analogInputSettingsConfigurationParamTypeId) {
-                if (parentThingClassId == neuronThingClassId) {
+                if (parentThing->thingClassId() == neuronThingClassId) {
                     if (!m_neuron) {
                         return;
                     }
@@ -664,7 +664,8 @@ void IntegrationPluginUniPi::postSetupThing(Thing *thing)
                         m_neuron->setAnalogInputConfiguration(circuit, NeuronCommon::AnalogIOConfiguration::Current);
                     }
                     return;
-                } else if (parentThingClassId == neuronExtensionThingClassId) {
+                }
+                if (parentThing->thingClassId() == neuronExtensionThingClassId) {
                     NeuronExtension *neuronExtension = m_neuronExtensions.value(thing->parentId());
                     if (!neuronExtension) {
                         return;
@@ -878,29 +879,6 @@ void IntegrationPluginUniPi::onPluginConfigurationChanged(const ParamTypeId &par
             m_modbusTCPMaster->setConnectionParameter(QModbusDevice::NetworkPortParameter, value.toInt());
         }
     }
-    /*
-               if (paramTypeId == uniPiPluginSerialPortParamTypeId) {
-                   if (m_modbusRTUMaster) {
-                       m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialPortNameParameter, value.toString());
-                   }
-               }
-
-               if (paramTypeId == uniPiPluginBaudrateParamTypeId) {
-                   if (m_modbusRTUMaster) {
-                       m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialBaudRateParameter, value.toInt());
-                   }
-               }
-
-               if (paramTypeId == uniPiPluginParityParamTypeId) {
-                   if (m_modbusRTUMaster) {
-                       if (value == "Even") {
-                           m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialParityParameter, QSerialPort::Parity::EvenParity);
-                       } else {
-                           m_modbusRTUMaster->setConnectionParameter(QModbusDevice::SerialParityParameter, QSerialPort::Parity::NoParity);
-                       }
-                   }
-               }
-           */
 }
 
 void IntegrationPluginUniPi::onNeuronConnectionStateChanged(bool state)

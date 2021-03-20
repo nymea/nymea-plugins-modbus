@@ -41,6 +41,11 @@ class NeuronCommon : public QObject
     Q_OBJECT
 public:
 
+    enum ModbusType {
+      ModbusTypeTcp,
+        ModbusTypeRtu
+    };
+
     enum AnalogIOConfiguration {
         Voltage,
         Current,
@@ -117,6 +122,7 @@ private:
 
     int m_slaveAddress = 0;
     uint m_responseTimeoutTime = 2000;
+    ModbusType m_modbusType;
     QModbusClient *m_modbusTcpInterface = nullptr;
     ModbusRtuMaster *m_modbusRtuInterface = nullptr;
 
@@ -135,9 +141,11 @@ private:
 
     bool readRequest(const QModbusDataUnit &request);
     bool sendModbusReadRequest(const QModbusDataUnit &request);
+    void readRequestReceived(const QVector<uint16_t> &data, int startAddress, QModbusDataUnit::RegisterType registerType);
 
     bool writeRequest(const Request &request);
     bool sendModbusWriteRequest(const Request &request);
+    void writeRequestReceived(const QVector<uint16_t> &data, int startAddress, QModbusDataUnit::RegisterType registerType);
     void getCoils(QList<int> registers);
 
 signals:
