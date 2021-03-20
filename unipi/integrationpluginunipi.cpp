@@ -581,8 +581,6 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
                 });
             }
         });
-
-
     } else if(thing->thingClassId() == neuronExtensionThingClassId) {
         qCDebug(dcUniPi()) << "Setting up Neuron extension thing" << thing->name();
 
@@ -654,29 +652,33 @@ void IntegrationPluginUniPi::postSetupThing(Thing *thing)
     if (thing->thingClassId() == analogInputThingClassId) {
         ThingClassId parentThingClassId = myThings().findById(thing->parentId())->thingClassId();
         QString circuit = thing->paramValue(analogInputThingCircuitParamTypeId).toString();
-        connect(thing, &Thing::settingChanged, thing, [parentThingClassId, circuit, this] (const ParamTypeId &paramTypeId, const QVariant &value) {
-            if (paramTypeId == analogInputConfigurationParamTypeId) {
+        connect(thing, &Thing::settingChanged, thing, [parentThingClassId, circuit, thing, this] (const ParamTypeId &paramTypeId, const QVariant &value) {
+            if (paramTypeId == analogInputSettingsConfigurationParamTypeId) {
                 if (parentThingClassId == neuronThingClassId) {
                     if (!m_neuron) {
                         return;
                     }
-                    NeuronCommon::AnalogIOConfiguration config;
                     if (value.toString() == "Voltage") {
                         m_neuron->setAnalogInputConfiguration(circuit, NeuronCommon::AnalogIOConfiguration::Voltage);
                     } else if (value.toString() == "Current") {
                         m_neuron->setAnalogInputConfiguration(circuit, NeuronCommon::AnalogIOConfiguration::Current);
                     }
                     return;
-            } else if (parentThingClassId == neuronExtensionThingClassId) {
-                NeuronExtension *neuronExtension = m_neuronExtensions.value(thing->parentId());
-                if (!neuronExtension) {
+                } else if (parentThingClassId == neuronExtensionThingClassId) {
+                    NeuronExtension *neuronExtension = m_neuronExtensions.value(thing->parentId());
+                    if (!neuronExtension) {
+                        return;
+                    }
+                    if (value.toString() == "Voltage") {
+                        m_neuron->setAnalogInputConfiguration(circuit, NeuronCommon::AnalogIOConfiguration::Voltage);
+                    } else if (value.toString() == "Current") {
+                        m_neuron->setAnalogInputConfiguration(circuit, NeuronCommon::AnalogIOConfiguration::Current);
+                    }
                     return;
                 }
-                neuronExtension->setAnalogInputConfiguration();
-                return;
             }
         });
-    } else if (thing->thingClassId() == analogInputThingClassId) {
+    } else if (thing->thingClassId() == analogOutputThingClassId) {
     }
 
     if (!m_reconnectTimer) {
