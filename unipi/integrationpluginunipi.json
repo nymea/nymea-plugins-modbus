@@ -129,20 +129,19 @@
                             "readOnly": true
                         },
                         {
-                            "id": "bcfecca5-d9eb-4a55-872b-42064ca49d5f",
-                            "name": "serialNumber",
-                            "displayName": "Serial number",
-                            "type": "QUuid",
-                            "defaultValue": "",
-                            "readOnly": true
-                        },
-                        {
                             "id": "2512ec7c-c877-4c38-825b-19d91cf7c2fd",
-                            "name": "modelId",
-                            "displayName": "Model Id",
-                            "type": "int",
-                            "defaultValue": 0,
-                            "readOnly": true
+                            "name": "model",
+                            "displayName": "Model",
+                            "type": "QString",
+                            "allowedValues": [
+                                "xS10",
+                                "xS20",
+                                "xS30",
+                                "xS40",
+                                "xS50",
+                                "xS11",
+                                "xS51"
+                            ]
                         }
                     ],
                     "stateTypes": [
