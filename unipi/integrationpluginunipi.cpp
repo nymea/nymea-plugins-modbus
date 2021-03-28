@@ -376,63 +376,23 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         }
         foreach (ModbusRtuMaster *modbusMaster, hardwareManager()->modbusRtuResource()->modbusRtuMasters()) {
             qCDebug(dcUniPi()) << "Found RTU master resource" << modbusMaster;
-            if (modbusMaster->connected()) {
+            NeuronExtensionDiscovery *extensionDiscovery = new NeuronExtensionDiscovery(modbusMaster);
+            extensionDiscovery->startDiscovery();
+            connect(extensionDiscovery, &NeuronExtensionDiscovery::finished, extensionDiscovery, &NeuronExtensionDiscovery::deleteLater);
+            connect(extensionDiscovery, &NeuronExtensionDiscovery::finished, info, [info, modbusMaster] (QHash<int, NeuronExtension::ExtensionTypes> devices) {
 
-                for (int i = 0; i <= 16; i++) {
-                    ModbusRtuReply *reply = modbusMaster->readHoldingRegister(i, 1000, 7);
-                    connect(reply, &ModbusRtuReply::finished, reply, &ModbusRtuReply::deleteLater);
-                    connect(reply, &ModbusRtuReply::finished, this, [info, modbusMaster, reply] {
+                foreach (int address, devices) {
+                    QString model = NeuronExtension::stringFromType(devices.value(address));
+                    qCDebug(dcUniPi()) << "     - Model" << model;
 
-                        if (reply->error() != ModbusRtuReply::Error::NoError) {
-                            return;
-                        }
-                        QVector<quint16> result = reply->result();
-                        if (result.length() < 7) {
-                            return;
-                        }
-                        qCDebug(dcUniPi()) << "Found Neuron Extension";
-                        qCDebug(dcUniPi()) << "     - Serial port" << modbusMaster->serialPort();
-                        qCDebug(dcUniPi()) << "     - Modbus master uuid" << modbusMaster->modbusUuid().toString();
-                        qCDebug(dcUniPi()) << "     - Slave Address" << reply->slaveAddress();
-                        qCDebug(dcUniPi()) << "     - Firmware version" << result[0];
-                        qCDebug(dcUniPi()) << "     - Number of IOs" << result[1];
-                        qCDebug(dcUniPi()) << "     - Number of peripherals" << result[2];
-                        qCDebug(dcUniPi()) << "     - Firmware Id" << result[3];
-                        qCDebug(dcUniPi()) << "     - Hardware Id" << result[4];
-                        qCDebug(dcUniPi()) << "     - Serial number" << (static_cast<quint32>(result[6])<<16 | result[5]);
-
-                        QString model;
-                        if (result[4] == 1) {
-                            model = "xS10";
-                        } else if (result[4] == 2) {
-                            model = "xS20";
-                        } else if (result[4] == 3) {
-                            model = "xS30";
-                        } else if (result[4] == 4) {
-                            model = "xS40";
-                        } else if (result[4] == 5) {
-                            model = "xS50";
-                        } else if (result[4] == 272) {
-                            model = "xS11";
-                        } else if (result[4] == 273) {
-                            model = "xS51";
-                        } else {
-                            qCWarning(dcUniPi()) << "Model ID not recognized";
-                            return;
-                        }
-                        qCDebug(dcUniPi()) << "     - Model" << model;
-
-                        ParamList parameters;
-                        ThingDescriptor thingDescriptor(neuronExtensionThingClassId, "Neuron extension", modbusMaster->serialPort());
-                        parameters.append(Param(neuronExtensionThingModbusMasterUuidParamTypeId, modbusMaster->modbusUuid()));
-                        parameters.append(Param(neuronExtensionThingModelParamTypeId, model));
-                        thingDescriptor.setParams(parameters);
-                        info->addThingDescriptor(thingDescriptor);
-                    });
+                    ParamList parameters;
+                    ThingDescriptor thingDescriptor(neuronExtensionThingClassId, "Neuron extension", modbusMaster->serialPort());
+                    parameters.append(Param(neuronExtensionThingModbusMasterUuidParamTypeId, modbusMaster->modbusUuid()));
+                    parameters.append(Param(neuronExtensionThingModelParamTypeId, model));
+                    thingDescriptor.setParams(parameters);
+                    info->addThingDescriptor(thingDescriptor);
                 }
-            } else {
-                qCWarning(dcUniPi()) << "Found configured resource" << modbusMaster << "but it is not connected. Skipping.";
-            }
+            });
         }
         QTimer::singleShot(5000, info, [info] {
             qCDebug(dcUniPi()) << "Discovery finished";
@@ -443,6 +403,7 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
         return info->finish(Thing::ThingErrorThingClassNotFound);
     }
 }
+
 
 void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
 {
