@@ -220,28 +220,48 @@ NeuronExtensionDiscovery::NeuronExtensionDiscovery(ModbusRtuMaster *modbusRtuMas
     m_startAddress(startAddress),
     m_endAddress(endAddress)
 {
-
 }
 
 bool NeuronExtensionDiscovery::startDiscovery()
 {
+    qCDebug(dcUniPi()) << "NeuronExtensionDiscovery: start Discovery, start Address" << m_startAddress << "end address" << m_endAddress;
     if (!m_modbusRtuMaster->connected()) {
+        qCDebug(dcUniPi()) << "NeuronExtensionDiscovery: Modbus RTU interface is not connected";
         return false;
     }
 
     if (m_discoveryOngoing) {
+        qCDebug(dcUniPi()) << "NeuronExtensionDiscovery: Discovery is already in progress";
         return false;
     }
     getNext(m_startAddress);
+
+    m_sweepingAddress = 0;
+    m_discoveredExtensions.clear();
     m_discoveryOngoing = true;
     return true;
+}
+
+void NeuronExtensionDiscovery::stopDiscovery()
+{
+    qCDebug(dcUniPi()) << "NeuronExtensionDiscovery: stopping discovery";
+    m_sweepingAddress = 0;
+    m_discoveryOngoing = false;
 }
 
 void NeuronExtensionDiscovery::getNext(int address)
 {
     ModbusRtuReply *reply = m_modbusRtuMaster->readHoldingRegister(address, 1000, 7);
     connect(reply, &ModbusRtuReply::finished, reply, &ModbusRtuReply::deleteLater);
-    connect(reply, &ModbusRtuReply::finished, this, [this, address, reply] {
+    connect(reply, &ModbusRtuReply::finished, this, [this, reply] {
+
+        if (reply->slaveAddress() == m_sweepingAddress) {
+            m_sweepingAddress = reply->slaveAddress()+1;
+        } else if (reply->slaveAddress() < m_sweepingAddress){
+            // A reply returns multiple finish signals depending on the retry
+            qCWarning(dcUniPi()) << "Got modbus reply from previous request, ignoring";
+            return;
+        }
 
         QVector<quint16> result = reply->result();
         if (result.length() == 7) {
@@ -267,21 +287,24 @@ void NeuronExtensionDiscovery::getNext(int address)
                 model = NeuronExtension::ExtensionTypes::xS40;
             } else if (result[4] == 5) {
                 model = NeuronExtension::ExtensionTypes::xS50;
-            } else if (result[4] == 272) {
+            } else if (result[4] == 271) {
                 model = NeuronExtension::ExtensionTypes::xS11;
-            } else if (result[4] == 273) {
+            } else if (result[4] == 272) {
                 model = NeuronExtension::ExtensionTypes::xS51;
             } else {
                 model = NeuronExtension::ExtensionTypes::Unknown;
             }
             qCDebug(dcUniPi()) << "     - Model" << model;
-            m_discoveredExtensions.insert(address, model);
+            emit deviceFound(reply->slaveAddress(), model);
+            m_discoveredExtensions.insert(reply->slaveAddress(), model);
         }
-        if (address == m_endAddress) {
+        if (reply->slaveAddress() >= m_endAddress) {
             m_discoveryOngoing = false;
+            qCWarning(dcUniPi()) << "NeuronExtensionDiscovery: Discovery finished, found" << m_discoveredExtensions.count() << "devices";
             emit finished(m_discoveredExtensions);
         } else {
-            getNext(address+1);
+            if (m_discoveryOngoing)
+                getNext(m_sweepingAddress);
         }
     });
 }

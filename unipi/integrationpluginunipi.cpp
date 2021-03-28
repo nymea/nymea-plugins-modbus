@@ -379,19 +379,17 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
             NeuronExtensionDiscovery *extensionDiscovery = new NeuronExtensionDiscovery(modbusMaster);
             extensionDiscovery->startDiscovery();
             connect(extensionDiscovery, &NeuronExtensionDiscovery::finished, extensionDiscovery, &NeuronExtensionDiscovery::deleteLater);
-            connect(extensionDiscovery, &NeuronExtensionDiscovery::finished, info, [info, modbusMaster] (QHash<int, NeuronExtension::ExtensionTypes> devices) {
+            connect(extensionDiscovery, &NeuronExtensionDiscovery::deviceFound, info, [info, modbusMaster] (int address, NeuronExtension::ExtensionTypes model) {
 
-                foreach (int address, devices) {
-                    QString model = NeuronExtension::stringFromType(devices.value(address));
-                    qCDebug(dcUniPi()) << "     - Model" << model;
-
-                    ParamList parameters;
-                    ThingDescriptor thingDescriptor(neuronExtensionThingClassId, "Neuron extension", modbusMaster->serialPort());
-                    parameters.append(Param(neuronExtensionThingModbusMasterUuidParamTypeId, modbusMaster->modbusUuid()));
-                    parameters.append(Param(neuronExtensionThingModelParamTypeId, model));
-                    thingDescriptor.setParams(parameters);
-                    info->addThingDescriptor(thingDescriptor);
-                }
+                QString modelString = NeuronExtension::stringFromType(model);
+                qCDebug(dcUniPi()) << "Neuron extension discovered" << model << "address" << address;
+                ParamList parameters;
+                ThingDescriptor thingDescriptor(neuronExtensionThingClassId, "Neuron extension", modbusMaster->serialPort());
+                parameters.append(Param(neuronExtensionThingModbusMasterUuidParamTypeId, modbusMaster->modbusUuid()));
+                parameters.append(Param(neuronExtensionThingModelParamTypeId, modelString));
+                parameters.append(Param(neuronExtensionThingSlaveAddressParamTypeId, address));
+                thingDescriptor.setParams(parameters);
+                info->addThingDescriptor(thingDescriptor);
             });
         }
         QTimer::singleShot(5000, info, [info] {

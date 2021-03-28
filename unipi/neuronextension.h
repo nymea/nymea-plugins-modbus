@@ -75,6 +75,7 @@ public:
     void setModbusRtuMaster(ModbusRtuMaster *modbusRtuMaster);
 
     bool startDiscovery();
+    void stopDiscovery();
 
 private:
     ModbusRtuMaster *m_modbusRtuMaster;
@@ -82,11 +83,13 @@ private:
 
     int m_startAddress = 0;
     int m_endAddress = 15;
+    int m_sweepingAddress = 0;
     bool m_discoveryOngoing = false;
 
     void getNext(int address);
 
 signals:
+    void deviceFound(int address, NeuronExtension::ExtensionTypes model);
     void finished(QHash<int, NeuronExtension::ExtensionTypes> devices);
 };
 #endif // NEURONEXTENSION_H
