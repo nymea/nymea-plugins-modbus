@@ -51,18 +51,18 @@ NeuronCommon::NeuronCommon(ModbusRtuMaster *modbusInterface, int slaveAddress, Q
 
 bool NeuronCommon::init()
 {
-    qCDebug(dcUniPi()) << "Neuron: Init";
+    qCDebug(dcUniPi()) << "NeuronCommon: Init";
     if (!loadModbusMap()) {
         return false;
     }
 
     if (m_modbusType == ModbusTypeTcp) {
         if (!m_modbusTcpInterface) {
-            qWarning(dcUniPi()) << "Neuron: Modbus interface not available";
+            qWarning(dcUniPi()) << "NeuronCommon: Modbus interface not available";
             return false;
         }
         if (m_modbusTcpInterface->connectDevice()) {
-            qWarning(dcUniPi()) << "Neuron: Could not connect to modbus device";
+            qWarning(dcUniPi()) << "NeuronCommon: Could not connect to modbus device";
             return  false;
         }
     }
@@ -76,7 +76,7 @@ int NeuronCommon::slaveAddress()
 
 void NeuronCommon::setSlaveAddress(int slaveAddress)
 {
-    qCDebug(dcUniPi()) << "Neuron: Set slave address" << slaveAddress;
+    qCDebug(dcUniPi()) << "NeuronCommon: Set slave address" << slaveAddress;
     m_slaveAddress = slaveAddress;
 }
 
@@ -151,6 +151,7 @@ void NeuronCommon::initTimers()
     m_outputPollingTimer->setTimerType(Qt::TimerType::PreciseTimer);
     m_outputPollingTimer->setInterval(1000);
 
+    if (m_modbusType == ModbusTypeTcp) {
     if (m_modbusTcpInterface->state() == QModbusDevice::State::ConnectedState) {
         m_inputPollingTimer->start();
         m_outputPollingTimer->start();
@@ -171,6 +172,29 @@ void NeuronCommon::initTimers()
             emit connectionStateChanged(false);
         }
     });
+    }
+    if (m_modbusType == ModbusTypeRtu) {
+        if (m_modbusRtuInterface->connected()) {
+            m_inputPollingTimer->start();
+            m_outputPollingTimer->start();
+        }
+
+        connect(m_modbusRtuInterface, &ModbusRtuMaster::connectedChanged, this, [this] (bool connected) {
+            if (connected) {
+                if (m_inputPollingTimer)
+                    m_inputPollingTimer->start();
+                if (m_outputPollingTimer)
+                    m_outputPollingTimer->start();
+                emit connectionStateChanged(true);
+            } else {
+                if (m_inputPollingTimer)
+                    m_inputPollingTimer->stop();
+                if (m_outputPollingTimer)
+                    m_outputPollingTimer->stop();
+                emit connectionStateChanged(false);
+            }
+        });
+    }
 }
 
 bool NeuronCommon::circuitValueChanged(const QString &circuit, quint32 value)
@@ -216,11 +240,11 @@ void NeuronCommon::getAllAnalogOutputs()
 bool NeuronCommon::getDigitalInput(const QString &circuit)
 {
     if (!m_modbusDigitalInputRegisters.contains(circuit)) {
-        qCWarning(dcUniPi()) << "Neuron: Digital input circuit not found" << circuit;
+        qCWarning(dcUniPi()) << "NeuronCommon: Digital input circuit not found" << circuit;
         return "";
     }
     int modbusAddress = m_modbusDigitalInputRegisters.value(circuit);
-    //qDebug(dcUniPi()) << "Neuron: Reading digital Input" << circuit << modbusAddress;
+    //qDebug(dcUniPi()) << "NeuronCommon: Reading digital Input" << circuit << modbusAddress;
 
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
     return readRequest(request);
@@ -228,13 +252,13 @@ bool NeuronCommon::getDigitalInput(const QString &circuit)
 
 bool NeuronCommon::getAnalogOutput(const QString &circuit)
 {
-    //qDebug(dcUniPi()) << "Neuron: Get analog output" << circuit;
+    //qDebug(dcUniPi()) << "NeuronCommon: Get analog output" << circuit;
     Q_FOREACH(RegisterDescriptor descriptor, m_modbusAnalogOutputRegisters.values()) {
         if (descriptor.circuit == circuit) {
             return getAnalogIO(descriptor);
         }
     }
-    qCWarning(dcUniPi()) << "Neuron: Analog output circuit not found" << circuit;
+    qCWarning(dcUniPi()) << "NeuronCommon: Analog output circuit not found" << circuit;
     return false;
 }
 
@@ -242,11 +266,11 @@ bool NeuronCommon::getAnalogOutput(const QString &circuit)
 QUuid NeuronCommon::setDigitalOutput(const QString &circuit, bool value)
 {
     if (!m_modbusDigitalOutputRegisters.contains(circuit)) {
-        qCWarning(dcUniPi()) << "Neuron: Digital output circuit not found" << circuit;
+        qCWarning(dcUniPi()) << "NeuronCommon: Digital output circuit not found" << circuit;
         return "";
     }
     int modbusAddress = m_modbusDigitalOutputRegisters.value(circuit);
-    //qDebug(dcUniPi()) << "Neuron: Setting digital ouput" << circuit << modbusAddress << value;
+    //qDebug(dcUniPi()) << "NeuronCommon: Setting digital ouput" << circuit << modbusAddress << value;
 
     Request request;
     request.data = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
@@ -262,7 +286,7 @@ QUuid NeuronCommon::setDigitalOutput(const QString &circuit, bool value)
 bool NeuronCommon::getDigitalOutput(const QString &circuit)
 {
     if (!m_modbusDigitalOutputRegisters.contains(circuit)) {
-        qCWarning(dcUniPi()) << "Neuron: Digital output circuit not found" << circuit;
+        qCWarning(dcUniPi()) << "NeuronCommon: Digital output circuit not found" << circuit;
         return false;
     }
     int modbusAddress = m_modbusDigitalOutputRegisters.value(circuit);
@@ -275,7 +299,7 @@ bool NeuronCommon::getDigitalOutput(const QString &circuit)
 
 QUuid NeuronCommon::setAnalogOutput(const QString &circuit, double value)
 {
-    qDebug(dcUniPi()) << "Neuron: Set analog output" << circuit << value;
+    qDebug(dcUniPi()) << "NeuronCommon: Set analog output" << circuit << value;
 
     Q_FOREACH(RegisterDescriptor descriptor, m_modbusAnalogOutputRegisters) {
         if (descriptor.circuit == circuit) {
@@ -294,16 +318,16 @@ QUuid NeuronCommon::setAnalogOutput(const QString &circuit, double value)
             return request.id;
         }
     }
-    qCWarning(dcUniPi()) << "Neuron: Analog output circuit not found" << circuit;
+    qCWarning(dcUniPi()) << "NeuronCommon: Analog output circuit not found" << circuit;
     return "";
 }
 
 
 QUuid NeuronCommon::setAnalogOutputConfiguration(const QString &circuit, AnalogIOConfiguration value)
 {
-    qDebug(dcUniPi()) << "Neuron: Set analog output configuration" << circuit << value;
+    qDebug(dcUniPi()) << "NeuronCommon: Set analog output configuration" << circuit << value;
     if (!m_modbusAnalogOutputConfigurationRegisters.contains(circuit)) {
-        qCWarning(dcUniPi()) << "Neuron: Analog output configuration register not found" << circuit;
+        qCWarning(dcUniPi()) << "NeuronCommon: Analog output configuration register not found" << circuit;
         return "";
     }
     int modbusAddress = m_modbusAnalogOutputConfigurationRegisters.value(circuit);
@@ -321,9 +345,9 @@ QUuid NeuronCommon::setAnalogOutputConfiguration(const QString &circuit, AnalogI
 
 QUuid NeuronCommon::setAnalogInputConfiguration(const QString &circuit, AnalogIOConfiguration value)
 {
-    qDebug(dcUniPi()) << "Neuron: Set analog input configuration" << circuit << value;
+    qDebug(dcUniPi()) << "NeuronCommon: Set analog input configuration" << circuit << value;
     if (!m_modbusAnalogInputConfigurationRegisters.contains(circuit)) {
-        qCWarning(dcUniPi()) << "Neuron: Analog input configuration register not found" << circuit;
+        qCWarning(dcUniPi()) << "NeuronCommon: Analog input configuration register not found" << circuit;
         return "";
     }
     int modbusAddress = m_modbusAnalogInputConfigurationRegisters.value(circuit);
@@ -347,7 +371,7 @@ bool NeuronCommon::getDeviceInformation()
 
 bool NeuronCommon::getAnalogInput(const QString &circuit)
 {
-    //qDebug(dcUniPi()) << "Neuron: Get analog input" << circuit;
+    //qDebug(dcUniPi()) << "NeuronCommon: Get analog input" << circuit;
 
     Q_FOREACH(RegisterDescriptor descriptor, m_modbusAnalogOutputRegisters.values()) {
         if (descriptor.circuit == circuit) {
@@ -360,11 +384,11 @@ bool NeuronCommon::getAnalogInput(const QString &circuit)
 QUuid NeuronCommon::setUserLED(const QString &circuit, bool value)
 {
     if (!m_modbusUserLEDRegisters.contains(circuit)) {
-        qCWarning(dcUniPi()) << "Neuron: User LED circuit not found" << circuit;
+        qCWarning(dcUniPi()) << "NeuronCommon: User LED circuit not found" << circuit;
         return "";
     }
     int modbusAddress = m_modbusUserLEDRegisters.value(circuit);
-    //qDebug(dcUniPi()) << "Neuron: Setting user led" << circuit << modbusAddress << value;
+    //qDebug(dcUniPi()) << "NeuronCommon: Setting user led" << circuit << modbusAddress << value;
 
     Request request;
     request.id = QUuid::createUuid();
@@ -381,11 +405,11 @@ QUuid NeuronCommon::setUserLED(const QString &circuit, bool value)
 bool NeuronCommon::getUserLED(const QString &circuit)
 {
     if (!m_modbusUserLEDRegisters.contains(circuit)) {
-        qCWarning(dcUniPi()) << "Neuron: User LED circuit not found" << circuit;
+        qCWarning(dcUniPi()) << "NeuronCommon: User LED circuit not found" << circuit;
         return false;
     }
     int modbusAddress = m_modbusUserLEDRegisters.value(circuit);
-    //qDebug(dcUniPi()) << "Neuron: Get user LED" << circuit << modbusAddress;
+    //qDebug(dcUniPi()) << "NeuronCommon: Get user LED" << circuit << modbusAddress;
 
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, modbusAddress, 1);
     return readRequest(request);
@@ -445,7 +469,7 @@ bool NeuronCommon::sendModbusWriteRequest(const Request &request)
                         writeRequestReceived(reply->result().values(), unit.startAddress(), unit.registerType());
                     } else {
                         emit requestExecuted(request.id, false);
-                        qCWarning(dcUniPi()) << "Neuron: Write response error:" << reply->error();
+                        qCWarning(dcUniPi()) << "NeuronCommon: Write response error:" << reply->error();
                         emit requestError(request.id, reply->errorString());
                     }
                 });
@@ -455,7 +479,7 @@ bool NeuronCommon::sendModbusWriteRequest(const Request &request)
                 return false;
             }
         } else {
-            qCWarning(dcUniPi()) << "Neuron: Read error: " << m_modbusTcpInterface->errorString();
+            qCWarning(dcUniPi()) << "NeuronCommon: Read error: " << m_modbusTcpInterface->errorString();
             return false;
         }
     }
@@ -476,7 +500,7 @@ bool NeuronCommon::sendModbusWriteRequest(const Request &request)
             reply = m_modbusRtuInterface->writeHoldingRegisters(m_slaveAddress, request.data.startAddress(), request.data.values());
         } break;
         default:
-            break;
+            return false;
         }
         connect(reply, &ModbusRtuReply::finished, reply, &ModbusRtuReply::deleteLater);
         connect(reply, &ModbusRtuReply::finished, this, [reply, registerType, this] {
@@ -517,7 +541,7 @@ bool NeuronCommon::readRequest(const QModbusDataUnit &request)
     if (m_readRequestQueue.isEmpty()) {
         return sendModbusReadRequest(request);
     } else if (m_readRequestQueue.length() > 200) {
-        qCWarning(dcUniPi()) << "Neuron: Too many pending read requests";
+        qCWarning(dcUniPi()) << "NeuronCommon: Too many pending read requests";
         return false;
     } else {
         m_readRequestQueue.append(request);
@@ -543,9 +567,9 @@ bool NeuronCommon::sendModbusReadRequest(const QModbusDataUnit &request)
                         const QModbusDataUnit unit = reply->result();
                         readRequestReceived(unit.values(), unit.startAddress(), unit.registerType());
                     } else if (reply->error() == QModbusDevice::ProtocolError) {
-                        qCWarning(dcUniPi()) << "Neuron: Read response error:" << reply->errorString() << reply->rawResult().exceptionCode();
+                        qCWarning(dcUniPi()) << "NeuronCommon: Read response error:" << reply->errorString() << reply->rawResult().exceptionCode();
                     } else {
-                        qCWarning(dcUniPi()) << "Neuron: Read response error:" << reply->error() << reply->errorString();
+                        qCWarning(dcUniPi()) << "NeuronCommon: Read response error:" << reply->error() << reply->errorString();
                     }
 
                 });
@@ -555,7 +579,7 @@ bool NeuronCommon::sendModbusReadRequest(const QModbusDataUnit &request)
                 return false;
             }
         } else {
-            qCWarning(dcUniPi()) << "Neuron: Read error: " << m_modbusTcpInterface->errorString();
+            qCWarning(dcUniPi()) << "NeuronCommon: Read error: " << m_modbusTcpInterface->errorString();
             return false;
         }
     }
@@ -613,7 +637,8 @@ void NeuronCommon::readRequestReceived(const QVector<uint16_t> &data, int startA
         info.firmwareId = data[3];
         info.hardwareId = data[4];
         info.serialNumber = (static_cast<uint32_t>(data[5])<<16) | data[6];
-        deviceInformationReceived(info);
+        emit deviceInformationReceived(info);
+        return;
     }
     int modbusAddress = 0;
     for (int i = 0; i < data.length(); i++) {
@@ -636,7 +661,7 @@ void NeuronCommon::readRequestReceived(const QVector<uint16_t> &data, int startA
                 if (circuitValueChanged(circuit, data.value(i)))
                     emit userLEDStatusChanged(circuit, data.value(i));
             } else {
-                qCWarning(dcUniPi()) << "Neuron: Received unrecognised coil register" << modbusAddress;
+                qCWarning(dcUniPi()) << "NeuronCommon: Received unrecognised coil register" << modbusAddress;
             }
             break;
 
@@ -652,14 +677,14 @@ void NeuronCommon::readRequestReceived(const QVector<uint16_t> &data, int startA
                         value = (data.value(i) << 16 | data.value(i+1));
                         i++;
                     } else {
-                        qCWarning(dcUniPi()) << "Neuron: Received analog output, but value count is too short";
+                        qCWarning(dcUniPi()) << "NeuronCommon: Received analog output, but value count is too short";
                     }
                 }
                 if (circuitValueChanged(circuit, value))
                     emit analogOutputStatusChanged(circuit, value);
 
             } else {
-                qCWarning(dcUniPi()) << "Neuron: Received unrecognised holding register" << modbusAddress;
+                qCWarning(dcUniPi()) << "NeuronCommon: Received unrecognised holding register" << modbusAddress;
             }
         } break;
         case QModbusDataUnit::RegisterType::InputRegisters:
@@ -674,19 +699,19 @@ void NeuronCommon::readRequestReceived(const QVector<uint16_t> &data, int startA
                         value = (data.value(i) << 16 | data.value(i+1));
                         i++;
                     } else {
-                        qCWarning(dcUniPi()) << "Neuron: Received analog input, but value count is too short";
+                        qCWarning(dcUniPi()) << "NeuronCommon: Received analog input, but value count is too short";
                     }
                 }
                 if (circuitValueChanged(circuit, value))
                     emit analogInputStatusChanged(circuit, value);
 
             } else {
-                qCWarning(dcUniPi()) << "Neuron: Received unrecognised input register" << modbusAddress;
+                qCWarning(dcUniPi()) << "NeuronCommon: Received unrecognised input register" << modbusAddress;
             }
             break;
         case QModbusDataUnit::RegisterType::DiscreteInputs:
         case QModbusDataUnit::RegisterType::Invalid:
-            qCWarning(dcUniPi()) << "Neuron: Invalide register type";
+            qCWarning(dcUniPi()) << "NeuronCommon: Invalide register type";
             break;
         }
     }
