@@ -40,15 +40,13 @@ NeuronExtension::NeuronExtension(ExtensionTypes extensionType, ModbusRtuMaster *
     NeuronCommon(modbusInterface, slaveAddress, parent),
     m_extensionType(extensionType)
 {
-    qCDebug(dcUniPi()) << "Neuron: Creating extension" << extensionType;
+    qCDebug(dcUniPi()) << "Neuron Extension: Creating extension" << extensionType;
 }
 
 NeuronExtension::~NeuronExtension()
 {
-    qCDebug(dcUniPi()) << "Neuron: Deleting extension" << m_extensionType;
+    qCDebug(dcUniPi()) << "Neuron Extension: Deleting extension" << m_extensionType;
 }
-
-
 
 QString NeuronExtension::type()
 {
