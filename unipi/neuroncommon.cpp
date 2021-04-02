@@ -606,7 +606,7 @@ bool NeuronCommon::sendModbusReadRequest(const QModbusDataUnit &request)
             reply = m_modbusRtuInterface->readHoldingRegister(m_slaveAddress, request.startAddress(), request.valueCount());
         } break;
         default:
-            break;
+            return false;
         }
         connect(reply, &ModbusRtuReply::finished, reply, &ModbusRtuReply::deleteLater);
         connect(reply, &ModbusRtuReply::finished, this, [reply, registerType, this] {
@@ -636,7 +636,7 @@ void NeuronCommon::readRequestReceived(const QVector<uint16_t> &data, int startA
         info.numberOfAIs = data[2]>>8;
         info.firmwareId = data[3];
         info.hardwareId = data[4];
-        info.serialNumber = (static_cast<uint32_t>(data[5])<<16) | data[6];
+        info.serialNumber = (static_cast<uint32_t>(data[6])<<16) | data[5];
         emit deviceInformationReceived(info);
         return;
     }

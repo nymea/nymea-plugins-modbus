@@ -118,7 +118,7 @@
                             "name": "slaveAddress",
                             "displayName": "Modbus slave address",
                             "type": "int",
-                            "defaultValue": 1
+                            "defaultValue": 0
                         },
                         {
                             "id": "af08a8bc-86d9-40bd-9fd4-ae45ad63f12d",
@@ -141,7 +141,8 @@
                                 "xS50",
                                 "xS11",
                                 "xS51"
-                            ]
+                            ],
+                            "readOnly": true
                         }
                     ],
                     "stateTypes": [

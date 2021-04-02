@@ -234,7 +234,7 @@ bool NeuronExtensionDiscovery::startDiscovery()
     }
     getNext(m_startAddress);
 
-    m_sweepingAddress = 0;
+    m_sweepingAddress = 1;
     m_discoveredExtensions.clear();
     m_discoveryOngoing = true;
     return true;
@@ -267,10 +267,6 @@ void NeuronExtensionDiscovery::getNext(int address)
             qCDebug(dcUniPi()) << "     - Serial port" << m_modbusRtuMaster->serialPort();
             qCDebug(dcUniPi()) << "     - Modbus master uuid" << m_modbusRtuMaster->modbusUuid().toString();
             qCDebug(dcUniPi()) << "     - Slave Address" << reply->slaveAddress();
-            qCDebug(dcUniPi()) << "     - Firmware version" << result[0];
-            qCDebug(dcUniPi()) << "     - Number of IOs" << result[1];
-            qCDebug(dcUniPi()) << "     - Number of peripherals" << result[2];
-            qCDebug(dcUniPi()) << "     - Firmware Id" << result[3];
             qCDebug(dcUniPi()) << "     - Hardware Id" << result[4];
             qCDebug(dcUniPi()) << "     - Serial number" << (static_cast<quint32>(result[6])<<16 | result[5]);
 
@@ -285,9 +281,9 @@ void NeuronExtensionDiscovery::getNext(int address)
                 model = NeuronExtension::ExtensionTypes::xS40;
             } else if (result[4] == 5) {
                 model = NeuronExtension::ExtensionTypes::xS50;
-            } else if (result[4] == 271) {
-                model = NeuronExtension::ExtensionTypes::xS11;
             } else if (result[4] == 272) {
+                model = NeuronExtension::ExtensionTypes::xS11;
+            } else if (result[4] == 273) {
                 model = NeuronExtension::ExtensionTypes::xS51;
             } else {
                 model = NeuronExtension::ExtensionTypes::Unknown;
