@@ -383,10 +383,11 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
             NeuronExtensionDiscovery *extensionDiscovery = new NeuronExtensionDiscovery(modbusMaster);
             connect(info, &ThingDiscoveryInfo::destroyed, extensionDiscovery, &NeuronExtensionDiscovery::deleteLater);
             connect(extensionDiscovery, &NeuronExtensionDiscovery::finished, extensionDiscovery, &NeuronExtensionDiscovery::deleteLater);
-            connect(extensionDiscovery, &NeuronExtensionDiscovery::deviceFound, info, [info, modbusMaster] (int address, NeuronExtension::ExtensionTypes model) {
+            connect(extensionDiscovery, &NeuronExtensionDiscovery::deviceFound, info, [info, modbusMaster, this] (int address, NeuronExtension::ExtensionTypes model) {
 
                 QString modelString = NeuronExtension::stringFromType(model);
                 qCDebug(dcUniPi()) << "Neuron extension discovered" << model << "address" << address;
+
                 ParamList params;
                 QString descriptionString = modelString;
                 descriptionString.append(QT_TR_NOOP(", address "));
@@ -399,6 +400,10 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
                 params.append(Param(neuronExtensionThingModbusMasterUuidParamTypeId, modbusMaster->modbusUuid().toString()));
                 params.append(Param(neuronExtensionThingModelParamTypeId, modelString));
                 params.append(Param(neuronExtensionThingSlaveAddressParamTypeId, address));
+                if (myThings().findByParams(params)){
+                    // Reconfiguration
+                    thingDescriptor.setThingId(myThings().findByParams(params)->id());
+                }
                 thingDescriptor.setParams(params);
                 info->addThingDescriptor(thingDescriptor);
             });
@@ -636,6 +641,7 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
         connect(neuronExtension, &NeuronExtension::deviceInformationReceived, info, [info, neuronExtension, this] {
             qCDebug(dcUniPi()) << "Neuron extension device information received";
             m_neuronExtensions.insert(info->thing()->id(), neuronExtension);
+            info->thing()->setStateValue(neuronExtensionConnectedStateTypeId, true);
             return info->finish(Thing::ThingErrorNoError);
         });
         neuronExtension->getDeviceInformation();
