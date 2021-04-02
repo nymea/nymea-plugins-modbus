@@ -153,46 +153,6 @@
                             "type": "bool",
                             "cached": false,
                             "defaultValue": false
-                        },
-                        {
-                            "id": "18bf9df2-987c-404a-a5e6-f9099f21f8db",
-                            "name": "firmware",
-                            "displayName": "Firmware",
-                            "displayNameEvent": "Firmware changed",
-                            "type": "QString",
-                            "defaultValue": "Unkown"
-                        },
-                        {
-                            "id": "b5d7abd6-03bf-465c-83d2-921c8f12dd2e",
-                            "name": "numberOfDigitalOutputs",
-                            "displayName": "Number of digital outputs",
-                            "displayNameEvent": "Number of digital outputs changed",
-                            "type": "uint",
-                            "defaultValue": 0
-                        },
-                        {
-                            "id": "9c434c14-3588-4fb3-b599-5a89632ee697",
-                            "name": "numberOfDigitalInputs",
-                            "displayName": "Number of digital inputs",
-                            "displayNameEvent": "Number of digital inputs changed",
-                            "type": "uint",
-                            "defaultValue": 0
-                        },
-                        {
-                            "id": "ac864979-2945-48fb-b85b-d99c0f3e0a59",
-                            "name": "numberOfAnalogOutputs",
-                            "displayName": "Number of analog outputs",
-                            "displayNameEvent": "Number of analog outputs changed",
-                            "type": "uint",
-                            "defaultValue": 0
-                        },
-                        {
-                            "id": "bd87001b-3e36-480d-8f8a-8edc00191bb8",
-                            "name": "numberOfAnalogInputs",
-                            "displayName": "Number of analog inputs",
-                            "displayNameEvent": "Number of analog inputs changed",
-                            "type": "uint",
-                            "defaultValue": 0
                         }
                     ]
                 },

@@ -614,7 +614,7 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
             type = NeuronExtension::xS51;
         } else {
             qCDebug(dcUniPi()) << "Unkown Neuron extension type" << modelString;
-            return info->finish(Thing::ThingErrorSetupFailed, tr("Neuon type not supported"));
+            return info->finish(Thing::ThingErrorSetupFailed, tr("Neuron extension type not supported"));
         }
         NeuronExtension *neuronExtension = new NeuronExtension(type, modbusRtuMaster, slaveAddress, this);
         if (!neuronExtension->init()) {
