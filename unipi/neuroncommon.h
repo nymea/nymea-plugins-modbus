@@ -53,6 +53,19 @@ public:
     };
     Q_ENUM(AnalogIOConfiguration)
 
+    struct DeviceInformation {
+        int firmwareVersion;
+        int numberOfDIs;
+        int numberOfDOs;
+        int numberOfPeripherals;
+        int numberOfInternalRS485Lines;
+        int numberOfAOs;
+        int numberOfAIs;
+        int firmwareId;
+        int hardwareId;
+        int serialNumber;
+    };
+
     explicit NeuronCommon(QModbusClient *modbusInterface, int slaveAddress, QObject *parent = nullptr);
     explicit NeuronCommon(ModbusRtuMaster *modbusInterface, int slaveAddress, QObject *parent = nullptr);
 
@@ -72,6 +85,8 @@ public:
 
     QUuid setAnalogOutputConfiguration(const QString &circuit, AnalogIOConfiguration value);
     QUuid setAnalogInputConfiguration(const QString &circuit, AnalogIOConfiguration value);
+
+    bool getDeviceInformation();
 
     bool getDigitalOutput(const QString &circuit);
     bool getDigitalInput(const QString &circuit);
@@ -149,6 +164,7 @@ private:
     void getCoils(QList<int> registers);
 
 signals:
+    void deviceInformationReceived(DeviceInformation info);
     void requestExecuted(const QUuid &requestId, bool success);
     void requestError(const QUuid &requestId, const QString &error);
     void digitalInputStatusChanged(const QString &circuit, bool value);

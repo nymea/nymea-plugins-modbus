@@ -56,14 +56,15 @@ bool NeuronCommon::init()
         return false;
     }
 
-    if (!m_modbusTcpInterface) {
-        qWarning(dcUniPi()) << "Neuron: Modbus interface not available";
-        return false;
-    }
-
-    if (m_modbusTcpInterface->connectDevice()) {
-        qWarning(dcUniPi()) << "Neuron: Could not connect to modbus device";
-        return  false;
+    if (m_modbusType == ModbusTypeTcp) {
+        if (!m_modbusTcpInterface) {
+            qWarning(dcUniPi()) << "Neuron: Modbus interface not available";
+            return false;
+        }
+        if (m_modbusTcpInterface->connectDevice()) {
+            qWarning(dcUniPi()) << "Neuron: Could not connect to modbus device";
+            return  false;
+        }
     }
     return true;
 }
@@ -338,6 +339,12 @@ QUuid NeuronCommon::setAnalogInputConfiguration(const QString &circuit, AnalogIO
     return "";
 }
 
+bool NeuronCommon::getDeviceInformation()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 1000, 7);
+    return readRequest(request);
+}
+
 bool NeuronCommon::getAnalogInput(const QString &circuit)
 {
     //qDebug(dcUniPi()) << "Neuron: Get analog input" << circuit;
@@ -589,6 +596,25 @@ bool NeuronCommon::sendModbusReadRequest(const QModbusDataUnit &request)
 
 void NeuronCommon::readRequestReceived(const QVector<uint16_t> &data, int startAddress, QModbusDataUnit::RegisterType registerType)
 {
+    if (startAddress == 1000) {
+        //this is a get basic device information request
+        if (data.length() < 7) {
+            qCWarning(dcUniPi()) << "Device information response is too short" << data.length();
+            return;
+        }
+
+        DeviceInformation info;
+        info.firmwareVersion = data[0];
+        info.numberOfDIs = data[1]&0xff;
+        info.numberOfDOs = data[1]>>8;
+        info.numberOfInternalRS485Lines = data[2]&0x0f;
+        info.numberOfAOs = (data[2]>>4)&0x0f;
+        info.numberOfAIs = data[2]>>8;
+        info.firmwareId = data[3];
+        info.hardwareId = data[4];
+        info.serialNumber = (static_cast<uint32_t>(data[5])<<16) | data[6];
+        deviceInformationReceived(info);
+    }
     int modbusAddress = 0;
     for (int i = 0; i < data.length(); i++) {
         //qCDebug(dcUniPi()) << "Start Address:" << unit.startAddress() << "Register Type:" << unit.registerType() << "Value:" << unit.value(i);
