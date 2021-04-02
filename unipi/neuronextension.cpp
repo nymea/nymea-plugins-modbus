@@ -259,13 +259,13 @@ void NeuronExtensionDiscovery::getNext(int address)
             m_sweepingAddress = reply->slaveAddress()+1;
         } else if (reply->slaveAddress() < m_sweepingAddress){
             // A reply returns multiple finish signals depending on the retry
-            qCWarning(dcUniPi()) << "Got modbus reply from previous request, ignoring";
+            qCWarning(dcUniPi()) << "NeuronExtensionDiscovery: Got modbus reply from previous request, ignoring";
             return;
         }
 
         QVector<quint16> result = reply->result();
         if (result.length() == 7) {
-            qCDebug(dcUniPi()) << "Found Neuron Extension";
+            qCDebug(dcUniPi()) << "NeuronExtensionDiscovery: Found Extension";
             qCDebug(dcUniPi()) << "     - Serial port" << m_modbusRtuMaster->serialPort();
             qCDebug(dcUniPi()) << "     - Modbus master uuid" << m_modbusRtuMaster->modbusUuid().toString();
             qCDebug(dcUniPi()) << "     - Slave Address" << reply->slaveAddress();

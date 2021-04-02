@@ -407,12 +407,14 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
 {
     Thing *thing = info->thing();
     if (m_neuronMigration.contains(thing->thingClassId())) {
-        qCDebug(dcUniPi()) << "Start migration";
-        //TODO
+        qCWarning(dcUniPi()) << "UniPi plugin was upgraded from V2 to V3, and the devices cannot be migrated, please readd your Neuron";
+        info->finish(Thing::ThingErrorSetupFailed, tr("Could not migrate thing to new plugin version"));
+        return;
     }
     if (m_neuronExtensionMigration.contains(thing->thingClassId())) {
-        qCDebug(dcUniPi()) << "Start migration";
-        //TODO
+        qCWarning(dcUniPi()) << "UniPi plugin was upgraded from V2 to V3, and the devices cannot be migrated, please readd your Neuron extensions";
+        info->finish(Thing::ThingErrorSetupFailed, tr("Could not migrate thing to new plugin version"));
+        return;
     }
 
     if(thing->thingClassId() == uniPi1ThingClassId ||
@@ -465,7 +467,7 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
             m_modbusTCPMaster = nullptr;
         }
 
-        int port = configValue(uniPiPluginPortParamTypeId).toInt();;
+        int port = configValue(uniPiPluginPortParamTypeId).toInt();
         QHostAddress ipAddress = QHostAddress(configValue(uniPiPluginAddressParamTypeId).toString());
 
         qCDebug(dcUniPi()) << "Creating Modbus TCP Master";
@@ -480,11 +482,10 @@ void IntegrationPluginUniPi::setupThing(ThingSetupInfo *info)
             qCWarning(dcUniPi()) << "Connect failed:" << m_modbusTCPMaster->errorString();
             m_modbusTCPMaster->deleteLater();
             m_modbusTCPMaster = nullptr;
-            return info->finish(Thing::ThingErrorSetupFailed, QT_TR_NOOP("Could not connect to Modbus server."));;
+            return info->finish(Thing::ThingErrorSetupFailed, QT_TR_NOOP("Could not connect to Modbus server."));
         }
         connect(info, &ThingSetupInfo::aborted, m_modbusTCPMaster, &QModbusTcpClient::deleteLater);
         connect(m_modbusTCPMaster, &QModbusTcpClient::destroyed, this, [this] {m_modbusTCPMaster = nullptr;});
-
         connect(m_modbusTCPMaster, &QModbusTcpClient::stateChanged, info, [info, thing, this] (QModbusDevice::State state) {
 
             if (state == QModbusDevice::State::ConnectedState) {
