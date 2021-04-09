@@ -409,7 +409,7 @@ void IntegrationPluginUniPi::discoverThings(ThingDiscoveryInfo *info)
             });
             extensionDiscovery->startDiscovery();
         }
-        QTimer::singleShot(5000, info, [info] {
+        QTimer::singleShot(9000, info, [info] {
             qCDebug(dcUniPi()) << "Discovery finished";
             info->finish(Thing::ThingErrorNoError);
         });
