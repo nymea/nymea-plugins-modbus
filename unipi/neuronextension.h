@@ -71,7 +71,7 @@ class NeuronExtensionDiscovery : public QObject
 {
     Q_OBJECT
 public:
-    NeuronExtensionDiscovery(ModbusRtuMaster *modbusRtuMaster, int startAddress = 1, int endAddress = 15);
+    NeuronExtensionDiscovery(ModbusRtuMaster *modbusRtuMaster, int startAddress = 1, int endAddress = 7);
     void setModbusRtuMaster(ModbusRtuMaster *modbusRtuMaster);
 
     bool startDiscovery();
@@ -81,8 +81,8 @@ private:
     ModbusRtuMaster *m_modbusRtuMaster;
     QHash<int, NeuronExtension::ExtensionTypes> m_discoveredExtensions;
 
-    int m_startAddress = 1;
-    int m_endAddress = 15;
+    int m_startAddress;
+    int m_endAddress;
     int m_sweepingAddress = 1;
     bool m_discoveryOngoing = false;
 

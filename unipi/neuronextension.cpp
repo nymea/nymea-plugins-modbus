@@ -243,7 +243,7 @@ bool NeuronExtensionDiscovery::startDiscovery()
 void NeuronExtensionDiscovery::stopDiscovery()
 {
     qCDebug(dcUniPi()) << "NeuronExtensionDiscovery: stopping discovery";
-    m_sweepingAddress = 0;
+    m_sweepingAddress = 1;
     m_discoveryOngoing = false;
 }
 
