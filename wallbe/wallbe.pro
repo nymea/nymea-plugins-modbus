@@ -7,11 +7,11 @@ QT += \
 SOURCES += \
     integrationpluginwallbe.cpp \
     ../modbus/modbustcpmaster.cpp \
-    host.cpp \
-    discover.cpp
+    discovery.cpp \
+    host.cpp
 
 HEADERS += \
     integrationpluginwallbe.h \
     ../modbus/modbustcpmaster.h \
-    host.h \
-    discover.h
+    discovery.h \
+    host.h
