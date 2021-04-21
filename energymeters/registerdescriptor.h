@@ -35,8 +35,12 @@
 #include <QHash>
 
 enum ModbusRegisterType {
-    Voltage,
-    Current,
+    VoltageL1,
+    VoltageL2,
+    VoltageL3,
+    CurrentL1,
+    CurrentL2,
+    CurrentL3,
     ActivePower,
     Frequency,
     PowerFactor,
