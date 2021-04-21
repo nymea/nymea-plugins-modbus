@@ -139,14 +139,23 @@ void EnergyMeter::getRegister(ModbusRegisterType type, ModbusRegisterDescriptor 
     connect(reply, &ModbusRtuReply::finished, reply, &ModbusRtuReply::deleteLater);
     connect(reply, &ModbusRtuReply::finished, this, [reply, type, descriptor, this] {
         if (reply->error() != ModbusRtuReply::NoError) {
+            if (m_connected) {
+                m_connected = false;
+                emit connectedChanged(m_connected);
+            }
             return;
+        } else {
+            if (!m_connected) {
+                m_connected = true;
+                emit connectedChanged(m_connected);
+            }
         }
         double value = 0;
         if (reply->result().length() == 1) {
             value = static_cast<float>(reply->result().at(0));
         } else if (reply->result().length() == 2) {
             if (descriptor.dataType() == "float") {
-            value = static_cast<float>(reply->result().at(0) << 16 | reply->result().at(1));
+                value = static_cast<float>(reply->result().at(0) << 16 | reply->result().at(1));
             } else {
                 qCWarning(dcEnergyMeters()) << "Data type not supported" << descriptor.dataType();
             }
