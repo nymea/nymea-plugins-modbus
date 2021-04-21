@@ -32,6 +32,7 @@
 #define ENERGYMETER_H
 
 #include <QObject>
+#include <QUuid>
 
 #include "registerdescriptor.h"
 #include "hardware/modbus/modbusrtumaster.h"
@@ -43,6 +44,7 @@ public:
     explicit EnergyMeter(ModbusRtuMaster *modbusMaster, int slaveAddress, const QHash<ModbusRegisterType, ModbusRegisterDescriptor> &modbusRegisters, QObject *parent = nullptr);
     bool init();
 
+    QUuid modbusRtuMasterUuid();
     bool connected();
     bool getVoltage();
     bool getCurrent();
