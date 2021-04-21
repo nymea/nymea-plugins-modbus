@@ -68,26 +68,22 @@ IntegrationPluginEnergyMeters::IntegrationPluginEnergyMeters()
     m_discoverySlaveAddressParamTypeIds.insert(pro380ThingClassId, pro380DiscoverySlaveAddressParamTypeId);
     m_discoverySlaveAddressParamTypeIds.insert(sdm630ThingClassId, sdm630DiscoverySlaveAddressParamTypeId);
 
-    m_registerMaps.insert(pro380ThingClassId, &pro380RegisterMap);
-    m_registerMaps.insert(sdm630ThingClassId, &sdm630RegisterMap);
+    m_registerMaps.insert(pro380ThingClassId, pro380RegisterMap);
+    m_registerMaps.insert(sdm630ThingClassId, sdm630RegisterMap);
 
     // Modbus RTU hardware resource
     connect(hardwareManager()->modbusRtuResource(), &ModbusRtuHardwareResource::modbusRtuMasterRemoved, this, [=](const QUuid &modbusUuid){
         qCDebug(dcEnergyMeters()) << "Modbus RTU master has been removed" << modbusUuid.toString();
 
         // Check if there is any device using this resource
-        foreach (Thing *thing, m_modbusRtuMasters.keys()) {
-            if (m_modbusRtuMasters.value(thing)->modbusUuid() == modbusUuid) {
-                qCWarning(dcEnergyMeters()) << "Hardware resource removed for" << thing << ". The thing will not be functional any more until a new resource has been configured for it.";
-                m_modbusRtuMasters.remove(thing);
-                thing->setStateValue(m_connectionStateTypeIds[thing->thingClassId()], false);
+        foreach (EnergyMeter * meter, m_energyMeters) {
+            if (meter->modbusRtuMasterUuid() == modbusUuid) {
+                Thing *thing = m_energyMeters.key(meter);
+                if (!thing)
+                    return;
 
-                // Set all child things disconnected
-                foreach (Thing *childThing, myThings()) {
-                    if (childThing->parentId() == thing->id()) {
-                        thing->setStateValue(m_connectionStateTypeIds[childThing->thingClassId()], false);
-                    }
-                }
+                qCWarning(dcEnergyMeters()) << "Modbus RTU hardware resource removed for" << thing << ". The thing will not be functional any more until a new resource has been configured for it.";
+                thing->setStateValue(m_connectionStateTypeIds[thing->thingClassId()], false);
             }
         }
     });
@@ -152,7 +148,7 @@ void IntegrationPluginEnergyMeters::setupThing(ThingSetupInfo *info)
             return;
         }
 
-        EnergyMeter *meter = new EnergyMeter(hardwareManager()->modbusRtuResource()->getModbusRtuMaster(uuid), address, *m_registerMaps.value(thing->thingClassId()), this);
+        EnergyMeter *meter = new EnergyMeter(hardwareManager()->modbusRtuResource()->getModbusRtuMaster(uuid), address, m_registerMaps.value(thing->thingClassId()), this);
         connect(info, &ThingSetupInfo::aborted, meter, &EnergyMeter::deleteLater);
         connect(meter, &EnergyMeter::consumedEnergyReceived, info, [this, info, meter] {
             qCDebug(dcEnergyMeters()) << "Reply received, setup finished";

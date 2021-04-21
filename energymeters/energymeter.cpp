@@ -47,6 +47,11 @@ bool EnergyMeter::init()
     return true;
 }
 
+QUuid EnergyMeter::modbusRtuMasterUuid()
+{
+    return m_modbusRtuMaster->modbusUuid();
+}
+
 bool EnergyMeter::connected()
 {
     return m_connected;
