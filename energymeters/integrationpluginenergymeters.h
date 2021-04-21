@@ -70,12 +70,10 @@ private:
     QHash<ThingClassId, ParamTypeId> m_slaveIdParamTypeIds;
     QHash<ThingClassId, ParamTypeId> m_modbusUuidParamTypeIds;
 
-    QHash<ThingClassId, const QHash<ModbusRegisterType, ModbusRegisterDescriptor> *> m_registerMaps;
+    QHash<ThingClassId, QHash<ModbusRegisterType, ModbusRegisterDescriptor>> m_registerMaps;
 
     QHash<Thing *, EnergyMeter *> m_energyMeters;
-    QHash<Thing *, ModbusRtuMaster *> m_modbusRtuMasters;
     PluginTimer *m_pluginTimer = nullptr;
-    QHash<QUuid, ThingActionInfo *> m_asyncActions;
 
 private slots:
     void onConnectionStateChanged(bool status);
