@@ -73,7 +73,6 @@ private:
     QHash<ThingClassId, QHash<ModbusRegisterType, ModbusRegisterDescriptor>> m_registerMaps;
 
     QHash<Thing *, EnergyMeter *> m_energyMeters;
-    PluginTimer *m_pluginTimer = nullptr;
 
 private slots:
     void onConnectionStateChanged(bool status);

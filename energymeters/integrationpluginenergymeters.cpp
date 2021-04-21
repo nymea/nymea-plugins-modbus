@@ -71,8 +71,8 @@ IntegrationPluginEnergyMeters::IntegrationPluginEnergyMeters()
     m_registerMaps.insert(pro380ThingClassId, pro380RegisterMap);
     m_registerMaps.insert(sdm630ThingClassId, sdm630RegisterMap);
 
-    // Modbus RTU hardware resource
-    connect(hardwareManager()->modbusRtuResource(), &ModbusRtuHardwareResource::modbusRtuMasterRemoved, this, [=](const QUuid &modbusUuid){
+    // FIXME leads to crash, probably an issue in the modbus rtu resource
+    /*connect(hardwareManager()->modbusRtuResource(), &ModbusRtuHardwareResource::modbusRtuMasterRemoved, this, [=] (const QUuid &modbusUuid){
         qCDebug(dcEnergyMeters()) << "Modbus RTU master has been removed" << modbusUuid.toString();
 
         // Check if there is any device using this resource
@@ -86,7 +86,7 @@ IntegrationPluginEnergyMeters::IntegrationPluginEnergyMeters()
                 thing->setStateValue(m_connectionStateTypeIds[thing->thingClassId()], false);
             }
         }
-    });
+    }); */
 }
 
 void IntegrationPluginEnergyMeters::discoverThings(ThingDiscoveryInfo *info)
@@ -164,6 +164,7 @@ void IntegrationPluginEnergyMeters::setupThing(ThingSetupInfo *info)
             m_energyMeters.insert(info->thing(), meter);
             info->finish(Thing::ThingErrorNoError);
         });
+        meter->getEnergyConsumed();
         return;
     } else {
         Q_ASSERT_X(false, "setupThing", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
