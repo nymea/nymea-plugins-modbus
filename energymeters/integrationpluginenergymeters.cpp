@@ -50,11 +50,23 @@ IntegrationPluginEnergyMeters::IntegrationPluginEnergyMeters()
     m_connectionStateTypeIds.insert(pro380ThingClassId, pro380ConnectedStateTypeId);
     m_connectionStateTypeIds.insert(sdm630ThingClassId, sdm630ConnectedStateTypeId);
 
-    m_voltageStateTypeIds.insert(pro380ThingClassId, pro380VoltageStateTypeId);
-    m_voltageStateTypeIds.insert(sdm630ThingClassId, sdm630VoltageStateTypeId);
+    m_voltageL1StateTypeIds.insert(pro380ThingClassId, pro380VoltageL1StateTypeId);
+    m_voltageL1StateTypeIds.insert(sdm630ThingClassId, sdm630VoltageL1StateTypeId);
 
-    m_currentStateTypeIds.insert(pro380ThingClassId, pro380CurrentStateTypeId);
-    m_currentStateTypeIds.insert(sdm630ThingClassId, sdm630CurrentStateTypeId);
+    m_voltageL2StateTypeIds.insert(pro380ThingClassId, pro380VoltageL2StateTypeId);
+    m_voltageL2StateTypeIds.insert(sdm630ThingClassId, sdm630VoltageL2StateTypeId);
+
+    m_voltageL3StateTypeIds.insert(pro380ThingClassId, pro380VoltageL3StateTypeId);
+    m_voltageL3StateTypeIds.insert(sdm630ThingClassId, sdm630VoltageL3StateTypeId);
+
+    m_currentL1StateTypeIds.insert(pro380ThingClassId, pro380CurrentL1StateTypeId);
+    m_currentL1StateTypeIds.insert(sdm630ThingClassId, sdm630CurrentL1StateTypeId);
+
+    m_currentL2StateTypeIds.insert(pro380ThingClassId, pro380CurrentL2StateTypeId);
+    m_currentL2StateTypeIds.insert(sdm630ThingClassId, sdm630CurrentL2StateTypeId);
+
+    m_currentL3StateTypeIds.insert(pro380ThingClassId, pro380CurrentL3StateTypeId);
+    m_currentL3StateTypeIds.insert(sdm630ThingClassId, sdm630CurrentL3StateTypeId);
 
     m_activePowerStateTypeIds.insert(pro380ThingClassId, pro380CurrentPowerEventTypeId);
     m_activePowerStateTypeIds.insert(sdm630ThingClassId, sdm630CurrentPowerStateTypeId);
@@ -159,8 +171,12 @@ void IntegrationPluginEnergyMeters::setupThing(ThingSetupInfo *info)
         connect(meter, &EnergyMeter::consumedEnergyReceived, info, [this, info, meter] {
             qCDebug(dcEnergyMeters()) << "Reply received, setup finished";
             connect(meter, &EnergyMeter::connectedChanged, this, &IntegrationPluginEnergyMeters::onConnectionStateChanged);
-            connect(meter, &EnergyMeter::voltageReceived, this, &IntegrationPluginEnergyMeters::onVoltageReceived);
-            connect(meter, &EnergyMeter::currentReceived, this, &IntegrationPluginEnergyMeters::onCurrentReceived);
+            connect(meter, &EnergyMeter::voltageL1Received, this, &IntegrationPluginEnergyMeters::onVoltageL1Received);
+            connect(meter, &EnergyMeter::voltageL2Received, this, &IntegrationPluginEnergyMeters::onVoltageL2Received);
+            connect(meter, &EnergyMeter::voltageL3Received, this, &IntegrationPluginEnergyMeters::onVoltageL3Received);
+            connect(meter, &EnergyMeter::currentL1Received, this, &IntegrationPluginEnergyMeters::onCurrentL1Received);
+            connect(meter, &EnergyMeter::currentL2Received, this, &IntegrationPluginEnergyMeters::onCurrentL2Received);
+            connect(meter, &EnergyMeter::currentL3Received, this, &IntegrationPluginEnergyMeters::onCurrentL3Received);
             connect(meter, &EnergyMeter::activePowerReceived, this, &IntegrationPluginEnergyMeters::onActivePowerReceived);
             connect(meter, &EnergyMeter::powerFactorReceived, this, &IntegrationPluginEnergyMeters::onPowerFactorReceived);
             connect(meter, &EnergyMeter::frequencyReceived, this, &IntegrationPluginEnergyMeters::onFrequencyReceived);
@@ -228,7 +244,7 @@ void IntegrationPluginEnergyMeters::startUpdateCycle(EnergyMeter *meter)
         }
     }
     m_updateCycleInProgress.insert(meter, true);
-    meter->getVoltage();
+    meter->getVoltageL1();
 }
 
 void IntegrationPluginEnergyMeters::updateCycleFinished(EnergyMeter *meter)
@@ -254,18 +270,62 @@ void IntegrationPluginEnergyMeters::onConnectionStateChanged(bool status)
     thing->setStateValue(m_connectionStateTypeIds.value(thing->thingClassId()), status);
 }
 
-void IntegrationPluginEnergyMeters::onVoltageReceived(double voltage)
+void IntegrationPluginEnergyMeters::onVoltageL1Received(double voltage)
 {
     EnergyMeter *meter = static_cast<EnergyMeter *>(sender());
     Thing *thing = m_energyMeters.key(meter);
     if (!thing)
         return;
 
-    meter->getCurrent();
-    thing->setStateValue(m_voltageStateTypeIds.value(thing->thingClassId()), voltage);
+    meter->getVoltageL2();
+    thing->setStateValue(m_voltageL1StateTypeIds.value(thing->thingClassId()), voltage);
 }
 
-void IntegrationPluginEnergyMeters::onCurrentReceived(double current)
+void IntegrationPluginEnergyMeters::onVoltageL2Received(double voltage)
+{
+    EnergyMeter *meter = static_cast<EnergyMeter *>(sender());
+    Thing *thing = m_energyMeters.key(meter);
+    if (!thing)
+        return;
+
+    meter->getVoltageL3();
+    thing->setStateValue(m_voltageL2StateTypeIds.value(thing->thingClassId()), voltage);
+}
+
+void IntegrationPluginEnergyMeters::onVoltageL3Received(double voltage)
+{
+    EnergyMeter *meter = static_cast<EnergyMeter *>(sender());
+    Thing *thing = m_energyMeters.key(meter);
+    if (!thing)
+        return;
+
+    meter->getCurrentL1();
+    thing->setStateValue(m_voltageL3StateTypeIds.value(thing->thingClassId()), voltage);
+}
+
+void IntegrationPluginEnergyMeters::onCurrentL1Received(double current)
+{
+    EnergyMeter *meter = static_cast<EnergyMeter *>(sender());
+    Thing *thing = m_energyMeters.key(meter);
+    if (!thing)
+        return;
+
+    meter->getCurrentL2();
+    thing->setStateValue(m_currentL1StateTypeIds.value(thing->thingClassId()), current);
+}
+
+void IntegrationPluginEnergyMeters::onCurrentL2Received(double current)
+{
+    EnergyMeter *meter = static_cast<EnergyMeter *>(sender());
+    Thing *thing = m_energyMeters.key(meter);
+    if (!thing)
+        return;
+
+    meter->getCurrentL3();
+    thing->setStateValue(m_currentL2StateTypeIds.value(thing->thingClassId()), current);
+}
+
+void IntegrationPluginEnergyMeters::onCurrentL3Received(double current)
 {
     EnergyMeter *meter = static_cast<EnergyMeter *>(sender());
     Thing *thing = m_energyMeters.key(meter);
@@ -273,7 +333,7 @@ void IntegrationPluginEnergyMeters::onCurrentReceived(double current)
         return;
 
     meter->getActivePower();
-    thing->setStateValue(m_currentStateTypeIds.value(thing->thingClassId()), current);
+    thing->setStateValue(m_currentL3StateTypeIds.value(thing->thingClassId()), current);
 }
 
 void IntegrationPluginEnergyMeters::onActivePowerReceived(double power)
