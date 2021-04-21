@@ -65,6 +65,12 @@ IntegrationPluginEnergyMeters::IntegrationPluginEnergyMeters()
     m_powerFactorStateTypeIds.insert(pro380ThingClassId, pro380PowerFactorStateTypeId);
     m_powerFactorStateTypeIds.insert(sdm630ThingClassId, sdm630PowerFactorStateTypeId);
 
+    m_totalEnergyConsumedStateTypeIds.insert(pro380ThingClassId, pro380TotalEnergyConsumedEventTypeId);
+    m_totalEnergyConsumedStateTypeIds.insert(sdm630ThingClassId, sdm630TotalEnergyConsumedEventTypeId);
+
+    m_totalEnergyProducedStateTypeIds.insert(pro380ThingClassId, pro380TotalEnergyProducedStateTypeId);
+    m_totalEnergyProducedStateTypeIds.insert(sdm630ThingClassId, sdm630TotalEnergyProducedStateTypeId);
+
     m_discoverySlaveAddressParamTypeIds.insert(pro380ThingClassId, pro380DiscoverySlaveAddressParamTypeId);
     m_discoverySlaveAddressParamTypeIds.insert(sdm630ThingClassId, sdm630DiscoverySlaveAddressParamTypeId);
 
@@ -157,7 +163,7 @@ void IntegrationPluginEnergyMeters::setupThing(ThingSetupInfo *info)
             connect(meter, &EnergyMeter::currentReceived, this, &IntegrationPluginEnergyMeters::onCurrentReceived);
             connect(meter, &EnergyMeter::activePowerReceived, this, &IntegrationPluginEnergyMeters::onActivePowerReceived);
             connect(meter, &EnergyMeter::powerFactorReceived, this, &IntegrationPluginEnergyMeters::onPowerFactorReceived);
-            connect(meter, &EnergyMeter::frequencyReceived, this, &IntegrationPluginEnergyMeters::onActivePowerReceived);
+            connect(meter, &EnergyMeter::frequencyReceived, this, &IntegrationPluginEnergyMeters::onFrequencyReceived);
             connect(meter, &EnergyMeter::producedEnergyReceived, this, &IntegrationPluginEnergyMeters::onProducedEnergyReceived);
             connect(meter, &EnergyMeter::consumedEnergyReceived, this, &IntegrationPluginEnergyMeters::onConsumedEnergyReceived);
 
