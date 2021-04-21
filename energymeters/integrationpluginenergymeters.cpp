@@ -32,6 +32,7 @@
 #include "plugininfo.h"
 
 #include "bg-etechmodbusregister.h"
+#include "inepromodbusregister.h"
 
 IntegrationPluginEnergyMeters::IntegrationPluginEnergyMeters()
 {
@@ -66,6 +67,9 @@ IntegrationPluginEnergyMeters::IntegrationPluginEnergyMeters()
 
     m_discoverySlaveAddressParamTypeIds.insert(pro380ThingClassId, pro380DiscoverySlaveAddressParamTypeId);
     m_discoverySlaveAddressParamTypeIds.insert(sdm630ThingClassId, sdm630DiscoverySlaveAddressParamTypeId);
+
+    m_registerMaps.insert(pro380ThingClassId, &pro380RegisterMap);
+    m_registerMaps.insert(sdm630ThingClassId, &sdm630RegisterMap);
 
     // Modbus RTU hardware resource
     connect(hardwareManager()->modbusRtuResource(), &ModbusRtuHardwareResource::modbusRtuMasterRemoved, this, [=](const QUuid &modbusUuid){
@@ -148,7 +152,7 @@ void IntegrationPluginEnergyMeters::setupThing(ThingSetupInfo *info)
             return;
         }
 
-        EnergyMeter *meter = new EnergyMeter(hardwareManager()->modbusRtuResource()->getModbusRtuMaster(uuid), address, BgEtechModbusRegisers::map(), this);
+        EnergyMeter *meter = new EnergyMeter(hardwareManager()->modbusRtuResource()->getModbusRtuMaster(uuid), address, *m_registerMaps.value(thing->thingClassId()), this);
         connect(info, &ThingSetupInfo::aborted, meter, &EnergyMeter::deleteLater);
         connect(meter, &EnergyMeter::consumedEnergyReceived, info, [this, info, meter] {
             qCDebug(dcEnergyMeters()) << "Reply received, setup finished";
