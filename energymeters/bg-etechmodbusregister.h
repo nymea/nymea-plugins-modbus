@@ -33,27 +33,14 @@
 
 #include "registerdescriptor.h"
 
-class BgEtechModbusRegisers
-{
-
-private:
-    BgEtechModbusRegisers() {}
-    static void init () {
-        m_registerMap.insert(ModbusRegisterType::Voltage, ModbusRegisterDescriptor(1, 3, 2, "V", "float"));
-       /* m_registerMap.insert(ModbusRegisterType::Current, ModbusRegisterDescriptor(1, 3, 2, "V", "float"));
-        m_registerMap.insert(ModbusRegisterType::ActivePower, ModbusRegisterDescriptor(1, 3, 2, "V", "float"));
-        m_registerMap.insert(ModbusRegisterType::Frequency, ModbusRegisterDescriptor(1, 3, 2, "V", "float"));
-        m_registerMap.insert(ModbusRegisterType::PowerFactor, ModbusRegisterDescriptor(1, 3, 2, "V", "float"));
-        m_registerMap.insert(ModbusRegisterType::EnergyConsumed, ModbusRegisterDescriptor(1, 3, 2, "V", "float"));
-        m_registerMap.insert(ModbusRegisterType::EnergyProduced, ModbusRegisterDescriptor(1, 3, 2, "V", "float"));*/
-    }
-protected:
-    static QHash<ModbusRegisterType, ModbusRegisterDescriptor> m_registerMap;
-public:
-    static QHash<ModbusRegisterType, ModbusRegisterDescriptor> map()
-    {   BgEtechModbusRegisers();
-        init();
-        return m_registerMap;}
+static const QHash<ModbusRegisterType, ModbusRegisterDescriptor> sdm630RegisterMap {
+    {ModbusRegisterType::Voltage,        ModbusRegisterDescriptor(30043, 4, 2, "V", "float")}, //Average line to neutral volts
+    {ModbusRegisterType::Current,        ModbusRegisterDescriptor(30047, 4, 2, "A", "float")}, //Average line current
+    {ModbusRegisterType::ActivePower,    ModbusRegisterDescriptor(30053, 4, 2, "W", "float")}, //Total system power
+    {ModbusRegisterType::Frequency,      ModbusRegisterDescriptor(30071, 4, 2, "Hz", "float")},
+    {ModbusRegisterType::PowerFactor,    ModbusRegisterDescriptor(30067, 4, 2, "Degree", "float")}, //Total system phase angle
+    {ModbusRegisterType::EnergyConsumed, ModbusRegisterDescriptor(30073, 4, 2, "kWh", "float")}, //Total Import kWh
+    {ModbusRegisterType::EnergyProduced, ModbusRegisterDescriptor(30075, 4, 2, "kWh", "float")} //Total Export kWh
 };
 
 #endif // BGETECHMODBUSREGISTER_H

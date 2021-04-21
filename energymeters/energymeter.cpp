@@ -31,6 +31,8 @@
 #include "energymeter.h"
 #include "hardware/modbus/modbusrtureply.h"
 
+#include "extern-plugininfo.h"
+
 EnergyMeter::EnergyMeter(ModbusRtuMaster *modbusMaster, int slaveAddress, const QHash<ModbusRegisterType, ModbusRegisterDescriptor> &modbusRegisters, QObject *parent) :
     QObject(parent),
     m_modbusRtuMaster(modbusMaster),
@@ -123,26 +125,60 @@ bool EnergyMeter::getEnergyConsumed()
 void EnergyMeter::getRegister(ModbusRegisterType type, ModbusRegisterDescriptor descriptor)
 {
 
-    ModbusRtuReply *reply;
-    if (descriptor.functionCode() == 1){
-
-    } else if (descriptor.functionCode() == 2){
-
-    } else if (descriptor.functionCode() == 3){
+    ModbusRtuReply *reply = nullptr;
+    if (descriptor.functionCode() == 3){
         reply = m_modbusRtuMaster->readHoldingRegister(m_slaveAddress, descriptor.address(), descriptor.length());
     } else if (descriptor.functionCode() == 4){
+        reply = m_modbusRtuMaster->readInputRegister(m_slaveAddress, descriptor.address(), descriptor.length());
     }
     connect(reply, &ModbusRtuReply::finished, reply, &ModbusRtuReply::deleteLater);
-    connect(reply, &ModbusRtuReply::finished, this, [reply, type, this] {
+    connect(reply, &ModbusRtuReply::finished, this, [reply, type, descriptor, this] {
         if (reply->error() != ModbusRtuReply::NoError) {
             return;
         }
         double value = 0;
-        if (reply->result().length() == 2) {
+        if (reply->result().length() == 1) {
+            value = static_cast<float>(reply->result().at(0));
+        } else if (reply->result().length() == 2) {
+            if (descriptor.dataType() == "float") {
             value = static_cast<float>(reply->result().at(0) << 16 | reply->result().at(1));
+            } else {
+                qCWarning(dcEnergyMeters()) << "Data type not supported" << descriptor.dataType();
+            }
         }
 
-        emit valueReceived(type, value);
+        if (type == ModbusRegisterType::Voltage) {
+            if (descriptor.unit() == "mV")
+                value /= 1000;
+
+            emit voltageReceived(value);
+        } else if (type == ModbusRegisterType::Current) {
+            if (descriptor.unit() == "mA")
+                value /= 1000;
+
+            emit currentReceived(value);
+        } else if (type == ModbusRegisterType::ActivePower) {
+            if (descriptor.unit() == "kW") {
+                value *= 1000;
+            } else if (descriptor.unit() == "mW") {
+                value /= 1000;
+            }
+            emit activePowerReceived(value);
+        } else if (type == ModbusRegisterType::PowerFactor) {
+            emit powerFactorReceived(value);
+        } else if (type == ModbusRegisterType::Frequency) {
+            emit frequencyReceived(value);
+        } else if (type == ModbusRegisterType::EnergyConsumed) {
+            if (descriptor.unit() == "Wh") {
+                value /= 1000;
+            }
+            emit consumedEnergyReceived(value);
+        } else if (type == ModbusRegisterType::EnergyProduced) {
+            if (descriptor.unit() == "Wh") {
+                value /= 1000;
+            }
+            emit producedEnergyReceived(value);
+        }
     });
 }
 
