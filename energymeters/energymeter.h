@@ -55,6 +55,12 @@ public:
     bool getEnergyConsumed();
 
 private:
+    typedef union {
+        int32_t s;
+        uint32_t u;
+        float f;
+    } modbus_32_t;
+
     bool m_connected = false;
 
     ModbusRtuMaster *m_modbusRtuMaster = nullptr;
