@@ -150,12 +150,12 @@ void EnergyMeter::getRegister(ModbusRegisterType type, ModbusRegisterDescriptor 
                 emit connectedChanged(m_connected);
             }
         }
-        double value = 0;
+        modbus_32_t value;
         if (reply->result().length() == 1) {
-            value = static_cast<float>(reply->result().at(0));
+            value.u = static_cast<float>(reply->result().at(0));
         } else if (reply->result().length() == 2) {
             if (descriptor.dataType() == "float") {
-                value = static_cast<float>(reply->result().at(0) << 16 | reply->result().at(1));
+                value.u = static_cast<float>(static_cast<uint32_t>(reply->result().at(0)) << 16 | reply->result().at(1));
             } else {
                 qCWarning(dcEnergyMeters()) << "Data type not supported" << descriptor.dataType();
             }
@@ -163,35 +163,35 @@ void EnergyMeter::getRegister(ModbusRegisterType type, ModbusRegisterDescriptor 
 
         if (type == ModbusRegisterType::Voltage) {
             if (descriptor.unit() == "mV")
-                value /= 1000;
+                value.f /= 1000.00;
 
-            emit voltageReceived(value);
+            emit voltageReceived(value.f);
         } else if (type == ModbusRegisterType::Current) {
             if (descriptor.unit() == "mA")
-                value /= 1000;
+                value.f /= 1000.00;
 
-            emit currentReceived(value);
+            emit currentReceived(value.f);
         } else if (type == ModbusRegisterType::ActivePower) {
             if (descriptor.unit() == "kW") {
-                value *= 1000;
+                value.f *= 1000;
             } else if (descriptor.unit() == "mW") {
-                value /= 1000;
+                value.f /= 1000.00;
             }
-            emit activePowerReceived(value);
+            emit activePowerReceived(value.f);
         } else if (type == ModbusRegisterType::PowerFactor) {
-            emit powerFactorReceived(value);
+            emit powerFactorReceived(value.f);
         } else if (type == ModbusRegisterType::Frequency) {
-            emit frequencyReceived(value);
+            emit frequencyReceived(value.f);
         } else if (type == ModbusRegisterType::EnergyConsumed) {
             if (descriptor.unit() == "Wh") {
-                value /= 1000;
+                value.f /= 1000.00;
             }
-            emit consumedEnergyReceived(value);
+            emit consumedEnergyReceived(value.f);
         } else if (type == ModbusRegisterType::EnergyProduced) {
             if (descriptor.unit() == "Wh") {
-                value /= 1000;
+                value.f /= 1000.00;
             }
-            emit producedEnergyReceived(value);
+            emit producedEnergyReceived(value.f);
         }
     });
 }
