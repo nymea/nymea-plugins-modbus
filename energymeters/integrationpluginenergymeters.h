@@ -56,7 +56,6 @@ public:
     void thingRemoved(Thing *thing) override;
 
 private:
-    QTimer *m_updateTimer = nullptr;
     QHash<ThingClassId, StateTypeId> m_connectionStateTypeIds;
     QHash<ThingClassId, StateTypeId> m_voltageStateTypeIds;
     QHash<ThingClassId, StateTypeId> m_currentStateTypeIds;

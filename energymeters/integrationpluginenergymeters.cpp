@@ -177,23 +177,6 @@ void IntegrationPluginEnergyMeters::postSetupThing(Thing *thing)
     if (m_connectionStateTypeIds.contains(thing->thingClassId())) {
         thing->setStateValue(m_connectionStateTypeIds.value(thing->thingClassId()), true);
     }
-
-    if (!m_updateTimer) {
-        qCDebug(dcEnergyMeters()) << "Creating update timer";
-        m_updateTimer = new QTimer(this);
-        m_updateTimer->start(configValue(energyMetersPluginUpdateIntervalParamTypeId).toInt());
-        connect(m_updateTimer, &QTimer::timeout, this, [this] {
-            foreach (EnergyMeter *meter, m_energyMeters) {
-                meter->getVoltage();
-            }
-        });
-        connect(this, &IntegrationPlugin::configValueChanged, [this] (const ParamTypeId &paramTypeId, const QVariant value) {
-            if (m_updateTimer && (paramTypeId == energyMetersPluginUpdateIntervalParamTypeId)) {
-                qCDebug(dcEnergyMeters()) << "Updating update interval to" << value;
-                m_updateTimer->setInterval(value.toInt());
-            }
-        });
-    }
 }
 
 void IntegrationPluginEnergyMeters::thingRemoved(Thing *thing)
@@ -202,12 +185,6 @@ void IntegrationPluginEnergyMeters::thingRemoved(Thing *thing)
 
     if (m_energyMeters.contains(thing)) {
         m_energyMeters.take(thing)->deleteLater();
-    }
-
-    if (myThings().isEmpty() && !m_updateTimer) {
-        qCDebug(dcEnergyMeters()) << "Deleting update timer";
-        m_updateTimer->deleteLater();
-        m_updateTimer = nullptr;
     }
 }
 
@@ -219,6 +196,14 @@ void IntegrationPluginEnergyMeters::onConnectionStateChanged(bool status)
         return;
 
     thing->setStateValue(m_connectionStateTypeIds.value(thing->thingClassId()), status);
+    if (!status) {
+        QTimer::singleShot(5000, meter, [this, meter, thing] {
+            if (!thing->stateValue(m_connectionStateTypeIds.value(thing->thingClassId())).toBool()) {
+                // Check if the device is still disconnected
+                meter->getVoltage(); // restart update cycle
+            }
+        });
+    }
 }
 
 void IntegrationPluginEnergyMeters::onVoltageReceived(double voltage)
@@ -228,6 +213,7 @@ void IntegrationPluginEnergyMeters::onVoltageReceived(double voltage)
     if (!thing)
         return;
 
+    meter->getCurrent();
     thing->setStateValue(m_voltageStateTypeIds.value(thing->thingClassId()), voltage);
 }
 
@@ -238,6 +224,7 @@ void IntegrationPluginEnergyMeters::onCurrentReceived(double current)
     if (!thing)
         return;
 
+    meter->getActivePower();
     thing->setStateValue(m_currentStateTypeIds.value(thing->thingClassId()), current);
 }
 
@@ -248,6 +235,7 @@ void IntegrationPluginEnergyMeters::onActivePowerReceived(double power)
     if (!thing)
         return;
 
+    meter->getFrequency();
     thing->setStateValue(m_activePowerStateTypeIds.value(thing->thingClassId()), power);
 }
 
@@ -258,6 +246,7 @@ void IntegrationPluginEnergyMeters::onFrequencyReceived(double frequency)
     if (!thing)
         return;
 
+    meter->getPowerFactor();
     thing->setStateValue(m_frequencyStateTypeIds.value(thing->thingClassId()), frequency);
 }
 
@@ -268,6 +257,7 @@ void IntegrationPluginEnergyMeters::onPowerFactorReceived(double powerFactor)
     if (!thing)
         return;
 
+    meter->getEnergyProduced();
     thing->setStateValue(m_powerFactorStateTypeIds.value(thing->thingClassId()), powerFactor);
 }
 
@@ -278,6 +268,7 @@ void IntegrationPluginEnergyMeters::onProducedEnergyReceived(double energy)
     if (!thing)
         return;
 
+    meter->getEnergyConsumed();
     thing->setStateValue(m_totalEnergyProducedStateTypeIds.value(thing->thingClassId()), energy);
 }
 
@@ -288,5 +279,9 @@ void IntegrationPluginEnergyMeters::onConsumedEnergyReceived(double energy)
     if (!thing)
         return;
 
+    int updateInterval = configValue(energyMetersPluginUpdateIntervalParamTypeId).toInt();
+    QTimer::singleShot(updateInterval, meter, [meter] {
+        meter->getVoltage(); // restart update cycle
+    });
     thing->setStateValue(m_totalEnergyConsumedStateTypeIds.value(thing->thingClassId()), energy);
 }
