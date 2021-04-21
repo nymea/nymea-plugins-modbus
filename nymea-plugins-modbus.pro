@@ -4,6 +4,7 @@ PLUGIN_DIRS = \
     drexelundweiss          \
     energymeters            \ 
     modbuscommander         \
+    mtec                    \
     mypv                    \
     sunspec                 \
     unipi                   \
