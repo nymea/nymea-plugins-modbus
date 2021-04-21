@@ -151,6 +151,7 @@ void EnergyMeter::getRegister(ModbusRegisterType type, ModbusRegisterDescriptor 
             }
         }
         modbus_32_t value;
+        value.u = 0;
         if (reply->result().length() == 1) {
             value.u = static_cast<float>(reply->result().at(0));
         } else if (reply->result().length() == 2) {
