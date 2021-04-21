@@ -33,13 +33,13 @@
 #include "registerdescriptor.h"
 
 static const QHash<ModbusRegisterType, ModbusRegisterDescriptor> pro380RegisterMap {
-    {ModbusRegisterType::Voltage,        ModbusRegisterDescriptor(20482, 3, 2, "V", "float")}, //L1 Voltage
-    {ModbusRegisterType::Current,        ModbusRegisterDescriptor(20492, 3, 2, "A", "float")}, //L1 Current
-    {ModbusRegisterType::ActivePower,    ModbusRegisterDescriptor(20498, 3, 2, "kW", "float")}, //Total active power
-    {ModbusRegisterType::Frequency,      ModbusRegisterDescriptor(20488, 3, 2, "Hz", "float")},
-    {ModbusRegisterType::PowerFactor,    ModbusRegisterDescriptor(20522, 3, 2, "Degree", "float")},
-    {ModbusRegisterType::EnergyConsumed, ModbusRegisterDescriptor(24588, 3, 2, "kWh", "float")}, //Forward active energy
-    {ModbusRegisterType::EnergyProduced, ModbusRegisterDescriptor(24600, 3, 2, "kWh", "float")} //Reverse active energy
+    {ModbusRegisterType::Voltage,        ModbusRegisterDescriptor(0x5002, 3, 2, "V", "float")}, //L1 Voltage
+    {ModbusRegisterType::Current,        ModbusRegisterDescriptor(0x500C, 3, 2, "A", "float")}, //L1 Current
+    {ModbusRegisterType::ActivePower,    ModbusRegisterDescriptor(0x5012, 3, 2, "kW", "float")}, //Total active power
+    {ModbusRegisterType::Frequency,      ModbusRegisterDescriptor(0x5008, 3, 2, "Hz", "float")},
+    {ModbusRegisterType::PowerFactor,    ModbusRegisterDescriptor(0x502A, 3, 2, "Degree", "float")},
+    {ModbusRegisterType::EnergyConsumed, ModbusRegisterDescriptor(0x600C, 3, 2, "kWh", "float")}, //Forward active energy
+    {ModbusRegisterType::EnergyProduced, ModbusRegisterDescriptor(0x6018, 3, 2, "kWh", "float")} //Reverse active energy
 };
 
 #endif //INEPROMODBUSREGISTER_H
