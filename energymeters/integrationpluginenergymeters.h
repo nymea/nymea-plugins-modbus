@@ -56,6 +56,7 @@ public:
     void thingRemoved(Thing *thing) override;
 
 private:
+    PluginTimer *m_reconnectTimer = nullptr;
     QHash<ThingClassId, StateTypeId> m_connectionStateTypeIds;
     QHash<ThingClassId, StateTypeId> m_voltageStateTypeIds;
     QHash<ThingClassId, StateTypeId> m_currentStateTypeIds;
@@ -72,6 +73,10 @@ private:
     QHash<ThingClassId, QHash<ModbusRegisterType, ModbusRegisterDescriptor>> m_registerMaps;
 
     QHash<Thing *, EnergyMeter *> m_energyMeters;
+
+    QHash<EnergyMeter *, bool> m_updateCycleInProgress;
+    void startUpdateCycle(EnergyMeter *meter);
+    void updateCycleFinished(EnergyMeter *meter);
 
 private slots:
     void onConnectionStateChanged(bool status);

@@ -159,6 +159,8 @@ void EnergyMeter::getRegister(ModbusRegisterType type, ModbusRegisterDescriptor 
             } else {
                 qCWarning(dcEnergyMeters()) << "Data type not supported" << descriptor.dataType();
             }
+        } else {
+            return;
         }
 
         if (type == ModbusRegisterType::Voltage) {
