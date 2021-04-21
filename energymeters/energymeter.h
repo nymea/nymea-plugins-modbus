@@ -64,7 +64,6 @@ private:
 
 signals:
     void connectedChanged(bool connected);
-    void valueReceived(ModbusRegisterType type, double value);
 
     void voltageReceived(double voltage);
     void currentReceived(double current);
