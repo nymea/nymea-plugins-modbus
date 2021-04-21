@@ -110,7 +110,7 @@ void IntegrationPluginEnergyMeters::discoverThings(ThingDiscoveryInfo *info)
             if (!modbusMaster->connected()) {
                 continue;
             }
-            ThingDescriptor descriptor(info->thingClassId(), "Modbus interface "+modbusMaster->serialPort(), modbusMaster->modbusUuid().toString());
+            ThingDescriptor descriptor(info->thingClassId(), QT_TR_NOOP("Energy meter"), QT_TR_NOOP("Slave address ") +QString::number(slaveAddress)+" "+modbusMaster->serialPort());
             ParamList params;
             params << Param(m_slaveIdParamTypeIds.value(info->thingClassId()), slaveAddress);
             params << Param(m_modbusUuidParamTypeIds.value(info->thingClassId()), modbusMaster->modbusUuid());
@@ -176,6 +176,27 @@ void IntegrationPluginEnergyMeters::postSetupThing(Thing *thing)
     qCDebug(dcEnergyMeters) << "Post setup thing" << thing->name();
     if (m_connectionStateTypeIds.contains(thing->thingClassId())) {
         thing->setStateValue(m_connectionStateTypeIds.value(thing->thingClassId()), true);
+
+        if (m_energyMeters.contains(thing)) {
+            startUpdateCycle(m_energyMeters.value(thing));
+        }
+    }
+
+    if (!m_reconnectTimer) {
+        m_reconnectTimer = hardwareManager()->pluginTimerManager()->registerTimer(5000);
+        connect(m_reconnectTimer, &PluginTimer::timeout, this, [this] {
+            foreach (Thing *thing, myThings()) {
+                if (m_connectionStateTypeIds.contains(thing->thingClassId())) {
+                    if (!thing->stateValue(m_connectionStateTypeIds.value(thing->thingClassId())).toBool()) {
+                        EnergyMeter *meter = m_energyMeters.value(thing);
+                        if (!meter)
+                            continue;
+
+                        startUpdateCycle(meter);
+                    }
+                }
+            }
+        });
     }
 }
 
@@ -186,6 +207,32 @@ void IntegrationPluginEnergyMeters::thingRemoved(Thing *thing)
     if (m_energyMeters.contains(thing)) {
         m_energyMeters.take(thing)->deleteLater();
     }
+
+    if (myThings().isEmpty() && m_reconnectTimer) {
+        hardwareManager()->pluginTimerManager()->unregisterTimer(m_reconnectTimer);
+        m_reconnectTimer = nullptr;
+    }
+}
+
+void IntegrationPluginEnergyMeters::startUpdateCycle(EnergyMeter *meter)
+{
+    if (m_updateCycleInProgress.contains(meter)) {
+        if (m_updateCycleInProgress.value(meter)) {
+            return;
+        }
+    }
+    m_updateCycleInProgress.insert(meter, true);
+    meter->getVoltage();
+}
+
+void IntegrationPluginEnergyMeters::updateCycleFinished(EnergyMeter *meter)
+{
+    m_updateCycleInProgress.insert(meter, false);
+
+    int updateInterval = configValue(energyMetersPluginUpdateIntervalParamTypeId).toInt();
+    QTimer::singleShot(updateInterval, meter, [this, meter] {
+        startUpdateCycle(meter); // restart update cycle
+    });
 }
 
 void IntegrationPluginEnergyMeters::onConnectionStateChanged(bool status)
@@ -195,15 +242,10 @@ void IntegrationPluginEnergyMeters::onConnectionStateChanged(bool status)
     if (!thing)
         return;
 
-    thing->setStateValue(m_connectionStateTypeIds.value(thing->thingClassId()), status);
     if (!status) {
-        QTimer::singleShot(5000, meter, [this, meter, thing] {
-            if (!thing->stateValue(m_connectionStateTypeIds.value(thing->thingClassId())).toBool()) {
-                // Check if the device is still disconnected
-                meter->getVoltage(); // restart update cycle
-            }
-        });
+        updateCycleFinished(meter);
     }
+    thing->setStateValue(m_connectionStateTypeIds.value(thing->thingClassId()), status);
 }
 
 void IntegrationPluginEnergyMeters::onVoltageReceived(double voltage)
@@ -278,10 +320,6 @@ void IntegrationPluginEnergyMeters::onConsumedEnergyReceived(double energy)
     Thing *thing = m_energyMeters.key(meter);
     if (!thing)
         return;
-
-    int updateInterval = configValue(energyMetersPluginUpdateIntervalParamTypeId).toInt();
-    QTimer::singleShot(updateInterval, meter, [meter] {
-        meter->getVoltage(); // restart update cycle
-    });
+    updateCycleFinished(meter);
     thing->setStateValue(m_totalEnergyConsumedStateTypeIds.value(thing->thingClassId()), energy);
 }
