@@ -42,11 +42,6 @@ EnergyMeter::EnergyMeter(ModbusRtuMaster *modbusMaster, int slaveAddress, const 
 
 }
 
-bool EnergyMeter::init()
-{
-    return true;
-}
-
 QUuid EnergyMeter::modbusRtuMasterUuid()
 {
     return m_modbusRtuMaster->modbusUuid();
@@ -57,78 +52,67 @@ bool EnergyMeter::connected()
     return m_connected;
 }
 
-bool EnergyMeter::getVoltage()
+bool EnergyMeter::getVoltageL1()
 {
-    if (!m_modbusRegisters.contains(ModbusRegisterType::Voltage))
-        return false;
-
-    ModbusRegisterDescriptor descriptor = m_modbusRegisters.value(ModbusRegisterType::Voltage);
-    getRegister(ModbusRegisterType::Voltage, descriptor);
-    return true;
+    return getRegister(ModbusRegisterType::VoltageL1);
 }
 
-bool EnergyMeter::getCurrent()
+bool EnergyMeter::getVoltageL2()
 {
-    if (!m_modbusRegisters.contains(ModbusRegisterType::Current))
-        return false;
+    return getRegister(ModbusRegisterType::VoltageL2);
+}
 
-    ModbusRegisterDescriptor descriptor = m_modbusRegisters.value(ModbusRegisterType::Current);
-    getRegister(ModbusRegisterType::Current, descriptor);
-    return true;
+bool EnergyMeter::getVoltageL3()
+{
+    return getRegister(ModbusRegisterType::VoltageL3);
+}
+
+bool EnergyMeter::getCurrentL1()
+{
+    return getRegister(ModbusRegisterType::CurrentL1);
+}
+
+bool EnergyMeter::getCurrentL2()
+{
+    return getRegister(ModbusRegisterType::CurrentL2);
+}
+
+bool EnergyMeter::getCurrentL3()
+{
+    return getRegister(ModbusRegisterType::CurrentL3);
 }
 
 bool EnergyMeter::getFrequency()
 {
-    if (!m_modbusRegisters.contains(ModbusRegisterType::Frequency))
-        return false;
-
-    ModbusRegisterDescriptor descriptor = m_modbusRegisters.value(ModbusRegisterType::Frequency);
-    getRegister(ModbusRegisterType::Frequency, descriptor);
-    return true;
+    return getRegister(ModbusRegisterType::Frequency);
 }
 
 bool EnergyMeter::getPowerFactor()
 {
-    if (!m_modbusRegisters.contains(ModbusRegisterType::PowerFactor))
-        return false;
-
-    ModbusRegisterDescriptor descriptor = m_modbusRegisters.value(ModbusRegisterType::PowerFactor);
-    getRegister(ModbusRegisterType::PowerFactor, descriptor);
-    return true;
+    return getRegister(ModbusRegisterType::PowerFactor);
 }
 
 bool EnergyMeter::getActivePower()
 {
-    if (!m_modbusRegisters.contains(ModbusRegisterType::ActivePower))
-        return false;
-
-    ModbusRegisterDescriptor descriptor = m_modbusRegisters.value(ModbusRegisterType::ActivePower);
-    getRegister(ModbusRegisterType::ActivePower, descriptor);
-    return true;
+    return getRegister(ModbusRegisterType::ActivePower);
 }
 
 bool EnergyMeter::getEnergyProduced()
 {
-    if (!m_modbusRegisters.contains(ModbusRegisterType::EnergyProduced))
-        return false;
-
-    ModbusRegisterDescriptor descriptor = m_modbusRegisters.value(ModbusRegisterType::EnergyProduced);
-    getRegister(ModbusRegisterType::EnergyProduced, descriptor);
-    return true;
+    return getRegister(ModbusRegisterType::EnergyProduced);
 }
 
 bool EnergyMeter::getEnergyConsumed()
 {
-    if (!m_modbusRegisters.contains(ModbusRegisterType::EnergyConsumed))
-        return false;
-
-    ModbusRegisterDescriptor descriptor = m_modbusRegisters.value(ModbusRegisterType::EnergyConsumed);
-    getRegister(ModbusRegisterType::EnergyConsumed, descriptor);
-    return true;
+    return getRegister(ModbusRegisterType::EnergyConsumed);
 }
 
-void EnergyMeter::getRegister(ModbusRegisterType type, ModbusRegisterDescriptor descriptor)
+bool EnergyMeter::getRegister(ModbusRegisterType type)
 {
+    if (!m_modbusRegisters.contains(type))
+        return false;
+
+    ModbusRegisterDescriptor descriptor = m_modbusRegisters.value(type);
 
     ModbusRtuReply *reply = nullptr;
     if (descriptor.functionCode() == 3){
@@ -164,16 +148,36 @@ void EnergyMeter::getRegister(ModbusRegisterType type, ModbusRegisterDescriptor 
             return;
         }
 
-        if (type == ModbusRegisterType::Voltage) {
+        if (type == ModbusRegisterType::VoltageL1) {
             if (descriptor.unit() == "mV")
                 value.f /= 1000.00;
 
-            emit voltageReceived(value.f);
-        } else if (type == ModbusRegisterType::Current) {
+            emit voltageL1Received(value.f);
+        } else if (type == ModbusRegisterType::VoltageL2) {
+            if (descriptor.unit() == "mV")
+                value.f /= 1000.00;
+
+            emit voltageL2Received(value.f);
+        } else if (type == ModbusRegisterType::VoltageL3) {
+            if (descriptor.unit() == "mV")
+                value.f /= 1000.00;
+
+            emit voltageL3Received(value.f);
+        } else if (type == ModbusRegisterType::CurrentL1) {
             if (descriptor.unit() == "mA")
                 value.f /= 1000.00;
 
-            emit currentReceived(value.f);
+            emit currentL1Received(value.f);
+        } else if (type == ModbusRegisterType::CurrentL2) {
+            if (descriptor.unit() == "mA")
+                value.f /= 1000.00;
+
+            emit currentL2Received(value.f);
+        } else if (type == ModbusRegisterType::CurrentL3) {
+            if (descriptor.unit() == "mA")
+                value.f /= 1000.00;
+
+            emit currentL3Received(value.f);
         } else if (type == ModbusRegisterType::ActivePower) {
             if (descriptor.unit() == "kW") {
                 value.f *= 1000;
@@ -197,5 +201,6 @@ void EnergyMeter::getRegister(ModbusRegisterType type, ModbusRegisterDescriptor 
             emit producedEnergyReceived(value.f);
         }
     });
+    return true;
 }
 

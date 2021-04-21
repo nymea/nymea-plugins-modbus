@@ -42,12 +42,15 @@ class EnergyMeter : public QObject
     Q_OBJECT
 public:
     explicit EnergyMeter(ModbusRtuMaster *modbusMaster, int slaveAddress, const QHash<ModbusRegisterType, ModbusRegisterDescriptor> &modbusRegisters, QObject *parent = nullptr);
-    bool init();
 
     QUuid modbusRtuMasterUuid();
     bool connected();
-    bool getVoltage();
-    bool getCurrent();
+    bool getVoltageL1();
+    bool getVoltageL2();
+    bool getVoltageL3();
+    bool getCurrentL1();
+    bool getCurrentL2();
+    bool getCurrentL3();
     bool getFrequency();
     bool getPowerFactor();
     bool getActivePower();
@@ -68,13 +71,17 @@ private:
 
     QHash<ModbusRegisterType, ModbusRegisterDescriptor> m_modbusRegisters;
 
-    void getRegister(ModbusRegisterType type, ModbusRegisterDescriptor descriptor);
+    bool getRegister(ModbusRegisterType type);
 
 signals:
     void connectedChanged(bool connected);
 
-    void voltageReceived(double voltage);
-    void currentReceived(double current);
+    void voltageL1Received(double voltage);
+    void voltageL2Received(double voltage);
+    void voltageL3Received(double voltage);
+    void currentL1Received(double current);
+    void currentL2Received(double current);
+    void currentL3Received(double current);
     void frequencyReceived(double freqeuncy);
     void activePowerReceived(double power);
     void powerFactorReceived(double powerFactor);

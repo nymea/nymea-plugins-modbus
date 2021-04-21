@@ -33,8 +33,12 @@
 #include "registerdescriptor.h"
 
 static const QHash<ModbusRegisterType, ModbusRegisterDescriptor> pro380RegisterMap {
-    {ModbusRegisterType::Voltage,        ModbusRegisterDescriptor(0x5002, 3, 2, "V", "float")}, //L1 Voltage
-    {ModbusRegisterType::Current,        ModbusRegisterDescriptor(0x500C, 3, 2, "A", "float")}, //L1 Current
+    {ModbusRegisterType::VoltageL1,        ModbusRegisterDescriptor(0x5002, 3, 2, "V", "float")}, //L1 Voltage
+    {ModbusRegisterType::VoltageL2,        ModbusRegisterDescriptor(0x5004, 3, 2, "V", "float")}, //L2 Voltage
+    {ModbusRegisterType::VoltageL3,        ModbusRegisterDescriptor(0x5006, 3, 2, "V", "float")}, //L3 Voltage
+    {ModbusRegisterType::CurrentL1,        ModbusRegisterDescriptor(0x500C, 3, 2, "A", "float")}, //L1 Current
+    {ModbusRegisterType::CurrentL2,        ModbusRegisterDescriptor(0x500E, 3, 2, "A", "float")}, //L2 Current
+    {ModbusRegisterType::CurrentL3,        ModbusRegisterDescriptor(0x5010, 3, 2, "A", "float")}, //L3 Current
     {ModbusRegisterType::ActivePower,    ModbusRegisterDescriptor(0x5012, 3, 2, "kW", "float")}, //Total active power
     {ModbusRegisterType::Frequency,      ModbusRegisterDescriptor(0x5008, 3, 2, "Hz", "float")},
     {ModbusRegisterType::PowerFactor,    ModbusRegisterDescriptor(0x502A, 3, 2, "Degree", "float")},

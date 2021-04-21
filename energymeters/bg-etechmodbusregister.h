@@ -34,8 +34,12 @@
 #include "registerdescriptor.h"
 
 static const QHash<ModbusRegisterType, ModbusRegisterDescriptor> sdm630RegisterMap {
-    {ModbusRegisterType::Voltage,        ModbusRegisterDescriptor(30043, 4, 2, "V", "float")}, //Average line to neutral volts
-    {ModbusRegisterType::Current,        ModbusRegisterDescriptor(30047, 4, 2, "A", "float")}, //Average line current
+    {ModbusRegisterType::VoltageL1,      ModbusRegisterDescriptor(30001, 4, 2, "V", "float")},
+    {ModbusRegisterType::VoltageL2,      ModbusRegisterDescriptor(30003, 4, 2, "V", "float")},
+    {ModbusRegisterType::VoltageL3,      ModbusRegisterDescriptor(30005, 4, 2, "V", "float")},
+    {ModbusRegisterType::CurrentL1,      ModbusRegisterDescriptor(30007, 4, 2, "A", "float")},
+    {ModbusRegisterType::CurrentL2,      ModbusRegisterDescriptor(30009, 4, 2, "A", "float")},
+    {ModbusRegisterType::CurrentL3,      ModbusRegisterDescriptor(30011, 4, 2, "A", "float")},
     {ModbusRegisterType::ActivePower,    ModbusRegisterDescriptor(30053, 4, 2, "W", "float")}, //Total system power
     {ModbusRegisterType::Frequency,      ModbusRegisterDescriptor(30071, 4, 2, "Hz", "float")},
     {ModbusRegisterType::PowerFactor,    ModbusRegisterDescriptor(30067, 4, 2, "Degree", "float")}, //Total system phase angle
