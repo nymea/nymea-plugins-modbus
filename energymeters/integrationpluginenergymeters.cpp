@@ -205,7 +205,7 @@ void IntegrationPluginEnergyMeters::postSetupThing(Thing *thing)
     }
 
     if (!m_reconnectTimer) {
-        m_reconnectTimer = hardwareManager()->pluginTimerManager()->registerTimer(5000);
+        m_reconnectTimer = hardwareManager()->pluginTimerManager()->registerTimer(5);
         connect(m_reconnectTimer, &PluginTimer::timeout, this, [this] {
             foreach (Thing *thing, myThings()) {
                 if (m_connectionStateTypeIds.contains(thing->thingClassId())) {
@@ -227,10 +227,13 @@ void IntegrationPluginEnergyMeters::thingRemoved(Thing *thing)
     qCDebug(dcEnergyMeters()) << "Thing removed" << thing->name();
 
     if (m_energyMeters.contains(thing)) {
-        m_energyMeters.take(thing)->deleteLater();
+        EnergyMeter *meter = m_energyMeters.take(thing);
+        m_updateCycleInProgress.remove(meter);
+        meter->deleteLater();
     }
 
     if (myThings().isEmpty() && m_reconnectTimer) {
+        qCDebug(dcEnergyMeters()) << "Stopping reconnect timer";
         hardwareManager()->pluginTimerManager()->unregisterTimer(m_reconnectTimer);
         m_reconnectTimer = nullptr;
     }

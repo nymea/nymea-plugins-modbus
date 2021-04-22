@@ -1,0 +1,11 @@
+{
+    "title": "Energy Meters",
+    "tagline": "Connect Modbus RTU energy meters.",
+    "icon": "energymeter.svg",
+    "stability": "consumer",
+    "offline": true,
+    "technologies": [
+    ],
+    "categories": [
+    ]
+}
