@@ -49,7 +49,7 @@ class IntegrationPluginEnergyMeters : public IntegrationPlugin
 
 public:
     explicit IntegrationPluginEnergyMeters();
-
+    void init() override;
     void discoverThings(ThingDiscoveryInfo *info) override;
     void setupThing(ThingSetupInfo *info) override;
     void postSetupThing(Thing *thing) override;
