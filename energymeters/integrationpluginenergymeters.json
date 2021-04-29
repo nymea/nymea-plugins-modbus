@@ -39,7 +39,7 @@
                             "id": "c75b2c31-6ec3-49ab-8c8f-5231d0a7e941",
                             "name": "slaveAddress",
                             "displayName": "Modbus slave address",
-                            "type": "int",
+                            "type": "uint",
                             "defaultValue": 1
                         },
                         {
@@ -188,7 +188,7 @@
                             "id": "ac77ea98-b006-486e-a3e8-b30a483f26c1",
                             "name": "slaveAddress",
                             "displayName": "Modbus slave address",
-                            "type": "int",
+                            "type": "uint",
                             "defaultValue": 1
                         },
                         {
