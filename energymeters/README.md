@@ -11,5 +11,5 @@ Connect Modbus RTU based energy meters.
     
 ## Requirements
 
-* The plugin 'nymea-plugin-energymeter' must be installed
+* The plugin 'nymea-plugin-energymeter' must be installed.
 * At least one Modbus RTU interface must be setup.

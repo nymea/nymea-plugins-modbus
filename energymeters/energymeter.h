@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2020, nymea GmbH
+* Copyright 2013 - 2021, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -43,8 +43,10 @@ class EnergyMeter : public QObject
 public:
     explicit EnergyMeter(ModbusRtuMaster *modbusMaster, int slaveAddress, const QHash<ModbusRegisterType, ModbusRegisterDescriptor> &modbusRegisters, QObject *parent = nullptr);
 
-    QUuid modbusRtuMasterUuid();
-    bool connected();
+    ModbusRtuMaster *modbusMaster();
+    void setModbusMaster(ModbusRtuMaster *modbusMaster);
+
+    bool connected() const;
     bool getVoltageL1();
     bool getVoltageL2();
     bool getVoltageL3();
@@ -87,9 +89,6 @@ signals:
     void powerFactorReceived(double powerFactor);
     void producedEnergyReceived(double energy);
     void consumedEnergyReceived(double energy);
-
-//private slot:
-//    void onRegisterReceived();
 };
 
 #endif // ENERGYMETER_H
