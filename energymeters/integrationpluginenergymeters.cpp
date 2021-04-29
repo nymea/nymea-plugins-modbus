@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2020, nymea GmbH
+* Copyright 2013 - 2021, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -95,15 +95,17 @@ void IntegrationPluginEnergyMeters::init()
     connect(hardwareManager()->modbusRtuResource(), &ModbusRtuHardwareResource::modbusRtuMasterRemoved, this, [=] (const QUuid &modbusUuid){
         qCDebug(dcEnergyMeters()) << "Modbus RTU master has been removed" << modbusUuid.toString();
 
-        // Check if there is any device using this resource
-        foreach (EnergyMeter * meter, m_energyMeters) {
-            if (meter->modbusRtuMasterUuid() == modbusUuid) {
-                Thing *thing = m_energyMeters.key(meter);
-                if (!thing)
-                    return;
+        Q_FOREACH(Thing *thing, myThings()) {
+            if (m_modbusUuidParamTypeIds.contains(thing->thingClassId())) {
+                if (thing->paramValue(m_modbusUuidParamTypeIds.value(thing->thingClassId())) == modbusUuid) {
+                    qCWarning(dcEnergyMeters()) << "Modbus RTU hardware resource removed for" << thing << ". The thing will not be functional any more until a new resource has been configured for it.";
+                    thing->setStateValue(m_connectionStateTypeIds[thing->thingClassId()], false);
 
-                qCWarning(dcEnergyMeters()) << "Modbus RTU hardware resource removed for" << thing << ". The thing will not be functional any more until a new resource has been configured for it.";
-                thing->setStateValue(m_connectionStateTypeIds[thing->thingClassId()], false);
+                    EnergyMeter *meter = m_energyMeters.value(thing);
+                    if (!meter)
+                        return;
+                    meter->setModbusMaster(nullptr);
+                }
             }
         }
     });
@@ -119,29 +121,28 @@ void IntegrationPluginEnergyMeters::discoverThings(ThingDiscoveryInfo *info)
         return;
     }
 
-    if (m_connectionStateTypeIds.contains(info->thingClassId())) {
-        int slaveAddress = info->params().paramValue(m_discoverySlaveAddressParamTypeIds.value(info->thingClassId())).toInt();
-        if (slaveAddress > 254 || slaveAddress == 0) {
-            info->finish(Thing::ThingErrorInvalidParameter, tr("Modbus slave address must be between 1 and 254"));
-            return;
-        }
-        Q_FOREACH(ModbusRtuMaster *modbusMaster, hardwareManager()->modbusRtuResource()->modbusRtuMasters()) {
-            qCDebug(dcEnergyMeters()) << "Found RTU master resource" << modbusMaster << "connected" << modbusMaster->connected();
-            if (!modbusMaster->connected()) {
-                continue;
-            }
-            ThingDescriptor descriptor(info->thingClassId(), QT_TR_NOOP("Energy meter"), QT_TR_NOOP("Slave address ") +QString::number(slaveAddress)+" "+modbusMaster->serialPort());
-            ParamList params;
-            params << Param(m_slaveIdParamTypeIds.value(info->thingClassId()), slaveAddress);
-            params << Param(m_modbusUuidParamTypeIds.value(info->thingClassId()), modbusMaster->modbusUuid());
-            descriptor.setParams(params);
-            info->addThingDescriptor(descriptor);
-        }
-        info->finish(Thing::ThingErrorNoError);
-        return;
-    } else {
+    if (!m_connectionStateTypeIds.contains(info->thingClassId())) {
         Q_ASSERT_X(false, "discoverThings", QString("Unhandled thingClassId: %1").arg(info->thingClassId().toString()).toUtf8());
     }
+    uint slaveAddress = info->params().paramValue(m_discoverySlaveAddressParamTypeIds.value(info->thingClassId())).toUInt();
+    if (slaveAddress > 254 || slaveAddress == 0) {
+        info->finish(Thing::ThingErrorInvalidParameter, tr("Modbus slave address must be between 1 and 254"));
+        return;
+    }
+    Q_FOREACH(ModbusRtuMaster *modbusMaster, hardwareManager()->modbusRtuResource()->modbusRtuMasters()) {
+        qCDebug(dcEnergyMeters()) << "Found RTU master resource" << modbusMaster << "connected" << modbusMaster->connected();
+        if (!modbusMaster->connected()) {
+            continue;
+        }
+        ThingDescriptor descriptor(info->thingClassId(), QT_TR_NOOP("Energy meter"), QT_TR_NOOP("Slave address ") +QString::number(slaveAddress)+" "+modbusMaster->serialPort());
+        ParamList params;
+        params << Param(m_slaveIdParamTypeIds.value(info->thingClassId()), slaveAddress);
+        params << Param(m_modbusUuidParamTypeIds.value(info->thingClassId()), modbusMaster->modbusUuid());
+        descriptor.setParams(params);
+        info->addThingDescriptor(descriptor);
+    }
+    info->finish(Thing::ThingErrorNoError);
+    return;
 }
 
 void IntegrationPluginEnergyMeters::setupThing(ThingSetupInfo *info)
@@ -149,50 +150,49 @@ void IntegrationPluginEnergyMeters::setupThing(ThingSetupInfo *info)
     Thing *thing = info->thing();
     qCDebug(dcEnergyMeters()) << "Setup thing" << thing->name();
 
-    if (m_connectionStateTypeIds.contains(thing->thingClassId())) {
-
-        if (m_energyMeters.contains(thing)) {
-            qCDebug(dcEnergyMeters()) << "Setup after rediscovery, cleaning up ...";
-            m_energyMeters.take(thing)->deleteLater();
-        }
-        int address = thing->paramValue(m_slaveIdParamTypeIds.value(thing->thingClassId())).toInt();
-        if (address > 254 || address == 0) {
-            qCWarning(dcEnergyMeters()) << "Setup failed, slave address is not valid" << address;
-            info->finish(Thing::ThingErrorSetupFailed, tr("Slave address not valid, must be between 1 and 254"));
-            return;
-        }
-        QUuid uuid = thing->paramValue(m_modbusUuidParamTypeIds.value(thing->thingClassId())).toString();
-        if (!hardwareManager()->modbusRtuResource()->hasModbusRtuMaster(uuid)) {
-            qCWarning(dcEnergyMeters()) << "Setup failed, hardware manager not available";
-            info->finish(Thing::ThingErrorSetupFailed, tr("Modbus RTU resource not available."));
-            return;
-        }
-
-        EnergyMeter *meter = new EnergyMeter(hardwareManager()->modbusRtuResource()->getModbusRtuMaster(uuid), address, m_registerMaps.value(thing->thingClassId()), this);
-        connect(info, &ThingSetupInfo::aborted, meter, &EnergyMeter::deleteLater);
-        connect(meter, &EnergyMeter::consumedEnergyReceived, info, [this, info, meter] {
-            qCDebug(dcEnergyMeters()) << "Reply received, setup finished";
-            connect(meter, &EnergyMeter::connectedChanged, this, &IntegrationPluginEnergyMeters::onConnectionStateChanged);
-            connect(meter, &EnergyMeter::voltageL1Received, this, &IntegrationPluginEnergyMeters::onVoltageL1Received);
-            connect(meter, &EnergyMeter::voltageL2Received, this, &IntegrationPluginEnergyMeters::onVoltageL2Received);
-            connect(meter, &EnergyMeter::voltageL3Received, this, &IntegrationPluginEnergyMeters::onVoltageL3Received);
-            connect(meter, &EnergyMeter::currentL1Received, this, &IntegrationPluginEnergyMeters::onCurrentL1Received);
-            connect(meter, &EnergyMeter::currentL2Received, this, &IntegrationPluginEnergyMeters::onCurrentL2Received);
-            connect(meter, &EnergyMeter::currentL3Received, this, &IntegrationPluginEnergyMeters::onCurrentL3Received);
-            connect(meter, &EnergyMeter::activePowerReceived, this, &IntegrationPluginEnergyMeters::onActivePowerReceived);
-            connect(meter, &EnergyMeter::powerFactorReceived, this, &IntegrationPluginEnergyMeters::onPowerFactorReceived);
-            connect(meter, &EnergyMeter::frequencyReceived, this, &IntegrationPluginEnergyMeters::onFrequencyReceived);
-            connect(meter, &EnergyMeter::producedEnergyReceived, this, &IntegrationPluginEnergyMeters::onProducedEnergyReceived);
-            connect(meter, &EnergyMeter::consumedEnergyReceived, this, &IntegrationPluginEnergyMeters::onConsumedEnergyReceived);
-
-            m_energyMeters.insert(info->thing(), meter);
-            info->finish(Thing::ThingErrorNoError);
-        });
-        meter->getEnergyConsumed();
-        return;
-    } else {
+    if (!m_connectionStateTypeIds.contains(thing->thingClassId())) {
         Q_ASSERT_X(false, "setupThing", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
     }
+
+    if (m_energyMeters.contains(thing)) {
+        qCDebug(dcEnergyMeters()) << "Setup after rediscovery, cleaning up ...";
+        m_energyMeters.take(thing)->deleteLater();
+    }
+    uint address = thing->paramValue(m_slaveIdParamTypeIds.value(thing->thingClassId())).toUInt();
+    if (address > 254 || address == 0) {
+        qCWarning(dcEnergyMeters()) << "Setup failed, slave address is not valid" << address;
+        info->finish(Thing::ThingErrorSetupFailed, tr("Slave address not valid, must be between 1 and 254"));
+        return;
+    }
+    QUuid uuid = thing->paramValue(m_modbusUuidParamTypeIds.value(thing->thingClassId())).toUuid();
+    if (!hardwareManager()->modbusRtuResource()->hasModbusRtuMaster(uuid)) {
+        qCWarning(dcEnergyMeters()) << "Setup failed, hardware manager not available";
+        info->finish(Thing::ThingErrorSetupFailed, tr("Modbus RTU resource not available."));
+        return;
+    }
+
+    EnergyMeter *meter = new EnergyMeter(hardwareManager()->modbusRtuResource()->getModbusRtuMaster(uuid), address, m_registerMaps.value(thing->thingClassId()), this);
+    connect(info, &ThingSetupInfo::aborted, meter, &EnergyMeter::deleteLater);
+    connect(meter, &EnergyMeter::consumedEnergyReceived, info, [this, info, meter] {
+        qCDebug(dcEnergyMeters()) << "Reply received, setup finished";
+        connect(meter, &EnergyMeter::connectedChanged, this, &IntegrationPluginEnergyMeters::onConnectionStateChanged);
+        connect(meter, &EnergyMeter::voltageL1Received, this, &IntegrationPluginEnergyMeters::onVoltageL1Received);
+        connect(meter, &EnergyMeter::voltageL2Received, this, &IntegrationPluginEnergyMeters::onVoltageL2Received);
+        connect(meter, &EnergyMeter::voltageL3Received, this, &IntegrationPluginEnergyMeters::onVoltageL3Received);
+        connect(meter, &EnergyMeter::currentL1Received, this, &IntegrationPluginEnergyMeters::onCurrentL1Received);
+        connect(meter, &EnergyMeter::currentL2Received, this, &IntegrationPluginEnergyMeters::onCurrentL2Received);
+        connect(meter, &EnergyMeter::currentL3Received, this, &IntegrationPluginEnergyMeters::onCurrentL3Received);
+        connect(meter, &EnergyMeter::activePowerReceived, this, &IntegrationPluginEnergyMeters::onActivePowerReceived);
+        connect(meter, &EnergyMeter::powerFactorReceived, this, &IntegrationPluginEnergyMeters::onPowerFactorReceived);
+        connect(meter, &EnergyMeter::frequencyReceived, this, &IntegrationPluginEnergyMeters::onFrequencyReceived);
+        connect(meter, &EnergyMeter::producedEnergyReceived, this, &IntegrationPluginEnergyMeters::onProducedEnergyReceived);
+        connect(meter, &EnergyMeter::consumedEnergyReceived, this, &IntegrationPluginEnergyMeters::onConsumedEnergyReceived);
+
+        m_energyMeters.insert(info->thing(), meter);
+        info->finish(Thing::ThingErrorNoError);
+    });
+    meter->getEnergyConsumed();
+    return;
 }
 
 void IntegrationPluginEnergyMeters::postSetupThing(Thing *thing)
@@ -277,7 +277,7 @@ void IntegrationPluginEnergyMeters::onConnectionStateChanged(bool status)
 
 void IntegrationPluginEnergyMeters::onVoltageL1Received(double voltage)
 {
-    EnergyMeter *meter = static_cast<EnergyMeter *>(sender());
+    EnergyMeter *meter = qobject_cast<EnergyMeter *>(sender());
     Thing *thing = m_energyMeters.key(meter);
     if (!thing)
         return;
@@ -288,7 +288,7 @@ void IntegrationPluginEnergyMeters::onVoltageL1Received(double voltage)
 
 void IntegrationPluginEnergyMeters::onVoltageL2Received(double voltage)
 {
-    EnergyMeter *meter = static_cast<EnergyMeter *>(sender());
+    EnergyMeter *meter = qobject_cast<EnergyMeter *>(sender());
     Thing *thing = m_energyMeters.key(meter);
     if (!thing)
         return;
@@ -299,7 +299,7 @@ void IntegrationPluginEnergyMeters::onVoltageL2Received(double voltage)
 
 void IntegrationPluginEnergyMeters::onVoltageL3Received(double voltage)
 {
-    EnergyMeter *meter = static_cast<EnergyMeter *>(sender());
+    EnergyMeter *meter = qobject_cast<EnergyMeter *>(sender());
     Thing *thing = m_energyMeters.key(meter);
     if (!thing)
         return;
@@ -310,7 +310,7 @@ void IntegrationPluginEnergyMeters::onVoltageL3Received(double voltage)
 
 void IntegrationPluginEnergyMeters::onCurrentL1Received(double current)
 {
-    EnergyMeter *meter = static_cast<EnergyMeter *>(sender());
+    EnergyMeter *meter = qobject_cast<EnergyMeter *>(sender());
     Thing *thing = m_energyMeters.key(meter);
     if (!thing)
         return;
@@ -321,7 +321,7 @@ void IntegrationPluginEnergyMeters::onCurrentL1Received(double current)
 
 void IntegrationPluginEnergyMeters::onCurrentL2Received(double current)
 {
-    EnergyMeter *meter = static_cast<EnergyMeter *>(sender());
+    EnergyMeter *meter = qobject_cast<EnergyMeter *>(sender());
     Thing *thing = m_energyMeters.key(meter);
     if (!thing)
         return;
@@ -332,7 +332,7 @@ void IntegrationPluginEnergyMeters::onCurrentL2Received(double current)
 
 void IntegrationPluginEnergyMeters::onCurrentL3Received(double current)
 {
-    EnergyMeter *meter = static_cast<EnergyMeter *>(sender());
+    EnergyMeter *meter = qobject_cast<EnergyMeter *>(sender());
     Thing *thing = m_energyMeters.key(meter);
     if (!thing)
         return;
@@ -343,7 +343,7 @@ void IntegrationPluginEnergyMeters::onCurrentL3Received(double current)
 
 void IntegrationPluginEnergyMeters::onActivePowerReceived(double power)
 {
-    EnergyMeter *meter = static_cast<EnergyMeter *>(sender());
+    EnergyMeter *meter = qobject_cast<EnergyMeter *>(sender());
     Thing *thing = m_energyMeters.key(meter);
     if (!thing)
         return;
@@ -354,7 +354,7 @@ void IntegrationPluginEnergyMeters::onActivePowerReceived(double power)
 
 void IntegrationPluginEnergyMeters::onFrequencyReceived(double frequency)
 {
-    EnergyMeter *meter = static_cast<EnergyMeter *>(sender());
+    EnergyMeter *meter = qobject_cast<EnergyMeter *>(sender());
     Thing *thing = m_energyMeters.key(meter);
     if (!thing)
         return;
@@ -365,7 +365,7 @@ void IntegrationPluginEnergyMeters::onFrequencyReceived(double frequency)
 
 void IntegrationPluginEnergyMeters::onPowerFactorReceived(double powerFactor)
 {
-    EnergyMeter *meter = static_cast<EnergyMeter *>(sender());
+    EnergyMeter *meter = qobject_cast<EnergyMeter *>(sender());
     Thing *thing = m_energyMeters.key(meter);
     if (!thing)
         return;
@@ -376,7 +376,7 @@ void IntegrationPluginEnergyMeters::onPowerFactorReceived(double powerFactor)
 
 void IntegrationPluginEnergyMeters::onProducedEnergyReceived(double energy)
 {
-    EnergyMeter *meter = static_cast<EnergyMeter *>(sender());
+    EnergyMeter *meter = qobject_cast<EnergyMeter *>(sender());
     Thing *thing = m_energyMeters.key(meter);
     if (!thing)
         return;
@@ -387,7 +387,7 @@ void IntegrationPluginEnergyMeters::onProducedEnergyReceived(double energy)
 
 void IntegrationPluginEnergyMeters::onConsumedEnergyReceived(double energy)
 {
-    EnergyMeter *meter = static_cast<EnergyMeter *>(sender());
+    EnergyMeter *meter = qobject_cast<EnergyMeter *>(sender());
     Thing *thing = m_energyMeters.key(meter);
     if (!thing)
         return;

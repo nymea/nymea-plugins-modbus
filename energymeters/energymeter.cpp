@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2020, nymea GmbH
+* Copyright 2013 - 2021, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -42,12 +42,17 @@ EnergyMeter::EnergyMeter(ModbusRtuMaster *modbusMaster, int slaveAddress, const 
 
 }
 
-QUuid EnergyMeter::modbusRtuMasterUuid()
+ModbusRtuMaster *EnergyMeter::modbusMaster()
 {
-    return m_modbusRtuMaster->modbusUuid();
+    return m_modbusRtuMaster;
 }
 
-bool EnergyMeter::connected()
+void EnergyMeter::setModbusMaster(ModbusRtuMaster *modbusMaster)
+{
+    m_modbusRtuMaster = modbusMaster;
+}
+
+bool EnergyMeter::connected() const
 {
     return m_connected;
 }
@@ -110,6 +115,12 @@ bool EnergyMeter::getEnergyConsumed()
 bool EnergyMeter::getRegister(ModbusRegisterType type)
 {
     if (!m_modbusRegisters.contains(type))
+        return false;
+
+    if (!m_modbusRtuMaster)
+        return false;
+
+    if (!m_modbusRtuMaster->connected())
         return false;
 
     ModbusRegisterDescriptor descriptor = m_modbusRegisters.value(type);
@@ -199,6 +210,8 @@ bool EnergyMeter::getRegister(ModbusRegisterType type)
                 value.f /= 1000.00;
             }
             emit producedEnergyReceived(value.f);
+        } else {
+            qCWarning(dcEnergyMeters()) << "EnergyMeter: Modbus register type not handled" << type;
         }
     });
     return true;
