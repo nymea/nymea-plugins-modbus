@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2020, nymea GmbH
+* Copyright 2013 - 2021, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -32,6 +32,8 @@
 #define MODBUSDEGISTERDEFINITION
 
 #endif // MODBUSDEGISTERDEFINITION
+
+#include <QObject>
 
 enum ModbusRegisterX2 {
     AbsenkungderLuefterstufe1 = 5328,
@@ -241,7 +243,7 @@ enum HeatPumpStatus {
     NachAbtauenAbtropfen
 };
 
-enum VentialtionMode {
+enum VentilationMode {
     ManuellStufe0 = 0,
     ManuellStufe1,
     ManuellStufe2,
