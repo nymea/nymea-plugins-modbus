@@ -19,80 +19,36 @@
             "id": "9f476e8b-7e95-448e-b03b-874747e8fb1f",
             "thingClasses": [
                 {
-                    "name": "modbusConnection",
-                    "displayName": "Modbus connection",
-                    "id": "06d04eec-ab5d-479a-b9e6-8c89efc18a8b",
-                    "createMethods": ["discovery", "user"],
-                    "interfaces": ["gateway"],
-                    "paramTypes": [
-                        {
-                            "id": "ed49f7d8-ab18-4c37-9b80-1004b75dcb91",
-                            "name": "serialPort",
-                            "displayName": "Serial port",
-                            "type": "QString",
-                            "inputType": "TextLine",
-                            "defaultValue": "ttyAMA0"
-                        },
-                        {
-                            "id": "d0c04612-cc3e-4d38-b4c9-708e28dc4eb3",
-                            "name": "baudRate",
-                            "displayName": "Baud rate",
-                            "type": "int",
-                            "defaultValue": 9600
-                        }
-                    ],
-                    "stateTypes": [
-                        {
-                            "id": "181ce6e2-9c55-45c6-b329-adf379679e07a",
-                            "name": "connected",
-                            "displayName": "Connected",
-                            "displayNameEvent": "Connected changed",
-                            "type": "bool",
-                            "defaultValue": false
-                        }
-                    ],
-                    "actionTypes": [
-                        {
-                            "id": "b9a24ecc-4433-4f31-99ba-596033bda421",
-                            "name": "discoverDevices",
-                            "displayName": "Discover devices",
-                            "paramTypes": [
-                                {
-                                    "id": "22413a22-31d4-4b8c-b855-8a29da5946bc",
-                                    "name": "slaveAddress",
-                                    "displayName": "Slave address",
-                                    "type": "int",
-                                    "minValue": 0,
-                                    "maxValue": 250,
-                                    "defaultValue": 0
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
                     "name": "x2lu",
                     "displayName": "X2 LU",
                     "id": "0de8e21e-392a-4790-a78a-b1a7eaa7571b",
-                    "createMethods": ["auto"],
-                    "interfaces": ["co2sensor", "connectable"],
+                    "createMethods": ["discovery"],
+                    "interfaces": ["ventilation", "co2sensor", "connectable"],
+                    "discoveryParamTypes": [
+                         {
+                             "id": "8dd4ba9f-51f6-4711-a917-abac5e1aa82b",
+                             "name": "slaveAddress",
+                             "displayName": "Slave address",
+                             "type": "int",
+                             "defaultValue": 1
+                         }
+                     ],
                     "paramTypes": [
                         {
                             "id": "28a72cb7-3cd0-4704-b604-44fb090d5a88",
                             "name": "slaveAddress",
                             "displayName": "Slave address",
-                            "type": "int",
+                            "type": "uint",
                             "minValue": 0,
                             "maxValue": 250,
                             "defaultValue": 0
                         },
                         {
-                            "id": "91ef76cf-6c53-4a8a-a278-6f6e2ef68cc6",
-                            "name": "sofwareVersion",
-                            "displayName": "Software version",
-                            "type": "QString",
-                            "inputType": "TextLine",
-                            "defaultValue": "-"
+                            "id": "d25197d1-b1b9-45a9-b6fa-60583ed469fb",
+                            "name": "modbusMasterUuid",
+                            "displayName": "Modbus RTU master",
+                            "type": "QUuid",
+                            "defaultValue": ""
                         }
                     ],
                     "stateTypes":[
@@ -102,6 +58,16 @@
                             "displayName": "Connected",
                             "displayNameEvent": "Connected changed",
                             "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "c9df6349-2bf6-46cc-bce3-d4155836dbe5",
+                            "name": "power",
+                            "displayName": "Power",
+                            "displayNameAction": "Set power",
+                            "displayNameEvent": "Power changed",
+                            "type": "bool",
+                            "writable": true,
                             "defaultValue": false
                         },
                         {
@@ -145,25 +111,33 @@
                     "name": "x2wp",
                     "displayName": "X2 WP",
                     "id": "e548f962-92db-4110-8279-10fbcde35f93",
-                    "createMethods": ["auto"],
+                    "createMethods": ["discovery"],
                     "interfaces": ["thermostat", "heating", "temperaturesensor", "connectable"],
+                    "discoveryParamTypes": [
+                         {
+                             "id": "d4923c90-22c8-477e-a37a-341858e59dcb",
+                             "name": "slaveAddress",
+                             "displayName": "Slave address",
+                             "type": "int",
+                             "defaultValue": 1
+                         }
+                     ],
                     "paramTypes": [
                         {
                             "id": "b551d138-b006-4290-bfef-97072ff677c6",
                             "name": "slaveAddress",
                             "displayName": "Slave address",
-                            "type": "int",
+                            "type": "uint",
                             "minValue": 0,
                             "maxValue": 250,
                             "defaultValue": 0
                         },
                         {
-                            "id": "1ffd72a9-7b3f-4287-b671-7f22e159f9b8",
-                            "name": "sofwareVersion",
-                            "displayName": "Software version",
-                            "type": "QString",
-                            "inputType": "TextLine",
-                            "defaultValue": "-"
+                            "id": "db8358f3-f573-44e3-b024-c4613ee3a270",
+                            "name": "modbusMasterUuid",
+                            "displayName": "Modbus RTU master",
+                            "type": "QUuid",
+                            "defaultValue": ""
                         }
                     ],
                     "stateTypes":[
