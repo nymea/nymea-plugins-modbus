@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2020, nymea GmbH
+* Copyright 2013 - 2021, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -32,12 +32,11 @@
 #define INTEGRATIONPLUGINDREXELUNDWEISS_H
 
 #include "integrations/integrationplugin.h"
+#include "hardware/modbus/modbusrtumaster.h"
 #include "plugintimer.h"
-
-#include "../modbus/modbusrtumaster.h"
+#include "modbusdegisterdefinition.h"
 
 #include <QDateTime>
-#include <QSerialPortInfo>
 
 class IntegrationPluginDrexelUndWeiss : public IntegrationPlugin
 {
@@ -48,9 +47,8 @@ class IntegrationPluginDrexelUndWeiss : public IntegrationPlugin
 
 public:
     explicit IntegrationPluginDrexelUndWeiss();
-    ~IntegrationPluginDrexelUndWeiss() override;
-    void init() override;
 
+    void init() override;
     void discoverThings(ThingDiscoveryInfo *info) override;
     void setupThing(ThingSetupInfo *info) override;
     void postSetupThing(Thing *thing) override;
@@ -58,21 +56,21 @@ public:
     void executeAction(ThingActionInfo *info) override;
 
 private:
-    QList<QString> m_usedSerialPorts;
-    QHash<Thing *, ModbusRTUMaster *> m_modbusRTUMasters;
+    QHash<Thing *, ModbusRtuMaster *> m_modbusRtuMasters;
     PluginTimer *m_refreshTimer = nullptr;
-    QHash<QUuid, ThingActionInfo *> m_pendingActions;
 
+    QHash<ThingClassId, StateTypeId> m_connectedStateTypeIds;
+    void sendWriteRequest(ThingActionInfo *info, uint slaveAddress, uint modbusRegister, uint16_t value);
     void updateStates(Thing *thing);
-    void discoverModbusSlaves(ModbusRTUMaster *modbus, int slaveAddress);
+    void discoverModbusSlaves(ModbusRtuMaster *modbus, uint slaveAddress);
+    void readHoldingRegister(Thing *thing, ModbusRtuMaster *modbus, uint slaveAddress, uint modbusRegister);
+
+    VentilationMode getVentilationModeFromString(const QString &modeString);
 
 private slots:
     void onRefreshTimer();
     void onPluginConfigurationChanged(const ParamTypeId &paramTypeId, const QVariant &value);
-
     void onConnectionStateChanged(bool status);
-    void onReceivedHoldingRegister(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values);
-    void onWriteRequestFinished(QUuid requestId, bool success);
 };
 
 #endif // INTEGRATIONPLUGINDREXELUNDWEISS_H
