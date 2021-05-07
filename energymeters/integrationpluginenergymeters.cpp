@@ -173,8 +173,8 @@ void IntegrationPluginEnergyMeters::setupThing(ThingSetupInfo *info)
 
     EnergyMeter *meter = new EnergyMeter(hardwareManager()->modbusRtuResource()->getModbusRtuMaster(uuid), address, m_registerMaps.value(thing->thingClassId()), this);
     connect(info, &ThingSetupInfo::aborted, meter, &EnergyMeter::deleteLater);
-    connect(meter, &EnergyMeter::consumedEnergyReceived, info, [this, info, meter] {
-        qCDebug(dcEnergyMeters()) << "Reply received, setup finished";
+    connect(meter, &EnergyMeter::consumedEnergyReceived, info, [this, info, meter] (double energy) {
+        qCDebug(dcEnergyMeters()) << "Consumed energy receieved" << energy << "Setup finished";
         connect(meter, &EnergyMeter::connectedChanged, this, &IntegrationPluginEnergyMeters::onConnectionStateChanged);
         connect(meter, &EnergyMeter::voltageL1Received, this, &IntegrationPluginEnergyMeters::onVoltageL1Received);
         connect(meter, &EnergyMeter::voltageL2Received, this, &IntegrationPluginEnergyMeters::onVoltageL2Received);
@@ -203,6 +203,8 @@ void IntegrationPluginEnergyMeters::postSetupThing(Thing *thing)
 
         if (m_energyMeters.contains(thing)) {
             startUpdateCycle(m_energyMeters.value(thing));
+        } else {
+            qCWarning(dcEnergyMeters()) << "Thing has no energy meter connection and will not work properly";
         }
     }
 
@@ -272,6 +274,7 @@ void IntegrationPluginEnergyMeters::onConnectionStateChanged(bool status)
     if (!status) {
         updateCycleFinished(meter);
     }
+    qCDebug(dcEnergyMeters()) << "Connection status changed" << thing->name() << status;
     thing->setStateValue(m_connectionStateTypeIds.value(thing->thingClassId()), status);
 }
 
