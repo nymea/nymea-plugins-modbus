@@ -39,7 +39,7 @@ EnergyMeter::EnergyMeter(ModbusRtuMaster *modbusMaster, int slaveAddress, const 
     m_slaveAddress(slaveAddress),
     m_modbusRegisters(modbusRegisters)
 {
-
+    qCDebug(dcEnergyMeters()) << "EnergyMeter: Creating new meter connection, address:" << slaveAddress;
 }
 
 ModbusRtuMaster *EnergyMeter::modbusMaster()
@@ -114,14 +114,23 @@ bool EnergyMeter::getEnergyConsumed()
 
 bool EnergyMeter::getRegister(ModbusRegisterType type)
 {
-    if (!m_modbusRegisters.contains(type))
+    if (!m_modbusRegisters.contains(type)) {
+        qCWarning(dcEnergyMeters()) << "EnergyMeter: Register type not supported" << type;
+        setConnectionStatus(false);
         return false;
+    }
 
-    if (!m_modbusRtuMaster)
+    if (!m_modbusRtuMaster) {
+        qCWarning(dcEnergyMeters()) << "EnergyMeter: Modbus RTU interface not available";
+        setConnectionStatus(false);
         return false;
+    }
 
-    if (!m_modbusRtuMaster->connected())
+    if (!m_modbusRtuMaster->connected()) {
+        qCWarning(dcEnergyMeters()) << "EnergyMeter: Modbus RTU interface not connected";
+        setConnectionStatus(false);
         return false;
+    }
 
     ModbusRegisterDescriptor descriptor = m_modbusRegisters.value(type);
 
@@ -134,16 +143,9 @@ bool EnergyMeter::getRegister(ModbusRegisterType type)
     connect(reply, &ModbusRtuReply::finished, reply, &ModbusRtuReply::deleteLater);
     connect(reply, &ModbusRtuReply::finished, this, [reply, type, descriptor, this] {
         if (reply->error() != ModbusRtuReply::NoError) {
-            if (m_connected) {
-                m_connected = false;
-                emit connectedChanged(m_connected);
-            }
+            qCWarning(dcEnergyMeters()) << "EnergyMeter: Modbus RTU reply error" << reply->errorString();
+            setConnectionStatus(false);
             return;
-        } else {
-            if (!m_connected) {
-                m_connected = true;
-                emit connectedChanged(m_connected);
-            }
         }
         modbus_32_t value;
         value.u = 0;
@@ -153,9 +155,11 @@ bool EnergyMeter::getRegister(ModbusRegisterType type)
             if (descriptor.dataType() == "float") {
                 value.u = static_cast<float>(static_cast<uint32_t>(reply->result().at(0)) << 16 | reply->result().at(1));
             } else {
-                qCWarning(dcEnergyMeters()) << "Data type not supported" << descriptor.dataType();
+                qCWarning(dcEnergyMeters()) << "EnergyMeter: Data type not supported" << descriptor.dataType();
             }
         } else {
+            qCWarning(dcEnergyMeters()) << "EnergyMeter: Reply length invalid" << reply->result().length();
+            setConnectionStatus(false);
             return;
         }
 
@@ -214,6 +218,14 @@ bool EnergyMeter::getRegister(ModbusRegisterType type)
             qCWarning(dcEnergyMeters()) << "EnergyMeter: Modbus register type not handled" << type;
         }
     });
+    setConnectionStatus(true);
     return true;
 }
 
+void EnergyMeter::setConnectionStatus(bool connected)
+{
+    if (connected != m_connected) {
+        m_connected = connected;
+        emit connectedChanged(m_connected);
+    }
+}

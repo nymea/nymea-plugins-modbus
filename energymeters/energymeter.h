@@ -74,6 +74,7 @@ private:
     QHash<ModbusRegisterType, ModbusRegisterDescriptor> m_modbusRegisters;
 
     bool getRegister(ModbusRegisterType type);
+    void setConnectionStatus(bool connected);
 
 signals:
     void connectedChanged(bool connected);
