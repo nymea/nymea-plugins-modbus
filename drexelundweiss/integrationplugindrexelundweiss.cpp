@@ -124,26 +124,29 @@ void IntegrationPluginDrexelUndWeiss::setupThing(ThingSetupInfo *info)
         return info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("Modbus RTU interface is not connected."));
     }
 
-    ModbusRtuReply *reply = modbus->readHoldingRegister(slaveAddress, ModbusRegisterX2::Geraetetyp);
+    ModbusRtuReply *reply = modbus->readHoldingRegister(slaveAddress, ModbusRegisterX2::Geraetetyp, 2);
     connect(reply, &ModbusRtuReply::finished, reply, &ModbusRtuReply::deleteLater);
     connect(reply, &ModbusRtuReply::finished, info, [reply, modbus, info, thing, this] {
+        if (info->isFinished())
+            return; // ModbusRtuReply::finished is called for every retry
+
         if (reply->error() != ModbusRtuReply::Error::NoError) {
             qCWarning(dcDrexelUndWeiss()) << "Setup failed, received modbus error" << reply->errorString();
             return info->finish(Thing::ThingErrorHardwareNotAvailable);
         }
 
-        if (reply->result().length() != 1) {
+        if (reply->result().length() != 2) {
             qCWarning(dcDrexelUndWeiss()) << "Setup failed, received reply has an illegal length";
             return info->finish(Thing::ThingErrorHardwareNotAvailable);
         }
-        if (thing->thingClassId() == x2luThingClassId && reply->result().first() == DeviceType::X2_LU) {
+        if (thing->thingClassId() == x2luThingClassId && reply->result()[1] == DeviceType::X2_LU) {
             info->finish(Thing::ThingErrorNoError);
             m_modbusRtuMasters.insert(thing, modbus);
-        } else if (thing->thingClassId() == x2wpThingClassId && reply->result().first() == DeviceType::X2_WP) {
+        } else if (thing->thingClassId() == x2wpThingClassId && reply->result()[1] == DeviceType::X2_WP) {
             info->finish(Thing::ThingErrorNoError);
             m_modbusRtuMasters.insert(thing, modbus);
         } else {
-            qCWarning(dcDrexelUndWeiss()) << "Device on slave addresss" << reply->slaveAddress() << "is not the wanted one.";
+            qCWarning(dcDrexelUndWeiss()) << "Device on slave address" << reply->slaveAddress() << "is not the wanted one.";
             return info->finish(Thing::ThingErrorHardwareNotAvailable);
         }
 
@@ -172,7 +175,6 @@ void IntegrationPluginDrexelUndWeiss::postSetupThing(Thing *thing)
             qCWarning(dcDrexelUndWeiss()) << "No modbus interface available";
         }
         updateStates(thing);
-        // Update states
     } else {
         Q_ASSERT_X(false, "postSetupThing", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
     }
@@ -256,12 +258,14 @@ void IntegrationPluginDrexelUndWeiss::sendWriteRequest(ThingActionInfo *info, ui
 
 void IntegrationPluginDrexelUndWeiss::thingRemoved(Thing *thing)
 {
+    qCDebug(dcDrexelUndWeiss()) << "Thing removed" << thing->name();
 
     if (thing->thingClassId() == x2luThingClassId || thing->thingClassId() == x2luThingClassId) {
         m_modbusRtuMasters.remove(thing);
     }
 
     if (myThings().isEmpty()) {
+        qCDebug(dcDrexelUndWeiss()) << "Stopping refresh timer";
         hardwareManager()->pluginTimerManager()->unregisterTimer(m_refreshTimer);
         m_refreshTimer = nullptr;
     }
@@ -317,7 +321,7 @@ void IntegrationPluginDrexelUndWeiss::updateStates(Thing *thing)
 
 void IntegrationPluginDrexelUndWeiss::readHoldingRegister(Thing *thing, ModbusRtuMaster *modbus, uint slaveAddress, uint modbusRegister)
 {
-    ModbusRtuReply *reply = modbus->readHoldingRegister(slaveAddress, modbusRegister);
+    ModbusRtuReply *reply = modbus->readHoldingRegister(slaveAddress, modbusRegister, 2); // min 2 registers must be read
     connect(reply, &ModbusRtuReply::finished, reply, &ModbusRtuReply::deleteLater);
     connect(reply, &ModbusRtuReply::finished, this, [reply, thing, this] {
         if (reply->error() != ModbusRtuReply::Error::NoError) {
@@ -331,25 +335,25 @@ void IntegrationPluginDrexelUndWeiss::readHoldingRegister(Thing *thing, ModbusRt
         if (thing->thingClassId() == x2luThingClassId) {
             switch (reply->registerAddress()) {
             case ModbusRegisterX2::Waermepumpe:
-                thing->setStateValue(x2wpPowerStateTypeId, values[0]);
+                thing->setStateValue(x2wpPowerStateTypeId, values[1]);
                 break;
 
             case ModbusRegisterX2::RaumSoll:
-                thing->setStateValue(x2wpTargetTemperatureStateTypeId, values[0]/1000.00);
+                thing->setStateValue(x2wpTargetTemperatureStateTypeId, (static_cast<uint32_t>(values[0])<<16 | values[1])/1000.00);
                 break;
 
             case ModbusRegisterX2::Raum:
-                thing->setStateValue(x2wpTemperatureStateTypeId, values[0]/1000.00);
+                thing->setStateValue(x2wpTemperatureStateTypeId, (static_cast<uint32_t>(values[0])<<16 | values[1])/1000.00);
                 break;
 
             case ModbusRegisterX2::TemperaturWarmwasserspeicherUnten:
-                thing->setStateValue(x2wpWaterTemperatureStateTypeId, values[0]/1000.00);
+                thing->setStateValue(x2wpWaterTemperatureStateTypeId, (static_cast<uint32_t>(values[0])<<16 | values[1])/1000.00);
                 break;
             case ModbusRegisterX2::BrauchwasserSolltermperatur:
-                thing->setStateValue(x2wpTargetWaterTemperatureStateTypeId, values[0]/1000.00);
+                thing->setStateValue(x2wpTargetWaterTemperatureStateTypeId, (static_cast<uint32_t>(values[0])<<16 | values[1])/1000.00);
                 break;
             case ModbusRegisterX2::Auszenluft:
-                thing->setStateValue(x2wpOutsideAirTemperatureStateTypeId, values[0]/1000.00);
+                thing->setStateValue(x2wpOutsideAirTemperatureStateTypeId, (static_cast<uint32_t>(values[0])<<16 | values[1])/1000.00);
                 break;
 
             case ModbusRegisterX2::Summenstoerung:
