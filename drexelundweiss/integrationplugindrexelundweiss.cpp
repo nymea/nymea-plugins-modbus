@@ -190,7 +190,7 @@ void IntegrationPluginDrexelUndWeiss::executeAction(ThingActionInfo *info)
         uint slaveAddress = thing->paramValue(x2luThingSlaveAddressParamTypeId).toUInt();
         if (action.actionTypeId() == x2luPowerActionTypeId) {
             bool power = action.paramValue(x2luPowerActionPowerParamTypeId).toBool();
-            uint16_t data = 0;
+            uint32_t data = 0;
             if (power) {
                 data = getVentilationModeFromString(thing->stateValue(x2luVentilationModeStateTypeId).toString());
             } else {
@@ -200,7 +200,7 @@ void IntegrationPluginDrexelUndWeiss::executeAction(ThingActionInfo *info)
 
         } else if (action.actionTypeId() == x2luVentilationModeActionTypeId) {
             QString mode = action.param(x2luVentilationModeActionVentilationModeParamTypeId).value().toString();
-            uint16_t data = getVentilationModeFromString(mode);
+            uint32_t data = getVentilationModeFromString(mode);
             sendWriteRequest(info, slaveAddress, ModbusRegisterX2::Betriebsart, data);
 
         } else {
@@ -209,14 +209,25 @@ void IntegrationPluginDrexelUndWeiss::executeAction(ThingActionInfo *info)
     } else if (thing->thingClassId() == x2wpThingClassId) {
 
         uint slaveAddress = thing->paramValue(x2wpThingSlaveAddressParamTypeId).toUInt();
-        if (action.actionTypeId() == x2wpTargetTemperatureActionTypeId) {
-            qreal targetTemp = (action.param(x2wpTargetTemperatureActionTargetTemperatureParamTypeId).value().toDouble());
-            uint16_t data = static_cast<uint16_t>(qRound(targetTemp * 1000));
+        if (action.actionTypeId() == x2wpPowerActionTypeId) {
+            bool power = action.paramValue(x2wpPowerActionPowerParamTypeId).toBool();
+            uint32_t data = 0;
+            if (power) {
+                double targetTemp = thing->stateValue(x2wpTargetTemperatureActionTargetTemperatureParamTypeId).toDouble();
+                data = static_cast<uint32_t>(qRound(targetTemp * 1000));
+            } else {
+                data = 18 * 1000; //set to min temperature
+            }
+            sendWriteRequest(info, slaveAddress, ModbusRegisterX2::RaumSoll, data);
+
+        } else if (action.actionTypeId() == x2wpTargetTemperatureActionTypeId) {
+            double targetTemp = (action.param(x2wpTargetTemperatureActionTargetTemperatureParamTypeId).value().toDouble());
+            uint32_t data = static_cast<uint32_t>(qRound(targetTemp * 1000));
             sendWriteRequest(info, slaveAddress, ModbusRegisterX2::RaumSoll, data);
 
         } else if (action.actionTypeId() == x2wpTargetWaterTemperatureActionTypeId) {
-            qreal targetWaterTemp = action.param(x2wpTargetWaterTemperatureActionTargetWaterTemperatureParamTypeId).value().toDouble();
-            int data = static_cast<int>(qRound(targetWaterTemp * 1000));
+            double targetWaterTemp = action.param(x2wpTargetWaterTemperatureActionTargetWaterTemperatureParamTypeId).value().toDouble();
+            uint32_t data = static_cast<uint32_t>(qRound(targetWaterTemp * 1000));
             sendWriteRequest(info, slaveAddress, ModbusRegisterX2::BrauchwasserSolltermperatur, data);
 
         } else {
@@ -227,7 +238,7 @@ void IntegrationPluginDrexelUndWeiss::executeAction(ThingActionInfo *info)
     }
 }
 
-void IntegrationPluginDrexelUndWeiss::sendWriteRequest(ThingActionInfo *info, uint slaveAddress, uint modbusRegister, uint16_t value)
+void IntegrationPluginDrexelUndWeiss::sendWriteRequest(ThingActionInfo *info, uint slaveAddress, uint modbusRegister, uint32_t value)
 {
     ModbusRtuMaster *modbus = m_modbusRtuMasters.value(info->thing());
 
@@ -243,7 +254,10 @@ void IntegrationPluginDrexelUndWeiss::sendWriteRequest(ThingActionInfo *info, ui
         return;
     }
 
-    ModbusRtuReply *reply = modbus->writeHoldingRegisters(slaveAddress, modbusRegister, QVector<uint16_t>() << value);
+    QVector<uint16_t> values;
+    values.append(static_cast<uint16_t>(value>>16));
+    values.append(static_cast<uint16_t>(value&0xff));
+    ModbusRtuReply *reply = modbus->writeHoldingRegisters(slaveAddress, modbusRegister, values);
     connect(reply, &ModbusRtuReply::finished, reply, &ModbusRtuReply::deleteLater);
     connect(reply, &ModbusRtuReply::finished, info, [info, reply, this] {
 
