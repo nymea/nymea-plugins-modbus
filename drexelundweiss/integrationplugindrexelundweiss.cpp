@@ -39,6 +39,15 @@ IntegrationPluginDrexelUndWeiss::IntegrationPluginDrexelUndWeiss()
 {
     m_connectedStateTypeIds.insert(x2luThingClassId, x2luConnectedStateTypeId);
     m_connectedStateTypeIds.insert(x2wpThingClassId, x2wpConnectedStateTypeId);
+
+    m_discoverySlaveAddressParamTypeIds.insert(x2luThingClassId, x2luDiscoverySlaveAddressParamTypeId);
+    m_discoverySlaveAddressParamTypeIds.insert(x2wpThingClassId, x2wpDiscoverySlaveAddressParamTypeId);
+
+    m_slaveIdParamTypeIds.insert(x2luThingClassId, x2luThingSlaveAddressParamTypeId);
+    m_slaveIdParamTypeIds.insert(x2wpThingClassId, x2wpThingSlaveAddressParamTypeId);
+
+    m_modbusUuidParamTypeIds.insert(x2luThingClassId, x2luThingModbusMasterUuidParamTypeId);
+    m_modbusUuidParamTypeIds.insert(x2wpThingClassId, x2wpThingModbusMasterUuidParamTypeId);
 }
 
 void IntegrationPluginDrexelUndWeiss::init()
@@ -61,13 +70,38 @@ void IntegrationPluginDrexelUndWeiss::init()
 
 void IntegrationPluginDrexelUndWeiss::discoverThings(ThingDiscoveryInfo *info)
 {
-    if (info->thingClassId() == x2luThingClassId || info->thingClassId() == x2wpThingClassId) {
-        QList<ThingDescriptor> thingDescriptors;
-        info->finish(Thing::ThingErrorNoError);
+    qCDebug(dcDrexelUndWeiss()) << "Discover things";
+
+    if (hardwareManager()->modbusRtuResource()->modbusRtuMasters().isEmpty()) {
+        info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("No Modbus RTU interface available."));
         return;
-    } else {
-        Q_ASSERT_X(false, "discoverThings", QString("Unhandled thingClassId: %1").arg(info->thingClassId().toString()).toUtf8());
     }
+
+    uint slaveAddress = info->params().paramValue(m_discoverySlaveAddressParamTypeIds.value(info->thingClassId())).toUInt();
+    if (slaveAddress > 254 || slaveAddress == 0) {
+        info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("Modbus slave address must be between 1 and 254"));
+        return;
+    }
+    Q_FOREACH(ModbusRtuMaster *modbusMaster, hardwareManager()->modbusRtuResource()->modbusRtuMasters()) {
+        qCDebug(dcDrexelUndWeiss()) << "Found RTU master resource" << modbusMaster << "connected" << modbusMaster->connected();
+        if (!modbusMaster->connected()) {
+            continue;
+        }
+        QString name;
+        if (info->thingClassId() == x2wpThingClassId) {
+            name = QT_TR_NOOP("X2 Heat pump");
+        } else if (info->thingClassId() == x2luThingClassId) {
+            name = QT_TR_NOOP("X2 Ventilation unit");
+        }
+        ThingDescriptor descriptor(info->thingClassId(), name, QT_TR_NOOP("Slave address ") +QString::number(slaveAddress)+" "+modbusMaster->serialPort());
+        ParamList params;
+        params << Param(m_slaveIdParamTypeIds.value(info->thingClassId()), slaveAddress);
+        params << Param(m_modbusUuidParamTypeIds.value(info->thingClassId()), modbusMaster->modbusUuid());
+        descriptor.setParams(params);
+        info->addThingDescriptor(descriptor);
+    }
+    info->finish(Thing::ThingErrorNoError);
+    return;
 }
 
 void IntegrationPluginDrexelUndWeiss::setupThing(ThingSetupInfo *info)
@@ -75,80 +109,46 @@ void IntegrationPluginDrexelUndWeiss::setupThing(ThingSetupInfo *info)
     Thing *thing = info->thing();
     qCDebug(dcDrexelUndWeiss()) << "Setup thing" << thing->name();
 
-    if (thing->thingClassId() == x2luThingClassId) {
-
-        QUuid modbusMasterUuid = thing->paramValue(x2luThingModbusMasterUuidParamTypeId).toUuid();
-        uint slaveAddress = thing->paramValue(x2luThingSlaveAddressParamTypeId).toUInt();
-
-        if (!hardwareManager()->modbusRtuResource()->hasModbusRtuMaster(modbusMasterUuid)) {
-            return info->finish(Thing::ThingErrorHardwareNotAvailable, tr("Modbus RTU interface not available."));
-        }
-        ModbusRtuMaster *modbus = hardwareManager()->modbusRtuResource()->getModbusRtuMaster(modbusMasterUuid);
-        if (!modbus->connected()) {
-            return info->finish(Thing::ThingErrorHardwareNotAvailable, tr("Modbus RTU interface is not connected."));
-        }
-
-        ModbusRtuReply *reply = modbus->readHoldingRegister(slaveAddress, ModbusRegisterX2::Geraetetyp);
-        connect(reply, &ModbusRtuReply::finished, reply, &ModbusRtuReply::deleteLater);
-        connect(reply, &ModbusRtuReply::finished, info, [reply, modbus, info, thing, this] {
-            if (reply->error() != ModbusRtuReply::Error::NoError) {
-                qCWarning(dcDrexelUndWeiss()) << "Setup failed, received modbus error" << reply->errorString();
-                return info->finish(Thing::ThingErrorHardwareNotAvailable);
-            }
-
-            if (reply->result().length() != 1) {
-                qCWarning(dcDrexelUndWeiss()) << "Setup failed, received reply has an illegal length";
-                return info->finish(Thing::ThingErrorHardwareNotAvailable);
-            }
-            if (reply->result().first() != DeviceType::X2_LU) {
-                qCWarning(dcDrexelUndWeiss()) << "Device on slave addresss" << reply->slaveAddress() << "is not a X2 ventilation unit";
-                return info->finish(Thing::ThingErrorHardwareNotAvailable);
-            }
-
-            info->finish(Thing::ThingErrorNoError);
-            m_modbusRtuMasters.insert(thing, modbus);
-        });
-        connect(modbus, &ModbusRtuMaster::connectedChanged, this, &IntegrationPluginDrexelUndWeiss::onConnectionStateChanged);
-        info->finish(Thing::ThingErrorNoError);
-
-    } else if (thing->thingClassId() == x2wpThingClassId) {
-
-        QUuid modbusMasterUuid = thing->paramValue(x2wpThingModbusMasterUuidParamTypeId).toUuid();
-        uint slaveAddress = thing->paramValue(x2wpThingSlaveAddressParamTypeId).toUInt();
-
-        if (!hardwareManager()->modbusRtuResource()->hasModbusRtuMaster(modbusMasterUuid)) {
-            return info->finish(Thing::ThingErrorHardwareNotAvailable, tr("Modbus RTU interface not available."));
-        }
-        ModbusRtuMaster *modbus = hardwareManager()->modbusRtuResource()->getModbusRtuMaster(modbusMasterUuid);
-        if (!modbus->connected()) {
-            return info->finish(Thing::ThingErrorHardwareNotAvailable, tr("Modbus RTU interface is not connected."));
-        }
-        ModbusRtuReply *reply = modbus->readHoldingRegister(slaveAddress, ModbusRegisterX2::Geraetetyp);
-        connect(reply, &ModbusRtuReply::finished, reply, &ModbusRtuReply::deleteLater);
-        connect(reply, &ModbusRtuReply::finished, info, [reply, modbus, info, thing, this] {
-            if (reply->error() != ModbusRtuReply::Error::NoError) {
-                qCWarning(dcDrexelUndWeiss()) << "Setup failed, received modbus error" << reply->errorString();
-                return info->finish(Thing::ThingErrorHardwareNotAvailable);
-            }
-
-            if (reply->result().length() != 1) {
-                qCWarning(dcDrexelUndWeiss()) << "Setup failed, received reply has an illegal length";
-                return info->finish(Thing::ThingErrorHardwareNotAvailable);
-            }
-            if (reply->result().first() != DeviceType::X2_WP) {
-                qCWarning(dcDrexelUndWeiss()) << "Device on slave addresss" << reply->slaveAddress() << "is not a X2 heat pump";
-                return info->finish(Thing::ThingErrorHardwareNotAvailable);
-            }
-
-            info->finish(Thing::ThingErrorNoError);
-            m_modbusRtuMasters.insert(thing, modbus);
-        });
-        connect(modbus, &ModbusRtuMaster::connectedChanged, this, &IntegrationPluginDrexelUndWeiss::onConnectionStateChanged);
-        info->finish(Thing::ThingErrorNoError);
-
-    } else {
+    if (!m_connectedStateTypeIds.contains(thing->thingClassId())) {
         Q_ASSERT_X(false, "setupThing", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
     }
+
+    QUuid modbusMasterUuid = thing->paramValue(m_modbusUuidParamTypeIds.value(thing->thingClassId())).toUuid();
+    uint slaveAddress = thing->paramValue(m_slaveIdParamTypeIds.value(thing->thingClassId())).toUInt();
+
+    if (!hardwareManager()->modbusRtuResource()->hasModbusRtuMaster(modbusMasterUuid)) {
+        return info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("Modbus RTU interface not available."));
+    }
+    ModbusRtuMaster *modbus = hardwareManager()->modbusRtuResource()->getModbusRtuMaster(modbusMasterUuid);
+    if (!modbus->connected()) {
+        return info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("Modbus RTU interface is not connected."));
+    }
+
+    ModbusRtuReply *reply = modbus->readHoldingRegister(slaveAddress, ModbusRegisterX2::Geraetetyp);
+    connect(reply, &ModbusRtuReply::finished, reply, &ModbusRtuReply::deleteLater);
+    connect(reply, &ModbusRtuReply::finished, info, [reply, modbus, info, thing, this] {
+        if (reply->error() != ModbusRtuReply::Error::NoError) {
+            qCWarning(dcDrexelUndWeiss()) << "Setup failed, received modbus error" << reply->errorString();
+            return info->finish(Thing::ThingErrorHardwareNotAvailable);
+        }
+
+        if (reply->result().length() != 1) {
+            qCWarning(dcDrexelUndWeiss()) << "Setup failed, received reply has an illegal length";
+            return info->finish(Thing::ThingErrorHardwareNotAvailable);
+        }
+        if (thing->thingClassId() == x2luThingClassId && reply->result().first() == DeviceType::X2_LU) {
+            info->finish(Thing::ThingErrorNoError);
+            m_modbusRtuMasters.insert(thing, modbus);
+        } else if (thing->thingClassId() == x2wpThingClassId && reply->result().first() == DeviceType::X2_WP) {
+            info->finish(Thing::ThingErrorNoError);
+            m_modbusRtuMasters.insert(thing, modbus);
+        } else {
+            qCWarning(dcDrexelUndWeiss()) << "Device on slave addresss" << reply->slaveAddress() << "is not the wanted one.";
+            return info->finish(Thing::ThingErrorHardwareNotAvailable);
+        }
+
+    });
+    connect(modbus, &ModbusRtuMaster::connectedChanged, this, &IntegrationPluginDrexelUndWeiss::onConnectionStateChanged);
 }
 
 void IntegrationPluginDrexelUndWeiss::postSetupThing(Thing *thing)
