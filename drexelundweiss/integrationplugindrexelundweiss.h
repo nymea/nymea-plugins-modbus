@@ -60,6 +60,9 @@ private:
     PluginTimer *m_refreshTimer = nullptr;
 
     QHash<ThingClassId, StateTypeId> m_connectedStateTypeIds;
+    QHash<ThingClassId, ParamTypeId> m_discoverySlaveAddressParamTypeIds;
+    QHash<ThingClassId, ParamTypeId> m_slaveIdParamTypeIds;
+    QHash<ThingClassId, ParamTypeId> m_modbusUuidParamTypeIds;
     void sendWriteRequest(ThingActionInfo *info, uint slaveAddress, uint modbusRegister, uint16_t value);
     void updateStates(Thing *thing);
     void discoverModbusSlaves(ModbusRtuMaster *modbus, uint slaveAddress);
