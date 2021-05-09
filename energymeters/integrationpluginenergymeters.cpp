@@ -126,7 +126,7 @@ void IntegrationPluginEnergyMeters::discoverThings(ThingDiscoveryInfo *info)
     }
     uint slaveAddress = info->params().paramValue(m_discoverySlaveAddressParamTypeIds.value(info->thingClassId())).toUInt();
     if (slaveAddress > 254 || slaveAddress == 0) {
-        info->finish(Thing::ThingErrorInvalidParameter, tr("Modbus slave address must be between 1 and 254"));
+        info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("Modbus slave address must be between 1 and 254"));
         return;
     }
     Q_FOREACH(ModbusRtuMaster *modbusMaster, hardwareManager()->modbusRtuResource()->modbusRtuMasters()) {
@@ -174,7 +174,7 @@ void IntegrationPluginEnergyMeters::setupThing(ThingSetupInfo *info)
     EnergyMeter *meter = new EnergyMeter(hardwareManager()->modbusRtuResource()->getModbusRtuMaster(uuid), address, m_registerMaps.value(thing->thingClassId()), this);
     connect(info, &ThingSetupInfo::aborted, meter, &EnergyMeter::deleteLater);
     connect(meter, &EnergyMeter::consumedEnergyReceived, info, [this, info, meter] (double energy) {
-        qCDebug(dcEnergyMeters()) << "Consumed energy receieved" << energy << "Setup finished";
+        qCDebug(dcEnergyMeters()) << "Consumed energy received" << energy << "Setup finished";
         connect(meter, &EnergyMeter::connectedChanged, this, &IntegrationPluginEnergyMeters::onConnectionStateChanged);
         connect(meter, &EnergyMeter::voltageL1Received, this, &IntegrationPluginEnergyMeters::onVoltageL1Received);
         connect(meter, &EnergyMeter::voltageL2Received, this, &IntegrationPluginEnergyMeters::onVoltageL2Received);
@@ -209,15 +209,18 @@ void IntegrationPluginEnergyMeters::postSetupThing(Thing *thing)
     }
 
     if (!m_reconnectTimer) {
+        qCDebug(dcEnergyMeters()) << "Starting reconnect timer";
         m_reconnectTimer = hardwareManager()->pluginTimerManager()->registerTimer(5);
         connect(m_reconnectTimer, &PluginTimer::timeout, this, [this] {
             foreach (Thing *thing, myThings()) {
                 if (m_connectionStateTypeIds.contains(thing->thingClassId())) {
                     if (!thing->stateValue(m_connectionStateTypeIds.value(thing->thingClassId())).toBool()) {
                         EnergyMeter *meter = m_energyMeters.value(thing);
-                        if (!meter)
+                        if (!meter) {
+                            qCWarning(dcEnergyMeters()) << "On reconnect timer, could not find any EnergyMeter connection for" << thing->name();
                             continue;
-
+                        }
+                        qCDebug(dcEnergyMeters()) << "On reconnect timer, restarting update cycle for" << thing->name();
                         startUpdateCycle(meter);
                     }
                 }
@@ -247,6 +250,7 @@ void IntegrationPluginEnergyMeters::startUpdateCycle(EnergyMeter *meter)
 {
     if (m_updateCycleInProgress.contains(meter)) {
         if (m_updateCycleInProgress.value(meter)) {
+            qCWarning(dcEnergyMeters()) << "Update cycle not startet, update cycle already in progress";
             return;
         }
     }
