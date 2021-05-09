@@ -9,7 +9,11 @@ nymea plug-in for Drexel und Weiss HVAC systems.
 ## Requirements
 
 * The package "nymea-plugin-drexelundweiss" must be installed.
-* Modbus RTU interface must be avaible to nymea.
+* A modbus RTU interface must be avaible to nymea.
+* The modbus RTU interface must be set to:
+	* Parity none
+	* 8 Data bits
+	* 1 Stop bit
 
 ## More
 https://www.drexel-weiss.at

@@ -345,5 +345,25 @@ The name of the ParamType (ThingClass: x2lu, Type: thing, ID: {d25197d1-b1b9-45a
         <source>Modbus RTU interface not connected.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>No Modbus RTU interface available.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Modbus slave address must be between 1 and 254</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>X2 Heat pump</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>X2 Ventilation unit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Slave address </source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 </TS>
