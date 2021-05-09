@@ -63,7 +63,7 @@ private:
     QHash<ThingClassId, ParamTypeId> m_discoverySlaveAddressParamTypeIds;
     QHash<ThingClassId, ParamTypeId> m_slaveIdParamTypeIds;
     QHash<ThingClassId, ParamTypeId> m_modbusUuidParamTypeIds;
-    void sendWriteRequest(ThingActionInfo *info, uint slaveAddress, uint modbusRegister, uint16_t value);
+    void sendWriteRequest(ThingActionInfo *info, uint slaveAddress, uint modbusRegister, uint32_t value);
     void updateStates(Thing *thing);
     void discoverModbusSlaves(ModbusRtuMaster *modbus, uint slaveAddress);
     void readHoldingRegister(Thing *thing, ModbusRtuMaster *modbus, uint slaveAddress, uint modbusRegister);

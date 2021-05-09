@@ -157,7 +157,7 @@
                             "displayNameEvent": "Power changed",
                             "displayNameAction": "Change power",
                             "type": "bool",
-                            "defaultValue": 0,
+                            "defaultValue": false,
                             "writable": true
                         },
                         {
