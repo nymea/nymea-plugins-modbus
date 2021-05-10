@@ -167,9 +167,6 @@ private:
      * by the receivedStatusGroupx functions */
     IdmInfo m_idmInfo;
 
-    /** Converts a system operation mode code to a string (according to manual p. 13) */
-    QString systemOperationModeToString(IdmSysMode mode);
-
     /** Converts a heat pump operation mode code to a string (according to manual p. 14) */
     QString heatPumpOperationModeToString(IdmHeatPumpMode mode);
 
