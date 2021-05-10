@@ -73,12 +73,12 @@ public:
 
     bool connectDevice();
     QHostAddress getIdmAddress() const;
-    bool setTargetTemperature;
+    QUuid setTargetTemperature(double targetTemperature);
+    void getStatus();
 
 private:
-
     /** Modbus Unit ID of Idm device */
-    static const quint16 ModbusUnitID = 1;
+    static const quint16 modbusUnitID = 1;
 
     enum IscModus {
         KeineAbwarme = 0,
@@ -160,12 +160,12 @@ private:
      *       within the IntegrationPluginIdm class. */
     QHostAddress m_hostAddress;
 
-    /** Pointer to ModbusTCPMaster object, responseible for low-level communicaiton */
+    /** Pointer to ModbusTCPMaster object, responsible for low-level communicaiton */
     ModbusTCPMaster *m_modbusMaster = nullptr;
 
     /** This structure is allocated within onRequestStatus and filled
      * by the receivedStatusGroupx functions */
-    IdmInfo m_info;
+    IdmInfo m_idmInfo;
 
     /** Converts a system operation mode code to a string (according to manual p. 13) */
     QString systemOperationModeToString(IdmSysMode mode);
@@ -176,10 +176,10 @@ private:
 signals:
     void statusUpdated(const IdmInfo &info);
     void targetRoomTemperatureChanged();
+    void writeRequestExecuted(const QUuid &requestId, bool success);
 
-public slots:
+private slots:
     void onModbusError();
-    void onRequestStatus();
     void onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value);
 };
 

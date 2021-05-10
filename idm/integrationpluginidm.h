@@ -38,7 +38,6 @@
 
 #include <QUuid>
 
-
 class IntegrationPluginIdm: public IntegrationPlugin
 {
     Q_OBJECT
@@ -64,6 +63,8 @@ private:
 
 private slots:
     void onStatusUpdated(const IdmInfo &info);
+    void onWriteRequestExecuted(const QUuid &requestId, bool success);
+
 };
 
 #endif // INTEGRATIONPLUGINIDM_H

@@ -62,7 +62,7 @@ void IntegrationPluginIdm::setupThing(ThingSetupInfo *info)
         Q_FOREACH (Idm *idm, m_idmConnections) {
             if (hostAddress.isEqual(idm->getIdmAddress())) {
                 qCWarning(dcIdm()) << "Address already in use";
-                info->finish(Thing::ThingErrorSetupFailed, "IP address already in use");
+                info->finish(Thing::ThingErrorSetupFailed, QT_TR_NOOP("IP address already in use"));
                 return;
             }
         }
@@ -75,15 +75,18 @@ void IntegrationPluginIdm::setupThing(ThingSetupInfo *info)
             info->finish(Thing::ThingErrorHardwareNotAvailable);
             return;
         }
-        m_idmConnections.insert(thing, idm);
-        connect(idm, &Idm::statusUpdated, info, [info] (const IdmInfo &idmInfo) {
+
+        connect(idm, &Idm::statusUpdated, info, [info, thing, idm, this] (const IdmInfo &idmInfo) {
             if (idmInfo.connected) {
+                m_idmConnections.insert(thing, idm);
+                connect(idm, &Idm::statusUpdated, this, &IntegrationPluginIdm::onStatusUpdated);
+                connect(idm, &Idm::writeRequestExecuted, this, &IntegrationPluginIdm::onWriteRequestExecuted);
                 info->finish(Thing::ThingErrorNoError);
             }
         });
         connect(idm, &Idm::destroyed, this, [thing, this] {m_idmConnections.remove(thing);});
         connect(info, &ThingSetupInfo::aborted, idm, &Idm::deleteLater);
-        connect(idm, &Idm::statusUpdated, this, &IntegrationPluginIdm::onStatusUpdated);
+
 
     } else {
         Q_ASSERT_X(false, "setupThing", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
@@ -101,16 +104,14 @@ void IntegrationPluginIdm::postSetupThing(Thing *thing)
     }
 
     if (thing->thingClassId() == navigator2ThingClassId) {
-        qCDebug(dcIdm()) << "Thing id: " << thing->id();
         Idm *idm = m_idmConnections.value(thing);
-
-        if (idm != nullptr) {
-
-            qCDebug(dcIdm()) << "Thing set up, calling update";
-            update(thing);
-
-            thing->setStateValue(navigator2ConnectedStateTypeId, true);
+        if (!idm) {
+            qCWarning(dcIdm()) << "Could not find any iDM connection for" << thing->name();
+            return;
         }
+
+        thing->setStateValue(navigator2ConnectedStateTypeId, true);
+        update(thing);
     }
 }
 
@@ -137,9 +138,14 @@ void IntegrationPluginIdm::executeAction(ThingActionInfo *info)
     Action action = info->action();
 
     if (thing->thingClassId() == navigator2ThingClassId) {
+        Idm *idm = m_idmConnections.value(thing);
+        if (!idm) {
+            return info->finish(Thing::ThingErrorHardwareFailure);
+        }
         if (action.actionTypeId() == navigator2TargetTemperatureActionTypeId) {
             double targetTemperature = thing->stateValue(navigator2TargetTemperatureStateTypeId).toDouble();
-            Q_UNUSED(targetTemperature);
+            QUuid requestId = idm->setTargetTemperature(targetTemperature);
+            m_asyncActions.insert(requestId, info);
 
         } else {
             Q_ASSERT_X(false, "executeAction", QString("Unhandled action: %1").arg(action.actionTypeId().toString()).toUtf8());
@@ -152,13 +158,13 @@ void IntegrationPluginIdm::executeAction(ThingActionInfo *info)
 void IntegrationPluginIdm::update(Thing *thing)
 {
     if (thing->thingClassId() == navigator2ThingClassId) {
-        qCDebug(dcIdm()) << "Updating thing";
+        qCDebug(dcIdm()) << "Updating thing" << thing->name();
 
         Idm *idm = m_idmConnections.value(thing);
-
-        if (idm != nullptr) {
-            idm->onRequestStatus();
+        if (!idm) {
+            return;
         }
+        idm->getStatus();
     }
 }
 
@@ -184,6 +190,18 @@ void IntegrationPluginIdm::onStatusUpdated(const IdmInfo &info)
     thing->setStateValue(navigator2CurrentPowerConsumptionHeatPumpStateTypeId, info.powerConsumptionHeatPump);
     thing->setStateValue(navigator2ModeStateTypeId, info.mode);
     thing->setStateValue(navigator2ErrorStateTypeId, info.error);
+}
+
+void IntegrationPluginIdm::onWriteRequestExecuted(const QUuid &requestId, bool success)
+{
+    if (m_asyncActions.contains(requestId)) {
+        ThingActionInfo *info = m_asyncActions.value(requestId);
+        if (success) {
+            info->finish(Thing::ThingErrorNoError);
+        } else {
+            info->finish(Thing::ThingErrorHardwareNotAvailable);
+        }
+    }
 }
 
 void IntegrationPluginIdm::onRefreshTimer()
