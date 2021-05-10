@@ -173,31 +173,6 @@ void Idm::onModbusError()
     emit statusUpdated(m_idmInfo);
 }
 
-QString Idm::systemOperationModeToString(IdmSysMode mode)
-{
-    QString result{};
-
-    /* Operation modes according to table of manual p. 13 */
-    switch (mode) {
-    case IdmSysModeStandby:
-        result = "Standby";
-        break;
-    case IdmSysModeAutomatic:
-        result = "Automatik";
-        break;
-    case IdmSysModeAway:
-        result = "Abwesend";
-        break;
-    case IdmSysModeOnlyHotwater:
-        result = "Nur Warmwasser";
-        break;
-    case IdmSysModeOnlyRoomHeating:
-        result = "Nur Heizung/Kühlung";
-        break;
-    }
-    return result;
-}
-
 QString Idm::heatPumpOperationModeToString(IdmHeatPumpMode mode)
 {
     QString result{};
@@ -221,4 +196,3 @@ QString Idm::heatPumpOperationModeToString(IdmHeatPumpMode mode)
     }
     return result;
 }
-
