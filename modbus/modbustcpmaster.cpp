@@ -92,6 +92,11 @@ QString ModbusTCPMaster::errorString() const
     return m_modbusTcpClient->errorString();
 }
 
+QModbusDevice::Error ModbusTCPMaster::error() const
+{
+    return m_modbusTcpClient->error();
+}
+
 uint ModbusTCPMaster::port()
 {
     return m_modbusTcpClient->connectionParameter(QModbusDevice::NetworkPortParameter).toUInt();
