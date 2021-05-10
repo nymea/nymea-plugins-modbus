@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2020, nymea GmbH
+* Copyright 2013 - 2021, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -33,7 +33,6 @@
 #include "../modbus/modbushelpers.h"
 
 #include <QTimer>
-#include <cstring>
 
 Idm::Idm(const QHostAddress &address, QObject *parent) :
     QObject(parent),
@@ -61,6 +60,11 @@ bool Idm::connectDevice()
     return m_modbusMaster->connectDevice();
 }
 
+QHostAddress Idm::getIdmAddress() const
+{
+    return m_hostAddress;
+}
+
 void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value)
 {
     Q_UNUSED(slaveAddress);
@@ -70,7 +74,7 @@ void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const 
     case Idm::OutsideTemperature:
         /* qCDebug(dcIdm()) << "received outside temperature"; */
         if (value.length() == 2) {
-            m_info->outsideTemperature = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::OutsideTemperature - modbusRegister]);
+            m_info.outsideTemperature = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::OutsideTemperature - modbusRegister]);
         }
         QTimer::singleShot(200, this, [this] {
             m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::CurrentFaultNumber, 1);
@@ -80,9 +84,9 @@ void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const 
         /* qCDebug(dcIdm()) << "current fault number"; */
         if (value.length() == 1) {
             if (value[0] > 0) {
-                m_info->error = true;
+                m_info.error = true;
             } else {
-                m_info->error = false;
+                m_info.error = false;
             }
         }
         QTimer::singleShot(200, this, [this] {
@@ -92,7 +96,7 @@ void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const 
     case Idm::HeatStorageTemperature:
         /* qCDebug(dcIdm()) << "received storage temperature"; */
         if (value.length() == 2) {
-            m_info->waterTemperature = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::HeatStorageTemperature - modbusRegister]);
+            m_info.waterTemperature = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::HeatStorageTemperature - modbusRegister]);
         }
         QTimer::singleShot(200, this, [this] {
             m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::TargetHotWaterTemperature, 1);
@@ -102,7 +106,7 @@ void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const 
         /* qCDebug(dcIdm()) << "received target hot water temperature"; */
         if (value.length() == 1) {
             /* The hot water target temperature is stored as UCHAR (manual p. 13) */
-            m_info->targetWaterTemperature = (double)value[RegisterList::TargetHotWaterTemperature - modbusRegister];
+            m_info.targetWaterTemperature = (double)value[RegisterList::TargetHotWaterTemperature - modbusRegister];
         }
         QTimer::singleShot(200, this, [this] {
             m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::HeatPumpOperatingMode, 1);
@@ -111,7 +115,7 @@ void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const 
     case Idm::HeatPumpOperatingMode:
         /* qCDebug(dcIdm()) << "received heat pump operating mode"; */
         if (value.length() == 1) {
-            m_info->mode = heatPumpOperationModeToString((Idm::IdmHeatPumpMode)value[RegisterList::HeatPumpOperatingMode-modbusRegister]);
+            m_info.mode = heatPumpOperationModeToString((Idm::IdmHeatPumpMode)value[RegisterList::HeatPumpOperatingMode-modbusRegister]);
         }
         QTimer::singleShot(200, this, [this] {
             m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::RoomTemperatureHKA, 2);
@@ -120,7 +124,7 @@ void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const 
     case Idm::RoomTemperatureHKA:
         /* qCDebug(dcIdm()) << "received room temperature hka"; */
         if (value.length() == 2) {
-            m_info->roomTemperature = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::RoomTemperatureHKA - modbusRegister]);
+            m_info.roomTemperature = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::RoomTemperatureHKA - modbusRegister]);
         }
         QTimer::singleShot(200, this, [this] {
             m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::RoomTemperatureTargetHeatingEcoHKA, 2);
@@ -129,7 +133,7 @@ void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const 
     case Idm::RoomTemperatureTargetHeatingEcoHKA:
         /* qCDebug(dcIdm()) << "received room temprature hka eco"; */
         if (value.length() == 2) {
-            m_info->targetRoomTemperature = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::RoomTemperatureTargetHeatingEcoHKA - modbusRegister]);
+            m_info.targetRoomTemperature = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::RoomTemperatureTargetHeatingEcoHKA - modbusRegister]);
         }
         QTimer::singleShot(200, this, [this] {
             m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::CurrentPowerConsumptionHeatPump, 2);
@@ -138,12 +142,12 @@ void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const 
     case Idm::CurrentPowerConsumptionHeatPump:
         /* qCDebug(dcIdm()) << "received power consumption heat pump"; */
         if (value.length() == 2) {
-            m_info->powerConsumptionHeatPump = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::CurrentPowerConsumptionHeatPump - modbusRegister]);
+            m_info.powerConsumptionHeatPump = ModbusHelpers::convertRegisterToFloat(&value[RegisterList::CurrentPowerConsumptionHeatPump - modbusRegister]);
         }
 
         /* Everything read without an error
          * -> set connected to true */
-        m_info->connected = true;
+        m_info.connected = true;
         emit statusUpdated(m_info);
         break;
     }
@@ -152,24 +156,17 @@ void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const 
 void Idm::onModbusError()
 {
     qCDebug(dcIdm()) << "iDM: Received modbus error";
-
-    if (m_info != nullptr) {
-        m_info->connected = false;
-        emit statusUpdated(m_info);
-    }
+    m_info.connected = false;
+    emit statusUpdated(m_info);
 }
 
 void Idm::onRequestStatus()
 {
-    m_info = new IdmInfo;
-
-    QUuid reqId{};
-    reqId = m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::OutsideTemperature, 2);
-
-    /* qCDebug(dcIdm()) << "Request id: " << reqId; */
+    m_modbusMaster->readHoldingRegister(Idm::ModbusUnitID, Idm::OutsideTemperature, 2);
 }
 
-QString Idm::systemOperationModeToString(IdmSysMode mode) {
+QString Idm::systemOperationModeToString(IdmSysMode mode)
+{
     QString result{};
 
     /* Operation modes according to table of manual p. 13 */
@@ -190,13 +187,12 @@ QString Idm::systemOperationModeToString(IdmSysMode mode) {
         result = "Nur Heizung/Kühlung";
         break;
     }
-
     return result;
 }
 
-QString Idm::heatPumpOperationModeToString(IdmHeatPumpMode mode) {
+QString Idm::heatPumpOperationModeToString(IdmHeatPumpMode mode)
+{
     QString result{};
-
     /* Operation modes according to table of manual p. 14 */
     switch (mode) {
     case IdmHeatPumpModeOff:
@@ -215,7 +211,6 @@ QString Idm::heatPumpOperationModeToString(IdmHeatPumpMode mode) {
         result = "Defrost";
         break;
     }
-
     return result;
 }
 

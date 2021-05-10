@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2020, nymea GmbH
+* Copyright 2013 - 2021, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -72,12 +72,13 @@ public:
     ~Idm();
 
     bool connectDevice();
-    QHostAddress getIdmAddress() const {return m_hostAddress;};
+    QHostAddress getIdmAddress() const;
+    bool setTargetTemperature;
 
 private:
 
     /** Modbus Unit ID of Idm device */
-    static const quint16   ModbusUnitID = 1;
+    static const quint16 ModbusUnitID = 1;
 
     enum IscModus {
         KeineAbwarme = 0,
@@ -164,7 +165,7 @@ private:
 
     /** This structure is allocated within onRequestStatus and filled
      * by the receivedStatusGroupx functions */
-    IdmInfo *m_info = nullptr;
+    IdmInfo m_info;
 
     /** Converts a system operation mode code to a string (according to manual p. 13) */
     QString systemOperationModeToString(IdmSysMode mode);
@@ -173,7 +174,7 @@ private:
     QString heatPumpOperationModeToString(IdmHeatPumpMode mode);
 
 signals:
-    void statusUpdated(IdmInfo *info);
+    void statusUpdated(const IdmInfo &info);
     void targetRoomTemperatureChanged();
 
 public slots:
