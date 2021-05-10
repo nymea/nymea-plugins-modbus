@@ -10,7 +10,7 @@ Connect nymea to iDM heat pumps.
 
 * The package 'nymea-plugin-idm' must be installed
 * Navigator 2.0 settings
-	* "Modbus TCP" must be selected in the "Building Management System" menu? 
+	* "Modbus TCP" must be selected in the "Building Management System" menu?
 * Both devices must be in the same local area network.
 
 ## More
