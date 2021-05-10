@@ -37,7 +37,7 @@
 class ModbusHelpers {
 public:
     static float convertRegisterToFloat(const quint16 *reg);
-    static void convertFloatToRegister(QVector<quint16> &reg, float value);
+    static QVector<quint16> convertFloatToRegister(float value);
 };
 
 #endif

@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2020, nymea GmbH
+* Copyright 2013 - 2021, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -63,7 +63,7 @@ ModbusTCPMaster::~ModbusTCPMaster()
 }
 
 bool ModbusTCPMaster::connectDevice() {
-    // TCP connction to target device
+    // TCP connection to target device
     qCDebug(dcModbusTCP()) << "Setting up TCP connecion";
 
     if (!m_modbusTcpClient)
@@ -85,6 +85,11 @@ void ModbusTCPMaster::setNumberOfRetries(int number)
 void ModbusTCPMaster::setTimeout(int timeout)
 {
     m_modbusTcpClient->setTimeout(timeout);
+}
+
+QString ModbusTCPMaster::errorString() const
+{
+    return m_modbusTcpClient->errorString();
 }
 
 uint ModbusTCPMaster::port()
