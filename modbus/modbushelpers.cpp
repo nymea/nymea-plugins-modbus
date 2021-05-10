@@ -31,6 +31,7 @@
 #include "modbushelpers.h"
 
 float ModbusHelpers::convertRegisterToFloat(const quint16 *reg) {
+
     float result = 0.0;
 
     if (reg != nullptr) {
@@ -47,12 +48,14 @@ float ModbusHelpers::convertRegisterToFloat(const quint16 *reg) {
     return result;
 }
 
-void ModbusHelpers::convertFloatToRegister(QVector<quint16> &reg, float value) {
+QVector<quint16> ModbusHelpers::convertFloatToRegister(float value)
+{
     quint32 tmp = 0;
-
     memcpy((char *)&tmp, (char *)&value, sizeof(value));
 
+    QVector<quint16> reg;
     reg.append((quint16)(tmp));
     reg.append((quint16)((tmp & 0xFFFF0000) >> 16));
+    return reg;
 }
 
