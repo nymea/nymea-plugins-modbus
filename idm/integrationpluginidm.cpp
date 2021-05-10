@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2020, nymea GmbH
+* Copyright 2013 - 2021, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -44,9 +44,10 @@ void IntegrationPluginIdm::setupThing(ThingSetupInfo *info)
     if (thing->thingClassId() == navigator2ThingClassId) {
         QHostAddress hostAddress = QHostAddress(thing->paramValue(navigator2ThingIpAddressParamTypeId).toString());
 
-        if (hostAddress.isNull()) {
+
+        if (!hostAddress.isNull()) {
             qCWarning(dcIdm()) << "Setup failed, IP address not valid";
-            info->finish(Thing::ThingErrorInvalidParameter, "No IP address given");
+            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("No IP address given"));
             return;
         }
 
@@ -75,8 +76,8 @@ void IntegrationPluginIdm::setupThing(ThingSetupInfo *info)
             return;
         }
         m_idmConnections.insert(thing, idm);
-        connect(idm, &Idm::statusUpdated, info, [info] (IdmInfo *idmInfo) {
-            if (idmInfo->connected) {
+        connect(idm, &Idm::statusUpdated, info, [info] (const IdmInfo &idmInfo) {
+            if (idmInfo.connected) {
                 info->finish(Thing::ThingErrorNoError);
             }
         });
@@ -94,6 +95,7 @@ void IntegrationPluginIdm::postSetupThing(Thing *thing)
     qCDebug(dcIdm()) << "postSetupThing called" << thing->name();
 
     if (!m_refreshTimer) {
+        qCDebug(dcIdm()) << "Starting refresh timer";
         m_refreshTimer = hardwareManager()->pluginTimerManager()->registerTimer(10);
         connect(m_refreshTimer, &PluginTimer::timeout, this, &IntegrationPluginIdm::onRefreshTimer);
     }
@@ -121,6 +123,12 @@ void IntegrationPluginIdm::thingRemoved(Thing *thing)
             m_idmConnections.take(thing)->deleteLater();
         }
     }
+
+    if (myThings().isEmpty()) {
+        qCDebug(dcIdm()) << "Stopping refresh timer";
+        hardwareManager()->pluginTimerManager()->unregisterTimer(m_refreshTimer);
+        m_refreshTimer = nullptr;
+    }
 }
 
 void IntegrationPluginIdm::executeAction(ThingActionInfo *info)
@@ -129,7 +137,9 @@ void IntegrationPluginIdm::executeAction(ThingActionInfo *info)
     Action action = info->action();
 
     if (thing->thingClassId() == navigator2ThingClassId) {
-        if (action.actionTypeId() == navigator2PowerActionTypeId) {
+        if (action.actionTypeId() == navigator2TargetTemperatureActionTypeId) {
+            double targetTemperature = thing->stateValue(navigator2TargetTemperatureStateTypeId).toDouble();
+            Q_UNUSED(targetTemperature);
 
         } else {
             Q_ASSERT_X(false, "executeAction", QString("Unhandled action: %1").arg(action.actionTypeId().toString()).toUtf8());
@@ -152,15 +162,11 @@ void IntegrationPluginIdm::update(Thing *thing)
     }
 }
 
-void IntegrationPluginIdm::onStatusUpdated(IdmInfo *info)
+void IntegrationPluginIdm::onStatusUpdated(const IdmInfo &info)
 {
-    /* qCDebug(dcIdm()) << "onStatusUpdated"; */
-    if (!info)
-        return;
-
     qCDebug(dcIdm()) << "Received status from heat pump";
 
-    Idm *idm = static_cast<Idm *>(sender());
+    Idm *idm = qobject_cast<Idm *>(sender());
     Thing *thing = m_idmConnections.key(idm);
 
     if (!thing)
@@ -168,16 +174,16 @@ void IntegrationPluginIdm::onStatusUpdated(IdmInfo *info)
 
     /* Received a structure holding the status info of the
      * heat pump. Update the thing states with the individual fields. */
-    thing->setStateValue(navigator2ConnectedStateTypeId, info->connected);
-    thing->setStateValue(navigator2PowerStateTypeId, info->power);
-    thing->setStateValue(navigator2TemperatureStateTypeId, info->roomTemperature);
-    thing->setStateValue(navigator2OutsideAirTemperatureStateTypeId, info->outsideTemperature);
-    thing->setStateValue(navigator2WaterTemperatureStateTypeId, info->waterTemperature);
-    thing->setStateValue(navigator2TargetTemperatureStateTypeId, info->targetRoomTemperature);
-    thing->setStateValue(navigator2TargetWaterTemperatureStateTypeId, info->targetWaterTemperature);
-    thing->setStateValue(navigator2CurrentPowerConsumptionHeatPumpStateTypeId, info->powerConsumptionHeatPump);
-    thing->setStateValue(navigator2ModeStateTypeId, info->mode);
-    thing->setStateValue(navigator2ErrorStateTypeId, info->error);
+    thing->setStateValue(navigator2ConnectedStateTypeId, info.connected);
+    thing->setStateValue(navigator2PowerStateTypeId, info.power);
+    thing->setStateValue(navigator2TemperatureStateTypeId, info.roomTemperature);
+    thing->setStateValue(navigator2OutsideAirTemperatureStateTypeId, info.outsideTemperature);
+    thing->setStateValue(navigator2WaterTemperatureStateTypeId, info.waterTemperature);
+    thing->setStateValue(navigator2TargetTemperatureStateTypeId, info.targetRoomTemperature);
+    thing->setStateValue(navigator2TargetWaterTemperatureStateTypeId, info.targetWaterTemperature);
+    thing->setStateValue(navigator2CurrentPowerConsumptionHeatPumpStateTypeId, info.powerConsumptionHeatPump);
+    thing->setStateValue(navigator2ModeStateTypeId, info.mode);
+    thing->setStateValue(navigator2ErrorStateTypeId, info.error);
 }
 
 void IntegrationPluginIdm::onRefreshTimer()

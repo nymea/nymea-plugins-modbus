@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2020, nymea GmbH
+* Copyright 2013 - 2021, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -30,8 +30,6 @@
 
 #include "modbushelpers.h"
 
-#include <cstring>
-
 float ModbusHelpers::convertRegisterToFloat(const quint16 *reg) {
     float result = 0.0;
 
@@ -46,7 +44,6 @@ float ModbusHelpers::convertRegisterToFloat(const quint16 *reg) {
         /* needs to be done with char * to avoid pedantic compiler errors */
         memcpy((char *)&result, (char *)&tmp, sizeof(result));
     }
-
     return result;
 }
 

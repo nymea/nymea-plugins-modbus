@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2020, nymea GmbH
+* Copyright 2013 - 2021, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -36,8 +36,8 @@
 
 class ModbusHelpers {
 public:
-    static float    convertRegisterToFloat(const quint16 *reg);
-    static void     convertFloatToRegister(QVector<quint16> &reg, float value);
+    static float convertRegisterToFloat(const quint16 *reg);
+    static void convertFloatToRegister(QVector<quint16> &reg, float value);
 };
 
 #endif
