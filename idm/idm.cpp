@@ -168,7 +168,7 @@ void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const 
 
 void Idm::onModbusError()
 {
-    qCDebug(dcIdm()) << "iDM: Received modbus error";
+    qCDebug(dcIdm()) << "iDM: Received modbus error" << m_modbusMaster->errorString();
     m_idmInfo.connected = false;
     emit statusUpdated(m_idmInfo);
 }
