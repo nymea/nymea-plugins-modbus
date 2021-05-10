@@ -52,6 +52,7 @@ public:
     void setTimeout(int timeout);
 
     QString errorString() const;
+    QModbusDevice::Error error() const;
 
     QUuid readCoil(uint slaveAddress, uint registerAddress, uint size = 1);
     QUuid readDiscreteInput(uint slaveAddress, uint registerAddress, uint size = 1);
