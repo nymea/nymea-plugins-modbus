@@ -13,7 +13,7 @@
                     "displayName": "Navigator 2.0",
                     "id": "1c95ac91-4eca-4cbf-b0f4-d60d35d069ed",
                     "createMethods": ["user"],
-                    "interfaces": ["temperaturesensor", "connectable"],
+                    "interfaces": ["thermostat", "connectable"],
                     "paramTypes": [
                         {
                             "id": "05714e5c-d66a-4095-bbff-a0eb96fb035b",
@@ -37,10 +37,8 @@
                             "name": "power",
                             "displayName": "Power",
                             "displayNameEvent": "Power changed",
-                            "displayNameAction": "Change power",
                             "type": "bool",
-                            "defaultValue": 0,
-                            "writable": true
+                            "defaultValue": false
                         },
                         {
                             "id": "f0f596bf-7e45-43ea-b3d4-767b82dd422a",
@@ -73,10 +71,14 @@
                             "id": "efae7493-68c3-4cb9-853c-81011bdf09ca",
                             "name": "targetTemperature",
                             "displayName": "Target room temperature",
+                            "displayNameAction": "Set target room temperature",
                             "displayNameEvent": "Target room temperature changed",
                             "type": "double",
                             "unit": "DegreeCelsius",
-                            "defaultValue": 22.00
+                            "minValue": "18",
+                            "maxValue": "28",
+                            "defaultValue": 22.00,
+                            "writable": true
                         },
                         {
                             "id": "746244d6-dd37-4af8-b2ae-a7d8463e51e2",

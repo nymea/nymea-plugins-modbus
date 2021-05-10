@@ -46,27 +46,24 @@ class IntegrationPluginIdm: public IntegrationPlugin
     Q_PLUGIN_METADATA(IID "io.nymea.IntegrationPlugin" FILE "integrationpluginidm.json")
     Q_INTERFACES(IntegrationPlugin)
 
-
 public:
-    /** Constructor */
     explicit IntegrationPluginIdm();
 
     void setupThing(ThingSetupInfo *info) override;
     void postSetupThing(Thing *thing) override;
     void thingRemoved(Thing *thing) override;
     void executeAction(ThingActionInfo *info) override;
-    void update(Thing *thing);
 
 private:
-
     PluginTimer *m_refreshTimer = nullptr;
     QHash<Thing *, Idm *> m_idmConnections;
     QHash<QUuid, ThingActionInfo *> m_asyncActions;
 
+    void update(Thing *thing);
     void onRefreshTimer();
 
 private slots:
-    void onStatusUpdated(IdmInfo *info);
+    void onStatusUpdated(const IdmInfo &info);
 };
 
 #endif // INTEGRATIONPLUGINIDM_H
