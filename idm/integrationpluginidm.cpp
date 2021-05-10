@@ -146,6 +146,7 @@ void IntegrationPluginIdm::executeAction(ThingActionInfo *info)
             double targetTemperature = thing->stateValue(navigator2TargetTemperatureStateTypeId).toDouble();
             QUuid requestId = idm->setTargetTemperature(targetTemperature);
             m_asyncActions.insert(requestId, info);
+            connect(info, &ThingActionInfo::aborted, [requestId, this] {m_asyncActions.remove(requestId);});
 
         } else {
             Q_ASSERT_X(false, "executeAction", QString("Unhandled action: %1").arg(action.actionTypeId().toString()).toUtf8());
