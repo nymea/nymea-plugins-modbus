@@ -192,7 +192,7 @@ void IntegrationPluginDrexelUndWeiss::executeAction(ThingActionInfo *info)
             bool power = action.paramValue(x2luPowerActionPowerParamTypeId).toBool();
             uint32_t data = 0;
             if (power) {
-                data = getVentilationModeFromString(thing->stateValue(x2luVentilationModeStateTypeId).toString());
+                data = VentilationMode::Automatikbetrieb;
             } else {
                 data = VentilationMode::ManuellStufe0;
             }
