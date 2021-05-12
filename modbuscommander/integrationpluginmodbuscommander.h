@@ -36,7 +36,6 @@
 #include "hardware/modbus/modbusrtumaster.h"
 
 #include "../modbus/modbustcpmaster.h"
-#include "../modbus/modbusrtumaster.h"
 
 #include <QSerialPortInfo>
 #include <QUuid>
