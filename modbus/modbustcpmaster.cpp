@@ -154,6 +154,11 @@ void ModbusTCPMaster::setTimeout(int timeout)
     m_modbusTcpClient->setTimeout(timeout);
 }
 
+int ModbusTCPMaster::timeout()
+{
+    return m_modbusTcpClient->timeout();
+}
+
 QString ModbusTCPMaster::errorString() const
 {
     return m_modbusTcpClient->errorString();
