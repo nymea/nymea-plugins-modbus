@@ -9,4 +9,4 @@ SOURCES += \
 
 HEADERS += \
     integrationplugindrexelundweiss.h \
-    modbusdegisterdefinition.h
+    modbusregisterdefinition.h

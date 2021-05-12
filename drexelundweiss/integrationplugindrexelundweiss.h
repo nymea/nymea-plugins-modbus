@@ -34,7 +34,7 @@
 #include "integrations/integrationplugin.h"
 #include "hardware/modbus/modbusrtumaster.h"
 #include "plugintimer.h"
-#include "modbusdegisterdefinition.h"
+#include "modbusregisterdefinition.h"
 
 #include <QDateTime>
 
