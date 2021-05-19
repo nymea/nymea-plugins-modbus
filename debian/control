@@ -9,7 +9,6 @@ Build-depends: debhelper (>= 9.0.0),
                nymea-dev-tools:native,
                pkg-config,
                qtbase5-dev,
-               qt5-default,
                libi2c-dev
 Standards-Version: 3.9.3
 
