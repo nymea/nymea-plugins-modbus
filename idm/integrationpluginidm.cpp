@@ -43,9 +43,7 @@ void IntegrationPluginIdm::setupThing(ThingSetupInfo *info)
 
     if (thing->thingClassId() == navigator2ThingClassId) {
         QHostAddress hostAddress = QHostAddress(thing->paramValue(navigator2ThingIpAddressParamTypeId).toString());
-
-
-        if (!hostAddress.isNull()) {
+        if (hostAddress.isNull()) {
             qCWarning(dcIdm()) << "Setup failed, IP address not valid";
             info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("No IP address given"));
             return;
