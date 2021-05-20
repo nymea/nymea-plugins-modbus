@@ -153,7 +153,7 @@ void IntegrationPluginMTec::update(Thing *thing)
     }
 }
 
-void IntegrationPluginMTec::onConnectedChanged(bool connected)
+void IntegrationPluginMTec::onConnectedChanged(MTecHelpers::ConnectionState state)
 {
     MTec *mtec = qobject_cast<MTec *>(sender());
     Thing *thing = m_mtecConnections.key(mtec);
@@ -163,7 +163,11 @@ void IntegrationPluginMTec::onConnectedChanged(bool connected)
     if (!thing)
         return;
 
-    thing->setStateValue(mtecConnectedStateTypeId, connected);
+    if (state == MTecHelpers::ConnectionState::Online) {
+        thing->setStateValue(mtecConnectedStateTypeId, true);
+    }
+
+    thing->setStateValue(mtecStatusStateTypeId, MTecHelpers::connectionStateToString(state));
 }
 
 void IntegrationPluginMTec::onStatusUpdated(const MTecInfo &info)

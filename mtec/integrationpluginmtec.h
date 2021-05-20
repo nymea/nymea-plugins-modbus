@@ -34,6 +34,7 @@
 #include "plugintimer.h"
 
 #include "mtec.h"
+#include "mtechelpers.h"
 
 #include <QUuid>
 
@@ -62,7 +63,7 @@ private:
     QHash<QUuid, ThingActionInfo *> m_asyncActions;
 
 private slots:
-    void onConnectedChanged(bool connected);
+    void onConnectedChanged(MTecHelpers::ConnectionState state);
     void onRefreshTimer();
     void onStatusUpdated(const MTecInfo &info);
 
