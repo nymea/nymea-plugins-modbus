@@ -44,19 +44,41 @@ void MTecHelpers::convertFloatToRegister(quint16 &reg, float value)
     reg = qRound(value * 100.0);
 }
 
+QString MTecHelpers::connectionStateToString(ConnectionState state)
+{
+    QString str{};
+
+    switch (state) {
+    case Offline:
+        str = QT_TR_NOOP("Off");
+        break;
+    case Connecting:
+        str = QT_TR_NOOP("Connecting");
+        break;
+    case Online:
+        str = QT_TR_NOOP("Connected");
+        break;
+    case Error:
+        str = QT_TR_NOOP("Error");
+        break;
+    }
+
+    return str;
+}
+
 QString MTecHelpers::externalHeatSourceRequestToString(quint16 value)
 {
     QString str{};
 
     switch (value) {
     case 0:
-        str = "No request, external heat source must be turned off";
+        str = QT_TR_NOOP("No request, external heat source must be turned off");
         break;
     case 1:
-        str = "External heat source is released and can be switched on";
+        str = QT_TR_NOOP("External heat source is released and can be switched on");
         break;
     case 2:
-        str = "External heat source is required and must be turned on";
+        str = QT_TR_NOOP("External heat source is required and must be turned on");
         break;
     }
 

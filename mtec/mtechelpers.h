@@ -32,13 +32,23 @@
 #define MTECHELPERS_H
 
 #include <QtGlobal>
+#include <QObject>
 #include <QString>
 
-class MTecHelpers {
+class MTecHelpers : public QObject {
 public:
+    enum ConnectionState {
+        Offline,
+        Connecting,
+        Online,
+        Error
+    };
+    Q_ENUM(ConnectionState);
+
     static float    convertRegisterToFloat(quint16 reg);
     static void     convertFloatToRegister(quint16 &reg, float value);
 
+    static QString  connectionStateToString(ConnectionState state);
     static QString  externalHeatSourceRequestToString(quint16 value);
 };
 

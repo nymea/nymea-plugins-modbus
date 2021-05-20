@@ -37,6 +37,7 @@
 #include "../modbus/modbustcpmaster.h"
 
 #include "mtecinfo.h"
+#include "mtechelpers.h"
 
 class MTec : public QObject
 {
@@ -61,6 +62,9 @@ private:
 
     /** Modbus Unit ID (undocumented, guessing 1 for now) */
     static const quint16 ModbusUnitID = 1;
+
+    /** Number of retries to establish a modbus connection with the heat pump */
+    static const int ConnectionRetries = 3;
 
     /** The following modbus addresses can be read: */
     enum RegisterList {
@@ -108,15 +112,16 @@ private:
     /** This structure is filled by the receivedStatus... functions */
     MTecInfo m_info ;
 
-    bool m_firstRequest = true;
+    int m_requestsSent = 0;
     bool m_connected = false;
+    bool m_softConnection = false;
 
     QDateTime m_firstTimeout;
 
     int m_modbusTimeout;
 
 signals:
-    void connectedChanged(bool connected);
+    void connectedChanged(MTecHelpers::ConnectionState state);
     void statusUpdated(const MTecInfo &info);
 
 public slots:
