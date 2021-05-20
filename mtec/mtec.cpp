@@ -41,7 +41,10 @@ MTec::MTec(const QHostAddress &address, QObject *parent) :
     m_modbusMaster = new ModbusTCPMaster(address, 502, this);
 
     qCDebug(dcMTec()) << "created ModbusTCPMaster";
-    m_connected = m_modbusMaster->connectDevice();
+
+    if (m_modbusMaster->connectDevice()) {
+        emit connectedChanged(MTecHelpers::ConnectionState::Connecting);
+    }
 
     connect(m_modbusMaster, &ModbusTCPMaster::receivedHoldingRegister, this, &MTec::onReceivedHoldingRegister);
     connect(m_modbusMaster, &ModbusTCPMaster::readRequestError, this, &MTec::onModbusError);
@@ -56,19 +59,22 @@ void MTec::onModbusError()
 {
     qCWarning(dcMTec()) << "MTec: Received modbus error";
 
-    emit connectedChanged(false);
+    /* Only emit connected changed signal, if a soft connection
+     * had already been established.
+     * This avoids a series of possibly fake connection state changes,
+     * while the modbus server in the heatpump is starting up. */
+    if (m_softConnection) {
+        m_softConnection = false;
+        emit connectedChanged(MTecHelpers::ConnectionState::Offline);
+    }
 }
 
 void MTec::onRequestStatus()
 {
-    if ((m_connected) && (!m_firstTimeout.isValid())) {
-        /* No timestamp for timeout of first telegram defined,
-         * -> first request has not yet been sent
-         * -> do it now */
+    if ((m_softConnection) ||
+            ((m_connected) && (m_requestsSent < MTec::ConnectionRetries))) {
 
-        /* Note: m_firstRequest is set to false in
-         * the onReceivedHoldingRegister function */
-        if (m_firstRequest == true) {
+        if (m_requestsSent < MTec::ConnectionRetries) {
             m_firstTimeout = QDateTime::currentDateTime();
             m_firstTimeout = m_firstTimeout.addSecs(MTec::FirstConnectionTimeout);
 
@@ -83,17 +89,14 @@ void MTec::onRequestStatus()
             /* Set back original modbus timeout */
             m_modbusMaster->setTimeout(m_modbusTimeout);
         }
+        
     } else {
-        QDateTime now = QDateTime::currentDateTime();
-
-        if (m_firstTimeout.msecsTo(now) < MTec::FirstConnectionTimeout) {
-            /* Timeout of first request not yet reached
-             * -> return without sending another request */
-            return;
-        }
+        qCDebug(dcMTec()) << "Max number of modbus connects reached, giving up";
+        return;
     }
 
     m_modbusMaster->readHoldingRegister(MTec::ModbusUnitID, MTec::ActualPowerConsumption, 1);
+    m_requestsSent ++;
 }
 
 void MTec::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value)
@@ -102,7 +105,8 @@ void MTec::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const
 
     /* Some response was received, so the modbus communication is
      * established. */
-    m_firstRequest = false;
+    m_softConnection = true;
+    emit connectedChanged(MTecHelpers::ConnectionState::Online);
 
     switch (modbusRegister) {
     case ActualPowerConsumption:
