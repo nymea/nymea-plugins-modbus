@@ -209,18 +209,7 @@ void IntegrationPluginDrexelUndWeiss::executeAction(ThingActionInfo *info)
     } else if (thing->thingClassId() == x2wpThingClassId) {
 
         uint slaveAddress = thing->paramValue(x2wpThingSlaveAddressParamTypeId).toUInt();
-        if (action.actionTypeId() == x2wpPowerActionTypeId) {
-            bool power = action.paramValue(x2wpPowerActionPowerParamTypeId).toBool();
-            uint32_t data = 0;
-            if (power) {
-                double targetTemp = thing->stateValue(x2wpTargetTemperatureActionTargetTemperatureParamTypeId).toDouble();
-                data = static_cast<uint32_t>(qRound(targetTemp * 1000));
-            } else {
-                data = 18 * 1000; //set to min temperature
-            }
-            sendWriteRequest(info, slaveAddress, ModbusRegisterX2::RaumSoll, data);
-
-        } else if (action.actionTypeId() == x2wpTargetTemperatureActionTypeId) {
+        if (action.actionTypeId() == x2wpTargetTemperatureActionTypeId) {
             double targetTemp = (action.param(x2wpTargetTemperatureActionTargetTemperatureParamTypeId).value().toDouble());
             uint32_t data = static_cast<uint32_t>(qRound(targetTemp * 1000));
             sendWriteRequest(info, slaveAddress, ModbusRegisterX2::RaumSoll, data);
@@ -381,7 +370,7 @@ void IntegrationPluginDrexelUndWeiss::readHoldingRegister(Thing *thing, ModbusRt
                 if (value != 0) {
                     //get actual error
                 } else {
-                    thing->setStateValue(x2wpErrorStateTypeId, "No Error");
+                    thing->setStateValue(x2wpErrorStateTypeId, "No error");
                 }
                 break;
 
