@@ -34,17 +34,17 @@
 #include "registerdescriptor.h"
 
 static const QHash<ModbusRegisterType, ModbusRegisterDescriptor> sdm630RegisterMap {
-    {ModbusRegisterType::VoltageL1,      ModbusRegisterDescriptor(30001, 4, 2, "V", "float")},
-    {ModbusRegisterType::VoltageL2,      ModbusRegisterDescriptor(30003, 4, 2, "V", "float")},
-    {ModbusRegisterType::VoltageL3,      ModbusRegisterDescriptor(30005, 4, 2, "V", "float")},
-    {ModbusRegisterType::CurrentL1,      ModbusRegisterDescriptor(30007, 4, 2, "A", "float")},
-    {ModbusRegisterType::CurrentL2,      ModbusRegisterDescriptor(30009, 4, 2, "A", "float")},
-    {ModbusRegisterType::CurrentL3,      ModbusRegisterDescriptor(30011, 4, 2, "A", "float")},
-    {ModbusRegisterType::ActivePower,    ModbusRegisterDescriptor(30053, 4, 2, "W", "float")}, //Total system power
-    {ModbusRegisterType::Frequency,      ModbusRegisterDescriptor(30071, 4, 2, "Hz", "float")},
-    {ModbusRegisterType::PowerFactor,    ModbusRegisterDescriptor(30067, 4, 2, "Degree", "float")}, //Total system phase angle
-    {ModbusRegisterType::EnergyConsumed, ModbusRegisterDescriptor(30073, 4, 2, "kWh", "float")}, //Total Import kWh
-    {ModbusRegisterType::EnergyProduced, ModbusRegisterDescriptor(30075, 4, 2, "kWh", "float")} //Total Export kWh
+    {ModbusRegisterType::VoltageL1,      ModbusRegisterDescriptor(0x00, 4, 2, "V", "float")},
+    {ModbusRegisterType::VoltageL2,      ModbusRegisterDescriptor(0x02, 4, 2, "V", "float")},
+    {ModbusRegisterType::VoltageL3,      ModbusRegisterDescriptor(0x04, 4, 2, "V", "float")},
+    {ModbusRegisterType::CurrentL1,      ModbusRegisterDescriptor(0x06, 4, 2, "A", "float")},
+    {ModbusRegisterType::CurrentL2,      ModbusRegisterDescriptor(0x08, 4, 2, "A", "float")},
+    {ModbusRegisterType::CurrentL3,      ModbusRegisterDescriptor(0x0A, 4, 2, "A", "float")},
+    {ModbusRegisterType::ActivePower,    ModbusRegisterDescriptor(0x34, 4, 2, "W", "float")}, //Total system power
+    {ModbusRegisterType::Frequency,      ModbusRegisterDescriptor(0x46, 4, 2, "Hz", "float")},
+    {ModbusRegisterType::PowerFactor,    ModbusRegisterDescriptor(0x3E, 4, 2, "", "float")}, //Total system power factor
+    {ModbusRegisterType::EnergyConsumed, ModbusRegisterDescriptor(0x48, 4, 2, "kWh", "float")}, //Total Import kWh
+    {ModbusRegisterType::EnergyProduced, ModbusRegisterDescriptor(0x4A, 4, 2, "kWh", "float")} //Total Export kWh
 };
 
 #endif // BGETECHMODBUSREGISTER_H

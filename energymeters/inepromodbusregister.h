@@ -41,7 +41,7 @@ static const QHash<ModbusRegisterType, ModbusRegisterDescriptor> pro380RegisterM
     {ModbusRegisterType::CurrentL3,        ModbusRegisterDescriptor(0x5010, 3, 2, "A", "float")}, //L3 Current
     {ModbusRegisterType::ActivePower,    ModbusRegisterDescriptor(0x5012, 3, 2, "kW", "float")}, //Total active power
     {ModbusRegisterType::Frequency,      ModbusRegisterDescriptor(0x5008, 3, 2, "Hz", "float")},
-    {ModbusRegisterType::PowerFactor,    ModbusRegisterDescriptor(0x502A, 3, 2, "Degree", "float")},
+    {ModbusRegisterType::PowerFactor,    ModbusRegisterDescriptor(0x502A, 3, 2, "", "float")},
     {ModbusRegisterType::EnergyConsumed, ModbusRegisterDescriptor(0x600C, 3, 2, "kWh", "float")}, //Forward active energy
     {ModbusRegisterType::EnergyProduced, ModbusRegisterDescriptor(0x6018, 3, 2, "kWh", "float")} //Reverse active energy
 };
