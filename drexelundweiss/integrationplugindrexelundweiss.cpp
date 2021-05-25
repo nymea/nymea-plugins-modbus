@@ -245,7 +245,7 @@ void IntegrationPluginDrexelUndWeiss::sendWriteRequest(ThingActionInfo *info, ui
 
     QVector<uint16_t> values;
     values.append(static_cast<uint16_t>(value>>16));
-    values.append(static_cast<uint16_t>(value&0xff));
+    values.append(static_cast<uint16_t>(value&0xffff));
     ModbusRtuReply *reply = modbus->writeHoldingRegisters(slaveAddress, modbusRegister, values);
     connect(reply, &ModbusRtuReply::finished, reply, &ModbusRtuReply::deleteLater);
     connect(reply, &ModbusRtuReply::finished, info, [info, reply, this] {
