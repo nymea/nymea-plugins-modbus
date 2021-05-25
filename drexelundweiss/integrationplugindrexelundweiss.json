@@ -112,7 +112,7 @@
                     "displayName": "X2 WP",
                     "id": "e548f962-92db-4110-8279-10fbcde35f93",
                     "createMethods": ["discovery"],
-                    "interfaces": ["thermostat", "heating", "temperaturesensor", "connectable"],
+                    "interfaces": ["thermostat", "connectable"],
                     "discoveryParamTypes": [
                          {
                              "id": "d4923c90-22c8-477e-a37a-341858e59dcb",
@@ -155,10 +155,8 @@
                             "name": "power",
                             "displayName": "Power",
                             "displayNameEvent": "Power changed",
-                            "displayNameAction": "Change power",
                             "type": "bool",
-                            "defaultValue": false,
-                            "writable": true
+                            "defaultValue": false
                         },
                         {
                             "id": "3ab2d609-1686-4fd7-84e3-580c8e0537d0",
