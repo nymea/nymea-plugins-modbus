@@ -37,8 +37,6 @@
 #include <QTimer>
 #include <QUuid>
 
-Q_DECLARE_LOGGING_CATEGORY(dcModbusTcp)
-
 class ModbusTCPMaster : public QObject
 {
     Q_OBJECT
@@ -46,9 +44,21 @@ public:
     explicit ModbusTCPMaster(const QHostAddress &hostAddress, uint port, QObject *parent = nullptr);
     ~ModbusTCPMaster();
 
+    QHostAddress hostAddress() const;
+    bool setHostAddress(const QHostAddress &hostAddress);
+
+    uint port() const;
+    bool setPort(uint port);
+
     bool connectDevice();
-    bool connected();
+    void disconnectDevice();
+
+    bool connected() const;
+
+    int numberOfRetries() const;
     void setNumberOfRetries(int number);
+
+    int timeout() const;
     void setTimeout(int timeout);
 
     QString errorString() const;
@@ -65,14 +75,20 @@ public:
     QUuid writeHoldingRegister(uint slaveAddress, uint registerAddress, quint16 value);
     QUuid writeHoldingRegisters(uint slaveAddress, uint registerAddress, const QVector<quint16> &values);
 
-    QHostAddress hostAddress();
-    uint port();
-    bool setHostAddress(const QHostAddress &hostAddress);
-    bool setPort(uint port);
+    // Generic requests
+    QModbusReply *sendRawRequest(const QModbusRequest &request, int serverAddress);
+    QModbusReply *sendReadRequest(const QModbusDataUnit &read, int serverAddress);
+    QModbusReply *sendReadWriteRequest(const QModbusDataUnit &read, const QModbusDataUnit &write, int serverAddress);
+    QModbusReply *sendWriteRequest(const QModbusDataUnit &write, int serverAddress);
 
 private:
     QTimer *m_reconnectTimer = nullptr;
-    QModbusTcpClient *m_modbusTcpClient;
+    QModbusTcpClient *m_modbusTcpClient = nullptr;
+
+    QHostAddress m_hostAddress;
+    uint m_port;
+    int m_timeout = 1000;
+    int m_numberOfRetries = 3;
 
 private slots:
     void onReconnectTimer();
