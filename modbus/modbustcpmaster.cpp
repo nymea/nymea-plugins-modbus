@@ -49,21 +49,18 @@ ModbusTCPMaster::ModbusTCPMaster(const QHostAddress &hostAddress, uint port, QOb
 
     m_reconnectTimer = new QTimer(this);
     m_reconnectTimer->setSingleShot(true);
-    connect(m_reconnectTimer, &QTimer::timeout, this, &ModbusTCPMaster::onReconnectTimer);
+    m_reconnectTimer->setInterval(4000);
+    connect(m_reconnectTimer, &QTimer::timeout, this, &ModbusTCPMaster::connectDevice);
 }
 
 ModbusTCPMaster::~ModbusTCPMaster()
 {
     if (m_reconnectTimer) {
         m_reconnectTimer->stop();
-        delete m_reconnectTimer;
-        m_reconnectTimer = nullptr;
     }
 
     if (m_modbusTcpClient) {
-        m_modbusTcpClient->disconnectDevice();
-        delete m_modbusTcpClient;
-        m_modbusTcpClient = nullptr;
+        disconnectDevice();
     }
 }
 
@@ -77,30 +74,37 @@ uint ModbusTCPMaster::port() const
     return m_port;
 }
 
-bool ModbusTCPMaster::setPort(uint port)
+void ModbusTCPMaster::setPort(uint port)
 {
     m_port = port;
-    return connectDevice();
 }
 
-bool ModbusTCPMaster::setHostAddress(const QHostAddress &hostAddress)
+void ModbusTCPMaster::setHostAddress(const QHostAddress &hostAddress)
 {
     m_hostAddress = hostAddress;
-    return connectDevice();
 }
 
 bool ModbusTCPMaster::connectDevice() {
     // TCP connection to target device
-    qCDebug(dcModbusTCP()) << "Setting up TCP connecion" << QString("%1:%2").arg(m_hostAddress.toString()).arg(m_port);
     if (!m_modbusTcpClient)
         return false;
 
-    m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkPortParameter, m_port);
-    m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkAddressParameter, m_hostAddress.toString());
-    m_modbusTcpClient->setTimeout(m_timeout);
-    m_modbusTcpClient->setNumberOfRetries(m_numberOfRetries);
+    // Only connect if we are in the unconnected state
+    if (m_modbusTcpClient->state() == QModbusDevice::UnconnectedState) {
+        qCDebug(dcModbusTCP()) << "Connecting modbus TCP client to" << QString("%1:%2").arg(m_hostAddress.toString()).arg(m_port);
+        m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkPortParameter, m_port);
+        m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkAddressParameter, m_hostAddress.toString());
+        m_modbusTcpClient->setTimeout(m_timeout);
+        m_modbusTcpClient->setNumberOfRetries(m_numberOfRetries);
+        return m_modbusTcpClient->connectDevice();
+    } else if (m_modbusTcpClient->state() != QModbusDevice::ConnectedState) {
+        // Restart the timer in case of connecting not finished yet or closing
+        m_reconnectTimer->start();
+    } else {
+        qCWarning(dcModbusTCP()) << "Connect modbus TCP device" << QString("%1:%2").arg(m_hostAddress.toString()).arg(m_port) << "called, but the socket is currently in the" << m_modbusTcpClient->state();
+    }
 
-    return m_modbusTcpClient->connectDevice();
+    return false;
 }
 
 void ModbusTCPMaster::disconnectDevice()
@@ -108,12 +112,24 @@ void ModbusTCPMaster::disconnectDevice()
     if (!m_modbusTcpClient)
         return;
 
+    // Stop the reconnect timer since disconnect was explicitly called
+    m_reconnectTimer->stop();
     m_modbusTcpClient->disconnectDevice();
+}
+
+bool ModbusTCPMaster::reconnectDevice()
+{
+    qCWarning(dcModbusTCP()) << "Reconnecting modbus TCP device" << QString("%1:%2").arg(m_hostAddress.toString()).arg(m_port);
+    if (!m_modbusTcpClient)
+        return false;
+
+    disconnectDevice();
+    return connectDevice();
 }
 
 bool ModbusTCPMaster::connected() const
 {
-    return (m_modbusTcpClient->state() == QModbusDevice::State::ConnectedState);
+    return m_connected;
 }
 
 int ModbusTCPMaster::numberOfRetries() const
@@ -146,13 +162,6 @@ QString ModbusTCPMaster::errorString() const
 QModbusDevice::Error ModbusTCPMaster::error() const
 {
     return m_modbusTcpClient->error();
-}
-
-void ModbusTCPMaster::onReconnectTimer()
-{
-    if (!m_modbusTcpClient->connectDevice()) {
-        m_reconnectTimer->start(10000);
-    }
 }
 
 QUuid ModbusTCPMaster::readCoil(uint slaveAddress, uint registerAddress, uint size)
@@ -458,12 +467,17 @@ void ModbusTCPMaster::onModbusErrorOccurred(QModbusDevice::Error error)
 void ModbusTCPMaster::onModbusStateChanged(QModbusDevice::State state)
 {
     qCDebug(dcModbusTCP()) << "Connection state changed for" << m_hostAddress << state;
-
     bool connected = (state == QModbusDevice::ConnectedState);
-    if (!connected) {
-        //try to reconnect in 10 seconds
-        m_reconnectTimer->start(10000);
+    if (m_connected != connected) {
+        m_connected = connected;
+        emit connectionStateChanged(m_connected);
     }
 
-    emit connectionStateChanged(connected);
+    // If the socket is connected, stop the reconnect timer...
+    // If the socket is unconnected (not connecting and not closing), start the reconnect timer
+    if (m_connected) {
+        m_reconnectTimer->stop();
+    } else if (state == QModbusDevice::UnconnectedState) {
+        m_reconnectTimer->start();
+    }
 }

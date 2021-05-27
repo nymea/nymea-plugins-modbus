@@ -44,14 +44,13 @@ public:
     explicit ModbusTCPMaster(const QHostAddress &hostAddress, uint port, QObject *parent = nullptr);
     ~ModbusTCPMaster();
 
+    // If you change the hostaddress, make sure to reconnectDevice afterwards
     QHostAddress hostAddress() const;
-    bool setHostAddress(const QHostAddress &hostAddress);
+    void setHostAddress(const QHostAddress &hostAddress);
 
+    // If you change the port, make sure to reconnectDevice afterwards
     uint port() const;
-    bool setPort(uint port);
-
-    bool connectDevice();
-    void disconnectDevice();
+    void setPort(uint port);
 
     bool connected() const;
 
@@ -81,6 +80,11 @@ public:
     QModbusReply *sendReadWriteRequest(const QModbusDataUnit &read, const QModbusDataUnit &write, int serverAddress);
     QModbusReply *sendWriteRequest(const QModbusDataUnit &write, int serverAddress);
 
+public slots:
+    bool connectDevice();
+    void disconnectDevice();
+    bool reconnectDevice();
+
 private:
     QTimer *m_reconnectTimer = nullptr;
     QModbusTcpClient *m_modbusTcpClient = nullptr;
@@ -89,10 +93,9 @@ private:
     uint m_port;
     int m_timeout = 1000;
     int m_numberOfRetries = 3;
+    bool m_connected = false;
 
 private slots:
-    void onReconnectTimer();
-
     void onModbusErrorOccurred(QModbusDevice::Error error);
     void onModbusStateChanged(QModbusDevice::State state);
 
