@@ -2,7 +2,8 @@ TEMPLATE = subdirs
 
 PLUGIN_DIRS = \
     drexelundweiss          \
-    energymeters            \ 
+    energymeters            \
+    goecharger              \
     modbuscommander         \
     mypv                    \
     sunspec                 \

@@ -62,6 +62,22 @@ Description: nymea.io plugin for Modbus based energy meters
  .
  This package will install the nymea.io plugin for energy meters
 
+Package: nymea-plugin-goecharger
+Architecture: any
+Multi-Arch: same
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         nymea-plugins-modbus-translations
+Description: nymea.io plugin for go-eCharger wallboxes
+ The nymea daemon is a plugin based IoT (Internet of Things) server. The
+ server works like a translator for devices, things and services and
+ allows them to interact.
+ With the powerful rule engine you are able to connect any device available
+ in the system and create individual scenes and behaviors for your environment.
+ .
+ This package will install the nymea.io plugin for go-eCharger wallboxes
+
 
 Package: nymea-plugin-modbuscommander
 Architecture: any
