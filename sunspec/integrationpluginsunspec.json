@@ -39,7 +39,7 @@
                     "name": "sunspecConnection",
                     "displayName": "SunSpec connection",
                     "id": "f51853f3-8815-4cf3-b337-45cda1f3e6d5",
-                    "createMethods": [ "User" ],
+                    "createMethods": [ "User", "Discovery" ],
                     "interfaces": ["gateway"],
                     "paramTypes": [
                         {
