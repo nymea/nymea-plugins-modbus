@@ -34,8 +34,6 @@
 #include "integrations/integrationplugin.h"
 #include "plugintimer.h"
 #include "webasto.h"
-#include "../discovery/discovery.h"
-#include "../discovery/host.h"
 #include "../modbus/modbustcpmaster.h"
 
 #include <QObject>
@@ -59,7 +57,6 @@ public:
     void thingRemoved(Thing *thing) override;
 
 private:
-    Discovery *m_discovery = nullptr;
     PluginTimer *m_pluginTimer = nullptr;
     QHash<Thing *, Webasto *> m_webastoConnections;
     QHash<QUuid, ThingActionInfo *> m_asyncActions;

@@ -80,7 +80,7 @@ void Webasto::setLivebitInterval(uint seconds)
 void Webasto::getRegister(Webasto::TqModbusRegister modbusRegister, uint length)
 {
     qCDebug(dcWebasto()) << "Webasto: Get register" << modbusRegister << length;
-    if (length < 1 && length > 10) {
+    if (length < 1 || length > 10) {
         qCWarning(dcWebasto()) << "Invalide register length, allowed values [1,10]";
         return;
     }
