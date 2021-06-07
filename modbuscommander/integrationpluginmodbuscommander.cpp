@@ -32,6 +32,7 @@
 #include "plugininfo.h"
 
 #include "hardwaremanager.h"
+#include "network/networkdevicediscovery.h"
 #include "hardware/modbus/modbusrtumaster.h"
 #include "hardware/modbus/modbusrtuhardwareresource.h"
 
@@ -108,6 +109,44 @@ void IntegrationPluginModbusCommander::discoverThings(ThingDiscoveryInfo *info)
         }
 
         info->finish(Thing::ThingErrorNoError);
+        return;
+    } else if (thingClassId == modbusTCPClientThingClassId) {
+        NetworkDeviceDiscoveryReply *discoveryReply = hardwareManager()->networkDeviceDiscovery()->discover();
+        connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
+            ThingDescriptors descriptors;
+            qCDebug(dcModbusCommander()) << "Discovery finished. Found" << discoveryReply->networkDevices().count() << "devices";
+            foreach (const NetworkDevice &networkDevice, discoveryReply->networkDevices()) {
+                qCDebug(dcModbusCommander()) << networkDevice;
+                QString title;
+                if (networkDevice.hostName().isEmpty()) {
+                    title += networkDevice.address().toString();
+                } else {
+                    title += networkDevice.address().toString() + " (" + networkDevice.hostName() + ")";
+                }
+
+                QString description;
+                if (networkDevice.macAddressManufacturer().isEmpty()) {
+                    description = networkDevice.macAddress();
+                } else {
+                    description = networkDevice.macAddress() + " (" + networkDevice.macAddressManufacturer() + ")";
+                }
+
+                ThingDescriptor descriptor(modbusTCPClientThingClassId, title, description);
+
+                // Check if we already have set up this device
+                Things existingThings = myThings().filterByParam(modbusTCPClientThingIpAddressParamTypeId, networkDevice.address().toString());
+                if (existingThings.count() == 1) {
+                    qCDebug(dcModbusCommander()) << "This thing already exists in the system." << existingThings.first() << networkDevice;
+                    descriptor.setThingId(existingThings.first()->id());
+                }
+
+                ParamList params;
+                params << Param(modbusTCPClientThingIpAddressParamTypeId, networkDevice.address().toString());
+                descriptor.setParams(params);
+                info->addThingDescriptor(descriptor);
+            }
+            info->finish(Thing::ThingErrorNoError);
+        });
         return;
     } else if (thingClassId == discreteInputThingClassId) {
         Q_FOREACH(Thing *clientThing, myThings()){
