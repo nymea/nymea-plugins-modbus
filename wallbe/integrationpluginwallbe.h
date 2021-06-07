@@ -34,8 +34,6 @@
 #include "integrations/integrationplugin.h"
 #include "plugintimer.h"
 
-#include "host.h"
-#include "discovery.h"
 #include "../modbus/modbustcpmaster.h"
 
 #include <QObject>
@@ -72,7 +70,6 @@ public:
     void thingRemoved(Thing *thing) override;
 
 private:
-    Discovery *m_discovery = nullptr;
     QHash<Thing *, ModbusTCPMaster *> m_connections;
     PluginTimer *m_pluginTimer = nullptr;
     QHash<QUuid, ThingActionInfo *> m_asyncActions;
@@ -82,8 +79,8 @@ private:
 
 private slots:
     void onConnectionStateChanged(bool status);
-        void onReceivedInputRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value);
-            void onReceivedCoil(int slaveAddress, int modbusRegister, const QVector<quint16> &value);
+    void onReceivedInputRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value);
+    void onReceivedCoil(int slaveAddress, int modbusRegister, const QVector<quint16> &value);
     void onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value);
 
     void onWriteRequestExecuted(const QUuid &requestId, bool success);
