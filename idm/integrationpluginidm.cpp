@@ -28,12 +28,55 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include "network/networkdevicediscovery.h"
 #include "integrationpluginidm.h"
 #include "plugininfo.h"
 
 IntegrationPluginIdm::IntegrationPluginIdm()
 {
 
+}
+
+void IntegrationPluginIdm::discoverThings(ThingDiscoveryInfo *info)
+{
+    qCDebug(dcIdm()) << "Discovering network...";
+    NetworkDeviceDiscoveryReply *discoveryReply = hardwareManager()->networkDeviceDiscovery()->discover();
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
+        ThingDescriptors descriptors;
+        qCDebug(dcIdm()) << "Discovery finished. Found" << discoveryReply->networkDevices().count() << "devices";
+        foreach (const NetworkDevice &networkDevice, discoveryReply->networkDevices()) {
+            qCDebug(dcIdm()) << networkDevice;
+            QString title;
+            if (networkDevice.hostName().isEmpty()) {
+                title += networkDevice.address().toString();
+            } else {
+                title += networkDevice.address().toString() + " (" + networkDevice.hostName() + ")";
+            }
+
+            QString description;
+            if (networkDevice.macAddressManufacturer().isEmpty()) {
+                description = networkDevice.macAddress();
+            } else {
+                description = networkDevice.macAddress() + " (" + networkDevice.macAddressManufacturer() + ")";
+            }
+
+            ThingDescriptor descriptor(navigator2ThingClassId, title, description);
+
+            // Check if we already have set up this device
+            Things existingThings = myThings().filterByParam(navigator2ThingMacAddressParamTypeId, networkDevice.macAddress());
+            if (existingThings.count() == 1) {
+                qCDebug(dcIdm()) << "This thing already exists in the system." << existingThings.first() << networkDevice;
+                descriptor.setThingId(existingThings.first()->id());
+            }
+
+            ParamList params;
+            params << Param(navigator2ThingMacAddressParamTypeId, networkDevice.macAddress());
+            params << Param(navigator2ThingIpAddressParamTypeId, networkDevice.address().toString());
+            descriptor.setParams(params);
+            info->addThingDescriptor(descriptor);
+        }
+        info->finish(Thing::ThingErrorNoError);
+    });
 }
 
 void IntegrationPluginIdm::setupThing(ThingSetupInfo *info)
@@ -59,8 +102,8 @@ void IntegrationPluginIdm::setupThing(ThingSetupInfo *info)
         qCDebug(dcIdm()) << "User entered address: " << hostAddress.toString();
 
         /* Check, if address is already in use for another device */
-        Q_FOREACH (Idm *idm, m_idmConnections) {
-            if (hostAddress.isEqual(idm->getIdmAddress())) {
+        foreach (Idm *idm, m_idmConnections) {
+            if (hostAddress.isEqual(idm->address())) {
                 qCWarning(dcIdm()) << "Address already in use";
                 info->finish(Thing::ThingErrorSetupFailed, QT_TR_NOOP("IP address already in use"));
                 return;
@@ -146,8 +189,7 @@ void IntegrationPluginIdm::executeAction(ThingActionInfo *info)
             double targetTemperature = thing->stateValue(navigator2TargetTemperatureStateTypeId).toDouble();
             QUuid requestId = idm->setTargetTemperature(targetTemperature);
             m_asyncActions.insert(requestId, info);
-            connect(info, &ThingActionInfo::aborted, [requestId, this] {m_asyncActions.remove(requestId);});
-
+            connect(info, &ThingActionInfo::aborted, [requestId, this] (){ m_asyncActions.remove(requestId); });
         } else {
             Q_ASSERT_X(false, "executeAction", QString("Unhandled action: %1").arg(action.actionTypeId().toString()).toUtf8());
         }
@@ -160,11 +202,8 @@ void IntegrationPluginIdm::update(Thing *thing)
 {
     if (thing->thingClassId() == navigator2ThingClassId) {
         qCDebug(dcIdm()) << "Updating thing" << thing->name();
-
         Idm *idm = m_idmConnections.value(thing);
-        if (!idm) {
-            return;
-        }
+        if (!idm) { return; };
         idm->getStatus();
     }
 }
@@ -172,7 +211,6 @@ void IntegrationPluginIdm::update(Thing *thing)
 void IntegrationPluginIdm::onStatusUpdated(const IdmInfo &info)
 {
     qCDebug(dcIdm()) << "Received status from heat pump";
-
     Idm *idm = qobject_cast<Idm *>(sender());
     Thing *thing = m_idmConnections.key(idm);
 
@@ -207,8 +245,6 @@ void IntegrationPluginIdm::onWriteRequestExecuted(const QUuid &requestId, bool s
 
 void IntegrationPluginIdm::onRefreshTimer()
 {
-    qCDebug(dcIdm()) << "onRefreshTimer called";
-
     foreach (Thing *thing, myThings().filterByThingClassId(navigator2ThingClassId)) {
         update(thing);
     }
