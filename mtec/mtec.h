@@ -49,22 +49,16 @@ public:
     /** Destructor */
     ~MTec();
 
-    inline QHostAddress getHostAddress() const { return m_hostAddress; };
+    inline QHostAddress hostAddress() const { return m_hostAddress; };
+
+    bool connectDevice();
+    void disconnectDevice();
+
+    void requestStatus();
 
 private:
-    /**
-     * The first response of the M-Tec heatpump may be delayed
-     * by 10 s. The plugin will wait for the defined time in milliseconds
-     * for a response before sending an additional request or setting
-     * an error code.
-     */
-    static const int  FirstConnectionTimeout = 15000;
-
     /** Modbus Unit ID (undocumented, guessing 1 for now) */
     static const quint16 ModbusUnitID = 1;
-
-    /** Number of retries to establish a modbus connection with the heat pump */
-    static const int ConnectionRetries = 3;
 
     /** The following modbus addresses can be read: */
     enum RegisterList {
@@ -112,21 +106,13 @@ private:
     /** This structure is filled by the receivedStatus... functions */
     MTecInfo m_info ;
 
-    int m_requestsSent = 0;
-    bool m_connected = false;
-    bool m_softConnection = false;
-
-    QDateTime m_firstTimeout;
-
-    int m_modbusTimeout;
 
 signals:
-    void connectedChanged(MTecHelpers::ConnectionState state);
+    void connectedChanged(bool connected);
     void statusUpdated(const MTecInfo &info);
 
-public slots:
+private slots:
     void onModbusError();
-    void onRequestStatus();
     void onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value);
 
 };

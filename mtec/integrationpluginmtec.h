@@ -51,19 +51,16 @@ public:
 
     void discoverThings(ThingDiscoveryInfo *info) override;
     void setupThing(ThingSetupInfo *info) override;
-
-
-private:
     void postSetupThing(Thing *thing) override;
     void thingRemoved(Thing *thing) override;
     void executeAction(ThingActionInfo *info) override;
+
+private:
+    QHash<Thing *, MTec *> m_mtecConnections;
+
     void update(Thing *thing);
 
-    QHash<Thing *, MTec *> m_mtecConnections;
-    QHash<QUuid, ThingActionInfo *> m_asyncActions;
-
 private slots:
-    void onConnectedChanged(MTecHelpers::ConnectionState state);
     void onRefreshTimer();
     void onStatusUpdated(const MTecInfo &info);
 
