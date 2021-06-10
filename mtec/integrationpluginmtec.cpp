@@ -99,10 +99,6 @@ void IntegrationPluginMTec::setupThing(ThingSetupInfo *info)
         }
 
         qCDebug(dcMTec()) << "Using ip address" << hostAddress.toString();
-        if (myThings().filterByParam(mtecThingIpAddressParamTypeId, hostAddress.toString()).count() > 0) {
-            info->finish(Thing::ThingErrorThingInUse, QT_TR_NOOP("IP address already in use by another thing."));
-            return;
-        }
 
         // TODO: start timer and give 15 seconds until connected, since the controler is down for ~10 seconds after a disconnect
 
