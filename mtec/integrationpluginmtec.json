@@ -13,7 +13,7 @@
                     "displayName": "MTec",
                     "id": "451e38d8-50d5-4ae9-8d9f-21af9347128d",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["thermostat", "connectable"],
                     "paramTypes": [
                         {
                             "id": "f1c43b1e-cffe-4d30-bda0-c23ed648dd71",
@@ -41,43 +41,6 @@
                             "type": "bool",
                             "defaultValue": false,
                             "cached": false
-                        },                                           
-                        {
-                            "id": "545f94d6-f4fd-48fe-bf3b-f193e5cb76e7",
-                            "name": "waterTankTemperature",
-                            "displayName": "Water tank temperature",
-                            "displayNameEvent": "Water tank temperature changed",
-                            "unit": "DegreeCelsius",
-                            "type": "double",
-                            "defaultValue": 0
-                        },
-                        {
-                            "id": "a98e37f8-dcdc-4c4c-aecf-07f376321849",
-                            "name": "bufferTankTemperature",
-                            "displayName": "Buffer tank temperature",
-                            "displayNameEvent": "Buffer tank temperature changed",
-                            "unit": "DegreeCelsius",
-                            "type": "double",
-                            "defaultValue": 0
-                        },
-                        {
-                            "id": "d0c8f168-49b5-47ca-9988-c9922be38dd5",
-                            "name": "outdoorTemperature",
-                            "displayName": "Outdoor temperature",
-                            "displayNameEvent": "Outdoor temperature changed",
-                            "unit": "DegreeCelsius",
-                            "type": "double",
-                            "defaultValue": 0
-                        },
-                        {
-                            "id": "c67c79cf-7369-409f-b170-16c4ece9d25a",
-                            "name": "totalAccumulatedElectricalEnergy",
-                            "displayName": "Total accumulated electrical energy",
-                            "displayNameEvent": "Total accumulated electrical energy changed",
-                            "type": "double",
-                            "unit": "KiloWattHour",
-                            "defaultValue": 0,
-                            "suggestLogging": true
                         },
                         {
                             "id": "1e2037c8-09dc-4396-974c-efa9c486aa65",
@@ -96,6 +59,91 @@
                                 "Error"
                             ],
                             "defaultValue": "Standby",
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "9b538cb9-f7a3-471e-8d3b-09f6370a571c",
+                            "name": "targetTemperature",
+                            "displayName": "Target room temperature (heat circuit 0)",
+                            "displayNameEvent": "Target room temperature changed (heat circuit 0=",
+                            "displayNameAction": "Set target room temperature (heat circuit 0)",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "writable": true,
+                            "minValue": 10,
+                            "maxValue": 30,
+                            "defaultValue": 20
+                        },
+                        {
+                            "id": "b22ac9bb-3842-497c-bd93-f8bea6670e32",
+                            "name": "temperature",
+                            "displayName": "Room temperature heat circuit 0",
+                            "displayNameEvent": "Room temperature heat circuit 0 changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 20
+                        },
+                        {
+                            "id": "07465fbb-6949-4bd1-90d5-acf2d80c161d",
+                            "name": "heatingOn",
+                            "displayName": "Heating on",
+                            "displayNameEvent": "Heating turned on/off",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "8b407c1d-b84f-48d4-9961-b29bc58fff0e",
+                            "name": "coolingOn",
+                            "displayName": "Cooling on",
+                            "displayNameEvent": "Cooling turned on/off",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "d0c8f168-49b5-47ca-9988-c9922be38dd5",
+                            "name": "outdoorTemperature",
+                            "displayName": "Outdoor temperature",
+                            "displayNameEvent": "Outdoor temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "545f94d6-f4fd-48fe-bf3b-f193e5cb76e7",
+                            "name": "waterTankTopTemperature",
+                            "displayName": "Water tank top temperature",
+                            "displayNameEvent": "Water tank top temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "a98e37f8-dcdc-4c4c-aecf-07f376321849",
+                            "name": "bufferTankTemperature",
+                            "displayName": "Buffer tank temperature",
+                            "displayNameEvent": "Buffer tank temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "7d087af8-cdbe-463e-a9bb-7a7a79471963",
+                            "name": "totalAccumulatedHeatingEnergy",
+                            "displayName": "Total accumulated heating energy",
+                            "displayNameEvent": "Total accumulated heating energy changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "c67c79cf-7369-409f-b170-16c4ece9d25a",
+                            "name": "totalAccumulatedElectricalEnergy",
+                            "displayName": "Total accumulated electrical energy",
+                            "displayNameEvent": "Total accumulated electrical energy changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0,
                             "suggestLogging": true
                         },
                         {
@@ -123,14 +171,27 @@
                             "name": "smartHomeEnergy",
                             "displayName": "Smart home energy",
                             "displayNameEvent": "Smart home energy changed",
+                            "displayNameAction": "Set smart home energy",
+                            "type": "uint",
+                            "unit": "Watt",
+                            "minValue": 0,
+                            "maxValue": 20000,
+                            "defaultValue": 0,
+                            "writable": true,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "a7734474-30db-435c-985a-105fb3ea5a86",
+                            "name": "smartHomeEnergyElectricityMeter",
+                            "displayName": "Smart home energy consumed",
+                            "displayNameEvent": "Smart home energy consumed changed",
                             "type": "double",
                             "unit": "Watt",
                             "defaultValue": 0,
                             "suggestLogging": true
                         }
                     ],
-                    "actionTypes": [
-                    ]
+                    "actionTypes": [ ]
                 }
             ]
         }
