@@ -39,13 +39,11 @@ MTec::MTec(const QHostAddress &address, QObject *parent) :
     m_hostAddress(address)
 {
     m_modbusMaster = new ModbusTCPMaster(address, 502, this);
+    m_modbusMaster->setTimeout(2000);
+    m_modbusMaster->setNumberOfRetries(5);
 
-    qCDebug(dcMTec()) << "created ModbusTCPMaster";
-
-    if (m_modbusMaster->connectDevice()) {
-        emit connectedChanged(MTecHelpers::ConnectionState::Connecting);
-    }
-
+    qCDebug(dcMTec()) << "Created ModbusTCPMaster for" << address.toString();
+    connect(m_modbusMaster, &ModbusTCPMaster::connectionStateChanged, this, &MTec::connectedChanged);
     connect(m_modbusMaster, &ModbusTCPMaster::receivedHoldingRegister, this, &MTec::onReceivedHoldingRegister);
     connect(m_modbusMaster, &ModbusTCPMaster::readRequestError, this, &MTec::onModbusError);
     connect(m_modbusMaster, &ModbusTCPMaster::writeRequestError, this, &MTec::onModbusError);
@@ -55,58 +53,34 @@ MTec::~MTec()
 {
 }
 
-void MTec::onModbusError()
+bool MTec::connectDevice()
 {
-    qCWarning(dcMTec()) << "MTec: Received modbus error";
-
-    /* Only emit connected changed signal, if a soft connection
-     * had already been established.
-     * This avoids a series of possibly fake connection state changes,
-     * while the modbus server in the heatpump is starting up. */
-    if (m_softConnection) {
-        m_softConnection = false;
-        emit connectedChanged(MTecHelpers::ConnectionState::Offline);
-    }
+    return m_modbusMaster->connectDevice();
 }
 
-void MTec::onRequestStatus()
+void MTec::disconnectDevice()
 {
-    if ((m_softConnection) ||
-            ((m_connected) && (m_requestsSent < MTec::ConnectionRetries))) {
+    m_modbusMaster->disconnectDevice();
+}
 
-        if (m_requestsSent < MTec::ConnectionRetries) {
-            m_firstTimeout = QDateTime::currentDateTime();
-            m_firstTimeout = m_firstTimeout.addSecs(MTec::FirstConnectionTimeout);
-
-            /* Save original modbus timeout, will be set again
-             * after first response is received */
-            m_modbusTimeout = m_modbusMaster->timeout();
-
-            /* The M-Tec heatpump requires a longer timeout to
-             * start-up the modbus communication */
-            m_modbusMaster->setTimeout(MTec::FirstConnectionTimeout);
-        } else {
-            /* Set back original modbus timeout */
-            m_modbusMaster->setTimeout(m_modbusTimeout);
-        }
-        
-    } else {
-        qCDebug(dcMTec()) << "Max number of modbus connects reached, giving up";
+void MTec::requestStatus()
+{
+    if (!m_modbusMaster->connected()) {
         return;
     }
 
     m_modbusMaster->readHoldingRegister(MTec::ModbusUnitID, MTec::ActualPowerConsumption, 1);
-    m_requestsSent ++;
 }
+
+void MTec::onModbusError()
+{
+    qCWarning(dcMTec()) << "MTec: Received modbus error";
+}
+
 
 void MTec::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value)
 {
     Q_UNUSED(slaveAddress);
-
-    /* Some response was received, so the modbus communication is
-     * established. */
-    m_softConnection = true;
-    emit connectedChanged(MTecHelpers::ConnectionState::Online);
 
     switch (modbusRegister) {
     case ActualPowerConsumption:
