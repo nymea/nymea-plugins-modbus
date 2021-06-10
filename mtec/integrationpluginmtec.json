@@ -8,98 +8,94 @@
             "displayName": "M-Tec",
             "id": "04d3fa7c-e469-4a79-a119-155426e5a846",
             "thingClasses": [
-            {
-                "name": "mtec",
-                "displayName": "MTec",
-                "id": "451e38d8-50d5-4ae9-8d9f-21af9347128d",
-                "createMethods": ["user"],
-                "interfaces": ["connectable"],
-                "paramTypes": [
                 {
-                    "id": "f1c43b1e-cffe-4d30-bda0-c23ed648dd71",
-                    "name": "ipAddress",
-                    "displayName": "IP address",
-                    "type": "QString"
-                }
-                ],
-                "stateTypes": [
-                {
-                    "id": "8d64954a-855d-44ea-8bc9-88a71ab47b6b",
-                    "name": "connected",
-                    "displayName": "Connected",
-                    "displayNameEvent": "Connected changed",
-                    "type": "bool",
-                    "defaultValue": false,
-                    "cached": false
-                },
-                {
-                    "id": "9bf5f8d6-116a-4399-a728-51470a3a5620",
-                    "name": "status",
-                    "displayName": "Status",
-                    "displayNameEvent": "Status changed",
-                    "type": "QString",
-                    "defaultValue": "Off",
-                    "possibleValues": [
-                        "Off",
-                    "Connecting",
-                    "Connected",
-                    "Error"
+                    "name": "mtec",
+                    "displayName": "MTec",
+                    "id": "451e38d8-50d5-4ae9-8d9f-21af9347128d",
+                    "createMethods": ["discovery", "user"],
+                    "interfaces": ["connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "f1c43b1e-cffe-4d30-bda0-c23ed648dd71",
+                            "name": "ipAddress",
+                            "displayName": "IP address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": "127.0.0.1"
+                        },
+                        {
+                            "id": "906f6099-d0e1-4297-a2b3-f8ec4482c578",
+                            "name":"macAddress",
+                            "displayName": "MAC address",
+                            "type": "QString",
+                            "inputType": "MacAddress",
+                            "defaultValue": ""
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "8d64954a-855d-44ea-8bc9-88a71ab47b6b",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "c67c79cf-7369-409f-b170-16c4ece9d25a",
+                            "name": "actualPowerConsumption",
+                            "displayName": "Actual power consumption",
+                            "displayNameEvent": "Actual power consumption changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "663718fa-807e-4d85-bd78-61a65f8c0b5e",
+                            "name": "actualExcessEnergySmartHome",
+                            "displayName": "Actual excess energy from Smart home System",
+                            "displayNameEvent": "Actual excess energy from Smart home System changed",
+                            "displayNameAction": "Change actual excess energy from Smart home System",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "fd94d39c-0db6-497f-a0a5-6c5452cbcaaf",
+                            "name": "actualExcessEnergyElectricityMeter",
+                            "displayName": "Actual excess energy from Electricity Meter",
+                            "displayNameEvent": "Actual excess energy from Electricity Meter changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "087c0296-705b-483a-b1e9-7ce08202c035",
+                            "name": "externalSetValueScaling",
+                            "displayName": "Control of the heat source by an external control [100%]",
+                            "displayNameEvent": "Control of the heat source by an external control [100%] changed",
+                            "type": "double",
+                            "unit": "Percentage",
+                            "defaultValue": 100
+                        },
+                        {
+                            "id": "90b17788-ce63-47e3-b97d-1b025a41ce35",
+                            "name": "requestExternalHeatSource",
+                            "displayName": "Request external heat source",
+                            "displayNameEvent": "Request external heat source changed",
+                            "type": "QString",
+                            "defaultValue":  "No request, external heat source must be turned off",
+                            "possibleValues": [
+                                 "No request, external heat source must be turned off",
+                                 "External heat source is released and can be switched on",
+                                 "External heat source is required and must be turned on"
+                            ]
+                        }
+                    ],
+                    "actionTypes": [
                     ]
-                },
-                {
-                    "id": "c67c79cf-7369-409f-b170-16c4ece9d25a",
-                    "name": "actualPowerConsumption",
-                    "displayName": "Actual power consumption",
-                    "displayNameEvent": "Actual power consumption changed",
-                    "type": "double",
-                    "unit": "Watt",
-                    "defaultValue": 0
-                },
-                {
-                    "id": "663718fa-807e-4d85-bd78-61a65f8c0b5e",
-                    "name": "actualExcessEnergySmartHome",
-                    "displayName": "Actual excess energy from Smart home System",
-                    "displayNameEvent": "Actual excess energy from Smart home System changed",
-                    "displayNameAction": "Change actual excess energy from Smart home System",
-                    "type": "double",
-                    "unit": "Watt",
-                    "defaultValue": 0
-                },
-                {
-                    "id": "fd94d39c-0db6-497f-a0a5-6c5452cbcaaf",
-                    "name": "actualExcessEnergyElectricityMeter",
-                    "displayName": "Actual excess energy from Electricity Meter",
-                    "displayNameEvent": "Actual excess energy from Electricity Meter changed",
-                    "type": "double",
-                    "unit": "Watt",
-                    "defaultValue": 0
-                },
-                {
-                    "id": "087c0296-705b-483a-b1e9-7ce08202c035",
-                    "name": "externalSetValueScaling",
-                    "displayName": "Control of the heat source by an external control [100%]",
-                    "displayNameEvent": "Control of the heat source by an external control [100%] changed",
-                    "type": "double",
-                    "unit": "Percentage",
-                    "defaultValue": 100
-                },
-                {
-                    "id": "90b17788-ce63-47e3-b97d-1b025a41ce35",
-                    "name": "requestExternalHeatSource",
-                    "displayName": "Request external heat source",
-                    "displayNameEvent": "Request external heat source changed",
-                    "type": "QString",
-                    "defaultValue":  "No request, external heat source must be turned off",
-                    "possibleValues": [
-                         "No request, external heat source must be turned off",
-                         "External heat source is released and can be switched on",
-                         "External heat source is required and must be turned on"
-                    ]
                 }
-                ],
-                "actionTypes": [
-                ]
-            }
             ]
         }
     ]

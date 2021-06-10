@@ -28,6 +28,7 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include "network/networkdevicediscovery.h"
 #include "integrationpluginmtec.h"
 #include "plugininfo.h"
 
@@ -38,81 +39,96 @@ IntegrationPluginMTec::IntegrationPluginMTec()
 
 void IntegrationPluginMTec::discoverThings(ThingDiscoveryInfo *info)
 {
-    qCDebug(dcMTec()) << "Discover M-Tec heat pumps";
-
-    if (info->thingClassId() == mtecThingClassId) {
-        QString description = "Heatpump";
-        ThingDescriptor descriptor(info->thingClassId(), "M-Tec", description);
-        info->addThingDescriptor(descriptor);
-
-        // TODO Find out, if a discovery is possible/needed
-        // Otherwise, just report no error for now
-        info->finish(Thing::ThingErrorNoError);
+    if (!hardwareManager()->networkDeviceDiscovery()->available()) {
+        qCWarning(dcMTec()) << "The network discovery is not available on this platform.";
+        info->finish(Thing::ThingErrorUnsupportedFeature, QT_TR_NOOP("The network device discovery is not available."));
+        return;
     }
+
+    // Perform a network device discovery and filter for "go-eCharger" hosts
+    NetworkDeviceDiscoveryReply *discoveryReply = hardwareManager()->networkDeviceDiscovery()->discover();
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
+        foreach (const NetworkDevice &networkDevice, discoveryReply->networkDevices()) {
+
+            qCDebug(dcMTec()) << "Found" << networkDevice;
+
+            QString title;
+            if (networkDevice.hostName().isEmpty()) {
+                title = networkDevice.address().toString();
+            } else {
+                title = networkDevice.hostName() + " (" + networkDevice.address().toString() + ")";
+            }
+
+            QString description;
+            if (networkDevice.macAddressManufacturer().isEmpty()) {
+                description = networkDevice.macAddress();
+            } else {
+                description = networkDevice.macAddress() + " (" + networkDevice.macAddressManufacturer() + ")";
+            }
+
+            ThingDescriptor descriptor(mtecThingClassId, title, description);
+            ParamList params;
+            params << Param(mtecThingIpAddressParamTypeId, networkDevice.address().toString());
+            params << Param(mtecThingMacAddressParamTypeId, networkDevice.macAddress());
+            descriptor.setParams(params);
+
+            // Check if we already have set up this device
+            Things existingThings = myThings().filterByParam(mtecThingMacAddressParamTypeId, networkDevice.macAddress());
+            if (existingThings.count() == 1) {
+                qCDebug(dcMTec()) << "This heat pump already exists in the system!" << networkDevice;
+                descriptor.setThingId(existingThings.first()->id());
+            }
+
+            info->addThingDescriptor(descriptor);
+        }
+
+        info->finish(Thing::ThingErrorNoError);
+    });
 }
 
 void IntegrationPluginMTec::setupThing(ThingSetupInfo *info)
 {
-    qCDebug(dcMTec()) << "Setup" << info->thing();
-
     Thing *thing = info->thing();
+    qCDebug(dcMTec()) << "Setup" << thing;
 
     if (thing->thingClassId() == mtecThingClassId) {
         QHostAddress hostAddress = QHostAddress(thing->paramValue(mtecThingIpAddressParamTypeId).toString());
-
         if (hostAddress.isNull()) {
             info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("No IP address given"));
             return;
         }
 
-        qCDebug(dcMTec()) << "User entered address: " << hostAddress.toString();
-
-        /* Check, if address is already in use for another device */
-        /* for (QHash<Thing *, MTec *>::iterator item=m_mtecConnections.begin(); item != m_mtecConnections.end(); item++) { */
-        /*     if (hostAddress.isEqual(item.value()->getHostAddress())) { */
-        /*         qCDebug(dcMTec()) << "Address of thing: " << item.value()->getHostAddress().toString(); */
-
-        /*         qCDebug(dcMTec()) << "Address in use already"; */
-        /*     } else { */
-        /*         qCDebug(dcMTec()) << "Different address of other thing: " << item.value()->getHostAddress().toString(); */
-
-        /*     } */
-        /* } */
-
-        foreach (MTec *mtecConnection, m_mtecConnections.values()) {
-            if (mtecConnection->getHostAddress().isEqual(hostAddress)) {
-                qCWarning(dcMTec()) << "Address" << hostAddress.toString() << "already in use by" << m_mtecConnections.key(mtecConnection);
-                info->finish(Thing::ThingErrorThingInUse, QT_TR_NOOP("IP address already in use by another thing."));
-                return;
-            }
+        qCDebug(dcMTec()) << "Using ip address" << hostAddress.toString();
+        if (myThings().filterByParam(mtecThingIpAddressParamTypeId, hostAddress.toString()).count() > 0) {
+            info->finish(Thing::ThingErrorThingInUse, QT_TR_NOOP("IP address already in use by another thing."));
+            return;
         }
 
-        qCDebug(dcMTec()) << "Creating M-Tec object";
+        // TODO: start timer and give 15 seconds until connected, since the controler is down for ~10 seconds after a disconnect
 
-        /* Create new MTec object and store it in hash table */
         MTec *mtec = new MTec(hostAddress, this);
-        m_mtecConnections.insert(thing, mtec);
+        connect(mtec, &MTec::statusUpdated, this, &IntegrationPluginMTec::onStatusUpdated);
+        connect(mtec, &MTec::connectedChanged, thing, [=](bool connected){
+            qCDebug(dcMTec()) << "Connected changed to" << connected;
+            thing->setStateValue(mtecConnectedStateTypeId, connected);
+        });
 
-        info->thing()->setStateValue(mtecConnectedStateTypeId, true);
+        m_mtecConnections.insert(thing, mtec);
+        if (!mtec->connectDevice()) {
+            qCWarning(dcMTec()) << "Initial connect returned false. Lets wait 15 seconds until the connection can be established.";
+        }
+
         info->finish(Thing::ThingErrorNoError);
     }
 }
 
 void IntegrationPluginMTec::postSetupThing(Thing *thing)
 {
-    qCDebug(dcMTec()) << "PostSetup called for" << thing;
-
     if (thing->thingClassId() == mtecThingClassId) {
         MTec *mtec = m_mtecConnections.value(thing);
-
         if (mtec) {
-            connect(mtec, &MTec::statusUpdated, this, &IntegrationPluginMTec::onStatusUpdated);
-            connect(mtec, &MTec::connectedChanged, this, &IntegrationPluginMTec::onConnectedChanged);
-
-            qCDebug(dcMTec()) << "Thing set up, calling update";
             update(thing);
-
-            thing->setStateValue(mtecConnectedStateTypeId, true);
+            //thing->setStateValue(mtecConnectedStateTypeId, true);
         }
     }
 }
@@ -126,63 +142,38 @@ void IntegrationPluginMTec::thingRemoved(Thing *thing)
 
 void IntegrationPluginMTec::executeAction(ThingActionInfo *info)
 {
-    Thing *thing = info->thing();
-    Action action = info->action();
+//    Thing *thing = info->thing();
+//    Action action = info->action();
+    info->finish(Thing::ThingErrorNoError);
 
-    if (thing->thingClassId() == mtecThingClassId) {
-      /* if (action.actionTypeId() == mtecPowerActionTypeId) { */
-          
-      /* } else { */
-      /*   Q_ASSERT_X(false, "executeAction", QString("Unhandled action: %1").arg(action.actionTypeId().toString()).toUtf8()); */
-      /*   } */
-    } else {
-        Q_ASSERT_X(false, "executeAction", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
-    }
+//    if (thing->thingClassId() == mtecThingClassId) {
+//      /* if (action.actionTypeId() == mtecPowerActionTypeId) { */
+
+//    } else {
+//        Q_ASSERT_X(false, "executeAction", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
+//    }
 }
 
 void IntegrationPluginMTec::update(Thing *thing)
 {
     if (thing->thingClassId() == mtecThingClassId) {
         qCDebug(dcMTec()) << "Updating thing" << thing;
-
         MTec *mtec = m_mtecConnections.value(thing);
-
-        if (mtec) {
-            mtec->onRequestStatus();
-        }
+        if (!mtec) return;
+        mtec->requestStatus();
     }
-}
-
-void IntegrationPluginMTec::onConnectedChanged(MTecHelpers::ConnectionState state)
-{
-    MTec *mtec = qobject_cast<MTec *>(sender());
-    Thing *thing = m_mtecConnections.key(mtec);
-
-    qCDebug(dcMTec()) << "Received connection change event from heat pump" << thing;
-
-    if (!thing)
-        return;
-
-    if (state == MTecHelpers::ConnectionState::Online) {
-        thing->setStateValue(mtecConnectedStateTypeId, true);
-    }
-
-    thing->setStateValue(mtecStatusStateTypeId, MTecHelpers::connectionStateToString(state));
 }
 
 void IntegrationPluginMTec::onStatusUpdated(const MTecInfo &info)
 {
     MTec *mtec = qobject_cast<MTec *>(sender());
     Thing *thing = m_mtecConnections.key(mtec);
-
-    qCDebug(dcMTec()) << "Received status from heat pump" << thing;
-
     if (!thing)
         return;
 
+    qCDebug(dcMTec()) << "Received status from heat pump" << thing;
     /* Received a structure holding the status info of the
      * heat pump. Update the thing states with the individual fields. */
-    thing->setStateValue(mtecStatusStateTypeId, info.status);
     thing->setStateValue(mtecActualPowerConsumptionStateTypeId, info.actualPowerConsumption);
     thing->setStateValue(mtecActualExcessEnergySmartHomeStateTypeId, info.actualExcessEnergySmartHome);
     thing->setStateValue(mtecActualExcessEnergyElectricityMeterStateTypeId, info.actualExcessEnergyElectricityMeter);
@@ -192,8 +183,6 @@ void IntegrationPluginMTec::onStatusUpdated(const MTecInfo &info)
 
 void IntegrationPluginMTec::onRefreshTimer()
 {
-    qCDebug(dcMTec()) << "onRefreshTimer called";
-
     foreach (Thing *thing, myThings().filterByThingClassId(mtecThingClassId)) {
         update(thing);
     }
