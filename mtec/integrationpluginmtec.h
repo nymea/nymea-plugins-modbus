@@ -56,12 +56,11 @@ public:
     void executeAction(ThingActionInfo *info) override;
 
 private:
+    PluginTimer *m_pluginTimer = nullptr;
     QHash<Thing *, MTec *> m_mtecConnections;
 
-    void update(Thing *thing);
-
 private slots:
-    void onRefreshTimer();
+    void update(Thing *thing);
     void onStatusUpdated(const MTecInfo &info);
 
 };
