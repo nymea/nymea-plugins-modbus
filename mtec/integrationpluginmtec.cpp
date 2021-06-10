@@ -100,16 +100,81 @@ void IntegrationPluginMTec::setupThing(ThingSetupInfo *info)
 
         qCDebug(dcMTec()) << "Using ip address" << hostAddress.toString();
 
-        // TODO: start timer and give 15 seconds until connected, since the controler is down for ~10 seconds after a disconnect
-
         MTec *mtec = new MTec(hostAddress, this);
-        connect(mtec, &MTec::statusUpdated, this, &IntegrationPluginMTec::onStatusUpdated);
         connect(mtec, &MTec::connectedChanged, thing, [=](bool connected){
-            qCDebug(dcMTec()) << "Connected changed to" << connected;
+            qCDebug(dcMTec()) << thing << "Connected changed to" << connected;
             thing->setStateValue(mtecConnectedStateTypeId, connected);
         });
 
+        connect(mtec, &MTec::waterTankTemperatureChanged, thing, [=](double waterTankTemperature){
+            qCDebug(dcMTec()) << thing << "Water tank temperature" << waterTankTemperature << "°C";
+            thing->setStateValue(mtecWaterTankTemperatureStateTypeId, waterTankTemperature);
+        });
+
+        connect(mtec, &MTec::bufferTankTemperatureChanged, thing, [=](double bufferTankTemperature){
+            qCDebug(dcMTec()) << thing << "Buffer tank temperature" << bufferTankTemperature << "°C";
+            thing->setStateValue(mtecBufferTankTemperatureStateTypeId, bufferTankTemperature);
+        });
+
+        connect(mtec, &MTec::totalAccumulatedElectricalEnergyChanged, thing, [=](double totalAccumulatedElectricalEnergy){
+            qCDebug(dcMTec()) << thing << "Total accumulated energy" << totalAccumulatedElectricalEnergy << "kWh";
+            thing->setStateValue(mtecTotalAccumulatedElectricalEnergyStateTypeId, totalAccumulatedElectricalEnergy);
+        });
+
+        connect(mtec, &MTec::heatPumpStateChanged, thing, [=](MTec::HeatpumpState heatPumpState){
+            qCDebug(dcMTec()) << thing << "Heat pump state" << heatPumpState;
+            switch (heatPumpState) {
+            case MTec::HeatpumpStateStandby:
+                thing->setStateValue(mtecHeatPumpStateStateTypeId, "Standby");
+                break;
+            case MTec::HeatpumpStatePreRun:
+                thing->setStateValue(mtecHeatPumpStateStateTypeId, "Pre run");
+                break;
+            case MTec::HeatpumpStateAutomaticHeat:
+                thing->setStateValue(mtecHeatPumpStateStateTypeId, "Automatic heat");
+                break;
+            case MTec::HeatpumpStateDefrost:
+                thing->setStateValue(mtecHeatPumpStateStateTypeId, "Defrost");
+                break;
+            case MTec::HeatpumpStateAutomaticCool:
+                thing->setStateValue(mtecHeatPumpStateStateTypeId, "Automatic cool");
+                break;
+            case MTec::HeatpumpStatePostRun:
+                thing->setStateValue(mtecHeatPumpStateStateTypeId, "Post run");
+                break;
+            case MTec::HeatpumpStateSaftyShutdown:
+                thing->setStateValue(mtecHeatPumpStateStateTypeId, "Safty shutdown");
+                break;
+            case MTec::HeatpumpStateError:
+                thing->setStateValue(mtecHeatPumpStateStateTypeId, "Error");
+                break;
+            }
+        });
+
+        connect(mtec, &MTec::heatMeterPowerConsumptionChanged, thing, [=](double heatMeterPowerConsumption){
+            qCDebug(dcMTec()) << thing << "Heat meter power consumption" << heatMeterPowerConsumption << "W";
+            thing->setStateValue(mtecHeatMeterPowerConsumptionStateTypeId, heatMeterPowerConsumption);
+        });
+
+        connect(mtec, &MTec::energyMeterPowerConsumptionChanged, thing, [=](double energyMeterPowerConsumption){
+            qCDebug(dcMTec()) << thing << "Energy meter power consumption" << energyMeterPowerConsumption << "W";
+            thing->setStateValue(mtecEnergyMeterPowerConsumptionStateTypeId, energyMeterPowerConsumption);
+        });
+
+        connect(mtec, &MTec::actualExcessEnergySmartHomeChanged, thing, [=](double actualExcessEnergySmartHome){
+            qCDebug(dcMTec()) << thing << "Smart home energy" << actualExcessEnergySmartHome << "W";
+            thing->setStateValue(mtecSmartHomeEnergyStateTypeId, actualExcessEnergySmartHome);
+        });
+
+        connect(mtec, &MTec::actualOutdoorTemperatureChanged, thing, [=](double actualOutdoorTemperature){
+            qCDebug(dcMTec()) << thing << "Outdoor temperature" << actualOutdoorTemperature << "°C";
+            thing->setStateValue(mtecOutdoorTemperatureStateTypeId, actualOutdoorTemperature);
+        });
+
         m_mtecConnections.insert(thing, mtec);
+
+        // TODO: start timer and give 15 seconds until connected, since the controler is down for ~10 seconds after a disconnect
+
         if (!mtec->connectDevice()) {
             qCWarning(dcMTec()) << "Initial connect returned false. Lets wait 15 seconds until the connection can be established.";
         }
@@ -159,13 +224,6 @@ void IntegrationPluginMTec::executeAction(ThingActionInfo *info)
 //    Thing *thing = info->thing();
 //    Action action = info->action();
     info->finish(Thing::ThingErrorNoError);
-
-//    if (thing->thingClassId() == mtecThingClassId) {
-//      /* if (action.actionTypeId() == mtecPowerActionTypeId) { */
-
-//    } else {
-//        Q_ASSERT_X(false, "executeAction", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
-//    }
 }
 
 void IntegrationPluginMTec::update(Thing *thing)
@@ -174,25 +232,9 @@ void IntegrationPluginMTec::update(Thing *thing)
         qCDebug(dcMTec()) << "Updating thing" << thing;
         MTec *mtec = m_mtecConnections.value(thing);
         if (!mtec) return;
-        mtec->requestStatus();
+        mtec->updateValues();
     }
 }
 
-void IntegrationPluginMTec::onStatusUpdated(const MTecInfo &info)
-{
-    MTec *mtec = qobject_cast<MTec *>(sender());
-    Thing *thing = m_mtecConnections.key(mtec);
-    if (!thing)
-        return;
-
-    qCDebug(dcMTec()) << "Received status from heat pump" << thing;
-    /* Received a structure holding the status info of the
-     * heat pump. Update the thing states with the individual fields. */
-    thing->setStateValue(mtecActualPowerConsumptionStateTypeId, info.actualPowerConsumption);
-    thing->setStateValue(mtecActualExcessEnergySmartHomeStateTypeId, info.actualExcessEnergySmartHome);
-    thing->setStateValue(mtecActualExcessEnergyElectricityMeterStateTypeId, info.actualExcessEnergyElectricityMeter);
-    thing->setStateValue(mtecExternalSetValueScalingStateTypeId, info.externalSetValueScaling);
-    thing->setStateValue(mtecRequestExternalHeatSourceStateTypeId, info.requestExternalHeatSource);
-}
 
 
