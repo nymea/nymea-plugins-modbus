@@ -49,7 +49,8 @@
                             "displayNameEvent": "Actual power consumption changed",
                             "type": "double",
                             "unit": "Watt",
-                            "defaultValue": 0
+                            "defaultValue": 0,
+                            "suggestLogging": true
                         },
                         {
                             "id": "663718fa-807e-4d85-bd78-61a65f8c0b5e",
@@ -59,7 +60,8 @@
                             "displayNameAction": "Change actual excess energy from Smart home System",
                             "type": "double",
                             "unit": "Watt",
-                            "defaultValue": 0
+                            "defaultValue": 0,
+                            "suggestLogging": true
                         },
                         {
                             "id": "fd94d39c-0db6-497f-a0a5-6c5452cbcaaf",
@@ -68,7 +70,8 @@
                             "displayNameEvent": "Actual excess energy from Electricity Meter changed",
                             "type": "double",
                             "unit": "Watt",
-                            "defaultValue": 0
+                            "defaultValue": 0,
+                            "suggestLogging": true
                         },
                         {
                             "id": "087c0296-705b-483a-b1e9-7ce08202c035",
@@ -77,7 +80,8 @@
                             "displayNameEvent": "Control of the heat source by an external control [100%] changed",
                             "type": "double",
                             "unit": "Percentage",
-                            "defaultValue": 100
+                            "defaultValue": 100,
+                            "suggestLogging": true
                         },
                         {
                             "id": "90b17788-ce63-47e3-b97d-1b025a41ce35",
@@ -90,7 +94,8 @@
                                  "No request, external heat source must be turned off",
                                  "External heat source is released and can be switched on",
                                  "External heat source is required and must be turned on"
-                            ]
+                            ],
+                            "suggestLogging": true
                         }
                     ],
                     "actionTypes": [
