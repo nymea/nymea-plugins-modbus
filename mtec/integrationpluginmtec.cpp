@@ -128,7 +128,16 @@ void IntegrationPluginMTec::postSetupThing(Thing *thing)
         MTec *mtec = m_mtecConnections.value(thing);
         if (mtec) {
             update(thing);
-            //thing->setStateValue(mtecConnectedStateTypeId, true);
+        }
+
+        if (!m_pluginTimer) {
+            qCDebug(dcMTec()) << "Starting plugin timer...";
+            m_pluginTimer = hardwareManager()->pluginTimerManager()->registerTimer(10);
+            connect(m_pluginTimer, &PluginTimer::timeout, this, [this] {
+                foreach (Thing *thing, myThings().filterByThingClassId(mtecThingClassId)) {
+                    update(thing);
+                }
+            });
         }
     }
 }
@@ -136,7 +145,16 @@ void IntegrationPluginMTec::postSetupThing(Thing *thing)
 void IntegrationPluginMTec::thingRemoved(Thing *thing)
 {
     if (m_mtecConnections.contains(thing)) {
-        m_mtecConnections.take(thing)->deleteLater();
+        MTec *mtec = m_mtecConnections.take(thing);
+        if (mtec) {
+            mtec->disconnectDevice();
+            mtec->deleteLater();
+        }
+    }
+
+    if (myThings().isEmpty()) {
+        hardwareManager()->pluginTimerManager()->unregisterTimer(m_pluginTimer);
+        m_pluginTimer = nullptr;
     }
 }
 
@@ -179,13 +197,6 @@ void IntegrationPluginMTec::onStatusUpdated(const MTecInfo &info)
     thing->setStateValue(mtecActualExcessEnergyElectricityMeterStateTypeId, info.actualExcessEnergyElectricityMeter);
     thing->setStateValue(mtecExternalSetValueScalingStateTypeId, info.externalSetValueScaling);
     thing->setStateValue(mtecRequestExternalHeatSourceStateTypeId, info.requestExternalHeatSource);
-}
-
-void IntegrationPluginMTec::onRefreshTimer()
-{
-    foreach (Thing *thing, myThings().filterByThingClassId(mtecThingClassId)) {
-        update(thing);
-    }
 }
 
 
