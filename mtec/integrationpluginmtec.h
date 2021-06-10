@@ -34,7 +34,6 @@
 #include "plugintimer.h"
 
 #include "mtec.h"
-#include "mtechelpers.h"
 
 #include <QUuid>
 
@@ -61,7 +60,6 @@ private:
 
 private slots:
     void update(Thing *thing);
-    void onStatusUpdated(const MTecInfo &info);
 
 };
 

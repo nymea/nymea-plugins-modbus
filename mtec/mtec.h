@@ -36,17 +36,23 @@
 
 #include "../modbus/modbustcpmaster.h"
 
-#include "mtecinfo.h"
-#include "mtechelpers.h"
-
 class MTec : public QObject
 {
     Q_OBJECT
 public:
-    /** Constructor */
-    explicit MTec(const QHostAddress &address, QObject *parent = nullptr);
+    enum HeatpumpState {
+        HeatpumpStateStandby = 0,
+        HeatpumpStatePreRun = 1,
+        HeatpumpStateAutomaticHeat = 2,
+        HeatpumpStateDefrost = 3,
+        HeatpumpStateAutomaticCool = 4,
+        HeatpumpStatePostRun = 5,
+        HeatpumpStateSaftyShutdown = 7,
+        HeatpumpStateError = 8
+    };
+    Q_ENUM(HeatpumpState)
 
-    /** Destructor */
+    explicit MTec(const QHostAddress &address, QObject *parent = nullptr);
     ~MTec();
 
     inline QHostAddress hostAddress() const { return m_hostAddress; };
@@ -54,62 +60,70 @@ public:
     bool connectDevice();
     void disconnectDevice();
 
-    void requestStatus();
+    void updateValues();
 
 private:
     /** Modbus Unit ID (undocumented, guessing 1 for now) */
     static const quint16 ModbusUnitID = 1;
 
     /** The following modbus addresses can be read: */
-    enum RegisterList {
-        /**
-         * APPL.CtrlAppl.sParam.heatpump[0].ElectricEnergyMeter.values.power
-         * Actual power consumtion [W]
-         */
-        ActualPowerConsumption              = 707,
+    enum Register {
+        /* APPL.CtrlAppl.sParam.hotWaterTank[0].topTemp.values.actValue
+         * Hot water tank top temperature [1/10°C]. */
+        RegisterHotWaterTankTemperature = 401,
 
-        /**
-         * APPL.CtrlAppl.sIOModule.Virt[0].param.sensor[0]
-         * Acutal excess energy given from Smart home System [W]
-         */
-        ActualExcessEnergySmartHome         = 1000,
+        /* APPL.CtrlAppl.sParam.bufferTank[0].topTemp.values.actValue
+         * Buffer Actual top temperature [1/10°C]. */
+        RegisterBufferTankTemperature = 601,
 
-        /**
-         * APPL.CtrlAppl.sParam.photovoltaics.ElectricEnergyMeter.values.power
-         * Acutal excess energy given from Electricity Meter [W]
-         */
-        ActualExcessEnergyElectricityMeter  = 1002,
+        /* APPL.CtrlAppl.sStatisticalData.heatpump[0].consumption.electricalenergy
+         * Total accumulated electrical energy [kWh] */
+        RegisterTotalAccumulatedElectricalEnergy = 702,
 
-        /**
-         * APPL.CtrlAppl.sParam.extHeatSource[0].param.externalSetvalueScaled
-         * Control of the heat source by an external control [100%]
-         */
-        ExternalSetValueScaling             = 1600,
+        /* APPL.CtrlAppl.sParam.heatpump[0].values.heatpumpState */
+        RegisterHeatpumpState = 703,
 
-        /**
-         * APPL.CtrlAppl.sParam.extHeatSource[0].values.requestExtHeatsource
-         * 0…no request, external heat source must be turned off.
-         * 1…external heat source is released and can be switched on.
-         * 2…external heat source is required and must be turned on.
-         */
-        RequestExternalHeatSource           = 1601
+        /* APPL.CtrlAppl.sParam.heatpump[0].HeatMeter.values.power
+         * Actual power consumtion [W] */
+        RegisterHeatMeterPowerConsumption = 706,
+
+        /* APPL.CtrlAppl.sParam.heatpump[0].ElectricEnergyMeter.values.power
+         * Actual power consumtion [W] */
+        RegisterEnergyMeterPowerConsumption = 707,
+
+        /* APPL.CtrlAppl.sIOModule.Virt[0].param.sensor[0]
+         * Acutal excess energy given from Smart home System [W] */
+        RegisterActualExcessEnergySmartHome = 1000,
+
+        /* APPL.CtrlAppl.sParam.outdoorTemp.values.actValue
+         * Actual exterior temperature [°C] */
+        RegisterActualOutdoorTemperature = 1502,
+
     };
 
-    /* Note: This class only requires one IP address and one
-     *       TCP Modbus connection. Multiple devices are managed
-     *       within the IntegrationPluginMTec class. */
     QHostAddress m_hostAddress;
-
-    /** Pointer to ModbusTCPMaster object, responseible for low-level communicaiton */
     ModbusTCPMaster *m_modbusMaster = nullptr;
 
-    /** This structure is filled by the receivedStatus... functions */
-    MTecInfo m_info ;
-
+    double m_waterTankTemperature = 0;
+    double m_bufferTankTemperature = 0;
+    double m_totalAccumulatedElectricalEnergy = 0;
+    HeatpumpState m_heatPumpState = HeatpumpStateStandby;
+    double m_heatMeterPowerConsumption = 0;
+    double m_energyMeterPowerConsumption = 0;
+    double m_actualExcessEnergySmartHome = 0;
+    double m_actualOutdoorTemperature = 0;
 
 signals:
     void connectedChanged(bool connected);
-    void statusUpdated(const MTecInfo &info);
+
+    void waterTankTemperatureChanged(double waterTankTemperature);
+    void bufferTankTemperatureChanged(double bufferTankTemperature);
+    void totalAccumulatedElectricalEnergyChanged(double totalAccumulatedElectricalEnergy);
+    void heatPumpStateChanged(HeatpumpState heatPumpState);
+    void heatMeterPowerConsumptionChanged(double heatMeterPowerConsumption);
+    void energyMeterPowerConsumptionChanged(double energyMeterPowerConsumption);
+    void actualExcessEnergySmartHomeChanged(double actualExcessEnergySmartHome);
+    void actualOutdoorTemperatureChanged(double actualOutdoorTemperature);
 
 private slots:
     void onModbusError();

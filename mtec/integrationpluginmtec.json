@@ -41,60 +41,91 @@
                             "type": "bool",
                             "defaultValue": false,
                             "cached": false
+                        },                                           
+                        {
+                            "id": "545f94d6-f4fd-48fe-bf3b-f193e5cb76e7",
+                            "name": "waterTankTemperature",
+                            "displayName": "Water tank temperature",
+                            "displayNameEvent": "Water tank temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "a98e37f8-dcdc-4c4c-aecf-07f376321849",
+                            "name": "bufferTankTemperature",
+                            "displayName": "Buffer tank temperature",
+                            "displayNameEvent": "Buffer tank temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "d0c8f168-49b5-47ca-9988-c9922be38dd5",
+                            "name": "outdoorTemperature",
+                            "displayName": "Outdoor temperature",
+                            "displayNameEvent": "Outdoor temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0
                         },
                         {
                             "id": "c67c79cf-7369-409f-b170-16c4ece9d25a",
-                            "name": "actualPowerConsumption",
-                            "displayName": "Actual power consumption",
-                            "displayNameEvent": "Actual power consumption changed",
+                            "name": "totalAccumulatedElectricalEnergy",
+                            "displayName": "Total accumulated electrical energy",
+                            "displayNameEvent": "Total accumulated electrical energy changed",
                             "type": "double",
-                            "unit": "Watt",
+                            "unit": "KiloWattHour",
                             "defaultValue": 0,
                             "suggestLogging": true
                         },
                         {
-                            "id": "663718fa-807e-4d85-bd78-61a65f8c0b5e",
-                            "name": "actualExcessEnergySmartHome",
-                            "displayName": "Actual excess energy from Smart home System",
-                            "displayNameEvent": "Actual excess energy from Smart home System changed",
-                            "displayNameAction": "Change actual excess energy from Smart home System",
-                            "type": "double",
-                            "unit": "Watt",
-                            "defaultValue": 0,
-                            "suggestLogging": true
-                        },
-                        {
-                            "id": "fd94d39c-0db6-497f-a0a5-6c5452cbcaaf",
-                            "name": "actualExcessEnergyElectricityMeter",
-                            "displayName": "Actual excess energy from Electricity Meter",
-                            "displayNameEvent": "Actual excess energy from Electricity Meter changed",
-                            "type": "double",
-                            "unit": "Watt",
-                            "defaultValue": 0,
-                            "suggestLogging": true
-                        },
-                        {
-                            "id": "087c0296-705b-483a-b1e9-7ce08202c035",
-                            "name": "externalSetValueScaling",
-                            "displayName": "Control of the heat source by an external control [100%]",
-                            "displayNameEvent": "Control of the heat source by an external control [100%] changed",
-                            "type": "double",
-                            "unit": "Percentage",
-                            "defaultValue": 100,
-                            "suggestLogging": true
-                        },
-                        {
-                            "id": "90b17788-ce63-47e3-b97d-1b025a41ce35",
-                            "name": "requestExternalHeatSource",
-                            "displayName": "Request external heat source",
-                            "displayNameEvent": "Request external heat source changed",
+                            "id": "1e2037c8-09dc-4396-974c-efa9c486aa65",
+                            "name": "heatPumpState",
+                            "displayName": "Heat pump state",
+                            "displayNameEvent": "Heat pump state changed",
                             "type": "QString",
-                            "defaultValue":  "No request, external heat source must be turned off",
                             "possibleValues": [
-                                 "No request, external heat source must be turned off",
-                                 "External heat source is released and can be switched on",
-                                 "External heat source is required and must be turned on"
+                                "Standby",
+                                "Pre run",
+                                "Automatic heat",
+                                "Defrost",
+                                "Automatic cool",
+                                "Post run",
+                                "Safty shutdown",
+                                "Error"
                             ],
+                            "defaultValue": "Standby",
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "581abddc-90d6-4dea-a43c-63b117b335fe",
+                            "name": "heatMeterPowerConsumption",
+                            "displayName": "Heat meter power consumption",
+                            "displayNameEvent": "Heat meter power consumption changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "fd52a97e-f94d-4529-b479-b74e61f75a89",
+                            "name": "energyMeterPowerConsumption",
+                            "displayName": "Energy meter power consumption",
+                            "displayNameEvent": "Energy meter power consumption changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "b646ea10-ea7e-4eba-bfda-8e3cd38370a7",
+                            "name": "smartHomeEnergy",
+                            "displayName": "Smart home energy",
+                            "displayNameEvent": "Smart home energy changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0,
                             "suggestLogging": true
                         }
                     ],

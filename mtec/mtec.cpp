@@ -30,9 +30,6 @@
 
 #include "mtec.h"
 #include "extern-plugininfo.h"
-#include "mtechelpers.h"
-
-#include <cstring>
 
 MTec::MTec(const QHostAddress &address, QObject *parent) :
     QObject(parent),
@@ -51,6 +48,7 @@ MTec::MTec(const QHostAddress &address, QObject *parent) :
 
 MTec::~MTec()
 {
+    m_modbusMaster->disconnectDevice();
 }
 
 bool MTec::connectDevice()
@@ -63,58 +61,82 @@ void MTec::disconnectDevice()
     m_modbusMaster->disconnectDevice();
 }
 
-void MTec::requestStatus()
+void MTec::updateValues()
 {
     if (!m_modbusMaster->connected()) {
         return;
     }
 
-    m_modbusMaster->readHoldingRegister(MTec::ModbusUnitID, MTec::ActualPowerConsumption, 1);
+    m_modbusMaster->readHoldingRegister(MTec::ModbusUnitID, RegisterHotWaterTankTemperature, 1);
 }
 
 void MTec::onModbusError()
 {
-    qCWarning(dcMTec()) << "MTec: Received modbus error";
+    qCWarning(dcMTec()) << "Modbus error occured" << m_modbusMaster->errorString();
 }
-
 
 void MTec::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value)
 {
     Q_UNUSED(slaveAddress);
 
     switch (modbusRegister) {
-    case ActualPowerConsumption:
+    case RegisterHotWaterTankTemperature:
         if (value.length() == 1) {
-            m_info.actualPowerConsumption = MTecHelpers::convertRegisterToFloat(value[0]);
+            m_waterTankTemperature = value[0] / 10.0;
+            emit waterTankTemperatureChanged(m_waterTankTemperature);
         }
-        m_modbusMaster->readHoldingRegister(MTec::ModbusUnitID, MTec::ActualExcessEnergySmartHome, 1);
+        m_modbusMaster->readHoldingRegister(MTec::ModbusUnitID, RegisterBufferTankTemperature, 1);
         break;
-    case ActualExcessEnergySmartHome:
+    case RegisterBufferTankTemperature:
         if (value.length() == 1) {
-            m_info.actualExcessEnergySmartHome = MTecHelpers::convertRegisterToFloat(value[0]);
+            m_bufferTankTemperature = value[0] / 10.0;
+            emit bufferTankTemperatureChanged(m_bufferTankTemperature);
         }
-        m_modbusMaster->readHoldingRegister(MTec::ModbusUnitID, MTec::ActualExcessEnergyElectricityMeter, 1);
+        m_modbusMaster->readHoldingRegister(MTec::ModbusUnitID, RegisterTotalAccumulatedElectricalEnergy, 1);
         break;
-    case ActualExcessEnergyElectricityMeter:
+    case RegisterTotalAccumulatedElectricalEnergy:
         if (value.length() == 1) {
-            m_info.actualExcessEnergyElectricityMeter = MTecHelpers::convertRegisterToFloat(value[0]);
+            m_totalAccumulatedElectricalEnergy = value[0] / 100.0;
+            emit totalAccumulatedElectricalEnergyChanged(m_totalAccumulatedElectricalEnergy);
         }
-        m_modbusMaster->readHoldingRegister(MTec::ModbusUnitID, MTec::ExternalSetValueScaling, 1);
+        m_modbusMaster->readHoldingRegister(MTec::ModbusUnitID, RegisterHeatpumpState, 1);
         break;
-    case ExternalSetValueScaling:
+    case RegisterHeatpumpState:
         if (value.length() == 1) {
-            m_info.externalSetValueScaling = MTecHelpers::convertRegisterToFloat(value[0]);
+            m_heatPumpState = static_cast<HeatpumpState>(value[0]);
+            emit heatPumpStateChanged(m_heatPumpState);
         }
-        m_modbusMaster->readHoldingRegister(MTec::ModbusUnitID, MTec::RequestExternalHeatSource, 1);
+        m_modbusMaster->readHoldingRegister(MTec::ModbusUnitID, RegisterHeatMeterPowerConsumption, 1);
         break;
-    case RequestExternalHeatSource:
+    case RegisterHeatMeterPowerConsumption:
         if (value.length() == 1) {
-            m_info.requestExternalHeatSource = MTecHelpers::externalHeatSourceRequestToString(value[0]);
+            m_heatMeterPowerConsumption = value[0] / 100.0;
+            emit heatMeterPowerConsumptionChanged(m_heatMeterPowerConsumption);
+        }
+        m_modbusMaster->readHoldingRegister(MTec::ModbusUnitID, RegisterEnergyMeterPowerConsumption, 1);
+        break;
+    case RegisterEnergyMeterPowerConsumption:
+        if (value.length() == 1) {
+            m_energyMeterPowerConsumption = value[0] / 100.0;
+            emit energyMeterPowerConsumptionChanged(m_energyMeterPowerConsumption);
+        }
+        m_modbusMaster->readHoldingRegister(MTec::ModbusUnitID, RegisterActualExcessEnergySmartHome, 1);
+        break;
+    case RegisterActualExcessEnergySmartHome:
+        if (value.length() == 1) {
+            m_actualExcessEnergySmartHome = value[0] / 100.0;
+            emit actualExcessEnergySmartHomeChanged(m_actualExcessEnergySmartHome);
+        }
+        m_modbusMaster->readHoldingRegister(MTec::ModbusUnitID, RegisterActualOutdoorTemperature, 1);
+        break;
+    case RegisterActualOutdoorTemperature:
+        if (value.length() == 1) {
+            m_actualOutdoorTemperature = value[0] / 10.0;
+            emit actualOutdoorTemperatureChanged(m_actualOutdoorTemperature);
+        }
 
-            /* Everything read without errors
-             * -> update status in plugin */
-            emit statusUpdated(m_info);
-        }
+        // TODO: set initialized
+
         break;
     }
 }
