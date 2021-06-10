@@ -72,7 +72,8 @@
                             "writable": true,
                             "minValue": 10,
                             "maxValue": 30,
-                            "defaultValue": 20
+                            "defaultValue": 20,
+                            "suggestLogging": true
                         },
                         {
                             "id": "b22ac9bb-3842-497c-bd93-f8bea6670e32",
@@ -81,7 +82,8 @@
                             "displayNameEvent": "Room temperature heat circuit 0 changed",
                             "unit": "DegreeCelsius",
                             "type": "double",
-                            "defaultValue": 20
+                            "defaultValue": 20,
+                            "suggestLogging": true
                         },
                         {
                             "id": "07465fbb-6949-4bd1-90d5-acf2d80c161d",
@@ -89,7 +91,8 @@
                             "displayName": "Heating on",
                             "displayNameEvent": "Heating turned on/off",
                             "type": "bool",
-                            "defaultValue": false
+                            "defaultValue": false,
+                            "suggestLogging": true
                         },
                         {
                             "id": "8b407c1d-b84f-48d4-9961-b29bc58fff0e",
@@ -97,7 +100,8 @@
                             "displayName": "Cooling on",
                             "displayNameEvent": "Cooling turned on/off",
                             "type": "bool",
-                            "defaultValue": false
+                            "defaultValue": false,
+                            "suggestLogging": true
                         },
                         {
                             "id": "d0c8f168-49b5-47ca-9988-c9922be38dd5",
@@ -106,7 +110,8 @@
                             "displayNameEvent": "Outdoor temperature changed",
                             "unit": "DegreeCelsius",
                             "type": "double",
-                            "defaultValue": 0
+                            "defaultValue": 0,
+                            "suggestLogging": true
                         },
                         {
                             "id": "545f94d6-f4fd-48fe-bf3b-f193e5cb76e7",
@@ -115,7 +120,8 @@
                             "displayNameEvent": "Water tank top temperature changed",
                             "unit": "DegreeCelsius",
                             "type": "double",
-                            "defaultValue": 0
+                            "defaultValue": 0,
+                            "suggestLogging": true
                         },
                         {
                             "id": "a98e37f8-dcdc-4c4c-aecf-07f376321849",
@@ -124,7 +130,8 @@
                             "displayNameEvent": "Buffer tank temperature changed",
                             "unit": "DegreeCelsius",
                             "type": "double",
-                            "defaultValue": 0
+                            "defaultValue": 0,
+                            "suggestLogging": true
                         },
                         {
                             "id": "7d087af8-cdbe-463e-a9bb-7a7a79471963",
