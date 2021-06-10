@@ -55,8 +55,13 @@ public:
     explicit MTec(const QHostAddress &address, QObject *parent = nullptr);
     ~MTec();
 
-    inline QHostAddress hostAddress() const { return m_hostAddress; };
+    QHostAddress hostAddress() const;
+    bool connected() const;
 
+    QModbusReply *setTargetRoomTemperature(double targetRoomTemperature);
+    QModbusReply *setSmartHomeEnergy(quint16 smartHomeEnergy);
+
+public slots:
     bool connectDevice();
     void disconnectDevice();
 
@@ -68,34 +73,50 @@ private:
 
     /** The following modbus addresses can be read: */
     enum Register {
-        /* APPL.CtrlAppl.sParam.hotWaterTank[0].topTemp.values.actValue
+        /* R APPL.CtrlAppl.sParam.heatCircuit[0].tempRoom.values.actValue
+         * Actual room temperature [1/10°C]. */
+        RegisterRoomTemperature = 1,
+
+        /* RW APPL.CtrlAppl.sParam.heatCircuit[0].param.normalSetTemp
+         * Room set temperature for heating circuit [1/10°C]. */
+        RegisterTargetRoomTemperature = 4,
+
+        /* R APPL.CtrlAppl.sParam.hotWaterTank[0].topTemp.values.actValue
          * Hot water tank top temperature [1/10°C]. */
         RegisterHotWaterTankTemperature = 401,
 
-        /* APPL.CtrlAppl.sParam.bufferTank[0].topTemp.values.actValue
+        /* R APPL.CtrlAppl.sParam.bufferTank[0].topTemp.values.actValue
          * Buffer Actual top temperature [1/10°C]. */
         RegisterBufferTankTemperature = 601,
 
-        /* APPL.CtrlAppl.sStatisticalData.heatpump[0].consumption.electricalenergy
+        /* R APPL.CtrlAppl.sStatisticalData.heatpump[0].consumption.energy
+         * Total accumulated heating energy [kWh] */
+        RegisterTotalAccumulatedHeatingEnergy = 701,
+
+        /* R APPL.CtrlAppl.sStatisticalData.heatpump[0].consumption.electricalenergy
          * Total accumulated electrical energy [kWh] */
         RegisterTotalAccumulatedElectricalEnergy = 702,
 
-        /* APPL.CtrlAppl.sParam.heatpump[0].values.heatpumpState */
+        /* R APPL.CtrlAppl.sParam.heatpump[0].values.heatpumpState */
         RegisterHeatpumpState = 703,
 
-        /* APPL.CtrlAppl.sParam.heatpump[0].HeatMeter.values.power
+        /* R APPL.CtrlAppl.sParam.heatpump[0].HeatMeter.values.power
          * Actual power consumtion [W] */
         RegisterHeatMeterPowerConsumption = 706,
 
-        /* APPL.CtrlAppl.sParam.heatpump[0].ElectricEnergyMeter.values.power
+        /* R APPL.CtrlAppl.sParam.heatpump[0].ElectricEnergyMeter.values.power
          * Actual power consumtion [W] */
         RegisterEnergyMeterPowerConsumption = 707,
 
-        /* APPL.CtrlAppl.sIOModule.Virt[0].param.sensor[0]
+        /* RW APPL.CtrlAppl.sIOModule.Virt[0].param.sensor[0]
          * Acutal excess energy given from Smart home System [W] */
         RegisterActualExcessEnergySmartHome = 1000,
 
-        /* APPL.CtrlAppl.sParam.outdoorTemp.values.actValue
+        /* R APPL.CtrlAppl.sParam.photovoltaics.ElectricEnergyMeter.values.power
+         * Acutal excess energy given from Electricity Meter [W] */
+        RegisterActualExcessEnergySmartHomeElectricityMeter = 1002,
+
+        /* R APPL.CtrlAppl.sParam.outdoorTemp.values.actValue
          * Actual exterior temperature [°C] */
         RegisterActualOutdoorTemperature = 1502,
 
@@ -104,25 +125,33 @@ private:
     QHostAddress m_hostAddress;
     ModbusTCPMaster *m_modbusMaster = nullptr;
 
-    double m_waterTankTemperature = 0;
+    double m_roomTemperature = 0;
+    double m_targetRoomTemperature = 0;
+    double m_waterTankTopTemperature = 0;
     double m_bufferTankTemperature = 0;
+    double m_totalAccumulatedHeatingEnergy = 0;
     double m_totalAccumulatedElectricalEnergy = 0;
     HeatpumpState m_heatPumpState = HeatpumpStateStandby;
     double m_heatMeterPowerConsumption = 0;
     double m_energyMeterPowerConsumption = 0;
     double m_actualExcessEnergySmartHome = 0;
+    double m_actualExcessEnergySmartHomeElectricityMeter = 0;
     double m_actualOutdoorTemperature = 0;
 
 signals:
     void connectedChanged(bool connected);
 
-    void waterTankTemperatureChanged(double waterTankTemperature);
+    void roomTemperatureChanged(double roomTemperature);
+    void targetRoomTemperatureChanged(double targetRoomTemperature);
+    void waterTankTopTemperatureChanged(double waterTankTopTemperature);
     void bufferTankTemperatureChanged(double bufferTankTemperature);
+    void totalAccumulatedHeatingEnergyChanged(double totalAccumulatedHeatingEnergy);
     void totalAccumulatedElectricalEnergyChanged(double totalAccumulatedElectricalEnergy);
     void heatPumpStateChanged(HeatpumpState heatPumpState);
     void heatMeterPowerConsumptionChanged(double heatMeterPowerConsumption);
     void energyMeterPowerConsumptionChanged(double energyMeterPowerConsumption);
     void actualExcessEnergySmartHomeChanged(double actualExcessEnergySmartHome);
+    void actualExcessEnergySmartHomeElectricityMeterChanged(double actualExcessEnergySmartHomeElectricityMeter);
     void actualOutdoorTemperatureChanged(double actualOutdoorTemperature);
 
 private slots:
