@@ -106,9 +106,19 @@ void IntegrationPluginMTec::setupThing(ThingSetupInfo *info)
             thing->setStateValue(mtecConnectedStateTypeId, connected);
         });
 
-        connect(mtec, &MTec::waterTankTemperatureChanged, thing, [=](double waterTankTemperature){
-            qCDebug(dcMTec()) << thing << "Water tank temperature" << waterTankTemperature << "°C";
-            thing->setStateValue(mtecWaterTankTemperatureStateTypeId, waterTankTemperature);
+        connect(mtec, &MTec::roomTemperatureChanged, thing, [=](double roomTemperature){
+            qCDebug(dcMTec()) << thing << "Room temperature" << roomTemperature << "°C";
+            thing->setStateValue(mtecTemperatureStateTypeId, roomTemperature);
+        });
+
+        connect(mtec, &MTec::targetRoomTemperatureChanged, thing, [=](double targetRoomTemperature){
+            qCDebug(dcMTec()) << thing << "Target room temperature" << targetRoomTemperature << "°C";
+            thing->setStateValue(mtecTargetTemperatureStateTypeId, targetRoomTemperature);
+        });
+
+        connect(mtec, &MTec::waterTankTopTemperatureChanged, thing, [=](double waterTankTopTemperature){
+            qCDebug(dcMTec()) << thing << "Water tank top temperature" << waterTankTopTemperature << "°C";
+            thing->setStateValue(mtecWaterTankTopTemperatureStateTypeId, waterTankTopTemperature);
         });
 
         connect(mtec, &MTec::bufferTankTemperatureChanged, thing, [=](double bufferTankTemperature){
@@ -116,8 +126,13 @@ void IntegrationPluginMTec::setupThing(ThingSetupInfo *info)
             thing->setStateValue(mtecBufferTankTemperatureStateTypeId, bufferTankTemperature);
         });
 
+        connect(mtec, &MTec::totalAccumulatedHeatingEnergyChanged, thing, [=](double totalAccumulatedHeatingEnergy){
+            qCDebug(dcMTec()) << thing << "Total accumulated heating energy" << totalAccumulatedHeatingEnergy << "kWh";
+            thing->setStateValue(mtecTotalAccumulatedHeatingEnergyStateTypeId, totalAccumulatedHeatingEnergy);
+        });
+
         connect(mtec, &MTec::totalAccumulatedElectricalEnergyChanged, thing, [=](double totalAccumulatedElectricalEnergy){
-            qCDebug(dcMTec()) << thing << "Total accumulated energy" << totalAccumulatedElectricalEnergy << "kWh";
+            qCDebug(dcMTec()) << thing << "Total accumulated electrical energy" << totalAccumulatedElectricalEnergy << "kWh";
             thing->setStateValue(mtecTotalAccumulatedElectricalEnergyStateTypeId, totalAccumulatedElectricalEnergy);
         });
 
@@ -126,27 +141,43 @@ void IntegrationPluginMTec::setupThing(ThingSetupInfo *info)
             switch (heatPumpState) {
             case MTec::HeatpumpStateStandby:
                 thing->setStateValue(mtecHeatPumpStateStateTypeId, "Standby");
+                thing->setStateValue(mtecHeatingOnStateTypeId, false);
+                thing->setStateValue(mtecCoolingOnStateTypeId, false);
                 break;
             case MTec::HeatpumpStatePreRun:
                 thing->setStateValue(mtecHeatPumpStateStateTypeId, "Pre run");
+                thing->setStateValue(mtecHeatingOnStateTypeId, false);
+                thing->setStateValue(mtecCoolingOnStateTypeId, false);
                 break;
             case MTec::HeatpumpStateAutomaticHeat:
                 thing->setStateValue(mtecHeatPumpStateStateTypeId, "Automatic heat");
+                thing->setStateValue(mtecHeatingOnStateTypeId, true);
+                thing->setStateValue(mtecCoolingOnStateTypeId, false);
                 break;
             case MTec::HeatpumpStateDefrost:
                 thing->setStateValue(mtecHeatPumpStateStateTypeId, "Defrost");
+                thing->setStateValue(mtecHeatingOnStateTypeId, false);
+                thing->setStateValue(mtecCoolingOnStateTypeId, false);
                 break;
             case MTec::HeatpumpStateAutomaticCool:
                 thing->setStateValue(mtecHeatPumpStateStateTypeId, "Automatic cool");
+                thing->setStateValue(mtecHeatingOnStateTypeId, false);
+                thing->setStateValue(mtecCoolingOnStateTypeId, true);
                 break;
             case MTec::HeatpumpStatePostRun:
+                thing->setStateValue(mtecHeatingOnStateTypeId, false);
                 thing->setStateValue(mtecHeatPumpStateStateTypeId, "Post run");
+                thing->setStateValue(mtecCoolingOnStateTypeId, false);
                 break;
             case MTec::HeatpumpStateSaftyShutdown:
+                thing->setStateValue(mtecHeatingOnStateTypeId, false);
                 thing->setStateValue(mtecHeatPumpStateStateTypeId, "Safty shutdown");
+                thing->setStateValue(mtecCoolingOnStateTypeId, false);
                 break;
             case MTec::HeatpumpStateError:
+                thing->setStateValue(mtecHeatingOnStateTypeId, false);
                 thing->setStateValue(mtecHeatPumpStateStateTypeId, "Error");
+                thing->setStateValue(mtecCoolingOnStateTypeId, false);
                 break;
             }
         });
@@ -164,6 +195,11 @@ void IntegrationPluginMTec::setupThing(ThingSetupInfo *info)
         connect(mtec, &MTec::actualExcessEnergySmartHomeChanged, thing, [=](double actualExcessEnergySmartHome){
             qCDebug(dcMTec()) << thing << "Smart home energy" << actualExcessEnergySmartHome << "W";
             thing->setStateValue(mtecSmartHomeEnergyStateTypeId, actualExcessEnergySmartHome);
+        });
+
+        connect(mtec, &MTec::actualExcessEnergySmartHomeElectricityMeterChanged, thing, [=](double actualExcessEnergySmartHomeElectricityMeter){
+            qCDebug(dcMTec()) << thing << "Smart home energy electrical meter" << actualExcessEnergySmartHomeElectricityMeter << "W";
+            thing->setStateValue(mtecSmartHomeEnergyElectricityMeterStateTypeId, actualExcessEnergySmartHomeElectricityMeter);
         });
 
         connect(mtec, &MTec::actualOutdoorTemperatureChanged, thing, [=](double actualOutdoorTemperature){
@@ -221,9 +257,76 @@ void IntegrationPluginMTec::thingRemoved(Thing *thing)
 
 void IntegrationPluginMTec::executeAction(ThingActionInfo *info)
 {
-//    Thing *thing = info->thing();
-//    Action action = info->action();
-    info->finish(Thing::ThingErrorNoError);
+    Thing *thing = info->thing();
+    Action action = info->action();
+
+    MTec *mtec = m_mtecConnections.value(thing);
+    if (!mtec) {
+        qCWarning(dcMTec()) << "Could not execute action because the MTec connection could not be found for" << thing;
+        info->finish(Thing::ThingErrorHardwareNotAvailable);
+        return;
+    }
+
+    // Make sure we are connected
+    if (!mtec->connected()) {
+        qCWarning(dcMTec()) << "Could not execute action because the MTec connection is not connected" << thing;
+        info->finish(Thing::ThingErrorHardwareNotAvailable);
+        return;
+    }
+
+    if (action.actionTypeId() == mtecTargetTemperatureActionTypeId) {
+        double targetTemperature = action.paramValue(mtecTargetTemperatureActionTargetTemperatureParamTypeId).toDouble();
+        qCDebug(dcMTec()) << "Setting target temperature" << targetTemperature << "°C";
+        QModbusReply *reply = mtec->setTargetRoomTemperature(targetTemperature);
+        if (!reply) {
+            qCWarning(dcMTec()) << "Failed to send modbus request" << thing;
+            info->finish(Thing::ThingErrorHardwareFailure);
+            return;
+        }
+
+        connect(reply, &QModbusReply::finished, this, [=]() {
+            reply->deleteLater();
+            if (reply->error() == QModbusDevice::NoError) {
+                qCDebug(dcMTec()) << "Setting target temperature" << targetTemperature << "°C" << "finished successfully";
+                info->finish(Thing::ThingErrorNoError);
+            } else {
+                info->finish(Thing::ThingErrorHardwareFailure);
+            }
+        });
+
+        connect(reply, &QModbusReply::errorOccurred, this, [=](QModbusDevice::Error error) {
+            qCWarning(dcMTec()) << thing << "Action execution finished due to modbus replay error:" << error;
+            reply->deleteLater();
+            info->finish(Thing::ThingErrorHardwareFailure);
+        });
+    } else if (action.actionTypeId() == mtecSmartHomeEnergyActionTypeId) {
+        quint16 energy = action.paramValue(mtecSmartHomeEnergyActionSmartHomeEnergyParamTypeId).toUInt();
+        qCDebug(dcMTec()) << "Setting smart home energy to" << energy << "W";
+        QModbusReply *reply = mtec->setSmartHomeEnergy(energy);
+        if (!reply) {
+            qCWarning(dcMTec()) << "Failed to send modbus request" << thing;
+            info->finish(Thing::ThingErrorHardwareFailure);
+            return;
+        }
+
+        connect(reply, &QModbusReply::finished, this, [=]() {
+            reply->deleteLater();
+            if (reply->error() == QModbusDevice::NoError) {
+                qCDebug(dcMTec()) << "Setting smart home energy" << energy << "W" << "finished successfully";
+                info->finish(Thing::ThingErrorNoError);
+            } else {
+                info->finish(Thing::ThingErrorHardwareFailure);
+            }
+        });
+
+        connect(reply, &QModbusReply::errorOccurred, this, [=](QModbusDevice::Error error) {
+            qCWarning(dcMTec()) << thing << "Action execution finished due to modbus replay error:" << error;
+            reply->deleteLater();
+            info->finish(Thing::ThingErrorHardwareFailure);
+        });
+    } else {
+        Q_ASSERT_X(false, "executeAction", QString("Unhandled action: %1").arg(action.actionTypeId().toString()).toUtf8());
+    }
 }
 
 void IntegrationPluginMTec::update(Thing *thing)
