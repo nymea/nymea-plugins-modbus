@@ -288,6 +288,7 @@ void IntegrationPluginMTec::executeAction(ThingActionInfo *info)
             reply->deleteLater();
             if (reply->error() == QModbusDevice::NoError) {
                 qCDebug(dcMTec()) << "Setting target temperature" << targetTemperature << "°C" << "finished successfully";
+                thing->setStateValue(mtecTargetTemperatureStateTypeId, targetTemperature);
                 info->finish(Thing::ThingErrorNoError);
             } else {
                 info->finish(Thing::ThingErrorHardwareFailure);
@@ -313,6 +314,7 @@ void IntegrationPluginMTec::executeAction(ThingActionInfo *info)
             reply->deleteLater();
             if (reply->error() == QModbusDevice::NoError) {
                 qCDebug(dcMTec()) << "Setting smart home energy" << energy << "W" << "finished successfully";
+                thing->setStateValue(mtecSmartHomeEnergyStateTypeId, energy);
                 info->finish(Thing::ThingErrorNoError);
             } else {
                 info->finish(Thing::ThingErrorHardwareFailure);
