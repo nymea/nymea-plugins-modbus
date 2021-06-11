@@ -81,43 +81,49 @@ void IntegrationPluginWallbe::init()
 
 void IntegrationPluginWallbe::discoverThings(ThingDiscoveryInfo *info)
 {
-    if (info->thingClassId() == wallbeEcoThingClassId){
+    if (info->thingClassId() == wallbeEcoThingClassId) {
+        if (!hardwareManager()->networkDeviceDiscovery()->available()) {
+            qCWarning(dcWallbe()) << "Failed to discover network devices. The network device discovery is not available.";
+            info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("The discovery is not available."));
+            return;
+        }
+
         qCDebug(dcWallbe()) << "Start Wallbe eco discovery";
         NetworkDeviceDiscoveryReply *discoveryReply = hardwareManager()->networkDeviceDiscovery()->discover();
         connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
             ThingDescriptors descriptors;
-            qCDebug(dcWallbe()) << "Discovery finished. Found" << discoveryReply->networkDevices().count() << "devices";
-            foreach (const NetworkDevice &networkDevice, discoveryReply->networkDevices()) {
-                qCDebug(dcWallbe()) << networkDevice;
-                if (!networkDevice.macAddressManufacturer().contains("Phoenix", Qt::CaseSensitivity::CaseInsensitive))
+            qCDebug(dcWallbe()) << "Discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "devices";
+            foreach (const NetworkDeviceInfo &networkDeviceInfo, discoveryReply->networkDeviceInfos()) {
+                qCDebug(dcWallbe()) << networkDeviceInfo;
+                if (!networkDeviceInfo.macAddressManufacturer().contains("Phoenix", Qt::CaseSensitivity::CaseInsensitive))
                     continue;
 
                 QString title;
-                if (networkDevice.hostName().isEmpty()) {
-                    title += networkDevice.address().toString();
+                if (networkDeviceInfo.hostName().isEmpty()) {
+                    title += networkDeviceInfo.address().toString();
                 } else {
-                    title += networkDevice.address().toString() + " (" + networkDevice.hostName() + ")";
+                    title += networkDeviceInfo.address().toString() + " (" + networkDeviceInfo.hostName() + ")";
                 }
 
                 QString description;
-                if (networkDevice.macAddressManufacturer().isEmpty()) {
-                    description = networkDevice.macAddress();
+                if (networkDeviceInfo.macAddressManufacturer().isEmpty()) {
+                    description = networkDeviceInfo.macAddress();
                 } else {
-                    description = networkDevice.macAddress() + " (" + networkDevice.macAddressManufacturer() + ")";
+                    description = networkDeviceInfo.macAddress() + " (" + networkDeviceInfo.macAddressManufacturer() + ")";
                 }
 
                 ThingDescriptor descriptor(wallbeEcoThingClassId, title, description);
 
                 // Check if we already have set up this device
-                Things existingThings = myThings().filterByParam(wallbeEcoThingIpParamTypeId, networkDevice.address().toString());
+                Things existingThings = myThings().filterByParam(wallbeEcoThingIpParamTypeId, networkDeviceInfo.address().toString());
                 if (existingThings.count() == 1) {
-                    qCDebug(dcWallbe()) << "This thing already exists in the system." << existingThings.first() << networkDevice;
+                    qCDebug(dcWallbe()) << "This thing already exists in the system." << existingThings.first() << networkDeviceInfo;
                     descriptor.setThingId(existingThings.first()->id());
                 }
 
                 ParamList params;
-                params << Param(wallbeEcoThingIpParamTypeId, networkDevice.address().toString());
-                params << Param(wallbeEcoThingMacParamTypeId, networkDevice.macAddress());
+                params << Param(wallbeEcoThingIpParamTypeId, networkDeviceInfo.address().toString());
+                params << Param(wallbeEcoThingMacParamTypeId, networkDeviceInfo.macAddress());
                 descriptor.setParams(params);
                 info->addThingDescriptor(descriptor);
             }

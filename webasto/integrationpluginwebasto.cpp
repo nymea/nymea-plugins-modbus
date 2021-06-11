@@ -82,42 +82,48 @@ void IntegrationPluginWebasto::init()
 void IntegrationPluginWebasto::discoverThings(ThingDiscoveryInfo *info)
 {
     if (info->thingClassId() == liveWallboxThingClassId) {
+        if (!hardwareManager()->networkDeviceDiscovery()->available()) {
+            qCWarning(dcWebasto()) << "Failed to discover network devices. The network device discovery is not available.";
+            info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("The discovery is not available."));
+            return;
+        }
+
         qCDebug(dcWebasto()) << "Discover things";
         NetworkDeviceDiscoveryReply *discoveryReply = hardwareManager()->networkDeviceDiscovery()->discover();
         connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
             ThingDescriptors descriptors;
-            qCDebug(dcWebasto()) << "Discovery finished. Found" << discoveryReply->networkDevices().count() << "devices";
-            foreach (const NetworkDevice &networkDevice, discoveryReply->networkDevices()) {
-                qCDebug(dcWebasto()) << networkDevice;
-                if (!networkDevice.hostName().contains("webasto", Qt::CaseSensitivity::CaseInsensitive))
+            qCDebug(dcWebasto()) << "Discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "devices";
+            foreach (const NetworkDeviceInfo &networkDeviceInfo, discoveryReply->networkDeviceInfos()) {
+                qCDebug(dcWebasto()) << networkDeviceInfo;
+                if (!networkDeviceInfo.hostName().contains("webasto", Qt::CaseSensitivity::CaseInsensitive))
                     continue;
 
                 QString title = "Wallbox ";
-                if (networkDevice.hostName().isEmpty()) {
-                    title += networkDevice.address().toString();
+                if (networkDeviceInfo.hostName().isEmpty()) {
+                    title += networkDeviceInfo.address().toString();
                 } else {
-                    title += networkDevice.address().toString() + " (" + networkDevice.hostName() + ")";
+                    title += networkDeviceInfo.address().toString() + " (" + networkDeviceInfo.hostName() + ")";
                 }
 
                 QString description;
-                if (networkDevice.macAddressManufacturer().isEmpty()) {
-                    description = networkDevice.macAddress();
+                if (networkDeviceInfo.macAddressManufacturer().isEmpty()) {
+                    description = networkDeviceInfo.macAddress();
                 } else {
-                    description = networkDevice.macAddress() + " (" + networkDevice.macAddressManufacturer() + ")";
+                    description = networkDeviceInfo.macAddress() + " (" + networkDeviceInfo.macAddressManufacturer() + ")";
                 }
 
                 ThingDescriptor descriptor(liveWallboxThingClassId, title, description);
 
                 // Check if we already have set up this device
-                Things existingThings = myThings().filterByParam(liveWallboxThingIpAddressParamTypeId, networkDevice.address().toString());
+                Things existingThings = myThings().filterByParam(liveWallboxThingIpAddressParamTypeId, networkDeviceInfo.address().toString());
                 if (existingThings.count() == 1) {
-                    qCDebug(dcWebasto()) << "This thing already exists in the system." << existingThings.first() << networkDevice;
+                    qCDebug(dcWebasto()) << "This thing already exists in the system." << existingThings.first() << networkDeviceInfo;
                     descriptor.setThingId(existingThings.first()->id());
                 }
 
                 ParamList params;
-                params << Param(liveWallboxThingIpAddressParamTypeId, networkDevice.address().toString());
-                params << Param(liveWallboxThingMacAddressParamTypeId, networkDevice.macAddress());
+                params << Param(liveWallboxThingIpAddressParamTypeId, networkDeviceInfo.address().toString());
+                params << Param(liveWallboxThingMacAddressParamTypeId, networkDeviceInfo.macAddress());
                 descriptor.setParams(params);
                 info->addThingDescriptor(descriptor);
             }
