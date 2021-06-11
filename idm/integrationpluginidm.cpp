@@ -39,39 +39,45 @@ IntegrationPluginIdm::IntegrationPluginIdm()
 
 void IntegrationPluginIdm::discoverThings(ThingDiscoveryInfo *info)
 {
+    if (!hardwareManager()->networkDeviceDiscovery()->available()) {
+        qCWarning(dcIdm()) << "Failed to discover network devices. The network device discovery is not available.";
+        info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("The discovery is not available."));
+        return;
+    }
+
     qCDebug(dcIdm()) << "Discovering network...";
     NetworkDeviceDiscoveryReply *discoveryReply = hardwareManager()->networkDeviceDiscovery()->discover();
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
         ThingDescriptors descriptors;
-        qCDebug(dcIdm()) << "Discovery finished. Found" << discoveryReply->networkDevices().count() << "devices";
-        foreach (const NetworkDevice &networkDevice, discoveryReply->networkDevices()) {
-            qCDebug(dcIdm()) << networkDevice;
+        qCDebug(dcIdm()) << "Discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "devices";
+        foreach (const NetworkDeviceInfo &networkDeviceInfo, discoveryReply->networkDeviceInfos()) {
+            qCDebug(dcIdm()) << networkDeviceInfo;
             QString title;
-            if (networkDevice.hostName().isEmpty()) {
-                title += networkDevice.address().toString();
+            if (networkDeviceInfo.hostName().isEmpty()) {
+                title += networkDeviceInfo.address().toString();
             } else {
-                title += networkDevice.address().toString() + " (" + networkDevice.hostName() + ")";
+                title += networkDeviceInfo.address().toString() + " (" + networkDeviceInfo.hostName() + ")";
             }
 
             QString description;
-            if (networkDevice.macAddressManufacturer().isEmpty()) {
-                description = networkDevice.macAddress();
+            if (networkDeviceInfo.macAddressManufacturer().isEmpty()) {
+                description = networkDeviceInfo.macAddress();
             } else {
-                description = networkDevice.macAddress() + " (" + networkDevice.macAddressManufacturer() + ")";
+                description = networkDeviceInfo.macAddress() + " (" + networkDeviceInfo.macAddressManufacturer() + ")";
             }
 
             ThingDescriptor descriptor(navigator2ThingClassId, title, description);
 
             // Check if we already have set up this device
-            Things existingThings = myThings().filterByParam(navigator2ThingMacAddressParamTypeId, networkDevice.macAddress());
+            Things existingThings = myThings().filterByParam(navigator2ThingMacAddressParamTypeId, networkDeviceInfo.macAddress());
             if (existingThings.count() == 1) {
-                qCDebug(dcIdm()) << "This thing already exists in the system." << existingThings.first() << networkDevice;
+                qCDebug(dcIdm()) << "This thing already exists in the system." << existingThings.first() << networkDeviceInfo;
                 descriptor.setThingId(existingThings.first()->id());
             }
 
             ParamList params;
-            params << Param(navigator2ThingMacAddressParamTypeId, networkDevice.macAddress());
-            params << Param(navigator2ThingIpAddressParamTypeId, networkDevice.address().toString());
+            params << Param(navigator2ThingMacAddressParamTypeId, networkDeviceInfo.macAddress());
+            params << Param(navigator2ThingIpAddressParamTypeId, networkDeviceInfo.address().toString());
             descriptor.setParams(params);
             info->addThingDescriptor(descriptor);
         }
