@@ -59,7 +59,6 @@ public:
 
     int timeout() const;
     void setTimeout(int timeout);
-    int timeout();
 
     QString errorString() const;
     QModbusDevice::Error error() const;
@@ -105,9 +104,9 @@ signals:
 
     void writeRequestExecuted(const QUuid &requestId, bool success);
     void writeRequestError(const QUuid &requestId, const QString &error);
-    void readRequestError(const QUuid &requestId, const QString &error);
 
     void readRequestExecuted(const QUuid &requestId, bool success);
+    void readRequestError(const QUuid &requestId, const QString &error);
 
     void receivedCoil(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values);
     void receivedDiscreteInput(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values);
