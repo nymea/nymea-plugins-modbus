@@ -48,34 +48,34 @@ void IntegrationPluginMTec::discoverThings(ThingDiscoveryInfo *info)
     // Perform a network device discovery and filter for "go-eCharger" hosts
     NetworkDeviceDiscoveryReply *discoveryReply = hardwareManager()->networkDeviceDiscovery()->discover();
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
-        foreach (const NetworkDevice &networkDevice, discoveryReply->networkDevices()) {
+        foreach (const NetworkDeviceInfo &networkDeviceInfo, discoveryReply->networkDeviceInfos()) {
 
-            qCDebug(dcMTec()) << "Found" << networkDevice;
+            qCDebug(dcMTec()) << "Found" << networkDeviceInfo;
 
             QString title;
-            if (networkDevice.hostName().isEmpty()) {
-                title = networkDevice.address().toString();
+            if (networkDeviceInfo.hostName().isEmpty()) {
+                title = networkDeviceInfo.address().toString();
             } else {
-                title = networkDevice.hostName() + " (" + networkDevice.address().toString() + ")";
+                title = networkDeviceInfo.hostName() + " (" + networkDeviceInfo.address().toString() + ")";
             }
 
             QString description;
-            if (networkDevice.macAddressManufacturer().isEmpty()) {
-                description = networkDevice.macAddress();
+            if (networkDeviceInfo.macAddressManufacturer().isEmpty()) {
+                description = networkDeviceInfo.macAddress();
             } else {
-                description = networkDevice.macAddress() + " (" + networkDevice.macAddressManufacturer() + ")";
+                description = networkDeviceInfo.macAddress() + " (" + networkDeviceInfo.macAddressManufacturer() + ")";
             }
 
             ThingDescriptor descriptor(mtecThingClassId, title, description);
             ParamList params;
-            params << Param(mtecThingIpAddressParamTypeId, networkDevice.address().toString());
-            params << Param(mtecThingMacAddressParamTypeId, networkDevice.macAddress());
+            params << Param(mtecThingIpAddressParamTypeId, networkDeviceInfo.address().toString());
+            params << Param(mtecThingMacAddressParamTypeId, networkDeviceInfo.macAddress());
             descriptor.setParams(params);
 
             // Check if we already have set up this device
-            Things existingThings = myThings().filterByParam(mtecThingMacAddressParamTypeId, networkDevice.macAddress());
+            Things existingThings = myThings().filterByParam(mtecThingMacAddressParamTypeId, networkDeviceInfo.macAddress());
             if (existingThings.count() == 1) {
-                qCDebug(dcMTec()) << "This heat pump already exists in the system!" << networkDevice;
+                qCDebug(dcMTec()) << "This heat pump already exists in the system!" << networkDeviceInfo;
                 descriptor.setThingId(existingThings.first()->id());
             }
 
