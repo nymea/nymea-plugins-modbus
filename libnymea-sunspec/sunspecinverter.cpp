@@ -32,33 +32,27 @@
 
 #include <QTimer>
 
-SunSpecInverter::SunSpecInverter(SunSpec *sunspec, SunSpec::ModelId modelId, int modbusAddress) :
-    QObject(sunspec),
-    m_connection(sunspec),
-    m_id(modelId),
-    m_modelModbusStartRegister(modbusAddress)
+SunSpecInverter::SunSpecInverter(SunSpec *sunspec, SunSpec::ModelId modelId, int modbusStartRegister, QObject *parent) :
+    SunSpecDevice(sunspec, modelId, modbusStartRegister, parent)
 {
-    qCDebug(dcSunSpec()) << "SunSpecInverter: Setting up inverter";
+    qCDebug(dcSunSpec()) << "Inverter: Setting up inverter";
     connect(m_connection, &SunSpec::modelDataBlockReceived, this, &SunSpecInverter::onModelDataBlockReceived);
-}
-
-SunSpec::ModelId SunSpecInverter::modelId()
-{
-    return m_id;
 }
 
 void SunSpecInverter::init()
 {
-    qCDebug(dcSunSpec()) << "SunSpecInverter: Init";
-    m_connection->readModelHeader(m_modelModbusStartRegister);
+    qCDebug(dcSunSpec()) << "Inverter: Initialize...";
     connect(m_connection, &SunSpec::modelHeaderReceived, this, [this] (uint modbusAddress, SunSpec::ModelId modelId, uint length) {
-        if (modelId == m_id) {
-            qCDebug(dcSunSpec()) << "SunSpecInverter: Model Header received, modbus address:" << modbusAddress << "model Id:" << modelId << "length:" << length;
+        if (modelId == m_modelId) {
+            qCDebug(dcSunSpec()) << "Inverter: Model Header received, modbus address:" << modbusAddress << "model Id:" << modelId << "length:" << length;
             m_modelLength = length;
-            emit initFinished(true);
             m_initFinishedSuccess = true;
+            emit initFinished(true);
         }
     });
+
+    readModelHeader();
+
     QTimer::singleShot(10000, this,[this] {
         if (!m_initFinishedSuccess) {
             emit initFinished(false);
@@ -66,10 +60,16 @@ void SunSpecInverter::init()
     });
 }
 
-void SunSpecInverter::getInverterModelDataBlock()
+void SunSpecInverter::readModelHeader()
 {
-    qCDebug(dcSunSpec()) << "SunSpecInverter: get inverter model data block, modbus register" << m_modelModbusStartRegister << "length" << m_modelLength;
-    m_connection->readModelDataBlock(m_modelModbusStartRegister, m_modelLength);
+    qCDebug(dcSunSpec()) << "Inverter: get inverter model header from modbus register" << m_modbusStartRegister;
+    m_connection->readModelHeader(m_modbusStartRegister);
+}
+
+void SunSpecInverter::readBlockData()
+{
+    qCDebug(dcSunSpec()) << "Inverter: read inverter model data block, modbus register" << m_modbusStartRegister << "length" << m_modelLength;
+    m_connection->readModelDataBlock(m_modbusStartRegister, m_modelLength);
 }
 
 SunSpecInverter::SunSpecEvent1 SunSpecInverter::bitfieldToSunSpecEvent1(quint16 register0, quint16 register1)
@@ -96,25 +96,19 @@ SunSpecInverter::SunSpecEvent1 SunSpecInverter::bitfieldToSunSpecEvent1(quint16 
     return event1;
 }
 
-void SunSpecInverter::getInverterModelHeader()
-{
-    qCDebug(dcSunSpec()) << "SunSpecInverter: get inverter model header, modbus register" << m_modelModbusStartRegister;
-    m_connection->readModelHeader(m_modelModbusStartRegister);
-}
-
 void SunSpecInverter::onModelDataBlockReceived(SunSpec::ModelId modelId, uint length, QVector<quint16> data)
 {
-    Q_UNUSED(length)
-    if (modelId != m_id) {
+    if (modelId != m_modelId) {
         return;
     }
-    if (length < m_modelLength) {
-        qCDebug(dcSunSpec()) << "SunSpecInverter: on model data block received, model length is too short" << length;
-        return;
-    }
-    InverterData inverterData;
 
-    qCDebug(dcSunSpec()) << "SunSpecInverter: Received" << modelId;
+    if (length < m_modelLength) {
+        qCDebug(dcSunSpec()) << "Inverter: on model data block received, model length is too short" << length;
+        return;
+    }
+
+    qCDebug(dcSunSpec()) << "Inverter: Received data block for" << modelId;
+    InverterData inverterData;
     switch (modelId) {
     case SunSpec::ModelIdInverterSinglePhase:
     case SunSpec::ModelIdInverterSplitPhase:

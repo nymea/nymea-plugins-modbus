@@ -139,7 +139,7 @@ void SunSpec::findBaseRegister()
     validBaseRegisters.append(40000);
     validBaseRegisters.append(50000);
 
-    Q_FOREACH (int baseRegister, validBaseRegisters) {
+    foreach (int baseRegister, validBaseRegisters) {
         qCDebug(dcSunSpec()) << "   - Searching address" << baseRegister;
         QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, baseRegister, 2);
         if (QModbusReply *reply = m_modbusTcpClient->sendReadRequest(request, m_slaveId)) {

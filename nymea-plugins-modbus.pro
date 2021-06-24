@@ -9,6 +9,7 @@ PLUGIN_DIRS = \
     energymeters            \ 
     modbuscommander         \
     mypv                    \
+    solaredge               \
     sunspec                 \
     unipi                   \
     idm                     \

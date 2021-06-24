@@ -32,9 +32,9 @@
 #define SUNSPECINVERTER_H
 
 #include <QObject>
-#include "sunspec.h"
+#include "sunspecdevice.h"
 
-class SunSpecInverter : public QObject
+class SunSpecInverter : public SunSpecDevice
 {
     Q_OBJECT
 public:
@@ -161,18 +161,14 @@ public:
         SunSpec::SunSpecOperatingState operatingState;
     };
 
-    SunSpecInverter(SunSpec *sunspec, SunSpec::ModelId modelId, int modbusAddress);
-    SunSpec::ModelId modelId();
-    void init();
-    void getInverterModelDataBlock();
+    SunSpecInverter(SunSpec *sunspec, SunSpec::ModelId modelId, int modbusStartRegister, QObject *parent = nullptr);
+    ~SunSpecInverter() override = default;
+
+    void init() override;
+    void readModelHeader() override;
+    void readBlockData() override;
 
 private:
-    SunSpec *m_connection = nullptr;
-    SunSpec::ModelId m_id;
-    uint m_modelLength = 0;
-    uint m_modelModbusStartRegister = 40000;
-    bool m_initFinishedSuccess = false;
-
     SunSpecEvent1 bitfieldToSunSpecEvent1(quint16 register0, quint16 register1);
     void getInverterModelHeader();
 
@@ -180,7 +176,6 @@ private slots:
     void onModelDataBlockReceived(SunSpec::ModelId mapId, uint mapLength, QVector<quint16> data);
 
 signals:
-    void initFinished(bool success);
     void inverterDataReceived(InverterData data);
 };
 

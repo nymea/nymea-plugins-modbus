@@ -32,13 +32,13 @@
 #define SUNSPECMETER_H
 
 #include <QObject>
-#include "sunspec.h"
+#include "sunspecdevice.h"
 
-class SunSpecMeter : public QObject
+class SunSpecMeter : public SunSpecDevice
 {
     Q_OBJECT
-public:
 
+public:
     enum MeterEventFlags {
         MeterEventPowerFailure = 2,
         MeterEventUnderVoltage,
@@ -143,24 +143,17 @@ public:
         quint32 meterEventFlags;        // MeterEventFlags
     };
 
-    SunSpecMeter(SunSpec *sunspec, SunSpec::ModelId modelId, int modbusAddress);
-    SunSpec::ModelId modelId();
-    void init();
-    void getMeterModelHeader();
-    void getMeterModelDataBlock();
+    SunSpecMeter(SunSpec *connection, SunSpec::ModelId modelId, int modbusStartAddress, QObject *parent = nullptr);
+    ~SunSpecMeter() override = default;
 
-private:
-    SunSpec *m_connection = nullptr;
-    SunSpec::ModelId m_id = SunSpec::ModelIdDeltaConnectThreePhaseMeter;
-    uint m_modelLength = 0;
-    uint m_modelModbusStartRegister = 40000;
-    bool m_initFinishedSuccess = false;
+    void init() override;
+    void readModelHeader() override;
+    void readBlockData() override;
 
 private slots:
    void onModelDataBlockReceived(SunSpec::ModelId modelId, uint length, QVector<quint16> data);
 
 signals:
-    void initFinished(bool success);
     void meterDataReceived(const MeterData &data);
 };
 

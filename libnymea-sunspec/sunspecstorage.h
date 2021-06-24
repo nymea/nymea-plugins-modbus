@@ -32,24 +32,12 @@
 #define SUNSPECSTORAGE_H
 
 #include <QObject>
-#include "sunspec.h"
+#include "sunspecdevice.h"
 
-class SunSpecStorage : public QObject
+class SunSpecStorage : public SunSpecDevice
 {
     Q_OBJECT
 public:
-    SunSpecStorage(SunSpec *sunspec, SunSpec::ModelId modelId, int modbusAddress);
-
-    SunSpec::ModelId modelId();
-    void init();
-    void getStorageModelHeader();
-    void getStorageModelDataBlock();
-
-    QUuid setGridCharging(bool enabled);
-    QUuid setDischargingRate(float rate);
-    QUuid setChargingRate(float rate);
-    QUuid setStorageControlMode(bool chargingEnabled, bool dischargingEnabled);
-
     enum StorageControl {
         StorageControlHold      = 0,
         StorageControlCharge    = 1,
@@ -128,13 +116,19 @@ public:
         GridCharge ChaGriSet;   // 0 = PV, 1 = Grid
     };
 
-private:
-    SunSpec *m_connection = nullptr;
-    SunSpec::ModelId m_id = SunSpec::ModelIdEnergyStorageBaseModel;
-    uint m_modelLength = 0;
-    uint m_modelModbusStartRegister = 40000;
-    bool m_initFinishedSuccess = false;
+    SunSpecStorage(SunSpec *connection, SunSpec::ModelId modelId, int modbusStartAddress, QObject *parent = nullptr);
+    ~SunSpecStorage() override = default;
 
+    void init() override;
+    void readModelHeader() override;
+    void readBlockData() override;
+
+    QUuid setGridCharging(bool enabled);
+    QUuid setDischargingRate(float rate);
+    QUuid setChargingRate(float rate);
+    QUuid setStorageControlMode(bool chargingEnabled, bool dischargingEnabled);
+
+private:
     // Scale factors needed to perform write requests
     bool m_scaleFactorsSet = false;
     quint16 m_WChaMax_SF        = 0;

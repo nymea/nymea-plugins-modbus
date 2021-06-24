@@ -1,0 +1,12 @@
+{
+    "title": "SolarEdge",
+    "tagline": "SolarEdge plugin.",
+    "icon": "solaredge.png",
+    "stability": "consumer",
+    "offline": true,
+    "technologies": [
+	"network"
+    ],
+    "categories": [
+    ]
+}

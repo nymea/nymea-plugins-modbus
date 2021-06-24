@@ -184,13 +184,13 @@ public:
     void readModelHeader(uint modbusAddress);
     void readModelDataBlock(uint modbusAddress, uint modelLength); //modbusAddress = model start address, model length is without header
 
-    float convertToFloatWithSSF(quint32 rawValue, quint16 sunssf);
-    quint32 convertFromFloatWithSSF(float value, quint16 sunssf);
+    static float convertToFloatWithSSF(quint32 rawValue, quint16 sunssf);
+    static quint32 convertFromFloatWithSSF(float value, quint16 sunssf);
 
-    float convertFloatValues(quint16 rawValue0, quint16 rawValue1);
-    QByteArray convertModbusRegister(const uint16_t &modbusData);
-    QBitArray convertModbusRegisterBits(const uint16_t &modbusData);
-    QByteArray convertModbusRegisters(const QVector<quint16> &modbusData, int offset, int size);
+    static float convertFloatValues(quint16 rawValue0, quint16 rawValue1);
+    static QByteArray convertModbusRegister(const uint16_t &modbusData);
+    static QBitArray convertModbusRegisterBits(const uint16_t &modbusData);
+    static QByteArray convertModbusRegisters(const QVector<quint16> &modbusData, int offset, int size);
 
     QUuid writeHoldingRegister(uint registerAddress, quint16 value);
     QUuid writeHoldingRegisters(uint registerAddress, const QVector<quint16> &values);

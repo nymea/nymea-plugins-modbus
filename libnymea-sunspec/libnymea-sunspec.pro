@@ -8,12 +8,14 @@ TEMPLATE = lib
 
 SOURCES += \
     sunspec.cpp \
+    sunspecdevice.cpp \
     sunspecinverter.cpp \
     sunspecmeter.cpp \
     sunspecstorage.cpp
 
 HEADERS += \
     sunspec.h \
+    sunspecdevice.h \
     sunspecinverter.h \
     sunspecmeter.h \
     sunspecstorage.h

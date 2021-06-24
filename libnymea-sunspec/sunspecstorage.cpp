@@ -30,33 +30,27 @@
 
 #include "sunspecstorage.h"
 
-SunSpecStorage::SunSpecStorage(SunSpec *sunspec, SunSpec::ModelId modelId, int modbusAddress) :
-    QObject(sunspec),
-    m_connection(sunspec),
-    m_id(modelId),
-    m_modelModbusStartRegister(modbusAddress)
+SunSpecStorage::SunSpecStorage(SunSpec *connection, SunSpec::ModelId modelId, int modbusStartAddress, QObject *parent) :
+    SunSpecDevice(connection, modelId, modbusStartAddress, parent)
 {
-    qCDebug(dcSunSpec()) << "SunSpecStorage: Setting up storage";
+    qCDebug(dcSunSpec()) << "Storage: Setting up storage";
     connect(m_connection, &SunSpec::modelDataBlockReceived, this, &SunSpecStorage::onModelDataBlockReceived);
-}
-
-SunSpec::ModelId SunSpecStorage::modelId()
-{
-    return m_id;
 }
 
 void SunSpecStorage::init()
 {
-    qCDebug(dcSunSpec()) << "SunSpecStorage: Init";
-    getStorageModelHeader();
+    qCDebug(dcSunSpec()) << "Storage: Initialize...";
     connect(m_connection, &SunSpec::modelHeaderReceived, this, [this] (uint modbusAddress, SunSpec::ModelId modelId, uint length) {
-        if (modelId == m_id) {
-            qCDebug(dcSunSpec()) << "SunSpecStorager: Model header received, modbus address:" << modbusAddress << "model Id:" << modelId << "length:" << length;
+        if (modelId == m_modelId) {
+            qCDebug(dcSunSpec()) << "Storager: Model header received, modbus address:" << modbusAddress << "model Id:" << modelId << "length:" << length;
             m_modelLength = length;
             emit initFinished(true);
             m_initFinishedSuccess = true;
         }
     });
+
+    readModelHeader();
+
     QTimer::singleShot(10000, this, [this] {
         if (!m_initFinishedSuccess) {
             emit initFinished(false);
@@ -64,16 +58,16 @@ void SunSpecStorage::init()
     });
 }
 
-void SunSpecStorage::getStorageModelDataBlock()
+void SunSpecStorage::readModelHeader()
 {
-    qCDebug(dcSunSpec()) << "SunSpecStorage: get storage model data block, modbus register" << m_modelModbusStartRegister << "length" << m_modelLength;
-    m_connection->readModelDataBlock(m_modelModbusStartRegister, m_modelLength);
+    qCDebug(dcSunSpec()) << "Storage: get storage model header, modbus register" << m_modbusStartRegister << "length" << m_modelLength;
+    m_connection->readModelHeader(m_modbusStartRegister);
 }
 
-void SunSpecStorage::getStorageModelHeader()
+void SunSpecStorage::readBlockData()
 {
-    qCDebug(dcSunSpec()) << "SunSpecStorage: get storage model header, modbus register" << m_modelModbusStartRegister << "length" << m_modelLength;
-    m_connection->readModelHeader(m_modelModbusStartRegister);
+    qCDebug(dcSunSpec()) << "Storage: get storage model data block, modbus register" << m_modbusStartRegister << "length" << m_modelLength;
+    m_connection->readModelDataBlock(m_modbusStartRegister, m_modelLength);
 }
 
 QUuid SunSpecStorage::setGridCharging(bool enabled)
@@ -84,7 +78,7 @@ QUuid SunSpecStorage::setGridCharging(bool enabled)
     PV (charging from grid 0 disabled)
     GRID (charging from 1 grid enabled*/
 
-    uint registerAddress = m_modelModbusStartRegister + Model124Optional::Model124ChaGriSet;
+    uint registerAddress = m_modbusStartRegister + Model124Optional::Model124ChaGriSet;
     quint16 value = enabled;
     return m_connection->writeHoldingRegister(registerAddress, value);
 }
@@ -95,21 +89,21 @@ QUuid SunSpecStorage::setStorageControlMode(bool chargingEnabled, bool dischargi
     quint16 value = ((static_cast<quint16>(chargingEnabled)) |
                      (static_cast<quint16>(dischargingEnabled) << 1)) ;
 
-    uint modbusRegister = m_modelModbusStartRegister + Model124::Model124StorCtl_Mod;
+    uint modbusRegister = m_modbusStartRegister + Model124::Model124StorCtl_Mod;
     return m_connection->writeHoldingRegister(modbusRegister, value);
 }
 
 QUuid SunSpecStorage::setChargingRate(float rate)
 {
     if (!m_scaleFactorsSet) {
-        qCWarning(dcSunSpec()) << "SunSpecStorage: Set charging rate, scale factors are not set";
+        qCWarning(dcSunSpec()) << "Storage: Set charging rate, scale factors are not set";
         return "";
     }
     if (rate < 0.00 || rate > 100.00) {
-        qCWarning(dcSunSpec()) << "SunSpecStorage: Set charging rate, rate out of boundaries [0, 100]";
+        qCWarning(dcSunSpec()) << "Storage: Set charging rate, rate out of boundaries [0, 100]";
         return "";
     }
-    uint modbusRegister = m_modelModbusStartRegister + Model124::Model124WChaGra;
+    uint modbusRegister = m_modbusStartRegister + Model124::Model124WChaGra;
     quint16 value = m_connection->convertFromFloatWithSSF(rate, m_WChaDisChaGra_SF);
     return m_connection->writeHoldingRegister(modbusRegister, value);
 }
@@ -117,20 +111,20 @@ QUuid SunSpecStorage::setChargingRate(float rate)
 QUuid SunSpecStorage::setDischargingRate(float rate)
 {
     if (!m_scaleFactorsSet) {
-        qCWarning(dcSunSpec()) << "SunSpecStorage: Set discharging rate, scale factors are not set";
+        qCWarning(dcSunSpec()) << "Storage: Set discharging rate, scale factors are not set";
     }
     if (rate < 0.00 || rate > 100.00) {
-        qCWarning(dcSunSpec()) << "SunSpecStorage: Set doscharging rate, rate out of boundaries [0, 100]";
+        qCWarning(dcSunSpec()) << "Storage: Set doscharging rate, rate out of boundaries [0, 100]";
         return "";
     }
-    uint modbusRegister = m_modelModbusStartRegister + Model124::Model124WDisChaGra;
+    uint modbusRegister = m_modbusStartRegister + Model124::Model124WDisChaGra;
     quint16 value = m_connection->convertFromFloatWithSSF(rate, m_WChaDisChaGra_SF);
     return m_connection->writeHoldingRegister(modbusRegister, value);
 }
 
 void SunSpecStorage::onModelDataBlockReceived(SunSpec::ModelId modelId, uint length, const QVector<quint16> &data)
 {
-    if (modelId != m_id) {
+    if (modelId != m_modelId) {
         return;
     }
 
@@ -139,7 +133,7 @@ void SunSpecStorage::onModelDataBlockReceived(SunSpec::ModelId modelId, uint len
         return;
     }
 
-    qCDebug(dcSunSpec()) << "SunSpecStorage: Received" << modelId;
+    qCDebug(dcSunSpec()) << "Storage: Received" << modelId;
     switch (modelId) {
     case SunSpec::ModelIdStorage: {
         StorageData mandatory;
