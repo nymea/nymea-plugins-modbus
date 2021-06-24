@@ -13,6 +13,39 @@ Build-depends: debhelper (>= 9.0.0),
 Standards-Version: 3.9.3
 
 
+Package: libnymea-sunspec1
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
+Description: nymea.io sunspec library
+ The nymea daemon is a plugin based IoT (Internet of Things) server. The
+ server works like a translator for devices, things and services and
+ allows them to interact.
+ With the powerful rule engine you are able to connect any device available
+ in the system and create individual scenes and behaviors for your environment.
+ .
+ This package will install the nymea.io sunspec library
+
+Package: libnymea-sunspec-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         libnymea-sunspec1 (= ${binary:Version}),
+         pkg-config,
+         qtbase5-dev,
+Description: The main libraries and header files for developing with nymea sunspec.
+ The nymea daemon is a plugin based IoT (Internet of Things) server. The
+ server works like a translator for devices, things and services and
+ allows them to interact.
+ With the powerful rule engine you are able to connect any device available
+ in the system and create individual scenes and behaviors for your environment.
+ .
+ This package will install the development files for nymea sunspec.
+
+
 Package: nymea-plugin-drexelundweiss
 Architecture: any
 Section: libs
@@ -123,6 +156,7 @@ Description: nymea.io plugin for SunSpec Modbus devices.
  in the system and create individual scenes and behaviors for your environment.
  .
  This package will install the nymea.io plugin for SunSpec.
+
 
 Package: nymea-plugin-unipi2
 Architecture: any

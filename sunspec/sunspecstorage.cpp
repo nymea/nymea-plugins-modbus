@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2020, nymea GmbH
+* Copyright 2013 - 2021, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -31,145 +31,144 @@
 #include "sunspecstorage.h"
 #include "extern-plugininfo.h"
 
-SunSpecStorage::SunSpecStorage(SunSpec *sunspec, SunSpec::ModelId modelId, int modbusAddress) :
-    QObject(sunspec),
-    m_connection(sunspec),
-    m_id(modelId),
-    m_modelModbusStartRegister(modbusAddress)
+#include <models/sunspecstoragemodel.h>
+
+SunSpecStorage::SunSpecStorage(Thing *thing, SunSpecModel *model, QObject *parent) :
+    SunSpecThing(thing, model, parent)
 {
-    qCDebug(dcSunSpec()) << "SunSpecStorage: Setting up storage";
-    connect(m_connection, &SunSpec::modelDataBlockReceived, this, &SunSpecStorage::onModelDataBlockReceived);
+
 }
 
-SunSpec::ModelId SunSpecStorage::modelId()
+void SunSpecStorage::readBlockData()
 {
-    return m_id;
+    m_model->readBlockData();
 }
 
-void SunSpecStorage::init()
+void SunSpecStorage::executeAction(ThingActionInfo *info)
 {
-    qCDebug(dcSunSpec()) << "SunSpecStorage: Init";
-    getStorageModelHeader();
-    connect(m_connection, &SunSpec::modelHeaderReceived, this, [this] (uint modbusAddress, SunSpec::ModelId modelId, uint length) {
-        if (modelId == m_id) {
-            qCDebug(dcSunSpec()) << "SunSpecStorager: Model header received, modbus address:" << modbusAddress << "model Id:" << modelId << "length:" << length;
-            m_modelLength = length;
-            emit initFinished(true);
-            m_initFinishedSuccess = true;
+    Thing *thing = info->thing();
+    Action action = info->action();
+    SunSpecStorageModel *storage = qobject_cast<SunSpecStorageModel *>(m_model);
+
+    if (action.actionTypeId() == sunspecStorageGridChargingActionTypeId) {
+        bool gridCharging = action.param(sunspecStorageGridChargingActionGridChargingParamTypeId).value().toBool();
+        QModbusReply *reply = storage->setChaGriSet(gridCharging ? SunSpecStorageModel::ChagrisetGrid : SunSpecStorageModel::ChagrisetPv);
+        if (!reply) {
+            info->finish(Thing::ThingErrorHardwareFailure);
+            return;
         }
-    });
-    QTimer::singleShot(10000, this, [this] {
-        if (!m_initFinishedSuccess) {
-            emit initFinished(false);
+
+        connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+        connect(reply, &QModbusReply::finished, info, [info, reply]{
+            if (reply->error() != QModbusDevice::NoError) {
+                info->finish(Thing::ThingErrorHardwareFailure);
+                return;
+            }
+            info->finish(Thing::ThingErrorNoError);
+        });
+    } else if (action.actionTypeId() == sunspecStorageEnableChargingActionTypeId || action.actionTypeId() == sunspecStorageEnableDischargingActionTypeId) {
+        SunSpecStorageModel::Storctl_modFlags controlModeFlags;
+        if (action.param(sunspecStorageEnableChargingActionEnableChargingParamTypeId).value().toBool())
+            controlModeFlags.setFlag(SunSpecStorageModel::Storctl_modCharge);
+
+        if (thing->stateValue(sunspecStorageEnableDischargingStateTypeId).toBool())
+            controlModeFlags.setFlag(SunSpecStorageModel::Storctl_modDiScharge);
+
+        QModbusReply *reply = storage->setStorCtlMod(controlModeFlags);
+        if (!reply) {
+            info->finish(Thing::ThingErrorHardwareFailure);
+            return;
         }
-    });
+        connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+        connect(reply, &QModbusReply::finished, info, [info, reply]{
+            if (reply->error() != QModbusDevice::NoError) {
+                info->finish(Thing::ThingErrorHardwareFailure);
+                return;
+            }
+            info->finish(Thing::ThingErrorNoError);
+        });
+    } else if (action.actionTypeId() == sunspecStorageChargingRateActionTypeId) {
+        QModbusReply *reply = storage->setInWRte(action.param(sunspecStorageChargingRateActionChargingRateParamTypeId).value().toInt());
+        if (!reply) {
+            info->finish(Thing::ThingErrorHardwareFailure);
+            return;
+        }
+        connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+        connect(reply, &QModbusReply::finished, info, [info, reply]{
+            if (reply->error() != QModbusDevice::NoError) {
+                info->finish(Thing::ThingErrorHardwareFailure);
+                return;
+            }
+            info->finish(Thing::ThingErrorNoError);
+        });
+    } else if (action.actionTypeId() == sunspecStorageDischargingRateActionTypeId) {
+        QModbusReply *reply = storage->setOutWRte(action.param(sunspecStorageDischargingRateActionDischargingRateParamTypeId).value().toInt());
+        if (!reply) {
+            info->finish(Thing::ThingErrorHardwareFailure);
+            return;
+        }
+        connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+        connect(reply, &QModbusReply::finished, info, [info, reply]{
+            if (reply->error() != QModbusDevice::NoError) {
+                info->finish(Thing::ThingErrorHardwareFailure);
+                return;
+            }
+            info->finish(Thing::ThingErrorNoError);
+        });
+    } else {
+        Q_ASSERT_X(false, "executeAction", QString("Unhandled action: %1").arg(action.actionTypeId().toString()).toUtf8());
+    }
 }
 
-void SunSpecStorage::getStorageModelDataBlock()
+void SunSpecStorage::onBlockDataUpdated()
 {
-    qCDebug(dcSunSpec()) << "SunSpecStorage: get storage model data block, modbus register" << m_modelModbusStartRegister << "length" << m_modelLength;
-    m_connection->readModelDataBlock(m_modelModbusStartRegister, m_modelLength);
-}
+    SunSpecStorageModel *storage = qobject_cast<SunSpecStorageModel *>(m_model);
+    qCDebug(dcSunSpec()) << m_thing->name() << "block data updated" << storage;
 
-void SunSpecStorage::getStorageModelHeader()
-{
-    qCDebug(dcSunSpec()) << "SunSpecStorage: get storage model header, modbus register" << m_modelModbusStartRegister << "length" << m_modelLength;
-    m_connection->readModelHeader(m_modelModbusStartRegister);
-}
+    m_thing->setStateValue(sunspecStorageConnectedStateTypeId, true);
+    m_thing->setStateValue(sunspecStorageBatteryCriticalStateTypeId, storage->chaState() < 5);
+    m_thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, qRound(storage->chaState()));
+    m_thing->setStateValue(sunspecStorageGridChargingStateTypeId, storage->chaGriSet() == SunSpecStorageModel::ChagrisetGrid);
+    m_thing->setStateValue(sunspecStorageEnableChargingStateTypeId, storage->storCtlMod().testFlag(SunSpecStorageModel::Storctl_modCharge));
+    m_thing->setStateValue(sunspecStorageChargingRateStateTypeId, storage->wChaGra());
+    m_thing->setStateValue(sunspecStorageDischargingRateStateTypeId, storage->wDisChaGra());
 
-QUuid SunSpecStorage::setGridCharging(bool enabled)
-{
-    // Name ChaGriSet
-    /* Setpoint to enable/dis-
-    able charging from grid
-    PV (charging from grid 0 disabled)
-    GRID (charging from 1 grid enabled*/
-
-    uint registerAddress = m_modelModbusStartRegister + Model124Optional::Model124ChaGriSet;
-    quint16 value = enabled;
-    return m_connection->writeHoldingRegister(registerAddress, value);
-}
-
-QUuid SunSpecStorage::setStorageControlMode(bool chargingEnabled, bool dischargingEnabled)
-{
-    // Set charge bit to enable charge limit, set discharge bit to enable discharge limit, set both bits to enable both limits
-    quint16 value = ((static_cast<quint16>(chargingEnabled)) |
-                     (static_cast<quint16>(dischargingEnabled) << 1)) ;
-
-    uint modbusRegister = m_modelModbusStartRegister + Model124::Model124StorCtl_Mod;
-    return m_connection->writeHoldingRegister(modbusRegister, value);
-}
-
-QUuid SunSpecStorage::setChargingRate(float rate)
-{
-    if (!m_scaleFactorsSet) {
-        qCWarning(dcSunSpec()) << "SunSpecStorage: Set charging rate, scale factors are not set";
-        return "";
-    }
-    if (rate < 0.00 || rate > 100.00) {
-        qCWarning(dcSunSpec()) << "SunSpecStorage: Set charging rate, rate out of boundaries [0, 100]";
-        return "";
-    }
-    uint modbusRegister = m_modelModbusStartRegister + Model124::Model124WChaGra;
-    quint16 value = m_connection->convertFromFloatWithSSF(rate, m_WChaDisChaGra_SF);
-    return m_connection->writeHoldingRegister(modbusRegister, value);
-}
-
-QUuid SunSpecStorage::setDischargingRate(float rate)
-{
-    if (!m_scaleFactorsSet) {
-        qCWarning(dcSunSpec()) << "SunSpecStorage: Set discharging rate, scale factors are not set";
-    }
-    if (rate < 0.00 || rate > 100.00) {
-        qCWarning(dcSunSpec()) << "SunSpecStorage: Set doscharging rate, rate out of boundaries [0, 100]";
-        return "";
-    }
-    uint modbusRegister = m_modelModbusStartRegister + Model124::Model124WDisChaGra;
-    quint16 value = m_connection->convertFromFloatWithSSF(rate, m_WChaDisChaGra_SF);
-    return m_connection->writeHoldingRegister(modbusRegister, value);
-}
-
-void SunSpecStorage::onModelDataBlockReceived(SunSpec::ModelId modelId, uint length, const QVector<quint16> &data)
-{
-    if (modelId != m_id) {
-        return;
-    }
-
-    if (length < m_modelLength) {
-        qCDebug(dcSunSpec()) << "SunSpecMeter: on model data block received, model length is too short" << length;
-        return;
-    }
-
-    qCDebug(dcSunSpec()) << "SunSpecStorage: Received" << modelId;
-    switch (modelId) {
-    case SunSpec::ModelIdStorage: {
-        StorageData mandatory;
-        mandatory.WChaMax = m_connection->convertToFloatWithSSF(data[Model124WChaMax], data[Model124WChaMax_SF]);
-        mandatory.WChaGra = m_connection->convertToFloatWithSSF(data[Model124WChaGra], data[Model124WChaDisChaGra_SF]);
-        mandatory.WDisChaGra = m_connection->convertToFloatWithSSF(data[Model124WDisChaGra], data[Model124WChaDisChaGra_SF]);
-        mandatory.StorCtl_Mod_ChargingEnabled = data[Model124StorCtl_Mod]&0x01;
-        mandatory.StorCtl_Mod_DischargingEnabled = data[Model124StorCtl_Mod]&0x02;
-
-        StorageDataOptional optional;
-        optional.VAChaMax  = m_connection->convertToFloatWithSSF(data[Model124VAChaMax], data[Model124VAChaMax_SF]);
-        optional.MinRsvPct = m_connection->convertToFloatWithSSF(data[Model124MinRsvPct], data[Model124MinRsvPct_SF]);
-        optional.ChaState  = m_connection->convertToFloatWithSSF(data[Model124ChaState], data[Model124ChaState_SF]);
-        optional.StorAval  = m_connection->convertToFloatWithSSF(data[Model124StorAval], data[Model124StorAval_SF]);
-        optional.InBatV    = m_connection->convertToFloatWithSSF(data[Model124InBatV], data[Model124InBatV_SF]);
-        optional.ChaSt     = ChargingStatus(data[Model124ChaSt]);
-        optional.OutWRte   = m_connection->convertToFloatWithSSF(data[Model124OutWRte], data[Model124InOutWRte_SF]);
-        optional.InWRte    = m_connection->convertToFloatWithSSF(data[Model124InWRte], data[Model124InOutWRte_SF]);
-        optional.InOutWRte_WinTms  = data[Model124InOutWRte_WinTms];
-        optional.InOutWRte_RvrtTms = data[Model124InOutWRte_RvrtTms];
-        optional.InOutWRte_RmpTms  = data[Model124InOutWRte_RmpTms];
-        optional.ChaGriSet = GridCharge(data[Model124ChaGriSet]);
-        emit storageDataReceived(mandatory, optional);
-    } break;
-    case SunSpec::ModelIdBatteryBaseModel:
-    case SunSpec::ModelIdLithiumIonBatteryModel: {
-        qCDebug(dcSunSpec()) << "Model not yet supported";
-    }
-    default:
+    switch (storage->chaSt()) {
+    case SunSpecStorageModel::ChastOff:
+        m_thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Off");
+        m_thing->setStateValue(sunspecStorageChargingStateTypeId, false);
+        m_thing->setStateValue(sunspecStorageDischargingStateTypeId, false);
+        break;
+    case SunSpecStorageModel::ChastEmpty:
+        m_thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Empty");
+        m_thing->setStateValue(sunspecStorageChargingStateTypeId, false);
+        m_thing->setStateValue(sunspecStorageDischargingStateTypeId, false);
+        break;
+    case SunSpecStorageModel::ChastDischarging:
+        m_thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Discharging");
+        m_thing->setStateValue(sunspecStorageChargingStateTypeId, false);
+        m_thing->setStateValue(sunspecStorageDischargingStateTypeId, true);
+        break;
+    case SunSpecStorageModel::ChastCharging:
+        m_thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Charging");
+        m_thing->setStateValue(sunspecStorageChargingStateTypeId, true);
+        m_thing->setStateValue(sunspecStorageDischargingStateTypeId, false);
+        break;
+    case SunSpecStorageModel::ChastFull:
+        m_thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Full");
+        m_thing->setStateValue(sunspecStorageChargingStateTypeId, false);
+        m_thing->setStateValue(sunspecStorageDischargingStateTypeId, false);
+        break;
+    case SunSpecStorageModel::ChastHolding:
+        m_thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Holding");
+        m_thing->setStateValue(sunspecStorageChargingStateTypeId, false);
+        m_thing->setStateValue(sunspecStorageDischargingStateTypeId, false);
+        break;
+    case SunSpecStorageModel::ChastTesting:
+        m_thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Testing");
+        m_thing->setStateValue(sunspecStorageChargingStateTypeId, false);
+        m_thing->setStateValue(sunspecStorageDischargingStateTypeId, false);
         break;
     }
+
 }
