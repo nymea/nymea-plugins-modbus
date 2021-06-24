@@ -96,6 +96,11 @@ void SunSpec::setNumberOfRetries(uint retries)
     m_modbusTcpClient->setNumberOfRetries(retries);
 }
 
+QModbusTcpClient *SunSpec::modbusTcpClient() const
+{
+    return m_modbusTcpClient;
+}
+
 QHostAddress SunSpec::hostAddress() const
 {
     return m_hostAddress;

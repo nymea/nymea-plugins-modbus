@@ -168,23 +168,14 @@ public:
     void setTimeout(uint milliSeconds);
     void setNumberOfRetries(uint retries);
 
+    QModbusTcpClient *modbusTcpClient() const;
+
     QHostAddress hostAddress() const;
     uint port();
     uint slaveId();
     QString manufacturer();
     QString deviceModel();
     QString serialNumber();
-
-    QHostAddress m_hostAddress;
-    uint m_port;
-    QModbusTcpClient *m_modbusTcpClient = nullptr;
-    int m_slaveId = 1;
-    int m_baseRegister = 40000;
-    bool m_floatingPointRepresentation = false;
-    QString m_manufacturer = "Unknown";
-    QString m_deviceModel  = "Unknown";
-    QString m_serialNumber = "Unknown";
-    QHash<ModelId, int> m_modelList;
 
     void findBaseRegister();
     void findSunSpecModels(const QList<ModelId> &modelIds, uint modbusAddressOffset = 2);
@@ -203,6 +194,18 @@ public:
 
     QUuid writeHoldingRegister(uint registerAddress, quint16 value);
     QUuid writeHoldingRegisters(uint registerAddress, const QVector<quint16> &values);
+
+private:
+    QHostAddress m_hostAddress;
+    uint m_port;
+    QModbusTcpClient *m_modbusTcpClient = nullptr;
+    int m_slaveId = 1;
+    int m_baseRegister = 40000;
+    bool m_floatingPointRepresentation = false;
+    QString m_manufacturer = "Unknown";
+    QString m_deviceModel  = "Unknown";
+    QString m_serialNumber = "Unknown";
+    QHash<ModelId, int> m_modelList;
 
 signals:
     void connectionStateChanged(bool status);
