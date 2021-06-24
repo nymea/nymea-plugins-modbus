@@ -190,6 +190,7 @@ public:
     void readModelHeader(uint modbusAddress);
     void readModelDataBlock(uint modbusAddress, uint modelLength); //modbusAddress = model start address, model length is without header
 
+    float convertToFloatWithSSF(qint16 rawValue, quint16 sunssf);
     float convertToFloatWithSSF(quint16 rawValue, quint16 sunssf);
     float convertToFloatWithSSF(quint32 rawValue, quint16 sunssf);
     quint32 convertFromFloatWithSSF(float value, quint16 sunssf);
