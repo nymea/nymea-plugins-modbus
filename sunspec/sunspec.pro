@@ -1,19 +1,18 @@
 include(../plugins.pri)
-
-QT += \
-    network \
-    serialbus \
+include(../sunspec.pri)
 
 SOURCES += \
     integrationpluginsunspec.cpp \
-    sunspec.cpp \
+    solaredgebattery.cpp \
     sunspecinverter.cpp \
     sunspecmeter.cpp \
-    sunspecstorage.cpp
+    sunspecstorage.cpp \
+    sunspecthing.cpp
 
 HEADERS += \
     integrationpluginsunspec.h \
-    sunspec.h \
+    solaredgebattery.h \
     sunspecinverter.h \
     sunspecmeter.h \
-    sunspecstorage.h
+    sunspecstorage.h \
+    sunspecthing.h
