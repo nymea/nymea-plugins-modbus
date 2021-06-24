@@ -124,11 +124,13 @@ void SunSpecInverter::onModelDataBlockReceived(SunSpec::ModelId modelId, uint le
         inverterData.acPower = m_connection->convertToFloatWithSSF(data[Model10X::Model10XACPower], data[Model10X::Model10XWattScaleFactor]);
         inverterData.lineFrequency = m_connection->convertToFloatWithSSF(data[Model10X::Model10XLineFrequency], data[Model10X::Model10XHerzScaleFactor]);
 
-        quint16 ampereScaleFactor =  data[Model10X::Model10XAmpereScaleFactor];
+        qint16 ampereScaleFactor = static_cast<qint16>(data[Model10X::Model10XAmpereScaleFactor]);
+        qCDebug(dcSunSpec()) << "Ampere scale factor" << ampereScaleFactor << data[Model10X::Model10XAmpereScaleFactor];
         inverterData.phaseACurrent = m_connection->convertToFloatWithSSF(data[Model10X::Model10XPhaseACurrent], ampereScaleFactor);
         inverterData.phaseBCurrent = m_connection->convertToFloatWithSSF(data[Model10X::Model10XPhaseBCurrent], ampereScaleFactor);
         inverterData.phaseCCurrent = m_connection->convertToFloatWithSSF(data[Model10X::Model10XPhaseCCurrent], ampereScaleFactor);
-        quint16 voltageScaleFactor = data[Model10X::Model10XVoltageScaleFactor];
+        qint16 voltageScaleFactor = static_cast<qint16>(data[Model10X::Model10XVoltageScaleFactor]);
+        qCDebug(dcSunSpec()) << "Voltage scale factor" << voltageScaleFactor << data[Model10X::Model10XVoltageScaleFactor];
         inverterData.phaseVoltageAN = m_connection->convertToFloatWithSSF(data[Model10X::Model10XPhaseVoltageAN], voltageScaleFactor);
         inverterData.phaseVoltageBN = m_connection->convertToFloatWithSSF(data[Model10X::Model10XPhaseVoltageBN], voltageScaleFactor);
         inverterData.phaseVoltageCN = m_connection->convertToFloatWithSSF(data[Model10X::Model10XPhaseVoltageCN], voltageScaleFactor);
@@ -136,7 +138,9 @@ void SunSpecInverter::onModelDataBlockReceived(SunSpec::ModelId modelId, uint le
         quint32 acEnergy = ((static_cast<quint32>(data.value(Model10X::Model10XAcEnergy))<<16)|static_cast<quint32>(data.value(Model10X::Model10XAcEnergy+1)));
         inverterData.acEnergy = m_connection->convertToFloatWithSSF(acEnergy, data[Model10X::Model10XWattHoursScaleFactor]);
 
-        inverterData.cabinetTemperature = m_connection->convertToFloatWithSSF(data[Model10X::Model10XCabinetTemperature], data[Model10X::Model10XTemperatureScaleFactor]);
+        qint16 temperatureScaleFactor = static_cast<qint16>(data[Model10X::Model10XTemperatureScaleFactor]);
+        qCDebug(dcSunSpec()) << "Temperature scale factor" << temperatureScaleFactor << data[Model10X::Model10XTemperatureScaleFactor];
+        inverterData.cabinetTemperature = m_connection->convertToFloatWithSSF(data[Model10X::Model10XCabinetTemperature], temperatureScaleFactor);
         inverterData.event1 = bitfieldToSunSpecEvent1(data[Model10X::Model10XEvent1], data[Model10X::Model10XEvent1+1]);
         inverterData.operatingState = SunSpec::SunSpecOperatingState(data[Model10X::Model10XOperatingState]);
         emit inverterDataReceived(inverterData);
