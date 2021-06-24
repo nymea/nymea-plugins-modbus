@@ -32,6 +32,7 @@
 #include "plugininfo.h"
 
 #include "hardwaremanager.h"
+#include "network/networkdevicediscovery.h"
 #include "hardware/modbus/modbusrtumaster.h"
 #include "hardware/modbus/modbusrtuhardwareresource.h"
 
@@ -108,6 +109,50 @@ void IntegrationPluginModbusCommander::discoverThings(ThingDiscoveryInfo *info)
         }
 
         info->finish(Thing::ThingErrorNoError);
+        return;
+    } else if (thingClassId == modbusTCPClientThingClassId) {
+        if (!hardwareManager()->networkDeviceDiscovery()->available()) {
+            qCWarning(dcModbusCommander()) << "Failed to discover network devices. The network device discovery is not available.";
+            info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("The discovery is not available."));
+            return;
+        }
+
+        NetworkDeviceDiscoveryReply *discoveryReply = hardwareManager()->networkDeviceDiscovery()->discover();
+        connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
+            ThingDescriptors descriptors;
+            qCDebug(dcModbusCommander()) << "Discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "devices";
+            foreach (const NetworkDeviceInfo &networkDeviceInfo, discoveryReply->networkDeviceInfos()) {
+                qCDebug(dcModbusCommander()) << networkDeviceInfo;
+                QString title;
+                if (networkDeviceInfo.hostName().isEmpty()) {
+                    title += networkDeviceInfo.address().toString();
+                } else {
+                    title += networkDeviceInfo.address().toString() + " (" + networkDeviceInfo.hostName() + ")";
+                }
+
+                QString description;
+                if (networkDeviceInfo.macAddressManufacturer().isEmpty()) {
+                    description = networkDeviceInfo.macAddress();
+                } else {
+                    description = networkDeviceInfo.macAddress() + " (" + networkDeviceInfo.macAddressManufacturer() + ")";
+                }
+
+                ThingDescriptor descriptor(modbusTCPClientThingClassId, title, description);
+
+                // Check if we already have set up this device
+                Things existingThings = myThings().filterByParam(modbusTCPClientThingIpAddressParamTypeId, networkDeviceInfo.address().toString());
+                if (existingThings.count() == 1) {
+                    qCDebug(dcModbusCommander()) << "This thing already exists in the system." << existingThings.first() << networkDeviceInfo;
+                    descriptor.setThingId(existingThings.first()->id());
+                }
+
+                ParamList params;
+                params << Param(modbusTCPClientThingIpAddressParamTypeId, networkDeviceInfo.address().toString());
+                descriptor.setParams(params);
+                info->addThingDescriptor(descriptor);
+            }
+            info->finish(Thing::ThingErrorNoError);
+        });
         return;
     } else if (thingClassId == discreteInputThingClassId) {
         Q_FOREACH(Thing *clientThing, myThings()){

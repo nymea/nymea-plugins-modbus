@@ -40,14 +40,10 @@ Idm::Idm(const QHostAddress &address, QObject *parent) :
 {
     qCDebug(dcIdm()) << "iDM: Creating iDM connection" << m_hostAddress.toString();
     m_modbusMaster = new ModbusTCPMaster(address, 502, this);
-
-    if (m_modbusMaster) {
-        qCDebug(dcIdm()) << "iDM: Created ModbusTCPMaster";
-        connect(m_modbusMaster, &ModbusTCPMaster::receivedHoldingRegister, this, &Idm::onReceivedHoldingRegister);
-        connect(m_modbusMaster, &ModbusTCPMaster::readRequestError, this, &Idm::onModbusError);
-        connect(m_modbusMaster, &ModbusTCPMaster::writeRequestError, this, &Idm::onModbusError);
-        connect(m_modbusMaster, &ModbusTCPMaster::writeRequestExecuted, this, &Idm::writeRequestExecuted);
-    }
+    connect(m_modbusMaster, &ModbusTCPMaster::receivedHoldingRegister, this, &Idm::onReceivedHoldingRegister);
+    connect(m_modbusMaster, &ModbusTCPMaster::readRequestError, this, &Idm::onModbusError);
+    connect(m_modbusMaster, &ModbusTCPMaster::writeRequestError, this, &Idm::onModbusError);
+    connect(m_modbusMaster, &ModbusTCPMaster::writeRequestExecuted, this, &Idm::writeRequestExecuted);
 }
 
 Idm::~Idm()
@@ -61,21 +57,21 @@ bool Idm::connectDevice()
     return m_modbusMaster->connectDevice();
 }
 
-QHostAddress Idm::getIdmAddress() const
+QHostAddress Idm::address() const
 {
     return m_hostAddress;
 }
 
 void Idm::getStatus()
 {
-    //this request starts an update cycle
+    // This request starts an update cycle
     m_modbusMaster->readHoldingRegister(Idm::modbusUnitID, Idm::OutsideTemperature, 2);
 }
 
 QUuid Idm::setTargetTemperature(double targetTemperature)
 {
-   QVector<uint16_t> value = ModbusHelpers::convertFloatToRegister(targetTemperature);
-   return m_modbusMaster->writeHoldingRegisters(Idm::modbusUnitID, Idm::RegisterList::RoomTemperatureTargetHeatingEcoHKA, value);
+    QVector<uint16_t> value = ModbusHelpers::convertFloatToRegister(targetTemperature);
+    return m_modbusMaster->writeHoldingRegisters(Idm::modbusUnitID, Idm::RegisterList::RoomTemperatureTargetHeatingEcoHKA, value);
 }
 
 void Idm::onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value)

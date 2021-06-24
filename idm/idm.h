@@ -72,7 +72,7 @@ public:
     ~Idm();
 
     bool connectDevice();
-    QHostAddress getIdmAddress() const;
+    QHostAddress address() const;
     QUuid setTargetTemperature(double targetTemperature);
     void getStatus();
 

@@ -28,6 +28,7 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include "network/networkdevicediscovery.h"
 #include "integrationpluginwebasto.h"
 #include "plugininfo.h"
 
@@ -45,61 +46,84 @@ IntegrationPluginWebasto::IntegrationPluginWebasto()
 
 void IntegrationPluginWebasto::init()
 {
-    m_discovery = new Discovery(this);
-    connect(m_discovery, &Discovery::finished, this, [this](const QList<Host> &hosts) {
+    // FIXME: make use of the internal network discovery if the device gets unavailable. For now, commented out since it has not been used
+    // at the moment of changing this.
 
-        foreach (const Host &host, hosts) {
-            if (!host.hostName().contains("webasto", Qt::CaseSensitivity::CaseInsensitive))
-                continue;
+//    m_discovery = new Discovery(this);
+//    connect(m_discovery, &Discovery::finished, this, [this](const QList<Host> &hosts) {
 
-            foreach (Thing *existingThing, myThings()) {
-                if (existingThing->paramValue(liveWallboxThingMacAddressParamTypeId).toString().isEmpty()) {
-                    //This device got probably manually setup, to enable auto rediscovery the MAC address needs to setup
-                    if (existingThing->paramValue(liveWallboxThingIpAddressParamTypeId).toString() == host.address()) {
-                        qCDebug(dcWebasto()) << "Wallbox MAC Address has been discovered" << existingThing->name() << host.macAddress();
-                        existingThing->setParamValue(liveWallboxThingMacAddressParamTypeId, host.macAddress());
+//        foreach (const Host &host, hosts) {
+//            if (!host.hostName().contains("webasto", Qt::CaseSensitivity::CaseInsensitive))
+//                continue;
 
-                    }
-                } else if (existingThing->paramValue(liveWallboxThingMacAddressParamTypeId).toString() == host.macAddress())  {
-                    if (existingThing->paramValue(liveWallboxThingIpAddressParamTypeId).toString() != host.address()) {
-                        qCDebug(dcWebasto()) << "Wallbox IP Address has changed, from"  << existingThing->paramValue(liveWallboxThingIpAddressParamTypeId).toString() << "to" << host.address();
-                        existingThing->setParamValue(liveWallboxThingIpAddressParamTypeId, host.address());
+//            foreach (Thing *existingThing, myThings()) {
+//                if (existingThing->paramValue(liveWallboxThingMacAddressParamTypeId).toString().isEmpty()) {
+//                    //This device got probably manually setup, to enable auto rediscovery the MAC address needs to setup
+//                    if (existingThing->paramValue(liveWallboxThingIpAddressParamTypeId).toString() == host.address()) {
+//                        qCDebug(dcWebasto()) << "Wallbox MAC Address has been discovered" << existingThing->name() << host.macAddress();
+//                        existingThing->setParamValue(liveWallboxThingMacAddressParamTypeId, host.macAddress());
 
-                    } else {
-                        qCDebug(dcWebasto()) << "Wallbox" << existingThing->name() << "IP address has not changed" << host.address();
-                    }
-                    break;
-                }
-            }
-        }
-    });
+//                    }
+//                } else if (existingThing->paramValue(liveWallboxThingMacAddressParamTypeId).toString() == host.macAddress())  {
+//                    if (existingThing->paramValue(liveWallboxThingIpAddressParamTypeId).toString() != host.address()) {
+//                        qCDebug(dcWebasto()) << "Wallbox IP Address has changed, from"  << existingThing->paramValue(liveWallboxThingIpAddressParamTypeId).toString() << "to" << host.address();
+//                        existingThing->setParamValue(liveWallboxThingIpAddressParamTypeId, host.address());
+
+//                    } else {
+//                        qCDebug(dcWebasto()) << "Wallbox" << existingThing->name() << "IP address has not changed" << host.address();
+//                    }
+//                    break;
+//                }
+//            }
+//        }
+//    });
 }
 
 void IntegrationPluginWebasto::discoverThings(ThingDiscoveryInfo *info)
 {
-    qCDebug(dcWebasto()) << "Discover things";
     if (info->thingClassId() == liveWallboxThingClassId) {
-        m_discovery->discoverHosts(25);
-        connect(m_discovery, &Discovery::finished, info, [this, info] (const QList<Host> &hosts) {
+        if (!hardwareManager()->networkDeviceDiscovery()->available()) {
+            qCWarning(dcWebasto()) << "Failed to discover network devices. The network device discovery is not available.";
+            info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("The discovery is not available."));
+            return;
+        }
 
-            foreach (const Host &host, hosts) {
-                if (!host.hostName().contains("webasto", Qt::CaseSensitivity::CaseInsensitive))
+        qCDebug(dcWebasto()) << "Discover things";
+        NetworkDeviceDiscoveryReply *discoveryReply = hardwareManager()->networkDeviceDiscovery()->discover();
+        connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
+            ThingDescriptors descriptors;
+            qCDebug(dcWebasto()) << "Discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "devices";
+            foreach (const NetworkDeviceInfo &networkDeviceInfo, discoveryReply->networkDeviceInfos()) {
+                qCDebug(dcWebasto()) << networkDeviceInfo;
+                if (!networkDeviceInfo.hostName().contains("webasto", Qt::CaseSensitivity::CaseInsensitive))
                     continue;
 
-                qCDebug(dcWebasto()) << "     - " << host.hostName() << host.address() << host.macAddress();
-                ThingDescriptor descriptor(liveWallboxThingClassId, "Wallbox", host.address() + " (" + host.macAddress() + ")");
-
-                // Rediscovery
-                foreach (Thing *existingThing, myThings()) {
-                    if (existingThing->paramValue(liveWallboxThingMacAddressParamTypeId).toString() == host.macAddress()) {
-                        qCDebug(dcWebasto()) << "     - Device is already added";
-                        descriptor.setThingId(existingThing->id());
-                        break;
-                    }
+                QString title = "Wallbox ";
+                if (networkDeviceInfo.hostName().isEmpty()) {
+                    title += networkDeviceInfo.address().toString();
+                } else {
+                    title += networkDeviceInfo.address().toString() + " (" + networkDeviceInfo.hostName() + ")";
                 }
+
+                QString description;
+                if (networkDeviceInfo.macAddressManufacturer().isEmpty()) {
+                    description = networkDeviceInfo.macAddress();
+                } else {
+                    description = networkDeviceInfo.macAddress() + " (" + networkDeviceInfo.macAddressManufacturer() + ")";
+                }
+
+                ThingDescriptor descriptor(liveWallboxThingClassId, title, description);
+
+                // Check if we already have set up this device
+                Things existingThings = myThings().filterByParam(liveWallboxThingIpAddressParamTypeId, networkDeviceInfo.address().toString());
+                if (existingThings.count() == 1) {
+                    qCDebug(dcWebasto()) << "This thing already exists in the system." << existingThings.first() << networkDeviceInfo;
+                    descriptor.setThingId(existingThings.first()->id());
+                }
+
                 ParamList params;
-                params << Param(liveWallboxThingMacAddressParamTypeId, host.macAddress());
-                params << Param(liveWallboxThingIpAddressParamTypeId, host.address());
+                params << Param(liveWallboxThingIpAddressParamTypeId, networkDeviceInfo.address().toString());
+                params << Param(liveWallboxThingMacAddressParamTypeId, networkDeviceInfo.macAddress());
                 descriptor.setParams(params);
                 info->addThingDescriptor(descriptor);
             }

@@ -1,5 +1,5 @@
 {
-    "name": "Idm",
+    "name": "idm",
     "displayName": "iDM",
     "id": "3968d86d-d51a-4ad1-a185-91faa017e38f",
     "vendors": [
@@ -12,14 +12,23 @@
                     "name": "navigator2",
                     "displayName": "Navigator 2.0",
                     "id": "1c95ac91-4eca-4cbf-b0f4-d60d35d069ed",
-                    "createMethods": ["user"],
+                    "createMethods": ["user", "discovery"],
                     "interfaces": ["thermostat", "connectable"],
                     "paramTypes": [
                         {
                             "id": "05714e5c-d66a-4095-bbff-a0eb96fb035b",
                             "name":"ipAddress",
                             "displayName": "IP address",
-                            "type": "QString"
+                            "inputType": "IPv4Address",
+                            "type": "QString",
+                            "defaultValue": "0.0.0.0"
+                        },
+                        {
+                            "id": "d178ca29-41a1-4f56-82ec-76a833c1de50",
+                            "name": "macAddress",
+                            "displayName": "MAC address",
+                            "type": "QString",
+                            "defaultValue": ""
                         }
                     ],
                     "stateTypes":[
