@@ -363,7 +363,7 @@ QByteArray SunSpec::convertModbusRegisters(const QVector<quint16> &modbusData, i
 float SunSpec::convertToFloatWithSSF(quint16 rawValue, quint16 sunssf)
 {
     float value;
-    value = static_cast<qint16>(rawValue) * pow(10, static_cast<qint16>(sunssf));
+    value = rawValue * pow(10, static_cast<qint16>(sunssf));
     return value;
 }
 

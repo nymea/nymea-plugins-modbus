@@ -140,7 +140,7 @@ void SunSpecInverter::onModelDataBlockReceived(SunSpec::ModelId modelId, uint le
         inverterData.acEnergy = m_connection->convertToFloatWithSSF(acEnergy, data[Model10X::Model10XWattHoursScaleFactor]);
 
         qint16 temperatureScaleFactor = static_cast<qint16>(data[Model10X::Model10XTemperatureScaleFactor]);
-        qCDebug(dcSunSpec()) << "Temperature scale factor" << temperatureScaleFactor << data[Model10X::Model10XTemperatureScaleFactor];
+        qCDebug(dcSunSpec()) << "Temperature scale factor" << temperatureScaleFactor << "temperature value" << data[Model10X::Model10XCabinetTemperature];
         inverterData.cabinetTemperature = m_connection->convertToFloatWithSSF(data[Model10X::Model10XCabinetTemperature], temperatureScaleFactor);
 
         inverterData.event1 = bitfieldToSunSpecEvent1(data[Model10X::Model10XEvent1], data[Model10X::Model10XEvent1+1]);
