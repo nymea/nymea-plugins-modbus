@@ -132,6 +132,9 @@ void SunSpec::findBaseRegister()
     validBaseRegisters.append(0);
     validBaseRegisters.append(40000);
     validBaseRegisters.append(50000);
+    validBaseRegisters.append(57596);
+    validBaseRegisters.append(57598);
+    validBaseRegisters.append(57600);
 
     Q_FOREACH (int baseRegister, validBaseRegisters) {
         qCDebug(dcSunSpec()) << "   - Searching address" << baseRegister;
@@ -152,7 +155,7 @@ void SunSpec::findBaseRegister()
                             qCWarning(dcSunSpec()) << "SunSpec: Got reply on base register" << baseRegister << ", but value didn't mach 0x53756e53";
                         }
                     } else {
-                        qCDebug(dcSunSpec()) << "SunSpec: Find base register not found at:" << baseRegister;
+                        qCWarning(dcSunSpec()) << "SunSpec: Find base register not found at:" << baseRegister;
                     }
                 });
             } else {
