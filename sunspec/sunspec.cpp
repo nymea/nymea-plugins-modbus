@@ -133,8 +133,10 @@ void SunSpec::findBaseRegister()
     validBaseRegisters.append(40000);
     validBaseRegisters.append(50000);
     validBaseRegisters.append(57596);
+    validBaseRegisters.append(57596);
     validBaseRegisters.append(57598);
     validBaseRegisters.append(57600);
+    validBaseRegisters.append(57602);
 
     Q_FOREACH (int baseRegister, validBaseRegisters) {
         qCDebug(dcSunSpec()) << "   - Searching address" << baseRegister;
