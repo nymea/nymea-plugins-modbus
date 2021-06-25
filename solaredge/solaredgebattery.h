@@ -32,6 +32,7 @@
 #define SOLAREDGEBATTERY_H
 
 #include <QObject>
+#include <QDebug>
 
 #include <sunspec.h>
 
@@ -73,6 +74,7 @@ public:
         Charge = 3,
         Discharge = 4,
         Fault = 5,
+        Holding = 6,
         Idle = 7
     };
     Q_ENUM(BatteryStatus)
@@ -107,21 +109,24 @@ public:
     SunSpec *connection() const;
     int modbusStartRegister() const;
 
+    BatteryData batteryData() const;
+
     void init();
     void readBlockData();
 
 private:
+    QTimer m_timer;
     SunSpec *m_connection = nullptr;
     int m_modbusStartRegister;
-    QVector<quint16> m_blockBuffer;
     bool m_initFinishedSuccess = false;
-
-    void processBlockBuffer();
+    BatteryData m_batteryData;
 
 signals:
     void initFinished(bool success);
     void batteryDataReceived(const BatteryData &batteryData);
 
 };
+
+QDebug operator<<(QDebug debug, const SolarEdgeBattery::BatteryData &batteryData);
 
 #endif // SOLAREDGEBATTERY_H

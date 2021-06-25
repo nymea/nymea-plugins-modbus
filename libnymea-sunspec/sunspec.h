@@ -161,7 +161,11 @@ public:
 
     explicit SunSpec(const QHostAddress &hostAddress, uint port = 502, uint slaveId = 1, QObject *parent = 0);
     ~SunSpec();
+
     bool connectModbus();
+
+    bool connected() const;
+
     void setHostAddress(const QHostAddress &hostAddress);
     void setPort(uint port);
     void setSlaveId(uint slaveId);
@@ -184,7 +188,10 @@ public:
     void readModelHeader(uint modbusAddress);
     void readModelDataBlock(uint modbusAddress, uint modelLength); //modbusAddress = model start address, model length is without header
 
+    static float convertToFloat32(quint16 valueLsb, quint16 valueMsb);
+    static float convertToFloat(quint32 rawValue);
     static float convertToFloatWithSSF(quint32 rawValue, quint16 sunssf);
+    static float convertToFloatWithSSF(qint32 rawValue, quint16 sunssf);
     static quint32 convertFromFloatWithSSF(float value, quint16 sunssf);
 
     static float convertFloatValues(quint16 rawValue0, quint16 rawValue1);

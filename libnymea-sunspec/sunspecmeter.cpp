@@ -108,7 +108,7 @@ void SunSpecMeter::onModelDataBlockReceived(SunSpec::ModelId modelId, uint lengt
         quint16 energyScaleFactor = data[Model20XRealEnergyScaleFactor];
         meterData.totalRealEnergyExported = m_connection->convertToFloatWithSSF(data[Model20XTotalRealEnergyExported], energyScaleFactor);
         meterData.totalRealEnergyImported = m_connection->convertToFloatWithSSF(data[Model20XTotalRealEnergyImported], energyScaleFactor);;
-        meterData.meterEventFlags = (static_cast<quint32>(data[Model20XMeterEventFlags]) << 16) | data[Model20XMeterEventFlags+1];
+        meterData.meterEventFlags = (static_cast<quint32>(data[Model20XMeterEventFlags]) << 16) | data[Model20XMeterEventFlags + 1];
         emit meterDataReceived(meterData);
 
     } break;

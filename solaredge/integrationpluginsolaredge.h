@@ -86,9 +86,10 @@ private:
 
     void setupInverter(ThingSetupInfo *info);
     void setupMeter(ThingSetupInfo *info);
-//    void setupStorage(ThingSetupInfo *info);
+    void setupBattery(ThingSetupInfo *info);
 
     void searchBatteries(SunSpec *connection);
+    void searchBattery(SunSpec *connection, const ThingId &parentThingId, quint16 startRegister);
 
 private slots:
     void onRefreshTimer();
@@ -105,7 +106,7 @@ private slots:
 
     void onInverterDataReceived(const SunSpecInverter::InverterData &inverterData);
     void onMeterDataReceived(const SunSpecMeter::MeterData &meterData);
-//    void onStorageDataReceived(const SunSpecStorage::StorageData &mandatory, const SunSpecStorage::StorageDataOptional &optional);
+    void onBatteryDataReceived(const SolarEdgeBattery::BatteryData &batteryData);
 
 };
 #endif // INTEGRATIONPLUGINSOLAREDGE_H

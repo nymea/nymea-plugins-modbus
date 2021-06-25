@@ -32,6 +32,7 @@
 #define SUNSPECMETER_H
 
 #include <QObject>
+#include "sunspec.h"
 #include "sunspecdevice.h"
 
 class SunSpecMeter : public SunSpecDevice

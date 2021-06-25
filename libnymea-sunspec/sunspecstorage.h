@@ -32,6 +32,8 @@
 #define SUNSPECSTORAGE_H
 
 #include <QObject>
+
+#include "sunspec.h"
 #include "sunspecdevice.h"
 
 class SunSpecStorage : public SunSpecDevice

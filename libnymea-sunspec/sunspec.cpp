@@ -31,7 +31,7 @@
 #include "sunspec.h"
 #include  <QtEndian>
 
-Q_LOGGING_CATEGORY(dcSolarEdge, "SolarEdge")
+Q_LOGGING_CATEGORY(dcSunSpec, "SunSpec")
 
 SunSpec::SunSpec(const QHostAddress &hostAddress, uint port, uint slaveId, QObject *parent) :
     QObject(parent),
@@ -58,6 +58,11 @@ bool SunSpec::connectModbus()
 {
     qCDebug(dcSunSpec()) << "SunSpec: Connect modbus";
     return m_modbusTcpClient->connectDevice();
+}
+
+bool SunSpec::connected() const
+{
+    return m_modbusTcpClient->state() == QModbusDevice::ConnectedState;
 }
 
 void SunSpec::setHostAddress(const QHostAddress &hostAddress)
@@ -292,6 +297,26 @@ void SunSpec::readModelDataBlock(uint modbusAddress, uint length)
     }
 }
 
+float SunSpec::convertToFloat32(quint16 valueLsb, quint16 valueMsb)
+{
+    return convertToFloat(static_cast<quint32>(valueMsb) << 16 | valueLsb);
+}
+
+float SunSpec::convertToFloat(quint32 rawValue)
+{
+//    union {
+//        quint32 intValue;
+//        float floatValue;
+//    } u;
+
+//    u.intValue = rawValue;
+//    return u.floatValue;
+
+    float value = 0;
+    memcpy(&value, &rawValue, sizeof(quint32));
+    return value;
+}
+
 void SunSpec::readCommonModel()
 {
     qCDebug(dcSunSpec()) << "SunSpec: Read common model header. Modbus Address" << m_baseRegister+2 << ", Slave ID" << m_slaveId;
@@ -361,6 +386,13 @@ QByteArray SunSpec::convertModbusRegisters(const QVector<quint16> &modbusData, i
 }
 
 float SunSpec::convertToFloatWithSSF(quint32 rawValue, quint16 sunssf)
+{
+    float value;
+    value = rawValue * pow(10, static_cast<qint16>(sunssf));
+    return value;
+}
+
+float SunSpec::convertToFloatWithSSF(qint32 rawValue, quint16 sunssf)
 {
     float value;
     value = rawValue * pow(10, static_cast<qint16>(sunssf));
