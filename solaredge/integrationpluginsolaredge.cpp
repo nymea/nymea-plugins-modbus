@@ -192,7 +192,6 @@ void IntegrationPluginSolarEdge::setupThing(ThingSetupInfo *info)
             thing->setStateValue(solarEdgeConnectionDeviceModelStateTypeId, deviceModel);
             thing->setStateValue(solarEdgeConnectionSerialNumberStateTypeId, serielNumber);
         });
-
     } else if (thing->thingClassId() == solarEdgeThreePhaseInverterThingClassId ||
                thing->thingClassId() == solarEdgeSplitPhaseInverterThingClassId ||
                thing->thingClassId() == solarEdgeSinglePhaseInverterThingClassId ) {
@@ -462,38 +461,81 @@ void IntegrationPluginSolarEdge::setupMeter(ThingSetupInfo *info)
     connect(sunSpecMeter, &SunSpecMeter::meterDataReceived, this, &IntegrationPluginSolarEdge::onMeterDataReceived);
 }
 
-void IntegrationPluginSolarEdge::setupStorage(ThingSetupInfo *info)
-{
-    Thing *thing = info->thing();
-    uint modelId = thing->paramValue(m_modelIdParamTypeIds.value(thing->thingClassId())).toInt();
-    int modbusAddress = thing->paramValue(m_modbusAddressParamTypeIds.value(thing->thingClassId())).toInt();
+//void IntegrationPluginSolarEdge::setupStorage(ThingSetupInfo *info)
+//{
+//    Thing *thing = info->thing();
+//    uint modelId = thing->paramValue(m_modelIdParamTypeIds.value(thing->thingClassId())).toInt();
+//    int modbusAddress = thing->paramValue(m_modbusAddressParamTypeIds.value(thing->thingClassId())).toInt();
 
-    SunSpec *connection = m_sunSpecConnections.value(thing->parentId());
-    if (!connection) {
-        qCWarning(dcSolarEdge()) << "Could not find SunSpec connection for" << thing;
-        return info->finish(Thing::ThingErrorHardwareNotAvailable);
-    }
+//    SunSpec *connection = m_sunSpecConnections.value(thing->parentId());
+//    if (!connection) {
+//        qCWarning(dcSolarEdge()) << "Could not find SunSpec connection for" << thing;
+//        return info->finish(Thing::ThingErrorHardwareNotAvailable);
+//    }
 
-    SunSpecStorage *sunSpecStorage = new SunSpecStorage(connection, SunSpec::ModelId(modelId), modbusAddress);
-    sunSpecStorage->init();
-    connect(sunSpecStorage, &SunSpecStorage::initFinished, info, [this, sunSpecStorage, info] (bool success){
-        qCDebug(dcSolarEdge()) << "Modbus storage init finished, success:" << success;
-        if (success) {
-            m_sunSpecStorages.insert(info->thing(), sunSpecStorage);
-            info->finish(Thing::ThingErrorNoError);
-        } else {
-            info->finish(Thing::ThingErrorHardwareNotAvailable);
-        }
-    });
+//    SunSpecStorage *sunSpecStorage = new SunSpecStorage(connection, SunSpec::ModelId(modelId), modbusAddress);
+//    sunSpecStorage->init();
+//    connect(sunSpecStorage, &SunSpecStorage::initFinished, info, [this, sunSpecStorage, info] (bool success){
+//        qCDebug(dcSolarEdge()) << "Modbus storage init finished, success:" << success;
+//        if (success) {
+//            m_sunSpecStorages.insert(info->thing(), sunSpecStorage);
+//            info->finish(Thing::ThingErrorNoError);
+//        } else {
+//            info->finish(Thing::ThingErrorHardwareNotAvailable);
+//        }
+//    });
 
-    connect(info, &ThingSetupInfo::aborted, sunSpecStorage, &SunSpecStorage::deleteLater);
-    connect(sunSpecStorage, &SunSpecStorage::destroyed, thing, [thing, this] {m_sunSpecStorages.remove(thing);});
-    connect(sunSpecStorage, &SunSpecStorage::storageDataReceived, this, &IntegrationPluginSolarEdge::onStorageDataReceived);
-}
+//    connect(info, &ThingSetupInfo::aborted, sunSpecStorage, &SunSpecStorage::deleteLater);
+//    connect(sunSpecStorage, &SunSpecStorage::destroyed, thing, [thing, this] {m_sunSpecStorages.remove(thing);});
+//    connect(sunSpecStorage, &SunSpecStorage::storageDataReceived, this, &IntegrationPluginSolarEdge::onStorageDataReceived);
+//}
 
-void IntegrationPluginSolarEdge::searchBatteries()
+void IntegrationPluginSolarEdge::searchBatteries(SunSpec *connection)
 {
     qCDebug(dcSolarEdge()) << "Searching for connected batteries...";
+
+    // Batteries are not mapped to the sunspec layer, so we have to treat them as normal modbus registers.
+    // Read the battery id to verify if the battery is connected.
+    // Battery 1: start register 0xE100, device id register 0xE140
+    // Battery 2: start register 0xE200, device id register 0xE240
+
+    // Read battery 1 devic id
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 0xE140, 1);
+    if (QModbusReply *reply = connection->modbusTcpClient()->sendReadRequest(request, connection->slaveId())) {
+        if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [=]() {
+
+                if (reply->error() != QModbusDevice::NoError) {
+                    qCDebug(dcSolarEdge()) << "Battery 1 seems not to be connected.";
+                    return;
+                }
+
+                // Create battery 1
+                qCDebug(dcSolarEdge()) << "Found battery 1";
+                SolarEdgeBattery *battery = new SolarEdgeBattery(connection, 0xE100, connection);
+                battery->init();
+
+                connect(battery, &SolarEdgeBattery::initFinished, this, [=](bool success) {
+                    if (success) {
+                        qCDebug(dcSolarEdge()) << "Battery initialized successfully.";
+                        // TODO: create device if not already created
+                    } else {
+                        qCWarning(dcSolarEdge()) << "Failed to initialize battery 1";
+                        battery->deleteLater();
+                    }
+                });
+
+                // FIXME: create thing once initialized
+
+            });
+        } else {
+            delete reply; // broadcast replies return immediately
+            return;
+        }
+    }
+
+
 
 
 }
@@ -512,9 +554,9 @@ void IntegrationPluginSolarEdge::onRefreshTimer()
         meter->readBlockData();
     }
 
-    foreach (SunSpecStorage *storage, m_sunSpecStorages) {
-        storage->readBlockData();
-    }
+//    foreach (SunSpecStorage *storage, m_sunSpecStorages) {
+//        storage->readBlockData();
+//    }
 }
 
 void IntegrationPluginSolarEdge::onPluginConfigurationChanged(const ParamTypeId &paramTypeId, const QVariant &value)
@@ -786,22 +828,22 @@ void IntegrationPluginSolarEdge::onInverterDataReceived(const SunSpecInverter::I
     }
 }
 
-void IntegrationPluginSolarEdge::onStorageDataReceived(const SunSpecStorage::StorageData &mandatory, const SunSpecStorage::StorageDataOptional &optional)
-{
-    SunSpecStorage *storage = static_cast<SunSpecStorage *>(sender());
-    Thing *thing = m_sunSpecStorages.key(storage);
+//void IntegrationPluginSolarEdge::onStorageDataReceived(const SunSpecStorage::StorageData &mandatory, const SunSpecStorage::StorageDataOptional &optional)
+//{
+//    SunSpecStorage *storage = static_cast<SunSpecStorage *>(sender());
+//    Thing *thing = m_sunSpecStorages.key(storage);
 
-    if(!thing) return;
+//    if(!thing) return;
 
-    qCDebug(dcSolarEdge()) << "Storage data received";
-    qCDebug(dcSolarEdge()) << "   - Setpoint for maximum charge" << mandatory.WChaMax  << "[W]";
-    qCDebug(dcSolarEdge()) << "   - Setpoint for maximum charging rate." << mandatory.WChaGra  << "[%]";
-    qCDebug(dcSolarEdge()) << "   - Setpoint for maximum discharging rate." << mandatory.WDisChaGra  << "[%]";
-    qCDebug(dcSolarEdge()) << "   - Charging enabled" << mandatory.StorCtl_Mod_ChargingEnabled;
-    qCDebug(dcSolarEdge()) << "   - Discharging enabled" << mandatory.StorCtl_Mod_DischargingEnabled;
-    qCDebug(dcSolarEdge()) << "   - Storage status" << optional.ChaSt;
-    qCDebug(dcSolarEdge()) << "   - Currently available energy" << optional.ChaState << "[%]";
-    qCDebug(dcSolarEdge()) << "   - Grid charging enabled" << optional.ChaGriSet;
+//    qCDebug(dcSolarEdge()) << "Storage data received";
+//    qCDebug(dcSolarEdge()) << "   - Setpoint for maximum charge" << mandatory.WChaMax  << "[W]";
+//    qCDebug(dcSolarEdge()) << "   - Setpoint for maximum charging rate." << mandatory.WChaGra  << "[%]";
+//    qCDebug(dcSolarEdge()) << "   - Setpoint for maximum discharging rate." << mandatory.WDisChaGra  << "[%]";
+//    qCDebug(dcSolarEdge()) << "   - Charging enabled" << mandatory.StorCtl_Mod_ChargingEnabled;
+//    qCDebug(dcSolarEdge()) << "   - Discharging enabled" << mandatory.StorCtl_Mod_DischargingEnabled;
+//    qCDebug(dcSolarEdge()) << "   - Storage status" << optional.ChaSt;
+//    qCDebug(dcSolarEdge()) << "   - Currently available energy" << optional.ChaState << "[%]";
+//    qCDebug(dcSolarEdge()) << "   - Grid charging enabled" << optional.ChaGriSet;
 
 //    thing->setStateValue(m_connectedStateTypeIds.value(thing->thingClassId()), true);
 //    thing->setStateValue(solarEdgeStorageChargingRateStateTypeId, mandatory.WChaGra);
@@ -837,7 +879,7 @@ void IntegrationPluginSolarEdge::onStorageDataReceived(const SunSpecStorage::Sto
 //    double batteryLevel = optional.ChaState;
 //    thing->setStateValue(solarEdgeStorageBatteryLevelStateTypeId, batteryLevel);
 //    thing->setStateValue(solarEdgeStorageBatteryCriticalStateTypeId, (batteryLevel < 5 && !charging));
-}
+//}
 
 void IntegrationPluginSolarEdge::onMeterDataReceived(const SunSpecMeter::MeterData &meterData)
 {

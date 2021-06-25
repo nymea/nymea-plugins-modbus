@@ -171,9 +171,9 @@ public:
     QModbusTcpClient *modbusTcpClient() const;
 
     QHostAddress hostAddress() const;
-    uint port();
-    uint slaveId();
-    QString manufacturer();
+    uint port() const;
+    uint slaveId() const;
+    QString manufacturer() const;
     QString deviceModel();
     QString serialNumber();
 

@@ -44,8 +44,8 @@ void SunSpecStorage::init()
         if (modelId == m_modelId) {
             qCDebug(dcSunSpec()) << "Storager: Model header received, modbus address:" << modbusAddress << "model Id:" << modelId << "length:" << length;
             m_modelLength = length;
-            emit initFinished(true);
             m_initFinishedSuccess = true;
+            emit initFinished(true);
         }
     });
 

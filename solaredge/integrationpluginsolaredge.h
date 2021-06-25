@@ -38,6 +38,8 @@
 #include <sunspecstorage.h>
 #include <sunspecmeter.h>
 
+#include "solaredgebattery.h"
+
 #include <QUuid>
 
 class IntegrationPluginSolarEdge: public IntegrationPlugin
@@ -77,16 +79,16 @@ private:
     QHash<ThingId, SunSpec *> m_sunSpecConnections;
 
     QHash<Thing *, SunSpecInverter *> m_sunSpecInverters;
-    QHash<Thing *, SunSpecStorage *> m_sunSpecStorages;
     QHash<Thing *, SunSpecMeter *> m_sunSpecMeters;
+    QHash<Thing *, SolarEdgeBattery *> m_batteries;
 
     bool checkIfThingExists(uint modelId, uint modbusAddress);
 
     void setupInverter(ThingSetupInfo *info);
     void setupMeter(ThingSetupInfo *info);
-    void setupStorage(ThingSetupInfo *info);
+//    void setupStorage(ThingSetupInfo *info);
 
-    void searchBatteries();
+    void searchBatteries(SunSpec *connection);
 
 private slots:
     void onRefreshTimer();
@@ -102,8 +104,9 @@ private slots:
     void onWriteRequestError(QUuid requestId, const QString &error);
 
     void onInverterDataReceived(const SunSpecInverter::InverterData &inverterData);
-    void onStorageDataReceived(const SunSpecStorage::StorageData &mandatory, const SunSpecStorage::StorageDataOptional &optional);
     void onMeterDataReceived(const SunSpecMeter::MeterData &meterData);
+//    void onStorageDataReceived(const SunSpecStorage::StorageData &mandatory, const SunSpecStorage::StorageDataOptional &optional);
+
 };
 #endif // INTEGRATIONPLUGINSOLAREDGE_H
 

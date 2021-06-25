@@ -39,12 +39,88 @@ class SolarEdgeBattery : public QObject
 {
     Q_OBJECT
 public:
-    explicit SolarEdgeBattery(SunSpec *sunspec, QObject *parent = nullptr);
+    enum BatteryRegister {
+        ManufacturerName = 0x00,
+        Model = 0x10,
+        FirmwareVersion = 0x20,
+        SerialNumber = 0x30,
+        BatteryDeviceId = 0x40,
+        RatedEnergy = 0x42, // W * H
+        MaxChargeContinuesPower = 0x44, // W
+        MaxDischargeContinuesPower = 0x46, // W
+        MaxChargePeakPower = 0x48, // W
+        MaxDischargePeakPower = 0x4A, // W
+        // 32 byte reserved
+        BatteryAverageTemperature = 0x6c, // °C
+        BatteryMaxTemperature = 0x6E,
+        InstantaneousVoltage = 0x70, // V
+        InstantaneousCurrent = 0x72, // A
+        InstantaneousPower = 0x74, // W
+        LifetimeExportEnergyCounter = 0x76, // W * H
+        LifetimeImportEnergyCounter = 0x7A, // W * H
+        MaxEnergy = 0x7E, // W * H
+        AvailableEnergy = 0x80, // W * H
+        StateOfHealth = 0x82,
+        StateOfEnergy = 0x84,
+        Status = 0x86
+    };
+    Q_ENUM(BatteryRegister)
+
+    enum BatteryStatus {
+        Off = 0,
+        Standby = 1,
+        Init = 2,
+        Charge = 3,
+        Discharge = 4,
+        Fault = 5,
+        Idle = 7
+    };
+    Q_ENUM(BatteryStatus)
+
+    struct BatteryData {
+        QString manufacturerName;
+        QString model;
+        QString firmwareVersion;
+        QString serialNumber;
+        quint16 batteryDeviceId;
+        float ratedEnergy;
+        float maxChargeContinuesPower;
+        float maxDischargeContinuesPower;
+        float maxChargePeakPower;
+        float maxDischargePeakPower;
+        float averageTemperature;
+        float maxTemperature;
+        float instantaneousVoltage;
+        float instantaneousCurrent;
+        float instantaneousPower;
+        quint64 lifetimeExportEnergyCounter;
+        quint64 lifetimeImportEnergyCounter;
+        float maxEnergy;
+        float availableEnergy;
+        float stateOfHealth;
+        float stateOfEnergy;
+        BatteryStatus batteryStatus;
+    };
+
+    explicit SolarEdgeBattery(SunSpec *connection, int modbusStartRegister, QObject *parent = nullptr);
+
+    SunSpec *connection() const;
+    int modbusStartRegister() const;
+
+    void init();
+    void readBlockData();
 
 private:
-    SunSpec *m_sunspec = nullptr;
+    SunSpec *m_connection = nullptr;
+    int m_modbusStartRegister;
+    QVector<quint16> m_blockBuffer;
+    bool m_initFinishedSuccess = false;
+
+    void processBlockBuffer();
 
 signals:
+    void initFinished(bool success);
+    void batteryDataReceived(const BatteryData &batteryData);
 
 };
 
