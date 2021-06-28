@@ -173,8 +173,8 @@ void IntegrationPluginSolarEdge::setupThing(ThingSetupInfo *info)
             return info->finish(Thing::ThingErrorHardwareNotAvailable);
         }
 
-        connect(sunSpec, &SunSpec::connectionStateChanged, info, [this, sunSpec, info] (bool status) {
-            qCDebug(dcSolarEdge()) << "Modbus connection init finished" << status;
+        connect(sunSpec, &SunSpec::connectedChanged, info, [this, sunSpec, info] (bool connected) {
+            qCDebug(dcSolarEdge()) << "Modbus connection init finished" << connected;
             sunSpec->findBaseRegister();
             searchBatteries(sunSpec);
             connect(sunSpec, &SunSpec::foundBaseRegister, info, [info] (uint modbusAddress) {

@@ -51,13 +51,13 @@ public:
         float f;
     } suns_modbus_v32_t;
 
-    enum MandatoryRegistersModel1 {
+    enum ModelCommonMandatory {
         Manufacturer = 2,
         Model = 18,
         SerialNumber = 50
     };
 
-    enum OptionalRegistersModel1 {
+    enum ModelCommonOptional {
         Options = 34,
         Version = 40,
         DeviceAddress = 64,
@@ -162,24 +162,32 @@ public:
     explicit SunSpec(const QHostAddress &hostAddress, uint port = 502, uint slaveId = 1, QObject *parent = 0);
     ~SunSpec();
 
-    bool connectModbus();
-
     bool connected() const;
 
-    void setHostAddress(const QHostAddress &hostAddress);
-    void setPort(uint port);
+    uint slaveId() const;
     void setSlaveId(uint slaveId);
-    void setTimeout(uint milliSeconds);
+
+    int timeout() const;
+    void setTimeout(int milliSeconds);
+
+    uint numberOfRetries() const;
     void setNumberOfRetries(uint retries);
 
     QModbusTcpClient *modbusTcpClient() const;
 
     QHostAddress hostAddress() const;
+    void setHostAddress(const QHostAddress &hostAddress);
+
     uint port() const;
-    uint slaveId() const;
+    void setPort(uint port);
+
+    bool connectModbus();
+    void disconnectModbus();
+
     QString manufacturer() const;
-    QString deviceModel();
-    QString serialNumber();
+    QString deviceModel() const;
+    QString serialNumber() const;
+    QString version() const;
 
     void findBaseRegister();
     void findSunSpecModels(const QList<ModelId> &modelIds, uint modbusAddressOffset = 2);
@@ -212,10 +220,11 @@ private:
     QString m_manufacturer = "Unknown";
     QString m_deviceModel  = "Unknown";
     QString m_serialNumber = "Unknown";
+    QString m_version = "Unknown";
     QHash<ModelId, int> m_modelList;
 
 signals:
-    void connectionStateChanged(bool status);
+    void connectedChanged(bool connected);
     void requestExecuted(const QUuid &requestId, bool success);
 
     void foundBaseRegister(int modbusAddress);

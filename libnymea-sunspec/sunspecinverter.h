@@ -41,22 +41,22 @@ class SunSpecInverter : public SunSpecDevice
 public:
 
     enum Model10X { // Mandatory register
-        Model10XAcCurrent            = 0,
-        Model10XPhaseACurrent        = 1,
-        Model10XPhaseBCurrent        = 2,
-        Model10XPhaseCCurrent        = 3,
-        Model10XAmpereScaleFactor    = 4,
-        Model10XPhaseVoltageAN       = 8,
-        Model10XPhaseVoltageBN       = 9,
-        Model10XPhaseVoltageCN       = 10,
-        Model10XVoltageScaleFactor   = 11,
-        Model10XACPower              = 12,
-        Model10XWattScaleFactor      = 13,
-        Model10XLineFrequency        = 14,
-        Model10XHerzScaleFactor      = 15,
+        Model10XAcCurrent            = 0, // UINT16
+        Model10XPhaseACurrent        = 1, // UINT16
+        Model10XPhaseBCurrent        = 2, // UINT16
+        Model10XPhaseCCurrent        = 3, // UINT16
+        Model10XAmpereScaleFactor    = 4, // INT16, SF
+        Model10XPhaseVoltageAN       = 8, // UINT16
+        Model10XPhaseVoltageBN       = 9, // UINT16
+        Model10XPhaseVoltageCN       = 10, // UINT16
+        Model10XVoltageScaleFactor   = 11, // INT16, SF
+        Model10XACPower              = 12, // INT16
+        Model10XWattScaleFactor      = 13, // INT16, SF
+        Model10XLineFrequency        = 14, // UINT16
+        Model10XHerzScaleFactor      = 15, // INT16, SF
         Model10XAcEnergy             = 22,
         Model10XWattHoursScaleFactor = 24,
-        Model10XCabinetTemperature   = 31,
+        Model10XCabinetTemperature   = 32,
         Model10XTemperatureScaleFactor = 35,
         Model10XOperatingState       = 36,
         Model10XEvent1               = 38

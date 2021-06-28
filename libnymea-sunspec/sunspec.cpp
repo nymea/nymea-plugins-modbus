@@ -54,33 +54,14 @@ SunSpec::~SunSpec()
     qCDebug(dcSunSpec()) << "SunSpec: Deleting SunSpec connection";
 }
 
-bool SunSpec::connectModbus()
-{
-    qCDebug(dcSunSpec()) << "SunSpec: Connect modbus";
-    return m_modbusTcpClient->connectDevice();
-}
-
 bool SunSpec::connected() const
 {
     return m_modbusTcpClient->state() == QModbusDevice::ConnectedState;
 }
 
-void SunSpec::setHostAddress(const QHostAddress &hostAddress)
+uint SunSpec::slaveId() const
 {
-    if (m_hostAddress != hostAddress) {
-        qCDebug(dcSunSpec()) << "SunSpec: Set host address" << hostAddress.toString();
-        m_hostAddress = hostAddress;
-        m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkAddressParameter, m_hostAddress.toString());
-    }
-}
-
-void SunSpec::setPort(uint port)
-{
-    if (port != m_port) {
-        qCDebug(dcSunSpec()) << "SunSpec: Set Port" << port;
-        m_port = port;
-        m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkPortParameter, port);
-    }
+    return m_slaveId;
 }
 
 void SunSpec::setSlaveId(uint slaveId)
@@ -89,10 +70,20 @@ void SunSpec::setSlaveId(uint slaveId)
     m_slaveId = slaveId;
 }
 
-void SunSpec::setTimeout(uint milliSeconds)
+int SunSpec::timeout() const
+{
+    return m_modbusTcpClient->timeout();
+}
+
+void SunSpec::setTimeout(int milliSeconds)
 {
     qCDebug(dcSunSpec()) << "SunSpec: Set timeout" << milliSeconds << "[ms]";
     m_modbusTcpClient->setTimeout(milliSeconds);
+}
+
+uint SunSpec::numberOfRetries() const
+{
+    return m_modbusTcpClient->numberOfRetries();
 }
 
 void SunSpec::setNumberOfRetries(uint retries)
@@ -111,14 +102,39 @@ QHostAddress SunSpec::hostAddress() const
     return m_hostAddress;
 }
 
+void SunSpec::setHostAddress(const QHostAddress &hostAddress)
+{
+    if (m_hostAddress != hostAddress) {
+        qCDebug(dcSunSpec()) << "SunSpec: Set host address" << hostAddress.toString();
+        m_hostAddress = hostAddress;
+        m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkAddressParameter, m_hostAddress.toString());
+    }
+}
+
 uint SunSpec::port() const
 {
     return m_port;
 }
 
-uint SunSpec::slaveId() const
+void SunSpec::setPort(uint port)
 {
-    return m_slaveId;
+    if (port != m_port) {
+        qCDebug(dcSunSpec()) << "SunSpec: Set Port" << port;
+        m_port = port;
+        m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkPortParameter, port);
+    }
+}
+
+bool SunSpec::connectModbus()
+{
+    qCDebug(dcSunSpec()) << "SunSpec: Connecting modbus TCP connection...";
+    return m_modbusTcpClient->connectDevice();
+}
+
+void SunSpec::disconnectModbus()
+{
+    qCDebug(dcSunSpec()) << "SunSpec: Disconnecting modbus TCP connection...";
+    m_modbusTcpClient->disconnectDevice();
 }
 
 QString SunSpec::manufacturer() const
@@ -126,12 +142,12 @@ QString SunSpec::manufacturer() const
     return m_manufacturer;
 }
 
-QString SunSpec::deviceModel()
+QString SunSpec::deviceModel() const
 {
     return m_deviceModel;
 }
 
-QString SunSpec::serialNumber()
+QString SunSpec::serialNumber() const
 {
     return m_serialNumber;
 }
@@ -330,12 +346,10 @@ void SunSpec::readCommonModel()
 
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    m_manufacturer = convertModbusRegisters(unit.values(), MandatoryRegistersModel1::Manufacturer, 16);
-                    m_manufacturer.remove('\x00');
-                    m_deviceModel  = convertModbusRegisters(unit.values(), MandatoryRegistersModel1::Model, 16);
-                    m_deviceModel.remove('\x00');
-                    m_serialNumber = convertModbusRegisters(unit.values(), MandatoryRegistersModel1::SerialNumber, 16);
-                    m_serialNumber.remove('\x00');
+                    m_manufacturer = QString::fromUtf8(convertModbusRegisters(unit.values(), ModelCommonMandatory::Manufacturer, 16)).trimmed();
+                    m_deviceModel = QString::fromUtf8(convertModbusRegisters(unit.values(), ModelCommonMandatory::Model, 16)).trimmed();
+                    m_serialNumber = QString::fromUtf8(convertModbusRegisters(unit.values(), ModelCommonMandatory::SerialNumber, 16)).trimmed();
+                    m_version = QString::fromUtf8(convertModbusRegisters(unit.values(), ModelCommonMandatory::SerialNumber, 16)).trimmed();
                     qCDebug(dcSunSpec()) << "SunSpec: Received common block response. Manufacturer" << m_manufacturer << "Model" << m_deviceModel << "Serial number" << m_serialNumber;
                     emit commonModelReceived(m_manufacturer, m_deviceModel, m_serialNumber);
                 } else {
@@ -424,7 +438,8 @@ void SunSpec::onModbusStateChanged(QModbusDevice::State state)
             }
         });
     }
-    emit connectionStateChanged(connected);
+
+    emit connectedChanged(connected);
 }
 
 QUuid SunSpec::writeHoldingRegister(uint registerAddress, quint16 value)
