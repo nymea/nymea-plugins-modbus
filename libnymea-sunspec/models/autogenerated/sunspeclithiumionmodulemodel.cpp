@@ -57,16 +57,94 @@ QString SunSpecLithiumIonModuleModel::label() const
     return "Lithium-Ion Module Model";
 }
 
-void SunSpecLithiumIonModuleModel::readModelHeader()
+quint16 SunSpecLithiumIonModuleModel::modelId() const
 {
-
+    return m_modelId;
 }
-
-void SunSpecLithiumIonModuleModel::readBlockData()
+quint16 SunSpecLithiumIonModuleModel::modelLength() const
 {
-
+    return m_modelLength;
 }
-
+quint16 SunSpecLithiumIonModuleModel::stringIndex() const
+{
+    return m_stringIndex;
+}
+quint16 SunSpecLithiumIonModuleModel::moduleIndex() const
+{
+    return m_moduleIndex;
+}
+quint16 SunSpecLithiumIonModuleModel::moduleCellCount() const
+{
+    return m_moduleCellCount;
+}
+float SunSpecLithiumIonModuleModel::moduleSoC() const
+{
+    return m_moduleSoC;
+}
+float SunSpecLithiumIonModuleModel::depthOfDischarge() const
+{
+    return m_depthOfDischarge;
+}
+float SunSpecLithiumIonModuleModel::moduleSoH() const
+{
+    return m_moduleSoH;
+}
+quint32 SunSpecLithiumIonModuleModel::cycleCount() const
+{
+    return m_cycleCount;
+}
+float SunSpecLithiumIonModuleModel::moduleVoltage() const
+{
+    return m_moduleVoltage;
+}
+float SunSpecLithiumIonModuleModel::maxCellVoltage() const
+{
+    return m_maxCellVoltage;
+}
+quint16 SunSpecLithiumIonModuleModel::maxCellVoltageCell() const
+{
+    return m_maxCellVoltageCell;
+}
+float SunSpecLithiumIonModuleModel::minCellVoltage() const
+{
+    return m_minCellVoltage;
+}
+quint16 SunSpecLithiumIonModuleModel::minCellVoltageCell() const
+{
+    return m_minCellVoltageCell;
+}
+float SunSpecLithiumIonModuleModel::averageCellVoltage() const
+{
+    return m_averageCellVoltage;
+}
+qint16 SunSpecLithiumIonModuleModel::maxCellTemperature() const
+{
+    return m_maxCellTemperature;
+}
+quint16 SunSpecLithiumIonModuleModel::maxCellTemperatureCell() const
+{
+    return m_maxCellTemperatureCell;
+}
+qint16 SunSpecLithiumIonModuleModel::minCellTemperature() const
+{
+    return m_minCellTemperature;
+}
+quint16 SunSpecLithiumIonModuleModel::minCellTemperatureCell() const
+{
+    return m_minCellTemperatureCell;
+}
+qint16 SunSpecLithiumIonModuleModel::averageCellTemperature() const
+{
+    return m_averageCellTemperature;
+}
+quint16 SunSpecLithiumIonModuleModel::balancedCellCount() const
+{
+    return m_balancedCellCount;
+}
+QString SunSpecLithiumIonModuleModel::serialNumber() const
+{
+    return m_serialNumber;
+}
 void SunSpecLithiumIonModuleModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -122,17 +200,17 @@ void SunSpecLithiumIonModuleModel::initDataPoints()
     moduleCellCountDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     m_dataPoints.insert(moduleCellCountDataPoint.name(), moduleCellCountDataPoint);
 
-    SunSpecDataPoint moduleSocDataPoint;
-    moduleSocDataPoint.setName("SoC");
-    moduleSocDataPoint.setLabel("Module SoC");
-    moduleSocDataPoint.setDescription("Module state of charge, expressed as a percentage.");
-    moduleSocDataPoint.setUnits("%");
-    moduleSocDataPoint.setSize(1);
-    moduleSocDataPoint.setAddressOffset(5);
-    moduleSocDataPoint.setBlockOffset(3);
-    moduleSocDataPoint.setScaleFactorName("SoC_SF");
-    moduleSocDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints.insert(moduleSocDataPoint.name(), moduleSocDataPoint);
+    SunSpecDataPoint moduleSoCDataPoint;
+    moduleSoCDataPoint.setName("SoC");
+    moduleSoCDataPoint.setLabel("Module SoC");
+    moduleSoCDataPoint.setDescription("Module state of charge, expressed as a percentage.");
+    moduleSoCDataPoint.setUnits("%");
+    moduleSoCDataPoint.setSize(1);
+    moduleSoCDataPoint.setAddressOffset(5);
+    moduleSoCDataPoint.setBlockOffset(3);
+    moduleSoCDataPoint.setScaleFactorName("SoC_SF");
+    moduleSoCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    m_dataPoints.insert(moduleSoCDataPoint.name(), moduleSoCDataPoint);
 
     SunSpecDataPoint depthOfDischargeDataPoint;
     depthOfDischargeDataPoint.setName("DoD");
@@ -146,17 +224,17 @@ void SunSpecLithiumIonModuleModel::initDataPoints()
     depthOfDischargeDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     m_dataPoints.insert(depthOfDischargeDataPoint.name(), depthOfDischargeDataPoint);
 
-    SunSpecDataPoint moduleSohDataPoint;
-    moduleSohDataPoint.setName("SoH");
-    moduleSohDataPoint.setLabel("Module SoH");
-    moduleSohDataPoint.setDescription("Module state of health, expressed as a percentage.");
-    moduleSohDataPoint.setUnits("%");
-    moduleSohDataPoint.setSize(1);
-    moduleSohDataPoint.setAddressOffset(7);
-    moduleSohDataPoint.setBlockOffset(5);
-    moduleSohDataPoint.setScaleFactorName("SoH_SF");
-    moduleSohDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints.insert(moduleSohDataPoint.name(), moduleSohDataPoint);
+    SunSpecDataPoint moduleSoHDataPoint;
+    moduleSoHDataPoint.setName("SoH");
+    moduleSoHDataPoint.setLabel("Module SoH");
+    moduleSoHDataPoint.setDescription("Module state of health, expressed as a percentage.");
+    moduleSoHDataPoint.setUnits("%");
+    moduleSoHDataPoint.setSize(1);
+    moduleSoHDataPoint.setAddressOffset(7);
+    moduleSoHDataPoint.setBlockOffset(5);
+    moduleSoHDataPoint.setScaleFactorName("SoH_SF");
+    moduleSoHDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    m_dataPoints.insert(moduleSoHDataPoint.name(), moduleSoHDataPoint);
 
     SunSpecDataPoint cycleCountDataPoint;
     cycleCountDataPoint.setName("NCyc");
@@ -319,62 +397,62 @@ void SunSpecLithiumIonModuleModel::initDataPoints()
     serialNumberDataPoint.setDataType(SunSpecDataPoint::stringToDataType("string"));
     m_dataPoints.insert(serialNumberDataPoint.name(), serialNumberDataPoint);
 
-    SunSpecDataPoint SoC_SFDataPoint;
-    SoC_SFDataPoint.setName("SoC_SF");
-    SoC_SFDataPoint.setDescription("Scale factor for module state of charge.");
-    SoC_SFDataPoint.setSize(1);
-    SoC_SFDataPoint.setAddressOffset(38);
-    SoC_SFDataPoint.setBlockOffset(36);
-    SoC_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(SoC_SFDataPoint.name(), SoC_SFDataPoint);
+    SunSpecDataPoint soC_SFDataPoint;
+    soC_SFDataPoint.setName("SoC_SF");
+    soC_SFDataPoint.setDescription("Scale factor for module state of charge.");
+    soC_SFDataPoint.setSize(1);
+    soC_SFDataPoint.setAddressOffset(38);
+    soC_SFDataPoint.setBlockOffset(36);
+    soC_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(soC_SFDataPoint.name(), soC_SFDataPoint);
 
-    SunSpecDataPoint SoH_SFDataPoint;
-    SoH_SFDataPoint.setName("SoH_SF");
-    SoH_SFDataPoint.setDescription("Scale factor for module state of health.");
-    SoH_SFDataPoint.setSize(1);
-    SoH_SFDataPoint.setAddressOffset(39);
-    SoH_SFDataPoint.setBlockOffset(37);
-    SoH_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(SoH_SFDataPoint.name(), SoH_SFDataPoint);
+    SunSpecDataPoint soH_SFDataPoint;
+    soH_SFDataPoint.setName("SoH_SF");
+    soH_SFDataPoint.setDescription("Scale factor for module state of health.");
+    soH_SFDataPoint.setSize(1);
+    soH_SFDataPoint.setAddressOffset(39);
+    soH_SFDataPoint.setBlockOffset(37);
+    soH_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(soH_SFDataPoint.name(), soH_SFDataPoint);
 
-    SunSpecDataPoint DoD_SFDataPoint;
-    DoD_SFDataPoint.setName("DoD_SF");
-    DoD_SFDataPoint.setDescription("Scale factor for module depth of discharge.");
-    DoD_SFDataPoint.setSize(1);
-    DoD_SFDataPoint.setAddressOffset(40);
-    DoD_SFDataPoint.setBlockOffset(38);
-    DoD_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(DoD_SFDataPoint.name(), DoD_SFDataPoint);
+    SunSpecDataPoint doD_SFDataPoint;
+    doD_SFDataPoint.setName("DoD_SF");
+    doD_SFDataPoint.setDescription("Scale factor for module depth of discharge.");
+    doD_SFDataPoint.setSize(1);
+    doD_SFDataPoint.setAddressOffset(40);
+    doD_SFDataPoint.setBlockOffset(38);
+    doD_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(doD_SFDataPoint.name(), doD_SFDataPoint);
 
-    SunSpecDataPoint V_SFDataPoint;
-    V_SFDataPoint.setName("V_SF");
-    V_SFDataPoint.setDescription("Scale factor for module voltage.");
-    V_SFDataPoint.setMandatory(true);
-    V_SFDataPoint.setSize(1);
-    V_SFDataPoint.setAddressOffset(41);
-    V_SFDataPoint.setBlockOffset(39);
-    V_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(V_SFDataPoint.name(), V_SFDataPoint);
+    SunSpecDataPoint v_SFDataPoint;
+    v_SFDataPoint.setName("V_SF");
+    v_SFDataPoint.setDescription("Scale factor for module voltage.");
+    v_SFDataPoint.setMandatory(true);
+    v_SFDataPoint.setSize(1);
+    v_SFDataPoint.setAddressOffset(41);
+    v_SFDataPoint.setBlockOffset(39);
+    v_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(v_SFDataPoint.name(), v_SFDataPoint);
 
-    SunSpecDataPoint CellV_SFDataPoint;
-    CellV_SFDataPoint.setName("CellV_SF");
-    CellV_SFDataPoint.setDescription("Scale factor for cell voltage.");
-    CellV_SFDataPoint.setMandatory(true);
-    CellV_SFDataPoint.setSize(1);
-    CellV_SFDataPoint.setAddressOffset(42);
-    CellV_SFDataPoint.setBlockOffset(40);
-    CellV_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(CellV_SFDataPoint.name(), CellV_SFDataPoint);
+    SunSpecDataPoint cellV_SFDataPoint;
+    cellV_SFDataPoint.setName("CellV_SF");
+    cellV_SFDataPoint.setDescription("Scale factor for cell voltage.");
+    cellV_SFDataPoint.setMandatory(true);
+    cellV_SFDataPoint.setSize(1);
+    cellV_SFDataPoint.setAddressOffset(42);
+    cellV_SFDataPoint.setBlockOffset(40);
+    cellV_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(cellV_SFDataPoint.name(), cellV_SFDataPoint);
 
-    SunSpecDataPoint Tmp_SFDataPoint;
-    Tmp_SFDataPoint.setName("Tmp_SF");
-    Tmp_SFDataPoint.setDescription("Scale factor for module temperature.");
-    Tmp_SFDataPoint.setMandatory(true);
-    Tmp_SFDataPoint.setSize(1);
-    Tmp_SFDataPoint.setAddressOffset(43);
-    Tmp_SFDataPoint.setBlockOffset(41);
-    Tmp_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(Tmp_SFDataPoint.name(), Tmp_SFDataPoint);
+    SunSpecDataPoint tmp_SFDataPoint;
+    tmp_SFDataPoint.setName("Tmp_SF");
+    tmp_SFDataPoint.setDescription("Scale factor for module temperature.");
+    tmp_SFDataPoint.setMandatory(true);
+    tmp_SFDataPoint.setSize(1);
+    tmp_SFDataPoint.setAddressOffset(43);
+    tmp_SFDataPoint.setBlockOffset(41);
+    tmp_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(tmp_SFDataPoint.name(), tmp_SFDataPoint);
 
 }
 

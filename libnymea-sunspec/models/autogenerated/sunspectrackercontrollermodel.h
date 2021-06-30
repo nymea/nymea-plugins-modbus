@@ -52,12 +52,20 @@ public:
     };
     Q_ENUM(Typ)
 
-    enum GlblCtl {
-        GlblCtlAutomatic = 0,
-        GlblCtlManual = 1,
-        GlblCtlCalibrate = 2
+    enum Glblctl {
+        GlblctlAutomatic = 0,
+        GlblctlManual = 1,
+        GlblctlCalibrate = 2
     };
-    Q_ENUM(GlblCtl)
+    Q_ENUM(Glblctl)
+
+    enum Glblalm {
+        GlblalmSetPoint = 0x1,
+        GlblalmObsEl = 0x2,
+        GlblalmObsAz = 0x4
+    };
+    Q_DECLARE_FLAGS(GlblalmFlags, Glblalm)
+    Q_FLAG(Glblalm)
 
     explicit SunSpecTrackerControllerModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecTrackerControllerModel() override; 
@@ -66,10 +74,34 @@ public:
     QString description() const override;
     QString label() const override;
 
-    void readModelHeader() override;
-    void readBlockData() override;
+    quint16 modelId() const;
+    quint16 modelLength() const;
+    QString controller() const;
+    Typ type() const;
+    QString date() const;
+    QString time() const;
+    quint16 day() const;
+    qint32 manualElevation() const;
+    qint32 manualAzimuth() const;
+    Glblctl globalMode() const;
+    GlblalmFlags globalAlarm() const;
+    quint16 trackers() const;
 
 private:
+    quint16 m_modelId;
+    quint16 m_modelLength;
+    QString m_controller;
+    Typ m_type;
+    QString m_date;
+    QString m_time;
+    quint16 m_day;
+    qint32 m_manualElevation;
+    qint32 m_manualAzimuth;
+    Glblctl m_globalMode;
+    GlblalmFlags m_globalAlarm;
+    qint16 m_sf;
+    quint16 m_trackers;
+
     void initDataPoints();
 
 };

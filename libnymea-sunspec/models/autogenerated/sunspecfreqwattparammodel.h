@@ -41,6 +41,18 @@ class SunSpecFreqWattParamModel : public SunSpecModel
     Q_OBJECT
 public:
 
+    enum Hysena {
+        HysenaEnabled = 0x1
+    };
+    Q_DECLARE_FLAGS(HysenaFlags, Hysena)
+    Q_FLAG(Hysena)
+
+    enum Modena {
+        ModenaEnabled = 0x1
+    };
+    Q_DECLARE_FLAGS(ModenaFlags, Modena)
+    Q_FLAG(Modena)
+
     explicit SunSpecFreqWattParamModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecFreqWattParamModel() override; 
 
@@ -48,10 +60,30 @@ public:
     QString description() const override;
     QString label() const override;
 
-    void readModelHeader() override;
-    void readBlockData() override;
+    quint16 modelId() const;
+    quint16 modelLength() const;
+    float wGra() const;
+    qint16 hzStr() const;
+    qint16 hzStop() const;
+    HysenaFlags hysEna() const;
+    ModenaFlags modEna() const;
+    float hzStopWGra() const;
+    quint16 pad() const;
 
 private:
+    quint16 m_modelId;
+    quint16 m_modelLength;
+    float m_wGra;
+    qint16 m_hzStr;
+    qint16 m_hzStop;
+    HysenaFlags m_hysEna;
+    ModenaFlags m_modEna;
+    float m_hzStopWGra;
+    qint16 m_wGraSf;
+    qint16 m_hzStrStopSf;
+    qint16 m_rmpIncDecSf;
+    quint16 m_pad;
+
     void initDataPoints();
 
 };

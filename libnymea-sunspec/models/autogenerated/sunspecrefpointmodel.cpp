@@ -57,16 +57,30 @@ QString SunSpecRefPointModel::label() const
     return "Reference Point Model";
 }
 
-void SunSpecRefPointModel::readModelHeader()
+quint16 SunSpecRefPointModel::modelId() const
 {
-
+    return m_modelId;
 }
-
-void SunSpecRefPointModel::readBlockData()
+quint16 SunSpecRefPointModel::modelLength() const
 {
-
+    return m_modelLength;
 }
-
+quint16 SunSpecRefPointModel::ghi() const
+{
+    return m_ghi;
+}
+quint16 SunSpecRefPointModel::amps() const
+{
+    return m_amps;
+}
+quint16 SunSpecRefPointModel::voltage() const
+{
+    return m_voltage;
+}
+quint16 SunSpecRefPointModel::temperature() const
+{
+    return m_temperature;
+}
 void SunSpecRefPointModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

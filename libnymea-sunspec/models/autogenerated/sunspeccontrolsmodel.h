@@ -47,31 +47,31 @@ public:
     };
     Q_ENUM(Conn)
 
-    enum WMaxLim_Ena {
-        WMaxLim_EnaDisabled = 0,
-        WMaxLim_EnaEnabled = 1
+    enum Wmaxlim_ena {
+        Wmaxlim_enaDisabled = 0,
+        Wmaxlim_enaEnabled = 1
     };
-    Q_ENUM(WMaxLim_Ena)
+    Q_ENUM(Wmaxlim_ena)
 
-    enum OutPFSet_Ena {
-        OutPFSet_EnaDisabled = 0,
-        OutPFSet_EnaEnabled = 1
+    enum Outpfset_ena {
+        Outpfset_enaDisabled = 0,
+        Outpfset_enaEnabled = 1
     };
-    Q_ENUM(OutPFSet_Ena)
+    Q_ENUM(Outpfset_ena)
 
-    enum VArPct_Mod {
-        VArPct_ModNone = 0,
-        VArPct_ModWmax = 1,
-        VArPct_ModVarmax = 2,
-        VArPct_ModVaraval = 3
+    enum Varpct_mod {
+        Varpct_modNone = 0,
+        Varpct_modWMax = 1,
+        Varpct_modVArMax = 2,
+        Varpct_modVArAval = 3
     };
-    Q_ENUM(VArPct_Mod)
+    Q_ENUM(Varpct_mod)
 
-    enum VArPct_Ena {
-        VArPct_EnaDisabled = 0,
-        VArPct_EnaEnabled = 1
+    enum Varpct_ena {
+        Varpct_enaDisabled = 0,
+        Varpct_enaEnabled = 1
     };
-    Q_ENUM(VArPct_Ena)
+    Q_ENUM(Varpct_ena)
 
     explicit SunSpecControlsModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecControlsModel() override; 
@@ -80,10 +80,58 @@ public:
     QString description() const override;
     QString label() const override;
 
-    void readModelHeader() override;
-    void readBlockData() override;
+    quint16 modelId() const;
+    quint16 modelLength() const;
+    quint16 connWinTms() const;
+    quint16 connRvrtTms() const;
+    Conn conn() const;
+    float wMaxLimPct() const;
+    quint16 wMaxLimPctWinTms() const;
+    quint16 wMaxLimPctRvrtTms() const;
+    quint16 wMaxLimPctRmpTms() const;
+    Wmaxlim_ena wMaxLimEna() const;
+    qint16 outPfSet() const;
+    quint16 outPfSetWinTms() const;
+    quint16 outPfSetRvrtTms() const;
+    quint16 outPfSetRmpTms() const;
+    Outpfset_ena outPfSetEna() const;
+    qint16 vArWMaxPct() const;
+    qint16 vArMaxPct() const;
+    qint16 vArAvalPct() const;
+    quint16 vArPctWinTms() const;
+    quint16 vArPctRvrtTms() const;
+    quint16 vArPctRmpTms() const;
+    Varpct_mod vArPctMod() const;
+    Varpct_ena vArPctEna() const;
 
 private:
+    quint16 m_modelId;
+    quint16 m_modelLength;
+    quint16 m_connWinTms;
+    quint16 m_connRvrtTms;
+    Conn m_conn;
+    float m_wMaxLimPct;
+    quint16 m_wMaxLimPctWinTms;
+    quint16 m_wMaxLimPctRvrtTms;
+    quint16 m_wMaxLimPctRmpTms;
+    Wmaxlim_ena m_wMaxLimEna;
+    qint16 m_outPfSet;
+    quint16 m_outPfSetWinTms;
+    quint16 m_outPfSetRvrtTms;
+    quint16 m_outPfSetRmpTms;
+    Outpfset_ena m_outPfSetEna;
+    qint16 m_vArWMaxPct;
+    qint16 m_vArMaxPct;
+    qint16 m_vArAvalPct;
+    quint16 m_vArPctWinTms;
+    quint16 m_vArPctRvrtTms;
+    quint16 m_vArPctRmpTms;
+    Varpct_mod m_vArPctMod;
+    Varpct_ena m_vArPctEna;
+    qint16 m_wMaxLimPctSf;
+    qint16 m_outPfSetSf;
+    qint16 m_vArPctSf;
+
     void initDataPoints();
 
 };

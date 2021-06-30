@@ -57,16 +57,42 @@ QString SunSpecExtSettingsModel::label() const
     return "Extended Settings";
 }
 
-void SunSpecExtSettingsModel::readModelHeader()
+quint16 SunSpecExtSettingsModel::modelId() const
 {
-
+    return m_modelId;
 }
-
-void SunSpecExtSettingsModel::readBlockData()
+quint16 SunSpecExtSettingsModel::modelLength() const
 {
-
+    return m_modelLength;
 }
-
+float SunSpecExtSettingsModel::rampUpRate() const
+{
+    return m_rampUpRate;
+}
+float SunSpecExtSettingsModel::nomRmpDnRte() const
+{
+    return m_nomRmpDnRte;
+}
+float SunSpecExtSettingsModel::emergencyRampUpRate() const
+{
+    return m_emergencyRampUpRate;
+}
+float SunSpecExtSettingsModel::emergencyRampDownRate() const
+{
+    return m_emergencyRampDownRate;
+}
+float SunSpecExtSettingsModel::connectRampUpRate() const
+{
+    return m_connectRampUpRate;
+}
+float SunSpecExtSettingsModel::connectRampDownRate() const
+{
+    return m_connectRampDownRate;
+}
+float SunSpecExtSettingsModel::defaultRampRate() const
+{
+    return m_defaultRampRate;
+}
 void SunSpecExtSettingsModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -102,18 +128,18 @@ void SunSpecExtSettingsModel::initDataPoints()
     rampUpRateDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(rampUpRateDataPoint.name(), rampUpRateDataPoint);
 
-    SunSpecDataPoint nomrmpdnrteDataPoint;
-    nomrmpdnrteDataPoint.setName("NomRmpDnRte");
-    nomrmpdnrteDataPoint.setLabel("NomRmpDnRte");
-    nomrmpdnrteDataPoint.setDescription("Ramp down rate as a percentage of max current.");
-    nomrmpdnrteDataPoint.setUnits("Pct");
-    nomrmpdnrteDataPoint.setSize(1);
-    nomrmpdnrteDataPoint.setAddressOffset(3);
-    nomrmpdnrteDataPoint.setBlockOffset(1);
-    nomrmpdnrteDataPoint.setScaleFactorName("Rmp_SF");
-    nomrmpdnrteDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    nomrmpdnrteDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints.insert(nomrmpdnrteDataPoint.name(), nomrmpdnrteDataPoint);
+    SunSpecDataPoint nomRmpDnRteDataPoint;
+    nomRmpDnRteDataPoint.setName("NomRmpDnRte");
+    nomRmpDnRteDataPoint.setLabel("NomRmpDnRte");
+    nomRmpDnRteDataPoint.setDescription("Ramp down rate as a percentage of max current.");
+    nomRmpDnRteDataPoint.setUnits("Pct");
+    nomRmpDnRteDataPoint.setSize(1);
+    nomRmpDnRteDataPoint.setAddressOffset(3);
+    nomRmpDnRteDataPoint.setBlockOffset(1);
+    nomRmpDnRteDataPoint.setScaleFactorName("Rmp_SF");
+    nomRmpDnRteDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    nomRmpDnRteDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    m_dataPoints.insert(nomRmpDnRteDataPoint.name(), nomRmpDnRteDataPoint);
 
     SunSpecDataPoint emergencyRampUpRateDataPoint;
     emergencyRampUpRateDataPoint.setName("EmgRmpUpRte");

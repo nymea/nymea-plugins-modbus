@@ -57,16 +57,82 @@ QString SunSpecNameplateModel::label() const
     return "Nameplate";
 }
 
-void SunSpecNameplateModel::readModelHeader()
+quint16 SunSpecNameplateModel::modelId() const
 {
-
+    return m_modelId;
 }
-
-void SunSpecNameplateModel::readBlockData()
+quint16 SunSpecNameplateModel::modelLength() const
 {
-
+    return m_modelLength;
 }
-
+SunSpecNameplateModel::Dertyp SunSpecNameplateModel::derTyp() const
+{
+    return m_derTyp;
+}
+float SunSpecNameplateModel::wRtg() const
+{
+    return m_wRtg;
+}
+float SunSpecNameplateModel::vaRtg() const
+{
+    return m_vaRtg;
+}
+qint16 SunSpecNameplateModel::vArRtgQ1() const
+{
+    return m_vArRtgQ1;
+}
+qint16 SunSpecNameplateModel::vArRtgQ2() const
+{
+    return m_vArRtgQ2;
+}
+qint16 SunSpecNameplateModel::vArRtgQ3() const
+{
+    return m_vArRtgQ3;
+}
+qint16 SunSpecNameplateModel::vArRtgQ4() const
+{
+    return m_vArRtgQ4;
+}
+float SunSpecNameplateModel::aRtg() const
+{
+    return m_aRtg;
+}
+qint16 SunSpecNameplateModel::pfRtgQ1() const
+{
+    return m_pfRtgQ1;
+}
+qint16 SunSpecNameplateModel::pfRtgQ2() const
+{
+    return m_pfRtgQ2;
+}
+qint16 SunSpecNameplateModel::pfRtgQ3() const
+{
+    return m_pfRtgQ3;
+}
+qint16 SunSpecNameplateModel::pfRtgQ4() const
+{
+    return m_pfRtgQ4;
+}
+float SunSpecNameplateModel::whRtg() const
+{
+    return m_whRtg;
+}
+float SunSpecNameplateModel::ahrRtg() const
+{
+    return m_ahrRtg;
+}
+float SunSpecNameplateModel::maxChaRte() const
+{
+    return m_maxChaRte;
+}
+float SunSpecNameplateModel::maxDisChaRte() const
+{
+    return m_maxDisChaRte;
+}
+quint16 SunSpecNameplateModel::pad() const
+{
+    return m_pad;
+}
 void SunSpecNameplateModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -89,302 +155,302 @@ void SunSpecNameplateModel::initDataPoints()
     modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
-    SunSpecDataPoint dertypDataPoint;
-    dertypDataPoint.setName("DERTyp");
-    dertypDataPoint.setLabel("DERTyp");
-    dertypDataPoint.setDescription("Type of DER device. Default value is 4 to indicate PV device.");
-    dertypDataPoint.setMandatory(true);
-    dertypDataPoint.setSize(1);
-    dertypDataPoint.setAddressOffset(2);
-    dertypDataPoint.setBlockOffset(0);
-    dertypDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
-    m_dataPoints.insert(dertypDataPoint.name(), dertypDataPoint);
+    SunSpecDataPoint derTypDataPoint;
+    derTypDataPoint.setName("DERTyp");
+    derTypDataPoint.setLabel("DERTyp");
+    derTypDataPoint.setDescription("Type of DER device. Default value is 4 to indicate PV device.");
+    derTypDataPoint.setMandatory(true);
+    derTypDataPoint.setSize(1);
+    derTypDataPoint.setAddressOffset(2);
+    derTypDataPoint.setBlockOffset(0);
+    derTypDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    m_dataPoints.insert(derTypDataPoint.name(), derTypDataPoint);
 
-    SunSpecDataPoint wrtgDataPoint;
-    wrtgDataPoint.setName("WRtg");
-    wrtgDataPoint.setLabel("WRtg");
-    wrtgDataPoint.setDescription("Continuous power output capability of the inverter.");
-    wrtgDataPoint.setUnits("W");
-    wrtgDataPoint.setMandatory(true);
-    wrtgDataPoint.setSize(1);
-    wrtgDataPoint.setAddressOffset(3);
-    wrtgDataPoint.setBlockOffset(1);
-    wrtgDataPoint.setScaleFactorName("WRtg_SF");
-    wrtgDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints.insert(wrtgDataPoint.name(), wrtgDataPoint);
+    SunSpecDataPoint wRtgDataPoint;
+    wRtgDataPoint.setName("WRtg");
+    wRtgDataPoint.setLabel("WRtg");
+    wRtgDataPoint.setDescription("Continuous power output capability of the inverter.");
+    wRtgDataPoint.setUnits("W");
+    wRtgDataPoint.setMandatory(true);
+    wRtgDataPoint.setSize(1);
+    wRtgDataPoint.setAddressOffset(3);
+    wRtgDataPoint.setBlockOffset(1);
+    wRtgDataPoint.setScaleFactorName("WRtg_SF");
+    wRtgDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    m_dataPoints.insert(wRtgDataPoint.name(), wRtgDataPoint);
 
-    SunSpecDataPoint wrtgSfDataPoint;
-    wrtgSfDataPoint.setName("WRtg_SF");
-    wrtgSfDataPoint.setLabel("WRtg_SF");
-    wrtgSfDataPoint.setDescription("Scale factor");
-    wrtgSfDataPoint.setMandatory(true);
-    wrtgSfDataPoint.setSize(1);
-    wrtgSfDataPoint.setAddressOffset(4);
-    wrtgSfDataPoint.setBlockOffset(2);
-    wrtgSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(wrtgSfDataPoint.name(), wrtgSfDataPoint);
+    SunSpecDataPoint wRtgSfDataPoint;
+    wRtgSfDataPoint.setName("WRtg_SF");
+    wRtgSfDataPoint.setLabel("WRtg_SF");
+    wRtgSfDataPoint.setDescription("Scale factor");
+    wRtgSfDataPoint.setMandatory(true);
+    wRtgSfDataPoint.setSize(1);
+    wRtgSfDataPoint.setAddressOffset(4);
+    wRtgSfDataPoint.setBlockOffset(2);
+    wRtgSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(wRtgSfDataPoint.name(), wRtgSfDataPoint);
 
-    SunSpecDataPoint vartgDataPoint;
-    vartgDataPoint.setName("VARtg");
-    vartgDataPoint.setLabel("VARtg");
-    vartgDataPoint.setDescription("Continuous Volt-Ampere capability of the inverter.");
-    vartgDataPoint.setUnits("VA");
-    vartgDataPoint.setMandatory(true);
-    vartgDataPoint.setSize(1);
-    vartgDataPoint.setAddressOffset(5);
-    vartgDataPoint.setBlockOffset(3);
-    vartgDataPoint.setScaleFactorName("VARtg_SF");
-    vartgDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints.insert(vartgDataPoint.name(), vartgDataPoint);
+    SunSpecDataPoint vaRtgDataPoint;
+    vaRtgDataPoint.setName("VARtg");
+    vaRtgDataPoint.setLabel("VARtg");
+    vaRtgDataPoint.setDescription("Continuous Volt-Ampere capability of the inverter.");
+    vaRtgDataPoint.setUnits("VA");
+    vaRtgDataPoint.setMandatory(true);
+    vaRtgDataPoint.setSize(1);
+    vaRtgDataPoint.setAddressOffset(5);
+    vaRtgDataPoint.setBlockOffset(3);
+    vaRtgDataPoint.setScaleFactorName("VARtg_SF");
+    vaRtgDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    m_dataPoints.insert(vaRtgDataPoint.name(), vaRtgDataPoint);
 
-    SunSpecDataPoint vartgSfDataPoint;
-    vartgSfDataPoint.setName("VARtg_SF");
-    vartgSfDataPoint.setLabel("VARtg_SF");
-    vartgSfDataPoint.setDescription("Scale factor");
-    vartgSfDataPoint.setMandatory(true);
-    vartgSfDataPoint.setSize(1);
-    vartgSfDataPoint.setAddressOffset(6);
-    vartgSfDataPoint.setBlockOffset(4);
-    vartgSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(vartgSfDataPoint.name(), vartgSfDataPoint);
+    SunSpecDataPoint vaRtgSfDataPoint;
+    vaRtgSfDataPoint.setName("VARtg_SF");
+    vaRtgSfDataPoint.setLabel("VARtg_SF");
+    vaRtgSfDataPoint.setDescription("Scale factor");
+    vaRtgSfDataPoint.setMandatory(true);
+    vaRtgSfDataPoint.setSize(1);
+    vaRtgSfDataPoint.setAddressOffset(6);
+    vaRtgSfDataPoint.setBlockOffset(4);
+    vaRtgSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(vaRtgSfDataPoint.name(), vaRtgSfDataPoint);
 
-    SunSpecDataPoint varrtgq1DataPoint;
-    varrtgq1DataPoint.setName("VArRtgQ1");
-    varrtgq1DataPoint.setLabel("VArRtgQ1");
-    varrtgq1DataPoint.setDescription("Continuous VAR capability of the inverter in quadrant 1.");
-    varrtgq1DataPoint.setUnits("var");
-    varrtgq1DataPoint.setMandatory(true);
-    varrtgq1DataPoint.setSize(1);
-    varrtgq1DataPoint.setAddressOffset(7);
-    varrtgq1DataPoint.setBlockOffset(5);
-    varrtgq1DataPoint.setScaleFactorName("VArRtg_SF");
-    varrtgq1DataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-    m_dataPoints.insert(varrtgq1DataPoint.name(), varrtgq1DataPoint);
+    SunSpecDataPoint vArRtgQ1DataPoint;
+    vArRtgQ1DataPoint.setName("VArRtgQ1");
+    vArRtgQ1DataPoint.setLabel("VArRtgQ1");
+    vArRtgQ1DataPoint.setDescription("Continuous VAR capability of the inverter in quadrant 1.");
+    vArRtgQ1DataPoint.setUnits("var");
+    vArRtgQ1DataPoint.setMandatory(true);
+    vArRtgQ1DataPoint.setSize(1);
+    vArRtgQ1DataPoint.setAddressOffset(7);
+    vArRtgQ1DataPoint.setBlockOffset(5);
+    vArRtgQ1DataPoint.setScaleFactorName("VArRtg_SF");
+    vArRtgQ1DataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    m_dataPoints.insert(vArRtgQ1DataPoint.name(), vArRtgQ1DataPoint);
 
-    SunSpecDataPoint varrtgq2DataPoint;
-    varrtgq2DataPoint.setName("VArRtgQ2");
-    varrtgq2DataPoint.setLabel("VArRtgQ2");
-    varrtgq2DataPoint.setDescription("Continuous VAR capability of the inverter in quadrant 2.");
-    varrtgq2DataPoint.setUnits("var");
-    varrtgq2DataPoint.setMandatory(true);
-    varrtgq2DataPoint.setSize(1);
-    varrtgq2DataPoint.setAddressOffset(8);
-    varrtgq2DataPoint.setBlockOffset(6);
-    varrtgq2DataPoint.setScaleFactorName("VArRtg_SF");
-    varrtgq2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-    m_dataPoints.insert(varrtgq2DataPoint.name(), varrtgq2DataPoint);
+    SunSpecDataPoint vArRtgQ2DataPoint;
+    vArRtgQ2DataPoint.setName("VArRtgQ2");
+    vArRtgQ2DataPoint.setLabel("VArRtgQ2");
+    vArRtgQ2DataPoint.setDescription("Continuous VAR capability of the inverter in quadrant 2.");
+    vArRtgQ2DataPoint.setUnits("var");
+    vArRtgQ2DataPoint.setMandatory(true);
+    vArRtgQ2DataPoint.setSize(1);
+    vArRtgQ2DataPoint.setAddressOffset(8);
+    vArRtgQ2DataPoint.setBlockOffset(6);
+    vArRtgQ2DataPoint.setScaleFactorName("VArRtg_SF");
+    vArRtgQ2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    m_dataPoints.insert(vArRtgQ2DataPoint.name(), vArRtgQ2DataPoint);
 
-    SunSpecDataPoint varrtgq3DataPoint;
-    varrtgq3DataPoint.setName("VArRtgQ3");
-    varrtgq3DataPoint.setLabel("VArRtgQ3");
-    varrtgq3DataPoint.setDescription("Continuous VAR capability of the inverter in quadrant 3.");
-    varrtgq3DataPoint.setUnits("var");
-    varrtgq3DataPoint.setMandatory(true);
-    varrtgq3DataPoint.setSize(1);
-    varrtgq3DataPoint.setAddressOffset(9);
-    varrtgq3DataPoint.setBlockOffset(7);
-    varrtgq3DataPoint.setScaleFactorName("VArRtg_SF");
-    varrtgq3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-    m_dataPoints.insert(varrtgq3DataPoint.name(), varrtgq3DataPoint);
+    SunSpecDataPoint vArRtgQ3DataPoint;
+    vArRtgQ3DataPoint.setName("VArRtgQ3");
+    vArRtgQ3DataPoint.setLabel("VArRtgQ3");
+    vArRtgQ3DataPoint.setDescription("Continuous VAR capability of the inverter in quadrant 3.");
+    vArRtgQ3DataPoint.setUnits("var");
+    vArRtgQ3DataPoint.setMandatory(true);
+    vArRtgQ3DataPoint.setSize(1);
+    vArRtgQ3DataPoint.setAddressOffset(9);
+    vArRtgQ3DataPoint.setBlockOffset(7);
+    vArRtgQ3DataPoint.setScaleFactorName("VArRtg_SF");
+    vArRtgQ3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    m_dataPoints.insert(vArRtgQ3DataPoint.name(), vArRtgQ3DataPoint);
 
-    SunSpecDataPoint varrtgq4DataPoint;
-    varrtgq4DataPoint.setName("VArRtgQ4");
-    varrtgq4DataPoint.setLabel("VArRtgQ4");
-    varrtgq4DataPoint.setDescription("Continuous VAR capability of the inverter in quadrant 4.");
-    varrtgq4DataPoint.setUnits("var");
-    varrtgq4DataPoint.setMandatory(true);
-    varrtgq4DataPoint.setSize(1);
-    varrtgq4DataPoint.setAddressOffset(10);
-    varrtgq4DataPoint.setBlockOffset(8);
-    varrtgq4DataPoint.setScaleFactorName("VArRtg_SF");
-    varrtgq4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-    m_dataPoints.insert(varrtgq4DataPoint.name(), varrtgq4DataPoint);
+    SunSpecDataPoint vArRtgQ4DataPoint;
+    vArRtgQ4DataPoint.setName("VArRtgQ4");
+    vArRtgQ4DataPoint.setLabel("VArRtgQ4");
+    vArRtgQ4DataPoint.setDescription("Continuous VAR capability of the inverter in quadrant 4.");
+    vArRtgQ4DataPoint.setUnits("var");
+    vArRtgQ4DataPoint.setMandatory(true);
+    vArRtgQ4DataPoint.setSize(1);
+    vArRtgQ4DataPoint.setAddressOffset(10);
+    vArRtgQ4DataPoint.setBlockOffset(8);
+    vArRtgQ4DataPoint.setScaleFactorName("VArRtg_SF");
+    vArRtgQ4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    m_dataPoints.insert(vArRtgQ4DataPoint.name(), vArRtgQ4DataPoint);
 
-    SunSpecDataPoint varrtgSfDataPoint;
-    varrtgSfDataPoint.setName("VArRtg_SF");
-    varrtgSfDataPoint.setLabel("VArRtg_SF");
-    varrtgSfDataPoint.setDescription("Scale factor");
-    varrtgSfDataPoint.setMandatory(true);
-    varrtgSfDataPoint.setSize(1);
-    varrtgSfDataPoint.setAddressOffset(11);
-    varrtgSfDataPoint.setBlockOffset(9);
-    varrtgSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(varrtgSfDataPoint.name(), varrtgSfDataPoint);
+    SunSpecDataPoint vArRtgSfDataPoint;
+    vArRtgSfDataPoint.setName("VArRtg_SF");
+    vArRtgSfDataPoint.setLabel("VArRtg_SF");
+    vArRtgSfDataPoint.setDescription("Scale factor");
+    vArRtgSfDataPoint.setMandatory(true);
+    vArRtgSfDataPoint.setSize(1);
+    vArRtgSfDataPoint.setAddressOffset(11);
+    vArRtgSfDataPoint.setBlockOffset(9);
+    vArRtgSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(vArRtgSfDataPoint.name(), vArRtgSfDataPoint);
 
-    SunSpecDataPoint artgDataPoint;
-    artgDataPoint.setName("ARtg");
-    artgDataPoint.setLabel("ARtg");
-    artgDataPoint.setDescription("Maximum RMS AC current level capability of the inverter.");
-    artgDataPoint.setUnits("A");
-    artgDataPoint.setMandatory(true);
-    artgDataPoint.setSize(1);
-    artgDataPoint.setAddressOffset(12);
-    artgDataPoint.setBlockOffset(10);
-    artgDataPoint.setScaleFactorName("ARtg_SF");
-    artgDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints.insert(artgDataPoint.name(), artgDataPoint);
+    SunSpecDataPoint aRtgDataPoint;
+    aRtgDataPoint.setName("ARtg");
+    aRtgDataPoint.setLabel("ARtg");
+    aRtgDataPoint.setDescription("Maximum RMS AC current level capability of the inverter.");
+    aRtgDataPoint.setUnits("A");
+    aRtgDataPoint.setMandatory(true);
+    aRtgDataPoint.setSize(1);
+    aRtgDataPoint.setAddressOffset(12);
+    aRtgDataPoint.setBlockOffset(10);
+    aRtgDataPoint.setScaleFactorName("ARtg_SF");
+    aRtgDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    m_dataPoints.insert(aRtgDataPoint.name(), aRtgDataPoint);
 
-    SunSpecDataPoint artgSfDataPoint;
-    artgSfDataPoint.setName("ARtg_SF");
-    artgSfDataPoint.setLabel("ARtg_SF");
-    artgSfDataPoint.setDescription("Scale factor");
-    artgSfDataPoint.setMandatory(true);
-    artgSfDataPoint.setSize(1);
-    artgSfDataPoint.setAddressOffset(13);
-    artgSfDataPoint.setBlockOffset(11);
-    artgSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(artgSfDataPoint.name(), artgSfDataPoint);
+    SunSpecDataPoint aRtgSfDataPoint;
+    aRtgSfDataPoint.setName("ARtg_SF");
+    aRtgSfDataPoint.setLabel("ARtg_SF");
+    aRtgSfDataPoint.setDescription("Scale factor");
+    aRtgSfDataPoint.setMandatory(true);
+    aRtgSfDataPoint.setSize(1);
+    aRtgSfDataPoint.setAddressOffset(13);
+    aRtgSfDataPoint.setBlockOffset(11);
+    aRtgSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(aRtgSfDataPoint.name(), aRtgSfDataPoint);
 
-    SunSpecDataPoint pfrtgq1DataPoint;
-    pfrtgq1DataPoint.setName("PFRtgQ1");
-    pfrtgq1DataPoint.setLabel("PFRtgQ1");
-    pfrtgq1DataPoint.setDescription("Minimum power factor capability of the inverter in quadrant 1.");
-    pfrtgq1DataPoint.setUnits("cos()");
-    pfrtgq1DataPoint.setMandatory(true);
-    pfrtgq1DataPoint.setSize(1);
-    pfrtgq1DataPoint.setAddressOffset(14);
-    pfrtgq1DataPoint.setBlockOffset(12);
-    pfrtgq1DataPoint.setScaleFactorName("PFRtg_SF");
-    pfrtgq1DataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-    m_dataPoints.insert(pfrtgq1DataPoint.name(), pfrtgq1DataPoint);
+    SunSpecDataPoint pfRtgQ1DataPoint;
+    pfRtgQ1DataPoint.setName("PFRtgQ1");
+    pfRtgQ1DataPoint.setLabel("PFRtgQ1");
+    pfRtgQ1DataPoint.setDescription("Minimum power factor capability of the inverter in quadrant 1.");
+    pfRtgQ1DataPoint.setUnits("cos()");
+    pfRtgQ1DataPoint.setMandatory(true);
+    pfRtgQ1DataPoint.setSize(1);
+    pfRtgQ1DataPoint.setAddressOffset(14);
+    pfRtgQ1DataPoint.setBlockOffset(12);
+    pfRtgQ1DataPoint.setScaleFactorName("PFRtg_SF");
+    pfRtgQ1DataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    m_dataPoints.insert(pfRtgQ1DataPoint.name(), pfRtgQ1DataPoint);
 
-    SunSpecDataPoint pfrtgq2DataPoint;
-    pfrtgq2DataPoint.setName("PFRtgQ2");
-    pfrtgq2DataPoint.setLabel("PFRtgQ2");
-    pfrtgq2DataPoint.setDescription("Minimum power factor capability of the inverter in quadrant 2.");
-    pfrtgq2DataPoint.setUnits("cos()");
-    pfrtgq2DataPoint.setMandatory(true);
-    pfrtgq2DataPoint.setSize(1);
-    pfrtgq2DataPoint.setAddressOffset(15);
-    pfrtgq2DataPoint.setBlockOffset(13);
-    pfrtgq2DataPoint.setScaleFactorName("PFRtg_SF");
-    pfrtgq2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-    m_dataPoints.insert(pfrtgq2DataPoint.name(), pfrtgq2DataPoint);
+    SunSpecDataPoint pfRtgQ2DataPoint;
+    pfRtgQ2DataPoint.setName("PFRtgQ2");
+    pfRtgQ2DataPoint.setLabel("PFRtgQ2");
+    pfRtgQ2DataPoint.setDescription("Minimum power factor capability of the inverter in quadrant 2.");
+    pfRtgQ2DataPoint.setUnits("cos()");
+    pfRtgQ2DataPoint.setMandatory(true);
+    pfRtgQ2DataPoint.setSize(1);
+    pfRtgQ2DataPoint.setAddressOffset(15);
+    pfRtgQ2DataPoint.setBlockOffset(13);
+    pfRtgQ2DataPoint.setScaleFactorName("PFRtg_SF");
+    pfRtgQ2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    m_dataPoints.insert(pfRtgQ2DataPoint.name(), pfRtgQ2DataPoint);
 
-    SunSpecDataPoint pfrtgq3DataPoint;
-    pfrtgq3DataPoint.setName("PFRtgQ3");
-    pfrtgq3DataPoint.setLabel("PFRtgQ3");
-    pfrtgq3DataPoint.setDescription("Minimum power factor capability of the inverter in quadrant 3.");
-    pfrtgq3DataPoint.setUnits("cos()");
-    pfrtgq3DataPoint.setMandatory(true);
-    pfrtgq3DataPoint.setSize(1);
-    pfrtgq3DataPoint.setAddressOffset(16);
-    pfrtgq3DataPoint.setBlockOffset(14);
-    pfrtgq3DataPoint.setScaleFactorName("PFRtg_SF");
-    pfrtgq3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-    m_dataPoints.insert(pfrtgq3DataPoint.name(), pfrtgq3DataPoint);
+    SunSpecDataPoint pfRtgQ3DataPoint;
+    pfRtgQ3DataPoint.setName("PFRtgQ3");
+    pfRtgQ3DataPoint.setLabel("PFRtgQ3");
+    pfRtgQ3DataPoint.setDescription("Minimum power factor capability of the inverter in quadrant 3.");
+    pfRtgQ3DataPoint.setUnits("cos()");
+    pfRtgQ3DataPoint.setMandatory(true);
+    pfRtgQ3DataPoint.setSize(1);
+    pfRtgQ3DataPoint.setAddressOffset(16);
+    pfRtgQ3DataPoint.setBlockOffset(14);
+    pfRtgQ3DataPoint.setScaleFactorName("PFRtg_SF");
+    pfRtgQ3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    m_dataPoints.insert(pfRtgQ3DataPoint.name(), pfRtgQ3DataPoint);
 
-    SunSpecDataPoint pfrtgq4DataPoint;
-    pfrtgq4DataPoint.setName("PFRtgQ4");
-    pfrtgq4DataPoint.setLabel("PFRtgQ4");
-    pfrtgq4DataPoint.setDescription("Minimum power factor capability of the inverter in quadrant 4.");
-    pfrtgq4DataPoint.setUnits("cos()");
-    pfrtgq4DataPoint.setMandatory(true);
-    pfrtgq4DataPoint.setSize(1);
-    pfrtgq4DataPoint.setAddressOffset(17);
-    pfrtgq4DataPoint.setBlockOffset(15);
-    pfrtgq4DataPoint.setScaleFactorName("PFRtg_SF");
-    pfrtgq4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-    m_dataPoints.insert(pfrtgq4DataPoint.name(), pfrtgq4DataPoint);
+    SunSpecDataPoint pfRtgQ4DataPoint;
+    pfRtgQ4DataPoint.setName("PFRtgQ4");
+    pfRtgQ4DataPoint.setLabel("PFRtgQ4");
+    pfRtgQ4DataPoint.setDescription("Minimum power factor capability of the inverter in quadrant 4.");
+    pfRtgQ4DataPoint.setUnits("cos()");
+    pfRtgQ4DataPoint.setMandatory(true);
+    pfRtgQ4DataPoint.setSize(1);
+    pfRtgQ4DataPoint.setAddressOffset(17);
+    pfRtgQ4DataPoint.setBlockOffset(15);
+    pfRtgQ4DataPoint.setScaleFactorName("PFRtg_SF");
+    pfRtgQ4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    m_dataPoints.insert(pfRtgQ4DataPoint.name(), pfRtgQ4DataPoint);
 
-    SunSpecDataPoint pfrtgSfDataPoint;
-    pfrtgSfDataPoint.setName("PFRtg_SF");
-    pfrtgSfDataPoint.setLabel("PFRtg_SF");
-    pfrtgSfDataPoint.setDescription("Scale factor");
-    pfrtgSfDataPoint.setMandatory(true);
-    pfrtgSfDataPoint.setSize(1);
-    pfrtgSfDataPoint.setAddressOffset(18);
-    pfrtgSfDataPoint.setBlockOffset(16);
-    pfrtgSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(pfrtgSfDataPoint.name(), pfrtgSfDataPoint);
+    SunSpecDataPoint pfRtgSfDataPoint;
+    pfRtgSfDataPoint.setName("PFRtg_SF");
+    pfRtgSfDataPoint.setLabel("PFRtg_SF");
+    pfRtgSfDataPoint.setDescription("Scale factor");
+    pfRtgSfDataPoint.setMandatory(true);
+    pfRtgSfDataPoint.setSize(1);
+    pfRtgSfDataPoint.setAddressOffset(18);
+    pfRtgSfDataPoint.setBlockOffset(16);
+    pfRtgSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(pfRtgSfDataPoint.name(), pfRtgSfDataPoint);
 
-    SunSpecDataPoint whrtgDataPoint;
-    whrtgDataPoint.setName("WHRtg");
-    whrtgDataPoint.setLabel("WHRtg");
-    whrtgDataPoint.setDescription("Nominal energy rating of storage device.");
-    whrtgDataPoint.setUnits("Wh");
-    whrtgDataPoint.setSize(1);
-    whrtgDataPoint.setAddressOffset(19);
-    whrtgDataPoint.setBlockOffset(17);
-    whrtgDataPoint.setScaleFactorName("WHRtg_SF");
-    whrtgDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints.insert(whrtgDataPoint.name(), whrtgDataPoint);
+    SunSpecDataPoint whRtgDataPoint;
+    whRtgDataPoint.setName("WHRtg");
+    whRtgDataPoint.setLabel("WHRtg");
+    whRtgDataPoint.setDescription("Nominal energy rating of storage device.");
+    whRtgDataPoint.setUnits("Wh");
+    whRtgDataPoint.setSize(1);
+    whRtgDataPoint.setAddressOffset(19);
+    whRtgDataPoint.setBlockOffset(17);
+    whRtgDataPoint.setScaleFactorName("WHRtg_SF");
+    whRtgDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    m_dataPoints.insert(whRtgDataPoint.name(), whRtgDataPoint);
 
-    SunSpecDataPoint whrtgSfDataPoint;
-    whrtgSfDataPoint.setName("WHRtg_SF");
-    whrtgSfDataPoint.setLabel("WHRtg_SF");
-    whrtgSfDataPoint.setDescription("Scale factor");
-    whrtgSfDataPoint.setSize(1);
-    whrtgSfDataPoint.setAddressOffset(20);
-    whrtgSfDataPoint.setBlockOffset(18);
-    whrtgSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(whrtgSfDataPoint.name(), whrtgSfDataPoint);
+    SunSpecDataPoint whRtgSfDataPoint;
+    whRtgSfDataPoint.setName("WHRtg_SF");
+    whRtgSfDataPoint.setLabel("WHRtg_SF");
+    whRtgSfDataPoint.setDescription("Scale factor");
+    whRtgSfDataPoint.setSize(1);
+    whRtgSfDataPoint.setAddressOffset(20);
+    whRtgSfDataPoint.setBlockOffset(18);
+    whRtgSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(whRtgSfDataPoint.name(), whRtgSfDataPoint);
 
-    SunSpecDataPoint ahrrtgDataPoint;
-    ahrrtgDataPoint.setName("AhrRtg");
-    ahrrtgDataPoint.setLabel("AhrRtg");
-    ahrrtgDataPoint.setDescription("The usable capacity of the battery.  Maximum charge minus minimum charge from a technology capability perspective (Amp-hour capacity rating).");
-    ahrrtgDataPoint.setUnits("AH");
-    ahrrtgDataPoint.setSize(1);
-    ahrrtgDataPoint.setAddressOffset(21);
-    ahrrtgDataPoint.setBlockOffset(19);
-    ahrrtgDataPoint.setScaleFactorName("AhrRtg_SF");
-    ahrrtgDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints.insert(ahrrtgDataPoint.name(), ahrrtgDataPoint);
+    SunSpecDataPoint ahrRtgDataPoint;
+    ahrRtgDataPoint.setName("AhrRtg");
+    ahrRtgDataPoint.setLabel("AhrRtg");
+    ahrRtgDataPoint.setDescription("The usable capacity of the battery.  Maximum charge minus minimum charge from a technology capability perspective (Amp-hour capacity rating).");
+    ahrRtgDataPoint.setUnits("AH");
+    ahrRtgDataPoint.setSize(1);
+    ahrRtgDataPoint.setAddressOffset(21);
+    ahrRtgDataPoint.setBlockOffset(19);
+    ahrRtgDataPoint.setScaleFactorName("AhrRtg_SF");
+    ahrRtgDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    m_dataPoints.insert(ahrRtgDataPoint.name(), ahrRtgDataPoint);
 
-    SunSpecDataPoint ahrrtgSfDataPoint;
-    ahrrtgSfDataPoint.setName("AhrRtg_SF");
-    ahrrtgSfDataPoint.setLabel("AhrRtg_SF");
-    ahrrtgSfDataPoint.setDescription("Scale factor for amp-hour rating.");
-    ahrrtgSfDataPoint.setSize(1);
-    ahrrtgSfDataPoint.setAddressOffset(22);
-    ahrrtgSfDataPoint.setBlockOffset(20);
-    ahrrtgSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(ahrrtgSfDataPoint.name(), ahrrtgSfDataPoint);
+    SunSpecDataPoint ahrRtgSfDataPoint;
+    ahrRtgSfDataPoint.setName("AhrRtg_SF");
+    ahrRtgSfDataPoint.setLabel("AhrRtg_SF");
+    ahrRtgSfDataPoint.setDescription("Scale factor for amp-hour rating.");
+    ahrRtgSfDataPoint.setSize(1);
+    ahrRtgSfDataPoint.setAddressOffset(22);
+    ahrRtgSfDataPoint.setBlockOffset(20);
+    ahrRtgSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(ahrRtgSfDataPoint.name(), ahrRtgSfDataPoint);
 
-    SunSpecDataPoint maxcharteDataPoint;
-    maxcharteDataPoint.setName("MaxChaRte");
-    maxcharteDataPoint.setLabel("MaxChaRte");
-    maxcharteDataPoint.setDescription("Maximum rate of energy transfer into the storage device.");
-    maxcharteDataPoint.setUnits("W");
-    maxcharteDataPoint.setSize(1);
-    maxcharteDataPoint.setAddressOffset(23);
-    maxcharteDataPoint.setBlockOffset(21);
-    maxcharteDataPoint.setScaleFactorName("MaxChaRte_SF");
-    maxcharteDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints.insert(maxcharteDataPoint.name(), maxcharteDataPoint);
+    SunSpecDataPoint maxChaRteDataPoint;
+    maxChaRteDataPoint.setName("MaxChaRte");
+    maxChaRteDataPoint.setLabel("MaxChaRte");
+    maxChaRteDataPoint.setDescription("Maximum rate of energy transfer into the storage device.");
+    maxChaRteDataPoint.setUnits("W");
+    maxChaRteDataPoint.setSize(1);
+    maxChaRteDataPoint.setAddressOffset(23);
+    maxChaRteDataPoint.setBlockOffset(21);
+    maxChaRteDataPoint.setScaleFactorName("MaxChaRte_SF");
+    maxChaRteDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    m_dataPoints.insert(maxChaRteDataPoint.name(), maxChaRteDataPoint);
 
-    SunSpecDataPoint maxcharteSfDataPoint;
-    maxcharteSfDataPoint.setName("MaxChaRte_SF");
-    maxcharteSfDataPoint.setLabel("MaxChaRte_SF");
-    maxcharteSfDataPoint.setDescription("Scale factor");
-    maxcharteSfDataPoint.setSize(1);
-    maxcharteSfDataPoint.setAddressOffset(24);
-    maxcharteSfDataPoint.setBlockOffset(22);
-    maxcharteSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(maxcharteSfDataPoint.name(), maxcharteSfDataPoint);
+    SunSpecDataPoint maxChaRteSfDataPoint;
+    maxChaRteSfDataPoint.setName("MaxChaRte_SF");
+    maxChaRteSfDataPoint.setLabel("MaxChaRte_SF");
+    maxChaRteSfDataPoint.setDescription("Scale factor");
+    maxChaRteSfDataPoint.setSize(1);
+    maxChaRteSfDataPoint.setAddressOffset(24);
+    maxChaRteSfDataPoint.setBlockOffset(22);
+    maxChaRteSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(maxChaRteSfDataPoint.name(), maxChaRteSfDataPoint);
 
-    SunSpecDataPoint maxdischarteDataPoint;
-    maxdischarteDataPoint.setName("MaxDisChaRte");
-    maxdischarteDataPoint.setLabel("MaxDisChaRte");
-    maxdischarteDataPoint.setDescription("Maximum rate of energy transfer out of the storage device.");
-    maxdischarteDataPoint.setUnits("W");
-    maxdischarteDataPoint.setSize(1);
-    maxdischarteDataPoint.setAddressOffset(25);
-    maxdischarteDataPoint.setBlockOffset(23);
-    maxdischarteDataPoint.setScaleFactorName("MaxDisChaRte_SF");
-    maxdischarteDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints.insert(maxdischarteDataPoint.name(), maxdischarteDataPoint);
+    SunSpecDataPoint maxDisChaRteDataPoint;
+    maxDisChaRteDataPoint.setName("MaxDisChaRte");
+    maxDisChaRteDataPoint.setLabel("MaxDisChaRte");
+    maxDisChaRteDataPoint.setDescription("Maximum rate of energy transfer out of the storage device.");
+    maxDisChaRteDataPoint.setUnits("W");
+    maxDisChaRteDataPoint.setSize(1);
+    maxDisChaRteDataPoint.setAddressOffset(25);
+    maxDisChaRteDataPoint.setBlockOffset(23);
+    maxDisChaRteDataPoint.setScaleFactorName("MaxDisChaRte_SF");
+    maxDisChaRteDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    m_dataPoints.insert(maxDisChaRteDataPoint.name(), maxDisChaRteDataPoint);
 
-    SunSpecDataPoint maxdischarteSfDataPoint;
-    maxdischarteSfDataPoint.setName("MaxDisChaRte_SF");
-    maxdischarteSfDataPoint.setLabel("MaxDisChaRte_SF");
-    maxdischarteSfDataPoint.setDescription("Scale factor");
-    maxdischarteSfDataPoint.setSize(1);
-    maxdischarteSfDataPoint.setAddressOffset(26);
-    maxdischarteSfDataPoint.setBlockOffset(24);
-    maxdischarteSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(maxdischarteSfDataPoint.name(), maxdischarteSfDataPoint);
+    SunSpecDataPoint maxDisChaRteSfDataPoint;
+    maxDisChaRteSfDataPoint.setName("MaxDisChaRte_SF");
+    maxDisChaRteSfDataPoint.setLabel("MaxDisChaRte_SF");
+    maxDisChaRteSfDataPoint.setDescription("Scale factor");
+    maxDisChaRteSfDataPoint.setSize(1);
+    maxDisChaRteSfDataPoint.setAddressOffset(26);
+    maxDisChaRteSfDataPoint.setBlockOffset(24);
+    maxDisChaRteSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(maxDisChaRteSfDataPoint.name(), maxDisChaRteSfDataPoint);
 
     SunSpecDataPoint padDataPoint;
     padDataPoint.setName("Pad");

@@ -48,10 +48,21 @@ public:
     QString description() const override;
     QString label() const override;
 
-    void readModelHeader() override;
-    void readBlockData() override;
+    quint16 modelId() const;
+    quint16 modelLength() const;
+    quint16 ghi() const;
+    qint16 temp() const;
+    qint16 ambientTemperature() const;
+    quint16 windSpeed() const;
 
 private:
+    quint16 m_modelId;
+    quint16 m_modelLength;
+    quint16 m_ghi;
+    qint16 m_temp;
+    qint16 m_ambientTemperature;
+    quint16 m_windSpeed;
+
     void initDataPoints();
 
 };

@@ -87,16 +87,138 @@ QString SunSpecInverterModel::label() const
     }
 }
 
-void SunSpecInverterModel::readModelHeader()
+quint16 SunSpecInverterModel::modelId() const
 {
-
+    return m_modelId;
 }
-
-void SunSpecInverterModel::readBlockData()
+quint16 SunSpecInverterModel::modelLength() const
 {
-
+    return m_modelLength;
 }
-
+float SunSpecInverterModel::amps() const
+{
+    return m_amps;
+}
+float SunSpecInverterModel::ampsPhaseA() const
+{
+    return m_ampsPhaseA;
+}
+float SunSpecInverterModel::ampsPhaseB() const
+{
+    return m_ampsPhaseB;
+}
+float SunSpecInverterModel::ampsPhaseC() const
+{
+    return m_ampsPhaseC;
+}
+float SunSpecInverterModel::phaseVoltageAb() const
+{
+    return m_phaseVoltageAb;
+}
+float SunSpecInverterModel::phaseVoltageBc() const
+{
+    return m_phaseVoltageBc;
+}
+float SunSpecInverterModel::phaseVoltageCa() const
+{
+    return m_phaseVoltageCa;
+}
+float SunSpecInverterModel::phaseVoltageAn() const
+{
+    return m_phaseVoltageAn;
+}
+float SunSpecInverterModel::phaseVoltageBn() const
+{
+    return m_phaseVoltageBn;
+}
+float SunSpecInverterModel::phaseVoltageCn() const
+{
+    return m_phaseVoltageCn;
+}
+qint16 SunSpecInverterModel::watts() const
+{
+    return m_watts;
+}
+float SunSpecInverterModel::hz() const
+{
+    return m_hz;
+}
+qint16 SunSpecInverterModel::va() const
+{
+    return m_va;
+}
+qint16 SunSpecInverterModel::vAr() const
+{
+    return m_vAr;
+}
+qint16 SunSpecInverterModel::pf() const
+{
+    return m_pf;
+}
+quint32 SunSpecInverterModel::wattHours() const
+{
+    return m_wattHours;
+}
+float SunSpecInverterModel::dcAmps() const
+{
+    return m_dcAmps;
+}
+float SunSpecInverterModel::dcVoltage() const
+{
+    return m_dcVoltage;
+}
+qint16 SunSpecInverterModel::dcWatts() const
+{
+    return m_dcWatts;
+}
+qint16 SunSpecInverterModel::cabinetTemperature() const
+{
+    return m_cabinetTemperature;
+}
+qint16 SunSpecInverterModel::heatSinkTemperature() const
+{
+    return m_heatSinkTemperature;
+}
+qint16 SunSpecInverterModel::transformerTemperature() const
+{
+    return m_transformerTemperature;
+}
+qint16 SunSpecInverterModel::otherTemperature() const
+{
+    return m_otherTemperature;
+}
+SunSpecInverterModel::St SunSpecInverterModel::operatingState() const
+{
+    return m_operatingState;
+}
+quint16 SunSpecInverterModel::vendorOperatingState() const
+{
+    return m_vendorOperatingState;
+}
+SunSpecInverterModel::Evt1Flags SunSpecInverterModel::event1() const
+{
+    return m_event1;
+}
+quint32 SunSpecInverterModel::eventBitfield2() const
+{
+    return m_eventBitfield2;
+}
+quint32 SunSpecInverterModel::vendorEventBitfield1() const
+{
+    return m_vendorEventBitfield1;
+}
+quint32 SunSpecInverterModel::vendorEventBitfield2() const
+{
+    return m_vendorEventBitfield2;
+}
+quint32 SunSpecInverterModel::vendorEventBitfield3() const
+{
+    return m_vendorEventBitfield3;
+}
+quint32 SunSpecInverterModel::vendorEventBitfield4() const
+{
+    return m_vendorEventBitfield4;
+}
 void SunSpecInverterModel::initDataPoints()
 {
     switch (m_modelId) {
@@ -134,51 +256,51 @@ void SunSpecInverterModel::initDataPoints()
         ampsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
         m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
-        SunSpecDataPoint ampsPhaseaDataPoint;
-        ampsPhaseaDataPoint.setName("AphA");
-        ampsPhaseaDataPoint.setLabel("Amps PhaseA");
-        ampsPhaseaDataPoint.setDescription("Phase A Current");
-        ampsPhaseaDataPoint.setUnits("A");
-        ampsPhaseaDataPoint.setMandatory(true);
-        ampsPhaseaDataPoint.setSize(1);
-        ampsPhaseaDataPoint.setAddressOffset(3);
-        ampsPhaseaDataPoint.setBlockOffset(1);
-        ampsPhaseaDataPoint.setScaleFactorName("A_SF");
-        ampsPhaseaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-        m_dataPoints.insert(ampsPhaseaDataPoint.name(), ampsPhaseaDataPoint);
+        SunSpecDataPoint ampsPhaseADataPoint;
+        ampsPhaseADataPoint.setName("AphA");
+        ampsPhaseADataPoint.setLabel("Amps PhaseA");
+        ampsPhaseADataPoint.setDescription("Phase A Current");
+        ampsPhaseADataPoint.setUnits("A");
+        ampsPhaseADataPoint.setMandatory(true);
+        ampsPhaseADataPoint.setSize(1);
+        ampsPhaseADataPoint.setAddressOffset(3);
+        ampsPhaseADataPoint.setBlockOffset(1);
+        ampsPhaseADataPoint.setScaleFactorName("A_SF");
+        ampsPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+        m_dataPoints.insert(ampsPhaseADataPoint.name(), ampsPhaseADataPoint);
 
-        SunSpecDataPoint ampsPhasebDataPoint;
-        ampsPhasebDataPoint.setName("AphB");
-        ampsPhasebDataPoint.setLabel("Amps PhaseB");
-        ampsPhasebDataPoint.setDescription("Phase B Current");
-        ampsPhasebDataPoint.setUnits("A");
-        ampsPhasebDataPoint.setSize(1);
-        ampsPhasebDataPoint.setAddressOffset(4);
-        ampsPhasebDataPoint.setBlockOffset(2);
-        ampsPhasebDataPoint.setScaleFactorName("A_SF");
-        ampsPhasebDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-        m_dataPoints.insert(ampsPhasebDataPoint.name(), ampsPhasebDataPoint);
+        SunSpecDataPoint ampsPhaseBDataPoint;
+        ampsPhaseBDataPoint.setName("AphB");
+        ampsPhaseBDataPoint.setLabel("Amps PhaseB");
+        ampsPhaseBDataPoint.setDescription("Phase B Current");
+        ampsPhaseBDataPoint.setUnits("A");
+        ampsPhaseBDataPoint.setSize(1);
+        ampsPhaseBDataPoint.setAddressOffset(4);
+        ampsPhaseBDataPoint.setBlockOffset(2);
+        ampsPhaseBDataPoint.setScaleFactorName("A_SF");
+        ampsPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+        m_dataPoints.insert(ampsPhaseBDataPoint.name(), ampsPhaseBDataPoint);
 
-        SunSpecDataPoint ampsPhasecDataPoint;
-        ampsPhasecDataPoint.setName("AphC");
-        ampsPhasecDataPoint.setLabel("Amps PhaseC");
-        ampsPhasecDataPoint.setDescription("Phase C Current");
-        ampsPhasecDataPoint.setUnits("A");
-        ampsPhasecDataPoint.setSize(1);
-        ampsPhasecDataPoint.setAddressOffset(5);
-        ampsPhasecDataPoint.setBlockOffset(3);
-        ampsPhasecDataPoint.setScaleFactorName("A_SF");
-        ampsPhasecDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-        m_dataPoints.insert(ampsPhasecDataPoint.name(), ampsPhasecDataPoint);
+        SunSpecDataPoint ampsPhaseCDataPoint;
+        ampsPhaseCDataPoint.setName("AphC");
+        ampsPhaseCDataPoint.setLabel("Amps PhaseC");
+        ampsPhaseCDataPoint.setDescription("Phase C Current");
+        ampsPhaseCDataPoint.setUnits("A");
+        ampsPhaseCDataPoint.setSize(1);
+        ampsPhaseCDataPoint.setAddressOffset(5);
+        ampsPhaseCDataPoint.setBlockOffset(3);
+        ampsPhaseCDataPoint.setScaleFactorName("A_SF");
+        ampsPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+        m_dataPoints.insert(ampsPhaseCDataPoint.name(), ampsPhaseCDataPoint);
 
-        SunSpecDataPoint A_SFDataPoint;
-        A_SFDataPoint.setName("A_SF");
-        A_SFDataPoint.setMandatory(true);
-        A_SFDataPoint.setSize(1);
-        A_SFDataPoint.setAddressOffset(6);
-        A_SFDataPoint.setBlockOffset(4);
-        A_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(A_SFDataPoint.name(), A_SFDataPoint);
+        SunSpecDataPoint a_SFDataPoint;
+        a_SFDataPoint.setName("A_SF");
+        a_SFDataPoint.setMandatory(true);
+        a_SFDataPoint.setSize(1);
+        a_SFDataPoint.setAddressOffset(6);
+        a_SFDataPoint.setBlockOffset(4);
+        a_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(a_SFDataPoint.name(), a_SFDataPoint);
 
         SunSpecDataPoint phaseVoltageAbDataPoint;
         phaseVoltageAbDataPoint.setName("PPVphAB");
@@ -253,14 +375,14 @@ void SunSpecInverterModel::initDataPoints()
         phaseVoltageCnDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
         m_dataPoints.insert(phaseVoltageCnDataPoint.name(), phaseVoltageCnDataPoint);
 
-        SunSpecDataPoint V_SFDataPoint;
-        V_SFDataPoint.setName("V_SF");
-        V_SFDataPoint.setMandatory(true);
-        V_SFDataPoint.setSize(1);
-        V_SFDataPoint.setAddressOffset(13);
-        V_SFDataPoint.setBlockOffset(11);
-        V_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(V_SFDataPoint.name(), V_SFDataPoint);
+        SunSpecDataPoint v_SFDataPoint;
+        v_SFDataPoint.setName("V_SF");
+        v_SFDataPoint.setMandatory(true);
+        v_SFDataPoint.setSize(1);
+        v_SFDataPoint.setAddressOffset(13);
+        v_SFDataPoint.setBlockOffset(11);
+        v_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(v_SFDataPoint.name(), v_SFDataPoint);
 
         SunSpecDataPoint wattsDataPoint;
         wattsDataPoint.setName("W");
@@ -275,14 +397,14 @@ void SunSpecInverterModel::initDataPoints()
         wattsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(wattsDataPoint.name(), wattsDataPoint);
 
-        SunSpecDataPoint W_SFDataPoint;
-        W_SFDataPoint.setName("W_SF");
-        W_SFDataPoint.setMandatory(true);
-        W_SFDataPoint.setSize(1);
-        W_SFDataPoint.setAddressOffset(15);
-        W_SFDataPoint.setBlockOffset(13);
-        W_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(W_SFDataPoint.name(), W_SFDataPoint);
+        SunSpecDataPoint w_SFDataPoint;
+        w_SFDataPoint.setName("W_SF");
+        w_SFDataPoint.setMandatory(true);
+        w_SFDataPoint.setSize(1);
+        w_SFDataPoint.setAddressOffset(15);
+        w_SFDataPoint.setBlockOffset(13);
+        w_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(w_SFDataPoint.name(), w_SFDataPoint);
 
         SunSpecDataPoint hzDataPoint;
         hzDataPoint.setName("Hz");
@@ -297,14 +419,14 @@ void SunSpecInverterModel::initDataPoints()
         hzDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
         m_dataPoints.insert(hzDataPoint.name(), hzDataPoint);
 
-        SunSpecDataPoint Hz_SFDataPoint;
-        Hz_SFDataPoint.setName("Hz_SF");
-        Hz_SFDataPoint.setMandatory(true);
-        Hz_SFDataPoint.setSize(1);
-        Hz_SFDataPoint.setAddressOffset(17);
-        Hz_SFDataPoint.setBlockOffset(15);
-        Hz_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(Hz_SFDataPoint.name(), Hz_SFDataPoint);
+        SunSpecDataPoint hz_SFDataPoint;
+        hz_SFDataPoint.setName("Hz_SF");
+        hz_SFDataPoint.setMandatory(true);
+        hz_SFDataPoint.setSize(1);
+        hz_SFDataPoint.setAddressOffset(17);
+        hz_SFDataPoint.setBlockOffset(15);
+        hz_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(hz_SFDataPoint.name(), hz_SFDataPoint);
 
         SunSpecDataPoint vaDataPoint;
         vaDataPoint.setName("VA");
@@ -318,33 +440,33 @@ void SunSpecInverterModel::initDataPoints()
         vaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(vaDataPoint.name(), vaDataPoint);
 
-        SunSpecDataPoint VA_SFDataPoint;
-        VA_SFDataPoint.setName("VA_SF");
-        VA_SFDataPoint.setSize(1);
-        VA_SFDataPoint.setAddressOffset(19);
-        VA_SFDataPoint.setBlockOffset(17);
-        VA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(VA_SFDataPoint.name(), VA_SFDataPoint);
+        SunSpecDataPoint vA_SFDataPoint;
+        vA_SFDataPoint.setName("VA_SF");
+        vA_SFDataPoint.setSize(1);
+        vA_SFDataPoint.setAddressOffset(19);
+        vA_SFDataPoint.setBlockOffset(17);
+        vA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(vA_SFDataPoint.name(), vA_SFDataPoint);
 
-        SunSpecDataPoint varDataPoint;
-        varDataPoint.setName("VAr");
-        varDataPoint.setLabel("VAr");
-        varDataPoint.setDescription("AC Reactive Power");
-        varDataPoint.setUnits("var");
-        varDataPoint.setSize(1);
-        varDataPoint.setAddressOffset(20);
-        varDataPoint.setBlockOffset(18);
-        varDataPoint.setScaleFactorName("VAr_SF");
-        varDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-        m_dataPoints.insert(varDataPoint.name(), varDataPoint);
+        SunSpecDataPoint vArDataPoint;
+        vArDataPoint.setName("VAr");
+        vArDataPoint.setLabel("VAr");
+        vArDataPoint.setDescription("AC Reactive Power");
+        vArDataPoint.setUnits("var");
+        vArDataPoint.setSize(1);
+        vArDataPoint.setAddressOffset(20);
+        vArDataPoint.setBlockOffset(18);
+        vArDataPoint.setScaleFactorName("VAr_SF");
+        vArDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+        m_dataPoints.insert(vArDataPoint.name(), vArDataPoint);
 
-        SunSpecDataPoint VAr_SFDataPoint;
-        VAr_SFDataPoint.setName("VAr_SF");
-        VAr_SFDataPoint.setSize(1);
-        VAr_SFDataPoint.setAddressOffset(21);
-        VAr_SFDataPoint.setBlockOffset(19);
-        VAr_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(VAr_SFDataPoint.name(), VAr_SFDataPoint);
+        SunSpecDataPoint vAr_SFDataPoint;
+        vAr_SFDataPoint.setName("VAr_SF");
+        vAr_SFDataPoint.setSize(1);
+        vAr_SFDataPoint.setAddressOffset(21);
+        vAr_SFDataPoint.setBlockOffset(19);
+        vAr_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(vAr_SFDataPoint.name(), vAr_SFDataPoint);
 
         SunSpecDataPoint pfDataPoint;
         pfDataPoint.setName("PF");
@@ -358,35 +480,35 @@ void SunSpecInverterModel::initDataPoints()
         pfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(pfDataPoint.name(), pfDataPoint);
 
-        SunSpecDataPoint PF_SFDataPoint;
-        PF_SFDataPoint.setName("PF_SF");
-        PF_SFDataPoint.setSize(1);
-        PF_SFDataPoint.setAddressOffset(23);
-        PF_SFDataPoint.setBlockOffset(21);
-        PF_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(PF_SFDataPoint.name(), PF_SFDataPoint);
+        SunSpecDataPoint pF_SFDataPoint;
+        pF_SFDataPoint.setName("PF_SF");
+        pF_SFDataPoint.setSize(1);
+        pF_SFDataPoint.setAddressOffset(23);
+        pF_SFDataPoint.setBlockOffset(21);
+        pF_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(pF_SFDataPoint.name(), pF_SFDataPoint);
 
-        SunSpecDataPoint watthoursDataPoint;
-        watthoursDataPoint.setName("WH");
-        watthoursDataPoint.setLabel("WattHours");
-        watthoursDataPoint.setDescription("AC Energy");
-        watthoursDataPoint.setUnits("Wh");
-        watthoursDataPoint.setMandatory(true);
-        watthoursDataPoint.setSize(2);
-        watthoursDataPoint.setAddressOffset(24);
-        watthoursDataPoint.setBlockOffset(22);
-        watthoursDataPoint.setScaleFactorName("WH_SF");
-        watthoursDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(watthoursDataPoint.name(), watthoursDataPoint);
+        SunSpecDataPoint wattHoursDataPoint;
+        wattHoursDataPoint.setName("WH");
+        wattHoursDataPoint.setLabel("WattHours");
+        wattHoursDataPoint.setDescription("AC Energy");
+        wattHoursDataPoint.setUnits("Wh");
+        wattHoursDataPoint.setMandatory(true);
+        wattHoursDataPoint.setSize(2);
+        wattHoursDataPoint.setAddressOffset(24);
+        wattHoursDataPoint.setBlockOffset(22);
+        wattHoursDataPoint.setScaleFactorName("WH_SF");
+        wattHoursDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(wattHoursDataPoint.name(), wattHoursDataPoint);
 
-        SunSpecDataPoint WH_SFDataPoint;
-        WH_SFDataPoint.setName("WH_SF");
-        WH_SFDataPoint.setMandatory(true);
-        WH_SFDataPoint.setSize(1);
-        WH_SFDataPoint.setAddressOffset(26);
-        WH_SFDataPoint.setBlockOffset(24);
-        WH_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(WH_SFDataPoint.name(), WH_SFDataPoint);
+        SunSpecDataPoint wH_SFDataPoint;
+        wH_SFDataPoint.setName("WH_SF");
+        wH_SFDataPoint.setMandatory(true);
+        wH_SFDataPoint.setSize(1);
+        wH_SFDataPoint.setAddressOffset(26);
+        wH_SFDataPoint.setBlockOffset(24);
+        wH_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(wH_SFDataPoint.name(), wH_SFDataPoint);
 
         SunSpecDataPoint dcAmpsDataPoint;
         dcAmpsDataPoint.setName("DCA");
@@ -400,13 +522,13 @@ void SunSpecInverterModel::initDataPoints()
         dcAmpsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
         m_dataPoints.insert(dcAmpsDataPoint.name(), dcAmpsDataPoint);
 
-        SunSpecDataPoint DCA_SFDataPoint;
-        DCA_SFDataPoint.setName("DCA_SF");
-        DCA_SFDataPoint.setSize(1);
-        DCA_SFDataPoint.setAddressOffset(28);
-        DCA_SFDataPoint.setBlockOffset(26);
-        DCA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCA_SFDataPoint.name(), DCA_SFDataPoint);
+        SunSpecDataPoint dCA_SFDataPoint;
+        dCA_SFDataPoint.setName("DCA_SF");
+        dCA_SFDataPoint.setSize(1);
+        dCA_SFDataPoint.setAddressOffset(28);
+        dCA_SFDataPoint.setBlockOffset(26);
+        dCA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCA_SFDataPoint.name(), dCA_SFDataPoint);
 
         SunSpecDataPoint dcVoltageDataPoint;
         dcVoltageDataPoint.setName("DCV");
@@ -420,13 +542,13 @@ void SunSpecInverterModel::initDataPoints()
         dcVoltageDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
         m_dataPoints.insert(dcVoltageDataPoint.name(), dcVoltageDataPoint);
 
-        SunSpecDataPoint DCV_SFDataPoint;
-        DCV_SFDataPoint.setName("DCV_SF");
-        DCV_SFDataPoint.setSize(1);
-        DCV_SFDataPoint.setAddressOffset(30);
-        DCV_SFDataPoint.setBlockOffset(28);
-        DCV_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCV_SFDataPoint.name(), DCV_SFDataPoint);
+        SunSpecDataPoint dCV_SFDataPoint;
+        dCV_SFDataPoint.setName("DCV_SF");
+        dCV_SFDataPoint.setSize(1);
+        dCV_SFDataPoint.setAddressOffset(30);
+        dCV_SFDataPoint.setBlockOffset(28);
+        dCV_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCV_SFDataPoint.name(), dCV_SFDataPoint);
 
         SunSpecDataPoint dcWattsDataPoint;
         dcWattsDataPoint.setName("DCW");
@@ -440,13 +562,13 @@ void SunSpecInverterModel::initDataPoints()
         dcWattsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(dcWattsDataPoint.name(), dcWattsDataPoint);
 
-        SunSpecDataPoint DCW_SFDataPoint;
-        DCW_SFDataPoint.setName("DCW_SF");
-        DCW_SFDataPoint.setSize(1);
-        DCW_SFDataPoint.setAddressOffset(32);
-        DCW_SFDataPoint.setBlockOffset(30);
-        DCW_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCW_SFDataPoint.name(), DCW_SFDataPoint);
+        SunSpecDataPoint dCW_SFDataPoint;
+        dCW_SFDataPoint.setName("DCW_SF");
+        dCW_SFDataPoint.setSize(1);
+        dCW_SFDataPoint.setAddressOffset(32);
+        dCW_SFDataPoint.setBlockOffset(30);
+        dCW_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCW_SFDataPoint.name(), dCW_SFDataPoint);
 
         SunSpecDataPoint cabinetTemperatureDataPoint;
         cabinetTemperatureDataPoint.setName("TmpCab");
@@ -497,14 +619,14 @@ void SunSpecInverterModel::initDataPoints()
         otherTemperatureDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(otherTemperatureDataPoint.name(), otherTemperatureDataPoint);
 
-        SunSpecDataPoint Tmp_SFDataPoint;
-        Tmp_SFDataPoint.setName("Tmp_SF");
-        Tmp_SFDataPoint.setMandatory(true);
-        Tmp_SFDataPoint.setSize(1);
-        Tmp_SFDataPoint.setAddressOffset(37);
-        Tmp_SFDataPoint.setBlockOffset(35);
-        Tmp_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(Tmp_SFDataPoint.name(), Tmp_SFDataPoint);
+        SunSpecDataPoint tmp_SFDataPoint;
+        tmp_SFDataPoint.setName("Tmp_SF");
+        tmp_SFDataPoint.setMandatory(true);
+        tmp_SFDataPoint.setSize(1);
+        tmp_SFDataPoint.setAddressOffset(37);
+        tmp_SFDataPoint.setBlockOffset(35);
+        tmp_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(tmp_SFDataPoint.name(), tmp_SFDataPoint);
 
         SunSpecDataPoint operatingStateDataPoint;
         operatingStateDataPoint.setName("St");
@@ -625,52 +747,52 @@ void SunSpecInverterModel::initDataPoints()
         ampsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
         m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
-        SunSpecDataPoint ampsPhaseaDataPoint;
-        ampsPhaseaDataPoint.setName("AphA");
-        ampsPhaseaDataPoint.setLabel("Amps PhaseA");
-        ampsPhaseaDataPoint.setDescription("Phase A Current");
-        ampsPhaseaDataPoint.setUnits("A");
-        ampsPhaseaDataPoint.setMandatory(true);
-        ampsPhaseaDataPoint.setSize(1);
-        ampsPhaseaDataPoint.setAddressOffset(3);
-        ampsPhaseaDataPoint.setBlockOffset(1);
-        ampsPhaseaDataPoint.setScaleFactorName("A_SF");
-        ampsPhaseaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-        m_dataPoints.insert(ampsPhaseaDataPoint.name(), ampsPhaseaDataPoint);
+        SunSpecDataPoint ampsPhaseADataPoint;
+        ampsPhaseADataPoint.setName("AphA");
+        ampsPhaseADataPoint.setLabel("Amps PhaseA");
+        ampsPhaseADataPoint.setDescription("Phase A Current");
+        ampsPhaseADataPoint.setUnits("A");
+        ampsPhaseADataPoint.setMandatory(true);
+        ampsPhaseADataPoint.setSize(1);
+        ampsPhaseADataPoint.setAddressOffset(3);
+        ampsPhaseADataPoint.setBlockOffset(1);
+        ampsPhaseADataPoint.setScaleFactorName("A_SF");
+        ampsPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+        m_dataPoints.insert(ampsPhaseADataPoint.name(), ampsPhaseADataPoint);
 
-        SunSpecDataPoint ampsPhasebDataPoint;
-        ampsPhasebDataPoint.setName("AphB");
-        ampsPhasebDataPoint.setLabel("Amps PhaseB");
-        ampsPhasebDataPoint.setDescription("Phase B Current");
-        ampsPhasebDataPoint.setUnits("A");
-        ampsPhasebDataPoint.setMandatory(true);
-        ampsPhasebDataPoint.setSize(1);
-        ampsPhasebDataPoint.setAddressOffset(4);
-        ampsPhasebDataPoint.setBlockOffset(2);
-        ampsPhasebDataPoint.setScaleFactorName("A_SF");
-        ampsPhasebDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-        m_dataPoints.insert(ampsPhasebDataPoint.name(), ampsPhasebDataPoint);
+        SunSpecDataPoint ampsPhaseBDataPoint;
+        ampsPhaseBDataPoint.setName("AphB");
+        ampsPhaseBDataPoint.setLabel("Amps PhaseB");
+        ampsPhaseBDataPoint.setDescription("Phase B Current");
+        ampsPhaseBDataPoint.setUnits("A");
+        ampsPhaseBDataPoint.setMandatory(true);
+        ampsPhaseBDataPoint.setSize(1);
+        ampsPhaseBDataPoint.setAddressOffset(4);
+        ampsPhaseBDataPoint.setBlockOffset(2);
+        ampsPhaseBDataPoint.setScaleFactorName("A_SF");
+        ampsPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+        m_dataPoints.insert(ampsPhaseBDataPoint.name(), ampsPhaseBDataPoint);
 
-        SunSpecDataPoint ampsPhasecDataPoint;
-        ampsPhasecDataPoint.setName("AphC");
-        ampsPhasecDataPoint.setLabel("Amps PhaseC");
-        ampsPhasecDataPoint.setDescription("Phase C Current");
-        ampsPhasecDataPoint.setUnits("A");
-        ampsPhasecDataPoint.setSize(1);
-        ampsPhasecDataPoint.setAddressOffset(5);
-        ampsPhasecDataPoint.setBlockOffset(3);
-        ampsPhasecDataPoint.setScaleFactorName("A_SF");
-        ampsPhasecDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-        m_dataPoints.insert(ampsPhasecDataPoint.name(), ampsPhasecDataPoint);
+        SunSpecDataPoint ampsPhaseCDataPoint;
+        ampsPhaseCDataPoint.setName("AphC");
+        ampsPhaseCDataPoint.setLabel("Amps PhaseC");
+        ampsPhaseCDataPoint.setDescription("Phase C Current");
+        ampsPhaseCDataPoint.setUnits("A");
+        ampsPhaseCDataPoint.setSize(1);
+        ampsPhaseCDataPoint.setAddressOffset(5);
+        ampsPhaseCDataPoint.setBlockOffset(3);
+        ampsPhaseCDataPoint.setScaleFactorName("A_SF");
+        ampsPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+        m_dataPoints.insert(ampsPhaseCDataPoint.name(), ampsPhaseCDataPoint);
 
-        SunSpecDataPoint A_SFDataPoint;
-        A_SFDataPoint.setName("A_SF");
-        A_SFDataPoint.setMandatory(true);
-        A_SFDataPoint.setSize(1);
-        A_SFDataPoint.setAddressOffset(6);
-        A_SFDataPoint.setBlockOffset(4);
-        A_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(A_SFDataPoint.name(), A_SFDataPoint);
+        SunSpecDataPoint a_SFDataPoint;
+        a_SFDataPoint.setName("A_SF");
+        a_SFDataPoint.setMandatory(true);
+        a_SFDataPoint.setSize(1);
+        a_SFDataPoint.setAddressOffset(6);
+        a_SFDataPoint.setBlockOffset(4);
+        a_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(a_SFDataPoint.name(), a_SFDataPoint);
 
         SunSpecDataPoint phaseVoltageAbDataPoint;
         phaseVoltageAbDataPoint.setName("PPVphAB");
@@ -746,14 +868,14 @@ void SunSpecInverterModel::initDataPoints()
         phaseVoltageCnDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
         m_dataPoints.insert(phaseVoltageCnDataPoint.name(), phaseVoltageCnDataPoint);
 
-        SunSpecDataPoint V_SFDataPoint;
-        V_SFDataPoint.setName("V_SF");
-        V_SFDataPoint.setMandatory(true);
-        V_SFDataPoint.setSize(1);
-        V_SFDataPoint.setAddressOffset(13);
-        V_SFDataPoint.setBlockOffset(11);
-        V_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(V_SFDataPoint.name(), V_SFDataPoint);
+        SunSpecDataPoint v_SFDataPoint;
+        v_SFDataPoint.setName("V_SF");
+        v_SFDataPoint.setMandatory(true);
+        v_SFDataPoint.setSize(1);
+        v_SFDataPoint.setAddressOffset(13);
+        v_SFDataPoint.setBlockOffset(11);
+        v_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(v_SFDataPoint.name(), v_SFDataPoint);
 
         SunSpecDataPoint wattsDataPoint;
         wattsDataPoint.setName("W");
@@ -768,14 +890,14 @@ void SunSpecInverterModel::initDataPoints()
         wattsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(wattsDataPoint.name(), wattsDataPoint);
 
-        SunSpecDataPoint W_SFDataPoint;
-        W_SFDataPoint.setName("W_SF");
-        W_SFDataPoint.setMandatory(true);
-        W_SFDataPoint.setSize(1);
-        W_SFDataPoint.setAddressOffset(15);
-        W_SFDataPoint.setBlockOffset(13);
-        W_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(W_SFDataPoint.name(), W_SFDataPoint);
+        SunSpecDataPoint w_SFDataPoint;
+        w_SFDataPoint.setName("W_SF");
+        w_SFDataPoint.setMandatory(true);
+        w_SFDataPoint.setSize(1);
+        w_SFDataPoint.setAddressOffset(15);
+        w_SFDataPoint.setBlockOffset(13);
+        w_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(w_SFDataPoint.name(), w_SFDataPoint);
 
         SunSpecDataPoint hzDataPoint;
         hzDataPoint.setName("Hz");
@@ -790,14 +912,14 @@ void SunSpecInverterModel::initDataPoints()
         hzDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
         m_dataPoints.insert(hzDataPoint.name(), hzDataPoint);
 
-        SunSpecDataPoint Hz_SFDataPoint;
-        Hz_SFDataPoint.setName("Hz_SF");
-        Hz_SFDataPoint.setMandatory(true);
-        Hz_SFDataPoint.setSize(1);
-        Hz_SFDataPoint.setAddressOffset(17);
-        Hz_SFDataPoint.setBlockOffset(15);
-        Hz_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(Hz_SFDataPoint.name(), Hz_SFDataPoint);
+        SunSpecDataPoint hz_SFDataPoint;
+        hz_SFDataPoint.setName("Hz_SF");
+        hz_SFDataPoint.setMandatory(true);
+        hz_SFDataPoint.setSize(1);
+        hz_SFDataPoint.setAddressOffset(17);
+        hz_SFDataPoint.setBlockOffset(15);
+        hz_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(hz_SFDataPoint.name(), hz_SFDataPoint);
 
         SunSpecDataPoint vaDataPoint;
         vaDataPoint.setName("VA");
@@ -811,33 +933,33 @@ void SunSpecInverterModel::initDataPoints()
         vaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(vaDataPoint.name(), vaDataPoint);
 
-        SunSpecDataPoint VA_SFDataPoint;
-        VA_SFDataPoint.setName("VA_SF");
-        VA_SFDataPoint.setSize(1);
-        VA_SFDataPoint.setAddressOffset(19);
-        VA_SFDataPoint.setBlockOffset(17);
-        VA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(VA_SFDataPoint.name(), VA_SFDataPoint);
+        SunSpecDataPoint vA_SFDataPoint;
+        vA_SFDataPoint.setName("VA_SF");
+        vA_SFDataPoint.setSize(1);
+        vA_SFDataPoint.setAddressOffset(19);
+        vA_SFDataPoint.setBlockOffset(17);
+        vA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(vA_SFDataPoint.name(), vA_SFDataPoint);
 
-        SunSpecDataPoint varDataPoint;
-        varDataPoint.setName("VAr");
-        varDataPoint.setLabel("VAr");
-        varDataPoint.setDescription("AC Reactive Power");
-        varDataPoint.setUnits("var");
-        varDataPoint.setSize(1);
-        varDataPoint.setAddressOffset(20);
-        varDataPoint.setBlockOffset(18);
-        varDataPoint.setScaleFactorName("VAr_SF");
-        varDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-        m_dataPoints.insert(varDataPoint.name(), varDataPoint);
+        SunSpecDataPoint vArDataPoint;
+        vArDataPoint.setName("VAr");
+        vArDataPoint.setLabel("VAr");
+        vArDataPoint.setDescription("AC Reactive Power");
+        vArDataPoint.setUnits("var");
+        vArDataPoint.setSize(1);
+        vArDataPoint.setAddressOffset(20);
+        vArDataPoint.setBlockOffset(18);
+        vArDataPoint.setScaleFactorName("VAr_SF");
+        vArDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+        m_dataPoints.insert(vArDataPoint.name(), vArDataPoint);
 
-        SunSpecDataPoint VAr_SFDataPoint;
-        VAr_SFDataPoint.setName("VAr_SF");
-        VAr_SFDataPoint.setSize(1);
-        VAr_SFDataPoint.setAddressOffset(21);
-        VAr_SFDataPoint.setBlockOffset(19);
-        VAr_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(VAr_SFDataPoint.name(), VAr_SFDataPoint);
+        SunSpecDataPoint vAr_SFDataPoint;
+        vAr_SFDataPoint.setName("VAr_SF");
+        vAr_SFDataPoint.setSize(1);
+        vAr_SFDataPoint.setAddressOffset(21);
+        vAr_SFDataPoint.setBlockOffset(19);
+        vAr_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(vAr_SFDataPoint.name(), vAr_SFDataPoint);
 
         SunSpecDataPoint pfDataPoint;
         pfDataPoint.setName("PF");
@@ -851,35 +973,35 @@ void SunSpecInverterModel::initDataPoints()
         pfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(pfDataPoint.name(), pfDataPoint);
 
-        SunSpecDataPoint PF_SFDataPoint;
-        PF_SFDataPoint.setName("PF_SF");
-        PF_SFDataPoint.setSize(1);
-        PF_SFDataPoint.setAddressOffset(23);
-        PF_SFDataPoint.setBlockOffset(21);
-        PF_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(PF_SFDataPoint.name(), PF_SFDataPoint);
+        SunSpecDataPoint pF_SFDataPoint;
+        pF_SFDataPoint.setName("PF_SF");
+        pF_SFDataPoint.setSize(1);
+        pF_SFDataPoint.setAddressOffset(23);
+        pF_SFDataPoint.setBlockOffset(21);
+        pF_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(pF_SFDataPoint.name(), pF_SFDataPoint);
 
-        SunSpecDataPoint watthoursDataPoint;
-        watthoursDataPoint.setName("WH");
-        watthoursDataPoint.setLabel("WattHours");
-        watthoursDataPoint.setDescription("AC Energy");
-        watthoursDataPoint.setUnits("Wh");
-        watthoursDataPoint.setMandatory(true);
-        watthoursDataPoint.setSize(2);
-        watthoursDataPoint.setAddressOffset(24);
-        watthoursDataPoint.setBlockOffset(22);
-        watthoursDataPoint.setScaleFactorName("WH_SF");
-        watthoursDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(watthoursDataPoint.name(), watthoursDataPoint);
+        SunSpecDataPoint wattHoursDataPoint;
+        wattHoursDataPoint.setName("WH");
+        wattHoursDataPoint.setLabel("WattHours");
+        wattHoursDataPoint.setDescription("AC Energy");
+        wattHoursDataPoint.setUnits("Wh");
+        wattHoursDataPoint.setMandatory(true);
+        wattHoursDataPoint.setSize(2);
+        wattHoursDataPoint.setAddressOffset(24);
+        wattHoursDataPoint.setBlockOffset(22);
+        wattHoursDataPoint.setScaleFactorName("WH_SF");
+        wattHoursDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(wattHoursDataPoint.name(), wattHoursDataPoint);
 
-        SunSpecDataPoint WH_SFDataPoint;
-        WH_SFDataPoint.setName("WH_SF");
-        WH_SFDataPoint.setMandatory(true);
-        WH_SFDataPoint.setSize(1);
-        WH_SFDataPoint.setAddressOffset(26);
-        WH_SFDataPoint.setBlockOffset(24);
-        WH_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(WH_SFDataPoint.name(), WH_SFDataPoint);
+        SunSpecDataPoint wH_SFDataPoint;
+        wH_SFDataPoint.setName("WH_SF");
+        wH_SFDataPoint.setMandatory(true);
+        wH_SFDataPoint.setSize(1);
+        wH_SFDataPoint.setAddressOffset(26);
+        wH_SFDataPoint.setBlockOffset(24);
+        wH_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(wH_SFDataPoint.name(), wH_SFDataPoint);
 
         SunSpecDataPoint dcAmpsDataPoint;
         dcAmpsDataPoint.setName("DCA");
@@ -893,13 +1015,13 @@ void SunSpecInverterModel::initDataPoints()
         dcAmpsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
         m_dataPoints.insert(dcAmpsDataPoint.name(), dcAmpsDataPoint);
 
-        SunSpecDataPoint DCA_SFDataPoint;
-        DCA_SFDataPoint.setName("DCA_SF");
-        DCA_SFDataPoint.setSize(1);
-        DCA_SFDataPoint.setAddressOffset(28);
-        DCA_SFDataPoint.setBlockOffset(26);
-        DCA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCA_SFDataPoint.name(), DCA_SFDataPoint);
+        SunSpecDataPoint dCA_SFDataPoint;
+        dCA_SFDataPoint.setName("DCA_SF");
+        dCA_SFDataPoint.setSize(1);
+        dCA_SFDataPoint.setAddressOffset(28);
+        dCA_SFDataPoint.setBlockOffset(26);
+        dCA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCA_SFDataPoint.name(), dCA_SFDataPoint);
 
         SunSpecDataPoint dcVoltageDataPoint;
         dcVoltageDataPoint.setName("DCV");
@@ -913,13 +1035,13 @@ void SunSpecInverterModel::initDataPoints()
         dcVoltageDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
         m_dataPoints.insert(dcVoltageDataPoint.name(), dcVoltageDataPoint);
 
-        SunSpecDataPoint DCV_SFDataPoint;
-        DCV_SFDataPoint.setName("DCV_SF");
-        DCV_SFDataPoint.setSize(1);
-        DCV_SFDataPoint.setAddressOffset(30);
-        DCV_SFDataPoint.setBlockOffset(28);
-        DCV_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCV_SFDataPoint.name(), DCV_SFDataPoint);
+        SunSpecDataPoint dCV_SFDataPoint;
+        dCV_SFDataPoint.setName("DCV_SF");
+        dCV_SFDataPoint.setSize(1);
+        dCV_SFDataPoint.setAddressOffset(30);
+        dCV_SFDataPoint.setBlockOffset(28);
+        dCV_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCV_SFDataPoint.name(), dCV_SFDataPoint);
 
         SunSpecDataPoint dcWattsDataPoint;
         dcWattsDataPoint.setName("DCW");
@@ -933,13 +1055,13 @@ void SunSpecInverterModel::initDataPoints()
         dcWattsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(dcWattsDataPoint.name(), dcWattsDataPoint);
 
-        SunSpecDataPoint DCW_SFDataPoint;
-        DCW_SFDataPoint.setName("DCW_SF");
-        DCW_SFDataPoint.setSize(1);
-        DCW_SFDataPoint.setAddressOffset(32);
-        DCW_SFDataPoint.setBlockOffset(30);
-        DCW_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCW_SFDataPoint.name(), DCW_SFDataPoint);
+        SunSpecDataPoint dCW_SFDataPoint;
+        dCW_SFDataPoint.setName("DCW_SF");
+        dCW_SFDataPoint.setSize(1);
+        dCW_SFDataPoint.setAddressOffset(32);
+        dCW_SFDataPoint.setBlockOffset(30);
+        dCW_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCW_SFDataPoint.name(), dCW_SFDataPoint);
 
         SunSpecDataPoint cabinetTemperatureDataPoint;
         cabinetTemperatureDataPoint.setName("TmpCab");
@@ -990,14 +1112,14 @@ void SunSpecInverterModel::initDataPoints()
         otherTemperatureDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(otherTemperatureDataPoint.name(), otherTemperatureDataPoint);
 
-        SunSpecDataPoint Tmp_SFDataPoint;
-        Tmp_SFDataPoint.setName("Tmp_SF");
-        Tmp_SFDataPoint.setMandatory(true);
-        Tmp_SFDataPoint.setSize(1);
-        Tmp_SFDataPoint.setAddressOffset(37);
-        Tmp_SFDataPoint.setBlockOffset(35);
-        Tmp_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(Tmp_SFDataPoint.name(), Tmp_SFDataPoint);
+        SunSpecDataPoint tmp_SFDataPoint;
+        tmp_SFDataPoint.setName("Tmp_SF");
+        tmp_SFDataPoint.setMandatory(true);
+        tmp_SFDataPoint.setSize(1);
+        tmp_SFDataPoint.setAddressOffset(37);
+        tmp_SFDataPoint.setBlockOffset(35);
+        tmp_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(tmp_SFDataPoint.name(), tmp_SFDataPoint);
 
         SunSpecDataPoint operatingStateDataPoint;
         operatingStateDataPoint.setName("St");
@@ -1118,53 +1240,53 @@ void SunSpecInverterModel::initDataPoints()
         ampsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
         m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
-        SunSpecDataPoint ampsPhaseaDataPoint;
-        ampsPhaseaDataPoint.setName("AphA");
-        ampsPhaseaDataPoint.setLabel("Amps PhaseA");
-        ampsPhaseaDataPoint.setDescription("Phase A Current");
-        ampsPhaseaDataPoint.setUnits("A");
-        ampsPhaseaDataPoint.setMandatory(true);
-        ampsPhaseaDataPoint.setSize(1);
-        ampsPhaseaDataPoint.setAddressOffset(3);
-        ampsPhaseaDataPoint.setBlockOffset(1);
-        ampsPhaseaDataPoint.setScaleFactorName("A_SF");
-        ampsPhaseaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-        m_dataPoints.insert(ampsPhaseaDataPoint.name(), ampsPhaseaDataPoint);
+        SunSpecDataPoint ampsPhaseADataPoint;
+        ampsPhaseADataPoint.setName("AphA");
+        ampsPhaseADataPoint.setLabel("Amps PhaseA");
+        ampsPhaseADataPoint.setDescription("Phase A Current");
+        ampsPhaseADataPoint.setUnits("A");
+        ampsPhaseADataPoint.setMandatory(true);
+        ampsPhaseADataPoint.setSize(1);
+        ampsPhaseADataPoint.setAddressOffset(3);
+        ampsPhaseADataPoint.setBlockOffset(1);
+        ampsPhaseADataPoint.setScaleFactorName("A_SF");
+        ampsPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+        m_dataPoints.insert(ampsPhaseADataPoint.name(), ampsPhaseADataPoint);
 
-        SunSpecDataPoint ampsPhasebDataPoint;
-        ampsPhasebDataPoint.setName("AphB");
-        ampsPhasebDataPoint.setLabel("Amps PhaseB");
-        ampsPhasebDataPoint.setDescription("Phase B Current");
-        ampsPhasebDataPoint.setUnits("A");
-        ampsPhasebDataPoint.setMandatory(true);
-        ampsPhasebDataPoint.setSize(1);
-        ampsPhasebDataPoint.setAddressOffset(4);
-        ampsPhasebDataPoint.setBlockOffset(2);
-        ampsPhasebDataPoint.setScaleFactorName("A_SF");
-        ampsPhasebDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-        m_dataPoints.insert(ampsPhasebDataPoint.name(), ampsPhasebDataPoint);
+        SunSpecDataPoint ampsPhaseBDataPoint;
+        ampsPhaseBDataPoint.setName("AphB");
+        ampsPhaseBDataPoint.setLabel("Amps PhaseB");
+        ampsPhaseBDataPoint.setDescription("Phase B Current");
+        ampsPhaseBDataPoint.setUnits("A");
+        ampsPhaseBDataPoint.setMandatory(true);
+        ampsPhaseBDataPoint.setSize(1);
+        ampsPhaseBDataPoint.setAddressOffset(4);
+        ampsPhaseBDataPoint.setBlockOffset(2);
+        ampsPhaseBDataPoint.setScaleFactorName("A_SF");
+        ampsPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+        m_dataPoints.insert(ampsPhaseBDataPoint.name(), ampsPhaseBDataPoint);
 
-        SunSpecDataPoint ampsPhasecDataPoint;
-        ampsPhasecDataPoint.setName("AphC");
-        ampsPhasecDataPoint.setLabel("Amps PhaseC");
-        ampsPhasecDataPoint.setDescription("Phase C Current");
-        ampsPhasecDataPoint.setUnits("A");
-        ampsPhasecDataPoint.setMandatory(true);
-        ampsPhasecDataPoint.setSize(1);
-        ampsPhasecDataPoint.setAddressOffset(5);
-        ampsPhasecDataPoint.setBlockOffset(3);
-        ampsPhasecDataPoint.setScaleFactorName("A_SF");
-        ampsPhasecDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-        m_dataPoints.insert(ampsPhasecDataPoint.name(), ampsPhasecDataPoint);
+        SunSpecDataPoint ampsPhaseCDataPoint;
+        ampsPhaseCDataPoint.setName("AphC");
+        ampsPhaseCDataPoint.setLabel("Amps PhaseC");
+        ampsPhaseCDataPoint.setDescription("Phase C Current");
+        ampsPhaseCDataPoint.setUnits("A");
+        ampsPhaseCDataPoint.setMandatory(true);
+        ampsPhaseCDataPoint.setSize(1);
+        ampsPhaseCDataPoint.setAddressOffset(5);
+        ampsPhaseCDataPoint.setBlockOffset(3);
+        ampsPhaseCDataPoint.setScaleFactorName("A_SF");
+        ampsPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+        m_dataPoints.insert(ampsPhaseCDataPoint.name(), ampsPhaseCDataPoint);
 
-        SunSpecDataPoint A_SFDataPoint;
-        A_SFDataPoint.setName("A_SF");
-        A_SFDataPoint.setMandatory(true);
-        A_SFDataPoint.setSize(1);
-        A_SFDataPoint.setAddressOffset(6);
-        A_SFDataPoint.setBlockOffset(4);
-        A_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(A_SFDataPoint.name(), A_SFDataPoint);
+        SunSpecDataPoint a_SFDataPoint;
+        a_SFDataPoint.setName("A_SF");
+        a_SFDataPoint.setMandatory(true);
+        a_SFDataPoint.setSize(1);
+        a_SFDataPoint.setAddressOffset(6);
+        a_SFDataPoint.setBlockOffset(4);
+        a_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(a_SFDataPoint.name(), a_SFDataPoint);
 
         SunSpecDataPoint phaseVoltageAbDataPoint;
         phaseVoltageAbDataPoint.setName("PPVphAB");
@@ -1241,14 +1363,14 @@ void SunSpecInverterModel::initDataPoints()
         phaseVoltageCnDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
         m_dataPoints.insert(phaseVoltageCnDataPoint.name(), phaseVoltageCnDataPoint);
 
-        SunSpecDataPoint V_SFDataPoint;
-        V_SFDataPoint.setName("V_SF");
-        V_SFDataPoint.setMandatory(true);
-        V_SFDataPoint.setSize(1);
-        V_SFDataPoint.setAddressOffset(13);
-        V_SFDataPoint.setBlockOffset(11);
-        V_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(V_SFDataPoint.name(), V_SFDataPoint);
+        SunSpecDataPoint v_SFDataPoint;
+        v_SFDataPoint.setName("V_SF");
+        v_SFDataPoint.setMandatory(true);
+        v_SFDataPoint.setSize(1);
+        v_SFDataPoint.setAddressOffset(13);
+        v_SFDataPoint.setBlockOffset(11);
+        v_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(v_SFDataPoint.name(), v_SFDataPoint);
 
         SunSpecDataPoint wattsDataPoint;
         wattsDataPoint.setName("W");
@@ -1263,14 +1385,14 @@ void SunSpecInverterModel::initDataPoints()
         wattsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(wattsDataPoint.name(), wattsDataPoint);
 
-        SunSpecDataPoint W_SFDataPoint;
-        W_SFDataPoint.setName("W_SF");
-        W_SFDataPoint.setMandatory(true);
-        W_SFDataPoint.setSize(1);
-        W_SFDataPoint.setAddressOffset(15);
-        W_SFDataPoint.setBlockOffset(13);
-        W_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(W_SFDataPoint.name(), W_SFDataPoint);
+        SunSpecDataPoint w_SFDataPoint;
+        w_SFDataPoint.setName("W_SF");
+        w_SFDataPoint.setMandatory(true);
+        w_SFDataPoint.setSize(1);
+        w_SFDataPoint.setAddressOffset(15);
+        w_SFDataPoint.setBlockOffset(13);
+        w_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(w_SFDataPoint.name(), w_SFDataPoint);
 
         SunSpecDataPoint hzDataPoint;
         hzDataPoint.setName("Hz");
@@ -1285,14 +1407,14 @@ void SunSpecInverterModel::initDataPoints()
         hzDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
         m_dataPoints.insert(hzDataPoint.name(), hzDataPoint);
 
-        SunSpecDataPoint Hz_SFDataPoint;
-        Hz_SFDataPoint.setName("Hz_SF");
-        Hz_SFDataPoint.setMandatory(true);
-        Hz_SFDataPoint.setSize(1);
-        Hz_SFDataPoint.setAddressOffset(17);
-        Hz_SFDataPoint.setBlockOffset(15);
-        Hz_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(Hz_SFDataPoint.name(), Hz_SFDataPoint);
+        SunSpecDataPoint hz_SFDataPoint;
+        hz_SFDataPoint.setName("Hz_SF");
+        hz_SFDataPoint.setMandatory(true);
+        hz_SFDataPoint.setSize(1);
+        hz_SFDataPoint.setAddressOffset(17);
+        hz_SFDataPoint.setBlockOffset(15);
+        hz_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(hz_SFDataPoint.name(), hz_SFDataPoint);
 
         SunSpecDataPoint vaDataPoint;
         vaDataPoint.setName("VA");
@@ -1306,33 +1428,33 @@ void SunSpecInverterModel::initDataPoints()
         vaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(vaDataPoint.name(), vaDataPoint);
 
-        SunSpecDataPoint VA_SFDataPoint;
-        VA_SFDataPoint.setName("VA_SF");
-        VA_SFDataPoint.setSize(1);
-        VA_SFDataPoint.setAddressOffset(19);
-        VA_SFDataPoint.setBlockOffset(17);
-        VA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(VA_SFDataPoint.name(), VA_SFDataPoint);
+        SunSpecDataPoint vA_SFDataPoint;
+        vA_SFDataPoint.setName("VA_SF");
+        vA_SFDataPoint.setSize(1);
+        vA_SFDataPoint.setAddressOffset(19);
+        vA_SFDataPoint.setBlockOffset(17);
+        vA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(vA_SFDataPoint.name(), vA_SFDataPoint);
 
-        SunSpecDataPoint varDataPoint;
-        varDataPoint.setName("VAr");
-        varDataPoint.setLabel("VAr");
-        varDataPoint.setDescription("AC Reactive Power");
-        varDataPoint.setUnits("var");
-        varDataPoint.setSize(1);
-        varDataPoint.setAddressOffset(20);
-        varDataPoint.setBlockOffset(18);
-        varDataPoint.setScaleFactorName("VAr_SF");
-        varDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-        m_dataPoints.insert(varDataPoint.name(), varDataPoint);
+        SunSpecDataPoint vArDataPoint;
+        vArDataPoint.setName("VAr");
+        vArDataPoint.setLabel("VAr");
+        vArDataPoint.setDescription("AC Reactive Power");
+        vArDataPoint.setUnits("var");
+        vArDataPoint.setSize(1);
+        vArDataPoint.setAddressOffset(20);
+        vArDataPoint.setBlockOffset(18);
+        vArDataPoint.setScaleFactorName("VAr_SF");
+        vArDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+        m_dataPoints.insert(vArDataPoint.name(), vArDataPoint);
 
-        SunSpecDataPoint VAr_SFDataPoint;
-        VAr_SFDataPoint.setName("VAr_SF");
-        VAr_SFDataPoint.setSize(1);
-        VAr_SFDataPoint.setAddressOffset(21);
-        VAr_SFDataPoint.setBlockOffset(19);
-        VAr_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(VAr_SFDataPoint.name(), VAr_SFDataPoint);
+        SunSpecDataPoint vAr_SFDataPoint;
+        vAr_SFDataPoint.setName("VAr_SF");
+        vAr_SFDataPoint.setSize(1);
+        vAr_SFDataPoint.setAddressOffset(21);
+        vAr_SFDataPoint.setBlockOffset(19);
+        vAr_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(vAr_SFDataPoint.name(), vAr_SFDataPoint);
 
         SunSpecDataPoint pfDataPoint;
         pfDataPoint.setName("PF");
@@ -1346,35 +1468,35 @@ void SunSpecInverterModel::initDataPoints()
         pfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(pfDataPoint.name(), pfDataPoint);
 
-        SunSpecDataPoint PF_SFDataPoint;
-        PF_SFDataPoint.setName("PF_SF");
-        PF_SFDataPoint.setSize(1);
-        PF_SFDataPoint.setAddressOffset(23);
-        PF_SFDataPoint.setBlockOffset(21);
-        PF_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(PF_SFDataPoint.name(), PF_SFDataPoint);
+        SunSpecDataPoint pF_SFDataPoint;
+        pF_SFDataPoint.setName("PF_SF");
+        pF_SFDataPoint.setSize(1);
+        pF_SFDataPoint.setAddressOffset(23);
+        pF_SFDataPoint.setBlockOffset(21);
+        pF_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(pF_SFDataPoint.name(), pF_SFDataPoint);
 
-        SunSpecDataPoint watthoursDataPoint;
-        watthoursDataPoint.setName("WH");
-        watthoursDataPoint.setLabel("WattHours");
-        watthoursDataPoint.setDescription("AC Energy");
-        watthoursDataPoint.setUnits("Wh");
-        watthoursDataPoint.setMandatory(true);
-        watthoursDataPoint.setSize(2);
-        watthoursDataPoint.setAddressOffset(24);
-        watthoursDataPoint.setBlockOffset(22);
-        watthoursDataPoint.setScaleFactorName("WH_SF");
-        watthoursDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(watthoursDataPoint.name(), watthoursDataPoint);
+        SunSpecDataPoint wattHoursDataPoint;
+        wattHoursDataPoint.setName("WH");
+        wattHoursDataPoint.setLabel("WattHours");
+        wattHoursDataPoint.setDescription("AC Energy");
+        wattHoursDataPoint.setUnits("Wh");
+        wattHoursDataPoint.setMandatory(true);
+        wattHoursDataPoint.setSize(2);
+        wattHoursDataPoint.setAddressOffset(24);
+        wattHoursDataPoint.setBlockOffset(22);
+        wattHoursDataPoint.setScaleFactorName("WH_SF");
+        wattHoursDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(wattHoursDataPoint.name(), wattHoursDataPoint);
 
-        SunSpecDataPoint WH_SFDataPoint;
-        WH_SFDataPoint.setName("WH_SF");
-        WH_SFDataPoint.setMandatory(true);
-        WH_SFDataPoint.setSize(1);
-        WH_SFDataPoint.setAddressOffset(26);
-        WH_SFDataPoint.setBlockOffset(24);
-        WH_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(WH_SFDataPoint.name(), WH_SFDataPoint);
+        SunSpecDataPoint wH_SFDataPoint;
+        wH_SFDataPoint.setName("WH_SF");
+        wH_SFDataPoint.setMandatory(true);
+        wH_SFDataPoint.setSize(1);
+        wH_SFDataPoint.setAddressOffset(26);
+        wH_SFDataPoint.setBlockOffset(24);
+        wH_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(wH_SFDataPoint.name(), wH_SFDataPoint);
 
         SunSpecDataPoint dcAmpsDataPoint;
         dcAmpsDataPoint.setName("DCA");
@@ -1388,13 +1510,13 @@ void SunSpecInverterModel::initDataPoints()
         dcAmpsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
         m_dataPoints.insert(dcAmpsDataPoint.name(), dcAmpsDataPoint);
 
-        SunSpecDataPoint DCA_SFDataPoint;
-        DCA_SFDataPoint.setName("DCA_SF");
-        DCA_SFDataPoint.setSize(1);
-        DCA_SFDataPoint.setAddressOffset(28);
-        DCA_SFDataPoint.setBlockOffset(26);
-        DCA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCA_SFDataPoint.name(), DCA_SFDataPoint);
+        SunSpecDataPoint dCA_SFDataPoint;
+        dCA_SFDataPoint.setName("DCA_SF");
+        dCA_SFDataPoint.setSize(1);
+        dCA_SFDataPoint.setAddressOffset(28);
+        dCA_SFDataPoint.setBlockOffset(26);
+        dCA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCA_SFDataPoint.name(), dCA_SFDataPoint);
 
         SunSpecDataPoint dcVoltageDataPoint;
         dcVoltageDataPoint.setName("DCV");
@@ -1408,13 +1530,13 @@ void SunSpecInverterModel::initDataPoints()
         dcVoltageDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
         m_dataPoints.insert(dcVoltageDataPoint.name(), dcVoltageDataPoint);
 
-        SunSpecDataPoint DCV_SFDataPoint;
-        DCV_SFDataPoint.setName("DCV_SF");
-        DCV_SFDataPoint.setSize(1);
-        DCV_SFDataPoint.setAddressOffset(30);
-        DCV_SFDataPoint.setBlockOffset(28);
-        DCV_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCV_SFDataPoint.name(), DCV_SFDataPoint);
+        SunSpecDataPoint dCV_SFDataPoint;
+        dCV_SFDataPoint.setName("DCV_SF");
+        dCV_SFDataPoint.setSize(1);
+        dCV_SFDataPoint.setAddressOffset(30);
+        dCV_SFDataPoint.setBlockOffset(28);
+        dCV_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCV_SFDataPoint.name(), dCV_SFDataPoint);
 
         SunSpecDataPoint dcWattsDataPoint;
         dcWattsDataPoint.setName("DCW");
@@ -1428,13 +1550,13 @@ void SunSpecInverterModel::initDataPoints()
         dcWattsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(dcWattsDataPoint.name(), dcWattsDataPoint);
 
-        SunSpecDataPoint DCW_SFDataPoint;
-        DCW_SFDataPoint.setName("DCW_SF");
-        DCW_SFDataPoint.setSize(1);
-        DCW_SFDataPoint.setAddressOffset(32);
-        DCW_SFDataPoint.setBlockOffset(30);
-        DCW_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCW_SFDataPoint.name(), DCW_SFDataPoint);
+        SunSpecDataPoint dCW_SFDataPoint;
+        dCW_SFDataPoint.setName("DCW_SF");
+        dCW_SFDataPoint.setSize(1);
+        dCW_SFDataPoint.setAddressOffset(32);
+        dCW_SFDataPoint.setBlockOffset(30);
+        dCW_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCW_SFDataPoint.name(), dCW_SFDataPoint);
 
         SunSpecDataPoint cabinetTemperatureDataPoint;
         cabinetTemperatureDataPoint.setName("TmpCab");
@@ -1485,14 +1607,14 @@ void SunSpecInverterModel::initDataPoints()
         otherTemperatureDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(otherTemperatureDataPoint.name(), otherTemperatureDataPoint);
 
-        SunSpecDataPoint Tmp_SFDataPoint;
-        Tmp_SFDataPoint.setName("Tmp_SF");
-        Tmp_SFDataPoint.setMandatory(true);
-        Tmp_SFDataPoint.setSize(1);
-        Tmp_SFDataPoint.setAddressOffset(37);
-        Tmp_SFDataPoint.setBlockOffset(35);
-        Tmp_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(Tmp_SFDataPoint.name(), Tmp_SFDataPoint);
+        SunSpecDataPoint tmp_SFDataPoint;
+        tmp_SFDataPoint.setName("Tmp_SF");
+        tmp_SFDataPoint.setMandatory(true);
+        tmp_SFDataPoint.setSize(1);
+        tmp_SFDataPoint.setAddressOffset(37);
+        tmp_SFDataPoint.setBlockOffset(35);
+        tmp_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(tmp_SFDataPoint.name(), tmp_SFDataPoint);
 
         SunSpecDataPoint operatingStateDataPoint;
         operatingStateDataPoint.setName("St");
@@ -1612,39 +1734,39 @@ void SunSpecInverterModel::initDataPoints()
         ampsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
         m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
-        SunSpecDataPoint ampsPhaseaDataPoint;
-        ampsPhaseaDataPoint.setName("AphA");
-        ampsPhaseaDataPoint.setLabel("Amps PhaseA");
-        ampsPhaseaDataPoint.setDescription("Phase A Current");
-        ampsPhaseaDataPoint.setUnits("A");
-        ampsPhaseaDataPoint.setMandatory(true);
-        ampsPhaseaDataPoint.setSize(2);
-        ampsPhaseaDataPoint.setAddressOffset(4);
-        ampsPhaseaDataPoint.setBlockOffset(2);
-        ampsPhaseaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(ampsPhaseaDataPoint.name(), ampsPhaseaDataPoint);
+        SunSpecDataPoint ampsPhaseADataPoint;
+        ampsPhaseADataPoint.setName("AphA");
+        ampsPhaseADataPoint.setLabel("Amps PhaseA");
+        ampsPhaseADataPoint.setDescription("Phase A Current");
+        ampsPhaseADataPoint.setUnits("A");
+        ampsPhaseADataPoint.setMandatory(true);
+        ampsPhaseADataPoint.setSize(2);
+        ampsPhaseADataPoint.setAddressOffset(4);
+        ampsPhaseADataPoint.setBlockOffset(2);
+        ampsPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(ampsPhaseADataPoint.name(), ampsPhaseADataPoint);
 
-        SunSpecDataPoint ampsPhasebDataPoint;
-        ampsPhasebDataPoint.setName("AphB");
-        ampsPhasebDataPoint.setLabel("Amps PhaseB");
-        ampsPhasebDataPoint.setDescription("Phase B Current");
-        ampsPhasebDataPoint.setUnits("A");
-        ampsPhasebDataPoint.setSize(2);
-        ampsPhasebDataPoint.setAddressOffset(6);
-        ampsPhasebDataPoint.setBlockOffset(4);
-        ampsPhasebDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(ampsPhasebDataPoint.name(), ampsPhasebDataPoint);
+        SunSpecDataPoint ampsPhaseBDataPoint;
+        ampsPhaseBDataPoint.setName("AphB");
+        ampsPhaseBDataPoint.setLabel("Amps PhaseB");
+        ampsPhaseBDataPoint.setDescription("Phase B Current");
+        ampsPhaseBDataPoint.setUnits("A");
+        ampsPhaseBDataPoint.setSize(2);
+        ampsPhaseBDataPoint.setAddressOffset(6);
+        ampsPhaseBDataPoint.setBlockOffset(4);
+        ampsPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(ampsPhaseBDataPoint.name(), ampsPhaseBDataPoint);
 
-        SunSpecDataPoint ampsPhasecDataPoint;
-        ampsPhasecDataPoint.setName("AphC");
-        ampsPhasecDataPoint.setLabel("Amps PhaseC");
-        ampsPhasecDataPoint.setDescription("Phase C Current");
-        ampsPhasecDataPoint.setUnits("A");
-        ampsPhasecDataPoint.setSize(2);
-        ampsPhasecDataPoint.setAddressOffset(8);
-        ampsPhasecDataPoint.setBlockOffset(6);
-        ampsPhasecDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(ampsPhasecDataPoint.name(), ampsPhasecDataPoint);
+        SunSpecDataPoint ampsPhaseCDataPoint;
+        ampsPhaseCDataPoint.setName("AphC");
+        ampsPhaseCDataPoint.setLabel("Amps PhaseC");
+        ampsPhaseCDataPoint.setDescription("Phase C Current");
+        ampsPhaseCDataPoint.setUnits("A");
+        ampsPhaseCDataPoint.setSize(2);
+        ampsPhaseCDataPoint.setAddressOffset(8);
+        ampsPhaseCDataPoint.setBlockOffset(6);
+        ampsPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(ampsPhaseCDataPoint.name(), ampsPhaseCDataPoint);
 
         SunSpecDataPoint phaseVoltageAbDataPoint;
         phaseVoltageAbDataPoint.setName("PPVphAB");
@@ -1748,16 +1870,16 @@ void SunSpecInverterModel::initDataPoints()
         vaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
         m_dataPoints.insert(vaDataPoint.name(), vaDataPoint);
 
-        SunSpecDataPoint varDataPoint;
-        varDataPoint.setName("VAr");
-        varDataPoint.setLabel("VAr");
-        varDataPoint.setDescription("AC Reactive Power");
-        varDataPoint.setUnits("var");
-        varDataPoint.setSize(2);
-        varDataPoint.setAddressOffset(28);
-        varDataPoint.setBlockOffset(26);
-        varDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(varDataPoint.name(), varDataPoint);
+        SunSpecDataPoint vArDataPoint;
+        vArDataPoint.setName("VAr");
+        vArDataPoint.setLabel("VAr");
+        vArDataPoint.setDescription("AC Reactive Power");
+        vArDataPoint.setUnits("var");
+        vArDataPoint.setSize(2);
+        vArDataPoint.setAddressOffset(28);
+        vArDataPoint.setBlockOffset(26);
+        vArDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(vArDataPoint.name(), vArDataPoint);
 
         SunSpecDataPoint pfDataPoint;
         pfDataPoint.setName("PF");
@@ -1770,17 +1892,17 @@ void SunSpecInverterModel::initDataPoints()
         pfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
         m_dataPoints.insert(pfDataPoint.name(), pfDataPoint);
 
-        SunSpecDataPoint watthoursDataPoint;
-        watthoursDataPoint.setName("WH");
-        watthoursDataPoint.setLabel("WattHours");
-        watthoursDataPoint.setDescription("AC Energy");
-        watthoursDataPoint.setUnits("Wh");
-        watthoursDataPoint.setMandatory(true);
-        watthoursDataPoint.setSize(2);
-        watthoursDataPoint.setAddressOffset(32);
-        watthoursDataPoint.setBlockOffset(30);
-        watthoursDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(watthoursDataPoint.name(), watthoursDataPoint);
+        SunSpecDataPoint wattHoursDataPoint;
+        wattHoursDataPoint.setName("WH");
+        wattHoursDataPoint.setLabel("WattHours");
+        wattHoursDataPoint.setDescription("AC Energy");
+        wattHoursDataPoint.setUnits("Wh");
+        wattHoursDataPoint.setMandatory(true);
+        wattHoursDataPoint.setSize(2);
+        wattHoursDataPoint.setAddressOffset(32);
+        wattHoursDataPoint.setBlockOffset(30);
+        wattHoursDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(wattHoursDataPoint.name(), wattHoursDataPoint);
 
         SunSpecDataPoint dcAmpsDataPoint;
         dcAmpsDataPoint.setName("DCA");
@@ -1978,40 +2100,40 @@ void SunSpecInverterModel::initDataPoints()
         ampsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
         m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
-        SunSpecDataPoint ampsPhaseaDataPoint;
-        ampsPhaseaDataPoint.setName("AphA");
-        ampsPhaseaDataPoint.setLabel("Amps PhaseA");
-        ampsPhaseaDataPoint.setDescription("Phase A Current");
-        ampsPhaseaDataPoint.setUnits("A");
-        ampsPhaseaDataPoint.setMandatory(true);
-        ampsPhaseaDataPoint.setSize(2);
-        ampsPhaseaDataPoint.setAddressOffset(4);
-        ampsPhaseaDataPoint.setBlockOffset(2);
-        ampsPhaseaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(ampsPhaseaDataPoint.name(), ampsPhaseaDataPoint);
+        SunSpecDataPoint ampsPhaseADataPoint;
+        ampsPhaseADataPoint.setName("AphA");
+        ampsPhaseADataPoint.setLabel("Amps PhaseA");
+        ampsPhaseADataPoint.setDescription("Phase A Current");
+        ampsPhaseADataPoint.setUnits("A");
+        ampsPhaseADataPoint.setMandatory(true);
+        ampsPhaseADataPoint.setSize(2);
+        ampsPhaseADataPoint.setAddressOffset(4);
+        ampsPhaseADataPoint.setBlockOffset(2);
+        ampsPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(ampsPhaseADataPoint.name(), ampsPhaseADataPoint);
 
-        SunSpecDataPoint ampsPhasebDataPoint;
-        ampsPhasebDataPoint.setName("AphB");
-        ampsPhasebDataPoint.setLabel("Amps PhaseB");
-        ampsPhasebDataPoint.setDescription("Phase B Current");
-        ampsPhasebDataPoint.setUnits("A");
-        ampsPhasebDataPoint.setMandatory(true);
-        ampsPhasebDataPoint.setSize(2);
-        ampsPhasebDataPoint.setAddressOffset(6);
-        ampsPhasebDataPoint.setBlockOffset(4);
-        ampsPhasebDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(ampsPhasebDataPoint.name(), ampsPhasebDataPoint);
+        SunSpecDataPoint ampsPhaseBDataPoint;
+        ampsPhaseBDataPoint.setName("AphB");
+        ampsPhaseBDataPoint.setLabel("Amps PhaseB");
+        ampsPhaseBDataPoint.setDescription("Phase B Current");
+        ampsPhaseBDataPoint.setUnits("A");
+        ampsPhaseBDataPoint.setMandatory(true);
+        ampsPhaseBDataPoint.setSize(2);
+        ampsPhaseBDataPoint.setAddressOffset(6);
+        ampsPhaseBDataPoint.setBlockOffset(4);
+        ampsPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(ampsPhaseBDataPoint.name(), ampsPhaseBDataPoint);
 
-        SunSpecDataPoint ampsPhasecDataPoint;
-        ampsPhasecDataPoint.setName("AphC");
-        ampsPhasecDataPoint.setLabel("Amps PhaseC");
-        ampsPhasecDataPoint.setDescription("Phase C Current");
-        ampsPhasecDataPoint.setUnits("A");
-        ampsPhasecDataPoint.setSize(2);
-        ampsPhasecDataPoint.setAddressOffset(8);
-        ampsPhasecDataPoint.setBlockOffset(6);
-        ampsPhasecDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(ampsPhasecDataPoint.name(), ampsPhasecDataPoint);
+        SunSpecDataPoint ampsPhaseCDataPoint;
+        ampsPhaseCDataPoint.setName("AphC");
+        ampsPhaseCDataPoint.setLabel("Amps PhaseC");
+        ampsPhaseCDataPoint.setDescription("Phase C Current");
+        ampsPhaseCDataPoint.setUnits("A");
+        ampsPhaseCDataPoint.setSize(2);
+        ampsPhaseCDataPoint.setAddressOffset(8);
+        ampsPhaseCDataPoint.setBlockOffset(6);
+        ampsPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(ampsPhaseCDataPoint.name(), ampsPhaseCDataPoint);
 
         SunSpecDataPoint phaseVoltageAbDataPoint;
         phaseVoltageAbDataPoint.setName("PPVphAB");
@@ -2116,16 +2238,16 @@ void SunSpecInverterModel::initDataPoints()
         vaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
         m_dataPoints.insert(vaDataPoint.name(), vaDataPoint);
 
-        SunSpecDataPoint varDataPoint;
-        varDataPoint.setName("VAr");
-        varDataPoint.setLabel("VAr");
-        varDataPoint.setDescription("AC Reactive Power");
-        varDataPoint.setUnits("var");
-        varDataPoint.setSize(2);
-        varDataPoint.setAddressOffset(28);
-        varDataPoint.setBlockOffset(26);
-        varDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(varDataPoint.name(), varDataPoint);
+        SunSpecDataPoint vArDataPoint;
+        vArDataPoint.setName("VAr");
+        vArDataPoint.setLabel("VAr");
+        vArDataPoint.setDescription("AC Reactive Power");
+        vArDataPoint.setUnits("var");
+        vArDataPoint.setSize(2);
+        vArDataPoint.setAddressOffset(28);
+        vArDataPoint.setBlockOffset(26);
+        vArDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(vArDataPoint.name(), vArDataPoint);
 
         SunSpecDataPoint pfDataPoint;
         pfDataPoint.setName("PF");
@@ -2138,17 +2260,17 @@ void SunSpecInverterModel::initDataPoints()
         pfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
         m_dataPoints.insert(pfDataPoint.name(), pfDataPoint);
 
-        SunSpecDataPoint watthoursDataPoint;
-        watthoursDataPoint.setName("WH");
-        watthoursDataPoint.setLabel("WattHours");
-        watthoursDataPoint.setDescription("AC Energy");
-        watthoursDataPoint.setUnits("Wh");
-        watthoursDataPoint.setMandatory(true);
-        watthoursDataPoint.setSize(2);
-        watthoursDataPoint.setAddressOffset(32);
-        watthoursDataPoint.setBlockOffset(30);
-        watthoursDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(watthoursDataPoint.name(), watthoursDataPoint);
+        SunSpecDataPoint wattHoursDataPoint;
+        wattHoursDataPoint.setName("WH");
+        wattHoursDataPoint.setLabel("WattHours");
+        wattHoursDataPoint.setDescription("AC Energy");
+        wattHoursDataPoint.setUnits("Wh");
+        wattHoursDataPoint.setMandatory(true);
+        wattHoursDataPoint.setSize(2);
+        wattHoursDataPoint.setAddressOffset(32);
+        wattHoursDataPoint.setBlockOffset(30);
+        wattHoursDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(wattHoursDataPoint.name(), wattHoursDataPoint);
 
         SunSpecDataPoint dcAmpsDataPoint;
         dcAmpsDataPoint.setName("DCA");
@@ -2346,41 +2468,41 @@ void SunSpecInverterModel::initDataPoints()
         ampsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
         m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
-        SunSpecDataPoint ampsPhaseaDataPoint;
-        ampsPhaseaDataPoint.setName("AphA");
-        ampsPhaseaDataPoint.setLabel("Amps PhaseA");
-        ampsPhaseaDataPoint.setDescription("Phase A Current");
-        ampsPhaseaDataPoint.setUnits("A");
-        ampsPhaseaDataPoint.setMandatory(true);
-        ampsPhaseaDataPoint.setSize(2);
-        ampsPhaseaDataPoint.setAddressOffset(4);
-        ampsPhaseaDataPoint.setBlockOffset(2);
-        ampsPhaseaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(ampsPhaseaDataPoint.name(), ampsPhaseaDataPoint);
+        SunSpecDataPoint ampsPhaseADataPoint;
+        ampsPhaseADataPoint.setName("AphA");
+        ampsPhaseADataPoint.setLabel("Amps PhaseA");
+        ampsPhaseADataPoint.setDescription("Phase A Current");
+        ampsPhaseADataPoint.setUnits("A");
+        ampsPhaseADataPoint.setMandatory(true);
+        ampsPhaseADataPoint.setSize(2);
+        ampsPhaseADataPoint.setAddressOffset(4);
+        ampsPhaseADataPoint.setBlockOffset(2);
+        ampsPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(ampsPhaseADataPoint.name(), ampsPhaseADataPoint);
 
-        SunSpecDataPoint ampsPhasebDataPoint;
-        ampsPhasebDataPoint.setName("AphB");
-        ampsPhasebDataPoint.setLabel("Amps PhaseB");
-        ampsPhasebDataPoint.setDescription("Phase B Current");
-        ampsPhasebDataPoint.setUnits("A");
-        ampsPhasebDataPoint.setMandatory(true);
-        ampsPhasebDataPoint.setSize(2);
-        ampsPhasebDataPoint.setAddressOffset(6);
-        ampsPhasebDataPoint.setBlockOffset(4);
-        ampsPhasebDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(ampsPhasebDataPoint.name(), ampsPhasebDataPoint);
+        SunSpecDataPoint ampsPhaseBDataPoint;
+        ampsPhaseBDataPoint.setName("AphB");
+        ampsPhaseBDataPoint.setLabel("Amps PhaseB");
+        ampsPhaseBDataPoint.setDescription("Phase B Current");
+        ampsPhaseBDataPoint.setUnits("A");
+        ampsPhaseBDataPoint.setMandatory(true);
+        ampsPhaseBDataPoint.setSize(2);
+        ampsPhaseBDataPoint.setAddressOffset(6);
+        ampsPhaseBDataPoint.setBlockOffset(4);
+        ampsPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(ampsPhaseBDataPoint.name(), ampsPhaseBDataPoint);
 
-        SunSpecDataPoint ampsPhasecDataPoint;
-        ampsPhasecDataPoint.setName("AphC");
-        ampsPhasecDataPoint.setLabel("Amps PhaseC");
-        ampsPhasecDataPoint.setDescription("Phase C Current");
-        ampsPhasecDataPoint.setUnits("A");
-        ampsPhasecDataPoint.setMandatory(true);
-        ampsPhasecDataPoint.setSize(2);
-        ampsPhasecDataPoint.setAddressOffset(8);
-        ampsPhasecDataPoint.setBlockOffset(6);
-        ampsPhasecDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(ampsPhasecDataPoint.name(), ampsPhasecDataPoint);
+        SunSpecDataPoint ampsPhaseCDataPoint;
+        ampsPhaseCDataPoint.setName("AphC");
+        ampsPhaseCDataPoint.setLabel("Amps PhaseC");
+        ampsPhaseCDataPoint.setDescription("Phase C Current");
+        ampsPhaseCDataPoint.setUnits("A");
+        ampsPhaseCDataPoint.setMandatory(true);
+        ampsPhaseCDataPoint.setSize(2);
+        ampsPhaseCDataPoint.setAddressOffset(8);
+        ampsPhaseCDataPoint.setBlockOffset(6);
+        ampsPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(ampsPhaseCDataPoint.name(), ampsPhaseCDataPoint);
 
         SunSpecDataPoint phaseVoltageAbDataPoint;
         phaseVoltageAbDataPoint.setName("PPVphAB");
@@ -2486,16 +2608,16 @@ void SunSpecInverterModel::initDataPoints()
         vaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
         m_dataPoints.insert(vaDataPoint.name(), vaDataPoint);
 
-        SunSpecDataPoint varDataPoint;
-        varDataPoint.setName("VAr");
-        varDataPoint.setLabel("VAr");
-        varDataPoint.setDescription("AC Reactive Power");
-        varDataPoint.setUnits("var");
-        varDataPoint.setSize(2);
-        varDataPoint.setAddressOffset(28);
-        varDataPoint.setBlockOffset(26);
-        varDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(varDataPoint.name(), varDataPoint);
+        SunSpecDataPoint vArDataPoint;
+        vArDataPoint.setName("VAr");
+        vArDataPoint.setLabel("VAr");
+        vArDataPoint.setDescription("AC Reactive Power");
+        vArDataPoint.setUnits("var");
+        vArDataPoint.setSize(2);
+        vArDataPoint.setAddressOffset(28);
+        vArDataPoint.setBlockOffset(26);
+        vArDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(vArDataPoint.name(), vArDataPoint);
 
         SunSpecDataPoint pfDataPoint;
         pfDataPoint.setName("PF");
@@ -2508,17 +2630,17 @@ void SunSpecInverterModel::initDataPoints()
         pfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
         m_dataPoints.insert(pfDataPoint.name(), pfDataPoint);
 
-        SunSpecDataPoint watthoursDataPoint;
-        watthoursDataPoint.setName("WH");
-        watthoursDataPoint.setLabel("WattHours");
-        watthoursDataPoint.setDescription("AC Energy");
-        watthoursDataPoint.setUnits("Wh");
-        watthoursDataPoint.setMandatory(true);
-        watthoursDataPoint.setSize(2);
-        watthoursDataPoint.setAddressOffset(32);
-        watthoursDataPoint.setBlockOffset(30);
-        watthoursDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(watthoursDataPoint.name(), watthoursDataPoint);
+        SunSpecDataPoint wattHoursDataPoint;
+        wattHoursDataPoint.setName("WH");
+        wattHoursDataPoint.setLabel("WattHours");
+        wattHoursDataPoint.setDescription("AC Energy");
+        wattHoursDataPoint.setUnits("Wh");
+        wattHoursDataPoint.setMandatory(true);
+        wattHoursDataPoint.setSize(2);
+        wattHoursDataPoint.setAddressOffset(32);
+        wattHoursDataPoint.setBlockOffset(30);
+        wattHoursDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(wattHoursDataPoint.name(), wattHoursDataPoint);
 
         SunSpecDataPoint dcAmpsDataPoint;
         dcAmpsDataPoint.setName("DCA");

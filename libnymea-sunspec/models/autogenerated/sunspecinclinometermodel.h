@@ -48,10 +48,13 @@ public:
     QString description() const override;
     QString label() const override;
 
-    void readModelHeader() override;
-    void readBlockData() override;
+    quint16 modelId() const;
+    quint16 modelLength() const;
 
 private:
+    quint16 m_modelId;
+    quint16 m_modelLength;
+
     void initDataPoints();
 
 };

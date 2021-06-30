@@ -41,14 +41,20 @@ class SunSpecPricingModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    enum SigType {
-        SigTypeUnknown = 0,
-        SigTypeAbsolute = 1,
-        SigTypeRelative = 2,
-        SigTypeMultiplier = 3,
-        SigTypeLevel = 4
+    enum Sigtype {
+        SigtypeUnknown = 0,
+        SigtypeAbsolute = 1,
+        SigtypeRelative = 2,
+        SigtypeMultiplier = 3,
+        SigtypeLevel = 4
     };
-    Q_ENUM(SigType)
+    Q_ENUM(Sigtype)
+
+    enum Modena {
+        ModenaEnable = 0x1
+    };
+    Q_DECLARE_FLAGS(ModenaFlags, Modena)
+    Q_FLAG(Modena)
 
     explicit SunSpecPricingModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecPricingModel() override; 
@@ -57,10 +63,28 @@ public:
     QString description() const override;
     QString label() const override;
 
-    void readModelHeader() override;
-    void readBlockData() override;
+    quint16 modelId() const;
+    quint16 modelLength() const;
+    ModenaFlags modEna() const;
+    Sigtype sigType() const;
+    qint16 sig() const;
+    quint16 winTms() const;
+    quint16 rvtTms() const;
+    quint16 rmpTms() const;
+    quint16 pad() const;
 
 private:
+    quint16 m_modelId;
+    quint16 m_modelLength;
+    ModenaFlags m_modEna;
+    Sigtype m_sigType;
+    qint16 m_sig;
+    quint16 m_winTms;
+    quint16 m_rvtTms;
+    quint16 m_rmpTms;
+    qint16 m_sigSf;
+    quint16 m_pad;
+
     void initDataPoints();
 
 };

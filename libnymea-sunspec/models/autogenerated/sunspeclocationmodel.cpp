@@ -57,16 +57,38 @@ QString SunSpecLocationModel::label() const
     return "GPS";
 }
 
-void SunSpecLocationModel::readModelHeader()
+quint16 SunSpecLocationModel::modelId() const
 {
-
+    return m_modelId;
 }
-
-void SunSpecLocationModel::readBlockData()
+quint16 SunSpecLocationModel::modelLength() const
 {
-
+    return m_modelLength;
 }
-
+QString SunSpecLocationModel::tm() const
+{
+    return m_tm;
+}
+QString SunSpecLocationModel::date() const
+{
+    return m_date;
+}
+QString SunSpecLocationModel::location() const
+{
+    return m_location;
+}
+qint32 SunSpecLocationModel::lat() const
+{
+    return m_lat;
+}
+qint32 SunSpecLocationModel::longitude() const
+{
+    return m_longitude;
+}
+qint32 SunSpecLocationModel::altitude() const
+{
+    return m_altitude;
+}
 void SunSpecLocationModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -134,17 +156,17 @@ void SunSpecLocationModel::initDataPoints()
     latDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int32"));
     m_dataPoints.insert(latDataPoint.name(), latDataPoint);
 
-    SunSpecDataPoint longDataPoint;
-    longDataPoint.setName("Long");
-    longDataPoint.setLabel("Long");
-    longDataPoint.setDescription("Longitude with seven degrees of precision");
-    longDataPoint.setUnits("Degrees");
-    longDataPoint.setSize(2);
-    longDataPoint.setAddressOffset(34);
-    longDataPoint.setBlockOffset(32);
-    longDataPoint.setScaleFactorName("-7");
-    longDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int32"));
-    m_dataPoints.insert(longDataPoint.name(), longDataPoint);
+    SunSpecDataPoint longitudeDataPoint;
+    longitudeDataPoint.setName("Long");
+    longitudeDataPoint.setLabel("Long");
+    longitudeDataPoint.setDescription("Longitude with seven degrees of precision");
+    longitudeDataPoint.setUnits("Degrees");
+    longitudeDataPoint.setSize(2);
+    longitudeDataPoint.setAddressOffset(34);
+    longitudeDataPoint.setBlockOffset(32);
+    longitudeDataPoint.setScaleFactorName("-7");
+    longitudeDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int32"));
+    m_dataPoints.insert(longitudeDataPoint.name(), longitudeDataPoint);
 
     SunSpecDataPoint altitudeDataPoint;
     altitudeDataPoint.setName("Alt");

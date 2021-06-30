@@ -57,16 +57,14 @@ QString SunSpecIrradianceModel::label() const
     return "Irradiance Model";
 }
 
-void SunSpecIrradianceModel::readModelHeader()
+quint16 SunSpecIrradianceModel::modelId() const
 {
-
+    return m_modelId;
 }
-
-void SunSpecIrradianceModel::readBlockData()
+quint16 SunSpecIrradianceModel::modelLength() const
 {
-
+    return m_modelLength;
 }
-
 void SunSpecIrradianceModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

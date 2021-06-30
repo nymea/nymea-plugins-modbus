@@ -48,10 +48,28 @@ public:
     QString description() const override;
     QString label() const override;
 
-    void readModelHeader() override;
-    void readBlockData() override;
+    quint16 modelId() const;
+    quint16 modelLength() const;
+    float rampUpRate() const;
+    float nomRmpDnRte() const;
+    float emergencyRampUpRate() const;
+    float emergencyRampDownRate() const;
+    float connectRampUpRate() const;
+    float connectRampDownRate() const;
+    float defaultRampRate() const;
 
 private:
+    quint16 m_modelId;
+    quint16 m_modelLength;
+    float m_rampUpRate;
+    float m_nomRmpDnRte;
+    float m_emergencyRampUpRate;
+    float m_emergencyRampDownRate;
+    float m_connectRampUpRate;
+    float m_connectRampDownRate;
+    float m_defaultRampRate;
+    qint16 m_rampRateScaleFactor;
+
     void initDataPoints();
 
 };

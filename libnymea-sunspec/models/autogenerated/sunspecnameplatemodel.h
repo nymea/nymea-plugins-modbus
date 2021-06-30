@@ -41,11 +41,11 @@ class SunSpecNameplateModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    enum DERTyp {
-        DERTypPv = 4,
-        DERTypPvStor = 82
+    enum Dertyp {
+        DertypPv = 4,
+        DertypPvStor = 82
     };
-    Q_ENUM(DERTyp)
+    Q_ENUM(Dertyp)
 
     explicit SunSpecNameplateModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecNameplateModel() override; 
@@ -54,10 +54,56 @@ public:
     QString description() const override;
     QString label() const override;
 
-    void readModelHeader() override;
-    void readBlockData() override;
+    quint16 modelId() const;
+    quint16 modelLength() const;
+    Dertyp derTyp() const;
+    float wRtg() const;
+    float vaRtg() const;
+    qint16 vArRtgQ1() const;
+    qint16 vArRtgQ2() const;
+    qint16 vArRtgQ3() const;
+    qint16 vArRtgQ4() const;
+    float aRtg() const;
+    qint16 pfRtgQ1() const;
+    qint16 pfRtgQ2() const;
+    qint16 pfRtgQ3() const;
+    qint16 pfRtgQ4() const;
+    float whRtg() const;
+    float ahrRtg() const;
+    float maxChaRte() const;
+    float maxDisChaRte() const;
+    quint16 pad() const;
 
 private:
+    quint16 m_modelId;
+    quint16 m_modelLength;
+    Dertyp m_derTyp;
+    float m_wRtg;
+    qint16 m_wRtgSf;
+    float m_vaRtg;
+    qint16 m_vaRtgSf;
+    qint16 m_vArRtgQ1;
+    qint16 m_vArRtgQ2;
+    qint16 m_vArRtgQ3;
+    qint16 m_vArRtgQ4;
+    qint16 m_vArRtgSf;
+    float m_aRtg;
+    qint16 m_aRtgSf;
+    qint16 m_pfRtgQ1;
+    qint16 m_pfRtgQ2;
+    qint16 m_pfRtgQ3;
+    qint16 m_pfRtgQ4;
+    qint16 m_pfRtgSf;
+    float m_whRtg;
+    qint16 m_whRtgSf;
+    float m_ahrRtg;
+    qint16 m_ahrRtgSf;
+    float m_maxChaRte;
+    qint16 m_maxChaRteSf;
+    float m_maxDisChaRte;
+    qint16 m_maxDisChaRteSf;
+    quint16 m_pad;
+
     void initDataPoints();
 
 };

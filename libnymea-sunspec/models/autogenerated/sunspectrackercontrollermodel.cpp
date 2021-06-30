@@ -57,16 +57,54 @@ QString SunSpecTrackerControllerModel::label() const
     return "Tracker Controller DRAFT 2";
 }
 
-void SunSpecTrackerControllerModel::readModelHeader()
+quint16 SunSpecTrackerControllerModel::modelId() const
 {
-
+    return m_modelId;
 }
-
-void SunSpecTrackerControllerModel::readBlockData()
+quint16 SunSpecTrackerControllerModel::modelLength() const
 {
-
+    return m_modelLength;
 }
-
+QString SunSpecTrackerControllerModel::controller() const
+{
+    return m_controller;
+}
+SunSpecTrackerControllerModel::Typ SunSpecTrackerControllerModel::type() const
+{
+    return m_type;
+}
+QString SunSpecTrackerControllerModel::date() const
+{
+    return m_date;
+}
+QString SunSpecTrackerControllerModel::time() const
+{
+    return m_time;
+}
+quint16 SunSpecTrackerControllerModel::day() const
+{
+    return m_day;
+}
+qint32 SunSpecTrackerControllerModel::manualElevation() const
+{
+    return m_manualElevation;
+}
+qint32 SunSpecTrackerControllerModel::manualAzimuth() const
+{
+    return m_manualAzimuth;
+}
+SunSpecTrackerControllerModel::Glblctl SunSpecTrackerControllerModel::globalMode() const
+{
+    return m_globalMode;
+}
+SunSpecTrackerControllerModel::GlblalmFlags SunSpecTrackerControllerModel::globalAlarm() const
+{
+    return m_globalAlarm;
+}
+quint16 SunSpecTrackerControllerModel::trackers() const
+{
+    return m_trackers;
+}
 void SunSpecTrackerControllerModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

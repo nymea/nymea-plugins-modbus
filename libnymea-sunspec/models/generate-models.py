@@ -17,6 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 import os
+import re
 import sys
 import json
 import shutil
@@ -32,19 +33,34 @@ def convertToAlphaNumeric(text):
     return finalText
 
 
+def splitCamelCase(text):
+    return re.sub('([A-Z][a-z]+)', r' \1', re.sub('([A-Z]+)', r' \1', text)).split()
+
 def convertToCamelCase(text, capitalize = False):
     s = convertToAlphaNumeric(text)
     s = s.replace("-", " ").replace("_", " ")
-    s = s.split()
-    if len(text) == 0:
+    words = s.split()
+    #print('--> words', words)
+    finalWords = []
+
+    for i in range(len(words)):
+        camelCaseSplit = splitCamelCase(words[i])
+        if len(camelCaseSplit) == 0:
+            finalWords.append(words[i])  
+        else:
+            #print('--> camel split words', camelCaseSplit)
+            for j in range(len(camelCaseSplit)):
+                finalWords.append(camelCaseSplit[j])  
+
+    if len(finalWords) == 0:
         return text
 
     finalText = ''
     if capitalize:
-        finalText = s[0].lower().capitalize() + ''.join(i.lower().capitalize() for i in s[1:])
+        finalText = finalWords[0].capitalize() + ''.join(i.capitalize() for i in finalWords[1:])
     else:
-        finalText = s[0].lower() + ''.join(i.lower().capitalize() for i in s[1:])
-    #print('Convert camel case:', text, '-->', finalText)
+        finalText = finalWords[0].lower() + ''.join(i.capitalize() for i in finalWords[1:])
+    print('Convert camel case:', text, '-->', finalText)
     return finalText
 
 
@@ -55,6 +71,7 @@ def testCamelCase():
     convertToCamelCase('ac_meter', True)
     convertToCamelCase('model_123', True)
     convertToCamelCase('model 12abc ASDnndnDksndf', True)
+    convertToCamelCase('AbcDef_GhiJklMnoPqr Stu-vw', True)
     convertToCamelCase('Inverter (Single Phase) FLOAT', True)
     convertToCamelCase('Inverter (Single Phase) FLOAT 345', True)
 
@@ -162,12 +179,13 @@ def writeClassEnums(fileDescriptor, className, modelIds):
         modelData = models[modelId]
         points = modelData['group']['points']
         for pointData in points:
-            if 'type' in pointData and pointData['type'] == 'enum16' and 'symbols' in pointData:
+            if 'type' in pointData and pointData['type'].startswith('enum') and 'symbols' in pointData:
                 #print('Found enum in point data:', pointData['name'], pointData['symbols'])
-                if pointData['name'] in enumDefinitions.keys():
+                enumName = getEnumName(pointData)
+                if enumName in enumDefinitions.keys():
                     continue
                 else:
-                    enumDefinitions[pointData['name']] = pointData['symbols']
+                    enumDefinitions[enumName] = pointData['symbols']
 
     # Write actual enum declaration
     for enumDefinition in enumDefinitions:
@@ -188,16 +206,52 @@ def writeClassEnums(fileDescriptor, className, modelIds):
         writeLine(fileDescriptor)
 
 
+def writeClassFlags(fileDescriptor, className, modelIds):
+    print('--> Writing flags for', className)
+    # name, symbols[]
+    enumDefinitions = {}
+    # Get unique flags
+    for i in range(len(modelIds)):
+        modelId = int(modelIds[i])
+        modelData = models[modelId]
+        points = modelData['group']['points']
+        for pointData in points:
+            if 'type' in pointData and pointData['type'].startswith('bitfield') and 'symbols' in pointData:
+                #print('Found enum in point data:', pointData['name'], pointData['symbols'])
+                enumName = getEnumName(pointData)
+                if enumName in enumDefinitions.keys():
+                    continue
+                else:
+                    enumDefinitions[enumName] = pointData['symbols']
+
+    # Write actual enum declaration
+    for enumDefinition in enumDefinitions:
+        symbolList = enumDefinitions[enumDefinition]
+        #print('--> ######## ENUM for', modelData['id'], '-->', enumDefinition, symbolList)
+        writeLine(fileDescriptor, '    enum %s {' % enumDefinition)
+        for i in range(len(symbolList)):
+            symbol = symbolList[i]
+            valueName = convertToCamelCase(symbol['name'], True)
+            value = 0 | (1 << symbol['value'])
+            line = ('        %s%s = %s' % (enumDefinition, valueName, hex(value)))
+            if i < (len(symbolList) - 1):
+                line += ','
+
+            writeLine(fileDescriptor, line)
+
+        writeLine(fileDescriptor, '    };')
+        writeLine(fileDescriptor, '    Q_DECLARE_FLAGS(%sFlags, %s)' % (enumDefinition, enumDefinition))
+        writeLine(fileDescriptor, '    Q_FLAG(%s)' % enumDefinition)
+        writeLine(fileDescriptor)
+
+
 def addDataPointInitialization(fileDescriptor, dataPoint, addressOffset, indentation = 1):
     linePrepend = ''
     for i in range(indentation):
         linePrepend += '    '
 
     # Get property name
-    if 'label' in dataPoint:
-        propertyName = convertToCamelCase(dataPoint['label']) + 'DataPoint'
-    else:
-        propertyName = dataPoint['name'] + 'DataPoint'
+    propertyName = getPropertyName(dataPoint) + 'DataPoint'
 
     writeLine(fileDescriptor, linePrepend + 'SunSpecDataPoint %s;' % propertyName)
     writeLine(fileDescriptor, linePrepend + '%s.setName("%s");' % (propertyName, dataPoint['name']))
@@ -241,6 +295,129 @@ def addDataPointInitialization(fileDescriptor, dataPoint, addressOffset, indenta
     return size
 
 
+def getEnumName(dataPoint):
+    return dataPoint['name'].capitalize()
+
+
+def getPropertyName(dataPoint):
+    # Get property name
+    #if 'desc' in dataPoint and 'type' in dataPoint and not (dataPoint['type'].startswith('enum') or dataPoint['type'].startswith('bitfield')):
+    #    propertyName = convertToCamelCase(dataPoint['desc'])
+    if 'label' in dataPoint:
+        propertyName = convertToCamelCase(dataPoint['label'])
+    else:
+        propertyName = dataPoint['name']
+
+    # Correction for key words
+    if propertyName == 'long':
+        propertyName = 'longitude'
+
+    return propertyName[0].lower() + propertyName[1:] 
+
+
+def getCppType(dataPoint):
+    if dataPoint['type'] == 'uint16':
+        # If we have a scale factor set, this is gonna be a float value
+        if 'sf' in dataPoint:
+            return 'float'
+        else:
+            return 'quint16'
+    elif dataPoint['type'] == 'acc16' or dataPoint['type'] == 'pad' or dataPoint['type'] == 'raq16':
+        return 'quint16'
+    elif dataPoint['type'] == 'int16':
+        return 'qint16'
+    elif dataPoint['type'] == 'uint32' or dataPoint['type'] == 'acc32':
+        return 'quint32'
+    elif dataPoint['type'] == 'int32':
+        return 'qint32'
+    elif dataPoint['type'] == 'uint64' or dataPoint['type'] == 'acc64':
+        return 'quint64'
+    elif dataPoint['type'] == 'int64':
+        return 'qint64'
+    elif dataPoint['type'] == 'sunssf':
+        return 'qint16'
+    elif dataPoint['type'] == 'string':
+        return 'QString'
+    elif dataPoint['type'] == 'count':
+        return 'int'
+    elif dataPoint['type'] == 'float32':
+        return 'float'
+    elif dataPoint['type'] == 'float64':
+        return 'double'
+    elif dataPoint['type'].startswith('enum'):
+        if 'symbols' in dataPoint:
+            return getEnumName(dataPoint)
+        else:
+            if dataPoint['type'] == 'enum16':
+                return 'quint16'
+            elif dataPoint['type'] == 'enum32':
+                return 'quint32'
+
+    elif dataPoint['type'].startswith('bitfield'):
+        if 'symbols' in dataPoint:
+            return getEnumName(dataPoint) + 'Flags'
+        else:
+            if dataPoint['type'] == 'bitfield16':
+                return 'quint16'
+            elif dataPoint['type'] == 'bitfield32':
+                return 'quint32'
+            elif dataPoint['type'] == 'bitfield64':
+                return 'quint64'
+    else:
+        return dataPoint['type']
+
+
+
+def addPropertiesMethodDeclaration(fileDescriptor, modelIds):
+    print('Write member get method declarations')
+    # Picking the first model for now, since they should work all the same within one group
+    modelData = models[modelIds[0]]
+    dataPoints = modelData['group']['points']
+    for dataPoint in dataPoints:
+        propertyName = getPropertyName(dataPoint)
+        typeName = dataPoint['type']
+        # Note: we don't want to provide public access to scale factors
+        if typeName == 'sunssf':
+            continue
+        
+        writeLine(fileDescriptor, '    %s %s() const;' %(getCppType(dataPoint), propertyName))
+
+
+def addPropertiesMethodImplementation(fileDescriptor, className, modelIds):
+    print('Write member get method implementations')
+    # Picking the first model for now, since they should work all the same within one group
+    modelData = models[modelIds[0]]
+    dataPoints = modelData['group']['points']
+    for dataPoint in dataPoints:
+        propertyName = getPropertyName(dataPoint)
+        typeName = dataPoint['type']
+        # Note: we don't want to provide public access to scale factors
+        if typeName == 'sunssf':
+            continue
+        
+        cppType = getCppType(dataPoint)
+        if cppType[0].isupper() and cppType[0] != 'Q':
+            writeLine(fileDescriptor, '%s::%s %s::%s() const' %(className, cppType, className, propertyName))
+        else:
+            writeLine(fileDescriptor, '%s %s::%s() const' %(cppType, className, propertyName))
+
+        writeLine(fileDescriptor, '{')
+        writeLine(fileDescriptor, '    return m_%s;' % propertyName)
+        writeLine(fileDescriptor, '}')
+
+def addPropertiesDeclaration(fileDescriptor, modelIds):
+    print('Write private members')
+    # Picking the first model for now, since they should work all the same within one group
+    modelData = models[modelIds[0]]
+    dataPoints = modelData['group']['points']
+    for dataPoint in dataPoints:
+        propertyName = getPropertyName(dataPoint)
+
+        cppType = getCppType(dataPoint)
+        writeLine(fileDescriptor, '    %s m_%s;' %(cppType, propertyName))
+
+
+
 def writeHeaderFile(headerFileName, className, modelIds):
     headerFileBaseName = os.path.basename(headerFileName)
     headerFiles.append(headerFileBaseName)
@@ -268,6 +445,7 @@ def writeHeaderFile(headerFileName, className, modelIds):
     # Enum declarations
     writeLine(fileDescriptor)
     writeClassEnums(fileDescriptor, className, modelIds)
+    writeClassFlags(fileDescriptor, className, modelIds)
 
     # Constructor
     writeLine(fileDescriptor, '    explicit %s(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);' % className)
@@ -279,12 +457,16 @@ def writeHeaderFile(headerFileName, className, modelIds):
     writeLine(fileDescriptor, '    QString description() const override;')
     writeLine(fileDescriptor, '    QString label() const override;')
     writeLine(fileDescriptor)
-    writeLine(fileDescriptor, '    void readModelHeader() override;')
-    writeLine(fileDescriptor, '    void readBlockData() override;')
+
+    # Properties
+    addPropertiesMethodDeclaration(fileDescriptor, modelIds)
 
     # Private members
     writeLine(fileDescriptor)
     writeLine(fileDescriptor, 'private:')
+    addPropertiesDeclaration(fileDescriptor, modelIds)
+    writeLine(fileDescriptor)
+
     writeLine(fileDescriptor, '    void initDataPoints();')
 
     # End of class
@@ -425,18 +607,8 @@ def writeSourceFile(sourceFileName, className, modelIds):
     writeLine(fileDescriptor, '}')
     writeLine(fileDescriptor)
 
-    writeLine(fileDescriptor, 'void %s::readModelHeader()' % className)
-    writeLine(fileDescriptor, '{')
-    writeLine(fileDescriptor)
-    writeLine(fileDescriptor, '}')
-    writeLine(fileDescriptor)
-
-    writeLine(fileDescriptor, 'void %s::readBlockData()' % className)
-    writeLine(fileDescriptor, '{')
-    writeLine(fileDescriptor)
-    writeLine(fileDescriptor, '}')
-    writeLine(fileDescriptor)
-
+    # Property get methods
+    addPropertiesMethodImplementation(fileDescriptor, className, modelIds)
 
     # Init data points
     writeLine(fileDescriptor, 'void %s::initDataPoints()' % className)
@@ -491,6 +663,9 @@ def createClass(groupName, modelIds):
 ############################################################################################
 # Main
 ############################################################################################
+
+#testCamelCase()
+#exit(0)
 
 # Paths
 scriptPath = os.path.dirname(os.path.realpath(sys.argv[0]))

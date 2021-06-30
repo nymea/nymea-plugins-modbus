@@ -79,16 +79,46 @@ QString SunSpecStringCombinerModel::label() const
     }
 }
 
-void SunSpecStringCombinerModel::readModelHeader()
+quint16 SunSpecStringCombinerModel::modelId() const
 {
-
+    return m_modelId;
 }
-
-void SunSpecStringCombinerModel::readBlockData()
+quint16 SunSpecStringCombinerModel::modelLength() const
 {
-
+    return m_modelLength;
 }
-
+float SunSpecStringCombinerModel::rating() const
+{
+    return m_rating;
+}
+int SunSpecStringCombinerModel::n() const
+{
+    return m_n;
+}
+SunSpecStringCombinerModel::EvtFlags SunSpecStringCombinerModel::event() const
+{
+    return m_event;
+}
+quint32 SunSpecStringCombinerModel::vendorEvent() const
+{
+    return m_vendorEvent;
+}
+qint16 SunSpecStringCombinerModel::amps() const
+{
+    return m_amps;
+}
+quint32 SunSpecStringCombinerModel::ampHours() const
+{
+    return m_ampHours;
+}
+float SunSpecStringCombinerModel::voltage() const
+{
+    return m_voltage;
+}
+qint16 SunSpecStringCombinerModel::temp() const
+{
+    return m_temp;
+}
 void SunSpecStringCombinerModel::initDataPoints()
 {
     switch (m_modelId) {
@@ -113,33 +143,33 @@ void SunSpecStringCombinerModel::initDataPoints()
         modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
         m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
-        SunSpecDataPoint DCA_SFDataPoint;
-        DCA_SFDataPoint.setName("DCA_SF");
-        DCA_SFDataPoint.setDescription("Current scale factor");
-        DCA_SFDataPoint.setMandatory(true);
-        DCA_SFDataPoint.setSize(1);
-        DCA_SFDataPoint.setAddressOffset(2);
-        DCA_SFDataPoint.setBlockOffset(0);
-        DCA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCA_SFDataPoint.name(), DCA_SFDataPoint);
+        SunSpecDataPoint dCA_SFDataPoint;
+        dCA_SFDataPoint.setName("DCA_SF");
+        dCA_SFDataPoint.setDescription("Current scale factor");
+        dCA_SFDataPoint.setMandatory(true);
+        dCA_SFDataPoint.setSize(1);
+        dCA_SFDataPoint.setAddressOffset(2);
+        dCA_SFDataPoint.setBlockOffset(0);
+        dCA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCA_SFDataPoint.name(), dCA_SFDataPoint);
 
-        SunSpecDataPoint DCAhr_SFDataPoint;
-        DCAhr_SFDataPoint.setName("DCAhr_SF");
-        DCAhr_SFDataPoint.setDescription("Amp-hour scale factor");
-        DCAhr_SFDataPoint.setSize(1);
-        DCAhr_SFDataPoint.setAddressOffset(3);
-        DCAhr_SFDataPoint.setBlockOffset(1);
-        DCAhr_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCAhr_SFDataPoint.name(), DCAhr_SFDataPoint);
+        SunSpecDataPoint dCAhr_SFDataPoint;
+        dCAhr_SFDataPoint.setName("DCAhr_SF");
+        dCAhr_SFDataPoint.setDescription("Amp-hour scale factor");
+        dCAhr_SFDataPoint.setSize(1);
+        dCAhr_SFDataPoint.setAddressOffset(3);
+        dCAhr_SFDataPoint.setBlockOffset(1);
+        dCAhr_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCAhr_SFDataPoint.name(), dCAhr_SFDataPoint);
 
-        SunSpecDataPoint DCV_SFDataPoint;
-        DCV_SFDataPoint.setName("DCV_SF");
-        DCV_SFDataPoint.setDescription("Voltage scale factor");
-        DCV_SFDataPoint.setSize(1);
-        DCV_SFDataPoint.setAddressOffset(4);
-        DCV_SFDataPoint.setBlockOffset(2);
-        DCV_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCV_SFDataPoint.name(), DCV_SFDataPoint);
+        SunSpecDataPoint dCV_SFDataPoint;
+        dCV_SFDataPoint.setName("DCV_SF");
+        dCV_SFDataPoint.setDescription("Voltage scale factor");
+        dCV_SFDataPoint.setSize(1);
+        dCV_SFDataPoint.setAddressOffset(4);
+        dCV_SFDataPoint.setBlockOffset(2);
+        dCV_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCV_SFDataPoint.name(), dCV_SFDataPoint);
 
         SunSpecDataPoint ratingDataPoint;
         ratingDataPoint.setName("DCAMax");
@@ -257,52 +287,52 @@ void SunSpecStringCombinerModel::initDataPoints()
         modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
         m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
-        SunSpecDataPoint DCA_SFDataPoint;
-        DCA_SFDataPoint.setName("DCA_SF");
-        DCA_SFDataPoint.setDescription("Current scale factor");
-        DCA_SFDataPoint.setMandatory(true);
-        DCA_SFDataPoint.setSize(1);
-        DCA_SFDataPoint.setAddressOffset(2);
-        DCA_SFDataPoint.setBlockOffset(0);
-        DCA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCA_SFDataPoint.name(), DCA_SFDataPoint);
+        SunSpecDataPoint dCA_SFDataPoint;
+        dCA_SFDataPoint.setName("DCA_SF");
+        dCA_SFDataPoint.setDescription("Current scale factor");
+        dCA_SFDataPoint.setMandatory(true);
+        dCA_SFDataPoint.setSize(1);
+        dCA_SFDataPoint.setAddressOffset(2);
+        dCA_SFDataPoint.setBlockOffset(0);
+        dCA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCA_SFDataPoint.name(), dCA_SFDataPoint);
 
-        SunSpecDataPoint DCAhr_SFDataPoint;
-        DCAhr_SFDataPoint.setName("DCAhr_SF");
-        DCAhr_SFDataPoint.setDescription("Amp-hour scale factor");
-        DCAhr_SFDataPoint.setSize(1);
-        DCAhr_SFDataPoint.setAddressOffset(3);
-        DCAhr_SFDataPoint.setBlockOffset(1);
-        DCAhr_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCAhr_SFDataPoint.name(), DCAhr_SFDataPoint);
+        SunSpecDataPoint dCAhr_SFDataPoint;
+        dCAhr_SFDataPoint.setName("DCAhr_SF");
+        dCAhr_SFDataPoint.setDescription("Amp-hour scale factor");
+        dCAhr_SFDataPoint.setSize(1);
+        dCAhr_SFDataPoint.setAddressOffset(3);
+        dCAhr_SFDataPoint.setBlockOffset(1);
+        dCAhr_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCAhr_SFDataPoint.name(), dCAhr_SFDataPoint);
 
-        SunSpecDataPoint DCV_SFDataPoint;
-        DCV_SFDataPoint.setName("DCV_SF");
-        DCV_SFDataPoint.setDescription("Voltage scale factor");
-        DCV_SFDataPoint.setSize(1);
-        DCV_SFDataPoint.setAddressOffset(4);
-        DCV_SFDataPoint.setBlockOffset(2);
-        DCV_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCV_SFDataPoint.name(), DCV_SFDataPoint);
+        SunSpecDataPoint dCV_SFDataPoint;
+        dCV_SFDataPoint.setName("DCV_SF");
+        dCV_SFDataPoint.setDescription("Voltage scale factor");
+        dCV_SFDataPoint.setSize(1);
+        dCV_SFDataPoint.setAddressOffset(4);
+        dCV_SFDataPoint.setBlockOffset(2);
+        dCV_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCV_SFDataPoint.name(), dCV_SFDataPoint);
 
-        SunSpecDataPoint DCW_SFDataPoint;
-        DCW_SFDataPoint.setName("DCW_SF");
-        DCW_SFDataPoint.setDescription("Power scale factor");
-        DCW_SFDataPoint.setSize(1);
-        DCW_SFDataPoint.setAddressOffset(5);
-        DCW_SFDataPoint.setBlockOffset(3);
-        DCW_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCW_SFDataPoint.name(), DCW_SFDataPoint);
+        SunSpecDataPoint dCW_SFDataPoint;
+        dCW_SFDataPoint.setName("DCW_SF");
+        dCW_SFDataPoint.setDescription("Power scale factor");
+        dCW_SFDataPoint.setSize(1);
+        dCW_SFDataPoint.setAddressOffset(5);
+        dCW_SFDataPoint.setBlockOffset(3);
+        dCW_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCW_SFDataPoint.name(), dCW_SFDataPoint);
 
-        SunSpecDataPoint DCWh_SFDataPoint;
-        DCWh_SFDataPoint.setName("DCWh_SF");
-        DCWh_SFDataPoint.setDescription("Energy scale factor");
-        DCWh_SFDataPoint.setMandatory(true);
-        DCWh_SFDataPoint.setSize(1);
-        DCWh_SFDataPoint.setAddressOffset(6);
-        DCWh_SFDataPoint.setBlockOffset(4);
-        DCWh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCWh_SFDataPoint.name(), DCWh_SFDataPoint);
+        SunSpecDataPoint dCWh_SFDataPoint;
+        dCWh_SFDataPoint.setName("DCWh_SF");
+        dCWh_SFDataPoint.setDescription("Energy scale factor");
+        dCWh_SFDataPoint.setMandatory(true);
+        dCWh_SFDataPoint.setSize(1);
+        dCWh_SFDataPoint.setAddressOffset(6);
+        dCWh_SFDataPoint.setBlockOffset(4);
+        dCWh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCWh_SFDataPoint.name(), dCWh_SFDataPoint);
 
         SunSpecDataPoint ratingDataPoint;
         ratingDataPoint.setName("DCAMax");
@@ -453,33 +483,33 @@ void SunSpecStringCombinerModel::initDataPoints()
         modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
         m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
-        SunSpecDataPoint DCA_SFDataPoint;
-        DCA_SFDataPoint.setName("DCA_SF");
-        DCA_SFDataPoint.setDescription("Current scale factor");
-        DCA_SFDataPoint.setMandatory(true);
-        DCA_SFDataPoint.setSize(1);
-        DCA_SFDataPoint.setAddressOffset(2);
-        DCA_SFDataPoint.setBlockOffset(0);
-        DCA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCA_SFDataPoint.name(), DCA_SFDataPoint);
+        SunSpecDataPoint dCA_SFDataPoint;
+        dCA_SFDataPoint.setName("DCA_SF");
+        dCA_SFDataPoint.setDescription("Current scale factor");
+        dCA_SFDataPoint.setMandatory(true);
+        dCA_SFDataPoint.setSize(1);
+        dCA_SFDataPoint.setAddressOffset(2);
+        dCA_SFDataPoint.setBlockOffset(0);
+        dCA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCA_SFDataPoint.name(), dCA_SFDataPoint);
 
-        SunSpecDataPoint DCAhr_SFDataPoint;
-        DCAhr_SFDataPoint.setName("DCAhr_SF");
-        DCAhr_SFDataPoint.setDescription("Amp-hour scale factor");
-        DCAhr_SFDataPoint.setSize(1);
-        DCAhr_SFDataPoint.setAddressOffset(3);
-        DCAhr_SFDataPoint.setBlockOffset(1);
-        DCAhr_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCAhr_SFDataPoint.name(), DCAhr_SFDataPoint);
+        SunSpecDataPoint dCAhr_SFDataPoint;
+        dCAhr_SFDataPoint.setName("DCAhr_SF");
+        dCAhr_SFDataPoint.setDescription("Amp-hour scale factor");
+        dCAhr_SFDataPoint.setSize(1);
+        dCAhr_SFDataPoint.setAddressOffset(3);
+        dCAhr_SFDataPoint.setBlockOffset(1);
+        dCAhr_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCAhr_SFDataPoint.name(), dCAhr_SFDataPoint);
 
-        SunSpecDataPoint DCV_SFDataPoint;
-        DCV_SFDataPoint.setName("DCV_SF");
-        DCV_SFDataPoint.setDescription("Voltage scale factor");
-        DCV_SFDataPoint.setSize(1);
-        DCV_SFDataPoint.setAddressOffset(4);
-        DCV_SFDataPoint.setBlockOffset(2);
-        DCV_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCV_SFDataPoint.name(), DCV_SFDataPoint);
+        SunSpecDataPoint dCV_SFDataPoint;
+        dCV_SFDataPoint.setName("DCV_SF");
+        dCV_SFDataPoint.setDescription("Voltage scale factor");
+        dCV_SFDataPoint.setSize(1);
+        dCV_SFDataPoint.setAddressOffset(4);
+        dCV_SFDataPoint.setBlockOffset(2);
+        dCV_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCV_SFDataPoint.name(), dCV_SFDataPoint);
 
         SunSpecDataPoint ratingDataPoint;
         ratingDataPoint.setName("DCAMax");
@@ -574,23 +604,23 @@ void SunSpecStringCombinerModel::initDataPoints()
         tempDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(tempDataPoint.name(), tempDataPoint);
 
-        SunSpecDataPoint InDCA_SFDataPoint;
-        InDCA_SFDataPoint.setName("InDCA_SF");
-        InDCA_SFDataPoint.setDescription("Current scale factor for inputs");
-        InDCA_SFDataPoint.setSize(1);
-        InDCA_SFDataPoint.setAddressOffset(16);
-        InDCA_SFDataPoint.setBlockOffset(14);
-        InDCA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(InDCA_SFDataPoint.name(), InDCA_SFDataPoint);
+        SunSpecDataPoint inDCA_SFDataPoint;
+        inDCA_SFDataPoint.setName("InDCA_SF");
+        inDCA_SFDataPoint.setDescription("Current scale factor for inputs");
+        inDCA_SFDataPoint.setSize(1);
+        inDCA_SFDataPoint.setAddressOffset(16);
+        inDCA_SFDataPoint.setBlockOffset(14);
+        inDCA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(inDCA_SFDataPoint.name(), inDCA_SFDataPoint);
 
-        SunSpecDataPoint InDCAhr_SFDataPoint;
-        InDCAhr_SFDataPoint.setName("InDCAhr_SF");
-        InDCAhr_SFDataPoint.setDescription("Amp-hour scale factor for inputs");
-        InDCAhr_SFDataPoint.setSize(1);
-        InDCAhr_SFDataPoint.setAddressOffset(17);
-        InDCAhr_SFDataPoint.setBlockOffset(15);
-        InDCAhr_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(InDCAhr_SFDataPoint.name(), InDCAhr_SFDataPoint);
+        SunSpecDataPoint inDCAhr_SFDataPoint;
+        inDCAhr_SFDataPoint.setName("InDCAhr_SF");
+        inDCAhr_SFDataPoint.setDescription("Amp-hour scale factor for inputs");
+        inDCAhr_SFDataPoint.setSize(1);
+        inDCAhr_SFDataPoint.setAddressOffset(17);
+        inDCAhr_SFDataPoint.setBlockOffset(15);
+        inDCAhr_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(inDCAhr_SFDataPoint.name(), inDCAhr_SFDataPoint);
 
         break;
     }
@@ -615,51 +645,51 @@ void SunSpecStringCombinerModel::initDataPoints()
         modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
         m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
-        SunSpecDataPoint DCA_SFDataPoint;
-        DCA_SFDataPoint.setName("DCA_SF");
-        DCA_SFDataPoint.setDescription("Current scale factor");
-        DCA_SFDataPoint.setMandatory(true);
-        DCA_SFDataPoint.setSize(1);
-        DCA_SFDataPoint.setAddressOffset(2);
-        DCA_SFDataPoint.setBlockOffset(0);
-        DCA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCA_SFDataPoint.name(), DCA_SFDataPoint);
+        SunSpecDataPoint dCA_SFDataPoint;
+        dCA_SFDataPoint.setName("DCA_SF");
+        dCA_SFDataPoint.setDescription("Current scale factor");
+        dCA_SFDataPoint.setMandatory(true);
+        dCA_SFDataPoint.setSize(1);
+        dCA_SFDataPoint.setAddressOffset(2);
+        dCA_SFDataPoint.setBlockOffset(0);
+        dCA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCA_SFDataPoint.name(), dCA_SFDataPoint);
 
-        SunSpecDataPoint DCAhr_SFDataPoint;
-        DCAhr_SFDataPoint.setName("DCAhr_SF");
-        DCAhr_SFDataPoint.setDescription("Amp-hour scale factor");
-        DCAhr_SFDataPoint.setSize(1);
-        DCAhr_SFDataPoint.setAddressOffset(3);
-        DCAhr_SFDataPoint.setBlockOffset(1);
-        DCAhr_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCAhr_SFDataPoint.name(), DCAhr_SFDataPoint);
+        SunSpecDataPoint dCAhr_SFDataPoint;
+        dCAhr_SFDataPoint.setName("DCAhr_SF");
+        dCAhr_SFDataPoint.setDescription("Amp-hour scale factor");
+        dCAhr_SFDataPoint.setSize(1);
+        dCAhr_SFDataPoint.setAddressOffset(3);
+        dCAhr_SFDataPoint.setBlockOffset(1);
+        dCAhr_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCAhr_SFDataPoint.name(), dCAhr_SFDataPoint);
 
-        SunSpecDataPoint DCV_SFDataPoint;
-        DCV_SFDataPoint.setName("DCV_SF");
-        DCV_SFDataPoint.setDescription("Voltage scale factor");
-        DCV_SFDataPoint.setSize(1);
-        DCV_SFDataPoint.setAddressOffset(4);
-        DCV_SFDataPoint.setBlockOffset(2);
-        DCV_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCV_SFDataPoint.name(), DCV_SFDataPoint);
+        SunSpecDataPoint dCV_SFDataPoint;
+        dCV_SFDataPoint.setName("DCV_SF");
+        dCV_SFDataPoint.setDescription("Voltage scale factor");
+        dCV_SFDataPoint.setSize(1);
+        dCV_SFDataPoint.setAddressOffset(4);
+        dCV_SFDataPoint.setBlockOffset(2);
+        dCV_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCV_SFDataPoint.name(), dCV_SFDataPoint);
 
-        SunSpecDataPoint DCW_SFDataPoint;
-        DCW_SFDataPoint.setName("DCW_SF");
-        DCW_SFDataPoint.setDescription("Power scale factor");
-        DCW_SFDataPoint.setSize(1);
-        DCW_SFDataPoint.setAddressOffset(5);
-        DCW_SFDataPoint.setBlockOffset(3);
-        DCW_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCW_SFDataPoint.name(), DCW_SFDataPoint);
+        SunSpecDataPoint dCW_SFDataPoint;
+        dCW_SFDataPoint.setName("DCW_SF");
+        dCW_SFDataPoint.setDescription("Power scale factor");
+        dCW_SFDataPoint.setSize(1);
+        dCW_SFDataPoint.setAddressOffset(5);
+        dCW_SFDataPoint.setBlockOffset(3);
+        dCW_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCW_SFDataPoint.name(), dCW_SFDataPoint);
 
-        SunSpecDataPoint DCWh_SFDataPoint;
-        DCWh_SFDataPoint.setName("DCWh_SF");
-        DCWh_SFDataPoint.setDescription("Energy scale factor");
-        DCWh_SFDataPoint.setSize(1);
-        DCWh_SFDataPoint.setAddressOffset(6);
-        DCWh_SFDataPoint.setBlockOffset(4);
-        DCWh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(DCWh_SFDataPoint.name(), DCWh_SFDataPoint);
+        SunSpecDataPoint dCWh_SFDataPoint;
+        dCWh_SFDataPoint.setName("DCWh_SF");
+        dCWh_SFDataPoint.setDescription("Energy scale factor");
+        dCWh_SFDataPoint.setSize(1);
+        dCWh_SFDataPoint.setAddressOffset(6);
+        dCWh_SFDataPoint.setBlockOffset(4);
+        dCWh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(dCWh_SFDataPoint.name(), dCWh_SFDataPoint);
 
         SunSpecDataPoint ratingDataPoint;
         ratingDataPoint.setName("DCAMax");
@@ -789,50 +819,50 @@ void SunSpecStringCombinerModel::initDataPoints()
         wattHoursDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
         m_dataPoints.insert(wattHoursDataPoint.name(), wattHoursDataPoint);
 
-        SunSpecDataPoint InDCA_SFDataPoint;
-        InDCA_SFDataPoint.setName("InDCA_SF");
-        InDCA_SFDataPoint.setDescription("Current scale factor for inputs");
-        InDCA_SFDataPoint.setSize(1);
-        InDCA_SFDataPoint.setAddressOffset(22);
-        InDCA_SFDataPoint.setBlockOffset(20);
-        InDCA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(InDCA_SFDataPoint.name(), InDCA_SFDataPoint);
+        SunSpecDataPoint inDCA_SFDataPoint;
+        inDCA_SFDataPoint.setName("InDCA_SF");
+        inDCA_SFDataPoint.setDescription("Current scale factor for inputs");
+        inDCA_SFDataPoint.setSize(1);
+        inDCA_SFDataPoint.setAddressOffset(22);
+        inDCA_SFDataPoint.setBlockOffset(20);
+        inDCA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(inDCA_SFDataPoint.name(), inDCA_SFDataPoint);
 
-        SunSpecDataPoint InDCAhr_SFDataPoint;
-        InDCAhr_SFDataPoint.setName("InDCAhr_SF");
-        InDCAhr_SFDataPoint.setDescription("Amp-hour scale factor for inputs");
-        InDCAhr_SFDataPoint.setSize(1);
-        InDCAhr_SFDataPoint.setAddressOffset(23);
-        InDCAhr_SFDataPoint.setBlockOffset(21);
-        InDCAhr_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(InDCAhr_SFDataPoint.name(), InDCAhr_SFDataPoint);
+        SunSpecDataPoint inDCAhr_SFDataPoint;
+        inDCAhr_SFDataPoint.setName("InDCAhr_SF");
+        inDCAhr_SFDataPoint.setDescription("Amp-hour scale factor for inputs");
+        inDCAhr_SFDataPoint.setSize(1);
+        inDCAhr_SFDataPoint.setAddressOffset(23);
+        inDCAhr_SFDataPoint.setBlockOffset(21);
+        inDCAhr_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(inDCAhr_SFDataPoint.name(), inDCAhr_SFDataPoint);
 
-        SunSpecDataPoint InDCV_SFDataPoint;
-        InDCV_SFDataPoint.setName("InDCV_SF");
-        InDCV_SFDataPoint.setDescription("Voltage scale factor for inputs");
-        InDCV_SFDataPoint.setSize(1);
-        InDCV_SFDataPoint.setAddressOffset(24);
-        InDCV_SFDataPoint.setBlockOffset(22);
-        InDCV_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(InDCV_SFDataPoint.name(), InDCV_SFDataPoint);
+        SunSpecDataPoint inDCV_SFDataPoint;
+        inDCV_SFDataPoint.setName("InDCV_SF");
+        inDCV_SFDataPoint.setDescription("Voltage scale factor for inputs");
+        inDCV_SFDataPoint.setSize(1);
+        inDCV_SFDataPoint.setAddressOffset(24);
+        inDCV_SFDataPoint.setBlockOffset(22);
+        inDCV_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(inDCV_SFDataPoint.name(), inDCV_SFDataPoint);
 
-        SunSpecDataPoint InDCW_SFDataPoint;
-        InDCW_SFDataPoint.setName("InDCW_SF");
-        InDCW_SFDataPoint.setDescription("Power scale factor for inputs");
-        InDCW_SFDataPoint.setSize(1);
-        InDCW_SFDataPoint.setAddressOffset(25);
-        InDCW_SFDataPoint.setBlockOffset(23);
-        InDCW_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(InDCW_SFDataPoint.name(), InDCW_SFDataPoint);
+        SunSpecDataPoint inDCW_SFDataPoint;
+        inDCW_SFDataPoint.setName("InDCW_SF");
+        inDCW_SFDataPoint.setDescription("Power scale factor for inputs");
+        inDCW_SFDataPoint.setSize(1);
+        inDCW_SFDataPoint.setAddressOffset(25);
+        inDCW_SFDataPoint.setBlockOffset(23);
+        inDCW_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(inDCW_SFDataPoint.name(), inDCW_SFDataPoint);
 
-        SunSpecDataPoint InDCWh_SFDataPoint;
-        InDCWh_SFDataPoint.setName("InDCWh_SF");
-        InDCWh_SFDataPoint.setDescription("Energy scale factor for inputs");
-        InDCWh_SFDataPoint.setSize(1);
-        InDCWh_SFDataPoint.setAddressOffset(26);
-        InDCWh_SFDataPoint.setBlockOffset(24);
-        InDCWh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(InDCWh_SFDataPoint.name(), InDCWh_SFDataPoint);
+        SunSpecDataPoint inDCWh_SFDataPoint;
+        inDCWh_SFDataPoint.setName("InDCWh_SF");
+        inDCWh_SFDataPoint.setDescription("Energy scale factor for inputs");
+        inDCWh_SFDataPoint.setSize(1);
+        inDCWh_SFDataPoint.setAddressOffset(26);
+        inDCWh_SFDataPoint.setBlockOffset(24);
+        inDCWh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(inDCWh_SFDataPoint.name(), inDCWh_SFDataPoint);
 
         break;
     }

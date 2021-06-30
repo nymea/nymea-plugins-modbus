@@ -48,10 +48,59 @@ public:
     QString description() const override;
     QString label() const override;
 
-    void readModelHeader() override;
-    void readBlockData() override;
+    quint16 modelId() const;
+    quint16 modelLength() const;
+    quint16 stringIndex() const;
+    quint16 moduleIndex() const;
+    quint16 moduleCellCount() const;
+    float moduleSoC() const;
+    float depthOfDischarge() const;
+    float moduleSoH() const;
+    quint32 cycleCount() const;
+    float moduleVoltage() const;
+    float maxCellVoltage() const;
+    quint16 maxCellVoltageCell() const;
+    float minCellVoltage() const;
+    quint16 minCellVoltageCell() const;
+    float averageCellVoltage() const;
+    qint16 maxCellTemperature() const;
+    quint16 maxCellTemperatureCell() const;
+    qint16 minCellTemperature() const;
+    quint16 minCellTemperatureCell() const;
+    qint16 averageCellTemperature() const;
+    quint16 balancedCellCount() const;
+    QString serialNumber() const;
 
 private:
+    quint16 m_modelId;
+    quint16 m_modelLength;
+    quint16 m_stringIndex;
+    quint16 m_moduleIndex;
+    quint16 m_moduleCellCount;
+    float m_moduleSoC;
+    float m_depthOfDischarge;
+    float m_moduleSoH;
+    quint32 m_cycleCount;
+    float m_moduleVoltage;
+    float m_maxCellVoltage;
+    quint16 m_maxCellVoltageCell;
+    float m_minCellVoltage;
+    quint16 m_minCellVoltageCell;
+    float m_averageCellVoltage;
+    qint16 m_maxCellTemperature;
+    quint16 m_maxCellTemperatureCell;
+    qint16 m_minCellTemperature;
+    quint16 m_minCellTemperatureCell;
+    qint16 m_averageCellTemperature;
+    quint16 m_balancedCellCount;
+    QString m_serialNumber;
+    qint16 m_soC_SF;
+    qint16 m_soH_SF;
+    qint16 m_doD_SF;
+    qint16 m_v_SF;
+    qint16 m_cellV_SF;
+    qint16 m_tmp_SF;
+
     void initDataPoints();
 
 };

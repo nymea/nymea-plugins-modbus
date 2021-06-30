@@ -48,6 +48,47 @@ void SunSpecModel::init()
     m_initTimer.start();
 }
 
+void SunSpecModel::readBlockData()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister, m_modelLength);
+    if (QModbusReply *reply = m_connection->modbusTcpClient()->sendReadRequest(request, m_connection->slaveId())) {
+        if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [=]() {
+                if (reply->error() != QModbusDevice::NoError) {
+                    qCWarning(dcSunSpec()) << name() << description() << "Read block data response error:" << reply->error();
+                    return;
+                }
+
+                const QModbusDataUnit unit = reply->result();
+                qCDebug(dcSunSpec()) << name() << description() << "Received block data" << m_modbusStartRegister << unit.values().count();
+                m_blockData = unit.values();
+
+                // Fill the data points
+                foreach (const QString &dataPointName, m_dataPoints.keys()) {
+                    m_dataPoints[dataPointName].setRawData(m_blockData.mid(m_dataPoints[dataPointName].addressOffset(), m_dataPoints[dataPointName].size()));
+                }
+
+                setInitializedFinished();
+                emit blockUpdated();
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error) {
+                qCWarning(dcSunSpec())  << name() << description() << "Modbus reply while reading block data. Error:" << error;
+                emit reply->finished(); // To make sure it will be deleted
+            });
+
+        } else {
+            qCWarning(dcSunSpec()) << "Read block data error: " << m_connection->modbusTcpClient()->errorString();
+            delete reply; // broadcast replies return immediately
+            return;
+        }
+    } else {
+        qCWarning(dcSunSpec()) << "Read block data error: " << m_connection->modbusTcpClient()->errorString();
+        return;
+    }
+}
+
 void SunSpecModel::setInitializedFinished()
 {
     if (!m_initialized) {

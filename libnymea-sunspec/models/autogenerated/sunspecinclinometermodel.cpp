@@ -57,16 +57,14 @@ QString SunSpecInclinometerModel::label() const
     return "Inclinometer Model";
 }
 
-void SunSpecInclinometerModel::readModelHeader()
+quint16 SunSpecInclinometerModel::modelId() const
 {
-
+    return m_modelId;
 }
-
-void SunSpecInclinometerModel::readBlockData()
+quint16 SunSpecInclinometerModel::modelLength() const
 {
-
+    return m_modelLength;
 }
-
 void SunSpecInclinometerModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

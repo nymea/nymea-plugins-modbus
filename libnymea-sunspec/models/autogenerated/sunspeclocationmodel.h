@@ -48,10 +48,25 @@ public:
     QString description() const override;
     QString label() const override;
 
-    void readModelHeader() override;
-    void readBlockData() override;
+    quint16 modelId() const;
+    quint16 modelLength() const;
+    QString tm() const;
+    QString date() const;
+    QString location() const;
+    qint32 lat() const;
+    qint32 longitude() const;
+    qint32 altitude() const;
 
 private:
+    quint16 m_modelId;
+    quint16 m_modelLength;
+    QString m_tm;
+    QString m_date;
+    QString m_location;
+    qint32 m_lat;
+    qint32 m_longitude;
+    qint32 m_altitude;
+
     void initDataPoints();
 
 };

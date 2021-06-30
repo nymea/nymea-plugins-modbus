@@ -27,8 +27,7 @@ public:
     quint16 modbusStartRegister() const;
 
     virtual void init();
-    virtual void readModelHeader() = 0;
-    virtual void readBlockData() = 0;
+    virtual void readBlockData();
 
 protected:
     SunSpec *m_connection = nullptr;
@@ -47,6 +46,7 @@ protected:
 
 signals:
     void initFinished(bool success);
+    void blockUpdated();
 
 };
 

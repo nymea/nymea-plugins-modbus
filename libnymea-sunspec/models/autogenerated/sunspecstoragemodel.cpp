@@ -71,16 +71,78 @@ QString SunSpecStorageModel::label() const
     }
 }
 
-void SunSpecStorageModel::readModelHeader()
+quint16 SunSpecStorageModel::modelId() const
 {
-
+    return m_modelId;
 }
-
-void SunSpecStorageModel::readBlockData()
+quint16 SunSpecStorageModel::modelLength() const
 {
-
+    return m_modelLength;
 }
-
+float SunSpecStorageModel::wChaMax() const
+{
+    return m_wChaMax;
+}
+float SunSpecStorageModel::wChaGra() const
+{
+    return m_wChaGra;
+}
+float SunSpecStorageModel::wDisChaGra() const
+{
+    return m_wDisChaGra;
+}
+SunSpecStorageModel::Storctl_modFlags SunSpecStorageModel::storCtlMod() const
+{
+    return m_storCtlMod;
+}
+float SunSpecStorageModel::vaChaMax() const
+{
+    return m_vaChaMax;
+}
+float SunSpecStorageModel::minRsvPct() const
+{
+    return m_minRsvPct;
+}
+float SunSpecStorageModel::chaState() const
+{
+    return m_chaState;
+}
+float SunSpecStorageModel::storAval() const
+{
+    return m_storAval;
+}
+float SunSpecStorageModel::inBatV() const
+{
+    return m_inBatV;
+}
+SunSpecStorageModel::Chast SunSpecStorageModel::chaSt() const
+{
+    return m_chaSt;
+}
+qint16 SunSpecStorageModel::outWRte() const
+{
+    return m_outWRte;
+}
+qint16 SunSpecStorageModel::inWRte() const
+{
+    return m_inWRte;
+}
+quint16 SunSpecStorageModel::inOutWRteWinTms() const
+{
+    return m_inOutWRteWinTms;
+}
+quint16 SunSpecStorageModel::inOutWRteRvrtTms() const
+{
+    return m_inOutWRteRvrtTms;
+}
+quint16 SunSpecStorageModel::inOutWRteRmpTms() const
+{
+    return m_inOutWRteRmpTms;
+}
+SunSpecStorageModel::Chagriset SunSpecStorageModel::chaGriSet() const
+{
+    return m_chaGriSet;
+}
 void SunSpecStorageModel::initDataPoints()
 {
     switch (m_modelId) {
@@ -105,284 +167,284 @@ void SunSpecStorageModel::initDataPoints()
         modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
         m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
-        SunSpecDataPoint wchamaxDataPoint;
-        wchamaxDataPoint.setName("WChaMax");
-        wchamaxDataPoint.setLabel("WChaMax");
-        wchamaxDataPoint.setDescription("Setpoint for maximum charge.");
-        wchamaxDataPoint.setUnits("W");
-        wchamaxDataPoint.setMandatory(true);
-        wchamaxDataPoint.setSize(1);
-        wchamaxDataPoint.setAddressOffset(2);
-        wchamaxDataPoint.setBlockOffset(0);
-        wchamaxDataPoint.setScaleFactorName("WChaMax_SF");
-        wchamaxDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-        wchamaxDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-        m_dataPoints.insert(wchamaxDataPoint.name(), wchamaxDataPoint);
+        SunSpecDataPoint wChaMaxDataPoint;
+        wChaMaxDataPoint.setName("WChaMax");
+        wChaMaxDataPoint.setLabel("WChaMax");
+        wChaMaxDataPoint.setDescription("Setpoint for maximum charge.");
+        wChaMaxDataPoint.setUnits("W");
+        wChaMaxDataPoint.setMandatory(true);
+        wChaMaxDataPoint.setSize(1);
+        wChaMaxDataPoint.setAddressOffset(2);
+        wChaMaxDataPoint.setBlockOffset(0);
+        wChaMaxDataPoint.setScaleFactorName("WChaMax_SF");
+        wChaMaxDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+        wChaMaxDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+        m_dataPoints.insert(wChaMaxDataPoint.name(), wChaMaxDataPoint);
 
-        SunSpecDataPoint wchagraDataPoint;
-        wchagraDataPoint.setName("WChaGra");
-        wchagraDataPoint.setLabel("WChaGra");
-        wchagraDataPoint.setDescription("Setpoint for maximum charging rate. Default is MaxChaRte.");
-        wchagraDataPoint.setUnits("% WChaMax/sec");
-        wchagraDataPoint.setMandatory(true);
-        wchagraDataPoint.setSize(1);
-        wchagraDataPoint.setAddressOffset(3);
-        wchagraDataPoint.setBlockOffset(1);
-        wchagraDataPoint.setScaleFactorName("WChaDisChaGra_SF");
-        wchagraDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-        wchagraDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-        m_dataPoints.insert(wchagraDataPoint.name(), wchagraDataPoint);
+        SunSpecDataPoint wChaGraDataPoint;
+        wChaGraDataPoint.setName("WChaGra");
+        wChaGraDataPoint.setLabel("WChaGra");
+        wChaGraDataPoint.setDescription("Setpoint for maximum charging rate. Default is MaxChaRte.");
+        wChaGraDataPoint.setUnits("% WChaMax/sec");
+        wChaGraDataPoint.setMandatory(true);
+        wChaGraDataPoint.setSize(1);
+        wChaGraDataPoint.setAddressOffset(3);
+        wChaGraDataPoint.setBlockOffset(1);
+        wChaGraDataPoint.setScaleFactorName("WChaDisChaGra_SF");
+        wChaGraDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+        wChaGraDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+        m_dataPoints.insert(wChaGraDataPoint.name(), wChaGraDataPoint);
 
-        SunSpecDataPoint wdischagraDataPoint;
-        wdischagraDataPoint.setName("WDisChaGra");
-        wdischagraDataPoint.setLabel("WDisChaGra");
-        wdischagraDataPoint.setDescription("Setpoint for maximum discharge rate. Default is MaxDisChaRte.");
-        wdischagraDataPoint.setUnits("% WChaMax/sec");
-        wdischagraDataPoint.setMandatory(true);
-        wdischagraDataPoint.setSize(1);
-        wdischagraDataPoint.setAddressOffset(4);
-        wdischagraDataPoint.setBlockOffset(2);
-        wdischagraDataPoint.setScaleFactorName("WChaDisChaGra_SF");
-        wdischagraDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-        wdischagraDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-        m_dataPoints.insert(wdischagraDataPoint.name(), wdischagraDataPoint);
+        SunSpecDataPoint wDisChaGraDataPoint;
+        wDisChaGraDataPoint.setName("WDisChaGra");
+        wDisChaGraDataPoint.setLabel("WDisChaGra");
+        wDisChaGraDataPoint.setDescription("Setpoint for maximum discharge rate. Default is MaxDisChaRte.");
+        wDisChaGraDataPoint.setUnits("% WChaMax/sec");
+        wDisChaGraDataPoint.setMandatory(true);
+        wDisChaGraDataPoint.setSize(1);
+        wDisChaGraDataPoint.setAddressOffset(4);
+        wDisChaGraDataPoint.setBlockOffset(2);
+        wDisChaGraDataPoint.setScaleFactorName("WChaDisChaGra_SF");
+        wDisChaGraDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+        wDisChaGraDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+        m_dataPoints.insert(wDisChaGraDataPoint.name(), wDisChaGraDataPoint);
 
-        SunSpecDataPoint storctlModDataPoint;
-        storctlModDataPoint.setName("StorCtl_Mod");
-        storctlModDataPoint.setLabel("StorCtl_Mod");
-        storctlModDataPoint.setDescription("Activate hold/discharge/charge storage control mode. Bitfield value.");
-        storctlModDataPoint.setMandatory(true);
-        storctlModDataPoint.setSize(1);
-        storctlModDataPoint.setAddressOffset(5);
-        storctlModDataPoint.setBlockOffset(3);
-        storctlModDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield16"));
-        storctlModDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-        m_dataPoints.insert(storctlModDataPoint.name(), storctlModDataPoint);
+        SunSpecDataPoint storCtlModDataPoint;
+        storCtlModDataPoint.setName("StorCtl_Mod");
+        storCtlModDataPoint.setLabel("StorCtl_Mod");
+        storCtlModDataPoint.setDescription("Activate hold/discharge/charge storage control mode. Bitfield value.");
+        storCtlModDataPoint.setMandatory(true);
+        storCtlModDataPoint.setSize(1);
+        storCtlModDataPoint.setAddressOffset(5);
+        storCtlModDataPoint.setBlockOffset(3);
+        storCtlModDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield16"));
+        storCtlModDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+        m_dataPoints.insert(storCtlModDataPoint.name(), storCtlModDataPoint);
 
-        SunSpecDataPoint vachamaxDataPoint;
-        vachamaxDataPoint.setName("VAChaMax");
-        vachamaxDataPoint.setLabel("VAChaMax");
-        vachamaxDataPoint.setDescription("Setpoint for maximum charging VA.");
-        vachamaxDataPoint.setUnits("VA");
-        vachamaxDataPoint.setSize(1);
-        vachamaxDataPoint.setAddressOffset(6);
-        vachamaxDataPoint.setBlockOffset(4);
-        vachamaxDataPoint.setScaleFactorName("VAChaMax_SF");
-        vachamaxDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-        vachamaxDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-        m_dataPoints.insert(vachamaxDataPoint.name(), vachamaxDataPoint);
+        SunSpecDataPoint vaChaMaxDataPoint;
+        vaChaMaxDataPoint.setName("VAChaMax");
+        vaChaMaxDataPoint.setLabel("VAChaMax");
+        vaChaMaxDataPoint.setDescription("Setpoint for maximum charging VA.");
+        vaChaMaxDataPoint.setUnits("VA");
+        vaChaMaxDataPoint.setSize(1);
+        vaChaMaxDataPoint.setAddressOffset(6);
+        vaChaMaxDataPoint.setBlockOffset(4);
+        vaChaMaxDataPoint.setScaleFactorName("VAChaMax_SF");
+        vaChaMaxDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+        vaChaMaxDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+        m_dataPoints.insert(vaChaMaxDataPoint.name(), vaChaMaxDataPoint);
 
-        SunSpecDataPoint minrsvpctDataPoint;
-        minrsvpctDataPoint.setName("MinRsvPct");
-        minrsvpctDataPoint.setLabel("MinRsvPct");
-        minrsvpctDataPoint.setDescription("Setpoint for minimum reserve for storage as a percentage of the nominal maximum storage.");
-        minrsvpctDataPoint.setUnits("% WChaMax");
-        minrsvpctDataPoint.setSize(1);
-        minrsvpctDataPoint.setAddressOffset(7);
-        minrsvpctDataPoint.setBlockOffset(5);
-        minrsvpctDataPoint.setScaleFactorName("MinRsvPct_SF");
-        minrsvpctDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-        minrsvpctDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-        m_dataPoints.insert(minrsvpctDataPoint.name(), minrsvpctDataPoint);
+        SunSpecDataPoint minRsvPctDataPoint;
+        minRsvPctDataPoint.setName("MinRsvPct");
+        minRsvPctDataPoint.setLabel("MinRsvPct");
+        minRsvPctDataPoint.setDescription("Setpoint for minimum reserve for storage as a percentage of the nominal maximum storage.");
+        minRsvPctDataPoint.setUnits("% WChaMax");
+        minRsvPctDataPoint.setSize(1);
+        minRsvPctDataPoint.setAddressOffset(7);
+        minRsvPctDataPoint.setBlockOffset(5);
+        minRsvPctDataPoint.setScaleFactorName("MinRsvPct_SF");
+        minRsvPctDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+        minRsvPctDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+        m_dataPoints.insert(minRsvPctDataPoint.name(), minRsvPctDataPoint);
 
-        SunSpecDataPoint chastateDataPoint;
-        chastateDataPoint.setName("ChaState");
-        chastateDataPoint.setLabel("ChaState");
-        chastateDataPoint.setDescription("Currently available energy as a percent of the capacity rating.");
-        chastateDataPoint.setUnits("% AhrRtg");
-        chastateDataPoint.setSize(1);
-        chastateDataPoint.setAddressOffset(8);
-        chastateDataPoint.setBlockOffset(6);
-        chastateDataPoint.setScaleFactorName("ChaState_SF");
-        chastateDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-        m_dataPoints.insert(chastateDataPoint.name(), chastateDataPoint);
+        SunSpecDataPoint chaStateDataPoint;
+        chaStateDataPoint.setName("ChaState");
+        chaStateDataPoint.setLabel("ChaState");
+        chaStateDataPoint.setDescription("Currently available energy as a percent of the capacity rating.");
+        chaStateDataPoint.setUnits("% AhrRtg");
+        chaStateDataPoint.setSize(1);
+        chaStateDataPoint.setAddressOffset(8);
+        chaStateDataPoint.setBlockOffset(6);
+        chaStateDataPoint.setScaleFactorName("ChaState_SF");
+        chaStateDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+        m_dataPoints.insert(chaStateDataPoint.name(), chaStateDataPoint);
 
-        SunSpecDataPoint storavalDataPoint;
-        storavalDataPoint.setName("StorAval");
-        storavalDataPoint.setLabel("StorAval");
-        storavalDataPoint.setDescription("State of charge (ChaState) minus storage reserve (MinRsvPct) times capacity rating (AhrRtg).");
-        storavalDataPoint.setUnits("AH");
-        storavalDataPoint.setSize(1);
-        storavalDataPoint.setAddressOffset(9);
-        storavalDataPoint.setBlockOffset(7);
-        storavalDataPoint.setScaleFactorName("StorAval_SF");
-        storavalDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-        m_dataPoints.insert(storavalDataPoint.name(), storavalDataPoint);
+        SunSpecDataPoint storAvalDataPoint;
+        storAvalDataPoint.setName("StorAval");
+        storAvalDataPoint.setLabel("StorAval");
+        storAvalDataPoint.setDescription("State of charge (ChaState) minus storage reserve (MinRsvPct) times capacity rating (AhrRtg).");
+        storAvalDataPoint.setUnits("AH");
+        storAvalDataPoint.setSize(1);
+        storAvalDataPoint.setAddressOffset(9);
+        storAvalDataPoint.setBlockOffset(7);
+        storAvalDataPoint.setScaleFactorName("StorAval_SF");
+        storAvalDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+        m_dataPoints.insert(storAvalDataPoint.name(), storAvalDataPoint);
 
-        SunSpecDataPoint inbatvDataPoint;
-        inbatvDataPoint.setName("InBatV");
-        inbatvDataPoint.setLabel("InBatV");
-        inbatvDataPoint.setDescription("Internal battery voltage.");
-        inbatvDataPoint.setUnits("V");
-        inbatvDataPoint.setSize(1);
-        inbatvDataPoint.setAddressOffset(10);
-        inbatvDataPoint.setBlockOffset(8);
-        inbatvDataPoint.setScaleFactorName("InBatV_SF");
-        inbatvDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-        m_dataPoints.insert(inbatvDataPoint.name(), inbatvDataPoint);
+        SunSpecDataPoint inBatVDataPoint;
+        inBatVDataPoint.setName("InBatV");
+        inBatVDataPoint.setLabel("InBatV");
+        inBatVDataPoint.setDescription("Internal battery voltage.");
+        inBatVDataPoint.setUnits("V");
+        inBatVDataPoint.setSize(1);
+        inBatVDataPoint.setAddressOffset(10);
+        inBatVDataPoint.setBlockOffset(8);
+        inBatVDataPoint.setScaleFactorName("InBatV_SF");
+        inBatVDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+        m_dataPoints.insert(inBatVDataPoint.name(), inBatVDataPoint);
 
-        SunSpecDataPoint chastDataPoint;
-        chastDataPoint.setName("ChaSt");
-        chastDataPoint.setLabel("ChaSt");
-        chastDataPoint.setDescription("Charge status of storage device. Enumerated value.");
-        chastDataPoint.setSize(1);
-        chastDataPoint.setAddressOffset(11);
-        chastDataPoint.setBlockOffset(9);
-        chastDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
-        m_dataPoints.insert(chastDataPoint.name(), chastDataPoint);
+        SunSpecDataPoint chaStDataPoint;
+        chaStDataPoint.setName("ChaSt");
+        chaStDataPoint.setLabel("ChaSt");
+        chaStDataPoint.setDescription("Charge status of storage device. Enumerated value.");
+        chaStDataPoint.setSize(1);
+        chaStDataPoint.setAddressOffset(11);
+        chaStDataPoint.setBlockOffset(9);
+        chaStDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+        m_dataPoints.insert(chaStDataPoint.name(), chaStDataPoint);
 
-        SunSpecDataPoint outwrteDataPoint;
-        outwrteDataPoint.setName("OutWRte");
-        outwrteDataPoint.setLabel("OutWRte");
-        outwrteDataPoint.setDescription("Percent of max discharge rate.");
-        outwrteDataPoint.setUnits("% WDisChaMax");
-        outwrteDataPoint.setSize(1);
-        outwrteDataPoint.setAddressOffset(12);
-        outwrteDataPoint.setBlockOffset(10);
-        outwrteDataPoint.setScaleFactorName("InOutWRte_SF");
-        outwrteDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-        outwrteDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-        m_dataPoints.insert(outwrteDataPoint.name(), outwrteDataPoint);
+        SunSpecDataPoint outWRteDataPoint;
+        outWRteDataPoint.setName("OutWRte");
+        outWRteDataPoint.setLabel("OutWRte");
+        outWRteDataPoint.setDescription("Percent of max discharge rate.");
+        outWRteDataPoint.setUnits("% WDisChaMax");
+        outWRteDataPoint.setSize(1);
+        outWRteDataPoint.setAddressOffset(12);
+        outWRteDataPoint.setBlockOffset(10);
+        outWRteDataPoint.setScaleFactorName("InOutWRte_SF");
+        outWRteDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+        outWRteDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+        m_dataPoints.insert(outWRteDataPoint.name(), outWRteDataPoint);
 
-        SunSpecDataPoint inwrteDataPoint;
-        inwrteDataPoint.setName("InWRte");
-        inwrteDataPoint.setLabel("InWRte");
-        inwrteDataPoint.setDescription("Percent of max charging rate.");
-        inwrteDataPoint.setUnits(" % WChaMax");
-        inwrteDataPoint.setSize(1);
-        inwrteDataPoint.setAddressOffset(13);
-        inwrteDataPoint.setBlockOffset(11);
-        inwrteDataPoint.setScaleFactorName("InOutWRte_SF");
-        inwrteDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-        inwrteDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-        m_dataPoints.insert(inwrteDataPoint.name(), inwrteDataPoint);
+        SunSpecDataPoint inWRteDataPoint;
+        inWRteDataPoint.setName("InWRte");
+        inWRteDataPoint.setLabel("InWRte");
+        inWRteDataPoint.setDescription("Percent of max charging rate.");
+        inWRteDataPoint.setUnits(" % WChaMax");
+        inWRteDataPoint.setSize(1);
+        inWRteDataPoint.setAddressOffset(13);
+        inWRteDataPoint.setBlockOffset(11);
+        inWRteDataPoint.setScaleFactorName("InOutWRte_SF");
+        inWRteDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+        inWRteDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+        m_dataPoints.insert(inWRteDataPoint.name(), inWRteDataPoint);
 
-        SunSpecDataPoint inoutwrteWintmsDataPoint;
-        inoutwrteWintmsDataPoint.setName("InOutWRte_WinTms");
-        inoutwrteWintmsDataPoint.setLabel("InOutWRte_WinTms");
-        inoutwrteWintmsDataPoint.setDescription("Time window for charge/discharge rate change.");
-        inoutwrteWintmsDataPoint.setUnits("Secs");
-        inoutwrteWintmsDataPoint.setSize(1);
-        inoutwrteWintmsDataPoint.setAddressOffset(14);
-        inoutwrteWintmsDataPoint.setBlockOffset(12);
-        inoutwrteWintmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-        inoutwrteWintmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-        m_dataPoints.insert(inoutwrteWintmsDataPoint.name(), inoutwrteWintmsDataPoint);
+        SunSpecDataPoint inOutWRteWinTmsDataPoint;
+        inOutWRteWinTmsDataPoint.setName("InOutWRte_WinTms");
+        inOutWRteWinTmsDataPoint.setLabel("InOutWRte_WinTms");
+        inOutWRteWinTmsDataPoint.setDescription("Time window for charge/discharge rate change.");
+        inOutWRteWinTmsDataPoint.setUnits("Secs");
+        inOutWRteWinTmsDataPoint.setSize(1);
+        inOutWRteWinTmsDataPoint.setAddressOffset(14);
+        inOutWRteWinTmsDataPoint.setBlockOffset(12);
+        inOutWRteWinTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+        inOutWRteWinTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+        m_dataPoints.insert(inOutWRteWinTmsDataPoint.name(), inOutWRteWinTmsDataPoint);
 
-        SunSpecDataPoint inoutwrteRvrttmsDataPoint;
-        inoutwrteRvrttmsDataPoint.setName("InOutWRte_RvrtTms");
-        inoutwrteRvrttmsDataPoint.setLabel("InOutWRte_RvrtTms");
-        inoutwrteRvrttmsDataPoint.setDescription("Timeout period for charge/discharge rate.");
-        inoutwrteRvrttmsDataPoint.setUnits("Secs");
-        inoutwrteRvrttmsDataPoint.setSize(1);
-        inoutwrteRvrttmsDataPoint.setAddressOffset(15);
-        inoutwrteRvrttmsDataPoint.setBlockOffset(13);
-        inoutwrteRvrttmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-        inoutwrteRvrttmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-        m_dataPoints.insert(inoutwrteRvrttmsDataPoint.name(), inoutwrteRvrttmsDataPoint);
+        SunSpecDataPoint inOutWRteRvrtTmsDataPoint;
+        inOutWRteRvrtTmsDataPoint.setName("InOutWRte_RvrtTms");
+        inOutWRteRvrtTmsDataPoint.setLabel("InOutWRte_RvrtTms");
+        inOutWRteRvrtTmsDataPoint.setDescription("Timeout period for charge/discharge rate.");
+        inOutWRteRvrtTmsDataPoint.setUnits("Secs");
+        inOutWRteRvrtTmsDataPoint.setSize(1);
+        inOutWRteRvrtTmsDataPoint.setAddressOffset(15);
+        inOutWRteRvrtTmsDataPoint.setBlockOffset(13);
+        inOutWRteRvrtTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+        inOutWRteRvrtTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+        m_dataPoints.insert(inOutWRteRvrtTmsDataPoint.name(), inOutWRteRvrtTmsDataPoint);
 
-        SunSpecDataPoint inoutwrteRmptmsDataPoint;
-        inoutwrteRmptmsDataPoint.setName("InOutWRte_RmpTms");
-        inoutwrteRmptmsDataPoint.setLabel("InOutWRte_RmpTms");
-        inoutwrteRmptmsDataPoint.setDescription("Ramp time for moving from current setpoint to new setpoint.");
-        inoutwrteRmptmsDataPoint.setUnits("Secs");
-        inoutwrteRmptmsDataPoint.setSize(1);
-        inoutwrteRmptmsDataPoint.setAddressOffset(16);
-        inoutwrteRmptmsDataPoint.setBlockOffset(14);
-        inoutwrteRmptmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-        inoutwrteRmptmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-        m_dataPoints.insert(inoutwrteRmptmsDataPoint.name(), inoutwrteRmptmsDataPoint);
+        SunSpecDataPoint inOutWRteRmpTmsDataPoint;
+        inOutWRteRmpTmsDataPoint.setName("InOutWRte_RmpTms");
+        inOutWRteRmpTmsDataPoint.setLabel("InOutWRte_RmpTms");
+        inOutWRteRmpTmsDataPoint.setDescription("Ramp time for moving from current setpoint to new setpoint.");
+        inOutWRteRmpTmsDataPoint.setUnits("Secs");
+        inOutWRteRmpTmsDataPoint.setSize(1);
+        inOutWRteRmpTmsDataPoint.setAddressOffset(16);
+        inOutWRteRmpTmsDataPoint.setBlockOffset(14);
+        inOutWRteRmpTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+        inOutWRteRmpTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+        m_dataPoints.insert(inOutWRteRmpTmsDataPoint.name(), inOutWRteRmpTmsDataPoint);
 
-        SunSpecDataPoint ChaGriSetDataPoint;
-        ChaGriSetDataPoint.setName("ChaGriSet");
-        ChaGriSetDataPoint.setSize(1);
-        ChaGriSetDataPoint.setAddressOffset(17);
-        ChaGriSetDataPoint.setBlockOffset(15);
-        ChaGriSetDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
-        ChaGriSetDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-        m_dataPoints.insert(ChaGriSetDataPoint.name(), ChaGriSetDataPoint);
+        SunSpecDataPoint chaGriSetDataPoint;
+        chaGriSetDataPoint.setName("ChaGriSet");
+        chaGriSetDataPoint.setSize(1);
+        chaGriSetDataPoint.setAddressOffset(17);
+        chaGriSetDataPoint.setBlockOffset(15);
+        chaGriSetDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+        chaGriSetDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+        m_dataPoints.insert(chaGriSetDataPoint.name(), chaGriSetDataPoint);
 
-        SunSpecDataPoint wchamaxSfDataPoint;
-        wchamaxSfDataPoint.setName("WChaMax_SF");
-        wchamaxSfDataPoint.setLabel("WChaMax_SF");
-        wchamaxSfDataPoint.setDescription("Scale factor for maximum charge.");
-        wchamaxSfDataPoint.setMandatory(true);
-        wchamaxSfDataPoint.setSize(1);
-        wchamaxSfDataPoint.setAddressOffset(18);
-        wchamaxSfDataPoint.setBlockOffset(16);
-        wchamaxSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(wchamaxSfDataPoint.name(), wchamaxSfDataPoint);
+        SunSpecDataPoint wChaMaxSfDataPoint;
+        wChaMaxSfDataPoint.setName("WChaMax_SF");
+        wChaMaxSfDataPoint.setLabel("WChaMax_SF");
+        wChaMaxSfDataPoint.setDescription("Scale factor for maximum charge.");
+        wChaMaxSfDataPoint.setMandatory(true);
+        wChaMaxSfDataPoint.setSize(1);
+        wChaMaxSfDataPoint.setAddressOffset(18);
+        wChaMaxSfDataPoint.setBlockOffset(16);
+        wChaMaxSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(wChaMaxSfDataPoint.name(), wChaMaxSfDataPoint);
 
-        SunSpecDataPoint wchadischagraSfDataPoint;
-        wchadischagraSfDataPoint.setName("WChaDisChaGra_SF");
-        wchadischagraSfDataPoint.setLabel("WChaDisChaGra_SF");
-        wchadischagraSfDataPoint.setDescription("Scale factor for maximum charge and discharge rate.");
-        wchadischagraSfDataPoint.setMandatory(true);
-        wchadischagraSfDataPoint.setSize(1);
-        wchadischagraSfDataPoint.setAddressOffset(19);
-        wchadischagraSfDataPoint.setBlockOffset(17);
-        wchadischagraSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(wchadischagraSfDataPoint.name(), wchadischagraSfDataPoint);
+        SunSpecDataPoint wChaDisChaGraSfDataPoint;
+        wChaDisChaGraSfDataPoint.setName("WChaDisChaGra_SF");
+        wChaDisChaGraSfDataPoint.setLabel("WChaDisChaGra_SF");
+        wChaDisChaGraSfDataPoint.setDescription("Scale factor for maximum charge and discharge rate.");
+        wChaDisChaGraSfDataPoint.setMandatory(true);
+        wChaDisChaGraSfDataPoint.setSize(1);
+        wChaDisChaGraSfDataPoint.setAddressOffset(19);
+        wChaDisChaGraSfDataPoint.setBlockOffset(17);
+        wChaDisChaGraSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(wChaDisChaGraSfDataPoint.name(), wChaDisChaGraSfDataPoint);
 
-        SunSpecDataPoint vachamaxSfDataPoint;
-        vachamaxSfDataPoint.setName("VAChaMax_SF");
-        vachamaxSfDataPoint.setLabel("VAChaMax_SF");
-        vachamaxSfDataPoint.setDescription("Scale factor for maximum charging VA.");
-        vachamaxSfDataPoint.setSize(1);
-        vachamaxSfDataPoint.setAddressOffset(20);
-        vachamaxSfDataPoint.setBlockOffset(18);
-        vachamaxSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(vachamaxSfDataPoint.name(), vachamaxSfDataPoint);
+        SunSpecDataPoint vaChaMaxSfDataPoint;
+        vaChaMaxSfDataPoint.setName("VAChaMax_SF");
+        vaChaMaxSfDataPoint.setLabel("VAChaMax_SF");
+        vaChaMaxSfDataPoint.setDescription("Scale factor for maximum charging VA.");
+        vaChaMaxSfDataPoint.setSize(1);
+        vaChaMaxSfDataPoint.setAddressOffset(20);
+        vaChaMaxSfDataPoint.setBlockOffset(18);
+        vaChaMaxSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(vaChaMaxSfDataPoint.name(), vaChaMaxSfDataPoint);
 
-        SunSpecDataPoint minrsvpctSfDataPoint;
-        minrsvpctSfDataPoint.setName("MinRsvPct_SF");
-        minrsvpctSfDataPoint.setLabel("MinRsvPct_SF");
-        minrsvpctSfDataPoint.setDescription("Scale factor for minimum reserve percentage.");
-        minrsvpctSfDataPoint.setSize(1);
-        minrsvpctSfDataPoint.setAddressOffset(21);
-        minrsvpctSfDataPoint.setBlockOffset(19);
-        minrsvpctSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(minrsvpctSfDataPoint.name(), minrsvpctSfDataPoint);
+        SunSpecDataPoint minRsvPctSfDataPoint;
+        minRsvPctSfDataPoint.setName("MinRsvPct_SF");
+        minRsvPctSfDataPoint.setLabel("MinRsvPct_SF");
+        minRsvPctSfDataPoint.setDescription("Scale factor for minimum reserve percentage.");
+        minRsvPctSfDataPoint.setSize(1);
+        minRsvPctSfDataPoint.setAddressOffset(21);
+        minRsvPctSfDataPoint.setBlockOffset(19);
+        minRsvPctSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(minRsvPctSfDataPoint.name(), minRsvPctSfDataPoint);
 
-        SunSpecDataPoint chastateSfDataPoint;
-        chastateSfDataPoint.setName("ChaState_SF");
-        chastateSfDataPoint.setLabel("ChaState_SF");
-        chastateSfDataPoint.setDescription("Scale factor for available energy percent.");
-        chastateSfDataPoint.setSize(1);
-        chastateSfDataPoint.setAddressOffset(22);
-        chastateSfDataPoint.setBlockOffset(20);
-        chastateSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(chastateSfDataPoint.name(), chastateSfDataPoint);
+        SunSpecDataPoint chaStateSfDataPoint;
+        chaStateSfDataPoint.setName("ChaState_SF");
+        chaStateSfDataPoint.setLabel("ChaState_SF");
+        chaStateSfDataPoint.setDescription("Scale factor for available energy percent.");
+        chaStateSfDataPoint.setSize(1);
+        chaStateSfDataPoint.setAddressOffset(22);
+        chaStateSfDataPoint.setBlockOffset(20);
+        chaStateSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(chaStateSfDataPoint.name(), chaStateSfDataPoint);
 
-        SunSpecDataPoint storavalSfDataPoint;
-        storavalSfDataPoint.setName("StorAval_SF");
-        storavalSfDataPoint.setLabel("StorAval_SF");
-        storavalSfDataPoint.setDescription("Scale factor for state of charge.");
-        storavalSfDataPoint.setSize(1);
-        storavalSfDataPoint.setAddressOffset(23);
-        storavalSfDataPoint.setBlockOffset(21);
-        storavalSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(storavalSfDataPoint.name(), storavalSfDataPoint);
+        SunSpecDataPoint storAvalSfDataPoint;
+        storAvalSfDataPoint.setName("StorAval_SF");
+        storAvalSfDataPoint.setLabel("StorAval_SF");
+        storAvalSfDataPoint.setDescription("Scale factor for state of charge.");
+        storAvalSfDataPoint.setSize(1);
+        storAvalSfDataPoint.setAddressOffset(23);
+        storAvalSfDataPoint.setBlockOffset(21);
+        storAvalSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(storAvalSfDataPoint.name(), storAvalSfDataPoint);
 
-        SunSpecDataPoint inbatvSfDataPoint;
-        inbatvSfDataPoint.setName("InBatV_SF");
-        inbatvSfDataPoint.setLabel("InBatV_SF");
-        inbatvSfDataPoint.setDescription("Scale factor for battery voltage.");
-        inbatvSfDataPoint.setSize(1);
-        inbatvSfDataPoint.setAddressOffset(24);
-        inbatvSfDataPoint.setBlockOffset(22);
-        inbatvSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(inbatvSfDataPoint.name(), inbatvSfDataPoint);
+        SunSpecDataPoint inBatVSfDataPoint;
+        inBatVSfDataPoint.setName("InBatV_SF");
+        inBatVSfDataPoint.setLabel("InBatV_SF");
+        inBatVSfDataPoint.setDescription("Scale factor for battery voltage.");
+        inBatVSfDataPoint.setSize(1);
+        inBatVSfDataPoint.setAddressOffset(24);
+        inBatVSfDataPoint.setBlockOffset(22);
+        inBatVSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(inBatVSfDataPoint.name(), inBatVSfDataPoint);
 
-        SunSpecDataPoint inoutwrteSfDataPoint;
-        inoutwrteSfDataPoint.setName("InOutWRte_SF");
-        inoutwrteSfDataPoint.setLabel("InOutWRte_SF");
-        inoutwrteSfDataPoint.setDescription("Scale factor for percent charge/discharge rate.");
-        inoutwrteSfDataPoint.setSize(1);
-        inoutwrteSfDataPoint.setAddressOffset(25);
-        inoutwrteSfDataPoint.setBlockOffset(23);
-        inoutwrteSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(inoutwrteSfDataPoint.name(), inoutwrteSfDataPoint);
+        SunSpecDataPoint inOutWRteSfDataPoint;
+        inOutWRteSfDataPoint.setName("InOutWRte_SF");
+        inOutWRteSfDataPoint.setLabel("InOutWRte_SF");
+        inOutWRteSfDataPoint.setDescription("Scale factor for percent charge/discharge rate.");
+        inOutWRteSfDataPoint.setSize(1);
+        inOutWRteSfDataPoint.setAddressOffset(25);
+        inOutWRteSfDataPoint.setBlockOffset(23);
+        inOutWRteSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(inOutWRteSfDataPoint.name(), inOutWRteSfDataPoint);
 
         break;
     }

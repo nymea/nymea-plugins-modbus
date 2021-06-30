@@ -57,16 +57,54 @@ QString SunSpecAggregatorModel::label() const
     return "Basic Aggregator";
 }
 
-void SunSpecAggregatorModel::readModelHeader()
+quint16 SunSpecAggregatorModel::modelId() const
 {
-
+    return m_modelId;
 }
-
-void SunSpecAggregatorModel::readBlockData()
+quint16 SunSpecAggregatorModel::modelLength() const
 {
-
+    return m_modelLength;
 }
-
+quint16 SunSpecAggregatorModel::aid() const
+{
+    return m_aid;
+}
+quint16 SunSpecAggregatorModel::n() const
+{
+    return m_n;
+}
+quint16 SunSpecAggregatorModel::un() const
+{
+    return m_un;
+}
+SunSpecAggregatorModel::St SunSpecAggregatorModel::status() const
+{
+    return m_status;
+}
+quint16 SunSpecAggregatorModel::vendorStatus() const
+{
+    return m_vendorStatus;
+}
+SunSpecAggregatorModel::EvtFlags SunSpecAggregatorModel::eventCode() const
+{
+    return m_eventCode;
+}
+quint32 SunSpecAggregatorModel::vendorEventCode() const
+{
+    return m_vendorEventCode;
+}
+SunSpecAggregatorModel::Ctl SunSpecAggregatorModel::control() const
+{
+    return m_control;
+}
+quint32 SunSpecAggregatorModel::vendorControl() const
+{
+    return m_vendorControl;
+}
+quint32 SunSpecAggregatorModel::controlValue() const
+{
+    return m_controlValue;
+}
 void SunSpecAggregatorModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

@@ -41,6 +41,48 @@ class SunSpecScheduleModel : public SunSpecModel
     Q_OBJECT
 public:
 
+    enum Actschd {
+        ActschdSched1 = 0x1,
+        ActschdSched2 = 0x2,
+        ActschdSched3 = 0x4,
+        ActschdSched4 = 0x8,
+        ActschdSched5 = 0x10,
+        ActschdSched6 = 0x20,
+        ActschdSched7 = 0x40,
+        ActschdSched8 = 0x80,
+        ActschdSched9 = 0x100,
+        ActschdSched10 = 0x200,
+        ActschdSched12 = 0x400,
+        ActschdSched13 = 0x800,
+        ActschdSched14 = 0x1000,
+        ActschdSched15 = 0x2000,
+        ActschdSched16 = 0x4000,
+        ActschdSched17 = 0x8000,
+        ActschdSched18 = 0x10000,
+        ActschdSched19 = 0x20000,
+        ActschdSched20 = 0x40000,
+        ActschdSched21 = 0x80000,
+        ActschdSched22 = 0x200000,
+        ActschdSched23 = 0x400000,
+        ActschdSched24 = 0x800000,
+        ActschdSched25 = 0x1000000,
+        ActschdSched26 = 0x2000000,
+        ActschdSched27 = 0x4000000,
+        ActschdSched28 = 0x8000000,
+        ActschdSched29 = 0x10000000,
+        ActschdSched30 = 0x20000000,
+        ActschdSched31 = 0x40000000,
+        ActschdSched32 = 0x80000000
+    };
+    Q_DECLARE_FLAGS(ActschdFlags, Actschd)
+    Q_FLAG(Actschd)
+
+    enum Modena {
+        ModenaEnabled = 0x1
+    };
+    Q_DECLARE_FLAGS(ModenaFlags, Modena)
+    Q_FLAG(Modena)
+
     explicit SunSpecScheduleModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecScheduleModel() override; 
 
@@ -48,10 +90,23 @@ public:
     QString description() const override;
     QString label() const override;
 
-    void readModelHeader() override;
-    void readBlockData() override;
+    quint16 modelId() const;
+    quint16 modelLength() const;
+    ActschdFlags actSchd() const;
+    ModenaFlags modEna() const;
+    quint16 nSchd() const;
+    quint16 nPts() const;
+    quint16 pad() const;
 
 private:
+    quint16 m_modelId;
+    quint16 m_modelLength;
+    ActschdFlags m_actSchd;
+    ModenaFlags m_modEna;
+    quint16 m_nSchd;
+    quint16 m_nPts;
+    quint16 m_pad;
+
     void initDataPoints();
 
 };

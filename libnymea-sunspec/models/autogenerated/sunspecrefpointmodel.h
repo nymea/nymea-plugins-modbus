@@ -48,10 +48,21 @@ public:
     QString description() const override;
     QString label() const override;
 
-    void readModelHeader() override;
-    void readBlockData() override;
+    quint16 modelId() const;
+    quint16 modelLength() const;
+    quint16 ghi() const;
+    quint16 amps() const;
+    quint16 voltage() const;
+    quint16 temperature() const;
 
 private:
+    quint16 m_modelId;
+    quint16 m_modelLength;
+    quint16 m_ghi;
+    quint16 m_amps;
+    quint16 m_voltage;
+    quint16 m_temperature;
+
     void initDataPoints();
 
 };

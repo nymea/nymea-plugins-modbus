@@ -48,10 +48,35 @@ public:
     QString description() const override;
     QString label() const override;
 
-    void readModelHeader() override;
-    void readBlockData() override;
+    quint16 modelId() const;
+    quint16 modelLength() const;
+    qint16 ambientTemperature() const;
+    qint16 relativeHumidity() const;
+    qint16 barometricPressure() const;
+    qint16 windSpeed() const;
+    qint16 windDirection() const;
+    qint16 rainfall() const;
+    qint16 snowDepth() const;
+    qint16 precipitationType() const;
+    qint16 electricField() const;
+    qint16 surfaceWetness() const;
+    qint16 soilWetness() const;
 
 private:
+    quint16 m_modelId;
+    quint16 m_modelLength;
+    qint16 m_ambientTemperature;
+    qint16 m_relativeHumidity;
+    qint16 m_barometricPressure;
+    qint16 m_windSpeed;
+    qint16 m_windDirection;
+    qint16 m_rainfall;
+    qint16 m_snowDepth;
+    qint16 m_precipitationType;
+    qint16 m_electricField;
+    qint16 m_surfaceWetness;
+    qint16 m_soilWetness;
+
     void initDataPoints();
 
 };

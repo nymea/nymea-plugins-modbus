@@ -48,10 +48,27 @@ public:
     QString description() const override;
     QString label() const override;
 
-    void readModelHeader() override;
-    void readBlockData() override;
+    quint16 modelId() const;
+    quint16 modelLength() const;
+    QString manufacturer() const;
+    QString model() const;
+    QString options() const;
+    QString version() const;
+    QString serialNumber() const;
+    quint16 deviceAddress() const;
+    quint16 pad() const;
 
 private:
+    quint16 m_modelId;
+    quint16 m_modelLength;
+    QString m_manufacturer;
+    QString m_model;
+    QString m_options;
+    QString m_version;
+    QString m_serialNumber;
+    quint16 m_deviceAddress;
+    quint16 m_pad;
+
     void initDataPoints();
 
 };

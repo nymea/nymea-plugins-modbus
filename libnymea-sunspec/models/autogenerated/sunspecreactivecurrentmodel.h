@@ -41,11 +41,17 @@ class SunSpecReactiveCurrentModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    enum ArGraMod {
-        ArGraModEdge = 0,
-        ArGraModCenter = 1
+    enum Argramod {
+        ArgramodEdge = 0,
+        ArgramodCenter = 1
     };
-    Q_ENUM(ArGraMod)
+    Q_ENUM(Argramod)
+
+    enum Modena {
+        ModenaEnabled = 0x1
+    };
+    Q_DECLARE_FLAGS(ModenaFlags, Modena)
+    Q_FLAG(Modena)
 
     explicit SunSpecReactiveCurrentModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecReactiveCurrentModel() override; 
@@ -54,10 +60,39 @@ public:
     QString description() const override;
     QString label() const override;
 
-    void readModelHeader() override;
-    void readBlockData() override;
+    quint16 modelId() const;
+    quint16 modelLength() const;
+    Argramod arGraMod() const;
+    float arGraSag() const;
+    float arGraSwell() const;
+    ModenaFlags modEna() const;
+    quint16 filTms() const;
+    float dbVMin() const;
+    float dbVMax() const;
+    float blkZnV() const;
+    float hysBlkZnV() const;
+    quint16 blkZnTmms() const;
+    quint16 holdTmms() const;
+    quint16 pad() const;
 
 private:
+    quint16 m_modelId;
+    quint16 m_modelLength;
+    Argramod m_arGraMod;
+    float m_arGraSag;
+    float m_arGraSwell;
+    ModenaFlags m_modEna;
+    quint16 m_filTms;
+    float m_dbVMin;
+    float m_dbVMax;
+    float m_blkZnV;
+    float m_hysBlkZnV;
+    quint16 m_blkZnTmms;
+    quint16 m_holdTmms;
+    qint16 m_arGraSf;
+    qint16 m_vRefPctSf;
+    quint16 m_pad;
+
     void initDataPoints();
 
 };

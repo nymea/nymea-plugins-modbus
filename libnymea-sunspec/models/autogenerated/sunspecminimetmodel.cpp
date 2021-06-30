@@ -57,16 +57,30 @@ QString SunSpecMiniMetModel::label() const
     return "Mini Met Model";
 }
 
-void SunSpecMiniMetModel::readModelHeader()
+quint16 SunSpecMiniMetModel::modelId() const
 {
-
+    return m_modelId;
 }
-
-void SunSpecMiniMetModel::readBlockData()
+quint16 SunSpecMiniMetModel::modelLength() const
 {
-
+    return m_modelLength;
 }
-
+quint16 SunSpecMiniMetModel::ghi() const
+{
+    return m_ghi;
+}
+qint16 SunSpecMiniMetModel::temp() const
+{
+    return m_temp;
+}
+qint16 SunSpecMiniMetModel::ambientTemperature() const
+{
+    return m_ambientTemperature;
+}
+quint16 SunSpecMiniMetModel::windSpeed() const
+{
+    return m_windSpeed;
+}
 void SunSpecMiniMetModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

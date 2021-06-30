@@ -57,16 +57,42 @@ QString SunSpecCommonModel::label() const
     return "Common";
 }
 
-void SunSpecCommonModel::readModelHeader()
+quint16 SunSpecCommonModel::modelId() const
 {
-
+    return m_modelId;
 }
-
-void SunSpecCommonModel::readBlockData()
+quint16 SunSpecCommonModel::modelLength() const
 {
-
+    return m_modelLength;
 }
-
+QString SunSpecCommonModel::manufacturer() const
+{
+    return m_manufacturer;
+}
+QString SunSpecCommonModel::model() const
+{
+    return m_model;
+}
+QString SunSpecCommonModel::options() const
+{
+    return m_options;
+}
+QString SunSpecCommonModel::version() const
+{
+    return m_version;
+}
+QString SunSpecCommonModel::serialNumber() const
+{
+    return m_serialNumber;
+}
+quint16 SunSpecCommonModel::deviceAddress() const
+{
+    return m_deviceAddress;
+}
+quint16 SunSpecCommonModel::pad() const
+{
+    return m_pad;
+}
 void SunSpecCommonModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -153,14 +179,14 @@ void SunSpecCommonModel::initDataPoints()
     deviceAddressDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(deviceAddressDataPoint.name(), deviceAddressDataPoint);
 
-    SunSpecDataPoint PadDataPoint;
-    PadDataPoint.setName("Pad");
-    PadDataPoint.setDescription("Force even alignment");
-    PadDataPoint.setSize(1);
-    PadDataPoint.setAddressOffset(67);
-    PadDataPoint.setBlockOffset(65);
-    PadDataPoint.setDataType(SunSpecDataPoint::stringToDataType("pad"));
-    m_dataPoints.insert(PadDataPoint.name(), PadDataPoint);
+    SunSpecDataPoint padDataPoint;
+    padDataPoint.setName("Pad");
+    padDataPoint.setDescription("Force even alignment");
+    padDataPoint.setSize(1);
+    padDataPoint.setAddressOffset(67);
+    padDataPoint.setBlockOffset(65);
+    padDataPoint.setDataType(SunSpecDataPoint::stringToDataType("pad"));
+    m_dataPoints.insert(padDataPoint.name(), padDataPoint);
 
 }
 

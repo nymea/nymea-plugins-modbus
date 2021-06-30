@@ -57,16 +57,14 @@ QString SunSpecBomTempModel::label() const
     return "Back of Module Temperature Model";
 }
 
-void SunSpecBomTempModel::readModelHeader()
+quint16 SunSpecBomTempModel::modelId() const
 {
-
+    return m_modelId;
 }
-
-void SunSpecBomTempModel::readBlockData()
+quint16 SunSpecBomTempModel::modelLength() const
 {
-
+    return m_modelLength;
 }
-
 void SunSpecBomTempModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

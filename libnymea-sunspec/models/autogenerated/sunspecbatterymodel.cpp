@@ -57,16 +57,190 @@ QString SunSpecBatteryModel::label() const
     return "Battery Base Model";
 }
 
-void SunSpecBatteryModel::readModelHeader()
+quint16 SunSpecBatteryModel::modelId() const
 {
-
+    return m_modelId;
 }
-
-void SunSpecBatteryModel::readBlockData()
+quint16 SunSpecBatteryModel::modelLength() const
 {
-
+    return m_modelLength;
 }
-
+float SunSpecBatteryModel::nameplateChargeCapacity() const
+{
+    return m_nameplateChargeCapacity;
+}
+float SunSpecBatteryModel::nameplateEnergyCapacity() const
+{
+    return m_nameplateEnergyCapacity;
+}
+float SunSpecBatteryModel::nameplateMaxChargeRate() const
+{
+    return m_nameplateMaxChargeRate;
+}
+float SunSpecBatteryModel::nameplateMaxDischargeRate() const
+{
+    return m_nameplateMaxDischargeRate;
+}
+float SunSpecBatteryModel::selfDischargeRate() const
+{
+    return m_selfDischargeRate;
+}
+float SunSpecBatteryModel::nameplateMaxSoC() const
+{
+    return m_nameplateMaxSoC;
+}
+float SunSpecBatteryModel::nameplateMinSoC() const
+{
+    return m_nameplateMinSoC;
+}
+float SunSpecBatteryModel::maxReservePercent() const
+{
+    return m_maxReservePercent;
+}
+float SunSpecBatteryModel::minReservePercent() const
+{
+    return m_minReservePercent;
+}
+float SunSpecBatteryModel::stateOfCharge() const
+{
+    return m_stateOfCharge;
+}
+float SunSpecBatteryModel::depthOfDischarge() const
+{
+    return m_depthOfDischarge;
+}
+float SunSpecBatteryModel::stateOfHealth() const
+{
+    return m_stateOfHealth;
+}
+quint32 SunSpecBatteryModel::cycleCount() const
+{
+    return m_cycleCount;
+}
+SunSpecBatteryModel::Chast SunSpecBatteryModel::chargeStatus() const
+{
+    return m_chargeStatus;
+}
+SunSpecBatteryModel::Locremctl SunSpecBatteryModel::controlMode() const
+{
+    return m_controlMode;
+}
+quint16 SunSpecBatteryModel::batteryHeartbeat() const
+{
+    return m_batteryHeartbeat;
+}
+quint16 SunSpecBatteryModel::controllerHeartbeat() const
+{
+    return m_controllerHeartbeat;
+}
+quint16 SunSpecBatteryModel::alarmReset() const
+{
+    return m_alarmReset;
+}
+SunSpecBatteryModel::Typ SunSpecBatteryModel::batteryType() const
+{
+    return m_batteryType;
+}
+SunSpecBatteryModel::State SunSpecBatteryModel::stateOfTheBatteryBank() const
+{
+    return m_stateOfTheBatteryBank;
+}
+quint16 SunSpecBatteryModel::vendorBatteryBankState() const
+{
+    return m_vendorBatteryBankState;
+}
+quint32 SunSpecBatteryModel::warrantyDate() const
+{
+    return m_warrantyDate;
+}
+SunSpecBatteryModel::Evt1Flags SunSpecBatteryModel::batteryEvent1Bitfield() const
+{
+    return m_batteryEvent1Bitfield;
+}
+quint32 SunSpecBatteryModel::batteryEvent2Bitfield() const
+{
+    return m_batteryEvent2Bitfield;
+}
+quint32 SunSpecBatteryModel::vendorEventBitfield1() const
+{
+    return m_vendorEventBitfield1;
+}
+quint32 SunSpecBatteryModel::vendorEventBitfield2() const
+{
+    return m_vendorEventBitfield2;
+}
+float SunSpecBatteryModel::externalBatteryVoltage() const
+{
+    return m_externalBatteryVoltage;
+}
+float SunSpecBatteryModel::maxBatteryVoltage() const
+{
+    return m_maxBatteryVoltage;
+}
+float SunSpecBatteryModel::minBatteryVoltage() const
+{
+    return m_minBatteryVoltage;
+}
+float SunSpecBatteryModel::maxCellVoltage() const
+{
+    return m_maxCellVoltage;
+}
+quint16 SunSpecBatteryModel::maxCellVoltageString() const
+{
+    return m_maxCellVoltageString;
+}
+quint16 SunSpecBatteryModel::maxCellVoltageModule() const
+{
+    return m_maxCellVoltageModule;
+}
+float SunSpecBatteryModel::minCellVoltage() const
+{
+    return m_minCellVoltage;
+}
+quint16 SunSpecBatteryModel::minCellVoltageString() const
+{
+    return m_minCellVoltageString;
+}
+quint16 SunSpecBatteryModel::minCellVoltageModule() const
+{
+    return m_minCellVoltageModule;
+}
+float SunSpecBatteryModel::averageCellVoltage() const
+{
+    return m_averageCellVoltage;
+}
+qint16 SunSpecBatteryModel::totalDcCurrent() const
+{
+    return m_totalDcCurrent;
+}
+float SunSpecBatteryModel::maxChargeCurrent() const
+{
+    return m_maxChargeCurrent;
+}
+float SunSpecBatteryModel::maxDischargeCurrent() const
+{
+    return m_maxDischargeCurrent;
+}
+qint16 SunSpecBatteryModel::totalPower() const
+{
+    return m_totalPower;
+}
+SunSpecBatteryModel::Reqinvstate SunSpecBatteryModel::inverterStateRequest() const
+{
+    return m_inverterStateRequest;
+}
+qint16 SunSpecBatteryModel::batteryPowerRequest() const
+{
+    return m_batteryPowerRequest;
+}
+SunSpecBatteryModel::Setop SunSpecBatteryModel::setOperation() const
+{
+    return m_setOperation;
+}
+SunSpecBatteryModel::Setinvstate SunSpecBatteryModel::setInverterState() const
+{
+    return m_setInverterState;
+}
 void SunSpecBatteryModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -153,29 +327,29 @@ void SunSpecBatteryModel::initDataPoints()
     selfDischargeRateDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     m_dataPoints.insert(selfDischargeRateDataPoint.name(), selfDischargeRateDataPoint);
 
-    SunSpecDataPoint nameplateMaxSocDataPoint;
-    nameplateMaxSocDataPoint.setName("SoCMax");
-    nameplateMaxSocDataPoint.setLabel("Nameplate Max SoC");
-    nameplateMaxSocDataPoint.setDescription("Manufacturer maximum state of charge, expressed as a percentage.");
-    nameplateMaxSocDataPoint.setUnits("%WHRtg");
-    nameplateMaxSocDataPoint.setSize(1);
-    nameplateMaxSocDataPoint.setAddressOffset(7);
-    nameplateMaxSocDataPoint.setBlockOffset(5);
-    nameplateMaxSocDataPoint.setScaleFactorName("SoC_SF");
-    nameplateMaxSocDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints.insert(nameplateMaxSocDataPoint.name(), nameplateMaxSocDataPoint);
+    SunSpecDataPoint nameplateMaxSoCDataPoint;
+    nameplateMaxSoCDataPoint.setName("SoCMax");
+    nameplateMaxSoCDataPoint.setLabel("Nameplate Max SoC");
+    nameplateMaxSoCDataPoint.setDescription("Manufacturer maximum state of charge, expressed as a percentage.");
+    nameplateMaxSoCDataPoint.setUnits("%WHRtg");
+    nameplateMaxSoCDataPoint.setSize(1);
+    nameplateMaxSoCDataPoint.setAddressOffset(7);
+    nameplateMaxSoCDataPoint.setBlockOffset(5);
+    nameplateMaxSoCDataPoint.setScaleFactorName("SoC_SF");
+    nameplateMaxSoCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    m_dataPoints.insert(nameplateMaxSoCDataPoint.name(), nameplateMaxSoCDataPoint);
 
-    SunSpecDataPoint nameplateMinSocDataPoint;
-    nameplateMinSocDataPoint.setName("SoCMin");
-    nameplateMinSocDataPoint.setLabel("Nameplate Min SoC");
-    nameplateMinSocDataPoint.setDescription("Manufacturer minimum state of charge, expressed as a percentage.");
-    nameplateMinSocDataPoint.setUnits("%WHRtg");
-    nameplateMinSocDataPoint.setSize(1);
-    nameplateMinSocDataPoint.setAddressOffset(8);
-    nameplateMinSocDataPoint.setBlockOffset(6);
-    nameplateMinSocDataPoint.setScaleFactorName("SoC_SF");
-    nameplateMinSocDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints.insert(nameplateMinSocDataPoint.name(), nameplateMinSocDataPoint);
+    SunSpecDataPoint nameplateMinSoCDataPoint;
+    nameplateMinSoCDataPoint.setName("SoCMin");
+    nameplateMinSoCDataPoint.setLabel("Nameplate Min SoC");
+    nameplateMinSoCDataPoint.setDescription("Manufacturer minimum state of charge, expressed as a percentage.");
+    nameplateMinSoCDataPoint.setUnits("%WHRtg");
+    nameplateMinSoCDataPoint.setSize(1);
+    nameplateMinSoCDataPoint.setAddressOffset(8);
+    nameplateMinSoCDataPoint.setBlockOffset(6);
+    nameplateMinSoCDataPoint.setScaleFactorName("SoC_SF");
+    nameplateMinSoCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    m_dataPoints.insert(nameplateMinSoCDataPoint.name(), nameplateMinSoCDataPoint);
 
     SunSpecDataPoint maxReservePercentDataPoint;
     maxReservePercentDataPoint.setName("SocRsvMax");
@@ -599,121 +773,121 @@ void SunSpecBatteryModel::initDataPoints()
     setInverterStateDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(setInverterStateDataPoint.name(), setInverterStateDataPoint);
 
-    SunSpecDataPoint AHRtg_SFDataPoint;
-    AHRtg_SFDataPoint.setName("AHRtg_SF");
-    AHRtg_SFDataPoint.setDescription("Scale factor for charge capacity.");
-    AHRtg_SFDataPoint.setMandatory(true);
-    AHRtg_SFDataPoint.setSize(1);
-    AHRtg_SFDataPoint.setAddressOffset(52);
-    AHRtg_SFDataPoint.setBlockOffset(50);
-    AHRtg_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(AHRtg_SFDataPoint.name(), AHRtg_SFDataPoint);
+    SunSpecDataPoint aHRtg_SFDataPoint;
+    aHRtg_SFDataPoint.setName("AHRtg_SF");
+    aHRtg_SFDataPoint.setDescription("Scale factor for charge capacity.");
+    aHRtg_SFDataPoint.setMandatory(true);
+    aHRtg_SFDataPoint.setSize(1);
+    aHRtg_SFDataPoint.setAddressOffset(52);
+    aHRtg_SFDataPoint.setBlockOffset(50);
+    aHRtg_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(aHRtg_SFDataPoint.name(), aHRtg_SFDataPoint);
 
-    SunSpecDataPoint WHRtg_SFDataPoint;
-    WHRtg_SFDataPoint.setName("WHRtg_SF");
-    WHRtg_SFDataPoint.setDescription("Scale factor for energy capacity.");
-    WHRtg_SFDataPoint.setMandatory(true);
-    WHRtg_SFDataPoint.setSize(1);
-    WHRtg_SFDataPoint.setAddressOffset(53);
-    WHRtg_SFDataPoint.setBlockOffset(51);
-    WHRtg_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(WHRtg_SFDataPoint.name(), WHRtg_SFDataPoint);
+    SunSpecDataPoint wHRtg_SFDataPoint;
+    wHRtg_SFDataPoint.setName("WHRtg_SF");
+    wHRtg_SFDataPoint.setDescription("Scale factor for energy capacity.");
+    wHRtg_SFDataPoint.setMandatory(true);
+    wHRtg_SFDataPoint.setSize(1);
+    wHRtg_SFDataPoint.setAddressOffset(53);
+    wHRtg_SFDataPoint.setBlockOffset(51);
+    wHRtg_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(wHRtg_SFDataPoint.name(), wHRtg_SFDataPoint);
 
-    SunSpecDataPoint WChaDisChaMax_SFDataPoint;
-    WChaDisChaMax_SFDataPoint.setName("WChaDisChaMax_SF");
-    WChaDisChaMax_SFDataPoint.setDescription("Scale factor for maximum charge and discharge rate.");
-    WChaDisChaMax_SFDataPoint.setMandatory(true);
-    WChaDisChaMax_SFDataPoint.setSize(1);
-    WChaDisChaMax_SFDataPoint.setAddressOffset(54);
-    WChaDisChaMax_SFDataPoint.setBlockOffset(52);
-    WChaDisChaMax_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(WChaDisChaMax_SFDataPoint.name(), WChaDisChaMax_SFDataPoint);
+    SunSpecDataPoint wChaDisChaMax_SFDataPoint;
+    wChaDisChaMax_SFDataPoint.setName("WChaDisChaMax_SF");
+    wChaDisChaMax_SFDataPoint.setDescription("Scale factor for maximum charge and discharge rate.");
+    wChaDisChaMax_SFDataPoint.setMandatory(true);
+    wChaDisChaMax_SFDataPoint.setSize(1);
+    wChaDisChaMax_SFDataPoint.setAddressOffset(54);
+    wChaDisChaMax_SFDataPoint.setBlockOffset(52);
+    wChaDisChaMax_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(wChaDisChaMax_SFDataPoint.name(), wChaDisChaMax_SFDataPoint);
 
-    SunSpecDataPoint DisChaRte_SFDataPoint;
-    DisChaRte_SFDataPoint.setName("DisChaRte_SF");
-    DisChaRte_SFDataPoint.setDescription("Scale factor for self discharge rate.");
-    DisChaRte_SFDataPoint.setSize(1);
-    DisChaRte_SFDataPoint.setAddressOffset(55);
-    DisChaRte_SFDataPoint.setBlockOffset(53);
-    DisChaRte_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(DisChaRte_SFDataPoint.name(), DisChaRte_SFDataPoint);
+    SunSpecDataPoint disChaRte_SFDataPoint;
+    disChaRte_SFDataPoint.setName("DisChaRte_SF");
+    disChaRte_SFDataPoint.setDescription("Scale factor for self discharge rate.");
+    disChaRte_SFDataPoint.setSize(1);
+    disChaRte_SFDataPoint.setAddressOffset(55);
+    disChaRte_SFDataPoint.setBlockOffset(53);
+    disChaRte_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(disChaRte_SFDataPoint.name(), disChaRte_SFDataPoint);
 
-    SunSpecDataPoint SoC_SFDataPoint;
-    SoC_SFDataPoint.setName("SoC_SF");
-    SoC_SFDataPoint.setDescription("Scale factor for state of charge values.");
-    SoC_SFDataPoint.setMandatory(true);
-    SoC_SFDataPoint.setSize(1);
-    SoC_SFDataPoint.setAddressOffset(56);
-    SoC_SFDataPoint.setBlockOffset(54);
-    SoC_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(SoC_SFDataPoint.name(), SoC_SFDataPoint);
+    SunSpecDataPoint soC_SFDataPoint;
+    soC_SFDataPoint.setName("SoC_SF");
+    soC_SFDataPoint.setDescription("Scale factor for state of charge values.");
+    soC_SFDataPoint.setMandatory(true);
+    soC_SFDataPoint.setSize(1);
+    soC_SFDataPoint.setAddressOffset(56);
+    soC_SFDataPoint.setBlockOffset(54);
+    soC_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(soC_SFDataPoint.name(), soC_SFDataPoint);
 
-    SunSpecDataPoint DoD_SFDataPoint;
-    DoD_SFDataPoint.setName("DoD_SF");
-    DoD_SFDataPoint.setDescription("Scale factor for depth of discharge.");
-    DoD_SFDataPoint.setSize(1);
-    DoD_SFDataPoint.setAddressOffset(57);
-    DoD_SFDataPoint.setBlockOffset(55);
-    DoD_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(DoD_SFDataPoint.name(), DoD_SFDataPoint);
+    SunSpecDataPoint doD_SFDataPoint;
+    doD_SFDataPoint.setName("DoD_SF");
+    doD_SFDataPoint.setDescription("Scale factor for depth of discharge.");
+    doD_SFDataPoint.setSize(1);
+    doD_SFDataPoint.setAddressOffset(57);
+    doD_SFDataPoint.setBlockOffset(55);
+    doD_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(doD_SFDataPoint.name(), doD_SFDataPoint);
 
-    SunSpecDataPoint SoH_SFDataPoint;
-    SoH_SFDataPoint.setName("SoH_SF");
-    SoH_SFDataPoint.setDescription("Scale factor for state of health.");
-    SoH_SFDataPoint.setSize(1);
-    SoH_SFDataPoint.setAddressOffset(58);
-    SoH_SFDataPoint.setBlockOffset(56);
-    SoH_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(SoH_SFDataPoint.name(), SoH_SFDataPoint);
+    SunSpecDataPoint soH_SFDataPoint;
+    soH_SFDataPoint.setName("SoH_SF");
+    soH_SFDataPoint.setDescription("Scale factor for state of health.");
+    soH_SFDataPoint.setSize(1);
+    soH_SFDataPoint.setAddressOffset(58);
+    soH_SFDataPoint.setBlockOffset(56);
+    soH_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(soH_SFDataPoint.name(), soH_SFDataPoint);
 
-    SunSpecDataPoint V_SFDataPoint;
-    V_SFDataPoint.setName("V_SF");
-    V_SFDataPoint.setDescription("Scale factor for DC bus voltage.");
-    V_SFDataPoint.setMandatory(true);
-    V_SFDataPoint.setSize(1);
-    V_SFDataPoint.setAddressOffset(59);
-    V_SFDataPoint.setBlockOffset(57);
-    V_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(V_SFDataPoint.name(), V_SFDataPoint);
+    SunSpecDataPoint v_SFDataPoint;
+    v_SFDataPoint.setName("V_SF");
+    v_SFDataPoint.setDescription("Scale factor for DC bus voltage.");
+    v_SFDataPoint.setMandatory(true);
+    v_SFDataPoint.setSize(1);
+    v_SFDataPoint.setAddressOffset(59);
+    v_SFDataPoint.setBlockOffset(57);
+    v_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(v_SFDataPoint.name(), v_SFDataPoint);
 
-    SunSpecDataPoint CellV_SFDataPoint;
-    CellV_SFDataPoint.setName("CellV_SF");
-    CellV_SFDataPoint.setDescription("Scale factor for cell voltage.");
-    CellV_SFDataPoint.setMandatory(true);
-    CellV_SFDataPoint.setSize(1);
-    CellV_SFDataPoint.setAddressOffset(60);
-    CellV_SFDataPoint.setBlockOffset(58);
-    CellV_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(CellV_SFDataPoint.name(), CellV_SFDataPoint);
+    SunSpecDataPoint cellV_SFDataPoint;
+    cellV_SFDataPoint.setName("CellV_SF");
+    cellV_SFDataPoint.setDescription("Scale factor for cell voltage.");
+    cellV_SFDataPoint.setMandatory(true);
+    cellV_SFDataPoint.setSize(1);
+    cellV_SFDataPoint.setAddressOffset(60);
+    cellV_SFDataPoint.setBlockOffset(58);
+    cellV_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(cellV_SFDataPoint.name(), cellV_SFDataPoint);
 
-    SunSpecDataPoint A_SFDataPoint;
-    A_SFDataPoint.setName("A_SF");
-    A_SFDataPoint.setDescription("Scale factor for DC current.");
-    A_SFDataPoint.setMandatory(true);
-    A_SFDataPoint.setSize(1);
-    A_SFDataPoint.setAddressOffset(61);
-    A_SFDataPoint.setBlockOffset(59);
-    A_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(A_SFDataPoint.name(), A_SFDataPoint);
+    SunSpecDataPoint a_SFDataPoint;
+    a_SFDataPoint.setName("A_SF");
+    a_SFDataPoint.setDescription("Scale factor for DC current.");
+    a_SFDataPoint.setMandatory(true);
+    a_SFDataPoint.setSize(1);
+    a_SFDataPoint.setAddressOffset(61);
+    a_SFDataPoint.setBlockOffset(59);
+    a_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(a_SFDataPoint.name(), a_SFDataPoint);
 
-    SunSpecDataPoint AMax_SFDataPoint;
-    AMax_SFDataPoint.setName("AMax_SF");
-    AMax_SFDataPoint.setDescription("Scale factor for instantaneous DC charge/discharge current.");
-    AMax_SFDataPoint.setMandatory(true);
-    AMax_SFDataPoint.setSize(1);
-    AMax_SFDataPoint.setAddressOffset(62);
-    AMax_SFDataPoint.setBlockOffset(60);
-    AMax_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(AMax_SFDataPoint.name(), AMax_SFDataPoint);
+    SunSpecDataPoint aMax_SFDataPoint;
+    aMax_SFDataPoint.setName("AMax_SF");
+    aMax_SFDataPoint.setDescription("Scale factor for instantaneous DC charge/discharge current.");
+    aMax_SFDataPoint.setMandatory(true);
+    aMax_SFDataPoint.setSize(1);
+    aMax_SFDataPoint.setAddressOffset(62);
+    aMax_SFDataPoint.setBlockOffset(60);
+    aMax_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(aMax_SFDataPoint.name(), aMax_SFDataPoint);
 
-    SunSpecDataPoint W_SFDataPoint;
-    W_SFDataPoint.setName("W_SF");
-    W_SFDataPoint.setDescription("Scale factor for AC power request.");
-    W_SFDataPoint.setSize(1);
-    W_SFDataPoint.setAddressOffset(63);
-    W_SFDataPoint.setBlockOffset(61);
-    W_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(W_SFDataPoint.name(), W_SFDataPoint);
+    SunSpecDataPoint w_SFDataPoint;
+    w_SFDataPoint.setName("W_SF");
+    w_SFDataPoint.setDescription("Scale factor for AC power request.");
+    w_SFDataPoint.setSize(1);
+    w_SFDataPoint.setAddressOffset(63);
+    w_SFDataPoint.setBlockOffset(61);
+    w_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(w_SFDataPoint.name(), w_SFDataPoint);
 
 }
 

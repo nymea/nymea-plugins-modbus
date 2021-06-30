@@ -41,10 +41,16 @@ class SunSpecHfrtxModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    enum CrvType {
-        CrvTypeCeaseToEnergize = 1
+    enum Crvtype {
+        CrvtypeCeaseToEnergize = 1
     };
-    Q_ENUM(CrvType)
+    Q_ENUM(Crvtype)
+
+    enum Modena {
+        ModenaEnabled = 0x1
+    };
+    Q_DECLARE_FLAGS(ModenaFlags, Modena)
+    Q_FLAG(Modena)
 
     explicit SunSpecHfrtxModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecHfrtxModel() override; 
@@ -53,10 +59,31 @@ public:
     QString description() const override;
     QString label() const override;
 
-    void readModelHeader() override;
-    void readBlockData() override;
+    quint16 modelId() const;
+    quint16 modelLength() const;
+    quint16 actCrv() const;
+    ModenaFlags modEna() const;
+    quint16 winTms() const;
+    quint16 rvrtTms() const;
+    quint16 rmpTms() const;
+    quint16 nCrv() const;
+    quint16 nPt() const;
+    Crvtype crvType() const;
 
 private:
+    quint16 m_modelId;
+    quint16 m_modelLength;
+    quint16 m_actCrv;
+    ModenaFlags m_modEna;
+    quint16 m_winTms;
+    quint16 m_rvrtTms;
+    quint16 m_rmpTms;
+    quint16 m_nCrv;
+    quint16 m_nPt;
+    qint16 m_tmsSf;
+    qint16 m_hzSf;
+    Crvtype m_crvType;
+
     void initDataPoints();
 
 };

@@ -71,16 +71,82 @@ QString SunSpecSolarModuleModel::label() const
     }
 }
 
-void SunSpecSolarModuleModel::readModelHeader()
+quint16 SunSpecSolarModuleModel::modelId() const
 {
-
+    return m_modelId;
 }
-
-void SunSpecSolarModuleModel::readBlockData()
+quint16 SunSpecSolarModuleModel::modelLength() const
 {
-
+    return m_modelLength;
 }
-
+SunSpecSolarModuleModel::Stat SunSpecSolarModuleModel::status() const
+{
+    return m_status;
+}
+quint16 SunSpecSolarModuleModel::vendorStatus() const
+{
+    return m_vendorStatus;
+}
+SunSpecSolarModuleModel::EvtFlags SunSpecSolarModuleModel::events() const
+{
+    return m_events;
+}
+quint32 SunSpecSolarModuleModel::vendorModuleEventFlags() const
+{
+    return m_vendorModuleEventFlags;
+}
+quint16 SunSpecSolarModuleModel::control() const
+{
+    return m_control;
+}
+quint32 SunSpecSolarModuleModel::vendorControl() const
+{
+    return m_vendorControl;
+}
+qint32 SunSpecSolarModuleModel::controlValue() const
+{
+    return m_controlValue;
+}
+quint32 SunSpecSolarModuleModel::timestamp() const
+{
+    return m_timestamp;
+}
+float SunSpecSolarModuleModel::outputCurrent() const
+{
+    return m_outputCurrent;
+}
+float SunSpecSolarModuleModel::outputVoltage() const
+{
+    return m_outputVoltage;
+}
+float SunSpecSolarModuleModel::outputEnergy() const
+{
+    return m_outputEnergy;
+}
+float SunSpecSolarModuleModel::outputPower() const
+{
+    return m_outputPower;
+}
+float SunSpecSolarModuleModel::temp() const
+{
+    return m_temp;
+}
+float SunSpecSolarModuleModel::inputCurrent() const
+{
+    return m_inputCurrent;
+}
+float SunSpecSolarModuleModel::inputVoltage() const
+{
+    return m_inputVoltage;
+}
+float SunSpecSolarModuleModel::inputEnergy() const
+{
+    return m_inputEnergy;
+}
+float SunSpecSolarModuleModel::inputPower() const
+{
+    return m_inputPower;
+}
 void SunSpecSolarModuleModel::initDataPoints()
 {
     switch (m_modelId) {
@@ -313,41 +379,41 @@ void SunSpecSolarModuleModel::initDataPoints()
         modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
         m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
-        SunSpecDataPoint A_SFDataPoint;
-        A_SFDataPoint.setName("A_SF");
-        A_SFDataPoint.setDescription("Current scale factor");
-        A_SFDataPoint.setSize(1);
-        A_SFDataPoint.setAddressOffset(2);
-        A_SFDataPoint.setBlockOffset(0);
-        A_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(A_SFDataPoint.name(), A_SFDataPoint);
+        SunSpecDataPoint a_SFDataPoint;
+        a_SFDataPoint.setName("A_SF");
+        a_SFDataPoint.setDescription("Current scale factor");
+        a_SFDataPoint.setSize(1);
+        a_SFDataPoint.setAddressOffset(2);
+        a_SFDataPoint.setBlockOffset(0);
+        a_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(a_SFDataPoint.name(), a_SFDataPoint);
 
-        SunSpecDataPoint V_SFDataPoint;
-        V_SFDataPoint.setName("V_SF");
-        V_SFDataPoint.setDescription("Voltage scale factor");
-        V_SFDataPoint.setSize(1);
-        V_SFDataPoint.setAddressOffset(3);
-        V_SFDataPoint.setBlockOffset(1);
-        V_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(V_SFDataPoint.name(), V_SFDataPoint);
+        SunSpecDataPoint v_SFDataPoint;
+        v_SFDataPoint.setName("V_SF");
+        v_SFDataPoint.setDescription("Voltage scale factor");
+        v_SFDataPoint.setSize(1);
+        v_SFDataPoint.setAddressOffset(3);
+        v_SFDataPoint.setBlockOffset(1);
+        v_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(v_SFDataPoint.name(), v_SFDataPoint);
 
-        SunSpecDataPoint W_SFDataPoint;
-        W_SFDataPoint.setName("W_SF");
-        W_SFDataPoint.setDescription("Power scale factor");
-        W_SFDataPoint.setSize(1);
-        W_SFDataPoint.setAddressOffset(4);
-        W_SFDataPoint.setBlockOffset(2);
-        W_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(W_SFDataPoint.name(), W_SFDataPoint);
+        SunSpecDataPoint w_SFDataPoint;
+        w_SFDataPoint.setName("W_SF");
+        w_SFDataPoint.setDescription("Power scale factor");
+        w_SFDataPoint.setSize(1);
+        w_SFDataPoint.setAddressOffset(4);
+        w_SFDataPoint.setBlockOffset(2);
+        w_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(w_SFDataPoint.name(), w_SFDataPoint);
 
-        SunSpecDataPoint Wh_SFDataPoint;
-        Wh_SFDataPoint.setName("Wh_SF");
-        Wh_SFDataPoint.setDescription("Energy scale factor");
-        Wh_SFDataPoint.setSize(1);
-        Wh_SFDataPoint.setAddressOffset(5);
-        Wh_SFDataPoint.setBlockOffset(3);
-        Wh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(Wh_SFDataPoint.name(), Wh_SFDataPoint);
+        SunSpecDataPoint wh_SFDataPoint;
+        wh_SFDataPoint.setName("Wh_SF");
+        wh_SFDataPoint.setDescription("Energy scale factor");
+        wh_SFDataPoint.setSize(1);
+        wh_SFDataPoint.setAddressOffset(5);
+        wh_SFDataPoint.setBlockOffset(3);
+        wh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(wh_SFDataPoint.name(), wh_SFDataPoint);
 
         SunSpecDataPoint statusDataPoint;
         statusDataPoint.setName("Stat");

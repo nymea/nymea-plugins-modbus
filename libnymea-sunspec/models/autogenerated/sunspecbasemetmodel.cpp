@@ -57,16 +57,58 @@ QString SunSpecBaseMetModel::label() const
     return "Base Met";
 }
 
-void SunSpecBaseMetModel::readModelHeader()
+quint16 SunSpecBaseMetModel::modelId() const
 {
-
+    return m_modelId;
 }
-
-void SunSpecBaseMetModel::readBlockData()
+quint16 SunSpecBaseMetModel::modelLength() const
 {
-
+    return m_modelLength;
 }
-
+qint16 SunSpecBaseMetModel::ambientTemperature() const
+{
+    return m_ambientTemperature;
+}
+qint16 SunSpecBaseMetModel::relativeHumidity() const
+{
+    return m_relativeHumidity;
+}
+qint16 SunSpecBaseMetModel::barometricPressure() const
+{
+    return m_barometricPressure;
+}
+qint16 SunSpecBaseMetModel::windSpeed() const
+{
+    return m_windSpeed;
+}
+qint16 SunSpecBaseMetModel::windDirection() const
+{
+    return m_windDirection;
+}
+qint16 SunSpecBaseMetModel::rainfall() const
+{
+    return m_rainfall;
+}
+qint16 SunSpecBaseMetModel::snowDepth() const
+{
+    return m_snowDepth;
+}
+qint16 SunSpecBaseMetModel::precipitationType() const
+{
+    return m_precipitationType;
+}
+qint16 SunSpecBaseMetModel::electricField() const
+{
+    return m_electricField;
+}
+qint16 SunSpecBaseMetModel::surfaceWetness() const
+{
+    return m_surfaceWetness;
+}
+qint16 SunSpecBaseMetModel::soilWetness() const
+{
+    return m_soilWetness;
+}
 void SunSpecBaseMetModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

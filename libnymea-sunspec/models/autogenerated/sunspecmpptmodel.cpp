@@ -57,16 +57,26 @@ QString SunSpecMpptModel::label() const
     return "Multiple MPPT Inverter Extension Model";
 }
 
-void SunSpecMpptModel::readModelHeader()
+quint16 SunSpecMpptModel::modelId() const
 {
-
+    return m_modelId;
 }
-
-void SunSpecMpptModel::readBlockData()
+quint16 SunSpecMpptModel::modelLength() const
 {
-
+    return m_modelLength;
 }
-
+SunSpecMpptModel::EvtFlags SunSpecMpptModel::globalEvents() const
+{
+    return m_globalEvents;
+}
+int SunSpecMpptModel::numberOfModules() const
+{
+    return m_numberOfModules;
+}
+quint16 SunSpecMpptModel::timestampPeriod() const
+{
+    return m_timestampPeriod;
+}
 void SunSpecMpptModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

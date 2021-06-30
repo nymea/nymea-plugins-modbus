@@ -58,6 +58,32 @@ public:
     };
     Q_ENUM(Ctl)
 
+    enum Evt {
+        EvtGroundFault = 0x1,
+        EvtInputOverVoltage = 0x2,
+        EvtReserved2 = 0x4,
+        EvtDcDisconnect = 0x8,
+        EvtReserved4 = 0x10,
+        EvtReserved5 = 0x20,
+        EvtManualShutdown = 0x40,
+        EvtOverTemperature = 0x80,
+        EvtReserved8 = 0x100,
+        EvtReserved9 = 0x200,
+        EvtReserved10 = 0x400,
+        EvtReserved11 = 0x800,
+        EvtBlownFuse = 0x1000,
+        EvtUnderTemperature = 0x2000,
+        EvtMemoryLoss = 0x4000,
+        EvtArcDetection = 0x8000,
+        EvtTheftDetection = 0x10000,
+        EvtOutputOverCurrent = 0x20000,
+        EvtOutputOverVoltage = 0x40000,
+        EvtOutputUnderVoltage = 0x80000,
+        EvtTestFailed = 0x100000
+    };
+    Q_DECLARE_FLAGS(EvtFlags, Evt)
+    Q_FLAG(Evt)
+
     explicit SunSpecAggregatorModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecAggregatorModel() override; 
 
@@ -65,10 +91,33 @@ public:
     QString description() const override;
     QString label() const override;
 
-    void readModelHeader() override;
-    void readBlockData() override;
+    quint16 modelId() const;
+    quint16 modelLength() const;
+    quint16 aid() const;
+    quint16 n() const;
+    quint16 un() const;
+    St status() const;
+    quint16 vendorStatus() const;
+    EvtFlags eventCode() const;
+    quint32 vendorEventCode() const;
+    Ctl control() const;
+    quint32 vendorControl() const;
+    quint32 controlValue() const;
 
 private:
+    quint16 m_modelId;
+    quint16 m_modelLength;
+    quint16 m_aid;
+    quint16 m_n;
+    quint16 m_un;
+    St m_status;
+    quint16 m_vendorStatus;
+    EvtFlags m_eventCode;
+    quint32 m_vendorEventCode;
+    Ctl m_control;
+    quint32 m_vendorControl;
+    quint32 m_controlValue;
+
     void initDataPoints();
 
 };

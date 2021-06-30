@@ -41,22 +41,29 @@ class SunSpecStorageModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    enum ChaSt {
-        ChaStOff = 1,
-        ChaStEmpty = 2,
-        ChaStDischarging = 3,
-        ChaStCharging = 4,
-        ChaStFull = 5,
-        ChaStHolding = 6,
-        ChaStTesting = 7
+    enum Chast {
+        ChastOff = 1,
+        ChastEmpty = 2,
+        ChastDischarging = 3,
+        ChastCharging = 4,
+        ChastFull = 5,
+        ChastHolding = 6,
+        ChastTesting = 7
     };
-    Q_ENUM(ChaSt)
+    Q_ENUM(Chast)
 
-    enum ChaGriSet {
-        ChaGriSetPv = 0,
-        ChaGriSetGrid = 1
+    enum Chagriset {
+        ChagrisetPv = 0,
+        ChagrisetGrid = 1
     };
-    Q_ENUM(ChaGriSet)
+    Q_ENUM(Chagriset)
+
+    enum Storctl_mod {
+        Storctl_modCharge = 0x1,
+        Storctl_modDiScharge = 0x2
+    };
+    Q_DECLARE_FLAGS(Storctl_modFlags, Storctl_mod)
+    Q_FLAG(Storctl_mod)
 
     explicit SunSpecStorageModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecStorageModel() override; 
@@ -65,10 +72,53 @@ public:
     QString description() const override;
     QString label() const override;
 
-    void readModelHeader() override;
-    void readBlockData() override;
+    quint16 modelId() const;
+    quint16 modelLength() const;
+    float wChaMax() const;
+    float wChaGra() const;
+    float wDisChaGra() const;
+    Storctl_modFlags storCtlMod() const;
+    float vaChaMax() const;
+    float minRsvPct() const;
+    float chaState() const;
+    float storAval() const;
+    float inBatV() const;
+    Chast chaSt() const;
+    qint16 outWRte() const;
+    qint16 inWRte() const;
+    quint16 inOutWRteWinTms() const;
+    quint16 inOutWRteRvrtTms() const;
+    quint16 inOutWRteRmpTms() const;
+    Chagriset chaGriSet() const;
 
 private:
+    quint16 m_modelId;
+    quint16 m_modelLength;
+    float m_wChaMax;
+    float m_wChaGra;
+    float m_wDisChaGra;
+    Storctl_modFlags m_storCtlMod;
+    float m_vaChaMax;
+    float m_minRsvPct;
+    float m_chaState;
+    float m_storAval;
+    float m_inBatV;
+    Chast m_chaSt;
+    qint16 m_outWRte;
+    qint16 m_inWRte;
+    quint16 m_inOutWRteWinTms;
+    quint16 m_inOutWRteRvrtTms;
+    quint16 m_inOutWRteRmpTms;
+    Chagriset m_chaGriSet;
+    qint16 m_wChaMaxSf;
+    qint16 m_wChaDisChaGraSf;
+    qint16 m_vaChaMaxSf;
+    qint16 m_minRsvPctSf;
+    qint16 m_chaStateSf;
+    qint16 m_storAvalSf;
+    qint16 m_inBatVSf;
+    qint16 m_inOutWRteSf;
+
     void initDataPoints();
 
 };

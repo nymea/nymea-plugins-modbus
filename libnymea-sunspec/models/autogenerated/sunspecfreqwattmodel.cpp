@@ -57,16 +57,42 @@ QString SunSpecFreqWattModel::label() const
     return "Freq-Watt Crv";
 }
 
-void SunSpecFreqWattModel::readModelHeader()
+quint16 SunSpecFreqWattModel::modelId() const
 {
-
+    return m_modelId;
 }
-
-void SunSpecFreqWattModel::readBlockData()
+quint16 SunSpecFreqWattModel::modelLength() const
 {
-
+    return m_modelLength;
 }
-
+quint16 SunSpecFreqWattModel::actCrv() const
+{
+    return m_actCrv;
+}
+SunSpecFreqWattModel::ModenaFlags SunSpecFreqWattModel::modEna() const
+{
+    return m_modEna;
+}
+quint16 SunSpecFreqWattModel::winTms() const
+{
+    return m_winTms;
+}
+quint16 SunSpecFreqWattModel::rvrtTms() const
+{
+    return m_rvrtTms;
+}
+quint16 SunSpecFreqWattModel::rmpTms() const
+{
+    return m_rmpTms;
+}
+quint16 SunSpecFreqWattModel::nCrv() const
+{
+    return m_nCrv;
+}
+quint16 SunSpecFreqWattModel::nPt() const
+{
+    return m_nPt;
+}
 void SunSpecFreqWattModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -89,87 +115,87 @@ void SunSpecFreqWattModel::initDataPoints()
     modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
-    SunSpecDataPoint actcrvDataPoint;
-    actcrvDataPoint.setName("ActCrv");
-    actcrvDataPoint.setLabel("ActCrv");
-    actcrvDataPoint.setDescription("Index of active curve. 0=no active curve.");
-    actcrvDataPoint.setMandatory(true);
-    actcrvDataPoint.setSize(1);
-    actcrvDataPoint.setAddressOffset(2);
-    actcrvDataPoint.setBlockOffset(0);
-    actcrvDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    actcrvDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints.insert(actcrvDataPoint.name(), actcrvDataPoint);
+    SunSpecDataPoint actCrvDataPoint;
+    actCrvDataPoint.setName("ActCrv");
+    actCrvDataPoint.setLabel("ActCrv");
+    actCrvDataPoint.setDescription("Index of active curve. 0=no active curve.");
+    actCrvDataPoint.setMandatory(true);
+    actCrvDataPoint.setSize(1);
+    actCrvDataPoint.setAddressOffset(2);
+    actCrvDataPoint.setBlockOffset(0);
+    actCrvDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    actCrvDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    m_dataPoints.insert(actCrvDataPoint.name(), actCrvDataPoint);
 
-    SunSpecDataPoint modenaDataPoint;
-    modenaDataPoint.setName("ModEna");
-    modenaDataPoint.setLabel("ModEna");
-    modenaDataPoint.setDescription("Is curve-based Frequency-Watt control active.");
-    modenaDataPoint.setMandatory(true);
-    modenaDataPoint.setSize(1);
-    modenaDataPoint.setAddressOffset(3);
-    modenaDataPoint.setBlockOffset(1);
-    modenaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield16"));
-    modenaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints.insert(modenaDataPoint.name(), modenaDataPoint);
+    SunSpecDataPoint modEnaDataPoint;
+    modEnaDataPoint.setName("ModEna");
+    modEnaDataPoint.setLabel("ModEna");
+    modEnaDataPoint.setDescription("Is curve-based Frequency-Watt control active.");
+    modEnaDataPoint.setMandatory(true);
+    modEnaDataPoint.setSize(1);
+    modEnaDataPoint.setAddressOffset(3);
+    modEnaDataPoint.setBlockOffset(1);
+    modEnaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield16"));
+    modEnaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    m_dataPoints.insert(modEnaDataPoint.name(), modEnaDataPoint);
 
-    SunSpecDataPoint wintmsDataPoint;
-    wintmsDataPoint.setName("WinTms");
-    wintmsDataPoint.setLabel("WinTms");
-    wintmsDataPoint.setDescription("Time window for freq-watt change.");
-    wintmsDataPoint.setUnits("Secs");
-    wintmsDataPoint.setSize(1);
-    wintmsDataPoint.setAddressOffset(4);
-    wintmsDataPoint.setBlockOffset(2);
-    wintmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    wintmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints.insert(wintmsDataPoint.name(), wintmsDataPoint);
+    SunSpecDataPoint winTmsDataPoint;
+    winTmsDataPoint.setName("WinTms");
+    winTmsDataPoint.setLabel("WinTms");
+    winTmsDataPoint.setDescription("Time window for freq-watt change.");
+    winTmsDataPoint.setUnits("Secs");
+    winTmsDataPoint.setSize(1);
+    winTmsDataPoint.setAddressOffset(4);
+    winTmsDataPoint.setBlockOffset(2);
+    winTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    winTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    m_dataPoints.insert(winTmsDataPoint.name(), winTmsDataPoint);
 
-    SunSpecDataPoint rvrttmsDataPoint;
-    rvrttmsDataPoint.setName("RvrtTms");
-    rvrttmsDataPoint.setLabel("RvrtTms");
-    rvrttmsDataPoint.setDescription("Timeout period for freq-watt curve selection.");
-    rvrttmsDataPoint.setUnits("Secs");
-    rvrttmsDataPoint.setSize(1);
-    rvrttmsDataPoint.setAddressOffset(5);
-    rvrttmsDataPoint.setBlockOffset(3);
-    rvrttmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    rvrttmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints.insert(rvrttmsDataPoint.name(), rvrttmsDataPoint);
+    SunSpecDataPoint rvrtTmsDataPoint;
+    rvrtTmsDataPoint.setName("RvrtTms");
+    rvrtTmsDataPoint.setLabel("RvrtTms");
+    rvrtTmsDataPoint.setDescription("Timeout period for freq-watt curve selection.");
+    rvrtTmsDataPoint.setUnits("Secs");
+    rvrtTmsDataPoint.setSize(1);
+    rvrtTmsDataPoint.setAddressOffset(5);
+    rvrtTmsDataPoint.setBlockOffset(3);
+    rvrtTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    rvrtTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    m_dataPoints.insert(rvrtTmsDataPoint.name(), rvrtTmsDataPoint);
 
-    SunSpecDataPoint rmptmsDataPoint;
-    rmptmsDataPoint.setName("RmpTms");
-    rmptmsDataPoint.setLabel("RmpTms");
-    rmptmsDataPoint.setDescription("Ramp time for moving from current mode to new mode.");
-    rmptmsDataPoint.setUnits("Secs");
-    rmptmsDataPoint.setSize(1);
-    rmptmsDataPoint.setAddressOffset(6);
-    rmptmsDataPoint.setBlockOffset(4);
-    rmptmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    rmptmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints.insert(rmptmsDataPoint.name(), rmptmsDataPoint);
+    SunSpecDataPoint rmpTmsDataPoint;
+    rmpTmsDataPoint.setName("RmpTms");
+    rmpTmsDataPoint.setLabel("RmpTms");
+    rmpTmsDataPoint.setDescription("Ramp time for moving from current mode to new mode.");
+    rmpTmsDataPoint.setUnits("Secs");
+    rmpTmsDataPoint.setSize(1);
+    rmpTmsDataPoint.setAddressOffset(6);
+    rmpTmsDataPoint.setBlockOffset(4);
+    rmpTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    rmpTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    m_dataPoints.insert(rmpTmsDataPoint.name(), rmpTmsDataPoint);
 
-    SunSpecDataPoint ncrvDataPoint;
-    ncrvDataPoint.setName("NCrv");
-    ncrvDataPoint.setLabel("NCrv");
-    ncrvDataPoint.setDescription("Number of curves supported (recommend min. 4).");
-    ncrvDataPoint.setMandatory(true);
-    ncrvDataPoint.setSize(1);
-    ncrvDataPoint.setAddressOffset(7);
-    ncrvDataPoint.setBlockOffset(5);
-    ncrvDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints.insert(ncrvDataPoint.name(), ncrvDataPoint);
+    SunSpecDataPoint nCrvDataPoint;
+    nCrvDataPoint.setName("NCrv");
+    nCrvDataPoint.setLabel("NCrv");
+    nCrvDataPoint.setDescription("Number of curves supported (recommend min. 4).");
+    nCrvDataPoint.setMandatory(true);
+    nCrvDataPoint.setSize(1);
+    nCrvDataPoint.setAddressOffset(7);
+    nCrvDataPoint.setBlockOffset(5);
+    nCrvDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    m_dataPoints.insert(nCrvDataPoint.name(), nCrvDataPoint);
 
-    SunSpecDataPoint nptDataPoint;
-    nptDataPoint.setName("NPt");
-    nptDataPoint.setLabel("NPt");
-    nptDataPoint.setDescription("Number of curve points supported (maximum of 10).");
-    nptDataPoint.setMandatory(true);
-    nptDataPoint.setSize(1);
-    nptDataPoint.setAddressOffset(8);
-    nptDataPoint.setBlockOffset(6);
-    nptDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints.insert(nptDataPoint.name(), nptDataPoint);
+    SunSpecDataPoint nPtDataPoint;
+    nPtDataPoint.setName("NPt");
+    nPtDataPoint.setLabel("NPt");
+    nPtDataPoint.setDescription("Number of curve points supported (maximum of 10).");
+    nPtDataPoint.setMandatory(true);
+    nPtDataPoint.setSize(1);
+    nPtDataPoint.setAddressOffset(8);
+    nPtDataPoint.setBlockOffset(6);
+    nPtDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    m_dataPoints.insert(nPtDataPoint.name(), nPtDataPoint);
 
     SunSpecDataPoint hzSfDataPoint;
     hzSfDataPoint.setName("Hz_SF");
@@ -195,16 +221,16 @@ void SunSpecFreqWattModel::initDataPoints()
     wSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
     m_dataPoints.insert(wSfDataPoint.name(), wSfDataPoint);
 
-    SunSpecDataPoint rmpincdecSfDataPoint;
-    rmpincdecSfDataPoint.setName("RmpIncDec_SF");
-    rmpincdecSfDataPoint.setLabel("RmpIncDec_SF");
-    rmpincdecSfDataPoint.setDescription("Scale factor for increment and decrement ramps.");
-    rmpincdecSfDataPoint.setUnits("SF");
-    rmpincdecSfDataPoint.setSize(1);
-    rmpincdecSfDataPoint.setAddressOffset(11);
-    rmpincdecSfDataPoint.setBlockOffset(9);
-    rmpincdecSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(rmpincdecSfDataPoint.name(), rmpincdecSfDataPoint);
+    SunSpecDataPoint rmpIncDecSfDataPoint;
+    rmpIncDecSfDataPoint.setName("RmpIncDec_SF");
+    rmpIncDecSfDataPoint.setLabel("RmpIncDec_SF");
+    rmpIncDecSfDataPoint.setDescription("Scale factor for increment and decrement ramps.");
+    rmpIncDecSfDataPoint.setUnits("SF");
+    rmpIncDecSfDataPoint.setSize(1);
+    rmpIncDecSfDataPoint.setAddressOffset(11);
+    rmpIncDecSfDataPoint.setBlockOffset(9);
+    rmpIncDecSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(rmpIncDecSfDataPoint.name(), rmpIncDecSfDataPoint);
 
 }
 

@@ -57,16 +57,62 @@ QString SunSpecReactiveCurrentModel::label() const
     return "Dynamic Reactive Current";
 }
 
-void SunSpecReactiveCurrentModel::readModelHeader()
+quint16 SunSpecReactiveCurrentModel::modelId() const
 {
-
+    return m_modelId;
 }
-
-void SunSpecReactiveCurrentModel::readBlockData()
+quint16 SunSpecReactiveCurrentModel::modelLength() const
 {
-
+    return m_modelLength;
 }
-
+SunSpecReactiveCurrentModel::Argramod SunSpecReactiveCurrentModel::arGraMod() const
+{
+    return m_arGraMod;
+}
+float SunSpecReactiveCurrentModel::arGraSag() const
+{
+    return m_arGraSag;
+}
+float SunSpecReactiveCurrentModel::arGraSwell() const
+{
+    return m_arGraSwell;
+}
+SunSpecReactiveCurrentModel::ModenaFlags SunSpecReactiveCurrentModel::modEna() const
+{
+    return m_modEna;
+}
+quint16 SunSpecReactiveCurrentModel::filTms() const
+{
+    return m_filTms;
+}
+float SunSpecReactiveCurrentModel::dbVMin() const
+{
+    return m_dbVMin;
+}
+float SunSpecReactiveCurrentModel::dbVMax() const
+{
+    return m_dbVMax;
+}
+float SunSpecReactiveCurrentModel::blkZnV() const
+{
+    return m_blkZnV;
+}
+float SunSpecReactiveCurrentModel::hysBlkZnV() const
+{
+    return m_hysBlkZnV;
+}
+quint16 SunSpecReactiveCurrentModel::blkZnTmms() const
+{
+    return m_blkZnTmms;
+}
+quint16 SunSpecReactiveCurrentModel::holdTmms() const
+{
+    return m_holdTmms;
+}
+quint16 SunSpecReactiveCurrentModel::pad() const
+{
+    return m_pad;
+}
 void SunSpecReactiveCurrentModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -89,174 +135,174 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
-    SunSpecDataPoint argramodDataPoint;
-    argramodDataPoint.setName("ArGraMod");
-    argramodDataPoint.setLabel("ArGraMod");
-    argramodDataPoint.setDescription("Indicates if gradients trend toward zero at the edges of the deadband or trend toward zero at the center of the deadband.");
-    argramodDataPoint.setMandatory(true);
-    argramodDataPoint.setSize(1);
-    argramodDataPoint.setAddressOffset(2);
-    argramodDataPoint.setBlockOffset(0);
-    argramodDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
-    argramodDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints.insert(argramodDataPoint.name(), argramodDataPoint);
+    SunSpecDataPoint arGraModDataPoint;
+    arGraModDataPoint.setName("ArGraMod");
+    arGraModDataPoint.setLabel("ArGraMod");
+    arGraModDataPoint.setDescription("Indicates if gradients trend toward zero at the edges of the deadband or trend toward zero at the center of the deadband.");
+    arGraModDataPoint.setMandatory(true);
+    arGraModDataPoint.setSize(1);
+    arGraModDataPoint.setAddressOffset(2);
+    arGraModDataPoint.setBlockOffset(0);
+    arGraModDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    arGraModDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    m_dataPoints.insert(arGraModDataPoint.name(), arGraModDataPoint);
 
-    SunSpecDataPoint argrasagDataPoint;
-    argrasagDataPoint.setName("ArGraSag");
-    argrasagDataPoint.setLabel("ArGraSag");
-    argrasagDataPoint.setDescription("The gradient used to increase capacitive dynamic current. A value of 0 indicates no additional reactive current support.");
-    argrasagDataPoint.setUnits("%ARtg/%dV");
-    argrasagDataPoint.setMandatory(true);
-    argrasagDataPoint.setSize(1);
-    argrasagDataPoint.setAddressOffset(3);
-    argrasagDataPoint.setBlockOffset(1);
-    argrasagDataPoint.setScaleFactorName("ArGra_SF");
-    argrasagDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    argrasagDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints.insert(argrasagDataPoint.name(), argrasagDataPoint);
+    SunSpecDataPoint arGraSagDataPoint;
+    arGraSagDataPoint.setName("ArGraSag");
+    arGraSagDataPoint.setLabel("ArGraSag");
+    arGraSagDataPoint.setDescription("The gradient used to increase capacitive dynamic current. A value of 0 indicates no additional reactive current support.");
+    arGraSagDataPoint.setUnits("%ARtg/%dV");
+    arGraSagDataPoint.setMandatory(true);
+    arGraSagDataPoint.setSize(1);
+    arGraSagDataPoint.setAddressOffset(3);
+    arGraSagDataPoint.setBlockOffset(1);
+    arGraSagDataPoint.setScaleFactorName("ArGra_SF");
+    arGraSagDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    arGraSagDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    m_dataPoints.insert(arGraSagDataPoint.name(), arGraSagDataPoint);
 
-    SunSpecDataPoint argraswellDataPoint;
-    argraswellDataPoint.setName("ArGraSwell");
-    argraswellDataPoint.setLabel("ArGraSwell");
-    argraswellDataPoint.setDescription("The gradient used to increase inductive dynamic current.  A value of 0 indicates no additional reactive current support.");
-    argraswellDataPoint.setUnits("%ARtg/%dV");
-    argraswellDataPoint.setMandatory(true);
-    argraswellDataPoint.setSize(1);
-    argraswellDataPoint.setAddressOffset(4);
-    argraswellDataPoint.setBlockOffset(2);
-    argraswellDataPoint.setScaleFactorName("ArGra_SF");
-    argraswellDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    argraswellDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints.insert(argraswellDataPoint.name(), argraswellDataPoint);
+    SunSpecDataPoint arGraSwellDataPoint;
+    arGraSwellDataPoint.setName("ArGraSwell");
+    arGraSwellDataPoint.setLabel("ArGraSwell");
+    arGraSwellDataPoint.setDescription("The gradient used to increase inductive dynamic current.  A value of 0 indicates no additional reactive current support.");
+    arGraSwellDataPoint.setUnits("%ARtg/%dV");
+    arGraSwellDataPoint.setMandatory(true);
+    arGraSwellDataPoint.setSize(1);
+    arGraSwellDataPoint.setAddressOffset(4);
+    arGraSwellDataPoint.setBlockOffset(2);
+    arGraSwellDataPoint.setScaleFactorName("ArGra_SF");
+    arGraSwellDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    arGraSwellDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    m_dataPoints.insert(arGraSwellDataPoint.name(), arGraSwellDataPoint);
 
-    SunSpecDataPoint modenaDataPoint;
-    modenaDataPoint.setName("ModEna");
-    modenaDataPoint.setLabel("ModEna");
-    modenaDataPoint.setDescription("Activate dynamic reactive current model");
-    modenaDataPoint.setMandatory(true);
-    modenaDataPoint.setSize(1);
-    modenaDataPoint.setAddressOffset(5);
-    modenaDataPoint.setBlockOffset(3);
-    modenaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield16"));
-    modenaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints.insert(modenaDataPoint.name(), modenaDataPoint);
+    SunSpecDataPoint modEnaDataPoint;
+    modEnaDataPoint.setName("ModEna");
+    modEnaDataPoint.setLabel("ModEna");
+    modEnaDataPoint.setDescription("Activate dynamic reactive current model");
+    modEnaDataPoint.setMandatory(true);
+    modEnaDataPoint.setSize(1);
+    modEnaDataPoint.setAddressOffset(5);
+    modEnaDataPoint.setBlockOffset(3);
+    modEnaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield16"));
+    modEnaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    m_dataPoints.insert(modEnaDataPoint.name(), modEnaDataPoint);
 
-    SunSpecDataPoint filtmsDataPoint;
-    filtmsDataPoint.setName("FilTms");
-    filtmsDataPoint.setLabel("FilTms");
-    filtmsDataPoint.setDescription("The time window used to calculate the moving average voltage.");
-    filtmsDataPoint.setUnits("Secs");
-    filtmsDataPoint.setSize(1);
-    filtmsDataPoint.setAddressOffset(6);
-    filtmsDataPoint.setBlockOffset(4);
-    filtmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    filtmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints.insert(filtmsDataPoint.name(), filtmsDataPoint);
+    SunSpecDataPoint filTmsDataPoint;
+    filTmsDataPoint.setName("FilTms");
+    filTmsDataPoint.setLabel("FilTms");
+    filTmsDataPoint.setDescription("The time window used to calculate the moving average voltage.");
+    filTmsDataPoint.setUnits("Secs");
+    filTmsDataPoint.setSize(1);
+    filTmsDataPoint.setAddressOffset(6);
+    filTmsDataPoint.setBlockOffset(4);
+    filTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    filTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    m_dataPoints.insert(filTmsDataPoint.name(), filTmsDataPoint);
 
-    SunSpecDataPoint dbvminDataPoint;
-    dbvminDataPoint.setName("DbVMin");
-    dbvminDataPoint.setLabel("DbVMin");
-    dbvminDataPoint.setDescription("The lower delta voltage limit for which negative voltage deviations less than this value no dynamic vars are produced.");
-    dbvminDataPoint.setUnits("% VRef");
-    dbvminDataPoint.setSize(1);
-    dbvminDataPoint.setAddressOffset(7);
-    dbvminDataPoint.setBlockOffset(5);
-    dbvminDataPoint.setScaleFactorName("VRefPct_SF");
-    dbvminDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    dbvminDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints.insert(dbvminDataPoint.name(), dbvminDataPoint);
+    SunSpecDataPoint dbVMinDataPoint;
+    dbVMinDataPoint.setName("DbVMin");
+    dbVMinDataPoint.setLabel("DbVMin");
+    dbVMinDataPoint.setDescription("The lower delta voltage limit for which negative voltage deviations less than this value no dynamic vars are produced.");
+    dbVMinDataPoint.setUnits("% VRef");
+    dbVMinDataPoint.setSize(1);
+    dbVMinDataPoint.setAddressOffset(7);
+    dbVMinDataPoint.setBlockOffset(5);
+    dbVMinDataPoint.setScaleFactorName("VRefPct_SF");
+    dbVMinDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    dbVMinDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    m_dataPoints.insert(dbVMinDataPoint.name(), dbVMinDataPoint);
 
-    SunSpecDataPoint dbvmaxDataPoint;
-    dbvmaxDataPoint.setName("DbVMax");
-    dbvmaxDataPoint.setLabel("DbVMax");
-    dbvmaxDataPoint.setDescription("The upper delta voltage limit for which positive voltage deviations less than this value no dynamic current produced.");
-    dbvmaxDataPoint.setUnits("% VRef");
-    dbvmaxDataPoint.setSize(1);
-    dbvmaxDataPoint.setAddressOffset(8);
-    dbvmaxDataPoint.setBlockOffset(6);
-    dbvmaxDataPoint.setScaleFactorName("VRefPct_SF");
-    dbvmaxDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    dbvmaxDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints.insert(dbvmaxDataPoint.name(), dbvmaxDataPoint);
+    SunSpecDataPoint dbVMaxDataPoint;
+    dbVMaxDataPoint.setName("DbVMax");
+    dbVMaxDataPoint.setLabel("DbVMax");
+    dbVMaxDataPoint.setDescription("The upper delta voltage limit for which positive voltage deviations less than this value no dynamic current produced.");
+    dbVMaxDataPoint.setUnits("% VRef");
+    dbVMaxDataPoint.setSize(1);
+    dbVMaxDataPoint.setAddressOffset(8);
+    dbVMaxDataPoint.setBlockOffset(6);
+    dbVMaxDataPoint.setScaleFactorName("VRefPct_SF");
+    dbVMaxDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    dbVMaxDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    m_dataPoints.insert(dbVMaxDataPoint.name(), dbVMaxDataPoint);
 
-    SunSpecDataPoint blkznvDataPoint;
-    blkznvDataPoint.setName("BlkZnV");
-    blkznvDataPoint.setLabel("BlkZnV");
-    blkznvDataPoint.setDescription("Block zone voltage which defines a lower voltage boundary below which no dynamic current is produced.");
-    blkznvDataPoint.setUnits("% VRef");
-    blkznvDataPoint.setSize(1);
-    blkznvDataPoint.setAddressOffset(9);
-    blkznvDataPoint.setBlockOffset(7);
-    blkznvDataPoint.setScaleFactorName("VRefPct_SF");
-    blkznvDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    blkznvDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints.insert(blkznvDataPoint.name(), blkznvDataPoint);
+    SunSpecDataPoint blkZnVDataPoint;
+    blkZnVDataPoint.setName("BlkZnV");
+    blkZnVDataPoint.setLabel("BlkZnV");
+    blkZnVDataPoint.setDescription("Block zone voltage which defines a lower voltage boundary below which no dynamic current is produced.");
+    blkZnVDataPoint.setUnits("% VRef");
+    blkZnVDataPoint.setSize(1);
+    blkZnVDataPoint.setAddressOffset(9);
+    blkZnVDataPoint.setBlockOffset(7);
+    blkZnVDataPoint.setScaleFactorName("VRefPct_SF");
+    blkZnVDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    blkZnVDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    m_dataPoints.insert(blkZnVDataPoint.name(), blkZnVDataPoint);
 
-    SunSpecDataPoint hysblkznvDataPoint;
-    hysblkznvDataPoint.setName("HysBlkZnV");
-    hysblkznvDataPoint.setLabel("HysBlkZnV");
-    hysblkznvDataPoint.setDescription("Hysteresis voltage used with BlkZnV.");
-    hysblkznvDataPoint.setUnits("% VRef");
-    hysblkznvDataPoint.setSize(1);
-    hysblkznvDataPoint.setAddressOffset(10);
-    hysblkznvDataPoint.setBlockOffset(8);
-    hysblkznvDataPoint.setScaleFactorName("VRefPct_SF");
-    hysblkznvDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    hysblkznvDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints.insert(hysblkznvDataPoint.name(), hysblkznvDataPoint);
+    SunSpecDataPoint hysBlkZnVDataPoint;
+    hysBlkZnVDataPoint.setName("HysBlkZnV");
+    hysBlkZnVDataPoint.setLabel("HysBlkZnV");
+    hysBlkZnVDataPoint.setDescription("Hysteresis voltage used with BlkZnV.");
+    hysBlkZnVDataPoint.setUnits("% VRef");
+    hysBlkZnVDataPoint.setSize(1);
+    hysBlkZnVDataPoint.setAddressOffset(10);
+    hysBlkZnVDataPoint.setBlockOffset(8);
+    hysBlkZnVDataPoint.setScaleFactorName("VRefPct_SF");
+    hysBlkZnVDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    hysBlkZnVDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    m_dataPoints.insert(hysBlkZnVDataPoint.name(), hysBlkZnVDataPoint);
 
-    SunSpecDataPoint blkzntmmsDataPoint;
-    blkzntmmsDataPoint.setName("BlkZnTmms");
-    blkzntmmsDataPoint.setLabel("BlkZnTmms");
-    blkzntmmsDataPoint.setDescription("Block zone time the time before which reactive current support remains active regardless of how low the voltage drops.");
-    blkzntmmsDataPoint.setUnits("mSecs");
-    blkzntmmsDataPoint.setSize(1);
-    blkzntmmsDataPoint.setAddressOffset(11);
-    blkzntmmsDataPoint.setBlockOffset(9);
-    blkzntmmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    blkzntmmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints.insert(blkzntmmsDataPoint.name(), blkzntmmsDataPoint);
+    SunSpecDataPoint blkZnTmmsDataPoint;
+    blkZnTmmsDataPoint.setName("BlkZnTmms");
+    blkZnTmmsDataPoint.setLabel("BlkZnTmms");
+    blkZnTmmsDataPoint.setDescription("Block zone time the time before which reactive current support remains active regardless of how low the voltage drops.");
+    blkZnTmmsDataPoint.setUnits("mSecs");
+    blkZnTmmsDataPoint.setSize(1);
+    blkZnTmmsDataPoint.setAddressOffset(11);
+    blkZnTmmsDataPoint.setBlockOffset(9);
+    blkZnTmmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    blkZnTmmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    m_dataPoints.insert(blkZnTmmsDataPoint.name(), blkZnTmmsDataPoint);
 
-    SunSpecDataPoint holdtmmsDataPoint;
-    holdtmmsDataPoint.setName("HoldTmms");
-    holdtmmsDataPoint.setLabel("HoldTmms");
-    holdtmmsDataPoint.setDescription("Hold time during which reactive current support continues after the average voltage has entered the dead zone.");
-    holdtmmsDataPoint.setUnits("mSecs");
-    holdtmmsDataPoint.setSize(1);
-    holdtmmsDataPoint.setAddressOffset(12);
-    holdtmmsDataPoint.setBlockOffset(10);
-    holdtmmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    holdtmmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints.insert(holdtmmsDataPoint.name(), holdtmmsDataPoint);
+    SunSpecDataPoint holdTmmsDataPoint;
+    holdTmmsDataPoint.setName("HoldTmms");
+    holdTmmsDataPoint.setLabel("HoldTmms");
+    holdTmmsDataPoint.setDescription("Hold time during which reactive current support continues after the average voltage has entered the dead zone.");
+    holdTmmsDataPoint.setUnits("mSecs");
+    holdTmmsDataPoint.setSize(1);
+    holdTmmsDataPoint.setAddressOffset(12);
+    holdTmmsDataPoint.setBlockOffset(10);
+    holdTmmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    holdTmmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    m_dataPoints.insert(holdTmmsDataPoint.name(), holdTmmsDataPoint);
 
-    SunSpecDataPoint argraSfDataPoint;
-    argraSfDataPoint.setName("ArGra_SF");
-    argraSfDataPoint.setLabel("ArGra_SF");
-    argraSfDataPoint.setDescription("Scale factor for the gradients.");
-    argraSfDataPoint.setMandatory(true);
-    argraSfDataPoint.setSize(1);
-    argraSfDataPoint.setAddressOffset(13);
-    argraSfDataPoint.setBlockOffset(11);
-    argraSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(argraSfDataPoint.name(), argraSfDataPoint);
+    SunSpecDataPoint arGraSfDataPoint;
+    arGraSfDataPoint.setName("ArGra_SF");
+    arGraSfDataPoint.setLabel("ArGra_SF");
+    arGraSfDataPoint.setDescription("Scale factor for the gradients.");
+    arGraSfDataPoint.setMandatory(true);
+    arGraSfDataPoint.setSize(1);
+    arGraSfDataPoint.setAddressOffset(13);
+    arGraSfDataPoint.setBlockOffset(11);
+    arGraSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(arGraSfDataPoint.name(), arGraSfDataPoint);
 
-    SunSpecDataPoint vrefpctSfDataPoint;
-    vrefpctSfDataPoint.setName("VRefPct_SF");
-    vrefpctSfDataPoint.setLabel("VRefPct_SF");
-    vrefpctSfDataPoint.setDescription("Scale factor for the voltage zone and limit settings.");
-    vrefpctSfDataPoint.setSize(1);
-    vrefpctSfDataPoint.setAddressOffset(14);
-    vrefpctSfDataPoint.setBlockOffset(12);
-    vrefpctSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints.insert(vrefpctSfDataPoint.name(), vrefpctSfDataPoint);
+    SunSpecDataPoint vRefPctSfDataPoint;
+    vRefPctSfDataPoint.setName("VRefPct_SF");
+    vRefPctSfDataPoint.setLabel("VRefPct_SF");
+    vRefPctSfDataPoint.setDescription("Scale factor for the voltage zone and limit settings.");
+    vRefPctSfDataPoint.setSize(1);
+    vRefPctSfDataPoint.setAddressOffset(14);
+    vRefPctSfDataPoint.setBlockOffset(12);
+    vRefPctSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    m_dataPoints.insert(vRefPctSfDataPoint.name(), vRefPctSfDataPoint);
 
-    SunSpecDataPoint PadDataPoint;
-    PadDataPoint.setName("Pad");
-    PadDataPoint.setSize(1);
-    PadDataPoint.setAddressOffset(15);
-    PadDataPoint.setBlockOffset(13);
-    PadDataPoint.setDataType(SunSpecDataPoint::stringToDataType("pad"));
-    m_dataPoints.insert(PadDataPoint.name(), PadDataPoint);
+    SunSpecDataPoint padDataPoint;
+    padDataPoint.setName("Pad");
+    padDataPoint.setSize(1);
+    padDataPoint.setAddressOffset(15);
+    padDataPoint.setBlockOffset(13);
+    padDataPoint.setDataType(SunSpecDataPoint::stringToDataType("pad"));
+    m_dataPoints.insert(padDataPoint.name(), padDataPoint);
 
 }
 

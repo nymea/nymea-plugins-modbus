@@ -99,16 +99,262 @@ QString SunSpecAcMeterModel::label() const
     }
 }
 
-void SunSpecAcMeterModel::readModelHeader()
+quint16 SunSpecAcMeterModel::modelId() const
 {
-
+    return m_modelId;
 }
-
-void SunSpecAcMeterModel::readBlockData()
+quint16 SunSpecAcMeterModel::modelLength() const
 {
-
+    return m_modelLength;
 }
-
+qint16 SunSpecAcMeterModel::amps() const
+{
+    return m_amps;
+}
+qint16 SunSpecAcMeterModel::ampsPhaseA() const
+{
+    return m_ampsPhaseA;
+}
+qint16 SunSpecAcMeterModel::ampsPhaseB() const
+{
+    return m_ampsPhaseB;
+}
+qint16 SunSpecAcMeterModel::ampsPhaseC() const
+{
+    return m_ampsPhaseC;
+}
+qint16 SunSpecAcMeterModel::voltageLn() const
+{
+    return m_voltageLn;
+}
+qint16 SunSpecAcMeterModel::phaseVoltageAn() const
+{
+    return m_phaseVoltageAn;
+}
+qint16 SunSpecAcMeterModel::phaseVoltageBn() const
+{
+    return m_phaseVoltageBn;
+}
+qint16 SunSpecAcMeterModel::phaseVoltageCn() const
+{
+    return m_phaseVoltageCn;
+}
+qint16 SunSpecAcMeterModel::voltageLl() const
+{
+    return m_voltageLl;
+}
+qint16 SunSpecAcMeterModel::phaseVoltageAb() const
+{
+    return m_phaseVoltageAb;
+}
+qint16 SunSpecAcMeterModel::phaseVoltageBc() const
+{
+    return m_phaseVoltageBc;
+}
+qint16 SunSpecAcMeterModel::phaseVoltageCa() const
+{
+    return m_phaseVoltageCa;
+}
+qint16 SunSpecAcMeterModel::hz() const
+{
+    return m_hz;
+}
+qint16 SunSpecAcMeterModel::watts() const
+{
+    return m_watts;
+}
+qint16 SunSpecAcMeterModel::wattsPhaseA() const
+{
+    return m_wattsPhaseA;
+}
+qint16 SunSpecAcMeterModel::wattsPhaseB() const
+{
+    return m_wattsPhaseB;
+}
+qint16 SunSpecAcMeterModel::wattsPhaseC() const
+{
+    return m_wattsPhaseC;
+}
+qint16 SunSpecAcMeterModel::va() const
+{
+    return m_va;
+}
+qint16 SunSpecAcMeterModel::vaPhaseA() const
+{
+    return m_vaPhaseA;
+}
+qint16 SunSpecAcMeterModel::vaPhaseB() const
+{
+    return m_vaPhaseB;
+}
+qint16 SunSpecAcMeterModel::vaPhaseC() const
+{
+    return m_vaPhaseC;
+}
+qint16 SunSpecAcMeterModel::var() const
+{
+    return m_var;
+}
+qint16 SunSpecAcMeterModel::varPhaseA() const
+{
+    return m_varPhaseA;
+}
+qint16 SunSpecAcMeterModel::varPhaseB() const
+{
+    return m_varPhaseB;
+}
+qint16 SunSpecAcMeterModel::varPhaseC() const
+{
+    return m_varPhaseC;
+}
+qint16 SunSpecAcMeterModel::pf() const
+{
+    return m_pf;
+}
+qint16 SunSpecAcMeterModel::pfPhaseA() const
+{
+    return m_pfPhaseA;
+}
+qint16 SunSpecAcMeterModel::pfPhaseB() const
+{
+    return m_pfPhaseB;
+}
+qint16 SunSpecAcMeterModel::pfPhaseC() const
+{
+    return m_pfPhaseC;
+}
+quint32 SunSpecAcMeterModel::totalWattHoursExported() const
+{
+    return m_totalWattHoursExported;
+}
+quint32 SunSpecAcMeterModel::totalWattHoursExportedPhaseA() const
+{
+    return m_totalWattHoursExportedPhaseA;
+}
+quint32 SunSpecAcMeterModel::totalWattHoursExportedPhaseB() const
+{
+    return m_totalWattHoursExportedPhaseB;
+}
+quint32 SunSpecAcMeterModel::totalWattHoursExportedPhaseC() const
+{
+    return m_totalWattHoursExportedPhaseC;
+}
+quint32 SunSpecAcMeterModel::totalWattHoursImported() const
+{
+    return m_totalWattHoursImported;
+}
+quint32 SunSpecAcMeterModel::totalWattHoursImportedPhaseA() const
+{
+    return m_totalWattHoursImportedPhaseA;
+}
+quint32 SunSpecAcMeterModel::totalWattHoursImportedPhaseB() const
+{
+    return m_totalWattHoursImportedPhaseB;
+}
+quint32 SunSpecAcMeterModel::totalWattHoursImportedPhaseC() const
+{
+    return m_totalWattHoursImportedPhaseC;
+}
+quint32 SunSpecAcMeterModel::totalVaHoursExported() const
+{
+    return m_totalVaHoursExported;
+}
+quint32 SunSpecAcMeterModel::totalVaHoursExportedPhaseA() const
+{
+    return m_totalVaHoursExportedPhaseA;
+}
+quint32 SunSpecAcMeterModel::totalVaHoursExportedPhaseB() const
+{
+    return m_totalVaHoursExportedPhaseB;
+}
+quint32 SunSpecAcMeterModel::totalVaHoursExportedPhaseC() const
+{
+    return m_totalVaHoursExportedPhaseC;
+}
+quint32 SunSpecAcMeterModel::totalVaHoursImported() const
+{
+    return m_totalVaHoursImported;
+}
+quint32 SunSpecAcMeterModel::totalVaHoursImportedPhaseA() const
+{
+    return m_totalVaHoursImportedPhaseA;
+}
+quint32 SunSpecAcMeterModel::totalVaHoursImportedPhaseB() const
+{
+    return m_totalVaHoursImportedPhaseB;
+}
+quint32 SunSpecAcMeterModel::totalVaHoursImportedPhaseC() const
+{
+    return m_totalVaHoursImportedPhaseC;
+}
+quint32 SunSpecAcMeterModel::totalVarHoursImportedQ1() const
+{
+    return m_totalVarHoursImportedQ1;
+}
+quint32 SunSpecAcMeterModel::totalVArHoursImportedQ1PhaseA() const
+{
+    return m_totalVArHoursImportedQ1PhaseA;
+}
+quint32 SunSpecAcMeterModel::totalVArHoursImportedQ1PhaseB() const
+{
+    return m_totalVArHoursImportedQ1PhaseB;
+}
+quint32 SunSpecAcMeterModel::totalVArHoursImportedQ1PhaseC() const
+{
+    return m_totalVArHoursImportedQ1PhaseC;
+}
+quint32 SunSpecAcMeterModel::totalVArHoursImportedQ2() const
+{
+    return m_totalVArHoursImportedQ2;
+}
+quint32 SunSpecAcMeterModel::totalVArHoursImportedQ2PhaseA() const
+{
+    return m_totalVArHoursImportedQ2PhaseA;
+}
+quint32 SunSpecAcMeterModel::totalVArHoursImportedQ2PhaseB() const
+{
+    return m_totalVArHoursImportedQ2PhaseB;
+}
+quint32 SunSpecAcMeterModel::totalVArHoursImportedQ2PhaseC() const
+{
+    return m_totalVArHoursImportedQ2PhaseC;
+}
+quint32 SunSpecAcMeterModel::totalVArHoursExportedQ3() const
+{
+    return m_totalVArHoursExportedQ3;
+}
+quint32 SunSpecAcMeterModel::totalVArHoursExportedQ3PhaseA() const
+{
+    return m_totalVArHoursExportedQ3PhaseA;
+}
+quint32 SunSpecAcMeterModel::totalVArHoursExportedQ3PhaseB() const
+{
+    return m_totalVArHoursExportedQ3PhaseB;
+}
+quint32 SunSpecAcMeterModel::totalVArHoursExportedQ3PhaseC() const
+{
+    return m_totalVArHoursExportedQ3PhaseC;
+}
+quint32 SunSpecAcMeterModel::totalVArHoursExportedQ4() const
+{
+    return m_totalVArHoursExportedQ4;
+}
+quint32 SunSpecAcMeterModel::totalVArHoursExportedQ4ImportedPhaseA() const
+{
+    return m_totalVArHoursExportedQ4ImportedPhaseA;
+}
+quint32 SunSpecAcMeterModel::totalVArHoursExportedQ4ImportedPhaseB() const
+{
+    return m_totalVArHoursExportedQ4ImportedPhaseB;
+}
+quint32 SunSpecAcMeterModel::totalVArHoursExportedQ4ImportedPhaseC() const
+{
+    return m_totalVArHoursExportedQ4ImportedPhaseC;
+}
+SunSpecAcMeterModel::EvtFlags SunSpecAcMeterModel::events() const
+{
+    return m_events;
+}
 void SunSpecAcMeterModel::initDataPoints()
 {
     switch (m_modelId) {
@@ -146,52 +392,52 @@ void SunSpecAcMeterModel::initDataPoints()
         ampsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
-        SunSpecDataPoint ampsPhaseaDataPoint;
-        ampsPhaseaDataPoint.setName("AphA");
-        ampsPhaseaDataPoint.setLabel("Amps PhaseA");
-        ampsPhaseaDataPoint.setDescription("Phase A Current");
-        ampsPhaseaDataPoint.setUnits("A");
-        ampsPhaseaDataPoint.setMandatory(true);
-        ampsPhaseaDataPoint.setSize(1);
-        ampsPhaseaDataPoint.setAddressOffset(3);
-        ampsPhaseaDataPoint.setBlockOffset(1);
-        ampsPhaseaDataPoint.setScaleFactorName("A_SF");
-        ampsPhaseaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-        m_dataPoints.insert(ampsPhaseaDataPoint.name(), ampsPhaseaDataPoint);
+        SunSpecDataPoint ampsPhaseADataPoint;
+        ampsPhaseADataPoint.setName("AphA");
+        ampsPhaseADataPoint.setLabel("Amps PhaseA");
+        ampsPhaseADataPoint.setDescription("Phase A Current");
+        ampsPhaseADataPoint.setUnits("A");
+        ampsPhaseADataPoint.setMandatory(true);
+        ampsPhaseADataPoint.setSize(1);
+        ampsPhaseADataPoint.setAddressOffset(3);
+        ampsPhaseADataPoint.setBlockOffset(1);
+        ampsPhaseADataPoint.setScaleFactorName("A_SF");
+        ampsPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+        m_dataPoints.insert(ampsPhaseADataPoint.name(), ampsPhaseADataPoint);
 
-        SunSpecDataPoint ampsPhasebDataPoint;
-        ampsPhasebDataPoint.setName("AphB");
-        ampsPhasebDataPoint.setLabel("Amps PhaseB");
-        ampsPhasebDataPoint.setDescription("Phase B Current");
-        ampsPhasebDataPoint.setUnits("A");
-        ampsPhasebDataPoint.setSize(1);
-        ampsPhasebDataPoint.setAddressOffset(4);
-        ampsPhasebDataPoint.setBlockOffset(2);
-        ampsPhasebDataPoint.setScaleFactorName("A_SF");
-        ampsPhasebDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-        m_dataPoints.insert(ampsPhasebDataPoint.name(), ampsPhasebDataPoint);
+        SunSpecDataPoint ampsPhaseBDataPoint;
+        ampsPhaseBDataPoint.setName("AphB");
+        ampsPhaseBDataPoint.setLabel("Amps PhaseB");
+        ampsPhaseBDataPoint.setDescription("Phase B Current");
+        ampsPhaseBDataPoint.setUnits("A");
+        ampsPhaseBDataPoint.setSize(1);
+        ampsPhaseBDataPoint.setAddressOffset(4);
+        ampsPhaseBDataPoint.setBlockOffset(2);
+        ampsPhaseBDataPoint.setScaleFactorName("A_SF");
+        ampsPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+        m_dataPoints.insert(ampsPhaseBDataPoint.name(), ampsPhaseBDataPoint);
 
-        SunSpecDataPoint ampsPhasecDataPoint;
-        ampsPhasecDataPoint.setName("AphC");
-        ampsPhasecDataPoint.setLabel("Amps PhaseC");
-        ampsPhasecDataPoint.setDescription("Phase C Current");
-        ampsPhasecDataPoint.setUnits("A");
-        ampsPhasecDataPoint.setSize(1);
-        ampsPhasecDataPoint.setAddressOffset(5);
-        ampsPhasecDataPoint.setBlockOffset(3);
-        ampsPhasecDataPoint.setScaleFactorName("A_SF");
-        ampsPhasecDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-        m_dataPoints.insert(ampsPhasecDataPoint.name(), ampsPhasecDataPoint);
+        SunSpecDataPoint ampsPhaseCDataPoint;
+        ampsPhaseCDataPoint.setName("AphC");
+        ampsPhaseCDataPoint.setLabel("Amps PhaseC");
+        ampsPhaseCDataPoint.setDescription("Phase C Current");
+        ampsPhaseCDataPoint.setUnits("A");
+        ampsPhaseCDataPoint.setSize(1);
+        ampsPhaseCDataPoint.setAddressOffset(5);
+        ampsPhaseCDataPoint.setBlockOffset(3);
+        ampsPhaseCDataPoint.setScaleFactorName("A_SF");
+        ampsPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+        m_dataPoints.insert(ampsPhaseCDataPoint.name(), ampsPhaseCDataPoint);
 
-        SunSpecDataPoint A_SFDataPoint;
-        A_SFDataPoint.setName("A_SF");
-        A_SFDataPoint.setDescription("Current scale factor");
-        A_SFDataPoint.setMandatory(true);
-        A_SFDataPoint.setSize(1);
-        A_SFDataPoint.setAddressOffset(6);
-        A_SFDataPoint.setBlockOffset(4);
-        A_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(A_SFDataPoint.name(), A_SFDataPoint);
+        SunSpecDataPoint a_SFDataPoint;
+        a_SFDataPoint.setName("A_SF");
+        a_SFDataPoint.setDescription("Current scale factor");
+        a_SFDataPoint.setMandatory(true);
+        a_SFDataPoint.setSize(1);
+        a_SFDataPoint.setAddressOffset(6);
+        a_SFDataPoint.setBlockOffset(4);
+        a_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(a_SFDataPoint.name(), a_SFDataPoint);
 
         SunSpecDataPoint voltageLnDataPoint;
         voltageLnDataPoint.setName("PhV");
@@ -289,15 +535,15 @@ void SunSpecAcMeterModel::initDataPoints()
         phaseVoltageCaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(phaseVoltageCaDataPoint.name(), phaseVoltageCaDataPoint);
 
-        SunSpecDataPoint V_SFDataPoint;
-        V_SFDataPoint.setName("V_SF");
-        V_SFDataPoint.setDescription("Voltage scale factor");
-        V_SFDataPoint.setMandatory(true);
-        V_SFDataPoint.setSize(1);
-        V_SFDataPoint.setAddressOffset(15);
-        V_SFDataPoint.setBlockOffset(13);
-        V_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(V_SFDataPoint.name(), V_SFDataPoint);
+        SunSpecDataPoint v_SFDataPoint;
+        v_SFDataPoint.setName("V_SF");
+        v_SFDataPoint.setDescription("Voltage scale factor");
+        v_SFDataPoint.setMandatory(true);
+        v_SFDataPoint.setSize(1);
+        v_SFDataPoint.setAddressOffset(15);
+        v_SFDataPoint.setBlockOffset(13);
+        v_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(v_SFDataPoint.name(), v_SFDataPoint);
 
         SunSpecDataPoint hzDataPoint;
         hzDataPoint.setName("Hz");
@@ -312,14 +558,14 @@ void SunSpecAcMeterModel::initDataPoints()
         hzDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(hzDataPoint.name(), hzDataPoint);
 
-        SunSpecDataPoint Hz_SFDataPoint;
-        Hz_SFDataPoint.setName("Hz_SF");
-        Hz_SFDataPoint.setDescription("Frequency scale factor");
-        Hz_SFDataPoint.setSize(1);
-        Hz_SFDataPoint.setAddressOffset(17);
-        Hz_SFDataPoint.setBlockOffset(15);
-        Hz_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(Hz_SFDataPoint.name(), Hz_SFDataPoint);
+        SunSpecDataPoint hz_SFDataPoint;
+        hz_SFDataPoint.setName("Hz_SF");
+        hz_SFDataPoint.setDescription("Frequency scale factor");
+        hz_SFDataPoint.setSize(1);
+        hz_SFDataPoint.setAddressOffset(17);
+        hz_SFDataPoint.setBlockOffset(15);
+        hz_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(hz_SFDataPoint.name(), hz_SFDataPoint);
 
         SunSpecDataPoint wattsDataPoint;
         wattsDataPoint.setName("W");
@@ -367,15 +613,15 @@ void SunSpecAcMeterModel::initDataPoints()
         wattsPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(wattsPhaseCDataPoint.name(), wattsPhaseCDataPoint);
 
-        SunSpecDataPoint W_SFDataPoint;
-        W_SFDataPoint.setName("W_SF");
-        W_SFDataPoint.setDescription("Real Power scale factor");
-        W_SFDataPoint.setMandatory(true);
-        W_SFDataPoint.setSize(1);
-        W_SFDataPoint.setAddressOffset(22);
-        W_SFDataPoint.setBlockOffset(20);
-        W_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(W_SFDataPoint.name(), W_SFDataPoint);
+        SunSpecDataPoint w_SFDataPoint;
+        w_SFDataPoint.setName("W_SF");
+        w_SFDataPoint.setDescription("Real Power scale factor");
+        w_SFDataPoint.setMandatory(true);
+        w_SFDataPoint.setSize(1);
+        w_SFDataPoint.setAddressOffset(22);
+        w_SFDataPoint.setBlockOffset(20);
+        w_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(w_SFDataPoint.name(), w_SFDataPoint);
 
         SunSpecDataPoint vaDataPoint;
         vaDataPoint.setName("VA");
@@ -422,14 +668,14 @@ void SunSpecAcMeterModel::initDataPoints()
         vaPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(vaPhaseCDataPoint.name(), vaPhaseCDataPoint);
 
-        SunSpecDataPoint VA_SFDataPoint;
-        VA_SFDataPoint.setName("VA_SF");
-        VA_SFDataPoint.setDescription("Apparent Power scale factor");
-        VA_SFDataPoint.setSize(1);
-        VA_SFDataPoint.setAddressOffset(27);
-        VA_SFDataPoint.setBlockOffset(25);
-        VA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(VA_SFDataPoint.name(), VA_SFDataPoint);
+        SunSpecDataPoint vA_SFDataPoint;
+        vA_SFDataPoint.setName("VA_SF");
+        vA_SFDataPoint.setDescription("Apparent Power scale factor");
+        vA_SFDataPoint.setSize(1);
+        vA_SFDataPoint.setAddressOffset(27);
+        vA_SFDataPoint.setBlockOffset(25);
+        vA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(vA_SFDataPoint.name(), vA_SFDataPoint);
 
         SunSpecDataPoint varDataPoint;
         varDataPoint.setName("VAR");
@@ -476,14 +722,14 @@ void SunSpecAcMeterModel::initDataPoints()
         varPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(varPhaseCDataPoint.name(), varPhaseCDataPoint);
 
-        SunSpecDataPoint VAR_SFDataPoint;
-        VAR_SFDataPoint.setName("VAR_SF");
-        VAR_SFDataPoint.setDescription("Reactive Power scale factor");
-        VAR_SFDataPoint.setSize(1);
-        VAR_SFDataPoint.setAddressOffset(32);
-        VAR_SFDataPoint.setBlockOffset(30);
-        VAR_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(VAR_SFDataPoint.name(), VAR_SFDataPoint);
+        SunSpecDataPoint vAR_SFDataPoint;
+        vAR_SFDataPoint.setName("VAR_SF");
+        vAR_SFDataPoint.setDescription("Reactive Power scale factor");
+        vAR_SFDataPoint.setSize(1);
+        vAR_SFDataPoint.setAddressOffset(32);
+        vAR_SFDataPoint.setBlockOffset(30);
+        vAR_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(vAR_SFDataPoint.name(), vAR_SFDataPoint);
 
         SunSpecDataPoint pfDataPoint;
         pfDataPoint.setName("PF");
@@ -530,14 +776,14 @@ void SunSpecAcMeterModel::initDataPoints()
         pfPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(pfPhaseCDataPoint.name(), pfPhaseCDataPoint);
 
-        SunSpecDataPoint PF_SFDataPoint;
-        PF_SFDataPoint.setName("PF_SF");
-        PF_SFDataPoint.setDescription("Power Factor scale factor");
-        PF_SFDataPoint.setSize(1);
-        PF_SFDataPoint.setAddressOffset(37);
-        PF_SFDataPoint.setBlockOffset(35);
-        PF_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(PF_SFDataPoint.name(), PF_SFDataPoint);
+        SunSpecDataPoint pF_SFDataPoint;
+        pF_SFDataPoint.setName("PF_SF");
+        pF_SFDataPoint.setDescription("Power Factor scale factor");
+        pF_SFDataPoint.setSize(1);
+        pF_SFDataPoint.setAddressOffset(37);
+        pF_SFDataPoint.setBlockOffset(35);
+        pF_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(pF_SFDataPoint.name(), pF_SFDataPoint);
 
         SunSpecDataPoint totalWattHoursExportedDataPoint;
         totalWattHoursExportedDataPoint.setName("TotWhExp");
@@ -631,15 +877,15 @@ void SunSpecAcMeterModel::initDataPoints()
         totalWattHoursImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
         m_dataPoints.insert(totalWattHoursImportedPhaseCDataPoint.name(), totalWattHoursImportedPhaseCDataPoint);
 
-        SunSpecDataPoint TotWh_SFDataPoint;
-        TotWh_SFDataPoint.setName("TotWh_SF");
-        TotWh_SFDataPoint.setDescription("Real Energy scale factor");
-        TotWh_SFDataPoint.setMandatory(true);
-        TotWh_SFDataPoint.setSize(1);
-        TotWh_SFDataPoint.setAddressOffset(54);
-        TotWh_SFDataPoint.setBlockOffset(52);
-        TotWh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(TotWh_SFDataPoint.name(), TotWh_SFDataPoint);
+        SunSpecDataPoint totWh_SFDataPoint;
+        totWh_SFDataPoint.setName("TotWh_SF");
+        totWh_SFDataPoint.setDescription("Real Energy scale factor");
+        totWh_SFDataPoint.setMandatory(true);
+        totWh_SFDataPoint.setSize(1);
+        totWh_SFDataPoint.setAddressOffset(54);
+        totWh_SFDataPoint.setBlockOffset(52);
+        totWh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(totWh_SFDataPoint.name(), totWh_SFDataPoint);
 
         SunSpecDataPoint totalVaHoursExportedDataPoint;
         totalVaHoursExportedDataPoint.setName("TotVAhExp");
@@ -731,14 +977,14 @@ void SunSpecAcMeterModel::initDataPoints()
         totalVaHoursImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
         m_dataPoints.insert(totalVaHoursImportedPhaseCDataPoint.name(), totalVaHoursImportedPhaseCDataPoint);
 
-        SunSpecDataPoint TotVAh_SFDataPoint;
-        TotVAh_SFDataPoint.setName("TotVAh_SF");
-        TotVAh_SFDataPoint.setDescription("Apparent Energy scale factor");
-        TotVAh_SFDataPoint.setSize(1);
-        TotVAh_SFDataPoint.setAddressOffset(71);
-        TotVAh_SFDataPoint.setBlockOffset(69);
-        TotVAh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(TotVAh_SFDataPoint.name(), TotVAh_SFDataPoint);
+        SunSpecDataPoint totVAh_SFDataPoint;
+        totVAh_SFDataPoint.setName("TotVAh_SF");
+        totVAh_SFDataPoint.setDescription("Apparent Energy scale factor");
+        totVAh_SFDataPoint.setSize(1);
+        totVAh_SFDataPoint.setAddressOffset(71);
+        totVAh_SFDataPoint.setBlockOffset(69);
+        totVAh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(totVAh_SFDataPoint.name(), totVAh_SFDataPoint);
 
         SunSpecDataPoint totalVarHoursImportedQ1DataPoint;
         totalVarHoursImportedQ1DataPoint.setName("TotVArhImpQ1");
@@ -752,182 +998,182 @@ void SunSpecAcMeterModel::initDataPoints()
         totalVarHoursImportedQ1DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
         m_dataPoints.insert(totalVarHoursImportedQ1DataPoint.name(), totalVarHoursImportedQ1DataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ1PhaseADataPoint;
-        totalVarHoursImportedQ1PhaseADataPoint.setName("TotVArhImpQ1PhA");
-        totalVarHoursImportedQ1PhaseADataPoint.setLabel("Total VAr-hours Imported Q1 phase A");
-        totalVarHoursImportedQ1PhaseADataPoint.setUnits("varh");
-        totalVarHoursImportedQ1PhaseADataPoint.setSize(2);
-        totalVarHoursImportedQ1PhaseADataPoint.setAddressOffset(74);
-        totalVarHoursImportedQ1PhaseADataPoint.setBlockOffset(72);
-        totalVarHoursImportedQ1PhaseADataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ1PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ1PhaseADataPoint.name(), totalVarHoursImportedQ1PhaseADataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ1PhaseADataPoint;
+        totalVArHoursImportedQ1PhaseADataPoint.setName("TotVArhImpQ1PhA");
+        totalVArHoursImportedQ1PhaseADataPoint.setLabel("Total VAr-hours Imported Q1 phase A");
+        totalVArHoursImportedQ1PhaseADataPoint.setUnits("varh");
+        totalVArHoursImportedQ1PhaseADataPoint.setSize(2);
+        totalVArHoursImportedQ1PhaseADataPoint.setAddressOffset(74);
+        totalVArHoursImportedQ1PhaseADataPoint.setBlockOffset(72);
+        totalVArHoursImportedQ1PhaseADataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ1PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ1PhaseADataPoint.name(), totalVArHoursImportedQ1PhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ1PhaseBDataPoint;
-        totalVarHoursImportedQ1PhaseBDataPoint.setName("TotVArhImpQ1PhB");
-        totalVarHoursImportedQ1PhaseBDataPoint.setLabel("Total VAr-hours Imported Q1 phase B");
-        totalVarHoursImportedQ1PhaseBDataPoint.setUnits("varh");
-        totalVarHoursImportedQ1PhaseBDataPoint.setSize(2);
-        totalVarHoursImportedQ1PhaseBDataPoint.setAddressOffset(76);
-        totalVarHoursImportedQ1PhaseBDataPoint.setBlockOffset(74);
-        totalVarHoursImportedQ1PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ1PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ1PhaseBDataPoint.name(), totalVarHoursImportedQ1PhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ1PhaseBDataPoint;
+        totalVArHoursImportedQ1PhaseBDataPoint.setName("TotVArhImpQ1PhB");
+        totalVArHoursImportedQ1PhaseBDataPoint.setLabel("Total VAr-hours Imported Q1 phase B");
+        totalVArHoursImportedQ1PhaseBDataPoint.setUnits("varh");
+        totalVArHoursImportedQ1PhaseBDataPoint.setSize(2);
+        totalVArHoursImportedQ1PhaseBDataPoint.setAddressOffset(76);
+        totalVArHoursImportedQ1PhaseBDataPoint.setBlockOffset(74);
+        totalVArHoursImportedQ1PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ1PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ1PhaseBDataPoint.name(), totalVArHoursImportedQ1PhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ1PhaseCDataPoint;
-        totalVarHoursImportedQ1PhaseCDataPoint.setName("TotVArhImpQ1PhC");
-        totalVarHoursImportedQ1PhaseCDataPoint.setLabel("Total VAr-hours Imported Q1 phase C");
-        totalVarHoursImportedQ1PhaseCDataPoint.setUnits("varh");
-        totalVarHoursImportedQ1PhaseCDataPoint.setSize(2);
-        totalVarHoursImportedQ1PhaseCDataPoint.setAddressOffset(78);
-        totalVarHoursImportedQ1PhaseCDataPoint.setBlockOffset(76);
-        totalVarHoursImportedQ1PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ1PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ1PhaseCDataPoint.name(), totalVarHoursImportedQ1PhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ1PhaseCDataPoint;
+        totalVArHoursImportedQ1PhaseCDataPoint.setName("TotVArhImpQ1PhC");
+        totalVArHoursImportedQ1PhaseCDataPoint.setLabel("Total VAr-hours Imported Q1 phase C");
+        totalVArHoursImportedQ1PhaseCDataPoint.setUnits("varh");
+        totalVArHoursImportedQ1PhaseCDataPoint.setSize(2);
+        totalVArHoursImportedQ1PhaseCDataPoint.setAddressOffset(78);
+        totalVArHoursImportedQ1PhaseCDataPoint.setBlockOffset(76);
+        totalVArHoursImportedQ1PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ1PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ1PhaseCDataPoint.name(), totalVArHoursImportedQ1PhaseCDataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2DataPoint;
-        totalVarHoursImportedQ2DataPoint.setName("TotVArhImpQ2");
-        totalVarHoursImportedQ2DataPoint.setLabel("Total VAr-hours Imported Q2");
-        totalVarHoursImportedQ2DataPoint.setDescription("Total Reactive Power Imported Quadrant 2");
-        totalVarHoursImportedQ2DataPoint.setUnits("varh");
-        totalVarHoursImportedQ2DataPoint.setSize(2);
-        totalVarHoursImportedQ2DataPoint.setAddressOffset(80);
-        totalVarHoursImportedQ2DataPoint.setBlockOffset(78);
-        totalVarHoursImportedQ2DataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2DataPoint.name(), totalVarHoursImportedQ2DataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2DataPoint;
+        totalVArHoursImportedQ2DataPoint.setName("TotVArhImpQ2");
+        totalVArHoursImportedQ2DataPoint.setLabel("Total VAr-hours Imported Q2");
+        totalVArHoursImportedQ2DataPoint.setDescription("Total Reactive Power Imported Quadrant 2");
+        totalVArHoursImportedQ2DataPoint.setUnits("varh");
+        totalVArHoursImportedQ2DataPoint.setSize(2);
+        totalVArHoursImportedQ2DataPoint.setAddressOffset(80);
+        totalVArHoursImportedQ2DataPoint.setBlockOffset(78);
+        totalVArHoursImportedQ2DataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2DataPoint.name(), totalVArHoursImportedQ2DataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2PhaseADataPoint;
-        totalVarHoursImportedQ2PhaseADataPoint.setName("TotVArhImpQ2PhA");
-        totalVarHoursImportedQ2PhaseADataPoint.setLabel("Total VAr-hours Imported Q2 phase A");
-        totalVarHoursImportedQ2PhaseADataPoint.setUnits("varh");
-        totalVarHoursImportedQ2PhaseADataPoint.setSize(2);
-        totalVarHoursImportedQ2PhaseADataPoint.setAddressOffset(82);
-        totalVarHoursImportedQ2PhaseADataPoint.setBlockOffset(80);
-        totalVarHoursImportedQ2PhaseADataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ2PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2PhaseADataPoint.name(), totalVarHoursImportedQ2PhaseADataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2PhaseADataPoint;
+        totalVArHoursImportedQ2PhaseADataPoint.setName("TotVArhImpQ2PhA");
+        totalVArHoursImportedQ2PhaseADataPoint.setLabel("Total VAr-hours Imported Q2 phase A");
+        totalVArHoursImportedQ2PhaseADataPoint.setUnits("varh");
+        totalVArHoursImportedQ2PhaseADataPoint.setSize(2);
+        totalVArHoursImportedQ2PhaseADataPoint.setAddressOffset(82);
+        totalVArHoursImportedQ2PhaseADataPoint.setBlockOffset(80);
+        totalVArHoursImportedQ2PhaseADataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ2PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2PhaseADataPoint.name(), totalVArHoursImportedQ2PhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2PhaseBDataPoint;
-        totalVarHoursImportedQ2PhaseBDataPoint.setName("TotVArhImpQ2PhB");
-        totalVarHoursImportedQ2PhaseBDataPoint.setLabel("Total VAr-hours Imported Q2 phase B");
-        totalVarHoursImportedQ2PhaseBDataPoint.setUnits("varh");
-        totalVarHoursImportedQ2PhaseBDataPoint.setSize(2);
-        totalVarHoursImportedQ2PhaseBDataPoint.setAddressOffset(84);
-        totalVarHoursImportedQ2PhaseBDataPoint.setBlockOffset(82);
-        totalVarHoursImportedQ2PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ2PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2PhaseBDataPoint.name(), totalVarHoursImportedQ2PhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2PhaseBDataPoint;
+        totalVArHoursImportedQ2PhaseBDataPoint.setName("TotVArhImpQ2PhB");
+        totalVArHoursImportedQ2PhaseBDataPoint.setLabel("Total VAr-hours Imported Q2 phase B");
+        totalVArHoursImportedQ2PhaseBDataPoint.setUnits("varh");
+        totalVArHoursImportedQ2PhaseBDataPoint.setSize(2);
+        totalVArHoursImportedQ2PhaseBDataPoint.setAddressOffset(84);
+        totalVArHoursImportedQ2PhaseBDataPoint.setBlockOffset(82);
+        totalVArHoursImportedQ2PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ2PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2PhaseBDataPoint.name(), totalVArHoursImportedQ2PhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2PhaseCDataPoint;
-        totalVarHoursImportedQ2PhaseCDataPoint.setName("TotVArhImpQ2PhC");
-        totalVarHoursImportedQ2PhaseCDataPoint.setLabel("Total VAr-hours Imported Q2 phase C");
-        totalVarHoursImportedQ2PhaseCDataPoint.setUnits("varh");
-        totalVarHoursImportedQ2PhaseCDataPoint.setSize(2);
-        totalVarHoursImportedQ2PhaseCDataPoint.setAddressOffset(86);
-        totalVarHoursImportedQ2PhaseCDataPoint.setBlockOffset(84);
-        totalVarHoursImportedQ2PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ2PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2PhaseCDataPoint.name(), totalVarHoursImportedQ2PhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2PhaseCDataPoint;
+        totalVArHoursImportedQ2PhaseCDataPoint.setName("TotVArhImpQ2PhC");
+        totalVArHoursImportedQ2PhaseCDataPoint.setLabel("Total VAr-hours Imported Q2 phase C");
+        totalVArHoursImportedQ2PhaseCDataPoint.setUnits("varh");
+        totalVArHoursImportedQ2PhaseCDataPoint.setSize(2);
+        totalVArHoursImportedQ2PhaseCDataPoint.setAddressOffset(86);
+        totalVArHoursImportedQ2PhaseCDataPoint.setBlockOffset(84);
+        totalVArHoursImportedQ2PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ2PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2PhaseCDataPoint.name(), totalVArHoursImportedQ2PhaseCDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3DataPoint;
-        totalVarHoursExportedQ3DataPoint.setName("TotVArhExpQ3");
-        totalVarHoursExportedQ3DataPoint.setLabel("Total VAr-hours Exported Q3");
-        totalVarHoursExportedQ3DataPoint.setDescription("Total Reactive Power Exported Quadrant 3");
-        totalVarHoursExportedQ3DataPoint.setUnits("varh");
-        totalVarHoursExportedQ3DataPoint.setSize(2);
-        totalVarHoursExportedQ3DataPoint.setAddressOffset(88);
-        totalVarHoursExportedQ3DataPoint.setBlockOffset(86);
-        totalVarHoursExportedQ3DataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3DataPoint.name(), totalVarHoursExportedQ3DataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3DataPoint;
+        totalVArHoursExportedQ3DataPoint.setName("TotVArhExpQ3");
+        totalVArHoursExportedQ3DataPoint.setLabel("Total VAr-hours Exported Q3");
+        totalVArHoursExportedQ3DataPoint.setDescription("Total Reactive Power Exported Quadrant 3");
+        totalVArHoursExportedQ3DataPoint.setUnits("varh");
+        totalVArHoursExportedQ3DataPoint.setSize(2);
+        totalVArHoursExportedQ3DataPoint.setAddressOffset(88);
+        totalVArHoursExportedQ3DataPoint.setBlockOffset(86);
+        totalVArHoursExportedQ3DataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3DataPoint.name(), totalVArHoursExportedQ3DataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3PhaseADataPoint;
-        totalVarHoursExportedQ3PhaseADataPoint.setName("TotVArhExpQ3PhA");
-        totalVarHoursExportedQ3PhaseADataPoint.setLabel("Total VAr-hours Exported Q3 phase A");
-        totalVarHoursExportedQ3PhaseADataPoint.setUnits("varh");
-        totalVarHoursExportedQ3PhaseADataPoint.setSize(2);
-        totalVarHoursExportedQ3PhaseADataPoint.setAddressOffset(90);
-        totalVarHoursExportedQ3PhaseADataPoint.setBlockOffset(88);
-        totalVarHoursExportedQ3PhaseADataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ3PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3PhaseADataPoint.name(), totalVarHoursExportedQ3PhaseADataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3PhaseADataPoint;
+        totalVArHoursExportedQ3PhaseADataPoint.setName("TotVArhExpQ3PhA");
+        totalVArHoursExportedQ3PhaseADataPoint.setLabel("Total VAr-hours Exported Q3 phase A");
+        totalVArHoursExportedQ3PhaseADataPoint.setUnits("varh");
+        totalVArHoursExportedQ3PhaseADataPoint.setSize(2);
+        totalVArHoursExportedQ3PhaseADataPoint.setAddressOffset(90);
+        totalVArHoursExportedQ3PhaseADataPoint.setBlockOffset(88);
+        totalVArHoursExportedQ3PhaseADataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ3PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3PhaseADataPoint.name(), totalVArHoursExportedQ3PhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3PhaseBDataPoint;
-        totalVarHoursExportedQ3PhaseBDataPoint.setName("TotVArhExpQ3PhB");
-        totalVarHoursExportedQ3PhaseBDataPoint.setLabel("Total VAr-hours Exported Q3 phase B");
-        totalVarHoursExportedQ3PhaseBDataPoint.setUnits("varh");
-        totalVarHoursExportedQ3PhaseBDataPoint.setSize(2);
-        totalVarHoursExportedQ3PhaseBDataPoint.setAddressOffset(92);
-        totalVarHoursExportedQ3PhaseBDataPoint.setBlockOffset(90);
-        totalVarHoursExportedQ3PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ3PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3PhaseBDataPoint.name(), totalVarHoursExportedQ3PhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3PhaseBDataPoint;
+        totalVArHoursExportedQ3PhaseBDataPoint.setName("TotVArhExpQ3PhB");
+        totalVArHoursExportedQ3PhaseBDataPoint.setLabel("Total VAr-hours Exported Q3 phase B");
+        totalVArHoursExportedQ3PhaseBDataPoint.setUnits("varh");
+        totalVArHoursExportedQ3PhaseBDataPoint.setSize(2);
+        totalVArHoursExportedQ3PhaseBDataPoint.setAddressOffset(92);
+        totalVArHoursExportedQ3PhaseBDataPoint.setBlockOffset(90);
+        totalVArHoursExportedQ3PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ3PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3PhaseBDataPoint.name(), totalVArHoursExportedQ3PhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3PhaseCDataPoint;
-        totalVarHoursExportedQ3PhaseCDataPoint.setName("TotVArhExpQ3PhC");
-        totalVarHoursExportedQ3PhaseCDataPoint.setLabel("Total VAr-hours Exported Q3 phase C");
-        totalVarHoursExportedQ3PhaseCDataPoint.setUnits("varh");
-        totalVarHoursExportedQ3PhaseCDataPoint.setSize(2);
-        totalVarHoursExportedQ3PhaseCDataPoint.setAddressOffset(94);
-        totalVarHoursExportedQ3PhaseCDataPoint.setBlockOffset(92);
-        totalVarHoursExportedQ3PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ3PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3PhaseCDataPoint.name(), totalVarHoursExportedQ3PhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3PhaseCDataPoint;
+        totalVArHoursExportedQ3PhaseCDataPoint.setName("TotVArhExpQ3PhC");
+        totalVArHoursExportedQ3PhaseCDataPoint.setLabel("Total VAr-hours Exported Q3 phase C");
+        totalVArHoursExportedQ3PhaseCDataPoint.setUnits("varh");
+        totalVArHoursExportedQ3PhaseCDataPoint.setSize(2);
+        totalVArHoursExportedQ3PhaseCDataPoint.setAddressOffset(94);
+        totalVArHoursExportedQ3PhaseCDataPoint.setBlockOffset(92);
+        totalVArHoursExportedQ3PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ3PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3PhaseCDataPoint.name(), totalVArHoursExportedQ3PhaseCDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4DataPoint;
-        totalVarHoursExportedQ4DataPoint.setName("TotVArhExpQ4");
-        totalVarHoursExportedQ4DataPoint.setLabel("Total VAr-hours Exported Q4");
-        totalVarHoursExportedQ4DataPoint.setDescription("Total Reactive Power Exported Quadrant 4");
-        totalVarHoursExportedQ4DataPoint.setUnits("varh");
-        totalVarHoursExportedQ4DataPoint.setSize(2);
-        totalVarHoursExportedQ4DataPoint.setAddressOffset(96);
-        totalVarHoursExportedQ4DataPoint.setBlockOffset(94);
-        totalVarHoursExportedQ4DataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4DataPoint.name(), totalVarHoursExportedQ4DataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4DataPoint;
+        totalVArHoursExportedQ4DataPoint.setName("TotVArhExpQ4");
+        totalVArHoursExportedQ4DataPoint.setLabel("Total VAr-hours Exported Q4");
+        totalVArHoursExportedQ4DataPoint.setDescription("Total Reactive Power Exported Quadrant 4");
+        totalVArHoursExportedQ4DataPoint.setUnits("varh");
+        totalVArHoursExportedQ4DataPoint.setSize(2);
+        totalVArHoursExportedQ4DataPoint.setAddressOffset(96);
+        totalVArHoursExportedQ4DataPoint.setBlockOffset(94);
+        totalVArHoursExportedQ4DataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4DataPoint.name(), totalVArHoursExportedQ4DataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4ImportedPhaseADataPoint;
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setName("TotVArhExpQ4PhA");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase A");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setUnits("varh");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setSize(2);
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setAddressOffset(98);
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setBlockOffset(96);
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4ImportedPhaseADataPoint.name(), totalVarHoursExportedQ4ImportedPhaseADataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseADataPoint;
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setName("TotVArhExpQ4PhA");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase A");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setUnits("varh");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setSize(2);
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setAddressOffset(98);
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setBlockOffset(96);
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseADataPoint.name(), totalVArHoursExportedQ4ImportedPhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4ImportedPhaseBDataPoint;
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setName("TotVArhExpQ4PhB");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase B");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setUnits("varh");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setSize(2);
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setAddressOffset(100);
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setBlockOffset(98);
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4ImportedPhaseBDataPoint.name(), totalVarHoursExportedQ4ImportedPhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseBDataPoint;
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setName("TotVArhExpQ4PhB");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase B");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setUnits("varh");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setSize(2);
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setAddressOffset(100);
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setBlockOffset(98);
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseBDataPoint.name(), totalVArHoursExportedQ4ImportedPhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4ImportedPhaseCDataPoint;
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setName("TotVArhExpQ4PhC");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase C");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setUnits("varh");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setSize(2);
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setAddressOffset(102);
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setBlockOffset(100);
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4ImportedPhaseCDataPoint.name(), totalVarHoursExportedQ4ImportedPhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseCDataPoint;
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setName("TotVArhExpQ4PhC");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase C");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setUnits("varh");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setSize(2);
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setAddressOffset(102);
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setBlockOffset(100);
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseCDataPoint.name(), totalVArHoursExportedQ4ImportedPhaseCDataPoint);
 
-        SunSpecDataPoint TotVArh_SFDataPoint;
-        TotVArh_SFDataPoint.setName("TotVArh_SF");
-        TotVArh_SFDataPoint.setDescription("Reactive Energy scale factor");
-        TotVArh_SFDataPoint.setSize(1);
-        TotVArh_SFDataPoint.setAddressOffset(104);
-        TotVArh_SFDataPoint.setBlockOffset(102);
-        TotVArh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(TotVArh_SFDataPoint.name(), TotVArh_SFDataPoint);
+        SunSpecDataPoint totVArh_SFDataPoint;
+        totVArh_SFDataPoint.setName("TotVArh_SF");
+        totVArh_SFDataPoint.setDescription("Reactive Energy scale factor");
+        totVArh_SFDataPoint.setSize(1);
+        totVArh_SFDataPoint.setAddressOffset(104);
+        totVArh_SFDataPoint.setBlockOffset(102);
+        totVArh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(totVArh_SFDataPoint.name(), totVArh_SFDataPoint);
 
         SunSpecDataPoint eventsDataPoint;
         eventsDataPoint.setName("Evt");
@@ -976,53 +1222,53 @@ void SunSpecAcMeterModel::initDataPoints()
         ampsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
-        SunSpecDataPoint ampsPhaseaDataPoint;
-        ampsPhaseaDataPoint.setName("AphA");
-        ampsPhaseaDataPoint.setLabel("Amps PhaseA");
-        ampsPhaseaDataPoint.setDescription("Phase A Current");
-        ampsPhaseaDataPoint.setUnits("A");
-        ampsPhaseaDataPoint.setSize(1);
-        ampsPhaseaDataPoint.setAddressOffset(3);
-        ampsPhaseaDataPoint.setBlockOffset(1);
-        ampsPhaseaDataPoint.setScaleFactorName("A_SF");
-        ampsPhaseaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-        m_dataPoints.insert(ampsPhaseaDataPoint.name(), ampsPhaseaDataPoint);
+        SunSpecDataPoint ampsPhaseADataPoint;
+        ampsPhaseADataPoint.setName("AphA");
+        ampsPhaseADataPoint.setLabel("Amps PhaseA");
+        ampsPhaseADataPoint.setDescription("Phase A Current");
+        ampsPhaseADataPoint.setUnits("A");
+        ampsPhaseADataPoint.setSize(1);
+        ampsPhaseADataPoint.setAddressOffset(3);
+        ampsPhaseADataPoint.setBlockOffset(1);
+        ampsPhaseADataPoint.setScaleFactorName("A_SF");
+        ampsPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+        m_dataPoints.insert(ampsPhaseADataPoint.name(), ampsPhaseADataPoint);
 
-        SunSpecDataPoint ampsPhasebDataPoint;
-        ampsPhasebDataPoint.setName("AphB");
-        ampsPhasebDataPoint.setLabel("Amps PhaseB");
-        ampsPhasebDataPoint.setDescription("Phase B Current");
-        ampsPhasebDataPoint.setUnits("A");
-        ampsPhasebDataPoint.setMandatory(true);
-        ampsPhasebDataPoint.setSize(1);
-        ampsPhasebDataPoint.setAddressOffset(4);
-        ampsPhasebDataPoint.setBlockOffset(2);
-        ampsPhasebDataPoint.setScaleFactorName("A_SF");
-        ampsPhasebDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-        m_dataPoints.insert(ampsPhasebDataPoint.name(), ampsPhasebDataPoint);
+        SunSpecDataPoint ampsPhaseBDataPoint;
+        ampsPhaseBDataPoint.setName("AphB");
+        ampsPhaseBDataPoint.setLabel("Amps PhaseB");
+        ampsPhaseBDataPoint.setDescription("Phase B Current");
+        ampsPhaseBDataPoint.setUnits("A");
+        ampsPhaseBDataPoint.setMandatory(true);
+        ampsPhaseBDataPoint.setSize(1);
+        ampsPhaseBDataPoint.setAddressOffset(4);
+        ampsPhaseBDataPoint.setBlockOffset(2);
+        ampsPhaseBDataPoint.setScaleFactorName("A_SF");
+        ampsPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+        m_dataPoints.insert(ampsPhaseBDataPoint.name(), ampsPhaseBDataPoint);
 
-        SunSpecDataPoint ampsPhasecDataPoint;
-        ampsPhasecDataPoint.setName("AphC");
-        ampsPhasecDataPoint.setLabel("Amps PhaseC");
-        ampsPhasecDataPoint.setDescription("Phase C Current");
-        ampsPhasecDataPoint.setUnits("A");
-        ampsPhasecDataPoint.setMandatory(true);
-        ampsPhasecDataPoint.setSize(1);
-        ampsPhasecDataPoint.setAddressOffset(5);
-        ampsPhasecDataPoint.setBlockOffset(3);
-        ampsPhasecDataPoint.setScaleFactorName("A_SF");
-        ampsPhasecDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-        m_dataPoints.insert(ampsPhasecDataPoint.name(), ampsPhasecDataPoint);
+        SunSpecDataPoint ampsPhaseCDataPoint;
+        ampsPhaseCDataPoint.setName("AphC");
+        ampsPhaseCDataPoint.setLabel("Amps PhaseC");
+        ampsPhaseCDataPoint.setDescription("Phase C Current");
+        ampsPhaseCDataPoint.setUnits("A");
+        ampsPhaseCDataPoint.setMandatory(true);
+        ampsPhaseCDataPoint.setSize(1);
+        ampsPhaseCDataPoint.setAddressOffset(5);
+        ampsPhaseCDataPoint.setBlockOffset(3);
+        ampsPhaseCDataPoint.setScaleFactorName("A_SF");
+        ampsPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+        m_dataPoints.insert(ampsPhaseCDataPoint.name(), ampsPhaseCDataPoint);
 
-        SunSpecDataPoint A_SFDataPoint;
-        A_SFDataPoint.setName("A_SF");
-        A_SFDataPoint.setDescription("Current scale factor");
-        A_SFDataPoint.setMandatory(true);
-        A_SFDataPoint.setSize(1);
-        A_SFDataPoint.setAddressOffset(6);
-        A_SFDataPoint.setBlockOffset(4);
-        A_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(A_SFDataPoint.name(), A_SFDataPoint);
+        SunSpecDataPoint a_SFDataPoint;
+        a_SFDataPoint.setName("A_SF");
+        a_SFDataPoint.setDescription("Current scale factor");
+        a_SFDataPoint.setMandatory(true);
+        a_SFDataPoint.setSize(1);
+        a_SFDataPoint.setAddressOffset(6);
+        a_SFDataPoint.setBlockOffset(4);
+        a_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(a_SFDataPoint.name(), a_SFDataPoint);
 
         SunSpecDataPoint voltageLnDataPoint;
         voltageLnDataPoint.setName("PhV");
@@ -1125,15 +1371,15 @@ void SunSpecAcMeterModel::initDataPoints()
         phaseVoltageCaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(phaseVoltageCaDataPoint.name(), phaseVoltageCaDataPoint);
 
-        SunSpecDataPoint V_SFDataPoint;
-        V_SFDataPoint.setName("V_SF");
-        V_SFDataPoint.setDescription("Voltage scale factor");
-        V_SFDataPoint.setMandatory(true);
-        V_SFDataPoint.setSize(1);
-        V_SFDataPoint.setAddressOffset(15);
-        V_SFDataPoint.setBlockOffset(13);
-        V_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(V_SFDataPoint.name(), V_SFDataPoint);
+        SunSpecDataPoint v_SFDataPoint;
+        v_SFDataPoint.setName("V_SF");
+        v_SFDataPoint.setDescription("Voltage scale factor");
+        v_SFDataPoint.setMandatory(true);
+        v_SFDataPoint.setSize(1);
+        v_SFDataPoint.setAddressOffset(15);
+        v_SFDataPoint.setBlockOffset(13);
+        v_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(v_SFDataPoint.name(), v_SFDataPoint);
 
         SunSpecDataPoint hzDataPoint;
         hzDataPoint.setName("Hz");
@@ -1148,14 +1394,14 @@ void SunSpecAcMeterModel::initDataPoints()
         hzDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(hzDataPoint.name(), hzDataPoint);
 
-        SunSpecDataPoint Hz_SFDataPoint;
-        Hz_SFDataPoint.setName("Hz_SF");
-        Hz_SFDataPoint.setDescription("Frequency scale factor");
-        Hz_SFDataPoint.setSize(1);
-        Hz_SFDataPoint.setAddressOffset(17);
-        Hz_SFDataPoint.setBlockOffset(15);
-        Hz_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(Hz_SFDataPoint.name(), Hz_SFDataPoint);
+        SunSpecDataPoint hz_SFDataPoint;
+        hz_SFDataPoint.setName("Hz_SF");
+        hz_SFDataPoint.setDescription("Frequency scale factor");
+        hz_SFDataPoint.setSize(1);
+        hz_SFDataPoint.setAddressOffset(17);
+        hz_SFDataPoint.setBlockOffset(15);
+        hz_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(hz_SFDataPoint.name(), hz_SFDataPoint);
 
         SunSpecDataPoint wattsDataPoint;
         wattsDataPoint.setName("W");
@@ -1203,15 +1449,15 @@ void SunSpecAcMeterModel::initDataPoints()
         wattsPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(wattsPhaseCDataPoint.name(), wattsPhaseCDataPoint);
 
-        SunSpecDataPoint W_SFDataPoint;
-        W_SFDataPoint.setName("W_SF");
-        W_SFDataPoint.setDescription("Real Power scale factor");
-        W_SFDataPoint.setMandatory(true);
-        W_SFDataPoint.setSize(1);
-        W_SFDataPoint.setAddressOffset(22);
-        W_SFDataPoint.setBlockOffset(20);
-        W_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(W_SFDataPoint.name(), W_SFDataPoint);
+        SunSpecDataPoint w_SFDataPoint;
+        w_SFDataPoint.setName("W_SF");
+        w_SFDataPoint.setDescription("Real Power scale factor");
+        w_SFDataPoint.setMandatory(true);
+        w_SFDataPoint.setSize(1);
+        w_SFDataPoint.setAddressOffset(22);
+        w_SFDataPoint.setBlockOffset(20);
+        w_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(w_SFDataPoint.name(), w_SFDataPoint);
 
         SunSpecDataPoint vaDataPoint;
         vaDataPoint.setName("VA");
@@ -1258,14 +1504,14 @@ void SunSpecAcMeterModel::initDataPoints()
         vaPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(vaPhaseCDataPoint.name(), vaPhaseCDataPoint);
 
-        SunSpecDataPoint VA_SFDataPoint;
-        VA_SFDataPoint.setName("VA_SF");
-        VA_SFDataPoint.setDescription("Apparent Power scale factor");
-        VA_SFDataPoint.setSize(1);
-        VA_SFDataPoint.setAddressOffset(27);
-        VA_SFDataPoint.setBlockOffset(25);
-        VA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(VA_SFDataPoint.name(), VA_SFDataPoint);
+        SunSpecDataPoint vA_SFDataPoint;
+        vA_SFDataPoint.setName("VA_SF");
+        vA_SFDataPoint.setDescription("Apparent Power scale factor");
+        vA_SFDataPoint.setSize(1);
+        vA_SFDataPoint.setAddressOffset(27);
+        vA_SFDataPoint.setBlockOffset(25);
+        vA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(vA_SFDataPoint.name(), vA_SFDataPoint);
 
         SunSpecDataPoint varDataPoint;
         varDataPoint.setName("VAR");
@@ -1312,14 +1558,14 @@ void SunSpecAcMeterModel::initDataPoints()
         varPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(varPhaseCDataPoint.name(), varPhaseCDataPoint);
 
-        SunSpecDataPoint VAR_SFDataPoint;
-        VAR_SFDataPoint.setName("VAR_SF");
-        VAR_SFDataPoint.setDescription("Reactive Power scale factor");
-        VAR_SFDataPoint.setSize(1);
-        VAR_SFDataPoint.setAddressOffset(32);
-        VAR_SFDataPoint.setBlockOffset(30);
-        VAR_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(VAR_SFDataPoint.name(), VAR_SFDataPoint);
+        SunSpecDataPoint vAR_SFDataPoint;
+        vAR_SFDataPoint.setName("VAR_SF");
+        vAR_SFDataPoint.setDescription("Reactive Power scale factor");
+        vAR_SFDataPoint.setSize(1);
+        vAR_SFDataPoint.setAddressOffset(32);
+        vAR_SFDataPoint.setBlockOffset(30);
+        vAR_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(vAR_SFDataPoint.name(), vAR_SFDataPoint);
 
         SunSpecDataPoint pfDataPoint;
         pfDataPoint.setName("PF");
@@ -1366,14 +1612,14 @@ void SunSpecAcMeterModel::initDataPoints()
         pfPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(pfPhaseCDataPoint.name(), pfPhaseCDataPoint);
 
-        SunSpecDataPoint PF_SFDataPoint;
-        PF_SFDataPoint.setName("PF_SF");
-        PF_SFDataPoint.setDescription("Power Factor scale factor");
-        PF_SFDataPoint.setSize(1);
-        PF_SFDataPoint.setAddressOffset(37);
-        PF_SFDataPoint.setBlockOffset(35);
-        PF_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(PF_SFDataPoint.name(), PF_SFDataPoint);
+        SunSpecDataPoint pF_SFDataPoint;
+        pF_SFDataPoint.setName("PF_SF");
+        pF_SFDataPoint.setDescription("Power Factor scale factor");
+        pF_SFDataPoint.setSize(1);
+        pF_SFDataPoint.setAddressOffset(37);
+        pF_SFDataPoint.setBlockOffset(35);
+        pF_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(pF_SFDataPoint.name(), pF_SFDataPoint);
 
         SunSpecDataPoint totalWattHoursExportedDataPoint;
         totalWattHoursExportedDataPoint.setName("TotWhExp");
@@ -1467,15 +1713,15 @@ void SunSpecAcMeterModel::initDataPoints()
         totalWattHoursImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
         m_dataPoints.insert(totalWattHoursImportedPhaseCDataPoint.name(), totalWattHoursImportedPhaseCDataPoint);
 
-        SunSpecDataPoint TotWh_SFDataPoint;
-        TotWh_SFDataPoint.setName("TotWh_SF");
-        TotWh_SFDataPoint.setDescription("Real Energy scale factor");
-        TotWh_SFDataPoint.setMandatory(true);
-        TotWh_SFDataPoint.setSize(1);
-        TotWh_SFDataPoint.setAddressOffset(54);
-        TotWh_SFDataPoint.setBlockOffset(52);
-        TotWh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(TotWh_SFDataPoint.name(), TotWh_SFDataPoint);
+        SunSpecDataPoint totWh_SFDataPoint;
+        totWh_SFDataPoint.setName("TotWh_SF");
+        totWh_SFDataPoint.setDescription("Real Energy scale factor");
+        totWh_SFDataPoint.setMandatory(true);
+        totWh_SFDataPoint.setSize(1);
+        totWh_SFDataPoint.setAddressOffset(54);
+        totWh_SFDataPoint.setBlockOffset(52);
+        totWh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(totWh_SFDataPoint.name(), totWh_SFDataPoint);
 
         SunSpecDataPoint totalVaHoursExportedDataPoint;
         totalVaHoursExportedDataPoint.setName("TotVAhExp");
@@ -1567,14 +1813,14 @@ void SunSpecAcMeterModel::initDataPoints()
         totalVaHoursImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
         m_dataPoints.insert(totalVaHoursImportedPhaseCDataPoint.name(), totalVaHoursImportedPhaseCDataPoint);
 
-        SunSpecDataPoint TotVAh_SFDataPoint;
-        TotVAh_SFDataPoint.setName("TotVAh_SF");
-        TotVAh_SFDataPoint.setDescription("Apparent Energy scale factor");
-        TotVAh_SFDataPoint.setSize(1);
-        TotVAh_SFDataPoint.setAddressOffset(71);
-        TotVAh_SFDataPoint.setBlockOffset(69);
-        TotVAh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(TotVAh_SFDataPoint.name(), TotVAh_SFDataPoint);
+        SunSpecDataPoint totVAh_SFDataPoint;
+        totVAh_SFDataPoint.setName("TotVAh_SF");
+        totVAh_SFDataPoint.setDescription("Apparent Energy scale factor");
+        totVAh_SFDataPoint.setSize(1);
+        totVAh_SFDataPoint.setAddressOffset(71);
+        totVAh_SFDataPoint.setBlockOffset(69);
+        totVAh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(totVAh_SFDataPoint.name(), totVAh_SFDataPoint);
 
         SunSpecDataPoint totalVarHoursImportedQ1DataPoint;
         totalVarHoursImportedQ1DataPoint.setName("TotVArhImpQ1");
@@ -1588,182 +1834,182 @@ void SunSpecAcMeterModel::initDataPoints()
         totalVarHoursImportedQ1DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
         m_dataPoints.insert(totalVarHoursImportedQ1DataPoint.name(), totalVarHoursImportedQ1DataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ1PhaseADataPoint;
-        totalVarHoursImportedQ1PhaseADataPoint.setName("TotVArhImpQ1PhA");
-        totalVarHoursImportedQ1PhaseADataPoint.setLabel("Total VAr-hours Imported Q1 phase A");
-        totalVarHoursImportedQ1PhaseADataPoint.setUnits("varh");
-        totalVarHoursImportedQ1PhaseADataPoint.setSize(2);
-        totalVarHoursImportedQ1PhaseADataPoint.setAddressOffset(74);
-        totalVarHoursImportedQ1PhaseADataPoint.setBlockOffset(72);
-        totalVarHoursImportedQ1PhaseADataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ1PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ1PhaseADataPoint.name(), totalVarHoursImportedQ1PhaseADataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ1PhaseADataPoint;
+        totalVArHoursImportedQ1PhaseADataPoint.setName("TotVArhImpQ1PhA");
+        totalVArHoursImportedQ1PhaseADataPoint.setLabel("Total VAr-hours Imported Q1 phase A");
+        totalVArHoursImportedQ1PhaseADataPoint.setUnits("varh");
+        totalVArHoursImportedQ1PhaseADataPoint.setSize(2);
+        totalVArHoursImportedQ1PhaseADataPoint.setAddressOffset(74);
+        totalVArHoursImportedQ1PhaseADataPoint.setBlockOffset(72);
+        totalVArHoursImportedQ1PhaseADataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ1PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ1PhaseADataPoint.name(), totalVArHoursImportedQ1PhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ1PhaseBDataPoint;
-        totalVarHoursImportedQ1PhaseBDataPoint.setName("TotVArhImpQ1PhB");
-        totalVarHoursImportedQ1PhaseBDataPoint.setLabel("Total VAr-hours Imported Q1 phase B");
-        totalVarHoursImportedQ1PhaseBDataPoint.setUnits("varh");
-        totalVarHoursImportedQ1PhaseBDataPoint.setSize(2);
-        totalVarHoursImportedQ1PhaseBDataPoint.setAddressOffset(76);
-        totalVarHoursImportedQ1PhaseBDataPoint.setBlockOffset(74);
-        totalVarHoursImportedQ1PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ1PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ1PhaseBDataPoint.name(), totalVarHoursImportedQ1PhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ1PhaseBDataPoint;
+        totalVArHoursImportedQ1PhaseBDataPoint.setName("TotVArhImpQ1PhB");
+        totalVArHoursImportedQ1PhaseBDataPoint.setLabel("Total VAr-hours Imported Q1 phase B");
+        totalVArHoursImportedQ1PhaseBDataPoint.setUnits("varh");
+        totalVArHoursImportedQ1PhaseBDataPoint.setSize(2);
+        totalVArHoursImportedQ1PhaseBDataPoint.setAddressOffset(76);
+        totalVArHoursImportedQ1PhaseBDataPoint.setBlockOffset(74);
+        totalVArHoursImportedQ1PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ1PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ1PhaseBDataPoint.name(), totalVArHoursImportedQ1PhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ1PhaseCDataPoint;
-        totalVarHoursImportedQ1PhaseCDataPoint.setName("TotVArhImpQ1PhC");
-        totalVarHoursImportedQ1PhaseCDataPoint.setLabel("Total VAr-hours Imported Q1 phase C");
-        totalVarHoursImportedQ1PhaseCDataPoint.setUnits("varh");
-        totalVarHoursImportedQ1PhaseCDataPoint.setSize(2);
-        totalVarHoursImportedQ1PhaseCDataPoint.setAddressOffset(78);
-        totalVarHoursImportedQ1PhaseCDataPoint.setBlockOffset(76);
-        totalVarHoursImportedQ1PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ1PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ1PhaseCDataPoint.name(), totalVarHoursImportedQ1PhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ1PhaseCDataPoint;
+        totalVArHoursImportedQ1PhaseCDataPoint.setName("TotVArhImpQ1PhC");
+        totalVArHoursImportedQ1PhaseCDataPoint.setLabel("Total VAr-hours Imported Q1 phase C");
+        totalVArHoursImportedQ1PhaseCDataPoint.setUnits("varh");
+        totalVArHoursImportedQ1PhaseCDataPoint.setSize(2);
+        totalVArHoursImportedQ1PhaseCDataPoint.setAddressOffset(78);
+        totalVArHoursImportedQ1PhaseCDataPoint.setBlockOffset(76);
+        totalVArHoursImportedQ1PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ1PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ1PhaseCDataPoint.name(), totalVArHoursImportedQ1PhaseCDataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2DataPoint;
-        totalVarHoursImportedQ2DataPoint.setName("TotVArhImpQ2");
-        totalVarHoursImportedQ2DataPoint.setLabel("Total VAr-hours Imported Q2");
-        totalVarHoursImportedQ2DataPoint.setDescription("Total Reactive Power Imported Quadrant 2");
-        totalVarHoursImportedQ2DataPoint.setUnits("varh");
-        totalVarHoursImportedQ2DataPoint.setSize(2);
-        totalVarHoursImportedQ2DataPoint.setAddressOffset(80);
-        totalVarHoursImportedQ2DataPoint.setBlockOffset(78);
-        totalVarHoursImportedQ2DataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2DataPoint.name(), totalVarHoursImportedQ2DataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2DataPoint;
+        totalVArHoursImportedQ2DataPoint.setName("TotVArhImpQ2");
+        totalVArHoursImportedQ2DataPoint.setLabel("Total VAr-hours Imported Q2");
+        totalVArHoursImportedQ2DataPoint.setDescription("Total Reactive Power Imported Quadrant 2");
+        totalVArHoursImportedQ2DataPoint.setUnits("varh");
+        totalVArHoursImportedQ2DataPoint.setSize(2);
+        totalVArHoursImportedQ2DataPoint.setAddressOffset(80);
+        totalVArHoursImportedQ2DataPoint.setBlockOffset(78);
+        totalVArHoursImportedQ2DataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2DataPoint.name(), totalVArHoursImportedQ2DataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2PhaseADataPoint;
-        totalVarHoursImportedQ2PhaseADataPoint.setName("TotVArhImpQ2PhA");
-        totalVarHoursImportedQ2PhaseADataPoint.setLabel("Total VAr-hours Imported Q2 phase A");
-        totalVarHoursImportedQ2PhaseADataPoint.setUnits("varh");
-        totalVarHoursImportedQ2PhaseADataPoint.setSize(2);
-        totalVarHoursImportedQ2PhaseADataPoint.setAddressOffset(82);
-        totalVarHoursImportedQ2PhaseADataPoint.setBlockOffset(80);
-        totalVarHoursImportedQ2PhaseADataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ2PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2PhaseADataPoint.name(), totalVarHoursImportedQ2PhaseADataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2PhaseADataPoint;
+        totalVArHoursImportedQ2PhaseADataPoint.setName("TotVArhImpQ2PhA");
+        totalVArHoursImportedQ2PhaseADataPoint.setLabel("Total VAr-hours Imported Q2 phase A");
+        totalVArHoursImportedQ2PhaseADataPoint.setUnits("varh");
+        totalVArHoursImportedQ2PhaseADataPoint.setSize(2);
+        totalVArHoursImportedQ2PhaseADataPoint.setAddressOffset(82);
+        totalVArHoursImportedQ2PhaseADataPoint.setBlockOffset(80);
+        totalVArHoursImportedQ2PhaseADataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ2PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2PhaseADataPoint.name(), totalVArHoursImportedQ2PhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2PhaseBDataPoint;
-        totalVarHoursImportedQ2PhaseBDataPoint.setName("TotVArhImpQ2PhB");
-        totalVarHoursImportedQ2PhaseBDataPoint.setLabel("Total VAr-hours Imported Q2 phase B");
-        totalVarHoursImportedQ2PhaseBDataPoint.setUnits("varh");
-        totalVarHoursImportedQ2PhaseBDataPoint.setSize(2);
-        totalVarHoursImportedQ2PhaseBDataPoint.setAddressOffset(84);
-        totalVarHoursImportedQ2PhaseBDataPoint.setBlockOffset(82);
-        totalVarHoursImportedQ2PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ2PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2PhaseBDataPoint.name(), totalVarHoursImportedQ2PhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2PhaseBDataPoint;
+        totalVArHoursImportedQ2PhaseBDataPoint.setName("TotVArhImpQ2PhB");
+        totalVArHoursImportedQ2PhaseBDataPoint.setLabel("Total VAr-hours Imported Q2 phase B");
+        totalVArHoursImportedQ2PhaseBDataPoint.setUnits("varh");
+        totalVArHoursImportedQ2PhaseBDataPoint.setSize(2);
+        totalVArHoursImportedQ2PhaseBDataPoint.setAddressOffset(84);
+        totalVArHoursImportedQ2PhaseBDataPoint.setBlockOffset(82);
+        totalVArHoursImportedQ2PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ2PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2PhaseBDataPoint.name(), totalVArHoursImportedQ2PhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2PhaseCDataPoint;
-        totalVarHoursImportedQ2PhaseCDataPoint.setName("TotVArhImpQ2PhC");
-        totalVarHoursImportedQ2PhaseCDataPoint.setLabel("Total VAr-hours Imported Q2 phase C");
-        totalVarHoursImportedQ2PhaseCDataPoint.setUnits("varh");
-        totalVarHoursImportedQ2PhaseCDataPoint.setSize(2);
-        totalVarHoursImportedQ2PhaseCDataPoint.setAddressOffset(86);
-        totalVarHoursImportedQ2PhaseCDataPoint.setBlockOffset(84);
-        totalVarHoursImportedQ2PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ2PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2PhaseCDataPoint.name(), totalVarHoursImportedQ2PhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2PhaseCDataPoint;
+        totalVArHoursImportedQ2PhaseCDataPoint.setName("TotVArhImpQ2PhC");
+        totalVArHoursImportedQ2PhaseCDataPoint.setLabel("Total VAr-hours Imported Q2 phase C");
+        totalVArHoursImportedQ2PhaseCDataPoint.setUnits("varh");
+        totalVArHoursImportedQ2PhaseCDataPoint.setSize(2);
+        totalVArHoursImportedQ2PhaseCDataPoint.setAddressOffset(86);
+        totalVArHoursImportedQ2PhaseCDataPoint.setBlockOffset(84);
+        totalVArHoursImportedQ2PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ2PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2PhaseCDataPoint.name(), totalVArHoursImportedQ2PhaseCDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3DataPoint;
-        totalVarHoursExportedQ3DataPoint.setName("TotVArhExpQ3");
-        totalVarHoursExportedQ3DataPoint.setLabel("Total VAr-hours Exported Q3");
-        totalVarHoursExportedQ3DataPoint.setDescription("Total Reactive Power Exported Quadrant 3");
-        totalVarHoursExportedQ3DataPoint.setUnits("varh");
-        totalVarHoursExportedQ3DataPoint.setSize(2);
-        totalVarHoursExportedQ3DataPoint.setAddressOffset(88);
-        totalVarHoursExportedQ3DataPoint.setBlockOffset(86);
-        totalVarHoursExportedQ3DataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3DataPoint.name(), totalVarHoursExportedQ3DataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3DataPoint;
+        totalVArHoursExportedQ3DataPoint.setName("TotVArhExpQ3");
+        totalVArHoursExportedQ3DataPoint.setLabel("Total VAr-hours Exported Q3");
+        totalVArHoursExportedQ3DataPoint.setDescription("Total Reactive Power Exported Quadrant 3");
+        totalVArHoursExportedQ3DataPoint.setUnits("varh");
+        totalVArHoursExportedQ3DataPoint.setSize(2);
+        totalVArHoursExportedQ3DataPoint.setAddressOffset(88);
+        totalVArHoursExportedQ3DataPoint.setBlockOffset(86);
+        totalVArHoursExportedQ3DataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3DataPoint.name(), totalVArHoursExportedQ3DataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3PhaseADataPoint;
-        totalVarHoursExportedQ3PhaseADataPoint.setName("TotVArhExpQ3PhA");
-        totalVarHoursExportedQ3PhaseADataPoint.setLabel("Total VAr-hours Exported Q3 phase A");
-        totalVarHoursExportedQ3PhaseADataPoint.setUnits("varh");
-        totalVarHoursExportedQ3PhaseADataPoint.setSize(2);
-        totalVarHoursExportedQ3PhaseADataPoint.setAddressOffset(90);
-        totalVarHoursExportedQ3PhaseADataPoint.setBlockOffset(88);
-        totalVarHoursExportedQ3PhaseADataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ3PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3PhaseADataPoint.name(), totalVarHoursExportedQ3PhaseADataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3PhaseADataPoint;
+        totalVArHoursExportedQ3PhaseADataPoint.setName("TotVArhExpQ3PhA");
+        totalVArHoursExportedQ3PhaseADataPoint.setLabel("Total VAr-hours Exported Q3 phase A");
+        totalVArHoursExportedQ3PhaseADataPoint.setUnits("varh");
+        totalVArHoursExportedQ3PhaseADataPoint.setSize(2);
+        totalVArHoursExportedQ3PhaseADataPoint.setAddressOffset(90);
+        totalVArHoursExportedQ3PhaseADataPoint.setBlockOffset(88);
+        totalVArHoursExportedQ3PhaseADataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ3PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3PhaseADataPoint.name(), totalVArHoursExportedQ3PhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3PhaseBDataPoint;
-        totalVarHoursExportedQ3PhaseBDataPoint.setName("TotVArhExpQ3PhB");
-        totalVarHoursExportedQ3PhaseBDataPoint.setLabel("Total VAr-hours Exported Q3 phase B");
-        totalVarHoursExportedQ3PhaseBDataPoint.setUnits("varh");
-        totalVarHoursExportedQ3PhaseBDataPoint.setSize(2);
-        totalVarHoursExportedQ3PhaseBDataPoint.setAddressOffset(92);
-        totalVarHoursExportedQ3PhaseBDataPoint.setBlockOffset(90);
-        totalVarHoursExportedQ3PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ3PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3PhaseBDataPoint.name(), totalVarHoursExportedQ3PhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3PhaseBDataPoint;
+        totalVArHoursExportedQ3PhaseBDataPoint.setName("TotVArhExpQ3PhB");
+        totalVArHoursExportedQ3PhaseBDataPoint.setLabel("Total VAr-hours Exported Q3 phase B");
+        totalVArHoursExportedQ3PhaseBDataPoint.setUnits("varh");
+        totalVArHoursExportedQ3PhaseBDataPoint.setSize(2);
+        totalVArHoursExportedQ3PhaseBDataPoint.setAddressOffset(92);
+        totalVArHoursExportedQ3PhaseBDataPoint.setBlockOffset(90);
+        totalVArHoursExportedQ3PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ3PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3PhaseBDataPoint.name(), totalVArHoursExportedQ3PhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3PhaseCDataPoint;
-        totalVarHoursExportedQ3PhaseCDataPoint.setName("TotVArhExpQ3PhC");
-        totalVarHoursExportedQ3PhaseCDataPoint.setLabel("Total VAr-hours Exported Q3 phase C");
-        totalVarHoursExportedQ3PhaseCDataPoint.setUnits("varh");
-        totalVarHoursExportedQ3PhaseCDataPoint.setSize(2);
-        totalVarHoursExportedQ3PhaseCDataPoint.setAddressOffset(94);
-        totalVarHoursExportedQ3PhaseCDataPoint.setBlockOffset(92);
-        totalVarHoursExportedQ3PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ3PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3PhaseCDataPoint.name(), totalVarHoursExportedQ3PhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3PhaseCDataPoint;
+        totalVArHoursExportedQ3PhaseCDataPoint.setName("TotVArhExpQ3PhC");
+        totalVArHoursExportedQ3PhaseCDataPoint.setLabel("Total VAr-hours Exported Q3 phase C");
+        totalVArHoursExportedQ3PhaseCDataPoint.setUnits("varh");
+        totalVArHoursExportedQ3PhaseCDataPoint.setSize(2);
+        totalVArHoursExportedQ3PhaseCDataPoint.setAddressOffset(94);
+        totalVArHoursExportedQ3PhaseCDataPoint.setBlockOffset(92);
+        totalVArHoursExportedQ3PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ3PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3PhaseCDataPoint.name(), totalVArHoursExportedQ3PhaseCDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4DataPoint;
-        totalVarHoursExportedQ4DataPoint.setName("TotVArhExpQ4");
-        totalVarHoursExportedQ4DataPoint.setLabel("Total VAr-hours Exported Q4");
-        totalVarHoursExportedQ4DataPoint.setDescription("Total Reactive Power Exported Quadrant 4");
-        totalVarHoursExportedQ4DataPoint.setUnits("varh");
-        totalVarHoursExportedQ4DataPoint.setSize(2);
-        totalVarHoursExportedQ4DataPoint.setAddressOffset(96);
-        totalVarHoursExportedQ4DataPoint.setBlockOffset(94);
-        totalVarHoursExportedQ4DataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4DataPoint.name(), totalVarHoursExportedQ4DataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4DataPoint;
+        totalVArHoursExportedQ4DataPoint.setName("TotVArhExpQ4");
+        totalVArHoursExportedQ4DataPoint.setLabel("Total VAr-hours Exported Q4");
+        totalVArHoursExportedQ4DataPoint.setDescription("Total Reactive Power Exported Quadrant 4");
+        totalVArHoursExportedQ4DataPoint.setUnits("varh");
+        totalVArHoursExportedQ4DataPoint.setSize(2);
+        totalVArHoursExportedQ4DataPoint.setAddressOffset(96);
+        totalVArHoursExportedQ4DataPoint.setBlockOffset(94);
+        totalVArHoursExportedQ4DataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4DataPoint.name(), totalVArHoursExportedQ4DataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4ImportedPhaseADataPoint;
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setName("TotVArhExpQ4PhA");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase A");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setUnits("varh");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setSize(2);
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setAddressOffset(98);
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setBlockOffset(96);
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4ImportedPhaseADataPoint.name(), totalVarHoursExportedQ4ImportedPhaseADataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseADataPoint;
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setName("TotVArhExpQ4PhA");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase A");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setUnits("varh");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setSize(2);
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setAddressOffset(98);
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setBlockOffset(96);
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseADataPoint.name(), totalVArHoursExportedQ4ImportedPhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4ImportedPhaseBDataPoint;
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setName("TotVArhExpQ4PhB");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase B");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setUnits("varh");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setSize(2);
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setAddressOffset(100);
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setBlockOffset(98);
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4ImportedPhaseBDataPoint.name(), totalVarHoursExportedQ4ImportedPhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseBDataPoint;
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setName("TotVArhExpQ4PhB");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase B");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setUnits("varh");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setSize(2);
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setAddressOffset(100);
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setBlockOffset(98);
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseBDataPoint.name(), totalVArHoursExportedQ4ImportedPhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4ImportedPhaseCDataPoint;
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setName("TotVArhExpQ4PhC");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase C");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setUnits("varh");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setSize(2);
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setAddressOffset(102);
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setBlockOffset(100);
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4ImportedPhaseCDataPoint.name(), totalVarHoursExportedQ4ImportedPhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseCDataPoint;
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setName("TotVArhExpQ4PhC");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase C");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setUnits("varh");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setSize(2);
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setAddressOffset(102);
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setBlockOffset(100);
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseCDataPoint.name(), totalVArHoursExportedQ4ImportedPhaseCDataPoint);
 
-        SunSpecDataPoint TotVArh_SFDataPoint;
-        TotVArh_SFDataPoint.setName("TotVArh_SF");
-        TotVArh_SFDataPoint.setDescription("Reactive Energy scale factor");
-        TotVArh_SFDataPoint.setSize(1);
-        TotVArh_SFDataPoint.setAddressOffset(104);
-        TotVArh_SFDataPoint.setBlockOffset(102);
-        TotVArh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(TotVArh_SFDataPoint.name(), TotVArh_SFDataPoint);
+        SunSpecDataPoint totVArh_SFDataPoint;
+        totVArh_SFDataPoint.setName("TotVArh_SF");
+        totVArh_SFDataPoint.setDescription("Reactive Energy scale factor");
+        totVArh_SFDataPoint.setSize(1);
+        totVArh_SFDataPoint.setAddressOffset(104);
+        totVArh_SFDataPoint.setBlockOffset(102);
+        totVArh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(totVArh_SFDataPoint.name(), totVArh_SFDataPoint);
 
         SunSpecDataPoint eventsDataPoint;
         eventsDataPoint.setName("Evt");
@@ -1812,54 +2058,54 @@ void SunSpecAcMeterModel::initDataPoints()
         ampsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
-        SunSpecDataPoint ampsPhaseaDataPoint;
-        ampsPhaseaDataPoint.setName("AphA");
-        ampsPhaseaDataPoint.setLabel("Amps PhaseA");
-        ampsPhaseaDataPoint.setDescription("Phase A Current");
-        ampsPhaseaDataPoint.setUnits("A");
-        ampsPhaseaDataPoint.setMandatory(true);
-        ampsPhaseaDataPoint.setSize(1);
-        ampsPhaseaDataPoint.setAddressOffset(3);
-        ampsPhaseaDataPoint.setBlockOffset(1);
-        ampsPhaseaDataPoint.setScaleFactorName("A_SF");
-        ampsPhaseaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-        m_dataPoints.insert(ampsPhaseaDataPoint.name(), ampsPhaseaDataPoint);
+        SunSpecDataPoint ampsPhaseADataPoint;
+        ampsPhaseADataPoint.setName("AphA");
+        ampsPhaseADataPoint.setLabel("Amps PhaseA");
+        ampsPhaseADataPoint.setDescription("Phase A Current");
+        ampsPhaseADataPoint.setUnits("A");
+        ampsPhaseADataPoint.setMandatory(true);
+        ampsPhaseADataPoint.setSize(1);
+        ampsPhaseADataPoint.setAddressOffset(3);
+        ampsPhaseADataPoint.setBlockOffset(1);
+        ampsPhaseADataPoint.setScaleFactorName("A_SF");
+        ampsPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+        m_dataPoints.insert(ampsPhaseADataPoint.name(), ampsPhaseADataPoint);
 
-        SunSpecDataPoint ampsPhasebDataPoint;
-        ampsPhasebDataPoint.setName("AphB");
-        ampsPhasebDataPoint.setLabel("Amps PhaseB");
-        ampsPhasebDataPoint.setDescription("Phase B Current");
-        ampsPhasebDataPoint.setUnits("A");
-        ampsPhasebDataPoint.setMandatory(true);
-        ampsPhasebDataPoint.setSize(1);
-        ampsPhasebDataPoint.setAddressOffset(4);
-        ampsPhasebDataPoint.setBlockOffset(2);
-        ampsPhasebDataPoint.setScaleFactorName("A_SF");
-        ampsPhasebDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-        m_dataPoints.insert(ampsPhasebDataPoint.name(), ampsPhasebDataPoint);
+        SunSpecDataPoint ampsPhaseBDataPoint;
+        ampsPhaseBDataPoint.setName("AphB");
+        ampsPhaseBDataPoint.setLabel("Amps PhaseB");
+        ampsPhaseBDataPoint.setDescription("Phase B Current");
+        ampsPhaseBDataPoint.setUnits("A");
+        ampsPhaseBDataPoint.setMandatory(true);
+        ampsPhaseBDataPoint.setSize(1);
+        ampsPhaseBDataPoint.setAddressOffset(4);
+        ampsPhaseBDataPoint.setBlockOffset(2);
+        ampsPhaseBDataPoint.setScaleFactorName("A_SF");
+        ampsPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+        m_dataPoints.insert(ampsPhaseBDataPoint.name(), ampsPhaseBDataPoint);
 
-        SunSpecDataPoint ampsPhasecDataPoint;
-        ampsPhasecDataPoint.setName("AphC");
-        ampsPhasecDataPoint.setLabel("Amps PhaseC");
-        ampsPhasecDataPoint.setDescription("Phase C Current");
-        ampsPhasecDataPoint.setUnits("A");
-        ampsPhasecDataPoint.setMandatory(true);
-        ampsPhasecDataPoint.setSize(1);
-        ampsPhasecDataPoint.setAddressOffset(5);
-        ampsPhasecDataPoint.setBlockOffset(3);
-        ampsPhasecDataPoint.setScaleFactorName("A_SF");
-        ampsPhasecDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-        m_dataPoints.insert(ampsPhasecDataPoint.name(), ampsPhasecDataPoint);
+        SunSpecDataPoint ampsPhaseCDataPoint;
+        ampsPhaseCDataPoint.setName("AphC");
+        ampsPhaseCDataPoint.setLabel("Amps PhaseC");
+        ampsPhaseCDataPoint.setDescription("Phase C Current");
+        ampsPhaseCDataPoint.setUnits("A");
+        ampsPhaseCDataPoint.setMandatory(true);
+        ampsPhaseCDataPoint.setSize(1);
+        ampsPhaseCDataPoint.setAddressOffset(5);
+        ampsPhaseCDataPoint.setBlockOffset(3);
+        ampsPhaseCDataPoint.setScaleFactorName("A_SF");
+        ampsPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+        m_dataPoints.insert(ampsPhaseCDataPoint.name(), ampsPhaseCDataPoint);
 
-        SunSpecDataPoint A_SFDataPoint;
-        A_SFDataPoint.setName("A_SF");
-        A_SFDataPoint.setDescription("Current scale factor");
-        A_SFDataPoint.setMandatory(true);
-        A_SFDataPoint.setSize(1);
-        A_SFDataPoint.setAddressOffset(6);
-        A_SFDataPoint.setBlockOffset(4);
-        A_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(A_SFDataPoint.name(), A_SFDataPoint);
+        SunSpecDataPoint a_SFDataPoint;
+        a_SFDataPoint.setName("A_SF");
+        a_SFDataPoint.setDescription("Current scale factor");
+        a_SFDataPoint.setMandatory(true);
+        a_SFDataPoint.setSize(1);
+        a_SFDataPoint.setAddressOffset(6);
+        a_SFDataPoint.setBlockOffset(4);
+        a_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(a_SFDataPoint.name(), a_SFDataPoint);
 
         SunSpecDataPoint voltageLnDataPoint;
         voltageLnDataPoint.setName("PhV");
@@ -1965,15 +2211,15 @@ void SunSpecAcMeterModel::initDataPoints()
         phaseVoltageCaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(phaseVoltageCaDataPoint.name(), phaseVoltageCaDataPoint);
 
-        SunSpecDataPoint V_SFDataPoint;
-        V_SFDataPoint.setName("V_SF");
-        V_SFDataPoint.setDescription("Voltage scale factor");
-        V_SFDataPoint.setMandatory(true);
-        V_SFDataPoint.setSize(1);
-        V_SFDataPoint.setAddressOffset(15);
-        V_SFDataPoint.setBlockOffset(13);
-        V_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(V_SFDataPoint.name(), V_SFDataPoint);
+        SunSpecDataPoint v_SFDataPoint;
+        v_SFDataPoint.setName("V_SF");
+        v_SFDataPoint.setDescription("Voltage scale factor");
+        v_SFDataPoint.setMandatory(true);
+        v_SFDataPoint.setSize(1);
+        v_SFDataPoint.setAddressOffset(15);
+        v_SFDataPoint.setBlockOffset(13);
+        v_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(v_SFDataPoint.name(), v_SFDataPoint);
 
         SunSpecDataPoint hzDataPoint;
         hzDataPoint.setName("Hz");
@@ -1988,14 +2234,14 @@ void SunSpecAcMeterModel::initDataPoints()
         hzDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(hzDataPoint.name(), hzDataPoint);
 
-        SunSpecDataPoint Hz_SFDataPoint;
-        Hz_SFDataPoint.setName("Hz_SF");
-        Hz_SFDataPoint.setDescription("Frequency scale factor");
-        Hz_SFDataPoint.setSize(1);
-        Hz_SFDataPoint.setAddressOffset(17);
-        Hz_SFDataPoint.setBlockOffset(15);
-        Hz_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(Hz_SFDataPoint.name(), Hz_SFDataPoint);
+        SunSpecDataPoint hz_SFDataPoint;
+        hz_SFDataPoint.setName("Hz_SF");
+        hz_SFDataPoint.setDescription("Frequency scale factor");
+        hz_SFDataPoint.setSize(1);
+        hz_SFDataPoint.setAddressOffset(17);
+        hz_SFDataPoint.setBlockOffset(15);
+        hz_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(hz_SFDataPoint.name(), hz_SFDataPoint);
 
         SunSpecDataPoint wattsDataPoint;
         wattsDataPoint.setName("W");
@@ -2043,15 +2289,15 @@ void SunSpecAcMeterModel::initDataPoints()
         wattsPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(wattsPhaseCDataPoint.name(), wattsPhaseCDataPoint);
 
-        SunSpecDataPoint W_SFDataPoint;
-        W_SFDataPoint.setName("W_SF");
-        W_SFDataPoint.setDescription("Real Power scale factor");
-        W_SFDataPoint.setMandatory(true);
-        W_SFDataPoint.setSize(1);
-        W_SFDataPoint.setAddressOffset(22);
-        W_SFDataPoint.setBlockOffset(20);
-        W_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(W_SFDataPoint.name(), W_SFDataPoint);
+        SunSpecDataPoint w_SFDataPoint;
+        w_SFDataPoint.setName("W_SF");
+        w_SFDataPoint.setDescription("Real Power scale factor");
+        w_SFDataPoint.setMandatory(true);
+        w_SFDataPoint.setSize(1);
+        w_SFDataPoint.setAddressOffset(22);
+        w_SFDataPoint.setBlockOffset(20);
+        w_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(w_SFDataPoint.name(), w_SFDataPoint);
 
         SunSpecDataPoint vaDataPoint;
         vaDataPoint.setName("VA");
@@ -2098,14 +2344,14 @@ void SunSpecAcMeterModel::initDataPoints()
         vaPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(vaPhaseCDataPoint.name(), vaPhaseCDataPoint);
 
-        SunSpecDataPoint VA_SFDataPoint;
-        VA_SFDataPoint.setName("VA_SF");
-        VA_SFDataPoint.setDescription("Apparent Power scale factor");
-        VA_SFDataPoint.setSize(1);
-        VA_SFDataPoint.setAddressOffset(27);
-        VA_SFDataPoint.setBlockOffset(25);
-        VA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(VA_SFDataPoint.name(), VA_SFDataPoint);
+        SunSpecDataPoint vA_SFDataPoint;
+        vA_SFDataPoint.setName("VA_SF");
+        vA_SFDataPoint.setDescription("Apparent Power scale factor");
+        vA_SFDataPoint.setSize(1);
+        vA_SFDataPoint.setAddressOffset(27);
+        vA_SFDataPoint.setBlockOffset(25);
+        vA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(vA_SFDataPoint.name(), vA_SFDataPoint);
 
         SunSpecDataPoint varDataPoint;
         varDataPoint.setName("VAR");
@@ -2152,14 +2398,14 @@ void SunSpecAcMeterModel::initDataPoints()
         varPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(varPhaseCDataPoint.name(), varPhaseCDataPoint);
 
-        SunSpecDataPoint VAR_SFDataPoint;
-        VAR_SFDataPoint.setName("VAR_SF");
-        VAR_SFDataPoint.setDescription("Reactive Power scale factor");
-        VAR_SFDataPoint.setSize(1);
-        VAR_SFDataPoint.setAddressOffset(32);
-        VAR_SFDataPoint.setBlockOffset(30);
-        VAR_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(VAR_SFDataPoint.name(), VAR_SFDataPoint);
+        SunSpecDataPoint vAR_SFDataPoint;
+        vAR_SFDataPoint.setName("VAR_SF");
+        vAR_SFDataPoint.setDescription("Reactive Power scale factor");
+        vAR_SFDataPoint.setSize(1);
+        vAR_SFDataPoint.setAddressOffset(32);
+        vAR_SFDataPoint.setBlockOffset(30);
+        vAR_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(vAR_SFDataPoint.name(), vAR_SFDataPoint);
 
         SunSpecDataPoint pfDataPoint;
         pfDataPoint.setName("PF");
@@ -2206,14 +2452,14 @@ void SunSpecAcMeterModel::initDataPoints()
         pfPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(pfPhaseCDataPoint.name(), pfPhaseCDataPoint);
 
-        SunSpecDataPoint PF_SFDataPoint;
-        PF_SFDataPoint.setName("PF_SF");
-        PF_SFDataPoint.setDescription("Power Factor scale factor");
-        PF_SFDataPoint.setSize(1);
-        PF_SFDataPoint.setAddressOffset(37);
-        PF_SFDataPoint.setBlockOffset(35);
-        PF_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(PF_SFDataPoint.name(), PF_SFDataPoint);
+        SunSpecDataPoint pF_SFDataPoint;
+        pF_SFDataPoint.setName("PF_SF");
+        pF_SFDataPoint.setDescription("Power Factor scale factor");
+        pF_SFDataPoint.setSize(1);
+        pF_SFDataPoint.setAddressOffset(37);
+        pF_SFDataPoint.setBlockOffset(35);
+        pF_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(pF_SFDataPoint.name(), pF_SFDataPoint);
 
         SunSpecDataPoint totalWattHoursExportedDataPoint;
         totalWattHoursExportedDataPoint.setName("TotWhExp");
@@ -2307,15 +2553,15 @@ void SunSpecAcMeterModel::initDataPoints()
         totalWattHoursImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
         m_dataPoints.insert(totalWattHoursImportedPhaseCDataPoint.name(), totalWattHoursImportedPhaseCDataPoint);
 
-        SunSpecDataPoint TotWh_SFDataPoint;
-        TotWh_SFDataPoint.setName("TotWh_SF");
-        TotWh_SFDataPoint.setDescription("Real Energy scale factor");
-        TotWh_SFDataPoint.setMandatory(true);
-        TotWh_SFDataPoint.setSize(1);
-        TotWh_SFDataPoint.setAddressOffset(54);
-        TotWh_SFDataPoint.setBlockOffset(52);
-        TotWh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(TotWh_SFDataPoint.name(), TotWh_SFDataPoint);
+        SunSpecDataPoint totWh_SFDataPoint;
+        totWh_SFDataPoint.setName("TotWh_SF");
+        totWh_SFDataPoint.setDescription("Real Energy scale factor");
+        totWh_SFDataPoint.setMandatory(true);
+        totWh_SFDataPoint.setSize(1);
+        totWh_SFDataPoint.setAddressOffset(54);
+        totWh_SFDataPoint.setBlockOffset(52);
+        totWh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(totWh_SFDataPoint.name(), totWh_SFDataPoint);
 
         SunSpecDataPoint totalVaHoursExportedDataPoint;
         totalVaHoursExportedDataPoint.setName("TotVAhExp");
@@ -2407,14 +2653,14 @@ void SunSpecAcMeterModel::initDataPoints()
         totalVaHoursImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
         m_dataPoints.insert(totalVaHoursImportedPhaseCDataPoint.name(), totalVaHoursImportedPhaseCDataPoint);
 
-        SunSpecDataPoint TotVAh_SFDataPoint;
-        TotVAh_SFDataPoint.setName("TotVAh_SF");
-        TotVAh_SFDataPoint.setDescription("Apparent Energy scale factor");
-        TotVAh_SFDataPoint.setSize(1);
-        TotVAh_SFDataPoint.setAddressOffset(71);
-        TotVAh_SFDataPoint.setBlockOffset(69);
-        TotVAh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(TotVAh_SFDataPoint.name(), TotVAh_SFDataPoint);
+        SunSpecDataPoint totVAh_SFDataPoint;
+        totVAh_SFDataPoint.setName("TotVAh_SF");
+        totVAh_SFDataPoint.setDescription("Apparent Energy scale factor");
+        totVAh_SFDataPoint.setSize(1);
+        totVAh_SFDataPoint.setAddressOffset(71);
+        totVAh_SFDataPoint.setBlockOffset(69);
+        totVAh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(totVAh_SFDataPoint.name(), totVAh_SFDataPoint);
 
         SunSpecDataPoint totalVarHoursImportedQ1DataPoint;
         totalVarHoursImportedQ1DataPoint.setName("TotVArhImpQ1");
@@ -2428,182 +2674,182 @@ void SunSpecAcMeterModel::initDataPoints()
         totalVarHoursImportedQ1DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
         m_dataPoints.insert(totalVarHoursImportedQ1DataPoint.name(), totalVarHoursImportedQ1DataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ1PhaseADataPoint;
-        totalVarHoursImportedQ1PhaseADataPoint.setName("TotVArhImpQ1PhA");
-        totalVarHoursImportedQ1PhaseADataPoint.setLabel("Total VAr-hours Imported Q1 phase A");
-        totalVarHoursImportedQ1PhaseADataPoint.setUnits("varh");
-        totalVarHoursImportedQ1PhaseADataPoint.setSize(2);
-        totalVarHoursImportedQ1PhaseADataPoint.setAddressOffset(74);
-        totalVarHoursImportedQ1PhaseADataPoint.setBlockOffset(72);
-        totalVarHoursImportedQ1PhaseADataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ1PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ1PhaseADataPoint.name(), totalVarHoursImportedQ1PhaseADataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ1PhaseADataPoint;
+        totalVArHoursImportedQ1PhaseADataPoint.setName("TotVArhImpQ1PhA");
+        totalVArHoursImportedQ1PhaseADataPoint.setLabel("Total VAr-hours Imported Q1 phase A");
+        totalVArHoursImportedQ1PhaseADataPoint.setUnits("varh");
+        totalVArHoursImportedQ1PhaseADataPoint.setSize(2);
+        totalVArHoursImportedQ1PhaseADataPoint.setAddressOffset(74);
+        totalVArHoursImportedQ1PhaseADataPoint.setBlockOffset(72);
+        totalVArHoursImportedQ1PhaseADataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ1PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ1PhaseADataPoint.name(), totalVArHoursImportedQ1PhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ1PhaseBDataPoint;
-        totalVarHoursImportedQ1PhaseBDataPoint.setName("TotVArhImpQ1PhB");
-        totalVarHoursImportedQ1PhaseBDataPoint.setLabel("Total VAr-hours Imported Q1 phase B");
-        totalVarHoursImportedQ1PhaseBDataPoint.setUnits("varh");
-        totalVarHoursImportedQ1PhaseBDataPoint.setSize(2);
-        totalVarHoursImportedQ1PhaseBDataPoint.setAddressOffset(76);
-        totalVarHoursImportedQ1PhaseBDataPoint.setBlockOffset(74);
-        totalVarHoursImportedQ1PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ1PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ1PhaseBDataPoint.name(), totalVarHoursImportedQ1PhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ1PhaseBDataPoint;
+        totalVArHoursImportedQ1PhaseBDataPoint.setName("TotVArhImpQ1PhB");
+        totalVArHoursImportedQ1PhaseBDataPoint.setLabel("Total VAr-hours Imported Q1 phase B");
+        totalVArHoursImportedQ1PhaseBDataPoint.setUnits("varh");
+        totalVArHoursImportedQ1PhaseBDataPoint.setSize(2);
+        totalVArHoursImportedQ1PhaseBDataPoint.setAddressOffset(76);
+        totalVArHoursImportedQ1PhaseBDataPoint.setBlockOffset(74);
+        totalVArHoursImportedQ1PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ1PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ1PhaseBDataPoint.name(), totalVArHoursImportedQ1PhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ1PhaseCDataPoint;
-        totalVarHoursImportedQ1PhaseCDataPoint.setName("TotVArhImpQ1PhC");
-        totalVarHoursImportedQ1PhaseCDataPoint.setLabel("Total VAr-hours Imported Q1 phase C");
-        totalVarHoursImportedQ1PhaseCDataPoint.setUnits("varh");
-        totalVarHoursImportedQ1PhaseCDataPoint.setSize(2);
-        totalVarHoursImportedQ1PhaseCDataPoint.setAddressOffset(78);
-        totalVarHoursImportedQ1PhaseCDataPoint.setBlockOffset(76);
-        totalVarHoursImportedQ1PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ1PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ1PhaseCDataPoint.name(), totalVarHoursImportedQ1PhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ1PhaseCDataPoint;
+        totalVArHoursImportedQ1PhaseCDataPoint.setName("TotVArhImpQ1PhC");
+        totalVArHoursImportedQ1PhaseCDataPoint.setLabel("Total VAr-hours Imported Q1 phase C");
+        totalVArHoursImportedQ1PhaseCDataPoint.setUnits("varh");
+        totalVArHoursImportedQ1PhaseCDataPoint.setSize(2);
+        totalVArHoursImportedQ1PhaseCDataPoint.setAddressOffset(78);
+        totalVArHoursImportedQ1PhaseCDataPoint.setBlockOffset(76);
+        totalVArHoursImportedQ1PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ1PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ1PhaseCDataPoint.name(), totalVArHoursImportedQ1PhaseCDataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2DataPoint;
-        totalVarHoursImportedQ2DataPoint.setName("TotVArhImpQ2");
-        totalVarHoursImportedQ2DataPoint.setLabel("Total VAr-hours Imported Q2");
-        totalVarHoursImportedQ2DataPoint.setDescription("Total Reactive Power Imported Quadrant 2");
-        totalVarHoursImportedQ2DataPoint.setUnits("varh");
-        totalVarHoursImportedQ2DataPoint.setSize(2);
-        totalVarHoursImportedQ2DataPoint.setAddressOffset(80);
-        totalVarHoursImportedQ2DataPoint.setBlockOffset(78);
-        totalVarHoursImportedQ2DataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2DataPoint.name(), totalVarHoursImportedQ2DataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2DataPoint;
+        totalVArHoursImportedQ2DataPoint.setName("TotVArhImpQ2");
+        totalVArHoursImportedQ2DataPoint.setLabel("Total VAr-hours Imported Q2");
+        totalVArHoursImportedQ2DataPoint.setDescription("Total Reactive Power Imported Quadrant 2");
+        totalVArHoursImportedQ2DataPoint.setUnits("varh");
+        totalVArHoursImportedQ2DataPoint.setSize(2);
+        totalVArHoursImportedQ2DataPoint.setAddressOffset(80);
+        totalVArHoursImportedQ2DataPoint.setBlockOffset(78);
+        totalVArHoursImportedQ2DataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2DataPoint.name(), totalVArHoursImportedQ2DataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2PhaseADataPoint;
-        totalVarHoursImportedQ2PhaseADataPoint.setName("TotVArhImpQ2PhA");
-        totalVarHoursImportedQ2PhaseADataPoint.setLabel("Total VAr-hours Imported Q2 phase A");
-        totalVarHoursImportedQ2PhaseADataPoint.setUnits("varh");
-        totalVarHoursImportedQ2PhaseADataPoint.setSize(2);
-        totalVarHoursImportedQ2PhaseADataPoint.setAddressOffset(82);
-        totalVarHoursImportedQ2PhaseADataPoint.setBlockOffset(80);
-        totalVarHoursImportedQ2PhaseADataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ2PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2PhaseADataPoint.name(), totalVarHoursImportedQ2PhaseADataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2PhaseADataPoint;
+        totalVArHoursImportedQ2PhaseADataPoint.setName("TotVArhImpQ2PhA");
+        totalVArHoursImportedQ2PhaseADataPoint.setLabel("Total VAr-hours Imported Q2 phase A");
+        totalVArHoursImportedQ2PhaseADataPoint.setUnits("varh");
+        totalVArHoursImportedQ2PhaseADataPoint.setSize(2);
+        totalVArHoursImportedQ2PhaseADataPoint.setAddressOffset(82);
+        totalVArHoursImportedQ2PhaseADataPoint.setBlockOffset(80);
+        totalVArHoursImportedQ2PhaseADataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ2PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2PhaseADataPoint.name(), totalVArHoursImportedQ2PhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2PhaseBDataPoint;
-        totalVarHoursImportedQ2PhaseBDataPoint.setName("TotVArhImpQ2PhB");
-        totalVarHoursImportedQ2PhaseBDataPoint.setLabel("Total VAr-hours Imported Q2 phase B");
-        totalVarHoursImportedQ2PhaseBDataPoint.setUnits("varh");
-        totalVarHoursImportedQ2PhaseBDataPoint.setSize(2);
-        totalVarHoursImportedQ2PhaseBDataPoint.setAddressOffset(84);
-        totalVarHoursImportedQ2PhaseBDataPoint.setBlockOffset(82);
-        totalVarHoursImportedQ2PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ2PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2PhaseBDataPoint.name(), totalVarHoursImportedQ2PhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2PhaseBDataPoint;
+        totalVArHoursImportedQ2PhaseBDataPoint.setName("TotVArhImpQ2PhB");
+        totalVArHoursImportedQ2PhaseBDataPoint.setLabel("Total VAr-hours Imported Q2 phase B");
+        totalVArHoursImportedQ2PhaseBDataPoint.setUnits("varh");
+        totalVArHoursImportedQ2PhaseBDataPoint.setSize(2);
+        totalVArHoursImportedQ2PhaseBDataPoint.setAddressOffset(84);
+        totalVArHoursImportedQ2PhaseBDataPoint.setBlockOffset(82);
+        totalVArHoursImportedQ2PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ2PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2PhaseBDataPoint.name(), totalVArHoursImportedQ2PhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2PhaseCDataPoint;
-        totalVarHoursImportedQ2PhaseCDataPoint.setName("TotVArhImpQ2PhC");
-        totalVarHoursImportedQ2PhaseCDataPoint.setLabel("Total VAr-hours Imported Q2 phase C");
-        totalVarHoursImportedQ2PhaseCDataPoint.setUnits("varh");
-        totalVarHoursImportedQ2PhaseCDataPoint.setSize(2);
-        totalVarHoursImportedQ2PhaseCDataPoint.setAddressOffset(86);
-        totalVarHoursImportedQ2PhaseCDataPoint.setBlockOffset(84);
-        totalVarHoursImportedQ2PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ2PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2PhaseCDataPoint.name(), totalVarHoursImportedQ2PhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2PhaseCDataPoint;
+        totalVArHoursImportedQ2PhaseCDataPoint.setName("TotVArhImpQ2PhC");
+        totalVArHoursImportedQ2PhaseCDataPoint.setLabel("Total VAr-hours Imported Q2 phase C");
+        totalVArHoursImportedQ2PhaseCDataPoint.setUnits("varh");
+        totalVArHoursImportedQ2PhaseCDataPoint.setSize(2);
+        totalVArHoursImportedQ2PhaseCDataPoint.setAddressOffset(86);
+        totalVArHoursImportedQ2PhaseCDataPoint.setBlockOffset(84);
+        totalVArHoursImportedQ2PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ2PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2PhaseCDataPoint.name(), totalVArHoursImportedQ2PhaseCDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3DataPoint;
-        totalVarHoursExportedQ3DataPoint.setName("TotVArhExpQ3");
-        totalVarHoursExportedQ3DataPoint.setLabel("Total VAr-hours Exported Q3");
-        totalVarHoursExportedQ3DataPoint.setDescription("Total Reactive Power Exported Quadrant 3");
-        totalVarHoursExportedQ3DataPoint.setUnits("varh");
-        totalVarHoursExportedQ3DataPoint.setSize(2);
-        totalVarHoursExportedQ3DataPoint.setAddressOffset(88);
-        totalVarHoursExportedQ3DataPoint.setBlockOffset(86);
-        totalVarHoursExportedQ3DataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3DataPoint.name(), totalVarHoursExportedQ3DataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3DataPoint;
+        totalVArHoursExportedQ3DataPoint.setName("TotVArhExpQ3");
+        totalVArHoursExportedQ3DataPoint.setLabel("Total VAr-hours Exported Q3");
+        totalVArHoursExportedQ3DataPoint.setDescription("Total Reactive Power Exported Quadrant 3");
+        totalVArHoursExportedQ3DataPoint.setUnits("varh");
+        totalVArHoursExportedQ3DataPoint.setSize(2);
+        totalVArHoursExportedQ3DataPoint.setAddressOffset(88);
+        totalVArHoursExportedQ3DataPoint.setBlockOffset(86);
+        totalVArHoursExportedQ3DataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3DataPoint.name(), totalVArHoursExportedQ3DataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3PhaseADataPoint;
-        totalVarHoursExportedQ3PhaseADataPoint.setName("TotVArhExpQ3PhA");
-        totalVarHoursExportedQ3PhaseADataPoint.setLabel("Total VAr-hours Exported Q3 phase A");
-        totalVarHoursExportedQ3PhaseADataPoint.setUnits("varh");
-        totalVarHoursExportedQ3PhaseADataPoint.setSize(2);
-        totalVarHoursExportedQ3PhaseADataPoint.setAddressOffset(90);
-        totalVarHoursExportedQ3PhaseADataPoint.setBlockOffset(88);
-        totalVarHoursExportedQ3PhaseADataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ3PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3PhaseADataPoint.name(), totalVarHoursExportedQ3PhaseADataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3PhaseADataPoint;
+        totalVArHoursExportedQ3PhaseADataPoint.setName("TotVArhExpQ3PhA");
+        totalVArHoursExportedQ3PhaseADataPoint.setLabel("Total VAr-hours Exported Q3 phase A");
+        totalVArHoursExportedQ3PhaseADataPoint.setUnits("varh");
+        totalVArHoursExportedQ3PhaseADataPoint.setSize(2);
+        totalVArHoursExportedQ3PhaseADataPoint.setAddressOffset(90);
+        totalVArHoursExportedQ3PhaseADataPoint.setBlockOffset(88);
+        totalVArHoursExportedQ3PhaseADataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ3PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3PhaseADataPoint.name(), totalVArHoursExportedQ3PhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3PhaseBDataPoint;
-        totalVarHoursExportedQ3PhaseBDataPoint.setName("TotVArhExpQ3PhB");
-        totalVarHoursExportedQ3PhaseBDataPoint.setLabel("Total VAr-hours Exported Q3 phase B");
-        totalVarHoursExportedQ3PhaseBDataPoint.setUnits("varh");
-        totalVarHoursExportedQ3PhaseBDataPoint.setSize(2);
-        totalVarHoursExportedQ3PhaseBDataPoint.setAddressOffset(92);
-        totalVarHoursExportedQ3PhaseBDataPoint.setBlockOffset(90);
-        totalVarHoursExportedQ3PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ3PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3PhaseBDataPoint.name(), totalVarHoursExportedQ3PhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3PhaseBDataPoint;
+        totalVArHoursExportedQ3PhaseBDataPoint.setName("TotVArhExpQ3PhB");
+        totalVArHoursExportedQ3PhaseBDataPoint.setLabel("Total VAr-hours Exported Q3 phase B");
+        totalVArHoursExportedQ3PhaseBDataPoint.setUnits("varh");
+        totalVArHoursExportedQ3PhaseBDataPoint.setSize(2);
+        totalVArHoursExportedQ3PhaseBDataPoint.setAddressOffset(92);
+        totalVArHoursExportedQ3PhaseBDataPoint.setBlockOffset(90);
+        totalVArHoursExportedQ3PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ3PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3PhaseBDataPoint.name(), totalVArHoursExportedQ3PhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3PhaseCDataPoint;
-        totalVarHoursExportedQ3PhaseCDataPoint.setName("TotVArhExpQ3PhC");
-        totalVarHoursExportedQ3PhaseCDataPoint.setLabel("Total VAr-hours Exported Q3 phase C");
-        totalVarHoursExportedQ3PhaseCDataPoint.setUnits("varh");
-        totalVarHoursExportedQ3PhaseCDataPoint.setSize(2);
-        totalVarHoursExportedQ3PhaseCDataPoint.setAddressOffset(94);
-        totalVarHoursExportedQ3PhaseCDataPoint.setBlockOffset(92);
-        totalVarHoursExportedQ3PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ3PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3PhaseCDataPoint.name(), totalVarHoursExportedQ3PhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3PhaseCDataPoint;
+        totalVArHoursExportedQ3PhaseCDataPoint.setName("TotVArhExpQ3PhC");
+        totalVArHoursExportedQ3PhaseCDataPoint.setLabel("Total VAr-hours Exported Q3 phase C");
+        totalVArHoursExportedQ3PhaseCDataPoint.setUnits("varh");
+        totalVArHoursExportedQ3PhaseCDataPoint.setSize(2);
+        totalVArHoursExportedQ3PhaseCDataPoint.setAddressOffset(94);
+        totalVArHoursExportedQ3PhaseCDataPoint.setBlockOffset(92);
+        totalVArHoursExportedQ3PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ3PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3PhaseCDataPoint.name(), totalVArHoursExportedQ3PhaseCDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4DataPoint;
-        totalVarHoursExportedQ4DataPoint.setName("TotVArhExpQ4");
-        totalVarHoursExportedQ4DataPoint.setLabel("Total VAr-hours Exported Q4");
-        totalVarHoursExportedQ4DataPoint.setDescription("Total Reactive Power Exported Quadrant 4");
-        totalVarHoursExportedQ4DataPoint.setUnits("varh");
-        totalVarHoursExportedQ4DataPoint.setSize(2);
-        totalVarHoursExportedQ4DataPoint.setAddressOffset(96);
-        totalVarHoursExportedQ4DataPoint.setBlockOffset(94);
-        totalVarHoursExportedQ4DataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4DataPoint.name(), totalVarHoursExportedQ4DataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4DataPoint;
+        totalVArHoursExportedQ4DataPoint.setName("TotVArhExpQ4");
+        totalVArHoursExportedQ4DataPoint.setLabel("Total VAr-hours Exported Q4");
+        totalVArHoursExportedQ4DataPoint.setDescription("Total Reactive Power Exported Quadrant 4");
+        totalVArHoursExportedQ4DataPoint.setUnits("varh");
+        totalVArHoursExportedQ4DataPoint.setSize(2);
+        totalVArHoursExportedQ4DataPoint.setAddressOffset(96);
+        totalVArHoursExportedQ4DataPoint.setBlockOffset(94);
+        totalVArHoursExportedQ4DataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4DataPoint.name(), totalVArHoursExportedQ4DataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4ImportedPhaseADataPoint;
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setName("TotVArhExpQ4PhA");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase A");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setUnits("varh");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setSize(2);
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setAddressOffset(98);
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setBlockOffset(96);
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4ImportedPhaseADataPoint.name(), totalVarHoursExportedQ4ImportedPhaseADataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseADataPoint;
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setName("TotVArhExpQ4PhA");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase A");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setUnits("varh");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setSize(2);
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setAddressOffset(98);
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setBlockOffset(96);
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseADataPoint.name(), totalVArHoursExportedQ4ImportedPhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4ImportedPhaseBDataPoint;
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setName("TotVArhExpQ4PhB");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase B");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setUnits("varh");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setSize(2);
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setAddressOffset(100);
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setBlockOffset(98);
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4ImportedPhaseBDataPoint.name(), totalVarHoursExportedQ4ImportedPhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseBDataPoint;
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setName("TotVArhExpQ4PhB");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase B");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setUnits("varh");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setSize(2);
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setAddressOffset(100);
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setBlockOffset(98);
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseBDataPoint.name(), totalVArHoursExportedQ4ImportedPhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4ImportedPhaseCDataPoint;
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setName("TotVArhExpQ4PhC");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase C");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setUnits("varh");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setSize(2);
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setAddressOffset(102);
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setBlockOffset(100);
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4ImportedPhaseCDataPoint.name(), totalVarHoursExportedQ4ImportedPhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseCDataPoint;
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setName("TotVArhExpQ4PhC");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase C");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setUnits("varh");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setSize(2);
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setAddressOffset(102);
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setBlockOffset(100);
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseCDataPoint.name(), totalVArHoursExportedQ4ImportedPhaseCDataPoint);
 
-        SunSpecDataPoint TotVArh_SFDataPoint;
-        TotVArh_SFDataPoint.setName("TotVArh_SF");
-        TotVArh_SFDataPoint.setDescription("Reactive Energy scale factor");
-        TotVArh_SFDataPoint.setSize(1);
-        TotVArh_SFDataPoint.setAddressOffset(104);
-        TotVArh_SFDataPoint.setBlockOffset(102);
-        TotVArh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(TotVArh_SFDataPoint.name(), TotVArh_SFDataPoint);
+        SunSpecDataPoint totVArh_SFDataPoint;
+        totVArh_SFDataPoint.setName("TotVArh_SF");
+        totVArh_SFDataPoint.setDescription("Reactive Energy scale factor");
+        totVArh_SFDataPoint.setSize(1);
+        totVArh_SFDataPoint.setAddressOffset(104);
+        totVArh_SFDataPoint.setBlockOffset(102);
+        totVArh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(totVArh_SFDataPoint.name(), totVArh_SFDataPoint);
 
         SunSpecDataPoint eventsDataPoint;
         eventsDataPoint.setName("Evt");
@@ -2652,54 +2898,54 @@ void SunSpecAcMeterModel::initDataPoints()
         ampsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
-        SunSpecDataPoint ampsPhaseaDataPoint;
-        ampsPhaseaDataPoint.setName("AphA");
-        ampsPhaseaDataPoint.setLabel("Amps PhaseA");
-        ampsPhaseaDataPoint.setDescription("Phase A Current");
-        ampsPhaseaDataPoint.setUnits("A");
-        ampsPhaseaDataPoint.setMandatory(true);
-        ampsPhaseaDataPoint.setSize(1);
-        ampsPhaseaDataPoint.setAddressOffset(3);
-        ampsPhaseaDataPoint.setBlockOffset(1);
-        ampsPhaseaDataPoint.setScaleFactorName("A_SF");
-        ampsPhaseaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-        m_dataPoints.insert(ampsPhaseaDataPoint.name(), ampsPhaseaDataPoint);
+        SunSpecDataPoint ampsPhaseADataPoint;
+        ampsPhaseADataPoint.setName("AphA");
+        ampsPhaseADataPoint.setLabel("Amps PhaseA");
+        ampsPhaseADataPoint.setDescription("Phase A Current");
+        ampsPhaseADataPoint.setUnits("A");
+        ampsPhaseADataPoint.setMandatory(true);
+        ampsPhaseADataPoint.setSize(1);
+        ampsPhaseADataPoint.setAddressOffset(3);
+        ampsPhaseADataPoint.setBlockOffset(1);
+        ampsPhaseADataPoint.setScaleFactorName("A_SF");
+        ampsPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+        m_dataPoints.insert(ampsPhaseADataPoint.name(), ampsPhaseADataPoint);
 
-        SunSpecDataPoint ampsPhasebDataPoint;
-        ampsPhasebDataPoint.setName("AphB");
-        ampsPhasebDataPoint.setLabel("Amps PhaseB");
-        ampsPhasebDataPoint.setDescription("Phase B Current");
-        ampsPhasebDataPoint.setUnits("A");
-        ampsPhasebDataPoint.setMandatory(true);
-        ampsPhasebDataPoint.setSize(1);
-        ampsPhasebDataPoint.setAddressOffset(4);
-        ampsPhasebDataPoint.setBlockOffset(2);
-        ampsPhasebDataPoint.setScaleFactorName("A_SF");
-        ampsPhasebDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-        m_dataPoints.insert(ampsPhasebDataPoint.name(), ampsPhasebDataPoint);
+        SunSpecDataPoint ampsPhaseBDataPoint;
+        ampsPhaseBDataPoint.setName("AphB");
+        ampsPhaseBDataPoint.setLabel("Amps PhaseB");
+        ampsPhaseBDataPoint.setDescription("Phase B Current");
+        ampsPhaseBDataPoint.setUnits("A");
+        ampsPhaseBDataPoint.setMandatory(true);
+        ampsPhaseBDataPoint.setSize(1);
+        ampsPhaseBDataPoint.setAddressOffset(4);
+        ampsPhaseBDataPoint.setBlockOffset(2);
+        ampsPhaseBDataPoint.setScaleFactorName("A_SF");
+        ampsPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+        m_dataPoints.insert(ampsPhaseBDataPoint.name(), ampsPhaseBDataPoint);
 
-        SunSpecDataPoint ampsPhasecDataPoint;
-        ampsPhasecDataPoint.setName("AphC");
-        ampsPhasecDataPoint.setLabel("Amps PhaseC");
-        ampsPhasecDataPoint.setDescription("Phase C Current");
-        ampsPhasecDataPoint.setUnits("A");
-        ampsPhasecDataPoint.setMandatory(true);
-        ampsPhasecDataPoint.setSize(1);
-        ampsPhasecDataPoint.setAddressOffset(5);
-        ampsPhasecDataPoint.setBlockOffset(3);
-        ampsPhasecDataPoint.setScaleFactorName("A_SF");
-        ampsPhasecDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-        m_dataPoints.insert(ampsPhasecDataPoint.name(), ampsPhasecDataPoint);
+        SunSpecDataPoint ampsPhaseCDataPoint;
+        ampsPhaseCDataPoint.setName("AphC");
+        ampsPhaseCDataPoint.setLabel("Amps PhaseC");
+        ampsPhaseCDataPoint.setDescription("Phase C Current");
+        ampsPhaseCDataPoint.setUnits("A");
+        ampsPhaseCDataPoint.setMandatory(true);
+        ampsPhaseCDataPoint.setSize(1);
+        ampsPhaseCDataPoint.setAddressOffset(5);
+        ampsPhaseCDataPoint.setBlockOffset(3);
+        ampsPhaseCDataPoint.setScaleFactorName("A_SF");
+        ampsPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+        m_dataPoints.insert(ampsPhaseCDataPoint.name(), ampsPhaseCDataPoint);
 
-        SunSpecDataPoint A_SFDataPoint;
-        A_SFDataPoint.setName("A_SF");
-        A_SFDataPoint.setDescription("Current scale factor");
-        A_SFDataPoint.setMandatory(true);
-        A_SFDataPoint.setSize(1);
-        A_SFDataPoint.setAddressOffset(6);
-        A_SFDataPoint.setBlockOffset(4);
-        A_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(A_SFDataPoint.name(), A_SFDataPoint);
+        SunSpecDataPoint a_SFDataPoint;
+        a_SFDataPoint.setName("A_SF");
+        a_SFDataPoint.setDescription("Current scale factor");
+        a_SFDataPoint.setMandatory(true);
+        a_SFDataPoint.setSize(1);
+        a_SFDataPoint.setAddressOffset(6);
+        a_SFDataPoint.setBlockOffset(4);
+        a_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(a_SFDataPoint.name(), a_SFDataPoint);
 
         SunSpecDataPoint voltageLnDataPoint;
         voltageLnDataPoint.setName("PhV");
@@ -2801,15 +3047,15 @@ void SunSpecAcMeterModel::initDataPoints()
         phaseVoltageCaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(phaseVoltageCaDataPoint.name(), phaseVoltageCaDataPoint);
 
-        SunSpecDataPoint V_SFDataPoint;
-        V_SFDataPoint.setName("V_SF");
-        V_SFDataPoint.setDescription("Voltage scale factor");
-        V_SFDataPoint.setMandatory(true);
-        V_SFDataPoint.setSize(1);
-        V_SFDataPoint.setAddressOffset(15);
-        V_SFDataPoint.setBlockOffset(13);
-        V_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(V_SFDataPoint.name(), V_SFDataPoint);
+        SunSpecDataPoint v_SFDataPoint;
+        v_SFDataPoint.setName("V_SF");
+        v_SFDataPoint.setDescription("Voltage scale factor");
+        v_SFDataPoint.setMandatory(true);
+        v_SFDataPoint.setSize(1);
+        v_SFDataPoint.setAddressOffset(15);
+        v_SFDataPoint.setBlockOffset(13);
+        v_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(v_SFDataPoint.name(), v_SFDataPoint);
 
         SunSpecDataPoint hzDataPoint;
         hzDataPoint.setName("Hz");
@@ -2824,14 +3070,14 @@ void SunSpecAcMeterModel::initDataPoints()
         hzDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(hzDataPoint.name(), hzDataPoint);
 
-        SunSpecDataPoint Hz_SFDataPoint;
-        Hz_SFDataPoint.setName("Hz_SF");
-        Hz_SFDataPoint.setDescription("Frequency scale factor");
-        Hz_SFDataPoint.setSize(1);
-        Hz_SFDataPoint.setAddressOffset(17);
-        Hz_SFDataPoint.setBlockOffset(15);
-        Hz_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(Hz_SFDataPoint.name(), Hz_SFDataPoint);
+        SunSpecDataPoint hz_SFDataPoint;
+        hz_SFDataPoint.setName("Hz_SF");
+        hz_SFDataPoint.setDescription("Frequency scale factor");
+        hz_SFDataPoint.setSize(1);
+        hz_SFDataPoint.setAddressOffset(17);
+        hz_SFDataPoint.setBlockOffset(15);
+        hz_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(hz_SFDataPoint.name(), hz_SFDataPoint);
 
         SunSpecDataPoint wattsDataPoint;
         wattsDataPoint.setName("W");
@@ -2879,15 +3125,15 @@ void SunSpecAcMeterModel::initDataPoints()
         wattsPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(wattsPhaseCDataPoint.name(), wattsPhaseCDataPoint);
 
-        SunSpecDataPoint W_SFDataPoint;
-        W_SFDataPoint.setName("W_SF");
-        W_SFDataPoint.setDescription("Real Power scale factor");
-        W_SFDataPoint.setMandatory(true);
-        W_SFDataPoint.setSize(1);
-        W_SFDataPoint.setAddressOffset(22);
-        W_SFDataPoint.setBlockOffset(20);
-        W_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(W_SFDataPoint.name(), W_SFDataPoint);
+        SunSpecDataPoint w_SFDataPoint;
+        w_SFDataPoint.setName("W_SF");
+        w_SFDataPoint.setDescription("Real Power scale factor");
+        w_SFDataPoint.setMandatory(true);
+        w_SFDataPoint.setSize(1);
+        w_SFDataPoint.setAddressOffset(22);
+        w_SFDataPoint.setBlockOffset(20);
+        w_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(w_SFDataPoint.name(), w_SFDataPoint);
 
         SunSpecDataPoint vaDataPoint;
         vaDataPoint.setName("VA");
@@ -2934,14 +3180,14 @@ void SunSpecAcMeterModel::initDataPoints()
         vaPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(vaPhaseCDataPoint.name(), vaPhaseCDataPoint);
 
-        SunSpecDataPoint VA_SFDataPoint;
-        VA_SFDataPoint.setName("VA_SF");
-        VA_SFDataPoint.setDescription("Apparent Power scale factor");
-        VA_SFDataPoint.setSize(1);
-        VA_SFDataPoint.setAddressOffset(27);
-        VA_SFDataPoint.setBlockOffset(25);
-        VA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(VA_SFDataPoint.name(), VA_SFDataPoint);
+        SunSpecDataPoint vA_SFDataPoint;
+        vA_SFDataPoint.setName("VA_SF");
+        vA_SFDataPoint.setDescription("Apparent Power scale factor");
+        vA_SFDataPoint.setSize(1);
+        vA_SFDataPoint.setAddressOffset(27);
+        vA_SFDataPoint.setBlockOffset(25);
+        vA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(vA_SFDataPoint.name(), vA_SFDataPoint);
 
         SunSpecDataPoint varDataPoint;
         varDataPoint.setName("VAR");
@@ -2988,14 +3234,14 @@ void SunSpecAcMeterModel::initDataPoints()
         varPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(varPhaseCDataPoint.name(), varPhaseCDataPoint);
 
-        SunSpecDataPoint VAR_SFDataPoint;
-        VAR_SFDataPoint.setName("VAR_SF");
-        VAR_SFDataPoint.setDescription("Reactive Power scale factor");
-        VAR_SFDataPoint.setSize(1);
-        VAR_SFDataPoint.setAddressOffset(32);
-        VAR_SFDataPoint.setBlockOffset(30);
-        VAR_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(VAR_SFDataPoint.name(), VAR_SFDataPoint);
+        SunSpecDataPoint vAR_SFDataPoint;
+        vAR_SFDataPoint.setName("VAR_SF");
+        vAR_SFDataPoint.setDescription("Reactive Power scale factor");
+        vAR_SFDataPoint.setSize(1);
+        vAR_SFDataPoint.setAddressOffset(32);
+        vAR_SFDataPoint.setBlockOffset(30);
+        vAR_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(vAR_SFDataPoint.name(), vAR_SFDataPoint);
 
         SunSpecDataPoint pfDataPoint;
         pfDataPoint.setName("PF");
@@ -3042,14 +3288,14 @@ void SunSpecAcMeterModel::initDataPoints()
         pfPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(pfPhaseCDataPoint.name(), pfPhaseCDataPoint);
 
-        SunSpecDataPoint PF_SFDataPoint;
-        PF_SFDataPoint.setName("PF_SF");
-        PF_SFDataPoint.setDescription("Power Factor scale factor");
-        PF_SFDataPoint.setSize(1);
-        PF_SFDataPoint.setAddressOffset(37);
-        PF_SFDataPoint.setBlockOffset(35);
-        PF_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(PF_SFDataPoint.name(), PF_SFDataPoint);
+        SunSpecDataPoint pF_SFDataPoint;
+        pF_SFDataPoint.setName("PF_SF");
+        pF_SFDataPoint.setDescription("Power Factor scale factor");
+        pF_SFDataPoint.setSize(1);
+        pF_SFDataPoint.setAddressOffset(37);
+        pF_SFDataPoint.setBlockOffset(35);
+        pF_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(pF_SFDataPoint.name(), pF_SFDataPoint);
 
         SunSpecDataPoint totalWattHoursExportedDataPoint;
         totalWattHoursExportedDataPoint.setName("TotWhExp");
@@ -3143,15 +3389,15 @@ void SunSpecAcMeterModel::initDataPoints()
         totalWattHoursImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
         m_dataPoints.insert(totalWattHoursImportedPhaseCDataPoint.name(), totalWattHoursImportedPhaseCDataPoint);
 
-        SunSpecDataPoint TotWh_SFDataPoint;
-        TotWh_SFDataPoint.setName("TotWh_SF");
-        TotWh_SFDataPoint.setDescription("Real Energy scale factor");
-        TotWh_SFDataPoint.setMandatory(true);
-        TotWh_SFDataPoint.setSize(1);
-        TotWh_SFDataPoint.setAddressOffset(54);
-        TotWh_SFDataPoint.setBlockOffset(52);
-        TotWh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(TotWh_SFDataPoint.name(), TotWh_SFDataPoint);
+        SunSpecDataPoint totWh_SFDataPoint;
+        totWh_SFDataPoint.setName("TotWh_SF");
+        totWh_SFDataPoint.setDescription("Real Energy scale factor");
+        totWh_SFDataPoint.setMandatory(true);
+        totWh_SFDataPoint.setSize(1);
+        totWh_SFDataPoint.setAddressOffset(54);
+        totWh_SFDataPoint.setBlockOffset(52);
+        totWh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(totWh_SFDataPoint.name(), totWh_SFDataPoint);
 
         SunSpecDataPoint totalVaHoursExportedDataPoint;
         totalVaHoursExportedDataPoint.setName("TotVAhExp");
@@ -3243,14 +3489,14 @@ void SunSpecAcMeterModel::initDataPoints()
         totalVaHoursImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
         m_dataPoints.insert(totalVaHoursImportedPhaseCDataPoint.name(), totalVaHoursImportedPhaseCDataPoint);
 
-        SunSpecDataPoint TotVAh_SFDataPoint;
-        TotVAh_SFDataPoint.setName("TotVAh_SF");
-        TotVAh_SFDataPoint.setDescription("Apparent Energy scale factor");
-        TotVAh_SFDataPoint.setSize(1);
-        TotVAh_SFDataPoint.setAddressOffset(71);
-        TotVAh_SFDataPoint.setBlockOffset(69);
-        TotVAh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(TotVAh_SFDataPoint.name(), TotVAh_SFDataPoint);
+        SunSpecDataPoint totVAh_SFDataPoint;
+        totVAh_SFDataPoint.setName("TotVAh_SF");
+        totVAh_SFDataPoint.setDescription("Apparent Energy scale factor");
+        totVAh_SFDataPoint.setSize(1);
+        totVAh_SFDataPoint.setAddressOffset(71);
+        totVAh_SFDataPoint.setBlockOffset(69);
+        totVAh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(totVAh_SFDataPoint.name(), totVAh_SFDataPoint);
 
         SunSpecDataPoint totalVarHoursImportedQ1DataPoint;
         totalVarHoursImportedQ1DataPoint.setName("TotVArhImpQ1");
@@ -3264,182 +3510,182 @@ void SunSpecAcMeterModel::initDataPoints()
         totalVarHoursImportedQ1DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
         m_dataPoints.insert(totalVarHoursImportedQ1DataPoint.name(), totalVarHoursImportedQ1DataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ1PhaseADataPoint;
-        totalVarHoursImportedQ1PhaseADataPoint.setName("TotVArhImpQ1PhA");
-        totalVarHoursImportedQ1PhaseADataPoint.setLabel("Total VAr-hours Imported Q1 phase A");
-        totalVarHoursImportedQ1PhaseADataPoint.setUnits("varh");
-        totalVarHoursImportedQ1PhaseADataPoint.setSize(2);
-        totalVarHoursImportedQ1PhaseADataPoint.setAddressOffset(74);
-        totalVarHoursImportedQ1PhaseADataPoint.setBlockOffset(72);
-        totalVarHoursImportedQ1PhaseADataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ1PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ1PhaseADataPoint.name(), totalVarHoursImportedQ1PhaseADataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ1PhaseADataPoint;
+        totalVArHoursImportedQ1PhaseADataPoint.setName("TotVArhImpQ1PhA");
+        totalVArHoursImportedQ1PhaseADataPoint.setLabel("Total VAr-hours Imported Q1 phase A");
+        totalVArHoursImportedQ1PhaseADataPoint.setUnits("varh");
+        totalVArHoursImportedQ1PhaseADataPoint.setSize(2);
+        totalVArHoursImportedQ1PhaseADataPoint.setAddressOffset(74);
+        totalVArHoursImportedQ1PhaseADataPoint.setBlockOffset(72);
+        totalVArHoursImportedQ1PhaseADataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ1PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ1PhaseADataPoint.name(), totalVArHoursImportedQ1PhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ1PhaseBDataPoint;
-        totalVarHoursImportedQ1PhaseBDataPoint.setName("TotVArhImpQ1PhB");
-        totalVarHoursImportedQ1PhaseBDataPoint.setLabel("Total VAr-hours Imported Q1 phase B");
-        totalVarHoursImportedQ1PhaseBDataPoint.setUnits("varh");
-        totalVarHoursImportedQ1PhaseBDataPoint.setSize(2);
-        totalVarHoursImportedQ1PhaseBDataPoint.setAddressOffset(76);
-        totalVarHoursImportedQ1PhaseBDataPoint.setBlockOffset(74);
-        totalVarHoursImportedQ1PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ1PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ1PhaseBDataPoint.name(), totalVarHoursImportedQ1PhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ1PhaseBDataPoint;
+        totalVArHoursImportedQ1PhaseBDataPoint.setName("TotVArhImpQ1PhB");
+        totalVArHoursImportedQ1PhaseBDataPoint.setLabel("Total VAr-hours Imported Q1 phase B");
+        totalVArHoursImportedQ1PhaseBDataPoint.setUnits("varh");
+        totalVArHoursImportedQ1PhaseBDataPoint.setSize(2);
+        totalVArHoursImportedQ1PhaseBDataPoint.setAddressOffset(76);
+        totalVArHoursImportedQ1PhaseBDataPoint.setBlockOffset(74);
+        totalVArHoursImportedQ1PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ1PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ1PhaseBDataPoint.name(), totalVArHoursImportedQ1PhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ1PhaseCDataPoint;
-        totalVarHoursImportedQ1PhaseCDataPoint.setName("TotVArhImpQ1PhC");
-        totalVarHoursImportedQ1PhaseCDataPoint.setLabel("Total VAr-hours Imported Q1 phase C");
-        totalVarHoursImportedQ1PhaseCDataPoint.setUnits("varh");
-        totalVarHoursImportedQ1PhaseCDataPoint.setSize(2);
-        totalVarHoursImportedQ1PhaseCDataPoint.setAddressOffset(78);
-        totalVarHoursImportedQ1PhaseCDataPoint.setBlockOffset(76);
-        totalVarHoursImportedQ1PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ1PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ1PhaseCDataPoint.name(), totalVarHoursImportedQ1PhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ1PhaseCDataPoint;
+        totalVArHoursImportedQ1PhaseCDataPoint.setName("TotVArhImpQ1PhC");
+        totalVArHoursImportedQ1PhaseCDataPoint.setLabel("Total VAr-hours Imported Q1 phase C");
+        totalVArHoursImportedQ1PhaseCDataPoint.setUnits("varh");
+        totalVArHoursImportedQ1PhaseCDataPoint.setSize(2);
+        totalVArHoursImportedQ1PhaseCDataPoint.setAddressOffset(78);
+        totalVArHoursImportedQ1PhaseCDataPoint.setBlockOffset(76);
+        totalVArHoursImportedQ1PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ1PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ1PhaseCDataPoint.name(), totalVArHoursImportedQ1PhaseCDataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2DataPoint;
-        totalVarHoursImportedQ2DataPoint.setName("TotVArhImpQ2");
-        totalVarHoursImportedQ2DataPoint.setLabel("Total VAr-hours Imported Q2");
-        totalVarHoursImportedQ2DataPoint.setDescription("Total Reactive Power Imported Quadrant 2");
-        totalVarHoursImportedQ2DataPoint.setUnits("varh");
-        totalVarHoursImportedQ2DataPoint.setSize(2);
-        totalVarHoursImportedQ2DataPoint.setAddressOffset(80);
-        totalVarHoursImportedQ2DataPoint.setBlockOffset(78);
-        totalVarHoursImportedQ2DataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2DataPoint.name(), totalVarHoursImportedQ2DataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2DataPoint;
+        totalVArHoursImportedQ2DataPoint.setName("TotVArhImpQ2");
+        totalVArHoursImportedQ2DataPoint.setLabel("Total VAr-hours Imported Q2");
+        totalVArHoursImportedQ2DataPoint.setDescription("Total Reactive Power Imported Quadrant 2");
+        totalVArHoursImportedQ2DataPoint.setUnits("varh");
+        totalVArHoursImportedQ2DataPoint.setSize(2);
+        totalVArHoursImportedQ2DataPoint.setAddressOffset(80);
+        totalVArHoursImportedQ2DataPoint.setBlockOffset(78);
+        totalVArHoursImportedQ2DataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2DataPoint.name(), totalVArHoursImportedQ2DataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2PhaseADataPoint;
-        totalVarHoursImportedQ2PhaseADataPoint.setName("TotVArhImpQ2PhA");
-        totalVarHoursImportedQ2PhaseADataPoint.setLabel("Total VAr-hours Imported Q2 phase A");
-        totalVarHoursImportedQ2PhaseADataPoint.setUnits("varh");
-        totalVarHoursImportedQ2PhaseADataPoint.setSize(2);
-        totalVarHoursImportedQ2PhaseADataPoint.setAddressOffset(82);
-        totalVarHoursImportedQ2PhaseADataPoint.setBlockOffset(80);
-        totalVarHoursImportedQ2PhaseADataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ2PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2PhaseADataPoint.name(), totalVarHoursImportedQ2PhaseADataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2PhaseADataPoint;
+        totalVArHoursImportedQ2PhaseADataPoint.setName("TotVArhImpQ2PhA");
+        totalVArHoursImportedQ2PhaseADataPoint.setLabel("Total VAr-hours Imported Q2 phase A");
+        totalVArHoursImportedQ2PhaseADataPoint.setUnits("varh");
+        totalVArHoursImportedQ2PhaseADataPoint.setSize(2);
+        totalVArHoursImportedQ2PhaseADataPoint.setAddressOffset(82);
+        totalVArHoursImportedQ2PhaseADataPoint.setBlockOffset(80);
+        totalVArHoursImportedQ2PhaseADataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ2PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2PhaseADataPoint.name(), totalVArHoursImportedQ2PhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2PhaseBDataPoint;
-        totalVarHoursImportedQ2PhaseBDataPoint.setName("TotVArhImpQ2PhB");
-        totalVarHoursImportedQ2PhaseBDataPoint.setLabel("Total VAr-hours Imported Q2 phase B");
-        totalVarHoursImportedQ2PhaseBDataPoint.setUnits("varh");
-        totalVarHoursImportedQ2PhaseBDataPoint.setSize(2);
-        totalVarHoursImportedQ2PhaseBDataPoint.setAddressOffset(84);
-        totalVarHoursImportedQ2PhaseBDataPoint.setBlockOffset(82);
-        totalVarHoursImportedQ2PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ2PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2PhaseBDataPoint.name(), totalVarHoursImportedQ2PhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2PhaseBDataPoint;
+        totalVArHoursImportedQ2PhaseBDataPoint.setName("TotVArhImpQ2PhB");
+        totalVArHoursImportedQ2PhaseBDataPoint.setLabel("Total VAr-hours Imported Q2 phase B");
+        totalVArHoursImportedQ2PhaseBDataPoint.setUnits("varh");
+        totalVArHoursImportedQ2PhaseBDataPoint.setSize(2);
+        totalVArHoursImportedQ2PhaseBDataPoint.setAddressOffset(84);
+        totalVArHoursImportedQ2PhaseBDataPoint.setBlockOffset(82);
+        totalVArHoursImportedQ2PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ2PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2PhaseBDataPoint.name(), totalVArHoursImportedQ2PhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2PhaseCDataPoint;
-        totalVarHoursImportedQ2PhaseCDataPoint.setName("TotVArhImpQ2PhC");
-        totalVarHoursImportedQ2PhaseCDataPoint.setLabel("Total VAr-hours Imported Q2 phase C");
-        totalVarHoursImportedQ2PhaseCDataPoint.setUnits("varh");
-        totalVarHoursImportedQ2PhaseCDataPoint.setSize(2);
-        totalVarHoursImportedQ2PhaseCDataPoint.setAddressOffset(86);
-        totalVarHoursImportedQ2PhaseCDataPoint.setBlockOffset(84);
-        totalVarHoursImportedQ2PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ2PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2PhaseCDataPoint.name(), totalVarHoursImportedQ2PhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2PhaseCDataPoint;
+        totalVArHoursImportedQ2PhaseCDataPoint.setName("TotVArhImpQ2PhC");
+        totalVArHoursImportedQ2PhaseCDataPoint.setLabel("Total VAr-hours Imported Q2 phase C");
+        totalVArHoursImportedQ2PhaseCDataPoint.setUnits("varh");
+        totalVArHoursImportedQ2PhaseCDataPoint.setSize(2);
+        totalVArHoursImportedQ2PhaseCDataPoint.setAddressOffset(86);
+        totalVArHoursImportedQ2PhaseCDataPoint.setBlockOffset(84);
+        totalVArHoursImportedQ2PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ2PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2PhaseCDataPoint.name(), totalVArHoursImportedQ2PhaseCDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3DataPoint;
-        totalVarHoursExportedQ3DataPoint.setName("TotVArhExpQ3");
-        totalVarHoursExportedQ3DataPoint.setLabel("Total VAr-hours Exported Q3");
-        totalVarHoursExportedQ3DataPoint.setDescription("Total Reactive Power Exported Quadrant 3");
-        totalVarHoursExportedQ3DataPoint.setUnits("varh");
-        totalVarHoursExportedQ3DataPoint.setSize(2);
-        totalVarHoursExportedQ3DataPoint.setAddressOffset(88);
-        totalVarHoursExportedQ3DataPoint.setBlockOffset(86);
-        totalVarHoursExportedQ3DataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3DataPoint.name(), totalVarHoursExportedQ3DataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3DataPoint;
+        totalVArHoursExportedQ3DataPoint.setName("TotVArhExpQ3");
+        totalVArHoursExportedQ3DataPoint.setLabel("Total VAr-hours Exported Q3");
+        totalVArHoursExportedQ3DataPoint.setDescription("Total Reactive Power Exported Quadrant 3");
+        totalVArHoursExportedQ3DataPoint.setUnits("varh");
+        totalVArHoursExportedQ3DataPoint.setSize(2);
+        totalVArHoursExportedQ3DataPoint.setAddressOffset(88);
+        totalVArHoursExportedQ3DataPoint.setBlockOffset(86);
+        totalVArHoursExportedQ3DataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3DataPoint.name(), totalVArHoursExportedQ3DataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3PhaseADataPoint;
-        totalVarHoursExportedQ3PhaseADataPoint.setName("TotVArhExpQ3PhA");
-        totalVarHoursExportedQ3PhaseADataPoint.setLabel("Total VAr-hours Exported Q3 phase A");
-        totalVarHoursExportedQ3PhaseADataPoint.setUnits("varh");
-        totalVarHoursExportedQ3PhaseADataPoint.setSize(2);
-        totalVarHoursExportedQ3PhaseADataPoint.setAddressOffset(90);
-        totalVarHoursExportedQ3PhaseADataPoint.setBlockOffset(88);
-        totalVarHoursExportedQ3PhaseADataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ3PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3PhaseADataPoint.name(), totalVarHoursExportedQ3PhaseADataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3PhaseADataPoint;
+        totalVArHoursExportedQ3PhaseADataPoint.setName("TotVArhExpQ3PhA");
+        totalVArHoursExportedQ3PhaseADataPoint.setLabel("Total VAr-hours Exported Q3 phase A");
+        totalVArHoursExportedQ3PhaseADataPoint.setUnits("varh");
+        totalVArHoursExportedQ3PhaseADataPoint.setSize(2);
+        totalVArHoursExportedQ3PhaseADataPoint.setAddressOffset(90);
+        totalVArHoursExportedQ3PhaseADataPoint.setBlockOffset(88);
+        totalVArHoursExportedQ3PhaseADataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ3PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3PhaseADataPoint.name(), totalVArHoursExportedQ3PhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3PhaseBDataPoint;
-        totalVarHoursExportedQ3PhaseBDataPoint.setName("TotVArhExpQ3PhB");
-        totalVarHoursExportedQ3PhaseBDataPoint.setLabel("Total VAr-hours Exported Q3 phase B");
-        totalVarHoursExportedQ3PhaseBDataPoint.setUnits("varh");
-        totalVarHoursExportedQ3PhaseBDataPoint.setSize(2);
-        totalVarHoursExportedQ3PhaseBDataPoint.setAddressOffset(92);
-        totalVarHoursExportedQ3PhaseBDataPoint.setBlockOffset(90);
-        totalVarHoursExportedQ3PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ3PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3PhaseBDataPoint.name(), totalVarHoursExportedQ3PhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3PhaseBDataPoint;
+        totalVArHoursExportedQ3PhaseBDataPoint.setName("TotVArhExpQ3PhB");
+        totalVArHoursExportedQ3PhaseBDataPoint.setLabel("Total VAr-hours Exported Q3 phase B");
+        totalVArHoursExportedQ3PhaseBDataPoint.setUnits("varh");
+        totalVArHoursExportedQ3PhaseBDataPoint.setSize(2);
+        totalVArHoursExportedQ3PhaseBDataPoint.setAddressOffset(92);
+        totalVArHoursExportedQ3PhaseBDataPoint.setBlockOffset(90);
+        totalVArHoursExportedQ3PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ3PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3PhaseBDataPoint.name(), totalVArHoursExportedQ3PhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3PhaseCDataPoint;
-        totalVarHoursExportedQ3PhaseCDataPoint.setName("TotVArhExpQ3PhC");
-        totalVarHoursExportedQ3PhaseCDataPoint.setLabel("Total VAr-hours Exported Q3 phase C");
-        totalVarHoursExportedQ3PhaseCDataPoint.setUnits("varh");
-        totalVarHoursExportedQ3PhaseCDataPoint.setSize(2);
-        totalVarHoursExportedQ3PhaseCDataPoint.setAddressOffset(94);
-        totalVarHoursExportedQ3PhaseCDataPoint.setBlockOffset(92);
-        totalVarHoursExportedQ3PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ3PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3PhaseCDataPoint.name(), totalVarHoursExportedQ3PhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3PhaseCDataPoint;
+        totalVArHoursExportedQ3PhaseCDataPoint.setName("TotVArhExpQ3PhC");
+        totalVArHoursExportedQ3PhaseCDataPoint.setLabel("Total VAr-hours Exported Q3 phase C");
+        totalVArHoursExportedQ3PhaseCDataPoint.setUnits("varh");
+        totalVArHoursExportedQ3PhaseCDataPoint.setSize(2);
+        totalVArHoursExportedQ3PhaseCDataPoint.setAddressOffset(94);
+        totalVArHoursExportedQ3PhaseCDataPoint.setBlockOffset(92);
+        totalVArHoursExportedQ3PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ3PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3PhaseCDataPoint.name(), totalVArHoursExportedQ3PhaseCDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4DataPoint;
-        totalVarHoursExportedQ4DataPoint.setName("TotVArhExpQ4");
-        totalVarHoursExportedQ4DataPoint.setLabel("Total VAr-hours Exported Q4");
-        totalVarHoursExportedQ4DataPoint.setDescription("Total Reactive Power Exported Quadrant 4");
-        totalVarHoursExportedQ4DataPoint.setUnits("varh");
-        totalVarHoursExportedQ4DataPoint.setSize(2);
-        totalVarHoursExportedQ4DataPoint.setAddressOffset(96);
-        totalVarHoursExportedQ4DataPoint.setBlockOffset(94);
-        totalVarHoursExportedQ4DataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4DataPoint.name(), totalVarHoursExportedQ4DataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4DataPoint;
+        totalVArHoursExportedQ4DataPoint.setName("TotVArhExpQ4");
+        totalVArHoursExportedQ4DataPoint.setLabel("Total VAr-hours Exported Q4");
+        totalVArHoursExportedQ4DataPoint.setDescription("Total Reactive Power Exported Quadrant 4");
+        totalVArHoursExportedQ4DataPoint.setUnits("varh");
+        totalVArHoursExportedQ4DataPoint.setSize(2);
+        totalVArHoursExportedQ4DataPoint.setAddressOffset(96);
+        totalVArHoursExportedQ4DataPoint.setBlockOffset(94);
+        totalVArHoursExportedQ4DataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4DataPoint.name(), totalVArHoursExportedQ4DataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4ImportedPhaseADataPoint;
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setName("TotVArhExpQ4PhA");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase A");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setUnits("varh");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setSize(2);
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setAddressOffset(98);
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setBlockOffset(96);
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4ImportedPhaseADataPoint.name(), totalVarHoursExportedQ4ImportedPhaseADataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseADataPoint;
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setName("TotVArhExpQ4PhA");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase A");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setUnits("varh");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setSize(2);
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setAddressOffset(98);
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setBlockOffset(96);
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseADataPoint.name(), totalVArHoursExportedQ4ImportedPhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4ImportedPhaseBDataPoint;
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setName("TotVArhExpQ4PhB");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase B");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setUnits("varh");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setSize(2);
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setAddressOffset(100);
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setBlockOffset(98);
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4ImportedPhaseBDataPoint.name(), totalVarHoursExportedQ4ImportedPhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseBDataPoint;
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setName("TotVArhExpQ4PhB");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase B");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setUnits("varh");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setSize(2);
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setAddressOffset(100);
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setBlockOffset(98);
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseBDataPoint.name(), totalVArHoursExportedQ4ImportedPhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4ImportedPhaseCDataPoint;
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setName("TotVArhExpQ4PhC");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase C");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setUnits("varh");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setSize(2);
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setAddressOffset(102);
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setBlockOffset(100);
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4ImportedPhaseCDataPoint.name(), totalVarHoursExportedQ4ImportedPhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseCDataPoint;
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setName("TotVArhExpQ4PhC");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase C");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setUnits("varh");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setSize(2);
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setAddressOffset(102);
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setBlockOffset(100);
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseCDataPoint.name(), totalVArHoursExportedQ4ImportedPhaseCDataPoint);
 
-        SunSpecDataPoint TotVArh_SFDataPoint;
-        TotVArh_SFDataPoint.setName("TotVArh_SF");
-        TotVArh_SFDataPoint.setDescription("Reactive Energy scale factor");
-        TotVArh_SFDataPoint.setSize(1);
-        TotVArh_SFDataPoint.setAddressOffset(104);
-        TotVArh_SFDataPoint.setBlockOffset(102);
-        TotVArh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(TotVArh_SFDataPoint.name(), TotVArh_SFDataPoint);
+        SunSpecDataPoint totVArh_SFDataPoint;
+        totVArh_SFDataPoint.setName("TotVArh_SF");
+        totVArh_SFDataPoint.setDescription("Reactive Energy scale factor");
+        totVArh_SFDataPoint.setSize(1);
+        totVArh_SFDataPoint.setAddressOffset(104);
+        totVArh_SFDataPoint.setBlockOffset(102);
+        totVArh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(totVArh_SFDataPoint.name(), totVArh_SFDataPoint);
 
         SunSpecDataPoint eventsDataPoint;
         eventsDataPoint.setName("Evt");
@@ -3487,39 +3733,39 @@ void SunSpecAcMeterModel::initDataPoints()
         ampsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
         m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
-        SunSpecDataPoint ampsPhaseaDataPoint;
-        ampsPhaseaDataPoint.setName("AphA");
-        ampsPhaseaDataPoint.setLabel("Amps PhaseA");
-        ampsPhaseaDataPoint.setDescription("Phase A Current");
-        ampsPhaseaDataPoint.setUnits("A");
-        ampsPhaseaDataPoint.setMandatory(true);
-        ampsPhaseaDataPoint.setSize(2);
-        ampsPhaseaDataPoint.setAddressOffset(4);
-        ampsPhaseaDataPoint.setBlockOffset(2);
-        ampsPhaseaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(ampsPhaseaDataPoint.name(), ampsPhaseaDataPoint);
+        SunSpecDataPoint ampsPhaseADataPoint;
+        ampsPhaseADataPoint.setName("AphA");
+        ampsPhaseADataPoint.setLabel("Amps PhaseA");
+        ampsPhaseADataPoint.setDescription("Phase A Current");
+        ampsPhaseADataPoint.setUnits("A");
+        ampsPhaseADataPoint.setMandatory(true);
+        ampsPhaseADataPoint.setSize(2);
+        ampsPhaseADataPoint.setAddressOffset(4);
+        ampsPhaseADataPoint.setBlockOffset(2);
+        ampsPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(ampsPhaseADataPoint.name(), ampsPhaseADataPoint);
 
-        SunSpecDataPoint ampsPhasebDataPoint;
-        ampsPhasebDataPoint.setName("AphB");
-        ampsPhasebDataPoint.setLabel("Amps PhaseB");
-        ampsPhasebDataPoint.setDescription("Phase B Current");
-        ampsPhasebDataPoint.setUnits("A");
-        ampsPhasebDataPoint.setSize(2);
-        ampsPhasebDataPoint.setAddressOffset(6);
-        ampsPhasebDataPoint.setBlockOffset(4);
-        ampsPhasebDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(ampsPhasebDataPoint.name(), ampsPhasebDataPoint);
+        SunSpecDataPoint ampsPhaseBDataPoint;
+        ampsPhaseBDataPoint.setName("AphB");
+        ampsPhaseBDataPoint.setLabel("Amps PhaseB");
+        ampsPhaseBDataPoint.setDescription("Phase B Current");
+        ampsPhaseBDataPoint.setUnits("A");
+        ampsPhaseBDataPoint.setSize(2);
+        ampsPhaseBDataPoint.setAddressOffset(6);
+        ampsPhaseBDataPoint.setBlockOffset(4);
+        ampsPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(ampsPhaseBDataPoint.name(), ampsPhaseBDataPoint);
 
-        SunSpecDataPoint ampsPhasecDataPoint;
-        ampsPhasecDataPoint.setName("AphC");
-        ampsPhasecDataPoint.setLabel("Amps PhaseC");
-        ampsPhasecDataPoint.setDescription("Phase C Current");
-        ampsPhasecDataPoint.setUnits("A");
-        ampsPhasecDataPoint.setSize(2);
-        ampsPhasecDataPoint.setAddressOffset(8);
-        ampsPhasecDataPoint.setBlockOffset(6);
-        ampsPhasecDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(ampsPhasecDataPoint.name(), ampsPhasecDataPoint);
+        SunSpecDataPoint ampsPhaseCDataPoint;
+        ampsPhaseCDataPoint.setName("AphC");
+        ampsPhaseCDataPoint.setLabel("Amps PhaseC");
+        ampsPhaseCDataPoint.setDescription("Phase C Current");
+        ampsPhaseCDataPoint.setUnits("A");
+        ampsPhaseCDataPoint.setSize(2);
+        ampsPhaseCDataPoint.setAddressOffset(8);
+        ampsPhaseCDataPoint.setBlockOffset(6);
+        ampsPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(ampsPhaseCDataPoint.name(), ampsPhaseCDataPoint);
 
         SunSpecDataPoint voltageLnDataPoint;
         voltageLnDataPoint.setName("PhV");
@@ -3963,158 +4209,158 @@ void SunSpecAcMeterModel::initDataPoints()
         totalVarHoursImportedQ1DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
         m_dataPoints.insert(totalVarHoursImportedQ1DataPoint.name(), totalVarHoursImportedQ1DataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ1PhaseADataPoint;
-        totalVarHoursImportedQ1PhaseADataPoint.setName("TotVArhImpQ1phA");
-        totalVarHoursImportedQ1PhaseADataPoint.setLabel("Total VAr-hours Imported Q1 phase A");
-        totalVarHoursImportedQ1PhaseADataPoint.setUnits("varh");
-        totalVarHoursImportedQ1PhaseADataPoint.setSize(2);
-        totalVarHoursImportedQ1PhaseADataPoint.setAddressOffset(94);
-        totalVarHoursImportedQ1PhaseADataPoint.setBlockOffset(92);
-        totalVarHoursImportedQ1PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ1PhaseADataPoint.name(), totalVarHoursImportedQ1PhaseADataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ1PhaseADataPoint;
+        totalVArHoursImportedQ1PhaseADataPoint.setName("TotVArhImpQ1phA");
+        totalVArHoursImportedQ1PhaseADataPoint.setLabel("Total VAr-hours Imported Q1 phase A");
+        totalVArHoursImportedQ1PhaseADataPoint.setUnits("varh");
+        totalVArHoursImportedQ1PhaseADataPoint.setSize(2);
+        totalVArHoursImportedQ1PhaseADataPoint.setAddressOffset(94);
+        totalVArHoursImportedQ1PhaseADataPoint.setBlockOffset(92);
+        totalVArHoursImportedQ1PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ1PhaseADataPoint.name(), totalVArHoursImportedQ1PhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ1PhaseBDataPoint;
-        totalVarHoursImportedQ1PhaseBDataPoint.setName("TotVArhImpQ1phB");
-        totalVarHoursImportedQ1PhaseBDataPoint.setLabel("Total VAr-hours Imported Q1 phase B");
-        totalVarHoursImportedQ1PhaseBDataPoint.setUnits("varh");
-        totalVarHoursImportedQ1PhaseBDataPoint.setSize(2);
-        totalVarHoursImportedQ1PhaseBDataPoint.setAddressOffset(96);
-        totalVarHoursImportedQ1PhaseBDataPoint.setBlockOffset(94);
-        totalVarHoursImportedQ1PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ1PhaseBDataPoint.name(), totalVarHoursImportedQ1PhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ1PhaseBDataPoint;
+        totalVArHoursImportedQ1PhaseBDataPoint.setName("TotVArhImpQ1phB");
+        totalVArHoursImportedQ1PhaseBDataPoint.setLabel("Total VAr-hours Imported Q1 phase B");
+        totalVArHoursImportedQ1PhaseBDataPoint.setUnits("varh");
+        totalVArHoursImportedQ1PhaseBDataPoint.setSize(2);
+        totalVArHoursImportedQ1PhaseBDataPoint.setAddressOffset(96);
+        totalVArHoursImportedQ1PhaseBDataPoint.setBlockOffset(94);
+        totalVArHoursImportedQ1PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ1PhaseBDataPoint.name(), totalVArHoursImportedQ1PhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ1PhaseCDataPoint;
-        totalVarHoursImportedQ1PhaseCDataPoint.setName("TotVArhImpQ1phC");
-        totalVarHoursImportedQ1PhaseCDataPoint.setLabel("Total VAr-hours Imported Q1 phase C");
-        totalVarHoursImportedQ1PhaseCDataPoint.setUnits("varh");
-        totalVarHoursImportedQ1PhaseCDataPoint.setSize(2);
-        totalVarHoursImportedQ1PhaseCDataPoint.setAddressOffset(98);
-        totalVarHoursImportedQ1PhaseCDataPoint.setBlockOffset(96);
-        totalVarHoursImportedQ1PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ1PhaseCDataPoint.name(), totalVarHoursImportedQ1PhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ1PhaseCDataPoint;
+        totalVArHoursImportedQ1PhaseCDataPoint.setName("TotVArhImpQ1phC");
+        totalVArHoursImportedQ1PhaseCDataPoint.setLabel("Total VAr-hours Imported Q1 phase C");
+        totalVArHoursImportedQ1PhaseCDataPoint.setUnits("varh");
+        totalVArHoursImportedQ1PhaseCDataPoint.setSize(2);
+        totalVArHoursImportedQ1PhaseCDataPoint.setAddressOffset(98);
+        totalVArHoursImportedQ1PhaseCDataPoint.setBlockOffset(96);
+        totalVArHoursImportedQ1PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ1PhaseCDataPoint.name(), totalVArHoursImportedQ1PhaseCDataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2DataPoint;
-        totalVarHoursImportedQ2DataPoint.setName("TotVArhImpQ2");
-        totalVarHoursImportedQ2DataPoint.setLabel("Total VAr-hours Imported Q2");
-        totalVarHoursImportedQ2DataPoint.setDescription("Total Reactive Power Imported Quadrant 2");
-        totalVarHoursImportedQ2DataPoint.setUnits("varh");
-        totalVarHoursImportedQ2DataPoint.setSize(2);
-        totalVarHoursImportedQ2DataPoint.setAddressOffset(100);
-        totalVarHoursImportedQ2DataPoint.setBlockOffset(98);
-        totalVarHoursImportedQ2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2DataPoint.name(), totalVarHoursImportedQ2DataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2DataPoint;
+        totalVArHoursImportedQ2DataPoint.setName("TotVArhImpQ2");
+        totalVArHoursImportedQ2DataPoint.setLabel("Total VAr-hours Imported Q2");
+        totalVArHoursImportedQ2DataPoint.setDescription("Total Reactive Power Imported Quadrant 2");
+        totalVArHoursImportedQ2DataPoint.setUnits("varh");
+        totalVArHoursImportedQ2DataPoint.setSize(2);
+        totalVArHoursImportedQ2DataPoint.setAddressOffset(100);
+        totalVArHoursImportedQ2DataPoint.setBlockOffset(98);
+        totalVArHoursImportedQ2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2DataPoint.name(), totalVArHoursImportedQ2DataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2PhaseADataPoint;
-        totalVarHoursImportedQ2PhaseADataPoint.setName("TotVArhImpQ2phA");
-        totalVarHoursImportedQ2PhaseADataPoint.setLabel("Total VAr-hours Imported Q2 phase A");
-        totalVarHoursImportedQ2PhaseADataPoint.setUnits("varh");
-        totalVarHoursImportedQ2PhaseADataPoint.setSize(2);
-        totalVarHoursImportedQ2PhaseADataPoint.setAddressOffset(102);
-        totalVarHoursImportedQ2PhaseADataPoint.setBlockOffset(100);
-        totalVarHoursImportedQ2PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2PhaseADataPoint.name(), totalVarHoursImportedQ2PhaseADataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2PhaseADataPoint;
+        totalVArHoursImportedQ2PhaseADataPoint.setName("TotVArhImpQ2phA");
+        totalVArHoursImportedQ2PhaseADataPoint.setLabel("Total VAr-hours Imported Q2 phase A");
+        totalVArHoursImportedQ2PhaseADataPoint.setUnits("varh");
+        totalVArHoursImportedQ2PhaseADataPoint.setSize(2);
+        totalVArHoursImportedQ2PhaseADataPoint.setAddressOffset(102);
+        totalVArHoursImportedQ2PhaseADataPoint.setBlockOffset(100);
+        totalVArHoursImportedQ2PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2PhaseADataPoint.name(), totalVArHoursImportedQ2PhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2PhaseBDataPoint;
-        totalVarHoursImportedQ2PhaseBDataPoint.setName("TotVArhImpQ2phB");
-        totalVarHoursImportedQ2PhaseBDataPoint.setLabel("Total VAr-hours Imported Q2 phase B");
-        totalVarHoursImportedQ2PhaseBDataPoint.setUnits("varh");
-        totalVarHoursImportedQ2PhaseBDataPoint.setSize(2);
-        totalVarHoursImportedQ2PhaseBDataPoint.setAddressOffset(104);
-        totalVarHoursImportedQ2PhaseBDataPoint.setBlockOffset(102);
-        totalVarHoursImportedQ2PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2PhaseBDataPoint.name(), totalVarHoursImportedQ2PhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2PhaseBDataPoint;
+        totalVArHoursImportedQ2PhaseBDataPoint.setName("TotVArhImpQ2phB");
+        totalVArHoursImportedQ2PhaseBDataPoint.setLabel("Total VAr-hours Imported Q2 phase B");
+        totalVArHoursImportedQ2PhaseBDataPoint.setUnits("varh");
+        totalVArHoursImportedQ2PhaseBDataPoint.setSize(2);
+        totalVArHoursImportedQ2PhaseBDataPoint.setAddressOffset(104);
+        totalVArHoursImportedQ2PhaseBDataPoint.setBlockOffset(102);
+        totalVArHoursImportedQ2PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2PhaseBDataPoint.name(), totalVArHoursImportedQ2PhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2PhaseCDataPoint;
-        totalVarHoursImportedQ2PhaseCDataPoint.setName("TotVArhImpQ2phC");
-        totalVarHoursImportedQ2PhaseCDataPoint.setLabel("Total VAr-hours Imported Q2 phase C");
-        totalVarHoursImportedQ2PhaseCDataPoint.setUnits("varh");
-        totalVarHoursImportedQ2PhaseCDataPoint.setSize(2);
-        totalVarHoursImportedQ2PhaseCDataPoint.setAddressOffset(106);
-        totalVarHoursImportedQ2PhaseCDataPoint.setBlockOffset(104);
-        totalVarHoursImportedQ2PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2PhaseCDataPoint.name(), totalVarHoursImportedQ2PhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2PhaseCDataPoint;
+        totalVArHoursImportedQ2PhaseCDataPoint.setName("TotVArhImpQ2phC");
+        totalVArHoursImportedQ2PhaseCDataPoint.setLabel("Total VAr-hours Imported Q2 phase C");
+        totalVArHoursImportedQ2PhaseCDataPoint.setUnits("varh");
+        totalVArHoursImportedQ2PhaseCDataPoint.setSize(2);
+        totalVArHoursImportedQ2PhaseCDataPoint.setAddressOffset(106);
+        totalVArHoursImportedQ2PhaseCDataPoint.setBlockOffset(104);
+        totalVArHoursImportedQ2PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2PhaseCDataPoint.name(), totalVArHoursImportedQ2PhaseCDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3DataPoint;
-        totalVarHoursExportedQ3DataPoint.setName("TotVArhExpQ3");
-        totalVarHoursExportedQ3DataPoint.setLabel("Total VAr-hours Exported Q3");
-        totalVarHoursExportedQ3DataPoint.setDescription("Total Reactive Power Exported Quadrant 3");
-        totalVarHoursExportedQ3DataPoint.setUnits("varh");
-        totalVarHoursExportedQ3DataPoint.setSize(2);
-        totalVarHoursExportedQ3DataPoint.setAddressOffset(108);
-        totalVarHoursExportedQ3DataPoint.setBlockOffset(106);
-        totalVarHoursExportedQ3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3DataPoint.name(), totalVarHoursExportedQ3DataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3DataPoint;
+        totalVArHoursExportedQ3DataPoint.setName("TotVArhExpQ3");
+        totalVArHoursExportedQ3DataPoint.setLabel("Total VAr-hours Exported Q3");
+        totalVArHoursExportedQ3DataPoint.setDescription("Total Reactive Power Exported Quadrant 3");
+        totalVArHoursExportedQ3DataPoint.setUnits("varh");
+        totalVArHoursExportedQ3DataPoint.setSize(2);
+        totalVArHoursExportedQ3DataPoint.setAddressOffset(108);
+        totalVArHoursExportedQ3DataPoint.setBlockOffset(106);
+        totalVArHoursExportedQ3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3DataPoint.name(), totalVArHoursExportedQ3DataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3PhaseADataPoint;
-        totalVarHoursExportedQ3PhaseADataPoint.setName("TotVArhExpQ3phA");
-        totalVarHoursExportedQ3PhaseADataPoint.setLabel("Total VAr-hours Exported Q3 phase A");
-        totalVarHoursExportedQ3PhaseADataPoint.setUnits("varh");
-        totalVarHoursExportedQ3PhaseADataPoint.setSize(2);
-        totalVarHoursExportedQ3PhaseADataPoint.setAddressOffset(110);
-        totalVarHoursExportedQ3PhaseADataPoint.setBlockOffset(108);
-        totalVarHoursExportedQ3PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3PhaseADataPoint.name(), totalVarHoursExportedQ3PhaseADataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3PhaseADataPoint;
+        totalVArHoursExportedQ3PhaseADataPoint.setName("TotVArhExpQ3phA");
+        totalVArHoursExportedQ3PhaseADataPoint.setLabel("Total VAr-hours Exported Q3 phase A");
+        totalVArHoursExportedQ3PhaseADataPoint.setUnits("varh");
+        totalVArHoursExportedQ3PhaseADataPoint.setSize(2);
+        totalVArHoursExportedQ3PhaseADataPoint.setAddressOffset(110);
+        totalVArHoursExportedQ3PhaseADataPoint.setBlockOffset(108);
+        totalVArHoursExportedQ3PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3PhaseADataPoint.name(), totalVArHoursExportedQ3PhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3PhaseBDataPoint;
-        totalVarHoursExportedQ3PhaseBDataPoint.setName("TotVArhExpQ3phB");
-        totalVarHoursExportedQ3PhaseBDataPoint.setLabel("Total VAr-hours Exported Q3 phase B");
-        totalVarHoursExportedQ3PhaseBDataPoint.setUnits("varh");
-        totalVarHoursExportedQ3PhaseBDataPoint.setSize(2);
-        totalVarHoursExportedQ3PhaseBDataPoint.setAddressOffset(112);
-        totalVarHoursExportedQ3PhaseBDataPoint.setBlockOffset(110);
-        totalVarHoursExportedQ3PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3PhaseBDataPoint.name(), totalVarHoursExportedQ3PhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3PhaseBDataPoint;
+        totalVArHoursExportedQ3PhaseBDataPoint.setName("TotVArhExpQ3phB");
+        totalVArHoursExportedQ3PhaseBDataPoint.setLabel("Total VAr-hours Exported Q3 phase B");
+        totalVArHoursExportedQ3PhaseBDataPoint.setUnits("varh");
+        totalVArHoursExportedQ3PhaseBDataPoint.setSize(2);
+        totalVArHoursExportedQ3PhaseBDataPoint.setAddressOffset(112);
+        totalVArHoursExportedQ3PhaseBDataPoint.setBlockOffset(110);
+        totalVArHoursExportedQ3PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3PhaseBDataPoint.name(), totalVArHoursExportedQ3PhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3PhaseCDataPoint;
-        totalVarHoursExportedQ3PhaseCDataPoint.setName("TotVArhExpQ3phC");
-        totalVarHoursExportedQ3PhaseCDataPoint.setLabel("Total VAr-hours Exported Q3 phase C");
-        totalVarHoursExportedQ3PhaseCDataPoint.setUnits("varh");
-        totalVarHoursExportedQ3PhaseCDataPoint.setSize(2);
-        totalVarHoursExportedQ3PhaseCDataPoint.setAddressOffset(114);
-        totalVarHoursExportedQ3PhaseCDataPoint.setBlockOffset(112);
-        totalVarHoursExportedQ3PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3PhaseCDataPoint.name(), totalVarHoursExportedQ3PhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3PhaseCDataPoint;
+        totalVArHoursExportedQ3PhaseCDataPoint.setName("TotVArhExpQ3phC");
+        totalVArHoursExportedQ3PhaseCDataPoint.setLabel("Total VAr-hours Exported Q3 phase C");
+        totalVArHoursExportedQ3PhaseCDataPoint.setUnits("varh");
+        totalVArHoursExportedQ3PhaseCDataPoint.setSize(2);
+        totalVArHoursExportedQ3PhaseCDataPoint.setAddressOffset(114);
+        totalVArHoursExportedQ3PhaseCDataPoint.setBlockOffset(112);
+        totalVArHoursExportedQ3PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3PhaseCDataPoint.name(), totalVArHoursExportedQ3PhaseCDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4DataPoint;
-        totalVarHoursExportedQ4DataPoint.setName("TotVArhExpQ4");
-        totalVarHoursExportedQ4DataPoint.setLabel("Total VAr-hours Exported Q4");
-        totalVarHoursExportedQ4DataPoint.setDescription("Total Reactive Power Exported Quadrant 4");
-        totalVarHoursExportedQ4DataPoint.setUnits("varh");
-        totalVarHoursExportedQ4DataPoint.setSize(2);
-        totalVarHoursExportedQ4DataPoint.setAddressOffset(116);
-        totalVarHoursExportedQ4DataPoint.setBlockOffset(114);
-        totalVarHoursExportedQ4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4DataPoint.name(), totalVarHoursExportedQ4DataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4DataPoint;
+        totalVArHoursExportedQ4DataPoint.setName("TotVArhExpQ4");
+        totalVArHoursExportedQ4DataPoint.setLabel("Total VAr-hours Exported Q4");
+        totalVArHoursExportedQ4DataPoint.setDescription("Total Reactive Power Exported Quadrant 4");
+        totalVArHoursExportedQ4DataPoint.setUnits("varh");
+        totalVArHoursExportedQ4DataPoint.setSize(2);
+        totalVArHoursExportedQ4DataPoint.setAddressOffset(116);
+        totalVArHoursExportedQ4DataPoint.setBlockOffset(114);
+        totalVArHoursExportedQ4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4DataPoint.name(), totalVArHoursExportedQ4DataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4ImportedPhaseADataPoint;
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setName("TotVArhExpQ4phA");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase A");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setUnits("varh");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setSize(2);
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setAddressOffset(118);
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setBlockOffset(116);
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4ImportedPhaseADataPoint.name(), totalVarHoursExportedQ4ImportedPhaseADataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseADataPoint;
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setName("TotVArhExpQ4phA");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase A");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setUnits("varh");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setSize(2);
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setAddressOffset(118);
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setBlockOffset(116);
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseADataPoint.name(), totalVArHoursExportedQ4ImportedPhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4ImportedPhaseBDataPoint;
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setName("TotVArhExpQ4phB");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase B");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setUnits("varh");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setSize(2);
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setAddressOffset(120);
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setBlockOffset(118);
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4ImportedPhaseBDataPoint.name(), totalVarHoursExportedQ4ImportedPhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseBDataPoint;
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setName("TotVArhExpQ4phB");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase B");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setUnits("varh");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setSize(2);
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setAddressOffset(120);
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setBlockOffset(118);
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseBDataPoint.name(), totalVArHoursExportedQ4ImportedPhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4ImportedPhaseCDataPoint;
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setName("TotVArhExpQ4phC");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase C");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setUnits("varh");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setSize(2);
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setAddressOffset(122);
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setBlockOffset(120);
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4ImportedPhaseCDataPoint.name(), totalVarHoursExportedQ4ImportedPhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseCDataPoint;
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setName("TotVArhExpQ4phC");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase C");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setUnits("varh");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setSize(2);
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setAddressOffset(122);
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setBlockOffset(120);
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseCDataPoint.name(), totalVArHoursExportedQ4ImportedPhaseCDataPoint);
 
         SunSpecDataPoint eventsDataPoint;
         eventsDataPoint.setName("Evt");
@@ -4162,40 +4408,40 @@ void SunSpecAcMeterModel::initDataPoints()
         ampsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
         m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
-        SunSpecDataPoint ampsPhaseaDataPoint;
-        ampsPhaseaDataPoint.setName("AphA");
-        ampsPhaseaDataPoint.setLabel("Amps PhaseA");
-        ampsPhaseaDataPoint.setDescription("Phase A Current");
-        ampsPhaseaDataPoint.setUnits("A");
-        ampsPhaseaDataPoint.setMandatory(true);
-        ampsPhaseaDataPoint.setSize(2);
-        ampsPhaseaDataPoint.setAddressOffset(4);
-        ampsPhaseaDataPoint.setBlockOffset(2);
-        ampsPhaseaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(ampsPhaseaDataPoint.name(), ampsPhaseaDataPoint);
+        SunSpecDataPoint ampsPhaseADataPoint;
+        ampsPhaseADataPoint.setName("AphA");
+        ampsPhaseADataPoint.setLabel("Amps PhaseA");
+        ampsPhaseADataPoint.setDescription("Phase A Current");
+        ampsPhaseADataPoint.setUnits("A");
+        ampsPhaseADataPoint.setMandatory(true);
+        ampsPhaseADataPoint.setSize(2);
+        ampsPhaseADataPoint.setAddressOffset(4);
+        ampsPhaseADataPoint.setBlockOffset(2);
+        ampsPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(ampsPhaseADataPoint.name(), ampsPhaseADataPoint);
 
-        SunSpecDataPoint ampsPhasebDataPoint;
-        ampsPhasebDataPoint.setName("AphB");
-        ampsPhasebDataPoint.setLabel("Amps PhaseB");
-        ampsPhasebDataPoint.setDescription("Phase B Current");
-        ampsPhasebDataPoint.setUnits("A");
-        ampsPhasebDataPoint.setMandatory(true);
-        ampsPhasebDataPoint.setSize(2);
-        ampsPhasebDataPoint.setAddressOffset(6);
-        ampsPhasebDataPoint.setBlockOffset(4);
-        ampsPhasebDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(ampsPhasebDataPoint.name(), ampsPhasebDataPoint);
+        SunSpecDataPoint ampsPhaseBDataPoint;
+        ampsPhaseBDataPoint.setName("AphB");
+        ampsPhaseBDataPoint.setLabel("Amps PhaseB");
+        ampsPhaseBDataPoint.setDescription("Phase B Current");
+        ampsPhaseBDataPoint.setUnits("A");
+        ampsPhaseBDataPoint.setMandatory(true);
+        ampsPhaseBDataPoint.setSize(2);
+        ampsPhaseBDataPoint.setAddressOffset(6);
+        ampsPhaseBDataPoint.setBlockOffset(4);
+        ampsPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(ampsPhaseBDataPoint.name(), ampsPhaseBDataPoint);
 
-        SunSpecDataPoint ampsPhasecDataPoint;
-        ampsPhasecDataPoint.setName("AphC");
-        ampsPhasecDataPoint.setLabel("Amps PhaseC");
-        ampsPhasecDataPoint.setDescription("Phase C Current");
-        ampsPhasecDataPoint.setUnits("A");
-        ampsPhasecDataPoint.setSize(2);
-        ampsPhasecDataPoint.setAddressOffset(8);
-        ampsPhasecDataPoint.setBlockOffset(6);
-        ampsPhasecDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(ampsPhasecDataPoint.name(), ampsPhasecDataPoint);
+        SunSpecDataPoint ampsPhaseCDataPoint;
+        ampsPhaseCDataPoint.setName("AphC");
+        ampsPhaseCDataPoint.setLabel("Amps PhaseC");
+        ampsPhaseCDataPoint.setDescription("Phase C Current");
+        ampsPhaseCDataPoint.setUnits("A");
+        ampsPhaseCDataPoint.setSize(2);
+        ampsPhaseCDataPoint.setAddressOffset(8);
+        ampsPhaseCDataPoint.setBlockOffset(6);
+        ampsPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(ampsPhaseCDataPoint.name(), ampsPhaseCDataPoint);
 
         SunSpecDataPoint voltageLnDataPoint;
         voltageLnDataPoint.setName("PhV");
@@ -4644,158 +4890,158 @@ void SunSpecAcMeterModel::initDataPoints()
         totalVarHoursImportedQ1DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
         m_dataPoints.insert(totalVarHoursImportedQ1DataPoint.name(), totalVarHoursImportedQ1DataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ1PhaseADataPoint;
-        totalVarHoursImportedQ1PhaseADataPoint.setName("TotVArhImpQ1phA");
-        totalVarHoursImportedQ1PhaseADataPoint.setLabel("Total VAr-hours Imported Q1 phase A");
-        totalVarHoursImportedQ1PhaseADataPoint.setUnits("varh");
-        totalVarHoursImportedQ1PhaseADataPoint.setSize(2);
-        totalVarHoursImportedQ1PhaseADataPoint.setAddressOffset(94);
-        totalVarHoursImportedQ1PhaseADataPoint.setBlockOffset(92);
-        totalVarHoursImportedQ1PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ1PhaseADataPoint.name(), totalVarHoursImportedQ1PhaseADataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ1PhaseADataPoint;
+        totalVArHoursImportedQ1PhaseADataPoint.setName("TotVArhImpQ1phA");
+        totalVArHoursImportedQ1PhaseADataPoint.setLabel("Total VAr-hours Imported Q1 phase A");
+        totalVArHoursImportedQ1PhaseADataPoint.setUnits("varh");
+        totalVArHoursImportedQ1PhaseADataPoint.setSize(2);
+        totalVArHoursImportedQ1PhaseADataPoint.setAddressOffset(94);
+        totalVArHoursImportedQ1PhaseADataPoint.setBlockOffset(92);
+        totalVArHoursImportedQ1PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ1PhaseADataPoint.name(), totalVArHoursImportedQ1PhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ1PhaseBDataPoint;
-        totalVarHoursImportedQ1PhaseBDataPoint.setName("TotVArhImpQ1phB");
-        totalVarHoursImportedQ1PhaseBDataPoint.setLabel("Total VAr-hours Imported Q1 phase B");
-        totalVarHoursImportedQ1PhaseBDataPoint.setUnits("varh");
-        totalVarHoursImportedQ1PhaseBDataPoint.setSize(2);
-        totalVarHoursImportedQ1PhaseBDataPoint.setAddressOffset(96);
-        totalVarHoursImportedQ1PhaseBDataPoint.setBlockOffset(94);
-        totalVarHoursImportedQ1PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ1PhaseBDataPoint.name(), totalVarHoursImportedQ1PhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ1PhaseBDataPoint;
+        totalVArHoursImportedQ1PhaseBDataPoint.setName("TotVArhImpQ1phB");
+        totalVArHoursImportedQ1PhaseBDataPoint.setLabel("Total VAr-hours Imported Q1 phase B");
+        totalVArHoursImportedQ1PhaseBDataPoint.setUnits("varh");
+        totalVArHoursImportedQ1PhaseBDataPoint.setSize(2);
+        totalVArHoursImportedQ1PhaseBDataPoint.setAddressOffset(96);
+        totalVArHoursImportedQ1PhaseBDataPoint.setBlockOffset(94);
+        totalVArHoursImportedQ1PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ1PhaseBDataPoint.name(), totalVArHoursImportedQ1PhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ1PhaseCDataPoint;
-        totalVarHoursImportedQ1PhaseCDataPoint.setName("TotVArhImpQ1phC");
-        totalVarHoursImportedQ1PhaseCDataPoint.setLabel("Total VAr-hours Imported Q1 phase C");
-        totalVarHoursImportedQ1PhaseCDataPoint.setUnits("varh");
-        totalVarHoursImportedQ1PhaseCDataPoint.setSize(2);
-        totalVarHoursImportedQ1PhaseCDataPoint.setAddressOffset(98);
-        totalVarHoursImportedQ1PhaseCDataPoint.setBlockOffset(96);
-        totalVarHoursImportedQ1PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ1PhaseCDataPoint.name(), totalVarHoursImportedQ1PhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ1PhaseCDataPoint;
+        totalVArHoursImportedQ1PhaseCDataPoint.setName("TotVArhImpQ1phC");
+        totalVArHoursImportedQ1PhaseCDataPoint.setLabel("Total VAr-hours Imported Q1 phase C");
+        totalVArHoursImportedQ1PhaseCDataPoint.setUnits("varh");
+        totalVArHoursImportedQ1PhaseCDataPoint.setSize(2);
+        totalVArHoursImportedQ1PhaseCDataPoint.setAddressOffset(98);
+        totalVArHoursImportedQ1PhaseCDataPoint.setBlockOffset(96);
+        totalVArHoursImportedQ1PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ1PhaseCDataPoint.name(), totalVArHoursImportedQ1PhaseCDataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2DataPoint;
-        totalVarHoursImportedQ2DataPoint.setName("TotVArhImpQ2");
-        totalVarHoursImportedQ2DataPoint.setLabel("Total VAr-hours Imported Q2");
-        totalVarHoursImportedQ2DataPoint.setDescription("Total Reactive Power Imported Quadrant 2");
-        totalVarHoursImportedQ2DataPoint.setUnits("varh");
-        totalVarHoursImportedQ2DataPoint.setSize(2);
-        totalVarHoursImportedQ2DataPoint.setAddressOffset(100);
-        totalVarHoursImportedQ2DataPoint.setBlockOffset(98);
-        totalVarHoursImportedQ2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2DataPoint.name(), totalVarHoursImportedQ2DataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2DataPoint;
+        totalVArHoursImportedQ2DataPoint.setName("TotVArhImpQ2");
+        totalVArHoursImportedQ2DataPoint.setLabel("Total VAr-hours Imported Q2");
+        totalVArHoursImportedQ2DataPoint.setDescription("Total Reactive Power Imported Quadrant 2");
+        totalVArHoursImportedQ2DataPoint.setUnits("varh");
+        totalVArHoursImportedQ2DataPoint.setSize(2);
+        totalVArHoursImportedQ2DataPoint.setAddressOffset(100);
+        totalVArHoursImportedQ2DataPoint.setBlockOffset(98);
+        totalVArHoursImportedQ2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2DataPoint.name(), totalVArHoursImportedQ2DataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2PhaseADataPoint;
-        totalVarHoursImportedQ2PhaseADataPoint.setName("TotVArhImpQ2phA");
-        totalVarHoursImportedQ2PhaseADataPoint.setLabel("Total VAr-hours Imported Q2 phase A");
-        totalVarHoursImportedQ2PhaseADataPoint.setUnits("varh");
-        totalVarHoursImportedQ2PhaseADataPoint.setSize(2);
-        totalVarHoursImportedQ2PhaseADataPoint.setAddressOffset(102);
-        totalVarHoursImportedQ2PhaseADataPoint.setBlockOffset(100);
-        totalVarHoursImportedQ2PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2PhaseADataPoint.name(), totalVarHoursImportedQ2PhaseADataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2PhaseADataPoint;
+        totalVArHoursImportedQ2PhaseADataPoint.setName("TotVArhImpQ2phA");
+        totalVArHoursImportedQ2PhaseADataPoint.setLabel("Total VAr-hours Imported Q2 phase A");
+        totalVArHoursImportedQ2PhaseADataPoint.setUnits("varh");
+        totalVArHoursImportedQ2PhaseADataPoint.setSize(2);
+        totalVArHoursImportedQ2PhaseADataPoint.setAddressOffset(102);
+        totalVArHoursImportedQ2PhaseADataPoint.setBlockOffset(100);
+        totalVArHoursImportedQ2PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2PhaseADataPoint.name(), totalVArHoursImportedQ2PhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2PhaseBDataPoint;
-        totalVarHoursImportedQ2PhaseBDataPoint.setName("TotVArhImpQ2phB");
-        totalVarHoursImportedQ2PhaseBDataPoint.setLabel("Total VAr-hours Imported Q2 phase B");
-        totalVarHoursImportedQ2PhaseBDataPoint.setUnits("varh");
-        totalVarHoursImportedQ2PhaseBDataPoint.setSize(2);
-        totalVarHoursImportedQ2PhaseBDataPoint.setAddressOffset(104);
-        totalVarHoursImportedQ2PhaseBDataPoint.setBlockOffset(102);
-        totalVarHoursImportedQ2PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2PhaseBDataPoint.name(), totalVarHoursImportedQ2PhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2PhaseBDataPoint;
+        totalVArHoursImportedQ2PhaseBDataPoint.setName("TotVArhImpQ2phB");
+        totalVArHoursImportedQ2PhaseBDataPoint.setLabel("Total VAr-hours Imported Q2 phase B");
+        totalVArHoursImportedQ2PhaseBDataPoint.setUnits("varh");
+        totalVArHoursImportedQ2PhaseBDataPoint.setSize(2);
+        totalVArHoursImportedQ2PhaseBDataPoint.setAddressOffset(104);
+        totalVArHoursImportedQ2PhaseBDataPoint.setBlockOffset(102);
+        totalVArHoursImportedQ2PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2PhaseBDataPoint.name(), totalVArHoursImportedQ2PhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2PhaseCDataPoint;
-        totalVarHoursImportedQ2PhaseCDataPoint.setName("TotVArhImpQ2phC");
-        totalVarHoursImportedQ2PhaseCDataPoint.setLabel("Total VAr-hours Imported Q2 phase C");
-        totalVarHoursImportedQ2PhaseCDataPoint.setUnits("varh");
-        totalVarHoursImportedQ2PhaseCDataPoint.setSize(2);
-        totalVarHoursImportedQ2PhaseCDataPoint.setAddressOffset(106);
-        totalVarHoursImportedQ2PhaseCDataPoint.setBlockOffset(104);
-        totalVarHoursImportedQ2PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2PhaseCDataPoint.name(), totalVarHoursImportedQ2PhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2PhaseCDataPoint;
+        totalVArHoursImportedQ2PhaseCDataPoint.setName("TotVArhImpQ2phC");
+        totalVArHoursImportedQ2PhaseCDataPoint.setLabel("Total VAr-hours Imported Q2 phase C");
+        totalVArHoursImportedQ2PhaseCDataPoint.setUnits("varh");
+        totalVArHoursImportedQ2PhaseCDataPoint.setSize(2);
+        totalVArHoursImportedQ2PhaseCDataPoint.setAddressOffset(106);
+        totalVArHoursImportedQ2PhaseCDataPoint.setBlockOffset(104);
+        totalVArHoursImportedQ2PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2PhaseCDataPoint.name(), totalVArHoursImportedQ2PhaseCDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3DataPoint;
-        totalVarHoursExportedQ3DataPoint.setName("TotVArhExpQ3");
-        totalVarHoursExportedQ3DataPoint.setLabel("Total VAr-hours Exported Q3");
-        totalVarHoursExportedQ3DataPoint.setDescription("Total Reactive Power Exported Quadrant 3");
-        totalVarHoursExportedQ3DataPoint.setUnits("varh");
-        totalVarHoursExportedQ3DataPoint.setSize(2);
-        totalVarHoursExportedQ3DataPoint.setAddressOffset(108);
-        totalVarHoursExportedQ3DataPoint.setBlockOffset(106);
-        totalVarHoursExportedQ3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3DataPoint.name(), totalVarHoursExportedQ3DataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3DataPoint;
+        totalVArHoursExportedQ3DataPoint.setName("TotVArhExpQ3");
+        totalVArHoursExportedQ3DataPoint.setLabel("Total VAr-hours Exported Q3");
+        totalVArHoursExportedQ3DataPoint.setDescription("Total Reactive Power Exported Quadrant 3");
+        totalVArHoursExportedQ3DataPoint.setUnits("varh");
+        totalVArHoursExportedQ3DataPoint.setSize(2);
+        totalVArHoursExportedQ3DataPoint.setAddressOffset(108);
+        totalVArHoursExportedQ3DataPoint.setBlockOffset(106);
+        totalVArHoursExportedQ3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3DataPoint.name(), totalVArHoursExportedQ3DataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3PhaseADataPoint;
-        totalVarHoursExportedQ3PhaseADataPoint.setName("TotVArhExpQ3phA");
-        totalVarHoursExportedQ3PhaseADataPoint.setLabel("Total VAr-hours Exported Q3 phase A");
-        totalVarHoursExportedQ3PhaseADataPoint.setUnits("varh");
-        totalVarHoursExportedQ3PhaseADataPoint.setSize(2);
-        totalVarHoursExportedQ3PhaseADataPoint.setAddressOffset(110);
-        totalVarHoursExportedQ3PhaseADataPoint.setBlockOffset(108);
-        totalVarHoursExportedQ3PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3PhaseADataPoint.name(), totalVarHoursExportedQ3PhaseADataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3PhaseADataPoint;
+        totalVArHoursExportedQ3PhaseADataPoint.setName("TotVArhExpQ3phA");
+        totalVArHoursExportedQ3PhaseADataPoint.setLabel("Total VAr-hours Exported Q3 phase A");
+        totalVArHoursExportedQ3PhaseADataPoint.setUnits("varh");
+        totalVArHoursExportedQ3PhaseADataPoint.setSize(2);
+        totalVArHoursExportedQ3PhaseADataPoint.setAddressOffset(110);
+        totalVArHoursExportedQ3PhaseADataPoint.setBlockOffset(108);
+        totalVArHoursExportedQ3PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3PhaseADataPoint.name(), totalVArHoursExportedQ3PhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3PhaseBDataPoint;
-        totalVarHoursExportedQ3PhaseBDataPoint.setName("TotVArhExpQ3phB");
-        totalVarHoursExportedQ3PhaseBDataPoint.setLabel("Total VAr-hours Exported Q3 phase B");
-        totalVarHoursExportedQ3PhaseBDataPoint.setUnits("varh");
-        totalVarHoursExportedQ3PhaseBDataPoint.setSize(2);
-        totalVarHoursExportedQ3PhaseBDataPoint.setAddressOffset(112);
-        totalVarHoursExportedQ3PhaseBDataPoint.setBlockOffset(110);
-        totalVarHoursExportedQ3PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3PhaseBDataPoint.name(), totalVarHoursExportedQ3PhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3PhaseBDataPoint;
+        totalVArHoursExportedQ3PhaseBDataPoint.setName("TotVArhExpQ3phB");
+        totalVArHoursExportedQ3PhaseBDataPoint.setLabel("Total VAr-hours Exported Q3 phase B");
+        totalVArHoursExportedQ3PhaseBDataPoint.setUnits("varh");
+        totalVArHoursExportedQ3PhaseBDataPoint.setSize(2);
+        totalVArHoursExportedQ3PhaseBDataPoint.setAddressOffset(112);
+        totalVArHoursExportedQ3PhaseBDataPoint.setBlockOffset(110);
+        totalVArHoursExportedQ3PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3PhaseBDataPoint.name(), totalVArHoursExportedQ3PhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3PhaseCDataPoint;
-        totalVarHoursExportedQ3PhaseCDataPoint.setName("TotVArhExpQ3phC");
-        totalVarHoursExportedQ3PhaseCDataPoint.setLabel("Total VAr-hours Exported Q3 phase C");
-        totalVarHoursExportedQ3PhaseCDataPoint.setUnits("varh");
-        totalVarHoursExportedQ3PhaseCDataPoint.setSize(2);
-        totalVarHoursExportedQ3PhaseCDataPoint.setAddressOffset(114);
-        totalVarHoursExportedQ3PhaseCDataPoint.setBlockOffset(112);
-        totalVarHoursExportedQ3PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3PhaseCDataPoint.name(), totalVarHoursExportedQ3PhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3PhaseCDataPoint;
+        totalVArHoursExportedQ3PhaseCDataPoint.setName("TotVArhExpQ3phC");
+        totalVArHoursExportedQ3PhaseCDataPoint.setLabel("Total VAr-hours Exported Q3 phase C");
+        totalVArHoursExportedQ3PhaseCDataPoint.setUnits("varh");
+        totalVArHoursExportedQ3PhaseCDataPoint.setSize(2);
+        totalVArHoursExportedQ3PhaseCDataPoint.setAddressOffset(114);
+        totalVArHoursExportedQ3PhaseCDataPoint.setBlockOffset(112);
+        totalVArHoursExportedQ3PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3PhaseCDataPoint.name(), totalVArHoursExportedQ3PhaseCDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4DataPoint;
-        totalVarHoursExportedQ4DataPoint.setName("TotVArhExpQ4");
-        totalVarHoursExportedQ4DataPoint.setLabel("Total VAr-hours Exported Q4");
-        totalVarHoursExportedQ4DataPoint.setDescription("Total Reactive Power Exported Quadrant 4");
-        totalVarHoursExportedQ4DataPoint.setUnits("varh");
-        totalVarHoursExportedQ4DataPoint.setSize(2);
-        totalVarHoursExportedQ4DataPoint.setAddressOffset(116);
-        totalVarHoursExportedQ4DataPoint.setBlockOffset(114);
-        totalVarHoursExportedQ4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4DataPoint.name(), totalVarHoursExportedQ4DataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4DataPoint;
+        totalVArHoursExportedQ4DataPoint.setName("TotVArhExpQ4");
+        totalVArHoursExportedQ4DataPoint.setLabel("Total VAr-hours Exported Q4");
+        totalVArHoursExportedQ4DataPoint.setDescription("Total Reactive Power Exported Quadrant 4");
+        totalVArHoursExportedQ4DataPoint.setUnits("varh");
+        totalVArHoursExportedQ4DataPoint.setSize(2);
+        totalVArHoursExportedQ4DataPoint.setAddressOffset(116);
+        totalVArHoursExportedQ4DataPoint.setBlockOffset(114);
+        totalVArHoursExportedQ4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4DataPoint.name(), totalVArHoursExportedQ4DataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4ImportedPhaseADataPoint;
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setName("TotVArhExpQ4phA");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase A");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setUnits("varh");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setSize(2);
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setAddressOffset(118);
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setBlockOffset(116);
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4ImportedPhaseADataPoint.name(), totalVarHoursExportedQ4ImportedPhaseADataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseADataPoint;
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setName("TotVArhExpQ4phA");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase A");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setUnits("varh");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setSize(2);
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setAddressOffset(118);
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setBlockOffset(116);
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseADataPoint.name(), totalVArHoursExportedQ4ImportedPhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4ImportedPhaseBDataPoint;
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setName("TotVArhExpQ4phB");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase B");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setUnits("varh");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setSize(2);
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setAddressOffset(120);
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setBlockOffset(118);
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4ImportedPhaseBDataPoint.name(), totalVarHoursExportedQ4ImportedPhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseBDataPoint;
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setName("TotVArhExpQ4phB");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase B");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setUnits("varh");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setSize(2);
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setAddressOffset(120);
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setBlockOffset(118);
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseBDataPoint.name(), totalVArHoursExportedQ4ImportedPhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4ImportedPhaseCDataPoint;
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setName("TotVArhExpQ4phC");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase C");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setUnits("varh");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setSize(2);
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setAddressOffset(122);
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setBlockOffset(120);
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4ImportedPhaseCDataPoint.name(), totalVarHoursExportedQ4ImportedPhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseCDataPoint;
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setName("TotVArhExpQ4phC");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase C");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setUnits("varh");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setSize(2);
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setAddressOffset(122);
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setBlockOffset(120);
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseCDataPoint.name(), totalVArHoursExportedQ4ImportedPhaseCDataPoint);
 
         SunSpecDataPoint eventsDataPoint;
         eventsDataPoint.setName("Evt");
@@ -4843,41 +5089,41 @@ void SunSpecAcMeterModel::initDataPoints()
         ampsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
         m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
-        SunSpecDataPoint ampsPhaseaDataPoint;
-        ampsPhaseaDataPoint.setName("AphA");
-        ampsPhaseaDataPoint.setLabel("Amps PhaseA");
-        ampsPhaseaDataPoint.setDescription("Phase A Current");
-        ampsPhaseaDataPoint.setUnits("A");
-        ampsPhaseaDataPoint.setMandatory(true);
-        ampsPhaseaDataPoint.setSize(2);
-        ampsPhaseaDataPoint.setAddressOffset(4);
-        ampsPhaseaDataPoint.setBlockOffset(2);
-        ampsPhaseaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(ampsPhaseaDataPoint.name(), ampsPhaseaDataPoint);
+        SunSpecDataPoint ampsPhaseADataPoint;
+        ampsPhaseADataPoint.setName("AphA");
+        ampsPhaseADataPoint.setLabel("Amps PhaseA");
+        ampsPhaseADataPoint.setDescription("Phase A Current");
+        ampsPhaseADataPoint.setUnits("A");
+        ampsPhaseADataPoint.setMandatory(true);
+        ampsPhaseADataPoint.setSize(2);
+        ampsPhaseADataPoint.setAddressOffset(4);
+        ampsPhaseADataPoint.setBlockOffset(2);
+        ampsPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(ampsPhaseADataPoint.name(), ampsPhaseADataPoint);
 
-        SunSpecDataPoint ampsPhasebDataPoint;
-        ampsPhasebDataPoint.setName("AphB");
-        ampsPhasebDataPoint.setLabel("Amps PhaseB");
-        ampsPhasebDataPoint.setDescription("Phase B Current");
-        ampsPhasebDataPoint.setUnits("A");
-        ampsPhasebDataPoint.setMandatory(true);
-        ampsPhasebDataPoint.setSize(2);
-        ampsPhasebDataPoint.setAddressOffset(6);
-        ampsPhasebDataPoint.setBlockOffset(4);
-        ampsPhasebDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(ampsPhasebDataPoint.name(), ampsPhasebDataPoint);
+        SunSpecDataPoint ampsPhaseBDataPoint;
+        ampsPhaseBDataPoint.setName("AphB");
+        ampsPhaseBDataPoint.setLabel("Amps PhaseB");
+        ampsPhaseBDataPoint.setDescription("Phase B Current");
+        ampsPhaseBDataPoint.setUnits("A");
+        ampsPhaseBDataPoint.setMandatory(true);
+        ampsPhaseBDataPoint.setSize(2);
+        ampsPhaseBDataPoint.setAddressOffset(6);
+        ampsPhaseBDataPoint.setBlockOffset(4);
+        ampsPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(ampsPhaseBDataPoint.name(), ampsPhaseBDataPoint);
 
-        SunSpecDataPoint ampsPhasecDataPoint;
-        ampsPhasecDataPoint.setName("AphC");
-        ampsPhasecDataPoint.setLabel("Amps PhaseC");
-        ampsPhasecDataPoint.setDescription("Phase C Current");
-        ampsPhasecDataPoint.setUnits("A");
-        ampsPhasecDataPoint.setMandatory(true);
-        ampsPhasecDataPoint.setSize(2);
-        ampsPhasecDataPoint.setAddressOffset(8);
-        ampsPhasecDataPoint.setBlockOffset(6);
-        ampsPhasecDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(ampsPhasecDataPoint.name(), ampsPhasecDataPoint);
+        SunSpecDataPoint ampsPhaseCDataPoint;
+        ampsPhaseCDataPoint.setName("AphC");
+        ampsPhaseCDataPoint.setLabel("Amps PhaseC");
+        ampsPhaseCDataPoint.setDescription("Phase C Current");
+        ampsPhaseCDataPoint.setUnits("A");
+        ampsPhaseCDataPoint.setMandatory(true);
+        ampsPhaseCDataPoint.setSize(2);
+        ampsPhaseCDataPoint.setAddressOffset(8);
+        ampsPhaseCDataPoint.setBlockOffset(6);
+        ampsPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(ampsPhaseCDataPoint.name(), ampsPhaseCDataPoint);
 
         SunSpecDataPoint voltageLnDataPoint;
         voltageLnDataPoint.setName("PhV");
@@ -5329,158 +5575,158 @@ void SunSpecAcMeterModel::initDataPoints()
         totalVarHoursImportedQ1DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
         m_dataPoints.insert(totalVarHoursImportedQ1DataPoint.name(), totalVarHoursImportedQ1DataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ1PhaseADataPoint;
-        totalVarHoursImportedQ1PhaseADataPoint.setName("TotVArhImpQ1phA");
-        totalVarHoursImportedQ1PhaseADataPoint.setLabel("Total VAr-hours Imported Q1 phase A");
-        totalVarHoursImportedQ1PhaseADataPoint.setUnits("varh");
-        totalVarHoursImportedQ1PhaseADataPoint.setSize(2);
-        totalVarHoursImportedQ1PhaseADataPoint.setAddressOffset(94);
-        totalVarHoursImportedQ1PhaseADataPoint.setBlockOffset(92);
-        totalVarHoursImportedQ1PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ1PhaseADataPoint.name(), totalVarHoursImportedQ1PhaseADataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ1PhaseADataPoint;
+        totalVArHoursImportedQ1PhaseADataPoint.setName("TotVArhImpQ1phA");
+        totalVArHoursImportedQ1PhaseADataPoint.setLabel("Total VAr-hours Imported Q1 phase A");
+        totalVArHoursImportedQ1PhaseADataPoint.setUnits("varh");
+        totalVArHoursImportedQ1PhaseADataPoint.setSize(2);
+        totalVArHoursImportedQ1PhaseADataPoint.setAddressOffset(94);
+        totalVArHoursImportedQ1PhaseADataPoint.setBlockOffset(92);
+        totalVArHoursImportedQ1PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ1PhaseADataPoint.name(), totalVArHoursImportedQ1PhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ1PhaseBDataPoint;
-        totalVarHoursImportedQ1PhaseBDataPoint.setName("TotVArhImpQ1phB");
-        totalVarHoursImportedQ1PhaseBDataPoint.setLabel("Total VAr-hours Imported Q1 phase B");
-        totalVarHoursImportedQ1PhaseBDataPoint.setUnits("varh");
-        totalVarHoursImportedQ1PhaseBDataPoint.setSize(2);
-        totalVarHoursImportedQ1PhaseBDataPoint.setAddressOffset(96);
-        totalVarHoursImportedQ1PhaseBDataPoint.setBlockOffset(94);
-        totalVarHoursImportedQ1PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ1PhaseBDataPoint.name(), totalVarHoursImportedQ1PhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ1PhaseBDataPoint;
+        totalVArHoursImportedQ1PhaseBDataPoint.setName("TotVArhImpQ1phB");
+        totalVArHoursImportedQ1PhaseBDataPoint.setLabel("Total VAr-hours Imported Q1 phase B");
+        totalVArHoursImportedQ1PhaseBDataPoint.setUnits("varh");
+        totalVArHoursImportedQ1PhaseBDataPoint.setSize(2);
+        totalVArHoursImportedQ1PhaseBDataPoint.setAddressOffset(96);
+        totalVArHoursImportedQ1PhaseBDataPoint.setBlockOffset(94);
+        totalVArHoursImportedQ1PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ1PhaseBDataPoint.name(), totalVArHoursImportedQ1PhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ1PhaseCDataPoint;
-        totalVarHoursImportedQ1PhaseCDataPoint.setName("TotVArhImpQ1phC");
-        totalVarHoursImportedQ1PhaseCDataPoint.setLabel("Total VAr-hours Imported Q1 phase C");
-        totalVarHoursImportedQ1PhaseCDataPoint.setUnits("varh");
-        totalVarHoursImportedQ1PhaseCDataPoint.setSize(2);
-        totalVarHoursImportedQ1PhaseCDataPoint.setAddressOffset(98);
-        totalVarHoursImportedQ1PhaseCDataPoint.setBlockOffset(96);
-        totalVarHoursImportedQ1PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ1PhaseCDataPoint.name(), totalVarHoursImportedQ1PhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ1PhaseCDataPoint;
+        totalVArHoursImportedQ1PhaseCDataPoint.setName("TotVArhImpQ1phC");
+        totalVArHoursImportedQ1PhaseCDataPoint.setLabel("Total VAr-hours Imported Q1 phase C");
+        totalVArHoursImportedQ1PhaseCDataPoint.setUnits("varh");
+        totalVArHoursImportedQ1PhaseCDataPoint.setSize(2);
+        totalVArHoursImportedQ1PhaseCDataPoint.setAddressOffset(98);
+        totalVArHoursImportedQ1PhaseCDataPoint.setBlockOffset(96);
+        totalVArHoursImportedQ1PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ1PhaseCDataPoint.name(), totalVArHoursImportedQ1PhaseCDataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2DataPoint;
-        totalVarHoursImportedQ2DataPoint.setName("TotVArhImpQ2");
-        totalVarHoursImportedQ2DataPoint.setLabel("Total VAr-hours Imported Q2");
-        totalVarHoursImportedQ2DataPoint.setDescription("Total Reactive Power Imported Quadrant 2");
-        totalVarHoursImportedQ2DataPoint.setUnits("varh");
-        totalVarHoursImportedQ2DataPoint.setSize(2);
-        totalVarHoursImportedQ2DataPoint.setAddressOffset(100);
-        totalVarHoursImportedQ2DataPoint.setBlockOffset(98);
-        totalVarHoursImportedQ2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2DataPoint.name(), totalVarHoursImportedQ2DataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2DataPoint;
+        totalVArHoursImportedQ2DataPoint.setName("TotVArhImpQ2");
+        totalVArHoursImportedQ2DataPoint.setLabel("Total VAr-hours Imported Q2");
+        totalVArHoursImportedQ2DataPoint.setDescription("Total Reactive Power Imported Quadrant 2");
+        totalVArHoursImportedQ2DataPoint.setUnits("varh");
+        totalVArHoursImportedQ2DataPoint.setSize(2);
+        totalVArHoursImportedQ2DataPoint.setAddressOffset(100);
+        totalVArHoursImportedQ2DataPoint.setBlockOffset(98);
+        totalVArHoursImportedQ2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2DataPoint.name(), totalVArHoursImportedQ2DataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2PhaseADataPoint;
-        totalVarHoursImportedQ2PhaseADataPoint.setName("TotVArhImpQ2phA");
-        totalVarHoursImportedQ2PhaseADataPoint.setLabel("Total VAr-hours Imported Q2 phase A");
-        totalVarHoursImportedQ2PhaseADataPoint.setUnits("varh");
-        totalVarHoursImportedQ2PhaseADataPoint.setSize(2);
-        totalVarHoursImportedQ2PhaseADataPoint.setAddressOffset(102);
-        totalVarHoursImportedQ2PhaseADataPoint.setBlockOffset(100);
-        totalVarHoursImportedQ2PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2PhaseADataPoint.name(), totalVarHoursImportedQ2PhaseADataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2PhaseADataPoint;
+        totalVArHoursImportedQ2PhaseADataPoint.setName("TotVArhImpQ2phA");
+        totalVArHoursImportedQ2PhaseADataPoint.setLabel("Total VAr-hours Imported Q2 phase A");
+        totalVArHoursImportedQ2PhaseADataPoint.setUnits("varh");
+        totalVArHoursImportedQ2PhaseADataPoint.setSize(2);
+        totalVArHoursImportedQ2PhaseADataPoint.setAddressOffset(102);
+        totalVArHoursImportedQ2PhaseADataPoint.setBlockOffset(100);
+        totalVArHoursImportedQ2PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2PhaseADataPoint.name(), totalVArHoursImportedQ2PhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2PhaseBDataPoint;
-        totalVarHoursImportedQ2PhaseBDataPoint.setName("TotVArhImpQ2phB");
-        totalVarHoursImportedQ2PhaseBDataPoint.setLabel("Total VAr-hours Imported Q2 phase B");
-        totalVarHoursImportedQ2PhaseBDataPoint.setUnits("varh");
-        totalVarHoursImportedQ2PhaseBDataPoint.setSize(2);
-        totalVarHoursImportedQ2PhaseBDataPoint.setAddressOffset(104);
-        totalVarHoursImportedQ2PhaseBDataPoint.setBlockOffset(102);
-        totalVarHoursImportedQ2PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2PhaseBDataPoint.name(), totalVarHoursImportedQ2PhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2PhaseBDataPoint;
+        totalVArHoursImportedQ2PhaseBDataPoint.setName("TotVArhImpQ2phB");
+        totalVArHoursImportedQ2PhaseBDataPoint.setLabel("Total VAr-hours Imported Q2 phase B");
+        totalVArHoursImportedQ2PhaseBDataPoint.setUnits("varh");
+        totalVArHoursImportedQ2PhaseBDataPoint.setSize(2);
+        totalVArHoursImportedQ2PhaseBDataPoint.setAddressOffset(104);
+        totalVArHoursImportedQ2PhaseBDataPoint.setBlockOffset(102);
+        totalVArHoursImportedQ2PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2PhaseBDataPoint.name(), totalVArHoursImportedQ2PhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2PhaseCDataPoint;
-        totalVarHoursImportedQ2PhaseCDataPoint.setName("TotVArhImpQ2phC");
-        totalVarHoursImportedQ2PhaseCDataPoint.setLabel("Total VAr-hours Imported Q2 phase C");
-        totalVarHoursImportedQ2PhaseCDataPoint.setUnits("varh");
-        totalVarHoursImportedQ2PhaseCDataPoint.setSize(2);
-        totalVarHoursImportedQ2PhaseCDataPoint.setAddressOffset(106);
-        totalVarHoursImportedQ2PhaseCDataPoint.setBlockOffset(104);
-        totalVarHoursImportedQ2PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2PhaseCDataPoint.name(), totalVarHoursImportedQ2PhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2PhaseCDataPoint;
+        totalVArHoursImportedQ2PhaseCDataPoint.setName("TotVArhImpQ2phC");
+        totalVArHoursImportedQ2PhaseCDataPoint.setLabel("Total VAr-hours Imported Q2 phase C");
+        totalVArHoursImportedQ2PhaseCDataPoint.setUnits("varh");
+        totalVArHoursImportedQ2PhaseCDataPoint.setSize(2);
+        totalVArHoursImportedQ2PhaseCDataPoint.setAddressOffset(106);
+        totalVArHoursImportedQ2PhaseCDataPoint.setBlockOffset(104);
+        totalVArHoursImportedQ2PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2PhaseCDataPoint.name(), totalVArHoursImportedQ2PhaseCDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3DataPoint;
-        totalVarHoursExportedQ3DataPoint.setName("TotVArhExpQ3");
-        totalVarHoursExportedQ3DataPoint.setLabel("Total VAr-hours Exported Q3");
-        totalVarHoursExportedQ3DataPoint.setDescription("Total Reactive Power Exported Quadrant 3");
-        totalVarHoursExportedQ3DataPoint.setUnits("varh");
-        totalVarHoursExportedQ3DataPoint.setSize(2);
-        totalVarHoursExportedQ3DataPoint.setAddressOffset(108);
-        totalVarHoursExportedQ3DataPoint.setBlockOffset(106);
-        totalVarHoursExportedQ3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3DataPoint.name(), totalVarHoursExportedQ3DataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3DataPoint;
+        totalVArHoursExportedQ3DataPoint.setName("TotVArhExpQ3");
+        totalVArHoursExportedQ3DataPoint.setLabel("Total VAr-hours Exported Q3");
+        totalVArHoursExportedQ3DataPoint.setDescription("Total Reactive Power Exported Quadrant 3");
+        totalVArHoursExportedQ3DataPoint.setUnits("varh");
+        totalVArHoursExportedQ3DataPoint.setSize(2);
+        totalVArHoursExportedQ3DataPoint.setAddressOffset(108);
+        totalVArHoursExportedQ3DataPoint.setBlockOffset(106);
+        totalVArHoursExportedQ3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3DataPoint.name(), totalVArHoursExportedQ3DataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3PhaseADataPoint;
-        totalVarHoursExportedQ3PhaseADataPoint.setName("TotVArhExpQ3phA");
-        totalVarHoursExportedQ3PhaseADataPoint.setLabel("Total VAr-hours Exported Q3 phase A");
-        totalVarHoursExportedQ3PhaseADataPoint.setUnits("varh");
-        totalVarHoursExportedQ3PhaseADataPoint.setSize(2);
-        totalVarHoursExportedQ3PhaseADataPoint.setAddressOffset(110);
-        totalVarHoursExportedQ3PhaseADataPoint.setBlockOffset(108);
-        totalVarHoursExportedQ3PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3PhaseADataPoint.name(), totalVarHoursExportedQ3PhaseADataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3PhaseADataPoint;
+        totalVArHoursExportedQ3PhaseADataPoint.setName("TotVArhExpQ3phA");
+        totalVArHoursExportedQ3PhaseADataPoint.setLabel("Total VAr-hours Exported Q3 phase A");
+        totalVArHoursExportedQ3PhaseADataPoint.setUnits("varh");
+        totalVArHoursExportedQ3PhaseADataPoint.setSize(2);
+        totalVArHoursExportedQ3PhaseADataPoint.setAddressOffset(110);
+        totalVArHoursExportedQ3PhaseADataPoint.setBlockOffset(108);
+        totalVArHoursExportedQ3PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3PhaseADataPoint.name(), totalVArHoursExportedQ3PhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3PhaseBDataPoint;
-        totalVarHoursExportedQ3PhaseBDataPoint.setName("TotVArhExpQ3phB");
-        totalVarHoursExportedQ3PhaseBDataPoint.setLabel("Total VAr-hours Exported Q3 phase B");
-        totalVarHoursExportedQ3PhaseBDataPoint.setUnits("varh");
-        totalVarHoursExportedQ3PhaseBDataPoint.setSize(2);
-        totalVarHoursExportedQ3PhaseBDataPoint.setAddressOffset(112);
-        totalVarHoursExportedQ3PhaseBDataPoint.setBlockOffset(110);
-        totalVarHoursExportedQ3PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3PhaseBDataPoint.name(), totalVarHoursExportedQ3PhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3PhaseBDataPoint;
+        totalVArHoursExportedQ3PhaseBDataPoint.setName("TotVArhExpQ3phB");
+        totalVArHoursExportedQ3PhaseBDataPoint.setLabel("Total VAr-hours Exported Q3 phase B");
+        totalVArHoursExportedQ3PhaseBDataPoint.setUnits("varh");
+        totalVArHoursExportedQ3PhaseBDataPoint.setSize(2);
+        totalVArHoursExportedQ3PhaseBDataPoint.setAddressOffset(112);
+        totalVArHoursExportedQ3PhaseBDataPoint.setBlockOffset(110);
+        totalVArHoursExportedQ3PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3PhaseBDataPoint.name(), totalVArHoursExportedQ3PhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3PhaseCDataPoint;
-        totalVarHoursExportedQ3PhaseCDataPoint.setName("TotVArhExpQ3phC");
-        totalVarHoursExportedQ3PhaseCDataPoint.setLabel("Total VAr-hours Exported Q3 phase C");
-        totalVarHoursExportedQ3PhaseCDataPoint.setUnits("varh");
-        totalVarHoursExportedQ3PhaseCDataPoint.setSize(2);
-        totalVarHoursExportedQ3PhaseCDataPoint.setAddressOffset(114);
-        totalVarHoursExportedQ3PhaseCDataPoint.setBlockOffset(112);
-        totalVarHoursExportedQ3PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3PhaseCDataPoint.name(), totalVarHoursExportedQ3PhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3PhaseCDataPoint;
+        totalVArHoursExportedQ3PhaseCDataPoint.setName("TotVArhExpQ3phC");
+        totalVArHoursExportedQ3PhaseCDataPoint.setLabel("Total VAr-hours Exported Q3 phase C");
+        totalVArHoursExportedQ3PhaseCDataPoint.setUnits("varh");
+        totalVArHoursExportedQ3PhaseCDataPoint.setSize(2);
+        totalVArHoursExportedQ3PhaseCDataPoint.setAddressOffset(114);
+        totalVArHoursExportedQ3PhaseCDataPoint.setBlockOffset(112);
+        totalVArHoursExportedQ3PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3PhaseCDataPoint.name(), totalVArHoursExportedQ3PhaseCDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4DataPoint;
-        totalVarHoursExportedQ4DataPoint.setName("TotVArhExpQ4");
-        totalVarHoursExportedQ4DataPoint.setLabel("Total VAr-hours Exported Q4");
-        totalVarHoursExportedQ4DataPoint.setDescription("Total Reactive Power Exported Quadrant 4");
-        totalVarHoursExportedQ4DataPoint.setUnits("varh");
-        totalVarHoursExportedQ4DataPoint.setSize(2);
-        totalVarHoursExportedQ4DataPoint.setAddressOffset(116);
-        totalVarHoursExportedQ4DataPoint.setBlockOffset(114);
-        totalVarHoursExportedQ4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4DataPoint.name(), totalVarHoursExportedQ4DataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4DataPoint;
+        totalVArHoursExportedQ4DataPoint.setName("TotVArhExpQ4");
+        totalVArHoursExportedQ4DataPoint.setLabel("Total VAr-hours Exported Q4");
+        totalVArHoursExportedQ4DataPoint.setDescription("Total Reactive Power Exported Quadrant 4");
+        totalVArHoursExportedQ4DataPoint.setUnits("varh");
+        totalVArHoursExportedQ4DataPoint.setSize(2);
+        totalVArHoursExportedQ4DataPoint.setAddressOffset(116);
+        totalVArHoursExportedQ4DataPoint.setBlockOffset(114);
+        totalVArHoursExportedQ4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4DataPoint.name(), totalVArHoursExportedQ4DataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4ImportedPhaseADataPoint;
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setName("TotVArhExpQ4phA");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase A");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setUnits("varh");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setSize(2);
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setAddressOffset(118);
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setBlockOffset(116);
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4ImportedPhaseADataPoint.name(), totalVarHoursExportedQ4ImportedPhaseADataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseADataPoint;
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setName("TotVArhExpQ4phA");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase A");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setUnits("varh");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setSize(2);
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setAddressOffset(118);
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setBlockOffset(116);
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseADataPoint.name(), totalVArHoursExportedQ4ImportedPhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4ImportedPhaseBDataPoint;
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setName("TotVArhExpQ4phB");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase B");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setUnits("varh");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setSize(2);
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setAddressOffset(120);
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setBlockOffset(118);
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4ImportedPhaseBDataPoint.name(), totalVarHoursExportedQ4ImportedPhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseBDataPoint;
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setName("TotVArhExpQ4phB");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase B");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setUnits("varh");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setSize(2);
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setAddressOffset(120);
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setBlockOffset(118);
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseBDataPoint.name(), totalVArHoursExportedQ4ImportedPhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4ImportedPhaseCDataPoint;
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setName("TotVArhExpQ4phC");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase C");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setUnits("varh");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setSize(2);
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setAddressOffset(122);
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setBlockOffset(120);
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4ImportedPhaseCDataPoint.name(), totalVarHoursExportedQ4ImportedPhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseCDataPoint;
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setName("TotVArhExpQ4phC");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase C");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setUnits("varh");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setSize(2);
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setAddressOffset(122);
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setBlockOffset(120);
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseCDataPoint.name(), totalVArHoursExportedQ4ImportedPhaseCDataPoint);
 
         SunSpecDataPoint eventsDataPoint;
         eventsDataPoint.setName("Evt");
@@ -5528,41 +5774,41 @@ void SunSpecAcMeterModel::initDataPoints()
         ampsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
         m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
-        SunSpecDataPoint ampsPhaseaDataPoint;
-        ampsPhaseaDataPoint.setName("AphA");
-        ampsPhaseaDataPoint.setLabel("Amps PhaseA");
-        ampsPhaseaDataPoint.setDescription("Phase A Current");
-        ampsPhaseaDataPoint.setUnits("A");
-        ampsPhaseaDataPoint.setMandatory(true);
-        ampsPhaseaDataPoint.setSize(2);
-        ampsPhaseaDataPoint.setAddressOffset(4);
-        ampsPhaseaDataPoint.setBlockOffset(2);
-        ampsPhaseaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(ampsPhaseaDataPoint.name(), ampsPhaseaDataPoint);
+        SunSpecDataPoint ampsPhaseADataPoint;
+        ampsPhaseADataPoint.setName("AphA");
+        ampsPhaseADataPoint.setLabel("Amps PhaseA");
+        ampsPhaseADataPoint.setDescription("Phase A Current");
+        ampsPhaseADataPoint.setUnits("A");
+        ampsPhaseADataPoint.setMandatory(true);
+        ampsPhaseADataPoint.setSize(2);
+        ampsPhaseADataPoint.setAddressOffset(4);
+        ampsPhaseADataPoint.setBlockOffset(2);
+        ampsPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(ampsPhaseADataPoint.name(), ampsPhaseADataPoint);
 
-        SunSpecDataPoint ampsPhasebDataPoint;
-        ampsPhasebDataPoint.setName("AphB");
-        ampsPhasebDataPoint.setLabel("Amps PhaseB");
-        ampsPhasebDataPoint.setDescription("Phase B Current");
-        ampsPhasebDataPoint.setUnits("A");
-        ampsPhasebDataPoint.setMandatory(true);
-        ampsPhasebDataPoint.setSize(2);
-        ampsPhasebDataPoint.setAddressOffset(6);
-        ampsPhasebDataPoint.setBlockOffset(4);
-        ampsPhasebDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(ampsPhasebDataPoint.name(), ampsPhasebDataPoint);
+        SunSpecDataPoint ampsPhaseBDataPoint;
+        ampsPhaseBDataPoint.setName("AphB");
+        ampsPhaseBDataPoint.setLabel("Amps PhaseB");
+        ampsPhaseBDataPoint.setDescription("Phase B Current");
+        ampsPhaseBDataPoint.setUnits("A");
+        ampsPhaseBDataPoint.setMandatory(true);
+        ampsPhaseBDataPoint.setSize(2);
+        ampsPhaseBDataPoint.setAddressOffset(6);
+        ampsPhaseBDataPoint.setBlockOffset(4);
+        ampsPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(ampsPhaseBDataPoint.name(), ampsPhaseBDataPoint);
 
-        SunSpecDataPoint ampsPhasecDataPoint;
-        ampsPhasecDataPoint.setName("AphC");
-        ampsPhasecDataPoint.setLabel("Amps PhaseC");
-        ampsPhasecDataPoint.setDescription("Phase C Current");
-        ampsPhasecDataPoint.setUnits("A");
-        ampsPhasecDataPoint.setMandatory(true);
-        ampsPhasecDataPoint.setSize(2);
-        ampsPhasecDataPoint.setAddressOffset(8);
-        ampsPhasecDataPoint.setBlockOffset(6);
-        ampsPhasecDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(ampsPhasecDataPoint.name(), ampsPhasecDataPoint);
+        SunSpecDataPoint ampsPhaseCDataPoint;
+        ampsPhaseCDataPoint.setName("AphC");
+        ampsPhaseCDataPoint.setLabel("Amps PhaseC");
+        ampsPhaseCDataPoint.setDescription("Phase C Current");
+        ampsPhaseCDataPoint.setUnits("A");
+        ampsPhaseCDataPoint.setMandatory(true);
+        ampsPhaseCDataPoint.setSize(2);
+        ampsPhaseCDataPoint.setAddressOffset(8);
+        ampsPhaseCDataPoint.setBlockOffset(6);
+        ampsPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(ampsPhaseCDataPoint.name(), ampsPhaseCDataPoint);
 
         SunSpecDataPoint voltageLnDataPoint;
         voltageLnDataPoint.setName("PhV");
@@ -6010,158 +6256,158 @@ void SunSpecAcMeterModel::initDataPoints()
         totalVarHoursImportedQ1DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
         m_dataPoints.insert(totalVarHoursImportedQ1DataPoint.name(), totalVarHoursImportedQ1DataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ1PhaseADataPoint;
-        totalVarHoursImportedQ1PhaseADataPoint.setName("TotVArhImpQ1phA");
-        totalVarHoursImportedQ1PhaseADataPoint.setLabel("Total VAr-hours Imported Q1 phase A");
-        totalVarHoursImportedQ1PhaseADataPoint.setUnits("varh");
-        totalVarHoursImportedQ1PhaseADataPoint.setSize(2);
-        totalVarHoursImportedQ1PhaseADataPoint.setAddressOffset(94);
-        totalVarHoursImportedQ1PhaseADataPoint.setBlockOffset(92);
-        totalVarHoursImportedQ1PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ1PhaseADataPoint.name(), totalVarHoursImportedQ1PhaseADataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ1PhaseADataPoint;
+        totalVArHoursImportedQ1PhaseADataPoint.setName("TotVArhImpQ1phA");
+        totalVArHoursImportedQ1PhaseADataPoint.setLabel("Total VAr-hours Imported Q1 phase A");
+        totalVArHoursImportedQ1PhaseADataPoint.setUnits("varh");
+        totalVArHoursImportedQ1PhaseADataPoint.setSize(2);
+        totalVArHoursImportedQ1PhaseADataPoint.setAddressOffset(94);
+        totalVArHoursImportedQ1PhaseADataPoint.setBlockOffset(92);
+        totalVArHoursImportedQ1PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ1PhaseADataPoint.name(), totalVArHoursImportedQ1PhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ1PhaseBDataPoint;
-        totalVarHoursImportedQ1PhaseBDataPoint.setName("TotVArhImpQ1phB");
-        totalVarHoursImportedQ1PhaseBDataPoint.setLabel("Total VAr-hours Imported Q1 phase B");
-        totalVarHoursImportedQ1PhaseBDataPoint.setUnits("varh");
-        totalVarHoursImportedQ1PhaseBDataPoint.setSize(2);
-        totalVarHoursImportedQ1PhaseBDataPoint.setAddressOffset(96);
-        totalVarHoursImportedQ1PhaseBDataPoint.setBlockOffset(94);
-        totalVarHoursImportedQ1PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ1PhaseBDataPoint.name(), totalVarHoursImportedQ1PhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ1PhaseBDataPoint;
+        totalVArHoursImportedQ1PhaseBDataPoint.setName("TotVArhImpQ1phB");
+        totalVArHoursImportedQ1PhaseBDataPoint.setLabel("Total VAr-hours Imported Q1 phase B");
+        totalVArHoursImportedQ1PhaseBDataPoint.setUnits("varh");
+        totalVArHoursImportedQ1PhaseBDataPoint.setSize(2);
+        totalVArHoursImportedQ1PhaseBDataPoint.setAddressOffset(96);
+        totalVArHoursImportedQ1PhaseBDataPoint.setBlockOffset(94);
+        totalVArHoursImportedQ1PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ1PhaseBDataPoint.name(), totalVArHoursImportedQ1PhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ1PhaseCDataPoint;
-        totalVarHoursImportedQ1PhaseCDataPoint.setName("TotVArhImpQ1phC");
-        totalVarHoursImportedQ1PhaseCDataPoint.setLabel("Total VAr-hours Imported Q1 phase C");
-        totalVarHoursImportedQ1PhaseCDataPoint.setUnits("varh");
-        totalVarHoursImportedQ1PhaseCDataPoint.setSize(2);
-        totalVarHoursImportedQ1PhaseCDataPoint.setAddressOffset(98);
-        totalVarHoursImportedQ1PhaseCDataPoint.setBlockOffset(96);
-        totalVarHoursImportedQ1PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ1PhaseCDataPoint.name(), totalVarHoursImportedQ1PhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ1PhaseCDataPoint;
+        totalVArHoursImportedQ1PhaseCDataPoint.setName("TotVArhImpQ1phC");
+        totalVArHoursImportedQ1PhaseCDataPoint.setLabel("Total VAr-hours Imported Q1 phase C");
+        totalVArHoursImportedQ1PhaseCDataPoint.setUnits("varh");
+        totalVArHoursImportedQ1PhaseCDataPoint.setSize(2);
+        totalVArHoursImportedQ1PhaseCDataPoint.setAddressOffset(98);
+        totalVArHoursImportedQ1PhaseCDataPoint.setBlockOffset(96);
+        totalVArHoursImportedQ1PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ1PhaseCDataPoint.name(), totalVArHoursImportedQ1PhaseCDataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2DataPoint;
-        totalVarHoursImportedQ2DataPoint.setName("TotVArhImpQ2");
-        totalVarHoursImportedQ2DataPoint.setLabel("Total VAr-hours Imported Q2");
-        totalVarHoursImportedQ2DataPoint.setDescription("Total Reactive Power Imported Quadrant 2");
-        totalVarHoursImportedQ2DataPoint.setUnits("varh");
-        totalVarHoursImportedQ2DataPoint.setSize(2);
-        totalVarHoursImportedQ2DataPoint.setAddressOffset(100);
-        totalVarHoursImportedQ2DataPoint.setBlockOffset(98);
-        totalVarHoursImportedQ2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2DataPoint.name(), totalVarHoursImportedQ2DataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2DataPoint;
+        totalVArHoursImportedQ2DataPoint.setName("TotVArhImpQ2");
+        totalVArHoursImportedQ2DataPoint.setLabel("Total VAr-hours Imported Q2");
+        totalVArHoursImportedQ2DataPoint.setDescription("Total Reactive Power Imported Quadrant 2");
+        totalVArHoursImportedQ2DataPoint.setUnits("varh");
+        totalVArHoursImportedQ2DataPoint.setSize(2);
+        totalVArHoursImportedQ2DataPoint.setAddressOffset(100);
+        totalVArHoursImportedQ2DataPoint.setBlockOffset(98);
+        totalVArHoursImportedQ2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2DataPoint.name(), totalVArHoursImportedQ2DataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2PhaseADataPoint;
-        totalVarHoursImportedQ2PhaseADataPoint.setName("TotVArhImpQ2phA");
-        totalVarHoursImportedQ2PhaseADataPoint.setLabel("Total VAr-hours Imported Q2 phase A");
-        totalVarHoursImportedQ2PhaseADataPoint.setUnits("varh");
-        totalVarHoursImportedQ2PhaseADataPoint.setSize(2);
-        totalVarHoursImportedQ2PhaseADataPoint.setAddressOffset(102);
-        totalVarHoursImportedQ2PhaseADataPoint.setBlockOffset(100);
-        totalVarHoursImportedQ2PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2PhaseADataPoint.name(), totalVarHoursImportedQ2PhaseADataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2PhaseADataPoint;
+        totalVArHoursImportedQ2PhaseADataPoint.setName("TotVArhImpQ2phA");
+        totalVArHoursImportedQ2PhaseADataPoint.setLabel("Total VAr-hours Imported Q2 phase A");
+        totalVArHoursImportedQ2PhaseADataPoint.setUnits("varh");
+        totalVArHoursImportedQ2PhaseADataPoint.setSize(2);
+        totalVArHoursImportedQ2PhaseADataPoint.setAddressOffset(102);
+        totalVArHoursImportedQ2PhaseADataPoint.setBlockOffset(100);
+        totalVArHoursImportedQ2PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2PhaseADataPoint.name(), totalVArHoursImportedQ2PhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2PhaseBDataPoint;
-        totalVarHoursImportedQ2PhaseBDataPoint.setName("TotVArhImpQ2phB");
-        totalVarHoursImportedQ2PhaseBDataPoint.setLabel("Total VAr-hours Imported Q2 phase B");
-        totalVarHoursImportedQ2PhaseBDataPoint.setUnits("varh");
-        totalVarHoursImportedQ2PhaseBDataPoint.setSize(2);
-        totalVarHoursImportedQ2PhaseBDataPoint.setAddressOffset(104);
-        totalVarHoursImportedQ2PhaseBDataPoint.setBlockOffset(102);
-        totalVarHoursImportedQ2PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2PhaseBDataPoint.name(), totalVarHoursImportedQ2PhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2PhaseBDataPoint;
+        totalVArHoursImportedQ2PhaseBDataPoint.setName("TotVArhImpQ2phB");
+        totalVArHoursImportedQ2PhaseBDataPoint.setLabel("Total VAr-hours Imported Q2 phase B");
+        totalVArHoursImportedQ2PhaseBDataPoint.setUnits("varh");
+        totalVArHoursImportedQ2PhaseBDataPoint.setSize(2);
+        totalVArHoursImportedQ2PhaseBDataPoint.setAddressOffset(104);
+        totalVArHoursImportedQ2PhaseBDataPoint.setBlockOffset(102);
+        totalVArHoursImportedQ2PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2PhaseBDataPoint.name(), totalVArHoursImportedQ2PhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2PhaseCDataPoint;
-        totalVarHoursImportedQ2PhaseCDataPoint.setName("TotVArhImpQ2phC");
-        totalVarHoursImportedQ2PhaseCDataPoint.setLabel("Total VAr-hours Imported Q2 phase C");
-        totalVarHoursImportedQ2PhaseCDataPoint.setUnits("varh");
-        totalVarHoursImportedQ2PhaseCDataPoint.setSize(2);
-        totalVarHoursImportedQ2PhaseCDataPoint.setAddressOffset(106);
-        totalVarHoursImportedQ2PhaseCDataPoint.setBlockOffset(104);
-        totalVarHoursImportedQ2PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2PhaseCDataPoint.name(), totalVarHoursImportedQ2PhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2PhaseCDataPoint;
+        totalVArHoursImportedQ2PhaseCDataPoint.setName("TotVArhImpQ2phC");
+        totalVArHoursImportedQ2PhaseCDataPoint.setLabel("Total VAr-hours Imported Q2 phase C");
+        totalVArHoursImportedQ2PhaseCDataPoint.setUnits("varh");
+        totalVArHoursImportedQ2PhaseCDataPoint.setSize(2);
+        totalVArHoursImportedQ2PhaseCDataPoint.setAddressOffset(106);
+        totalVArHoursImportedQ2PhaseCDataPoint.setBlockOffset(104);
+        totalVArHoursImportedQ2PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2PhaseCDataPoint.name(), totalVArHoursImportedQ2PhaseCDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3DataPoint;
-        totalVarHoursExportedQ3DataPoint.setName("TotVArhExpQ3");
-        totalVarHoursExportedQ3DataPoint.setLabel("Total VAr-hours Exported Q3");
-        totalVarHoursExportedQ3DataPoint.setDescription("Total Reactive Power Exported Quadrant 3");
-        totalVarHoursExportedQ3DataPoint.setUnits("varh");
-        totalVarHoursExportedQ3DataPoint.setSize(2);
-        totalVarHoursExportedQ3DataPoint.setAddressOffset(108);
-        totalVarHoursExportedQ3DataPoint.setBlockOffset(106);
-        totalVarHoursExportedQ3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3DataPoint.name(), totalVarHoursExportedQ3DataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3DataPoint;
+        totalVArHoursExportedQ3DataPoint.setName("TotVArhExpQ3");
+        totalVArHoursExportedQ3DataPoint.setLabel("Total VAr-hours Exported Q3");
+        totalVArHoursExportedQ3DataPoint.setDescription("Total Reactive Power Exported Quadrant 3");
+        totalVArHoursExportedQ3DataPoint.setUnits("varh");
+        totalVArHoursExportedQ3DataPoint.setSize(2);
+        totalVArHoursExportedQ3DataPoint.setAddressOffset(108);
+        totalVArHoursExportedQ3DataPoint.setBlockOffset(106);
+        totalVArHoursExportedQ3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3DataPoint.name(), totalVArHoursExportedQ3DataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3PhaseADataPoint;
-        totalVarHoursExportedQ3PhaseADataPoint.setName("TotVArhExpQ3phA");
-        totalVarHoursExportedQ3PhaseADataPoint.setLabel("Total VAr-hours Exported Q3 phase A");
-        totalVarHoursExportedQ3PhaseADataPoint.setUnits("varh");
-        totalVarHoursExportedQ3PhaseADataPoint.setSize(2);
-        totalVarHoursExportedQ3PhaseADataPoint.setAddressOffset(110);
-        totalVarHoursExportedQ3PhaseADataPoint.setBlockOffset(108);
-        totalVarHoursExportedQ3PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3PhaseADataPoint.name(), totalVarHoursExportedQ3PhaseADataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3PhaseADataPoint;
+        totalVArHoursExportedQ3PhaseADataPoint.setName("TotVArhExpQ3phA");
+        totalVArHoursExportedQ3PhaseADataPoint.setLabel("Total VAr-hours Exported Q3 phase A");
+        totalVArHoursExportedQ3PhaseADataPoint.setUnits("varh");
+        totalVArHoursExportedQ3PhaseADataPoint.setSize(2);
+        totalVArHoursExportedQ3PhaseADataPoint.setAddressOffset(110);
+        totalVArHoursExportedQ3PhaseADataPoint.setBlockOffset(108);
+        totalVArHoursExportedQ3PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3PhaseADataPoint.name(), totalVArHoursExportedQ3PhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3PhaseBDataPoint;
-        totalVarHoursExportedQ3PhaseBDataPoint.setName("TotVArhExpQ3phB");
-        totalVarHoursExportedQ3PhaseBDataPoint.setLabel("Total VAr-hours Exported Q3 phase B");
-        totalVarHoursExportedQ3PhaseBDataPoint.setUnits("varh");
-        totalVarHoursExportedQ3PhaseBDataPoint.setSize(2);
-        totalVarHoursExportedQ3PhaseBDataPoint.setAddressOffset(112);
-        totalVarHoursExportedQ3PhaseBDataPoint.setBlockOffset(110);
-        totalVarHoursExportedQ3PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3PhaseBDataPoint.name(), totalVarHoursExportedQ3PhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3PhaseBDataPoint;
+        totalVArHoursExportedQ3PhaseBDataPoint.setName("TotVArhExpQ3phB");
+        totalVArHoursExportedQ3PhaseBDataPoint.setLabel("Total VAr-hours Exported Q3 phase B");
+        totalVArHoursExportedQ3PhaseBDataPoint.setUnits("varh");
+        totalVArHoursExportedQ3PhaseBDataPoint.setSize(2);
+        totalVArHoursExportedQ3PhaseBDataPoint.setAddressOffset(112);
+        totalVArHoursExportedQ3PhaseBDataPoint.setBlockOffset(110);
+        totalVArHoursExportedQ3PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3PhaseBDataPoint.name(), totalVArHoursExportedQ3PhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3PhaseCDataPoint;
-        totalVarHoursExportedQ3PhaseCDataPoint.setName("TotVArhExpQ3phC");
-        totalVarHoursExportedQ3PhaseCDataPoint.setLabel("Total VAr-hours Exported Q3 phase C");
-        totalVarHoursExportedQ3PhaseCDataPoint.setUnits("varh");
-        totalVarHoursExportedQ3PhaseCDataPoint.setSize(2);
-        totalVarHoursExportedQ3PhaseCDataPoint.setAddressOffset(114);
-        totalVarHoursExportedQ3PhaseCDataPoint.setBlockOffset(112);
-        totalVarHoursExportedQ3PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3PhaseCDataPoint.name(), totalVarHoursExportedQ3PhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3PhaseCDataPoint;
+        totalVArHoursExportedQ3PhaseCDataPoint.setName("TotVArhExpQ3phC");
+        totalVArHoursExportedQ3PhaseCDataPoint.setLabel("Total VAr-hours Exported Q3 phase C");
+        totalVArHoursExportedQ3PhaseCDataPoint.setUnits("varh");
+        totalVArHoursExportedQ3PhaseCDataPoint.setSize(2);
+        totalVArHoursExportedQ3PhaseCDataPoint.setAddressOffset(114);
+        totalVArHoursExportedQ3PhaseCDataPoint.setBlockOffset(112);
+        totalVArHoursExportedQ3PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3PhaseCDataPoint.name(), totalVArHoursExportedQ3PhaseCDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4DataPoint;
-        totalVarHoursExportedQ4DataPoint.setName("TotVArhExpQ4");
-        totalVarHoursExportedQ4DataPoint.setLabel("Total VAr-hours Exported Q4");
-        totalVarHoursExportedQ4DataPoint.setDescription("Total Reactive Power Exported Quadrant 4");
-        totalVarHoursExportedQ4DataPoint.setUnits("varh");
-        totalVarHoursExportedQ4DataPoint.setSize(2);
-        totalVarHoursExportedQ4DataPoint.setAddressOffset(116);
-        totalVarHoursExportedQ4DataPoint.setBlockOffset(114);
-        totalVarHoursExportedQ4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4DataPoint.name(), totalVarHoursExportedQ4DataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4DataPoint;
+        totalVArHoursExportedQ4DataPoint.setName("TotVArhExpQ4");
+        totalVArHoursExportedQ4DataPoint.setLabel("Total VAr-hours Exported Q4");
+        totalVArHoursExportedQ4DataPoint.setDescription("Total Reactive Power Exported Quadrant 4");
+        totalVArHoursExportedQ4DataPoint.setUnits("varh");
+        totalVArHoursExportedQ4DataPoint.setSize(2);
+        totalVArHoursExportedQ4DataPoint.setAddressOffset(116);
+        totalVArHoursExportedQ4DataPoint.setBlockOffset(114);
+        totalVArHoursExportedQ4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4DataPoint.name(), totalVArHoursExportedQ4DataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4ImportedPhaseADataPoint;
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setName("TotVArhExpQ4phA");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase A");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setUnits("varh");
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setSize(2);
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setAddressOffset(118);
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setBlockOffset(116);
-        totalVarHoursExportedQ4ImportedPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4ImportedPhaseADataPoint.name(), totalVarHoursExportedQ4ImportedPhaseADataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseADataPoint;
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setName("TotVArhExpQ4phA");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase A");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setUnits("varh");
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setSize(2);
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setAddressOffset(118);
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setBlockOffset(116);
+        totalVArHoursExportedQ4ImportedPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseADataPoint.name(), totalVArHoursExportedQ4ImportedPhaseADataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4ImportedPhaseBDataPoint;
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setName("TotVArhExpQ4phB");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase B");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setUnits("varh");
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setSize(2);
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setAddressOffset(120);
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setBlockOffset(118);
-        totalVarHoursExportedQ4ImportedPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4ImportedPhaseBDataPoint.name(), totalVarHoursExportedQ4ImportedPhaseBDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseBDataPoint;
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setName("TotVArhExpQ4phB");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase B");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setUnits("varh");
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setSize(2);
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setAddressOffset(120);
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setBlockOffset(118);
+        totalVArHoursExportedQ4ImportedPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseBDataPoint.name(), totalVArHoursExportedQ4ImportedPhaseBDataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4ImportedPhaseCDataPoint;
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setName("TotVArhExpQ4phC");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase C");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setUnits("varh");
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setSize(2);
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setAddressOffset(122);
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setBlockOffset(120);
-        totalVarHoursExportedQ4ImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4ImportedPhaseCDataPoint.name(), totalVarHoursExportedQ4ImportedPhaseCDataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseCDataPoint;
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setName("TotVArhExpQ4phC");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setLabel("Total VAr-hours Exported Q4 Imported phase C");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setUnits("varh");
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setSize(2);
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setAddressOffset(122);
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setBlockOffset(120);
+        totalVArHoursExportedQ4ImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseCDataPoint.name(), totalVArHoursExportedQ4ImportedPhaseCDataPoint);
 
         SunSpecDataPoint eventsDataPoint;
         eventsDataPoint.setName("Evt");
@@ -6210,15 +6456,15 @@ void SunSpecAcMeterModel::initDataPoints()
         ampsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
-        SunSpecDataPoint A_SFDataPoint;
-        A_SFDataPoint.setName("A_SF");
-        A_SFDataPoint.setDescription("Current scale factor");
-        A_SFDataPoint.setMandatory(true);
-        A_SFDataPoint.setSize(1);
-        A_SFDataPoint.setAddressOffset(3);
-        A_SFDataPoint.setBlockOffset(1);
-        A_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(A_SFDataPoint.name(), A_SFDataPoint);
+        SunSpecDataPoint a_SFDataPoint;
+        a_SFDataPoint.setName("A_SF");
+        a_SFDataPoint.setDescription("Current scale factor");
+        a_SFDataPoint.setMandatory(true);
+        a_SFDataPoint.setSize(1);
+        a_SFDataPoint.setAddressOffset(3);
+        a_SFDataPoint.setBlockOffset(1);
+        a_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(a_SFDataPoint.name(), a_SFDataPoint);
 
         SunSpecDataPoint voltageDataPoint;
         voltageDataPoint.setName("PhV");
@@ -6232,15 +6478,15 @@ void SunSpecAcMeterModel::initDataPoints()
         voltageDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(voltageDataPoint.name(), voltageDataPoint);
 
-        SunSpecDataPoint V_SFDataPoint;
-        V_SFDataPoint.setName("V_SF");
-        V_SFDataPoint.setDescription("Voltage scale factor");
-        V_SFDataPoint.setMandatory(true);
-        V_SFDataPoint.setSize(1);
-        V_SFDataPoint.setAddressOffset(5);
-        V_SFDataPoint.setBlockOffset(3);
-        V_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(V_SFDataPoint.name(), V_SFDataPoint);
+        SunSpecDataPoint v_SFDataPoint;
+        v_SFDataPoint.setName("V_SF");
+        v_SFDataPoint.setDescription("Voltage scale factor");
+        v_SFDataPoint.setMandatory(true);
+        v_SFDataPoint.setSize(1);
+        v_SFDataPoint.setAddressOffset(5);
+        v_SFDataPoint.setBlockOffset(3);
+        v_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(v_SFDataPoint.name(), v_SFDataPoint);
 
         SunSpecDataPoint hzDataPoint;
         hzDataPoint.setName("Hz");
@@ -6255,14 +6501,14 @@ void SunSpecAcMeterModel::initDataPoints()
         hzDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(hzDataPoint.name(), hzDataPoint);
 
-        SunSpecDataPoint Hz_SFDataPoint;
-        Hz_SFDataPoint.setName("Hz_SF");
-        Hz_SFDataPoint.setDescription("Frequency scale factor");
-        Hz_SFDataPoint.setSize(1);
-        Hz_SFDataPoint.setAddressOffset(7);
-        Hz_SFDataPoint.setBlockOffset(5);
-        Hz_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(Hz_SFDataPoint.name(), Hz_SFDataPoint);
+        SunSpecDataPoint hz_SFDataPoint;
+        hz_SFDataPoint.setName("Hz_SF");
+        hz_SFDataPoint.setDescription("Frequency scale factor");
+        hz_SFDataPoint.setSize(1);
+        hz_SFDataPoint.setAddressOffset(7);
+        hz_SFDataPoint.setBlockOffset(5);
+        hz_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(hz_SFDataPoint.name(), hz_SFDataPoint);
 
         SunSpecDataPoint wattsDataPoint;
         wattsDataPoint.setName("W");
@@ -6277,15 +6523,15 @@ void SunSpecAcMeterModel::initDataPoints()
         wattsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(wattsDataPoint.name(), wattsDataPoint);
 
-        SunSpecDataPoint W_SFDataPoint;
-        W_SFDataPoint.setName("W_SF");
-        W_SFDataPoint.setDescription("Real Power scale factor");
-        W_SFDataPoint.setMandatory(true);
-        W_SFDataPoint.setSize(1);
-        W_SFDataPoint.setAddressOffset(9);
-        W_SFDataPoint.setBlockOffset(7);
-        W_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(W_SFDataPoint.name(), W_SFDataPoint);
+        SunSpecDataPoint w_SFDataPoint;
+        w_SFDataPoint.setName("W_SF");
+        w_SFDataPoint.setDescription("Real Power scale factor");
+        w_SFDataPoint.setMandatory(true);
+        w_SFDataPoint.setSize(1);
+        w_SFDataPoint.setAddressOffset(9);
+        w_SFDataPoint.setBlockOffset(7);
+        w_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(w_SFDataPoint.name(), w_SFDataPoint);
 
         SunSpecDataPoint vaDataPoint;
         vaDataPoint.setName("VA");
@@ -6299,14 +6545,14 @@ void SunSpecAcMeterModel::initDataPoints()
         vaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(vaDataPoint.name(), vaDataPoint);
 
-        SunSpecDataPoint VA_SFDataPoint;
-        VA_SFDataPoint.setName("VA_SF");
-        VA_SFDataPoint.setDescription("Apparent Power scale factor");
-        VA_SFDataPoint.setSize(1);
-        VA_SFDataPoint.setAddressOffset(11);
-        VA_SFDataPoint.setBlockOffset(9);
-        VA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(VA_SFDataPoint.name(), VA_SFDataPoint);
+        SunSpecDataPoint vA_SFDataPoint;
+        vA_SFDataPoint.setName("VA_SF");
+        vA_SFDataPoint.setDescription("Apparent Power scale factor");
+        vA_SFDataPoint.setSize(1);
+        vA_SFDataPoint.setAddressOffset(11);
+        vA_SFDataPoint.setBlockOffset(9);
+        vA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(vA_SFDataPoint.name(), vA_SFDataPoint);
 
         SunSpecDataPoint varDataPoint;
         varDataPoint.setName("VAR");
@@ -6320,14 +6566,14 @@ void SunSpecAcMeterModel::initDataPoints()
         varDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(varDataPoint.name(), varDataPoint);
 
-        SunSpecDataPoint VAR_SFDataPoint;
-        VAR_SFDataPoint.setName("VAR_SF");
-        VAR_SFDataPoint.setDescription("Reactive Power scale factor");
-        VAR_SFDataPoint.setSize(1);
-        VAR_SFDataPoint.setAddressOffset(13);
-        VAR_SFDataPoint.setBlockOffset(11);
-        VAR_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(VAR_SFDataPoint.name(), VAR_SFDataPoint);
+        SunSpecDataPoint vAR_SFDataPoint;
+        vAR_SFDataPoint.setName("VAR_SF");
+        vAR_SFDataPoint.setDescription("Reactive Power scale factor");
+        vAR_SFDataPoint.setSize(1);
+        vAR_SFDataPoint.setAddressOffset(13);
+        vAR_SFDataPoint.setBlockOffset(11);
+        vAR_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(vAR_SFDataPoint.name(), vAR_SFDataPoint);
 
         SunSpecDataPoint pfDataPoint;
         pfDataPoint.setName("PF");
@@ -6341,14 +6587,14 @@ void SunSpecAcMeterModel::initDataPoints()
         pfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
         m_dataPoints.insert(pfDataPoint.name(), pfDataPoint);
 
-        SunSpecDataPoint PF_SFDataPoint;
-        PF_SFDataPoint.setName("PF_SF");
-        PF_SFDataPoint.setDescription("Power Factor scale factor");
-        PF_SFDataPoint.setSize(1);
-        PF_SFDataPoint.setAddressOffset(15);
-        PF_SFDataPoint.setBlockOffset(13);
-        PF_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(PF_SFDataPoint.name(), PF_SFDataPoint);
+        SunSpecDataPoint pF_SFDataPoint;
+        pF_SFDataPoint.setName("PF_SF");
+        pF_SFDataPoint.setDescription("Power Factor scale factor");
+        pF_SFDataPoint.setSize(1);
+        pF_SFDataPoint.setAddressOffset(15);
+        pF_SFDataPoint.setBlockOffset(13);
+        pF_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(pF_SFDataPoint.name(), pF_SFDataPoint);
 
         SunSpecDataPoint totalWattHoursExportedDataPoint;
         totalWattHoursExportedDataPoint.setName("TotWhExp");
@@ -6376,15 +6622,15 @@ void SunSpecAcMeterModel::initDataPoints()
         totalWattHoursImportedDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
         m_dataPoints.insert(totalWattHoursImportedDataPoint.name(), totalWattHoursImportedDataPoint);
 
-        SunSpecDataPoint TotWh_SFDataPoint;
-        TotWh_SFDataPoint.setName("TotWh_SF");
-        TotWh_SFDataPoint.setDescription("Real Energy scale factor");
-        TotWh_SFDataPoint.setMandatory(true);
-        TotWh_SFDataPoint.setSize(1);
-        TotWh_SFDataPoint.setAddressOffset(20);
-        TotWh_SFDataPoint.setBlockOffset(18);
-        TotWh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(TotWh_SFDataPoint.name(), TotWh_SFDataPoint);
+        SunSpecDataPoint totWh_SFDataPoint;
+        totWh_SFDataPoint.setName("TotWh_SF");
+        totWh_SFDataPoint.setDescription("Real Energy scale factor");
+        totWh_SFDataPoint.setMandatory(true);
+        totWh_SFDataPoint.setSize(1);
+        totWh_SFDataPoint.setAddressOffset(20);
+        totWh_SFDataPoint.setBlockOffset(18);
+        totWh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(totWh_SFDataPoint.name(), totWh_SFDataPoint);
 
         SunSpecDataPoint totalVaHoursExportedDataPoint;
         totalVaHoursExportedDataPoint.setName("TotVAhExp");
@@ -6410,14 +6656,14 @@ void SunSpecAcMeterModel::initDataPoints()
         totalVaHoursImportedDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
         m_dataPoints.insert(totalVaHoursImportedDataPoint.name(), totalVaHoursImportedDataPoint);
 
-        SunSpecDataPoint TotVAh_SFDataPoint;
-        TotVAh_SFDataPoint.setName("TotVAh_SF");
-        TotVAh_SFDataPoint.setDescription("Apparent Energy scale factor");
-        TotVAh_SFDataPoint.setSize(1);
-        TotVAh_SFDataPoint.setAddressOffset(25);
-        TotVAh_SFDataPoint.setBlockOffset(23);
-        TotVAh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(TotVAh_SFDataPoint.name(), TotVAh_SFDataPoint);
+        SunSpecDataPoint totVAh_SFDataPoint;
+        totVAh_SFDataPoint.setName("TotVAh_SF");
+        totVAh_SFDataPoint.setDescription("Apparent Energy scale factor");
+        totVAh_SFDataPoint.setSize(1);
+        totVAh_SFDataPoint.setAddressOffset(25);
+        totVAh_SFDataPoint.setBlockOffset(23);
+        totVAh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(totVAh_SFDataPoint.name(), totVAh_SFDataPoint);
 
         SunSpecDataPoint totalVarHoursImportedQ1DataPoint;
         totalVarHoursImportedQ1DataPoint.setName("TotVArhImpQ1");
@@ -6431,50 +6677,50 @@ void SunSpecAcMeterModel::initDataPoints()
         totalVarHoursImportedQ1DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
         m_dataPoints.insert(totalVarHoursImportedQ1DataPoint.name(), totalVarHoursImportedQ1DataPoint);
 
-        SunSpecDataPoint totalVarHoursImportedQ2DataPoint;
-        totalVarHoursImportedQ2DataPoint.setName("TotVArhImpQ2");
-        totalVarHoursImportedQ2DataPoint.setLabel("Total VAr-hours Imported Q2");
-        totalVarHoursImportedQ2DataPoint.setDescription("Total Reactive Power Imported Quadrant 2");
-        totalVarHoursImportedQ2DataPoint.setUnits("varh");
-        totalVarHoursImportedQ2DataPoint.setSize(2);
-        totalVarHoursImportedQ2DataPoint.setAddressOffset(28);
-        totalVarHoursImportedQ2DataPoint.setBlockOffset(26);
-        totalVarHoursImportedQ2DataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursImportedQ2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursImportedQ2DataPoint.name(), totalVarHoursImportedQ2DataPoint);
+        SunSpecDataPoint totalVArHoursImportedQ2DataPoint;
+        totalVArHoursImportedQ2DataPoint.setName("TotVArhImpQ2");
+        totalVArHoursImportedQ2DataPoint.setLabel("Total VAr-hours Imported Q2");
+        totalVArHoursImportedQ2DataPoint.setDescription("Total Reactive Power Imported Quadrant 2");
+        totalVArHoursImportedQ2DataPoint.setUnits("varh");
+        totalVArHoursImportedQ2DataPoint.setSize(2);
+        totalVArHoursImportedQ2DataPoint.setAddressOffset(28);
+        totalVArHoursImportedQ2DataPoint.setBlockOffset(26);
+        totalVArHoursImportedQ2DataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursImportedQ2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursImportedQ2DataPoint.name(), totalVArHoursImportedQ2DataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ3DataPoint;
-        totalVarHoursExportedQ3DataPoint.setName("TotVArhExpQ3");
-        totalVarHoursExportedQ3DataPoint.setLabel("Total VAr-hours Exported Q3");
-        totalVarHoursExportedQ3DataPoint.setDescription("Total Reactive Power Exported Quadrant 3");
-        totalVarHoursExportedQ3DataPoint.setUnits("varh");
-        totalVarHoursExportedQ3DataPoint.setSize(2);
-        totalVarHoursExportedQ3DataPoint.setAddressOffset(30);
-        totalVarHoursExportedQ3DataPoint.setBlockOffset(28);
-        totalVarHoursExportedQ3DataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ3DataPoint.name(), totalVarHoursExportedQ3DataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ3DataPoint;
+        totalVArHoursExportedQ3DataPoint.setName("TotVArhExpQ3");
+        totalVArHoursExportedQ3DataPoint.setLabel("Total VAr-hours Exported Q3");
+        totalVArHoursExportedQ3DataPoint.setDescription("Total Reactive Power Exported Quadrant 3");
+        totalVArHoursExportedQ3DataPoint.setUnits("varh");
+        totalVArHoursExportedQ3DataPoint.setSize(2);
+        totalVArHoursExportedQ3DataPoint.setAddressOffset(30);
+        totalVArHoursExportedQ3DataPoint.setBlockOffset(28);
+        totalVArHoursExportedQ3DataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ3DataPoint.name(), totalVArHoursExportedQ3DataPoint);
 
-        SunSpecDataPoint totalVarHoursExportedQ4DataPoint;
-        totalVarHoursExportedQ4DataPoint.setName("TotVArhExpQ4");
-        totalVarHoursExportedQ4DataPoint.setLabel("Total VAr-hours Exported Q4");
-        totalVarHoursExportedQ4DataPoint.setDescription("Total Reactive Power Exported Quadrant 4");
-        totalVarHoursExportedQ4DataPoint.setUnits("varh");
-        totalVarHoursExportedQ4DataPoint.setSize(2);
-        totalVarHoursExportedQ4DataPoint.setAddressOffset(32);
-        totalVarHoursExportedQ4DataPoint.setBlockOffset(30);
-        totalVarHoursExportedQ4DataPoint.setScaleFactorName("TotVArh_SF");
-        totalVarHoursExportedQ4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints.insert(totalVarHoursExportedQ4DataPoint.name(), totalVarHoursExportedQ4DataPoint);
+        SunSpecDataPoint totalVArHoursExportedQ4DataPoint;
+        totalVArHoursExportedQ4DataPoint.setName("TotVArhExpQ4");
+        totalVArHoursExportedQ4DataPoint.setLabel("Total VAr-hours Exported Q4");
+        totalVArHoursExportedQ4DataPoint.setDescription("Total Reactive Power Exported Quadrant 4");
+        totalVArHoursExportedQ4DataPoint.setUnits("varh");
+        totalVArHoursExportedQ4DataPoint.setSize(2);
+        totalVArHoursExportedQ4DataPoint.setAddressOffset(32);
+        totalVArHoursExportedQ4DataPoint.setBlockOffset(30);
+        totalVArHoursExportedQ4DataPoint.setScaleFactorName("TotVArh_SF");
+        totalVArHoursExportedQ4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+        m_dataPoints.insert(totalVArHoursExportedQ4DataPoint.name(), totalVArHoursExportedQ4DataPoint);
 
-        SunSpecDataPoint TotVArh_SFDataPoint;
-        TotVArh_SFDataPoint.setName("TotVArh_SF");
-        TotVArh_SFDataPoint.setDescription("Reactive Energy scale factor");
-        TotVArh_SFDataPoint.setSize(1);
-        TotVArh_SFDataPoint.setAddressOffset(34);
-        TotVArh_SFDataPoint.setBlockOffset(32);
-        TotVArh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints.insert(TotVArh_SFDataPoint.name(), TotVArh_SFDataPoint);
+        SunSpecDataPoint totVArh_SFDataPoint;
+        totVArh_SFDataPoint.setName("TotVArh_SF");
+        totVArh_SFDataPoint.setDescription("Reactive Energy scale factor");
+        totVArh_SFDataPoint.setSize(1);
+        totVArh_SFDataPoint.setAddressOffset(34);
+        totVArh_SFDataPoint.setBlockOffset(32);
+        totVArh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+        m_dataPoints.insert(totVArh_SFDataPoint.name(), totVArh_SFDataPoint);
 
         SunSpecDataPoint eventsDataPoint;
         eventsDataPoint.setName("Evt");
@@ -6487,14 +6733,14 @@ void SunSpecAcMeterModel::initDataPoints()
         eventsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
         m_dataPoints.insert(eventsDataPoint.name(), eventsDataPoint);
 
-        SunSpecDataPoint RsrvdDataPoint;
-        RsrvdDataPoint.setName("Rsrvd");
-        RsrvdDataPoint.setMandatory(true);
-        RsrvdDataPoint.setSize(1);
-        RsrvdDataPoint.setAddressOffset(37);
-        RsrvdDataPoint.setBlockOffset(35);
-        RsrvdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("pad"));
-        m_dataPoints.insert(RsrvdDataPoint.name(), RsrvdDataPoint);
+        SunSpecDataPoint rsrvdDataPoint;
+        rsrvdDataPoint.setName("Rsrvd");
+        rsrvdDataPoint.setMandatory(true);
+        rsrvdDataPoint.setSize(1);
+        rsrvdDataPoint.setAddressOffset(37);
+        rsrvdDataPoint.setBlockOffset(35);
+        rsrvdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("pad"));
+        m_dataPoints.insert(rsrvdDataPoint.name(), rsrvdDataPoint);
 
         SunSpecDataPoint timestampDataPoint;
         timestampDataPoint.setName("Ts");

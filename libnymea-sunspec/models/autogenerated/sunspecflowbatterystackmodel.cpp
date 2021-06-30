@@ -57,16 +57,18 @@ QString SunSpecFlowBatteryStackModel::label() const
     return "Flow Battery Stack Model";
 }
 
-void SunSpecFlowBatteryStackModel::readModelHeader()
+quint16 SunSpecFlowBatteryStackModel::modelId() const
 {
-
+    return m_modelId;
 }
-
-void SunSpecFlowBatteryStackModel::readBlockData()
+quint16 SunSpecFlowBatteryStackModel::modelLength() const
 {
-
+    return m_modelLength;
 }
-
+quint16 SunSpecFlowBatteryStackModel::stackPointsToBeDetermined() const
+{
+    return m_stackPointsToBeDetermined;
+}
 void SunSpecFlowBatteryStackModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
