@@ -156,9 +156,9 @@ void SunSpec::findBaseRegister()
 {
     qCDebug(dcSunSpec()) << "SunSpec: Find base register";
     QList<int> validBaseRegisters;
-    validBaseRegisters.append(0);
-    validBaseRegisters.append(40000);
-    validBaseRegisters.append(50000);
+    validBaseRegisters.append(40000); // Default start address
+    validBaseRegisters.append(50000); // Alternative start address
+    validBaseRegisters.append(0); // Alternative start address
 
     foreach (int baseRegister, validBaseRegisters) {
         qCDebug(dcSunSpec()) << "   - Searching address" << baseRegister;

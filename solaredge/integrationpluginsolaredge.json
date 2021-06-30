@@ -112,7 +112,7 @@
                     "displayName": "SolarEdge single phase inverter",
                     "id": "21601a44-d80e-47ab-b8c9-4d5e44ddcb06",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["extendedsmartmeterproducer", "connectable"],
+                    "interfaces": ["smartmeterproducer", "connectable"],
                     "paramTypes": [
                         {
                             "id": "5e0c71b0-5600-4f01-ad45-f65ecec8eee3",
@@ -246,7 +246,7 @@
                     "displayName": "SolarEdge split phase inverter",
                     "id": "e40fe10a-26d2-4a84-9796-5c1e6a66c49a",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["extendedsmartmeterproducer", "connectable"],
+                    "interfaces": ["smartmeterproducer", "connectable"],
                     "paramTypes": [
                         {
                             "id": "7482adcf-f7e8-4a31-ad93-36774a53670e",
@@ -407,7 +407,7 @@
                     "displayName": "SolarEdge three phase inverter",
                     "id": "04f2d6f3-ddd1-4006-98c6-9cf881034373",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["extendedsmartmeterproducer", "connectable"],
+                    "interfaces": ["smartmeterproducer", "connectable"],
                     "paramTypes": [
                         {
                             "id": "0d225447-3477-44c9-a3e1-079d1d282d02",
@@ -586,7 +586,7 @@
                     "displayName": "SolarEdge single phase meter",
                     "id": "bc64020e-f332-4a6a-9d4a-5dc5b5a7bfa6",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["extendedsmartmeterconsumer", "connectable"],
+                    "interfaces": ["smartmeterconsumer", "connectable"],
                     "paramTypes": [
                         {
                             "id": "77e18b82-425e-476f-a778-aaf837db3a52",
@@ -685,7 +685,7 @@
                     "displayName": "SolarEdge split phase meter",
                     "id": "78ac949c-4d41-43e2-9a47-d6658c169036",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["extendedsmartmeterconsumer", "connectable"],
+                    "interfaces": ["smartmeterconsumer", "connectable"],
                     "paramTypes": [
                         {
                             "id": "edd5a1ad-0fa2-4711-bc94-d0b21dec6dd8",
@@ -811,7 +811,7 @@
                     "displayName": "SolarEdge three phase meter",
                     "id": "0b9cf2aa-0b46-45e4-be58-c1ce4dc09848",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["extendedsmartmeterconsumer", "connectable"],
+                    "interfaces": ["smartmeterconsumer", "connectable"],
                     "paramTypes": [
                         {
                             "id": "a1de19f9-96c9-4f8b-a694-808d32cd7ca1",
