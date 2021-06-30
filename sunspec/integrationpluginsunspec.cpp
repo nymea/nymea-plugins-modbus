@@ -30,6 +30,7 @@
 
 #include "plugininfo.h"
 #include "integrationpluginsunspec.h"
+#include "network/networkdevicediscovery.h"
 
 #include <QHostAddress>
 
@@ -98,6 +99,52 @@ void IntegrationPluginSunSpec::init()
     m_frequencyStateTypeIds.insert(sunspecThreePhaseMeterThingClassId, sunspecThreePhaseMeterFrequencyStateTypeId);
 }
 
+void IntegrationPluginSunSpec::discoverThings(ThingDiscoveryInfo *info)
+{
+    if (!hardwareManager()->networkDeviceDiscovery()->available()) {
+        qCWarning(dcSunSpec()) << "Failed to discover network devices. The network device discovery is not available.";
+        info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("The discovery is not available."));
+        return;
+    }
+
+    NetworkDeviceDiscoveryReply *discoveryReply = hardwareManager()->networkDeviceDiscovery()->discover();
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
+        ThingDescriptors descriptors;
+        qCDebug(dcSunSpec()) << "Discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "devices";
+        foreach (const NetworkDeviceInfo &networkDeviceInfo, discoveryReply->networkDeviceInfos()) {
+            qCDebug(dcSunSpec()) << networkDeviceInfo;
+            QString title;
+            if (networkDeviceInfo.hostName().isEmpty()) {
+                title += networkDeviceInfo.address().toString();
+            } else {
+                title += networkDeviceInfo.address().toString() + " (" + networkDeviceInfo.hostName() + ")";
+            }
+
+            QString description;
+            if (networkDeviceInfo.macAddressManufacturer().isEmpty()) {
+                description = networkDeviceInfo.macAddress();
+            } else {
+                description = networkDeviceInfo.macAddress() + " (" + networkDeviceInfo.macAddressManufacturer() + ")";
+            }
+
+            ThingDescriptor descriptor(sunspecConnectionThingClassId, title, description);
+
+            // Check if we already have set up this device
+            Things existingThings = myThings().filterByParam(sunspecConnectionThingIpAddressParamTypeId, networkDeviceInfo.address().toString());
+            if (existingThings.count() == 1) {
+                qCDebug(dcSunSpec()) << "This thing already exists in the system." << existingThings.first() << networkDeviceInfo;
+                descriptor.setThingId(existingThings.first()->id());
+            }
+
+            ParamList params;
+            params << Param(sunspecConnectionThingIpAddressParamTypeId, networkDeviceInfo.address().toString());
+            descriptor.setParams(params);
+            info->addThingDescriptor(descriptor);
+        }
+        info->finish(Thing::ThingErrorNoError);
+    });
+}
+
 void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
 {
     Thing *thing = info->thing();
@@ -132,7 +179,7 @@ void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
         });
 
         connect(info, &ThingSetupInfo::aborted, sunSpec, &SunSpec::deleteLater);
-        connect(sunSpec, &SunSpec::destroyed, [this, thing] {
+        connect(sunSpec, &SunSpec::destroyed, thing, [this, thing] {
             m_sunSpecConnections.remove(thing->id());
         });
         connect(sunSpec, &SunSpec::foundSunSpecModel, this, &IntegrationPluginSunSpec::onFoundSunSpecModel);

@@ -30,7 +30,7 @@
 
 #include "integrationpluginwallbe.h"
 #include "plugininfo.h"
-
+#include "network/networkdevicediscovery.h"
 #include "types/param.h"
 
 #include <QDebug>
@@ -41,66 +41,89 @@
 
 IntegrationPluginWallbe::IntegrationPluginWallbe()
 {
+
 }
 
-void IntegrationPluginWallbe::init() {
+void IntegrationPluginWallbe::init()
+{
+    // FIXME: make use of the internal network discovery if the device gets unavailable. For now, commented out since it has not been used
+    // at the moment of changing this.
 
-    m_discovery = new Discovery();
-    connect(m_discovery, &Discovery::finished, this, [this](const QList<Host> &hosts) {
-        foreach (const Host &host, hosts) {
-            if (!host.vendor().contains("Phoenix", Qt::CaseSensitivity::CaseInsensitive))
-                continue;
+    //    m_discovery = new Discovery();
+    //    connect(m_discovery, &Discovery::finished, this, [this](const QList<Host> &hosts) {
+    //        foreach (const Host &host, hosts) {
+    //            if (!host.vendor().contains("Phoenix", Qt::CaseSensitivity::CaseInsensitive))
+    //                continue;
 
-            Q_FOREACH(Thing *existingThing, myThings()) {
-                if (existingThing->paramValue(wallbeEcoThingMacParamTypeId).toString().isEmpty()) {
-                    //This device got probably manually setup, to enable auto rediscovery the MAC address needs to setup
-                    if (existingThing->paramValue(wallbeEcoThingIpParamTypeId).toString() == host.address()) {
-                        qCDebug(dcWallbe()) << "Wallbe Wallbox MAC Address has been discovered" << existingThing->name() << host.macAddress();
-                        existingThing->setParamValue(wallbeEcoThingMacParamTypeId, host.macAddress());
+    //            Q_FOREACH(Thing *existingThing, myThings()) {
+    //                if (existingThing->paramValue(wallbeEcoThingMacParamTypeId).toString().isEmpty()) {
+    //                    //This device got probably manually setup, to enable auto rediscovery the MAC address needs to setup
+    //                    if (existingThing->paramValue(wallbeEcoThingIpParamTypeId).toString() == host.address()) {
+    //                        qCDebug(dcWallbe()) << "Wallbe Wallbox MAC Address has been discovered" << existingThing->name() << host.macAddress();
+    //                        existingThing->setParamValue(wallbeEcoThingMacParamTypeId, host.macAddress());
 
-                    }
-                } else if (existingThing->paramValue(wallbeEcoThingMacParamTypeId).toString() == host.macAddress())  {
-                    if (existingThing->paramValue(wallbeEcoThingIpParamTypeId).toString() != host.address()) {
-                        qCDebug(dcWallbe()) << "Wallbe Wallbox IP Address has changed, from"  << existingThing->paramValue(wallbeEcoThingIpParamTypeId).toString() << "to" << host.address();
-                        existingThing->setParamValue(wallbeEcoThingIpParamTypeId, host.address());
+    //                    }
+    //                } else if (existingThing->paramValue(wallbeEcoThingMacParamTypeId).toString() == host.macAddress())  {
+    //                    if (existingThing->paramValue(wallbeEcoThingIpParamTypeId).toString() != host.address()) {
+    //                        qCDebug(dcWallbe()) << "Wallbe Wallbox IP Address has changed, from"  << existingThing->paramValue(wallbeEcoThingIpParamTypeId).toString() << "to" << host.address();
+    //                        existingThing->setParamValue(wallbeEcoThingIpParamTypeId, host.address());
 
-                    } else {
-                        qCDebug(dcWallbe()) << "Wallbe Wallbox" << existingThing->name() << "IP address has not changed" << host.address();
-                    }
-                    break;
-                }
-            }
-        }
-    });
+    //                    } else {
+    //                        qCDebug(dcWallbe()) << "Wallbe Wallbox" << existingThing->name() << "IP address has not changed" << host.address();
+    //                    }
+    //                    break;
+    //                }
+    //            }
+    //        }
+    //    });
 }
 
 
 void IntegrationPluginWallbe::discoverThings(ThingDiscoveryInfo *info)
 {
-    if (info->thingClassId() == wallbeEcoThingClassId){
-        qCDebug(dcWallbe) << "Start Wallbe eco discovery";
+    if (info->thingClassId() == wallbeEcoThingClassId) {
+        if (!hardwareManager()->networkDeviceDiscovery()->available()) {
+            qCWarning(dcWallbe()) << "Failed to discover network devices. The network device discovery is not available.";
+            info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("The discovery is not available."));
+            return;
+        }
 
-        m_discovery->discoverHosts(50);
-        connect(m_discovery, &Discovery::finished, info, [this, info] (const QList<Host> &hosts) {
-
-            foreach (const Host &host, hosts) {
-                if (!host.vendor().contains("Phoenix", Qt::CaseSensitivity::CaseInsensitive))
+        qCDebug(dcWallbe()) << "Start Wallbe eco discovery";
+        NetworkDeviceDiscoveryReply *discoveryReply = hardwareManager()->networkDeviceDiscovery()->discover();
+        connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
+            ThingDescriptors descriptors;
+            qCDebug(dcWallbe()) << "Discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "devices";
+            foreach (const NetworkDeviceInfo &networkDeviceInfo, discoveryReply->networkDeviceInfos()) {
+                qCDebug(dcWallbe()) << networkDeviceInfo;
+                if (!networkDeviceInfo.macAddressManufacturer().contains("Phoenix", Qt::CaseSensitivity::CaseInsensitive))
                     continue;
 
-                ThingDescriptor descriptor(wallbeEcoThingClassId);
-                // Rediscovery
-                foreach (Thing *existingThing, myThings()) {
-                    if (existingThing->paramValue(wallbeEcoThingMacParamTypeId).toString() == host.macAddress()) {
-                        qCDebug(dcWallbe()) << "     - Device is already added";
-                        descriptor.setThingId(existingThing->id());
-                        break;
-                    }
+                QString title;
+                if (networkDeviceInfo.hostName().isEmpty()) {
+                    title += networkDeviceInfo.address().toString();
+                } else {
+                    title += networkDeviceInfo.address().toString() + " (" + networkDeviceInfo.hostName() + ")";
                 }
-                descriptor.setTitle(host.hostName().remove(".localdomain"));
-                descriptor.setDescription(host.address());
+
+                QString description;
+                if (networkDeviceInfo.macAddressManufacturer().isEmpty()) {
+                    description = networkDeviceInfo.macAddress();
+                } else {
+                    description = networkDeviceInfo.macAddress() + " (" + networkDeviceInfo.macAddressManufacturer() + ")";
+                }
+
+                ThingDescriptor descriptor(wallbeEcoThingClassId, title, description);
+
+                // Check if we already have set up this device
+                Things existingThings = myThings().filterByParam(wallbeEcoThingIpParamTypeId, networkDeviceInfo.address().toString());
+                if (existingThings.count() == 1) {
+                    qCDebug(dcWallbe()) << "This thing already exists in the system." << existingThings.first() << networkDeviceInfo;
+                    descriptor.setThingId(existingThings.first()->id());
+                }
+
                 ParamList params;
-                params.append(Param(wallbeEcoThingIpParamTypeId, host.address()));
-                params.append(Param(wallbeEcoThingMacParamTypeId, host.macAddress()));
+                params << Param(wallbeEcoThingIpParamTypeId, networkDeviceInfo.address().toString());
+                params << Param(wallbeEcoThingMacParamTypeId, networkDeviceInfo.macAddress());
                 descriptor.setParams(params);
                 info->addThingDescriptor(descriptor);
             }
@@ -297,8 +320,8 @@ void IntegrationPluginWallbe::onReceivedInputRegister(int slaveAddress, int modb
     } else if (WallbeRegisterAddress(modbusRegister) == WallbeRegisterAddress::FirmwareVersion) {
         int firmware = (uint32_t)(value[1]<<16)|(uint32_t)(value[0]);
         uint major = firmware/10000;
-                uint minor = (firmware%10000)/100;
-                uint patch = firmware%100;
+        uint minor = (firmware%10000)/100;
+        uint patch = firmware%100;
         QString firmwarestring = QString::number(major)+'.'+QString::number(minor)+'.'+QString::number(patch);
         thing->setStateValue(wallbeEcoFirmwareVersionStateTypeId, firmwarestring);
     }

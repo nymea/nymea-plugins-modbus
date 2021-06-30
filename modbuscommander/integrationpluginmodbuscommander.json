@@ -22,7 +22,7 @@
                     "id": "35d3e7dc-1f33-4b8c-baa3-eb10b4f157a7",
                     "name": "modbusTCPClient",
                     "displayName": "Modbus TCP client",
-                    "createMethods": ["user"],
+                    "createMethods": ["user", "discovery"],
                     "interfaces": ["connectable"],
                     "settingsTypes": [
                         {
