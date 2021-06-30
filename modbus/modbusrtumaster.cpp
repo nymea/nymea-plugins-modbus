@@ -54,7 +54,6 @@ ModbusRTUMaster::ModbusRTUMaster(QString serialPort, uint baudrate, QSerialPort:
     connect(m_reconnectTimer, &QTimer::timeout, this, &ModbusRTUMaster::onReconnectTimer);
 }
 
-
 ModbusRTUMaster::~ModbusRTUMaster()
 {
     if (!m_modbusRtuSerialMaster) {

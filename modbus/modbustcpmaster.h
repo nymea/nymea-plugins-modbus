@@ -1,6 +1,6 @@
 ﻿/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2020, nymea GmbH
+* Copyright 2013 - 2021, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -37,6 +37,8 @@
 #include <QTimer>
 #include <QUuid>
 
+Q_DECLARE_LOGGING_CATEGORY(dcModbusTcp)
+
 class ModbusTCPMaster : public QObject
 {
     Q_OBJECT
@@ -48,6 +50,9 @@ public:
     bool connected();
     void setNumberOfRetries(int number);
     void setTimeout(int timeout);
+
+    QString errorString() const;
+    QModbusDevice::Error error() const;
 
     QUuid readCoil(uint slaveAddress, uint registerAddress, uint size = 1);
     QUuid readDiscreteInput(uint slaveAddress, uint registerAddress, uint size = 1);
@@ -80,6 +85,9 @@ signals:
 
     void writeRequestExecuted(const QUuid &requestId, bool success);
     void writeRequestError(const QUuid &requestId, const QString &error);
+
+    void readRequestExecuted(const QUuid &requestId, bool success);
+    void readRequestError(const QUuid &requestId, const QString &error);
 
     void receivedCoil(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values);
     void receivedDiscreteInput(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values);
