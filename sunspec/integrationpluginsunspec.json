@@ -105,7 +105,7 @@
                     "displayName": "SunSpec single phase inverter",
                     "id": "c5d5204e-3375-4b92-8128-fab77a671fed",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["extendedsmartmeterproducer", "connectable"],
+                    "interfaces": ["smartmeterproducer", "connectable"],
                     "paramTypes": [
                         {
                             "id": "41715d00-a947-4f43-a475-cea05790e01d",
@@ -239,7 +239,7 @@
                     "displayName": "SunSpec split phase inverter",
                     "id": "61b38f93-d331-42bf-b1ef-d3fb16ad1230",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["extendedsmartmeterproducer", "connectable"],
+                    "interfaces": ["smartmeterproducer", "connectable"],
                     "paramTypes": [
                         {
                             "id": "c42fb50e-210f-4b53-88eb-fa216e15f88f",
@@ -400,7 +400,7 @@
                     "displayName": "SunSpec three phase inverter",
                     "id": "2e4122ea-96a5-415c-b5e2-7d6012265a83",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["extendedsmartmeterproducer", "connectable"],
+                    "interfaces": ["smartmeterproducer", "connectable"],
                     "paramTypes": [
                         {
                             "id": "8d5b2b58-ce46-406d-844e-f53136afcf09",
@@ -579,7 +579,7 @@
                     "displayName": "SunSpec single phase meter",
                     "id": "7ffa43b8-b56f-4435-8509-980e9d81dfa8",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["extendedsmartmeterconsumer", "connectable"],
+                    "interfaces": ["smartmeterconsumer", "connectable"],
                     "paramTypes": [
                         {
                             "id": "7d6fcafb-c62e-4a21-aae2-f4041c487149",
@@ -678,7 +678,7 @@
                     "displayName": "SunSpec split phase meter",
                     "id": "b8a18e45-5ff5-4f43-915f-04ee216c809d",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["extendedsmartmeterconsumer", "connectable"],
+                    "interfaces": ["smartmeterconsumer", "connectable"],
                     "paramTypes": [
                         {
                             "id": "89aeec6d-abeb-48b5-9594-214ad5db2d03",
@@ -804,7 +804,7 @@
                     "displayName": "SunSpec three phase meter",
                     "id": "68f822f9-ff30-4275-b229-39a3674fead7",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["extendedsmartmeterconsumer", "connectable"],
+                    "interfaces": ["smartmeterconsumer", "connectable"],
                     "paramTypes": [
                         {
                             "id": "a1960821-155c-4176-86fa-974429039182",

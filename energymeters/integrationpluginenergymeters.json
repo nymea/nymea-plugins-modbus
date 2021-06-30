@@ -24,7 +24,7 @@
                     "displayName": "PRO380-Mod",
                     "id": "d7c6440b-54f9-4cc0-a96b-9bb7304b3e77",
                     "createMethods": ["discovery"],
-                    "interfaces": ["extendedsmartmeterconsumer", "extendedsmartmeterproducer"],
+                    "interfaces": ["smartmeterconsumer", "smartmeterproducer"],
                     "discoveryParamTypes": [
                         {
                             "id": "a29f37f6-b344-4628-8ab4-8f4c18fada4a",
@@ -173,7 +173,7 @@
                     "displayName": "SDM630Modbus",
                     "id": "f37597bb-35fe-48f2-9617-343dd54c0903",
                     "createMethods": ["discovery"],
-                    "interfaces": ["extendedsmartmeterconsumer", "extendedsmartmeterproducer"],
+                    "interfaces": ["smartmeterconsumer", "smartmeterproducer"],
                     "discoveryParamTypes": [
                         {
                             "id": "6ab43559-53ec-47ba-b8a0-8d3b7f8d90c2",
