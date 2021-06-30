@@ -1,0 +1,206 @@
+{
+    "name": "MTec",
+        "displayName": "M-Tec",
+        "id": "07cd316b-1e2c-40cf-8358-88d7407506ae",
+        "vendors": [
+        {
+            "name": "MTec",
+            "displayName": "M-Tec",
+            "id": "04d3fa7c-e469-4a79-a119-155426e5a846",
+            "thingClasses": [
+                {
+                    "name": "mtec",
+                    "displayName": "MTec",
+                    "id": "451e38d8-50d5-4ae9-8d9f-21af9347128d",
+                    "createMethods": ["discovery", "user"],
+                    "interfaces": ["thermostat", "connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "f1c43b1e-cffe-4d30-bda0-c23ed648dd71",
+                            "name": "ipAddress",
+                            "displayName": "IP address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": "127.0.0.1"
+                        },
+                        {
+                            "id": "906f6099-d0e1-4297-a2b3-f8ec4482c578",
+                            "name":"macAddress",
+                            "displayName": "MAC address",
+                            "type": "QString",
+                            "inputType": "MacAddress",
+                            "defaultValue": ""
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "8d64954a-855d-44ea-8bc9-88a71ab47b6b",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "1e2037c8-09dc-4396-974c-efa9c486aa65",
+                            "name": "heatPumpState",
+                            "displayName": "Heat pump state",
+                            "displayNameEvent": "Heat pump state changed",
+                            "type": "QString",
+                            "possibleValues": [
+                                "Standby",
+                                "Pre run",
+                                "Automatic heat",
+                                "Defrost",
+                                "Automatic cool",
+                                "Post run",
+                                "Safty shutdown",
+                                "Error"
+                            ],
+                            "defaultValue": "Standby",
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "9b538cb9-f7a3-471e-8d3b-09f6370a571c",
+                            "name": "targetTemperature",
+                            "displayName": "Target room temperature (heat circuit 0)",
+                            "displayNameEvent": "Target room temperature changed (heat circuit 0=",
+                            "displayNameAction": "Set target room temperature (heat circuit 0)",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "writable": true,
+                            "minValue": 10,
+                            "maxValue": 30,
+                            "defaultValue": 20,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "b22ac9bb-3842-497c-bd93-f8bea6670e32",
+                            "name": "temperature",
+                            "displayName": "Room temperature heat circuit 0",
+                            "displayNameEvent": "Room temperature heat circuit 0 changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 20,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "07465fbb-6949-4bd1-90d5-acf2d80c161d",
+                            "name": "heatingOn",
+                            "displayName": "Heating on",
+                            "displayNameEvent": "Heating turned on/off",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "8b407c1d-b84f-48d4-9961-b29bc58fff0e",
+                            "name": "coolingOn",
+                            "displayName": "Cooling on",
+                            "displayNameEvent": "Cooling turned on/off",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "d0c8f168-49b5-47ca-9988-c9922be38dd5",
+                            "name": "outdoorTemperature",
+                            "displayName": "Outdoor temperature",
+                            "displayNameEvent": "Outdoor temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "545f94d6-f4fd-48fe-bf3b-f193e5cb76e7",
+                            "name": "waterTankTopTemperature",
+                            "displayName": "Water tank top temperature",
+                            "displayNameEvent": "Water tank top temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "a98e37f8-dcdc-4c4c-aecf-07f376321849",
+                            "name": "bufferTankTemperature",
+                            "displayName": "Buffer tank temperature",
+                            "displayNameEvent": "Buffer tank temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "7d087af8-cdbe-463e-a9bb-7a7a79471963",
+                            "name": "totalAccumulatedHeatingEnergy",
+                            "displayName": "Total accumulated heating energy",
+                            "displayNameEvent": "Total accumulated heating energy changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "c67c79cf-7369-409f-b170-16c4ece9d25a",
+                            "name": "totalAccumulatedElectricalEnergy",
+                            "displayName": "Total accumulated electrical energy",
+                            "displayNameEvent": "Total accumulated electrical energy changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "581abddc-90d6-4dea-a43c-63b117b335fe",
+                            "name": "heatMeterPowerConsumption",
+                            "displayName": "Heat meter power consumption",
+                            "displayNameEvent": "Heat meter power consumption changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "fd52a97e-f94d-4529-b479-b74e61f75a89",
+                            "name": "energyMeterPowerConsumption",
+                            "displayName": "Energy meter power consumption",
+                            "displayNameEvent": "Energy meter power consumption changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "b646ea10-ea7e-4eba-bfda-8e3cd38370a7",
+                            "name": "smartHomeEnergy",
+                            "displayName": "Smart home energy",
+                            "displayNameEvent": "Smart home energy changed",
+                            "displayNameAction": "Set smart home energy",
+                            "type": "uint",
+                            "unit": "Watt",
+                            "minValue": 0,
+                            "maxValue": 20000,
+                            "defaultValue": 0,
+                            "writable": true,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "a7734474-30db-435c-985a-105fb3ea5a86",
+                            "name": "smartHomeEnergyElectricityMeter",
+                            "displayName": "Smart home energy consumed",
+                            "displayNameEvent": "Smart home energy consumed changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        }
+                    ],
+                    "actionTypes": [ ]
+                }
+            ]
+        }
+    ]
+}

@@ -37,8 +37,6 @@
 #include <QTimer>
 #include <QUuid>
 
-Q_DECLARE_LOGGING_CATEGORY(dcModbusTcp)
-
 class ModbusTCPMaster : public QObject
 {
     Q_OBJECT
@@ -46,10 +44,22 @@ public:
     explicit ModbusTCPMaster(const QHostAddress &hostAddress, uint port, QObject *parent = nullptr);
     ~ModbusTCPMaster();
 
-    bool connectDevice();
-    bool connected();
+    // If you change the hostaddress, make sure to reconnectDevice afterwards
+    QHostAddress hostAddress() const;
+    void setHostAddress(const QHostAddress &hostAddress);
+
+    // If you change the port, make sure to reconnectDevice afterwards
+    uint port() const;
+    void setPort(uint port);
+
+    bool connected() const;
+
+    int numberOfRetries() const;
     void setNumberOfRetries(int number);
+
+    int timeout() const;
     void setTimeout(int timeout);
+    int timeout();
 
     QString errorString() const;
     QModbusDevice::Error error() const;
@@ -65,18 +75,28 @@ public:
     QUuid writeHoldingRegister(uint slaveAddress, uint registerAddress, quint16 value);
     QUuid writeHoldingRegisters(uint slaveAddress, uint registerAddress, const QVector<quint16> &values);
 
-    QHostAddress hostAddress();
-    uint port();
-    bool setHostAddress(const QHostAddress &hostAddress);
-    bool setPort(uint port);
+    // Generic requests
+    QModbusReply *sendRawRequest(const QModbusRequest &request, int serverAddress);
+    QModbusReply *sendReadRequest(const QModbusDataUnit &read, int serverAddress);
+    QModbusReply *sendReadWriteRequest(const QModbusDataUnit &read, const QModbusDataUnit &write, int serverAddress);
+    QModbusReply *sendWriteRequest(const QModbusDataUnit &write, int serverAddress);
+
+public slots:
+    bool connectDevice();
+    void disconnectDevice();
+    bool reconnectDevice();
 
 private:
     QTimer *m_reconnectTimer = nullptr;
-    QModbusTcpClient *m_modbusTcpClient;
+    QModbusTcpClient *m_modbusTcpClient = nullptr;
+
+    QHostAddress m_hostAddress;
+    uint m_port;
+    int m_timeout = 1000;
+    int m_numberOfRetries = 3;
+    bool m_connected = false;
 
 private slots:
-    void onReconnectTimer();
-
     void onModbusErrorOccurred(QModbusDevice::Error error);
     void onModbusStateChanged(QModbusDevice::State state);
 
@@ -85,9 +105,9 @@ signals:
 
     void writeRequestExecuted(const QUuid &requestId, bool success);
     void writeRequestError(const QUuid &requestId, const QString &error);
+    void readRequestError(const QUuid &requestId, const QString &error);
 
     void readRequestExecuted(const QUuid &requestId, bool success);
-    void readRequestError(const QUuid &requestId, const QString &error);
 
     void receivedCoil(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values);
     void receivedDiscreteInput(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values);
