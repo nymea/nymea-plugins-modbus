@@ -125,6 +125,16 @@ void SunSpecDataPoint::setScaleFactorName(const QString &scaleFactorName)
     m_scaleFactorName = scaleFactorName;
 }
 
+QVector<quint16> SunSpecDataPoint::rawData() const
+{
+    return m_rawData;
+}
+
+void SunSpecDataPoint::setRawData(const QVector<quint16> &rawData)
+{
+    m_rawData = rawData;
+}
+
 bool SunSpecDataPoint::isValid() const
 {
     // TODO: verify if value is not invalid code

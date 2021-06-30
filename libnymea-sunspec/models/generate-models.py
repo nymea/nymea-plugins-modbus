@@ -92,6 +92,8 @@ def loadGroups():
     print('--> Read groups...')
     for key, value in sorted(models.items(), key=lambda item: int(item[0])):
         groupName = value['group']['name']
+
+        # Filter out unspecific / unneeded models...
         if groupName.startswith('model_') or groupName.startswith('DER'):
             continue
 
@@ -186,6 +188,59 @@ def writeClassEnums(fileDescriptor, className, modelIds):
         writeLine(fileDescriptor)
 
 
+def addDataPointInitialization(fileDescriptor, dataPoint, addressOffset, indentation = 1):
+    linePrepend = ''
+    for i in range(indentation):
+        linePrepend += '    '
+
+    # Get property name
+    if 'label' in dataPoint:
+        propertyName = convertToCamelCase(dataPoint['label']) + 'DataPoint'
+    else:
+        propertyName = dataPoint['name'] + 'DataPoint'
+
+    writeLine(fileDescriptor, linePrepend + 'SunSpecDataPoint %s;' % propertyName)
+    writeLine(fileDescriptor, linePrepend + '%s.setName("%s");' % (propertyName, dataPoint['name']))
+    
+    if 'label' in dataPoint:
+        writeLine(fileDescriptor, linePrepend + '%s.setLabel("%s");' % (propertyName, dataPoint['label']))
+
+    if 'desc' in dataPoint:
+        writeLine(fileDescriptor, linePrepend + '%s.setDescription("%s");' % (propertyName, dataPoint['desc']))
+
+    if 'detail' in dataPoint:
+        writeLine(fileDescriptor, linePrepend + '%s.setDetail("%s");' % (propertyName, dataPoint['detail']))
+
+    if 'units' in dataPoint:
+        writeLine(fileDescriptor, linePrepend + '%s.setUnits("%s");' % (propertyName, dataPoint['units']))
+
+    if 'mandatory' in dataPoint and dataPoint['mandatory'] == 'M':
+        writeLine(fileDescriptor, linePrepend + '%s.setMandatory(true);' % (propertyName))
+
+    size = 0
+    if 'size' in dataPoint:
+        size = int(dataPoint['size'])
+        writeLine(fileDescriptor, linePrepend + '%s.setSize(%s);' % (propertyName, size))
+
+    writeLine(fileDescriptor, linePrepend + '%s.setAddressOffset(%s);' % (propertyName, addressOffset))
+    blockOffset = addressOffset - 2
+    if blockOffset >= 0:
+        writeLine(fileDescriptor, linePrepend + '%s.setBlockOffset(%s);' % (propertyName, blockOffset))
+
+    if 'sf' in dataPoint:
+        writeLine(fileDescriptor, linePrepend + '%s.setScaleFactorName("%s");' % (propertyName, dataPoint['sf']))
+
+    if 'type' in dataPoint:
+        writeLine(fileDescriptor, linePrepend + '%s.setDataType(SunSpecDataPoint::stringToDataType("%s"));' % (propertyName, dataPoint['type']))
+
+    if 'access' in dataPoint and dataPoint['access'] == 'RW':
+        writeLine(fileDescriptor, linePrepend + '%s.setAccess(SunSpecDataPoint::AccessReadWrite);' % (propertyName))
+
+    writeLine(fileDescriptor, linePrepend + 'm_dataPoints.insert(%s.name(), %s);' % (propertyName, propertyName))
+    writeLine(fileDescriptor)
+    return size
+
+
 def writeHeaderFile(headerFileName, className, modelIds):
     headerFileBaseName = os.path.basename(headerFileName)
     headerFiles.append(headerFileBaseName)
@@ -240,51 +295,6 @@ def writeHeaderFile(headerFileName, className, modelIds):
     fileDescriptor.close()
 
 
-def addDataPointInitialization(fileDescriptor, dataPoint, indentation = 1):
-    linePrepend = ''
-    for i in range(indentation):
-        linePrepend += '    '
-
-    # Get property name
-    if 'label' in dataPoint:
-        propertyName = convertToCamelCase(dataPoint['label']) + 'DataPoint'
-    else:
-        propertyName = dataPoint['name'] + 'DataPoint'
-
-    writeLine(fileDescriptor, linePrepend + 'SunSpecDataPoint %s;' % propertyName)
-    writeLine(fileDescriptor, linePrepend + '%s.setName("%s");' % (propertyName, dataPoint['name']))
-    
-    if 'label' in dataPoint:
-        writeLine(fileDescriptor, linePrepend + '%s.setLabel("%s");' % (propertyName, dataPoint['label']))
-
-    if 'desc' in dataPoint:
-        writeLine(fileDescriptor, linePrepend + '%s.setDescription("%s");' % (propertyName, dataPoint['desc']))
-
-    if 'detail' in dataPoint:
-        writeLine(fileDescriptor, linePrepend + '%s.setDetail("%s");' % (propertyName, dataPoint['detail']))
-
-    if 'units' in dataPoint:
-        writeLine(fileDescriptor, linePrepend + '%s.setUnits("%s");' % (propertyName, dataPoint['units']))
-
-    if 'mandatory' in dataPoint and dataPoint['mandatory'] == 'M':
-        writeLine(fileDescriptor, linePrepend + '%s.setMandatory(true);' % (propertyName))
-
-    if 'size' in dataPoint:
-        writeLine(fileDescriptor, linePrepend + '%s.setSize(%s);' % (propertyName, dataPoint['size']))
-
-    if 'sf' in dataPoint:
-        writeLine(fileDescriptor, linePrepend + '%s.setScaleFactorName("%s");' % (propertyName, dataPoint['sf']))
-
-    if 'type' in dataPoint:
-        writeLine(fileDescriptor, linePrepend + '%s.setDataType(SunSpecDataPoint::stringToDataType("%s"));' % (propertyName, dataPoint['type']))
-
-    if 'access' in dataPoint and dataPoint['access'] == 'RW':
-        writeLine(fileDescriptor, linePrepend + '%s.setAccess(SunSpecDataPoint::AccessReadWrite);' % (propertyName))
-
-    writeLine(fileDescriptor, linePrepend + 'm_dataPoints << %s;' % (propertyName))
-    writeLine(fileDescriptor)
-
-
 def writeSourceFile(sourceFileName, className, modelIds):
     sourceFileBaseName = os.path.basename(sourceFileName)
     sourceFiles.append(str(sourceFileBaseName))
@@ -299,6 +309,12 @@ def writeSourceFile(sourceFileName, className, modelIds):
     writeLine(fileDescriptor, '    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)')
     writeLine(fileDescriptor, '{')
     writeLine(fileDescriptor, '    initDataPoints();')
+    # Write supported model ids
+    modelIdsLine = ''
+    for i in range(len(modelIds)):
+        modelIdsLine += (' << %s' % modelIds[i])
+
+    writeLine(fileDescriptor, '    m_supportedModelIds' + modelIdsLine + ';')
     writeLine(fileDescriptor, '}')
     writeLine(fileDescriptor)
 
@@ -322,19 +338,34 @@ def writeSourceFile(sourceFileName, className, modelIds):
         else:
             writeLine(fileDescriptor, '    return QString();')
     else:
-        # Return value depending on the modelId
-        writeLine(fileDescriptor, '    switch (m_modelId) {')
+        # Check if all names are the same
+        name = ''
+        requireSwitch = False
         for i in range(len(modelIds)):
             modelId = modelIds[i]
-            writeLine(fileDescriptor, '    case %s:' % modelId)
-            if 'name' in models[modelId]['group']:
-                writeLine(fileDescriptor, '        return "%s";' % models[modelId]['group']['name'])
-            else:
-                writeLine(fileDescriptor, '        return QString();')
+            if i == 0: 
+                name = models[modelId]['group']['name']
+                continue
+            
+            if name != models[modelId]['group']['name']:
+                requireSwitch = True
 
-        writeLine(fileDescriptor, '    default:')
-        writeLine(fileDescriptor, '        return QString();')
-        writeLine(fileDescriptor, '    }')
+        if not requireSwitch:
+            writeLine(fileDescriptor, '    return "%s";' % models[modelId]['group']['name'])
+        else:
+            # Return value depending on the modelId
+            writeLine(fileDescriptor, '    switch (m_modelId) {')
+            for i in range(len(modelIds)):
+                modelId = modelIds[i]
+                writeLine(fileDescriptor, '    case %s:' % modelId)
+                if 'name' in models[modelId]['group']:
+                    writeLine(fileDescriptor, '        return "%s";' % models[modelId]['group']['name'])
+                else:
+                    writeLine(fileDescriptor, '        return QString();')
+
+            writeLine(fileDescriptor, '    default:')
+            writeLine(fileDescriptor, '        return QString();')
+            writeLine(fileDescriptor, '    }')
 
     writeLine(fileDescriptor, '}')
     writeLine(fileDescriptor)
@@ -413,8 +444,10 @@ def writeSourceFile(sourceFileName, className, modelIds):
     if len(modelIds) == 1:
         modelId = modelIds[0]
         dataPoints = models[modelId]['group']['points']
+        addressOffset = 0
         for dataPoint in dataPoints:
-            addDataPointInitialization(fileDescriptor, dataPoint)
+            dataSize = addDataPointInitialization(fileDescriptor, dataPoint, addressOffset)
+            addressOffset += dataSize
     else:
         # Return value depending on the modelId
         writeLine(fileDescriptor, '    switch (m_modelId) {')
@@ -422,8 +455,10 @@ def writeSourceFile(sourceFileName, className, modelIds):
             modelId = modelIds[i]
             dataPoints = models[modelId]['group']['points']
             writeLine(fileDescriptor, '    case %s: {' % modelId)
+            addressOffset = 0
             for dataPoint in dataPoints:
-                addDataPointInitialization(fileDescriptor, dataPoint, 2)
+                dataSize = addDataPointInitialization(fileDescriptor, dataPoint, addressOffset, 2)
+                addressOffset += dataSize
             
             writeLine(fileDescriptor, '        break;')
             writeLine(fileDescriptor, '    }')
@@ -433,11 +468,6 @@ def writeSourceFile(sourceFileName, className, modelIds):
         writeLine(fileDescriptor, '    }')
     writeLine(fileDescriptor, '}')
     writeLine(fileDescriptor)
-
-
-
-
-
 
     fileDescriptor.close()
 
@@ -522,10 +552,3 @@ for i in range(sourcesCount):
     writeLine(includeFile, line)
 
 includeFile.close()
-
-# group name, [ids]
-# each group is gonna be a class, a group with multiple id's need different parsing compaired to single group classes
-
-
-
-

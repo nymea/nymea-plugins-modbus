@@ -34,6 +34,7 @@ SunSpecControlsModel::SunSpecControlsModel(SunSpec *connection, quint16 modelId,
     SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
 {
     initDataPoints();
+    m_supportedModelIds << 123;
 }
 
 SunSpecControlsModel::~SunSpecControlsModel()
@@ -74,8 +75,9 @@ void SunSpecControlsModel::initDataPoints()
     modelIdDataPoint.setDescription("Model identifier");
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
+    modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelIdDataPoint;
+    m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
     modelLengthDataPoint.setName("L");
@@ -83,8 +85,9 @@ void SunSpecControlsModel::initDataPoints()
     modelLengthDataPoint.setDescription("Model length");
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
+    modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelLengthDataPoint;
+    m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint connWintmsDataPoint;
     connWintmsDataPoint.setName("Conn_WinTms");
@@ -92,9 +95,11 @@ void SunSpecControlsModel::initDataPoints()
     connWintmsDataPoint.setDescription("Time window for connect/disconnect.");
     connWintmsDataPoint.setUnits("Secs");
     connWintmsDataPoint.setSize(1);
+    connWintmsDataPoint.setAddressOffset(2);
+    connWintmsDataPoint.setBlockOffset(0);
     connWintmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     connWintmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << connWintmsDataPoint;
+    m_dataPoints.insert(connWintmsDataPoint.name(), connWintmsDataPoint);
 
     SunSpecDataPoint connRvrttmsDataPoint;
     connRvrttmsDataPoint.setName("Conn_RvrtTms");
@@ -102,9 +107,11 @@ void SunSpecControlsModel::initDataPoints()
     connRvrttmsDataPoint.setDescription("Timeout period for connect/disconnect.");
     connRvrttmsDataPoint.setUnits("Secs");
     connRvrttmsDataPoint.setSize(1);
+    connRvrttmsDataPoint.setAddressOffset(3);
+    connRvrttmsDataPoint.setBlockOffset(1);
     connRvrttmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     connRvrttmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << connRvrttmsDataPoint;
+    m_dataPoints.insert(connRvrttmsDataPoint.name(), connRvrttmsDataPoint);
 
     SunSpecDataPoint connDataPoint;
     connDataPoint.setName("Conn");
@@ -112,9 +119,11 @@ void SunSpecControlsModel::initDataPoints()
     connDataPoint.setDescription("Enumerated valued.  Connection control.");
     connDataPoint.setMandatory(true);
     connDataPoint.setSize(1);
+    connDataPoint.setAddressOffset(4);
+    connDataPoint.setBlockOffset(2);
     connDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
     connDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << connDataPoint;
+    m_dataPoints.insert(connDataPoint.name(), connDataPoint);
 
     SunSpecDataPoint wmaxlimpctDataPoint;
     wmaxlimpctDataPoint.setName("WMaxLimPct");
@@ -123,10 +132,12 @@ void SunSpecControlsModel::initDataPoints()
     wmaxlimpctDataPoint.setUnits("% WMax");
     wmaxlimpctDataPoint.setMandatory(true);
     wmaxlimpctDataPoint.setSize(1);
+    wmaxlimpctDataPoint.setAddressOffset(5);
+    wmaxlimpctDataPoint.setBlockOffset(3);
     wmaxlimpctDataPoint.setScaleFactorName("WMaxLimPct_SF");
     wmaxlimpctDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     wmaxlimpctDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << wmaxlimpctDataPoint;
+    m_dataPoints.insert(wmaxlimpctDataPoint.name(), wmaxlimpctDataPoint);
 
     SunSpecDataPoint wmaxlimpctWintmsDataPoint;
     wmaxlimpctWintmsDataPoint.setName("WMaxLimPct_WinTms");
@@ -134,9 +145,11 @@ void SunSpecControlsModel::initDataPoints()
     wmaxlimpctWintmsDataPoint.setDescription("Time window for power limit change.");
     wmaxlimpctWintmsDataPoint.setUnits("Secs");
     wmaxlimpctWintmsDataPoint.setSize(1);
+    wmaxlimpctWintmsDataPoint.setAddressOffset(6);
+    wmaxlimpctWintmsDataPoint.setBlockOffset(4);
     wmaxlimpctWintmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     wmaxlimpctWintmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << wmaxlimpctWintmsDataPoint;
+    m_dataPoints.insert(wmaxlimpctWintmsDataPoint.name(), wmaxlimpctWintmsDataPoint);
 
     SunSpecDataPoint wmaxlimpctRvrttmsDataPoint;
     wmaxlimpctRvrttmsDataPoint.setName("WMaxLimPct_RvrtTms");
@@ -144,9 +157,11 @@ void SunSpecControlsModel::initDataPoints()
     wmaxlimpctRvrttmsDataPoint.setDescription("Timeout period for power limit.");
     wmaxlimpctRvrttmsDataPoint.setUnits("Secs");
     wmaxlimpctRvrttmsDataPoint.setSize(1);
+    wmaxlimpctRvrttmsDataPoint.setAddressOffset(7);
+    wmaxlimpctRvrttmsDataPoint.setBlockOffset(5);
     wmaxlimpctRvrttmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     wmaxlimpctRvrttmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << wmaxlimpctRvrttmsDataPoint;
+    m_dataPoints.insert(wmaxlimpctRvrttmsDataPoint.name(), wmaxlimpctRvrttmsDataPoint);
 
     SunSpecDataPoint wmaxlimpctRmptmsDataPoint;
     wmaxlimpctRmptmsDataPoint.setName("WMaxLimPct_RmpTms");
@@ -154,9 +169,11 @@ void SunSpecControlsModel::initDataPoints()
     wmaxlimpctRmptmsDataPoint.setDescription("Ramp time for moving from current setpoint to new setpoint.");
     wmaxlimpctRmptmsDataPoint.setUnits("Secs");
     wmaxlimpctRmptmsDataPoint.setSize(1);
+    wmaxlimpctRmptmsDataPoint.setAddressOffset(8);
+    wmaxlimpctRmptmsDataPoint.setBlockOffset(6);
     wmaxlimpctRmptmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     wmaxlimpctRmptmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << wmaxlimpctRmptmsDataPoint;
+    m_dataPoints.insert(wmaxlimpctRmptmsDataPoint.name(), wmaxlimpctRmptmsDataPoint);
 
     SunSpecDataPoint wmaxlimEnaDataPoint;
     wmaxlimEnaDataPoint.setName("WMaxLim_Ena");
@@ -164,9 +181,11 @@ void SunSpecControlsModel::initDataPoints()
     wmaxlimEnaDataPoint.setDescription("Enumerated valued.  Throttle enable/disable control.");
     wmaxlimEnaDataPoint.setMandatory(true);
     wmaxlimEnaDataPoint.setSize(1);
+    wmaxlimEnaDataPoint.setAddressOffset(9);
+    wmaxlimEnaDataPoint.setBlockOffset(7);
     wmaxlimEnaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
     wmaxlimEnaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << wmaxlimEnaDataPoint;
+    m_dataPoints.insert(wmaxlimEnaDataPoint.name(), wmaxlimEnaDataPoint);
 
     SunSpecDataPoint outpfsetDataPoint;
     outpfsetDataPoint.setName("OutPFSet");
@@ -175,10 +194,12 @@ void SunSpecControlsModel::initDataPoints()
     outpfsetDataPoint.setUnits("cos()");
     outpfsetDataPoint.setMandatory(true);
     outpfsetDataPoint.setSize(1);
+    outpfsetDataPoint.setAddressOffset(10);
+    outpfsetDataPoint.setBlockOffset(8);
     outpfsetDataPoint.setScaleFactorName("OutPFSet_SF");
     outpfsetDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
     outpfsetDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << outpfsetDataPoint;
+    m_dataPoints.insert(outpfsetDataPoint.name(), outpfsetDataPoint);
 
     SunSpecDataPoint outpfsetWintmsDataPoint;
     outpfsetWintmsDataPoint.setName("OutPFSet_WinTms");
@@ -186,9 +207,11 @@ void SunSpecControlsModel::initDataPoints()
     outpfsetWintmsDataPoint.setDescription("Time window for power factor change.");
     outpfsetWintmsDataPoint.setUnits("Secs");
     outpfsetWintmsDataPoint.setSize(1);
+    outpfsetWintmsDataPoint.setAddressOffset(11);
+    outpfsetWintmsDataPoint.setBlockOffset(9);
     outpfsetWintmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     outpfsetWintmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << outpfsetWintmsDataPoint;
+    m_dataPoints.insert(outpfsetWintmsDataPoint.name(), outpfsetWintmsDataPoint);
 
     SunSpecDataPoint outpfsetRvrttmsDataPoint;
     outpfsetRvrttmsDataPoint.setName("OutPFSet_RvrtTms");
@@ -196,9 +219,11 @@ void SunSpecControlsModel::initDataPoints()
     outpfsetRvrttmsDataPoint.setDescription("Timeout period for power factor.");
     outpfsetRvrttmsDataPoint.setUnits("Secs");
     outpfsetRvrttmsDataPoint.setSize(1);
+    outpfsetRvrttmsDataPoint.setAddressOffset(12);
+    outpfsetRvrttmsDataPoint.setBlockOffset(10);
     outpfsetRvrttmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     outpfsetRvrttmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << outpfsetRvrttmsDataPoint;
+    m_dataPoints.insert(outpfsetRvrttmsDataPoint.name(), outpfsetRvrttmsDataPoint);
 
     SunSpecDataPoint outpfsetRmptmsDataPoint;
     outpfsetRmptmsDataPoint.setName("OutPFSet_RmpTms");
@@ -206,9 +231,11 @@ void SunSpecControlsModel::initDataPoints()
     outpfsetRmptmsDataPoint.setDescription("Ramp time for moving from current setpoint to new setpoint.");
     outpfsetRmptmsDataPoint.setUnits("Secs");
     outpfsetRmptmsDataPoint.setSize(1);
+    outpfsetRmptmsDataPoint.setAddressOffset(13);
+    outpfsetRmptmsDataPoint.setBlockOffset(11);
     outpfsetRmptmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     outpfsetRmptmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << outpfsetRmptmsDataPoint;
+    m_dataPoints.insert(outpfsetRmptmsDataPoint.name(), outpfsetRmptmsDataPoint);
 
     SunSpecDataPoint outpfsetEnaDataPoint;
     outpfsetEnaDataPoint.setName("OutPFSet_Ena");
@@ -216,9 +243,11 @@ void SunSpecControlsModel::initDataPoints()
     outpfsetEnaDataPoint.setDescription("Enumerated valued.  Fixed power factor enable/disable control.");
     outpfsetEnaDataPoint.setMandatory(true);
     outpfsetEnaDataPoint.setSize(1);
+    outpfsetEnaDataPoint.setAddressOffset(14);
+    outpfsetEnaDataPoint.setBlockOffset(12);
     outpfsetEnaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
     outpfsetEnaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << outpfsetEnaDataPoint;
+    m_dataPoints.insert(outpfsetEnaDataPoint.name(), outpfsetEnaDataPoint);
 
     SunSpecDataPoint varwmaxpctDataPoint;
     varwmaxpctDataPoint.setName("VArWMaxPct");
@@ -226,10 +255,12 @@ void SunSpecControlsModel::initDataPoints()
     varwmaxpctDataPoint.setDescription("Reactive power in percent of WMax.");
     varwmaxpctDataPoint.setUnits("% WMax");
     varwmaxpctDataPoint.setSize(1);
+    varwmaxpctDataPoint.setAddressOffset(15);
+    varwmaxpctDataPoint.setBlockOffset(13);
     varwmaxpctDataPoint.setScaleFactorName("VArPct_SF");
     varwmaxpctDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
     varwmaxpctDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << varwmaxpctDataPoint;
+    m_dataPoints.insert(varwmaxpctDataPoint.name(), varwmaxpctDataPoint);
 
     SunSpecDataPoint varmaxpctDataPoint;
     varmaxpctDataPoint.setName("VArMaxPct");
@@ -237,10 +268,12 @@ void SunSpecControlsModel::initDataPoints()
     varmaxpctDataPoint.setDescription("Reactive power in percent of VArMax.");
     varmaxpctDataPoint.setUnits("% VArMax");
     varmaxpctDataPoint.setSize(1);
+    varmaxpctDataPoint.setAddressOffset(16);
+    varmaxpctDataPoint.setBlockOffset(14);
     varmaxpctDataPoint.setScaleFactorName("VArPct_SF");
     varmaxpctDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
     varmaxpctDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << varmaxpctDataPoint;
+    m_dataPoints.insert(varmaxpctDataPoint.name(), varmaxpctDataPoint);
 
     SunSpecDataPoint varavalpctDataPoint;
     varavalpctDataPoint.setName("VArAvalPct");
@@ -248,10 +281,12 @@ void SunSpecControlsModel::initDataPoints()
     varavalpctDataPoint.setDescription("Reactive power in percent of VArAval.");
     varavalpctDataPoint.setUnits("% VArAval");
     varavalpctDataPoint.setSize(1);
+    varavalpctDataPoint.setAddressOffset(17);
+    varavalpctDataPoint.setBlockOffset(15);
     varavalpctDataPoint.setScaleFactorName("VArPct_SF");
     varavalpctDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
     varavalpctDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << varavalpctDataPoint;
+    m_dataPoints.insert(varavalpctDataPoint.name(), varavalpctDataPoint);
 
     SunSpecDataPoint varpctWintmsDataPoint;
     varpctWintmsDataPoint.setName("VArPct_WinTms");
@@ -259,9 +294,11 @@ void SunSpecControlsModel::initDataPoints()
     varpctWintmsDataPoint.setDescription("Time window for VAR limit change.");
     varpctWintmsDataPoint.setUnits("Secs");
     varpctWintmsDataPoint.setSize(1);
+    varpctWintmsDataPoint.setAddressOffset(18);
+    varpctWintmsDataPoint.setBlockOffset(16);
     varpctWintmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     varpctWintmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << varpctWintmsDataPoint;
+    m_dataPoints.insert(varpctWintmsDataPoint.name(), varpctWintmsDataPoint);
 
     SunSpecDataPoint varpctRvrttmsDataPoint;
     varpctRvrttmsDataPoint.setName("VArPct_RvrtTms");
@@ -269,9 +306,11 @@ void SunSpecControlsModel::initDataPoints()
     varpctRvrttmsDataPoint.setDescription("Timeout period for VAR limit.");
     varpctRvrttmsDataPoint.setUnits("Secs");
     varpctRvrttmsDataPoint.setSize(1);
+    varpctRvrttmsDataPoint.setAddressOffset(19);
+    varpctRvrttmsDataPoint.setBlockOffset(17);
     varpctRvrttmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     varpctRvrttmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << varpctRvrttmsDataPoint;
+    m_dataPoints.insert(varpctRvrttmsDataPoint.name(), varpctRvrttmsDataPoint);
 
     SunSpecDataPoint varpctRmptmsDataPoint;
     varpctRmptmsDataPoint.setName("VArPct_RmpTms");
@@ -279,18 +318,22 @@ void SunSpecControlsModel::initDataPoints()
     varpctRmptmsDataPoint.setDescription("Ramp time for moving from current setpoint to new setpoint.");
     varpctRmptmsDataPoint.setUnits("Secs");
     varpctRmptmsDataPoint.setSize(1);
+    varpctRmptmsDataPoint.setAddressOffset(20);
+    varpctRmptmsDataPoint.setBlockOffset(18);
     varpctRmptmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     varpctRmptmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << varpctRmptmsDataPoint;
+    m_dataPoints.insert(varpctRmptmsDataPoint.name(), varpctRmptmsDataPoint);
 
     SunSpecDataPoint varpctModDataPoint;
     varpctModDataPoint.setName("VArPct_Mod");
     varpctModDataPoint.setLabel("VArPct_Mod");
     varpctModDataPoint.setDescription("Enumerated value. VAR percent limit mode.");
     varpctModDataPoint.setSize(1);
+    varpctModDataPoint.setAddressOffset(21);
+    varpctModDataPoint.setBlockOffset(19);
     varpctModDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
     varpctModDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << varpctModDataPoint;
+    m_dataPoints.insert(varpctModDataPoint.name(), varpctModDataPoint);
 
     SunSpecDataPoint varpctEnaDataPoint;
     varpctEnaDataPoint.setName("VArPct_Ena");
@@ -298,9 +341,11 @@ void SunSpecControlsModel::initDataPoints()
     varpctEnaDataPoint.setDescription("Enumerated valued.  Percent limit VAr enable/disable control.");
     varpctEnaDataPoint.setMandatory(true);
     varpctEnaDataPoint.setSize(1);
+    varpctEnaDataPoint.setAddressOffset(22);
+    varpctEnaDataPoint.setBlockOffset(20);
     varpctEnaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
     varpctEnaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << varpctEnaDataPoint;
+    m_dataPoints.insert(varpctEnaDataPoint.name(), varpctEnaDataPoint);
 
     SunSpecDataPoint wmaxlimpctSfDataPoint;
     wmaxlimpctSfDataPoint.setName("WMaxLimPct_SF");
@@ -308,8 +353,10 @@ void SunSpecControlsModel::initDataPoints()
     wmaxlimpctSfDataPoint.setDescription("Scale factor for power output percent.");
     wmaxlimpctSfDataPoint.setMandatory(true);
     wmaxlimpctSfDataPoint.setSize(1);
+    wmaxlimpctSfDataPoint.setAddressOffset(23);
+    wmaxlimpctSfDataPoint.setBlockOffset(21);
     wmaxlimpctSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints << wmaxlimpctSfDataPoint;
+    m_dataPoints.insert(wmaxlimpctSfDataPoint.name(), wmaxlimpctSfDataPoint);
 
     SunSpecDataPoint outpfsetSfDataPoint;
     outpfsetSfDataPoint.setName("OutPFSet_SF");
@@ -317,16 +364,20 @@ void SunSpecControlsModel::initDataPoints()
     outpfsetSfDataPoint.setDescription("Scale factor for power factor.");
     outpfsetSfDataPoint.setMandatory(true);
     outpfsetSfDataPoint.setSize(1);
+    outpfsetSfDataPoint.setAddressOffset(24);
+    outpfsetSfDataPoint.setBlockOffset(22);
     outpfsetSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints << outpfsetSfDataPoint;
+    m_dataPoints.insert(outpfsetSfDataPoint.name(), outpfsetSfDataPoint);
 
     SunSpecDataPoint varpctSfDataPoint;
     varpctSfDataPoint.setName("VArPct_SF");
     varpctSfDataPoint.setLabel("VArPct_SF");
     varpctSfDataPoint.setDescription("Scale factor for reactive power percent.");
     varpctSfDataPoint.setSize(1);
+    varpctSfDataPoint.setAddressOffset(25);
+    varpctSfDataPoint.setBlockOffset(23);
     varpctSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints << varpctSfDataPoint;
+    m_dataPoints.insert(varpctSfDataPoint.name(), varpctSfDataPoint);
 
 }
 

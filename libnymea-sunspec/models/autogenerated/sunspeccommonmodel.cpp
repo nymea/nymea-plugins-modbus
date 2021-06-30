@@ -34,6 +34,7 @@ SunSpecCommonModel::SunSpecCommonModel(SunSpec *connection, quint16 modelId, qui
     SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
 {
     initDataPoints();
+    m_supportedModelIds << 1;
 }
 
 SunSpecCommonModel::~SunSpecCommonModel()
@@ -74,8 +75,9 @@ void SunSpecCommonModel::initDataPoints()
     modelIdDataPoint.setDescription("Model identifier");
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
+    modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelIdDataPoint;
+    m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
     modelLengthDataPoint.setName("L");
@@ -83,8 +85,9 @@ void SunSpecCommonModel::initDataPoints()
     modelLengthDataPoint.setDescription("Model length");
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
+    modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelLengthDataPoint;
+    m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint manufacturerDataPoint;
     manufacturerDataPoint.setName("Mn");
@@ -92,8 +95,10 @@ void SunSpecCommonModel::initDataPoints()
     manufacturerDataPoint.setDescription("Well known value registered with SunSpec for compliance");
     manufacturerDataPoint.setMandatory(true);
     manufacturerDataPoint.setSize(16);
+    manufacturerDataPoint.setAddressOffset(2);
+    manufacturerDataPoint.setBlockOffset(0);
     manufacturerDataPoint.setDataType(SunSpecDataPoint::stringToDataType("string"));
-    m_dataPoints << manufacturerDataPoint;
+    m_dataPoints.insert(manufacturerDataPoint.name(), manufacturerDataPoint);
 
     SunSpecDataPoint modelDataPoint;
     modelDataPoint.setName("Md");
@@ -101,24 +106,30 @@ void SunSpecCommonModel::initDataPoints()
     modelDataPoint.setDescription("Manufacturer specific value (32 chars)");
     modelDataPoint.setMandatory(true);
     modelDataPoint.setSize(16);
+    modelDataPoint.setAddressOffset(18);
+    modelDataPoint.setBlockOffset(16);
     modelDataPoint.setDataType(SunSpecDataPoint::stringToDataType("string"));
-    m_dataPoints << modelDataPoint;
+    m_dataPoints.insert(modelDataPoint.name(), modelDataPoint);
 
     SunSpecDataPoint optionsDataPoint;
     optionsDataPoint.setName("Opt");
     optionsDataPoint.setLabel("Options");
     optionsDataPoint.setDescription("Manufacturer specific value (16 chars)");
     optionsDataPoint.setSize(8);
+    optionsDataPoint.setAddressOffset(34);
+    optionsDataPoint.setBlockOffset(32);
     optionsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("string"));
-    m_dataPoints << optionsDataPoint;
+    m_dataPoints.insert(optionsDataPoint.name(), optionsDataPoint);
 
     SunSpecDataPoint versionDataPoint;
     versionDataPoint.setName("Vr");
     versionDataPoint.setLabel("Version");
     versionDataPoint.setDescription("Manufacturer specific value (16 chars)");
     versionDataPoint.setSize(8);
+    versionDataPoint.setAddressOffset(42);
+    versionDataPoint.setBlockOffset(40);
     versionDataPoint.setDataType(SunSpecDataPoint::stringToDataType("string"));
-    m_dataPoints << versionDataPoint;
+    m_dataPoints.insert(versionDataPoint.name(), versionDataPoint);
 
     SunSpecDataPoint serialNumberDataPoint;
     serialNumberDataPoint.setName("SN");
@@ -126,24 +137,30 @@ void SunSpecCommonModel::initDataPoints()
     serialNumberDataPoint.setDescription("Manufacturer specific value (32 chars)");
     serialNumberDataPoint.setMandatory(true);
     serialNumberDataPoint.setSize(16);
+    serialNumberDataPoint.setAddressOffset(50);
+    serialNumberDataPoint.setBlockOffset(48);
     serialNumberDataPoint.setDataType(SunSpecDataPoint::stringToDataType("string"));
-    m_dataPoints << serialNumberDataPoint;
+    m_dataPoints.insert(serialNumberDataPoint.name(), serialNumberDataPoint);
 
     SunSpecDataPoint deviceAddressDataPoint;
     deviceAddressDataPoint.setName("DA");
     deviceAddressDataPoint.setLabel("Device Address");
     deviceAddressDataPoint.setDescription("Modbus device address");
     deviceAddressDataPoint.setSize(1);
+    deviceAddressDataPoint.setAddressOffset(66);
+    deviceAddressDataPoint.setBlockOffset(64);
     deviceAddressDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     deviceAddressDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << deviceAddressDataPoint;
+    m_dataPoints.insert(deviceAddressDataPoint.name(), deviceAddressDataPoint);
 
     SunSpecDataPoint PadDataPoint;
     PadDataPoint.setName("Pad");
     PadDataPoint.setDescription("Force even alignment");
     PadDataPoint.setSize(1);
+    PadDataPoint.setAddressOffset(67);
+    PadDataPoint.setBlockOffset(65);
     PadDataPoint.setDataType(SunSpecDataPoint::stringToDataType("pad"));
-    m_dataPoints << PadDataPoint;
+    m_dataPoints.insert(PadDataPoint.name(), PadDataPoint);
 
 }
 

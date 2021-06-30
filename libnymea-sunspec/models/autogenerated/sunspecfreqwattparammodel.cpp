@@ -34,6 +34,7 @@ SunSpecFreqWattParamModel::SunSpecFreqWattParamModel(SunSpec *connection, quint1
     SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
 {
     initDataPoints();
+    m_supportedModelIds << 127;
 }
 
 SunSpecFreqWattParamModel::~SunSpecFreqWattParamModel()
@@ -74,8 +75,9 @@ void SunSpecFreqWattParamModel::initDataPoints()
     modelIdDataPoint.setDescription("Model identifier");
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
+    modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelIdDataPoint;
+    m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
     modelLengthDataPoint.setName("L");
@@ -83,8 +85,9 @@ void SunSpecFreqWattParamModel::initDataPoints()
     modelLengthDataPoint.setDescription("Model length");
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
+    modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelLengthDataPoint;
+    m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint wgraDataPoint;
     wgraDataPoint.setName("WGra");
@@ -93,10 +96,12 @@ void SunSpecFreqWattParamModel::initDataPoints()
     wgraDataPoint.setUnits("% PM/Hz");
     wgraDataPoint.setMandatory(true);
     wgraDataPoint.setSize(1);
+    wgraDataPoint.setAddressOffset(2);
+    wgraDataPoint.setBlockOffset(0);
     wgraDataPoint.setScaleFactorName("WGra_SF");
     wgraDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     wgraDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << wgraDataPoint;
+    m_dataPoints.insert(wgraDataPoint.name(), wgraDataPoint);
 
     SunSpecDataPoint hzstrDataPoint;
     hzstrDataPoint.setName("HzStr");
@@ -105,10 +110,12 @@ void SunSpecFreqWattParamModel::initDataPoints()
     hzstrDataPoint.setUnits("Hz");
     hzstrDataPoint.setMandatory(true);
     hzstrDataPoint.setSize(1);
+    hzstrDataPoint.setAddressOffset(3);
+    hzstrDataPoint.setBlockOffset(1);
     hzstrDataPoint.setScaleFactorName("HzStrStop_SF");
     hzstrDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
     hzstrDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << hzstrDataPoint;
+    m_dataPoints.insert(hzstrDataPoint.name(), hzstrDataPoint);
 
     SunSpecDataPoint hzstopDataPoint;
     hzstopDataPoint.setName("HzStop");
@@ -117,10 +124,12 @@ void SunSpecFreqWattParamModel::initDataPoints()
     hzstopDataPoint.setUnits("Hz");
     hzstopDataPoint.setMandatory(true);
     hzstopDataPoint.setSize(1);
+    hzstopDataPoint.setAddressOffset(4);
+    hzstopDataPoint.setBlockOffset(2);
     hzstopDataPoint.setScaleFactorName("HzStrStop_SF");
     hzstopDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
     hzstopDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << hzstopDataPoint;
+    m_dataPoints.insert(hzstopDataPoint.name(), hzstopDataPoint);
 
     SunSpecDataPoint hysenaDataPoint;
     hysenaDataPoint.setName("HysEna");
@@ -128,9 +137,11 @@ void SunSpecFreqWattParamModel::initDataPoints()
     hysenaDataPoint.setDescription("Enable hysteresis");
     hysenaDataPoint.setMandatory(true);
     hysenaDataPoint.setSize(1);
+    hysenaDataPoint.setAddressOffset(5);
+    hysenaDataPoint.setBlockOffset(3);
     hysenaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield16"));
     hysenaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << hysenaDataPoint;
+    m_dataPoints.insert(hysenaDataPoint.name(), hysenaDataPoint);
 
     SunSpecDataPoint modenaDataPoint;
     modenaDataPoint.setName("ModEna");
@@ -138,9 +149,11 @@ void SunSpecFreqWattParamModel::initDataPoints()
     modenaDataPoint.setDescription("Is Parameterized Frequency-Watt control active.");
     modenaDataPoint.setMandatory(true);
     modenaDataPoint.setSize(1);
+    modenaDataPoint.setAddressOffset(6);
+    modenaDataPoint.setBlockOffset(4);
     modenaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield16"));
     modenaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << modenaDataPoint;
+    m_dataPoints.insert(modenaDataPoint.name(), modenaDataPoint);
 
     SunSpecDataPoint hzstopwgraDataPoint;
     hzstopwgraDataPoint.setName("HzStopWGra");
@@ -148,40 +161,50 @@ void SunSpecFreqWattParamModel::initDataPoints()
     hzstopwgraDataPoint.setDescription("The maximum time-based rate of change at which power output returns to normal after having been capped by an over frequency event.");
     hzstopwgraDataPoint.setUnits("% WMax/min");
     hzstopwgraDataPoint.setSize(1);
+    hzstopwgraDataPoint.setAddressOffset(7);
+    hzstopwgraDataPoint.setBlockOffset(5);
     hzstopwgraDataPoint.setScaleFactorName("RmpIncDec_SF");
     hzstopwgraDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     hzstopwgraDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << hzstopwgraDataPoint;
+    m_dataPoints.insert(hzstopwgraDataPoint.name(), hzstopwgraDataPoint);
 
     SunSpecDataPoint wgraSfDataPoint;
     wgraSfDataPoint.setName("WGra_SF");
     wgraSfDataPoint.setLabel("WGra_SF");
     wgraSfDataPoint.setDescription("Scale factor for output gradient.");
     wgraSfDataPoint.setSize(1);
+    wgraSfDataPoint.setAddressOffset(8);
+    wgraSfDataPoint.setBlockOffset(6);
     wgraSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints << wgraSfDataPoint;
+    m_dataPoints.insert(wgraSfDataPoint.name(), wgraSfDataPoint);
 
     SunSpecDataPoint hzstrstopSfDataPoint;
     hzstrstopSfDataPoint.setName("HzStrStop_SF");
     hzstrstopSfDataPoint.setLabel("HzStrStop_SF");
     hzstrstopSfDataPoint.setDescription("Scale factor for frequency deviations.");
     hzstrstopSfDataPoint.setSize(1);
+    hzstrstopSfDataPoint.setAddressOffset(9);
+    hzstrstopSfDataPoint.setBlockOffset(7);
     hzstrstopSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints << hzstrstopSfDataPoint;
+    m_dataPoints.insert(hzstrstopSfDataPoint.name(), hzstrstopSfDataPoint);
 
     SunSpecDataPoint rmpincdecSfDataPoint;
     rmpincdecSfDataPoint.setName("RmpIncDec_SF");
     rmpincdecSfDataPoint.setLabel("RmpIncDec_SF");
     rmpincdecSfDataPoint.setDescription("Scale factor for increment and decrement ramps.");
     rmpincdecSfDataPoint.setSize(1);
+    rmpincdecSfDataPoint.setAddressOffset(10);
+    rmpincdecSfDataPoint.setBlockOffset(8);
     rmpincdecSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints << rmpincdecSfDataPoint;
+    m_dataPoints.insert(rmpincdecSfDataPoint.name(), rmpincdecSfDataPoint);
 
     SunSpecDataPoint PadDataPoint;
     PadDataPoint.setName("Pad");
     PadDataPoint.setSize(1);
+    PadDataPoint.setAddressOffset(11);
+    PadDataPoint.setBlockOffset(9);
     PadDataPoint.setDataType(SunSpecDataPoint::stringToDataType("pad"));
-    m_dataPoints << PadDataPoint;
+    m_dataPoints.insert(PadDataPoint.name(), PadDataPoint);
 
 }
 

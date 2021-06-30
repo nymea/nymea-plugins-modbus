@@ -2,6 +2,7 @@
 #define SUNSPECDATAPOINT_H
 
 #include <QObject>
+#include <QVector>
 
 class SunSpecDataPoint
 {
@@ -78,6 +79,9 @@ public:
     QString scaleFactorName() const;
     void setScaleFactorName(const QString &scaleFactorName);
 
+    QVector<quint16> rawData() const;
+    void setRawData(const QVector<quint16> &rawData);
+
     bool isValid() const;
 
     static DataType stringToDataType(const QString &typString);
@@ -96,6 +100,7 @@ private:
     int m_size = 1;
     QString m_scaleFactorName;
 
+    QVector<quint16> m_rawData;
 };
 
 #endif // SUNSPECDATAPOINT_H

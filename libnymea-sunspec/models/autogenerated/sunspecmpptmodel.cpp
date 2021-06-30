@@ -34,6 +34,7 @@ SunSpecMpptModel::SunSpecMpptModel(SunSpec *connection, quint16 modelId, quint16
     SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
 {
     initDataPoints();
+    m_supportedModelIds << 160;
 }
 
 SunSpecMpptModel::~SunSpecMpptModel()
@@ -74,8 +75,9 @@ void SunSpecMpptModel::initDataPoints()
     modelIdDataPoint.setDescription("Model identifier");
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
+    modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelIdDataPoint;
+    m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
     modelLengthDataPoint.setName("L");
@@ -83,57 +85,72 @@ void SunSpecMpptModel::initDataPoints()
     modelLengthDataPoint.setDescription("Model length");
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
+    modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelLengthDataPoint;
+    m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint currentScaleFactorDataPoint;
     currentScaleFactorDataPoint.setName("DCA_SF");
     currentScaleFactorDataPoint.setLabel("Current Scale Factor");
     currentScaleFactorDataPoint.setSize(1);
+    currentScaleFactorDataPoint.setAddressOffset(2);
+    currentScaleFactorDataPoint.setBlockOffset(0);
     currentScaleFactorDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints << currentScaleFactorDataPoint;
+    m_dataPoints.insert(currentScaleFactorDataPoint.name(), currentScaleFactorDataPoint);
 
     SunSpecDataPoint voltageScaleFactorDataPoint;
     voltageScaleFactorDataPoint.setName("DCV_SF");
     voltageScaleFactorDataPoint.setLabel("Voltage Scale Factor");
     voltageScaleFactorDataPoint.setSize(1);
+    voltageScaleFactorDataPoint.setAddressOffset(3);
+    voltageScaleFactorDataPoint.setBlockOffset(1);
     voltageScaleFactorDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints << voltageScaleFactorDataPoint;
+    m_dataPoints.insert(voltageScaleFactorDataPoint.name(), voltageScaleFactorDataPoint);
 
     SunSpecDataPoint powerScaleFactorDataPoint;
     powerScaleFactorDataPoint.setName("DCW_SF");
     powerScaleFactorDataPoint.setLabel("Power Scale Factor");
     powerScaleFactorDataPoint.setSize(1);
+    powerScaleFactorDataPoint.setAddressOffset(4);
+    powerScaleFactorDataPoint.setBlockOffset(2);
     powerScaleFactorDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints << powerScaleFactorDataPoint;
+    m_dataPoints.insert(powerScaleFactorDataPoint.name(), powerScaleFactorDataPoint);
 
     SunSpecDataPoint energyScaleFactorDataPoint;
     energyScaleFactorDataPoint.setName("DCWH_SF");
     energyScaleFactorDataPoint.setLabel("Energy Scale Factor");
     energyScaleFactorDataPoint.setSize(1);
+    energyScaleFactorDataPoint.setAddressOffset(5);
+    energyScaleFactorDataPoint.setBlockOffset(3);
     energyScaleFactorDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints << energyScaleFactorDataPoint;
+    m_dataPoints.insert(energyScaleFactorDataPoint.name(), energyScaleFactorDataPoint);
 
     SunSpecDataPoint globalEventsDataPoint;
     globalEventsDataPoint.setName("Evt");
     globalEventsDataPoint.setLabel("Global Events");
     globalEventsDataPoint.setSize(2);
+    globalEventsDataPoint.setAddressOffset(6);
+    globalEventsDataPoint.setBlockOffset(4);
     globalEventsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
-    m_dataPoints << globalEventsDataPoint;
+    m_dataPoints.insert(globalEventsDataPoint.name(), globalEventsDataPoint);
 
     SunSpecDataPoint numberOfModulesDataPoint;
     numberOfModulesDataPoint.setName("N");
     numberOfModulesDataPoint.setLabel("Number of Modules");
     numberOfModulesDataPoint.setSize(1);
+    numberOfModulesDataPoint.setAddressOffset(8);
+    numberOfModulesDataPoint.setBlockOffset(6);
     numberOfModulesDataPoint.setDataType(SunSpecDataPoint::stringToDataType("count"));
-    m_dataPoints << numberOfModulesDataPoint;
+    m_dataPoints.insert(numberOfModulesDataPoint.name(), numberOfModulesDataPoint);
 
     SunSpecDataPoint timestampPeriodDataPoint;
     timestampPeriodDataPoint.setName("TmsPer");
     timestampPeriodDataPoint.setLabel("Timestamp Period");
     timestampPeriodDataPoint.setSize(1);
+    timestampPeriodDataPoint.setAddressOffset(9);
+    timestampPeriodDataPoint.setBlockOffset(7);
     timestampPeriodDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << timestampPeriodDataPoint;
+    m_dataPoints.insert(timestampPeriodDataPoint.name(), timestampPeriodDataPoint);
 
 }
 

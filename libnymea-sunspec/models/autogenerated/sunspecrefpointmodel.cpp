@@ -34,6 +34,7 @@ SunSpecRefPointModel::SunSpecRefPointModel(SunSpec *connection, quint16 modelId,
     SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
 {
     initDataPoints();
+    m_supportedModelIds << 306;
 }
 
 SunSpecRefPointModel::~SunSpecRefPointModel()
@@ -74,8 +75,9 @@ void SunSpecRefPointModel::initDataPoints()
     modelIdDataPoint.setDescription("Model identifier");
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
+    modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelIdDataPoint;
+    m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
     modelLengthDataPoint.setName("L");
@@ -83,8 +85,9 @@ void SunSpecRefPointModel::initDataPoints()
     modelLengthDataPoint.setDescription("Model length");
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
+    modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelLengthDataPoint;
+    m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint ghiDataPoint;
     ghiDataPoint.setName("GHI");
@@ -92,8 +95,10 @@ void SunSpecRefPointModel::initDataPoints()
     ghiDataPoint.setDescription("Global Horizontal Irradiance");
     ghiDataPoint.setUnits("W/m2");
     ghiDataPoint.setSize(1);
+    ghiDataPoint.setAddressOffset(2);
+    ghiDataPoint.setBlockOffset(0);
     ghiDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << ghiDataPoint;
+    m_dataPoints.insert(ghiDataPoint.name(), ghiDataPoint);
 
     SunSpecDataPoint ampsDataPoint;
     ampsDataPoint.setName("A");
@@ -101,8 +106,10 @@ void SunSpecRefPointModel::initDataPoints()
     ampsDataPoint.setDescription("Current measurement at reference point");
     ampsDataPoint.setUnits("W/m2");
     ampsDataPoint.setSize(1);
+    ampsDataPoint.setAddressOffset(3);
+    ampsDataPoint.setBlockOffset(1);
     ampsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << ampsDataPoint;
+    m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
     SunSpecDataPoint voltageDataPoint;
     voltageDataPoint.setName("V");
@@ -110,8 +117,10 @@ void SunSpecRefPointModel::initDataPoints()
     voltageDataPoint.setDescription("Voltage  measurement at reference point");
     voltageDataPoint.setUnits("W/m2");
     voltageDataPoint.setSize(1);
+    voltageDataPoint.setAddressOffset(4);
+    voltageDataPoint.setBlockOffset(2);
     voltageDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << voltageDataPoint;
+    m_dataPoints.insert(voltageDataPoint.name(), voltageDataPoint);
 
     SunSpecDataPoint temperatureDataPoint;
     temperatureDataPoint.setName("Tmp");
@@ -119,8 +128,10 @@ void SunSpecRefPointModel::initDataPoints()
     temperatureDataPoint.setDescription("Temperature measurement at reference point");
     temperatureDataPoint.setUnits("W/m2");
     temperatureDataPoint.setSize(1);
+    temperatureDataPoint.setAddressOffset(5);
+    temperatureDataPoint.setBlockOffset(3);
     temperatureDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << temperatureDataPoint;
+    m_dataPoints.insert(temperatureDataPoint.name(), temperatureDataPoint);
 
 }
 

@@ -16,6 +16,8 @@ public:
 
     SunSpec *connection() const;
 
+    QVector<quint16> supportedModelIds() const;
+
     virtual QString name() const = 0;
     virtual QString description() const = 0;
     virtual QString label() const = 0;
@@ -35,10 +37,11 @@ protected:
     quint16 m_modelId;
     quint16 m_modelLength = 0;
     quint16 m_modbusStartRegister = 0;
+    QVector<quint16> m_supportedModelIds;
     bool m_initialized = false;
 
     QVector<quint16> m_blockData;
-    QVector<SunSpecDataPoint> m_dataPoints;
+    QHash<QString, SunSpecDataPoint> m_dataPoints;
 
     void setInitializedFinished();
 

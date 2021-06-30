@@ -34,6 +34,7 @@ SunSpecFlowBatteryStackModel::SunSpecFlowBatteryStackModel(SunSpec *connection, 
     SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
 {
     initDataPoints();
+    m_supportedModelIds << 809;
 }
 
 SunSpecFlowBatteryStackModel::~SunSpecFlowBatteryStackModel()
@@ -74,8 +75,9 @@ void SunSpecFlowBatteryStackModel::initDataPoints()
     modelIdDataPoint.setDescription("Model identifier");
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
+    modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelIdDataPoint;
+    m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
     modelLengthDataPoint.setName("L");
@@ -83,16 +85,19 @@ void SunSpecFlowBatteryStackModel::initDataPoints()
     modelLengthDataPoint.setDescription("Model length");
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
+    modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelLengthDataPoint;
+    m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint stackPointsToBeDeterminedDataPoint;
     stackPointsToBeDeterminedDataPoint.setName("StackTBD");
     stackPointsToBeDeterminedDataPoint.setLabel("Stack Points To Be Determined");
     stackPointsToBeDeterminedDataPoint.setMandatory(true);
     stackPointsToBeDeterminedDataPoint.setSize(1);
+    stackPointsToBeDeterminedDataPoint.setAddressOffset(2);
+    stackPointsToBeDeterminedDataPoint.setBlockOffset(0);
     stackPointsToBeDeterminedDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << stackPointsToBeDeterminedDataPoint;
+    m_dataPoints.insert(stackPointsToBeDeterminedDataPoint.name(), stackPointsToBeDeterminedDataPoint);
 
 }
 

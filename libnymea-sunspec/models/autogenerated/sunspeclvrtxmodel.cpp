@@ -34,6 +34,7 @@ SunSpecLvrtxModel::SunSpecLvrtxModel(SunSpec *connection, quint16 modelId, quint
     SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
 {
     initDataPoints();
+    m_supportedModelIds << 139;
 }
 
 SunSpecLvrtxModel::~SunSpecLvrtxModel()
@@ -74,8 +75,9 @@ void SunSpecLvrtxModel::initDataPoints()
     modelIdDataPoint.setDescription("Model identifier");
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
+    modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelIdDataPoint;
+    m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
     modelLengthDataPoint.setName("L");
@@ -83,8 +85,9 @@ void SunSpecLvrtxModel::initDataPoints()
     modelLengthDataPoint.setDescription("Model length");
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
+    modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelLengthDataPoint;
+    m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint actcrvDataPoint;
     actcrvDataPoint.setName("ActCrv");
@@ -92,9 +95,11 @@ void SunSpecLvrtxModel::initDataPoints()
     actcrvDataPoint.setDescription("Index of active curve. 0=no active curve.");
     actcrvDataPoint.setMandatory(true);
     actcrvDataPoint.setSize(1);
+    actcrvDataPoint.setAddressOffset(2);
+    actcrvDataPoint.setBlockOffset(0);
     actcrvDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     actcrvDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << actcrvDataPoint;
+    m_dataPoints.insert(actcrvDataPoint.name(), actcrvDataPoint);
 
     SunSpecDataPoint modenaDataPoint;
     modenaDataPoint.setName("ModEna");
@@ -102,9 +107,11 @@ void SunSpecLvrtxModel::initDataPoints()
     modenaDataPoint.setDescription("LVRT control mode. Enable active curve.  Bitfield value.");
     modenaDataPoint.setMandatory(true);
     modenaDataPoint.setSize(1);
+    modenaDataPoint.setAddressOffset(3);
+    modenaDataPoint.setBlockOffset(1);
     modenaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield16"));
     modenaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << modenaDataPoint;
+    m_dataPoints.insert(modenaDataPoint.name(), modenaDataPoint);
 
     SunSpecDataPoint wintmsDataPoint;
     wintmsDataPoint.setName("WinTms");
@@ -112,9 +119,11 @@ void SunSpecLvrtxModel::initDataPoints()
     wintmsDataPoint.setDescription("Time window for LVRT change.");
     wintmsDataPoint.setUnits("Secs");
     wintmsDataPoint.setSize(1);
+    wintmsDataPoint.setAddressOffset(4);
+    wintmsDataPoint.setBlockOffset(2);
     wintmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     wintmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << wintmsDataPoint;
+    m_dataPoints.insert(wintmsDataPoint.name(), wintmsDataPoint);
 
     SunSpecDataPoint rvrttmsDataPoint;
     rvrttmsDataPoint.setName("RvrtTms");
@@ -122,9 +131,11 @@ void SunSpecLvrtxModel::initDataPoints()
     rvrttmsDataPoint.setDescription("Timeout period for LVRT curve selection.");
     rvrttmsDataPoint.setUnits("Secs");
     rvrttmsDataPoint.setSize(1);
+    rvrttmsDataPoint.setAddressOffset(5);
+    rvrttmsDataPoint.setBlockOffset(3);
     rvrttmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     rvrttmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << rvrttmsDataPoint;
+    m_dataPoints.insert(rvrttmsDataPoint.name(), rvrttmsDataPoint);
 
     SunSpecDataPoint rmptmsDataPoint;
     rmptmsDataPoint.setName("RmpTms");
@@ -132,9 +143,11 @@ void SunSpecLvrtxModel::initDataPoints()
     rmptmsDataPoint.setDescription("Ramp time for moving from current mode to new mode.");
     rmptmsDataPoint.setUnits("Secs");
     rmptmsDataPoint.setSize(1);
+    rmptmsDataPoint.setAddressOffset(6);
+    rmptmsDataPoint.setBlockOffset(4);
     rmptmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     rmptmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << rmptmsDataPoint;
+    m_dataPoints.insert(rmptmsDataPoint.name(), rmptmsDataPoint);
 
     SunSpecDataPoint ncrvDataPoint;
     ncrvDataPoint.setName("NCrv");
@@ -142,8 +155,10 @@ void SunSpecLvrtxModel::initDataPoints()
     ncrvDataPoint.setDescription("Number of curves supported (recommend 4).");
     ncrvDataPoint.setMandatory(true);
     ncrvDataPoint.setSize(1);
+    ncrvDataPoint.setAddressOffset(7);
+    ncrvDataPoint.setBlockOffset(5);
     ncrvDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << ncrvDataPoint;
+    m_dataPoints.insert(ncrvDataPoint.name(), ncrvDataPoint);
 
     SunSpecDataPoint nptDataPoint;
     nptDataPoint.setName("NPt");
@@ -151,8 +166,10 @@ void SunSpecLvrtxModel::initDataPoints()
     nptDataPoint.setDescription("Number of curve points supported (maximum of 20).");
     nptDataPoint.setMandatory(true);
     nptDataPoint.setSize(1);
+    nptDataPoint.setAddressOffset(8);
+    nptDataPoint.setBlockOffset(6);
     nptDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << nptDataPoint;
+    m_dataPoints.insert(nptDataPoint.name(), nptDataPoint);
 
     SunSpecDataPoint tmsSfDataPoint;
     tmsSfDataPoint.setName("Tms_SF");
@@ -160,8 +177,10 @@ void SunSpecLvrtxModel::initDataPoints()
     tmsSfDataPoint.setDescription("Scale factor for duration.");
     tmsSfDataPoint.setMandatory(true);
     tmsSfDataPoint.setSize(1);
+    tmsSfDataPoint.setAddressOffset(9);
+    tmsSfDataPoint.setBlockOffset(7);
     tmsSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints << tmsSfDataPoint;
+    m_dataPoints.insert(tmsSfDataPoint.name(), tmsSfDataPoint);
 
     SunSpecDataPoint vSfDataPoint;
     vSfDataPoint.setName("V_SF");
@@ -169,15 +188,19 @@ void SunSpecLvrtxModel::initDataPoints()
     vSfDataPoint.setDescription("Scale factor for percent VRef.");
     vSfDataPoint.setMandatory(true);
     vSfDataPoint.setSize(1);
+    vSfDataPoint.setAddressOffset(10);
+    vSfDataPoint.setBlockOffset(8);
     vSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints << vSfDataPoint;
+    m_dataPoints.insert(vSfDataPoint.name(), vSfDataPoint);
 
     SunSpecDataPoint CrvTypeDataPoint;
     CrvTypeDataPoint.setName("CrvType");
     CrvTypeDataPoint.setMandatory(true);
     CrvTypeDataPoint.setSize(1);
+    CrvTypeDataPoint.setAddressOffset(11);
+    CrvTypeDataPoint.setBlockOffset(9);
     CrvTypeDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
-    m_dataPoints << CrvTypeDataPoint;
+    m_dataPoints.insert(CrvTypeDataPoint.name(), CrvTypeDataPoint);
 
 }
 

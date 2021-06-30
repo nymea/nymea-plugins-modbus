@@ -34,6 +34,7 @@ SunSpecPricingModel::SunSpecPricingModel(SunSpec *connection, quint16 modelId, q
     SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
 {
     initDataPoints();
+    m_supportedModelIds << 125;
 }
 
 SunSpecPricingModel::~SunSpecPricingModel()
@@ -74,8 +75,9 @@ void SunSpecPricingModel::initDataPoints()
     modelIdDataPoint.setDescription("Model identifier");
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
+    modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelIdDataPoint;
+    m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
     modelLengthDataPoint.setName("L");
@@ -83,8 +85,9 @@ void SunSpecPricingModel::initDataPoints()
     modelLengthDataPoint.setDescription("Model length");
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
+    modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelLengthDataPoint;
+    m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint modenaDataPoint;
     modenaDataPoint.setName("ModEna");
@@ -92,18 +95,22 @@ void SunSpecPricingModel::initDataPoints()
     modenaDataPoint.setDescription("Is price-based charge/discharge mode active?");
     modenaDataPoint.setMandatory(true);
     modenaDataPoint.setSize(1);
+    modenaDataPoint.setAddressOffset(2);
+    modenaDataPoint.setBlockOffset(0);
     modenaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield16"));
     modenaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << modenaDataPoint;
+    m_dataPoints.insert(modenaDataPoint.name(), modenaDataPoint);
 
     SunSpecDataPoint sigtypeDataPoint;
     sigtypeDataPoint.setName("SigType");
     sigtypeDataPoint.setLabel("SigType");
     sigtypeDataPoint.setDescription("Meaning of the pricing signal. When a Price schedule is used, type must match the schedule range variable description.");
     sigtypeDataPoint.setSize(1);
+    sigtypeDataPoint.setAddressOffset(3);
+    sigtypeDataPoint.setBlockOffset(1);
     sigtypeDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
     sigtypeDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << sigtypeDataPoint;
+    m_dataPoints.insert(sigtypeDataPoint.name(), sigtypeDataPoint);
 
     SunSpecDataPoint sigDataPoint;
     sigDataPoint.setName("Sig");
@@ -111,10 +118,12 @@ void SunSpecPricingModel::initDataPoints()
     sigDataPoint.setDescription("Utility/ESP specific pricing signal. Content depends on pricing signal type. When H/M/L type is specified. Low=0; Med=1; High=2.");
     sigDataPoint.setMandatory(true);
     sigDataPoint.setSize(1);
+    sigDataPoint.setAddressOffset(4);
+    sigDataPoint.setBlockOffset(2);
     sigDataPoint.setScaleFactorName("Sig_SF");
     sigDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
     sigDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << sigDataPoint;
+    m_dataPoints.insert(sigDataPoint.name(), sigDataPoint);
 
     SunSpecDataPoint wintmsDataPoint;
     wintmsDataPoint.setName("WinTms");
@@ -122,9 +131,11 @@ void SunSpecPricingModel::initDataPoints()
     wintmsDataPoint.setDescription("Time window for charge/discharge pricing change.");
     wintmsDataPoint.setUnits("Secs");
     wintmsDataPoint.setSize(1);
+    wintmsDataPoint.setAddressOffset(5);
+    wintmsDataPoint.setBlockOffset(3);
     wintmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     wintmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << wintmsDataPoint;
+    m_dataPoints.insert(wintmsDataPoint.name(), wintmsDataPoint);
 
     SunSpecDataPoint rvttmsDataPoint;
     rvttmsDataPoint.setName("RvtTms");
@@ -132,9 +143,11 @@ void SunSpecPricingModel::initDataPoints()
     rvttmsDataPoint.setDescription("Timeout period for charge/discharge pricing change.");
     rvttmsDataPoint.setUnits("Secs");
     rvttmsDataPoint.setSize(1);
+    rvttmsDataPoint.setAddressOffset(6);
+    rvttmsDataPoint.setBlockOffset(4);
     rvttmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     rvttmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << rvttmsDataPoint;
+    m_dataPoints.insert(rvttmsDataPoint.name(), rvttmsDataPoint);
 
     SunSpecDataPoint rmptmsDataPoint;
     rmptmsDataPoint.setName("RmpTms");
@@ -142,9 +155,11 @@ void SunSpecPricingModel::initDataPoints()
     rmptmsDataPoint.setDescription("Ramp time for moving from current charge or discharge level to new level.");
     rmptmsDataPoint.setUnits("Secs");
     rmptmsDataPoint.setSize(1);
+    rmptmsDataPoint.setAddressOffset(7);
+    rmptmsDataPoint.setBlockOffset(5);
     rmptmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
     rmptmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << rmptmsDataPoint;
+    m_dataPoints.insert(rmptmsDataPoint.name(), rmptmsDataPoint);
 
     SunSpecDataPoint sigSfDataPoint;
     sigSfDataPoint.setName("Sig_SF");
@@ -152,14 +167,18 @@ void SunSpecPricingModel::initDataPoints()
     sigSfDataPoint.setDescription("Pricing signal scale factor.");
     sigSfDataPoint.setMandatory(true);
     sigSfDataPoint.setSize(1);
+    sigSfDataPoint.setAddressOffset(8);
+    sigSfDataPoint.setBlockOffset(6);
     sigSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints << sigSfDataPoint;
+    m_dataPoints.insert(sigSfDataPoint.name(), sigSfDataPoint);
 
     SunSpecDataPoint PadDataPoint;
     PadDataPoint.setName("Pad");
     PadDataPoint.setSize(1);
+    PadDataPoint.setAddressOffset(9);
+    PadDataPoint.setBlockOffset(7);
     PadDataPoint.setDataType(SunSpecDataPoint::stringToDataType("pad"));
-    m_dataPoints << PadDataPoint;
+    m_dataPoints.insert(PadDataPoint.name(), PadDataPoint);
 
 }
 

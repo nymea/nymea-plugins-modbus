@@ -34,6 +34,7 @@ SunSpecBaseMetModel::SunSpecBaseMetModel(SunSpec *connection, quint16 modelId, q
     SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
 {
     initDataPoints();
+    m_supportedModelIds << 307;
 }
 
 SunSpecBaseMetModel::~SunSpecBaseMetModel()
@@ -74,8 +75,9 @@ void SunSpecBaseMetModel::initDataPoints()
     modelIdDataPoint.setDescription("Model identifier");
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
+    modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelIdDataPoint;
+    m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
     modelLengthDataPoint.setName("L");
@@ -83,97 +85,120 @@ void SunSpecBaseMetModel::initDataPoints()
     modelLengthDataPoint.setDescription("Model length");
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
+    modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelLengthDataPoint;
+    m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint ambientTemperatureDataPoint;
     ambientTemperatureDataPoint.setName("TmpAmb");
     ambientTemperatureDataPoint.setLabel("Ambient Temperature");
     ambientTemperatureDataPoint.setUnits("C");
     ambientTemperatureDataPoint.setSize(1);
+    ambientTemperatureDataPoint.setAddressOffset(2);
+    ambientTemperatureDataPoint.setBlockOffset(0);
     ambientTemperatureDataPoint.setScaleFactorName("-1");
     ambientTemperatureDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-    m_dataPoints << ambientTemperatureDataPoint;
+    m_dataPoints.insert(ambientTemperatureDataPoint.name(), ambientTemperatureDataPoint);
 
     SunSpecDataPoint relativeHumidityDataPoint;
     relativeHumidityDataPoint.setName("RH");
     relativeHumidityDataPoint.setLabel("Relative Humidity");
     relativeHumidityDataPoint.setUnits("Pct");
     relativeHumidityDataPoint.setSize(1);
+    relativeHumidityDataPoint.setAddressOffset(3);
+    relativeHumidityDataPoint.setBlockOffset(1);
     relativeHumidityDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-    m_dataPoints << relativeHumidityDataPoint;
+    m_dataPoints.insert(relativeHumidityDataPoint.name(), relativeHumidityDataPoint);
 
     SunSpecDataPoint barometricPressureDataPoint;
     barometricPressureDataPoint.setName("Pres");
     barometricPressureDataPoint.setLabel("Barometric Pressure");
     barometricPressureDataPoint.setUnits("HPa");
     barometricPressureDataPoint.setSize(1);
+    barometricPressureDataPoint.setAddressOffset(4);
+    barometricPressureDataPoint.setBlockOffset(2);
     barometricPressureDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-    m_dataPoints << barometricPressureDataPoint;
+    m_dataPoints.insert(barometricPressureDataPoint.name(), barometricPressureDataPoint);
 
     SunSpecDataPoint windSpeedDataPoint;
     windSpeedDataPoint.setName("WndSpd");
     windSpeedDataPoint.setLabel("Wind Speed");
     windSpeedDataPoint.setUnits("mps");
     windSpeedDataPoint.setSize(1);
+    windSpeedDataPoint.setAddressOffset(5);
+    windSpeedDataPoint.setBlockOffset(3);
     windSpeedDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-    m_dataPoints << windSpeedDataPoint;
+    m_dataPoints.insert(windSpeedDataPoint.name(), windSpeedDataPoint);
 
     SunSpecDataPoint windDirectionDataPoint;
     windDirectionDataPoint.setName("WndDir");
     windDirectionDataPoint.setLabel("Wind Direction");
     windDirectionDataPoint.setUnits("deg");
     windDirectionDataPoint.setSize(1);
+    windDirectionDataPoint.setAddressOffset(6);
+    windDirectionDataPoint.setBlockOffset(4);
     windDirectionDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-    m_dataPoints << windDirectionDataPoint;
+    m_dataPoints.insert(windDirectionDataPoint.name(), windDirectionDataPoint);
 
     SunSpecDataPoint rainfallDataPoint;
     rainfallDataPoint.setName("Rain");
     rainfallDataPoint.setLabel("Rainfall");
     rainfallDataPoint.setUnits("mm");
     rainfallDataPoint.setSize(1);
+    rainfallDataPoint.setAddressOffset(7);
+    rainfallDataPoint.setBlockOffset(5);
     rainfallDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-    m_dataPoints << rainfallDataPoint;
+    m_dataPoints.insert(rainfallDataPoint.name(), rainfallDataPoint);
 
     SunSpecDataPoint snowDepthDataPoint;
     snowDepthDataPoint.setName("Snw");
     snowDepthDataPoint.setLabel("Snow Depth");
     snowDepthDataPoint.setUnits("mm");
     snowDepthDataPoint.setSize(1);
+    snowDepthDataPoint.setAddressOffset(8);
+    snowDepthDataPoint.setBlockOffset(6);
     snowDepthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-    m_dataPoints << snowDepthDataPoint;
+    m_dataPoints.insert(snowDepthDataPoint.name(), snowDepthDataPoint);
 
     SunSpecDataPoint precipitationTypeDataPoint;
     precipitationTypeDataPoint.setName("PPT");
     precipitationTypeDataPoint.setLabel("Precipitation Type");
     precipitationTypeDataPoint.setDescription(" Precipitation Type (WMO 4680 SYNOP code reference)");
     precipitationTypeDataPoint.setSize(1);
+    precipitationTypeDataPoint.setAddressOffset(9);
+    precipitationTypeDataPoint.setBlockOffset(7);
     precipitationTypeDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-    m_dataPoints << precipitationTypeDataPoint;
+    m_dataPoints.insert(precipitationTypeDataPoint.name(), precipitationTypeDataPoint);
 
     SunSpecDataPoint electricFieldDataPoint;
     electricFieldDataPoint.setName("ElecFld");
     electricFieldDataPoint.setLabel("Electric Field");
     electricFieldDataPoint.setUnits("Vm");
     electricFieldDataPoint.setSize(1);
+    electricFieldDataPoint.setAddressOffset(10);
+    electricFieldDataPoint.setBlockOffset(8);
     electricFieldDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-    m_dataPoints << electricFieldDataPoint;
+    m_dataPoints.insert(electricFieldDataPoint.name(), electricFieldDataPoint);
 
     SunSpecDataPoint surfaceWetnessDataPoint;
     surfaceWetnessDataPoint.setName("SurWet");
     surfaceWetnessDataPoint.setLabel("Surface Wetness");
     surfaceWetnessDataPoint.setUnits("kO");
     surfaceWetnessDataPoint.setSize(1);
+    surfaceWetnessDataPoint.setAddressOffset(11);
+    surfaceWetnessDataPoint.setBlockOffset(9);
     surfaceWetnessDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-    m_dataPoints << surfaceWetnessDataPoint;
+    m_dataPoints.insert(surfaceWetnessDataPoint.name(), surfaceWetnessDataPoint);
 
     SunSpecDataPoint soilWetnessDataPoint;
     soilWetnessDataPoint.setName("SoilWet");
     soilWetnessDataPoint.setLabel("Soil Wetness");
     soilWetnessDataPoint.setUnits("Pct");
     soilWetnessDataPoint.setSize(1);
+    soilWetnessDataPoint.setAddressOffset(12);
+    soilWetnessDataPoint.setBlockOffset(10);
     soilWetnessDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-    m_dataPoints << soilWetnessDataPoint;
+    m_dataPoints.insert(soilWetnessDataPoint.name(), soilWetnessDataPoint);
 
 }
 

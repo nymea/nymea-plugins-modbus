@@ -34,6 +34,7 @@ SunSpecSolarModuleModel::SunSpecSolarModuleModel(SunSpec *connection, quint16 mo
     SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
 {
     initDataPoints();
+    m_supportedModelIds << 501 << 502;
 }
 
 SunSpecSolarModuleModel::~SunSpecSolarModuleModel()
@@ -43,14 +44,7 @@ SunSpecSolarModuleModel::~SunSpecSolarModuleModel()
 
 QString SunSpecSolarModuleModel::name() const
 {
-    switch (m_modelId) {
-    case 501:
-        return "solar_module";
-    case 502:
-        return "solar_module";
-    default:
-        return QString();
-    }
+    return "solar_module";
 }
 
 QString SunSpecSolarModuleModel::description() const
@@ -97,8 +91,9 @@ void SunSpecSolarModuleModel::initDataPoints()
         modelIdDataPoint.setDescription("Model identifier");
         modelIdDataPoint.setMandatory(true);
         modelIdDataPoint.setSize(1);
+        modelIdDataPoint.setAddressOffset(0);
         modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-        m_dataPoints << modelIdDataPoint;
+        m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
         SunSpecDataPoint modelLengthDataPoint;
         modelLengthDataPoint.setName("L");
@@ -106,8 +101,9 @@ void SunSpecSolarModuleModel::initDataPoints()
         modelLengthDataPoint.setDescription("Model length");
         modelLengthDataPoint.setMandatory(true);
         modelLengthDataPoint.setSize(1);
+        modelLengthDataPoint.setAddressOffset(1);
         modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-        m_dataPoints << modelLengthDataPoint;
+        m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
         SunSpecDataPoint statusDataPoint;
         statusDataPoint.setName("Stat");
@@ -115,16 +111,20 @@ void SunSpecSolarModuleModel::initDataPoints()
         statusDataPoint.setDescription("Enumerated value.  Module Status Code");
         statusDataPoint.setMandatory(true);
         statusDataPoint.setSize(1);
+        statusDataPoint.setAddressOffset(2);
+        statusDataPoint.setBlockOffset(0);
         statusDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
-        m_dataPoints << statusDataPoint;
+        m_dataPoints.insert(statusDataPoint.name(), statusDataPoint);
 
         SunSpecDataPoint vendorStatusDataPoint;
         vendorStatusDataPoint.setName("StatVend");
         vendorStatusDataPoint.setLabel("Vendor Status");
         vendorStatusDataPoint.setDescription("Module Vendor Status Code");
         vendorStatusDataPoint.setSize(1);
+        vendorStatusDataPoint.setAddressOffset(3);
+        vendorStatusDataPoint.setBlockOffset(1);
         vendorStatusDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
-        m_dataPoints << vendorStatusDataPoint;
+        m_dataPoints.insert(vendorStatusDataPoint.name(), vendorStatusDataPoint);
 
         SunSpecDataPoint eventsDataPoint;
         eventsDataPoint.setName("Evt");
@@ -132,43 +132,53 @@ void SunSpecSolarModuleModel::initDataPoints()
         eventsDataPoint.setDescription("Bitmask value.  Module Event Flags");
         eventsDataPoint.setMandatory(true);
         eventsDataPoint.setSize(2);
+        eventsDataPoint.setAddressOffset(4);
+        eventsDataPoint.setBlockOffset(2);
         eventsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
-        m_dataPoints << eventsDataPoint;
+        m_dataPoints.insert(eventsDataPoint.name(), eventsDataPoint);
 
         SunSpecDataPoint vendorModuleEventFlagsDataPoint;
         vendorModuleEventFlagsDataPoint.setName("EvtVend");
         vendorModuleEventFlagsDataPoint.setLabel("Vendor Module Event Flags");
         vendorModuleEventFlagsDataPoint.setDescription("Vendor specific flags");
         vendorModuleEventFlagsDataPoint.setSize(2);
+        vendorModuleEventFlagsDataPoint.setAddressOffset(6);
+        vendorModuleEventFlagsDataPoint.setBlockOffset(4);
         vendorModuleEventFlagsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
-        m_dataPoints << vendorModuleEventFlagsDataPoint;
+        m_dataPoints.insert(vendorModuleEventFlagsDataPoint.name(), vendorModuleEventFlagsDataPoint);
 
         SunSpecDataPoint controlDataPoint;
         controlDataPoint.setName("Ctl");
         controlDataPoint.setLabel("Control");
         controlDataPoint.setDescription("Module Control");
         controlDataPoint.setSize(1);
+        controlDataPoint.setAddressOffset(8);
+        controlDataPoint.setBlockOffset(6);
         controlDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
         controlDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-        m_dataPoints << controlDataPoint;
+        m_dataPoints.insert(controlDataPoint.name(), controlDataPoint);
 
         SunSpecDataPoint vendorControlDataPoint;
         vendorControlDataPoint.setName("CtlVend");
         vendorControlDataPoint.setLabel("Vendor Control");
         vendorControlDataPoint.setDescription("Vendor Module Control");
         vendorControlDataPoint.setSize(2);
+        vendorControlDataPoint.setAddressOffset(9);
+        vendorControlDataPoint.setBlockOffset(7);
         vendorControlDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum32"));
         vendorControlDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-        m_dataPoints << vendorControlDataPoint;
+        m_dataPoints.insert(vendorControlDataPoint.name(), vendorControlDataPoint);
 
         SunSpecDataPoint controlValueDataPoint;
         controlValueDataPoint.setName("CtlVal");
         controlValueDataPoint.setLabel("Control Value");
         controlValueDataPoint.setDescription("Module Control Value");
         controlValueDataPoint.setSize(2);
+        controlValueDataPoint.setAddressOffset(11);
+        controlValueDataPoint.setBlockOffset(9);
         controlValueDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int32"));
         controlValueDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-        m_dataPoints << controlValueDataPoint;
+        m_dataPoints.insert(controlValueDataPoint.name(), controlValueDataPoint);
 
         SunSpecDataPoint timestampDataPoint;
         timestampDataPoint.setName("Tms");
@@ -176,8 +186,10 @@ void SunSpecSolarModuleModel::initDataPoints()
         timestampDataPoint.setDescription("Time in seconds since 2000 epoch");
         timestampDataPoint.setUnits("Secs");
         timestampDataPoint.setSize(2);
+        timestampDataPoint.setAddressOffset(13);
+        timestampDataPoint.setBlockOffset(11);
         timestampDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint32"));
-        m_dataPoints << timestampDataPoint;
+        m_dataPoints.insert(timestampDataPoint.name(), timestampDataPoint);
 
         SunSpecDataPoint outputCurrentDataPoint;
         outputCurrentDataPoint.setName("OutA");
@@ -185,8 +197,10 @@ void SunSpecSolarModuleModel::initDataPoints()
         outputCurrentDataPoint.setDescription("Output Current");
         outputCurrentDataPoint.setUnits("A");
         outputCurrentDataPoint.setSize(2);
+        outputCurrentDataPoint.setAddressOffset(15);
+        outputCurrentDataPoint.setBlockOffset(13);
         outputCurrentDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints << outputCurrentDataPoint;
+        m_dataPoints.insert(outputCurrentDataPoint.name(), outputCurrentDataPoint);
 
         SunSpecDataPoint outputVoltageDataPoint;
         outputVoltageDataPoint.setName("OutV");
@@ -194,8 +208,10 @@ void SunSpecSolarModuleModel::initDataPoints()
         outputVoltageDataPoint.setDescription("Output Voltage");
         outputVoltageDataPoint.setUnits("V");
         outputVoltageDataPoint.setSize(2);
+        outputVoltageDataPoint.setAddressOffset(17);
+        outputVoltageDataPoint.setBlockOffset(15);
         outputVoltageDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints << outputVoltageDataPoint;
+        m_dataPoints.insert(outputVoltageDataPoint.name(), outputVoltageDataPoint);
 
         SunSpecDataPoint outputEnergyDataPoint;
         outputEnergyDataPoint.setName("OutWh");
@@ -203,8 +219,10 @@ void SunSpecSolarModuleModel::initDataPoints()
         outputEnergyDataPoint.setDescription("Output Energy");
         outputEnergyDataPoint.setUnits("Wh");
         outputEnergyDataPoint.setSize(2);
+        outputEnergyDataPoint.setAddressOffset(19);
+        outputEnergyDataPoint.setBlockOffset(17);
         outputEnergyDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints << outputEnergyDataPoint;
+        m_dataPoints.insert(outputEnergyDataPoint.name(), outputEnergyDataPoint);
 
         SunSpecDataPoint outputPowerDataPoint;
         outputPowerDataPoint.setName("OutW");
@@ -212,8 +230,10 @@ void SunSpecSolarModuleModel::initDataPoints()
         outputPowerDataPoint.setDescription("Output Power");
         outputPowerDataPoint.setUnits("W");
         outputPowerDataPoint.setSize(2);
+        outputPowerDataPoint.setAddressOffset(21);
+        outputPowerDataPoint.setBlockOffset(19);
         outputPowerDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints << outputPowerDataPoint;
+        m_dataPoints.insert(outputPowerDataPoint.name(), outputPowerDataPoint);
 
         SunSpecDataPoint tempDataPoint;
         tempDataPoint.setName("Tmp");
@@ -221,8 +241,10 @@ void SunSpecSolarModuleModel::initDataPoints()
         tempDataPoint.setDescription("Module Temperature");
         tempDataPoint.setUnits("C");
         tempDataPoint.setSize(2);
+        tempDataPoint.setAddressOffset(23);
+        tempDataPoint.setBlockOffset(21);
         tempDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints << tempDataPoint;
+        m_dataPoints.insert(tempDataPoint.name(), tempDataPoint);
 
         SunSpecDataPoint inputCurrentDataPoint;
         inputCurrentDataPoint.setName("InA");
@@ -230,8 +252,10 @@ void SunSpecSolarModuleModel::initDataPoints()
         inputCurrentDataPoint.setDescription("Input Current");
         inputCurrentDataPoint.setUnits("A");
         inputCurrentDataPoint.setSize(2);
+        inputCurrentDataPoint.setAddressOffset(25);
+        inputCurrentDataPoint.setBlockOffset(23);
         inputCurrentDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints << inputCurrentDataPoint;
+        m_dataPoints.insert(inputCurrentDataPoint.name(), inputCurrentDataPoint);
 
         SunSpecDataPoint inputVoltageDataPoint;
         inputVoltageDataPoint.setName("InV");
@@ -239,8 +263,10 @@ void SunSpecSolarModuleModel::initDataPoints()
         inputVoltageDataPoint.setDescription("Input Voltage");
         inputVoltageDataPoint.setUnits("V");
         inputVoltageDataPoint.setSize(2);
+        inputVoltageDataPoint.setAddressOffset(27);
+        inputVoltageDataPoint.setBlockOffset(25);
         inputVoltageDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints << inputVoltageDataPoint;
+        m_dataPoints.insert(inputVoltageDataPoint.name(), inputVoltageDataPoint);
 
         SunSpecDataPoint inputEnergyDataPoint;
         inputEnergyDataPoint.setName("InWh");
@@ -248,8 +274,10 @@ void SunSpecSolarModuleModel::initDataPoints()
         inputEnergyDataPoint.setDescription("Input Energy");
         inputEnergyDataPoint.setUnits("Wh");
         inputEnergyDataPoint.setSize(2);
+        inputEnergyDataPoint.setAddressOffset(29);
+        inputEnergyDataPoint.setBlockOffset(27);
         inputEnergyDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints << inputEnergyDataPoint;
+        m_dataPoints.insert(inputEnergyDataPoint.name(), inputEnergyDataPoint);
 
         SunSpecDataPoint inputPowerDataPoint;
         inputPowerDataPoint.setName("InW");
@@ -257,8 +285,10 @@ void SunSpecSolarModuleModel::initDataPoints()
         inputPowerDataPoint.setDescription("Input Power");
         inputPowerDataPoint.setUnits("W");
         inputPowerDataPoint.setSize(2);
+        inputPowerDataPoint.setAddressOffset(31);
+        inputPowerDataPoint.setBlockOffset(29);
         inputPowerDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
-        m_dataPoints << inputPowerDataPoint;
+        m_dataPoints.insert(inputPowerDataPoint.name(), inputPowerDataPoint);
 
         break;
     }
@@ -269,8 +299,9 @@ void SunSpecSolarModuleModel::initDataPoints()
         modelIdDataPoint.setDescription("Model identifier");
         modelIdDataPoint.setMandatory(true);
         modelIdDataPoint.setSize(1);
+        modelIdDataPoint.setAddressOffset(0);
         modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-        m_dataPoints << modelIdDataPoint;
+        m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
         SunSpecDataPoint modelLengthDataPoint;
         modelLengthDataPoint.setName("L");
@@ -278,36 +309,45 @@ void SunSpecSolarModuleModel::initDataPoints()
         modelLengthDataPoint.setDescription("Model length");
         modelLengthDataPoint.setMandatory(true);
         modelLengthDataPoint.setSize(1);
+        modelLengthDataPoint.setAddressOffset(1);
         modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-        m_dataPoints << modelLengthDataPoint;
+        m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
         SunSpecDataPoint A_SFDataPoint;
         A_SFDataPoint.setName("A_SF");
         A_SFDataPoint.setDescription("Current scale factor");
         A_SFDataPoint.setSize(1);
+        A_SFDataPoint.setAddressOffset(2);
+        A_SFDataPoint.setBlockOffset(0);
         A_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints << A_SFDataPoint;
+        m_dataPoints.insert(A_SFDataPoint.name(), A_SFDataPoint);
 
         SunSpecDataPoint V_SFDataPoint;
         V_SFDataPoint.setName("V_SF");
         V_SFDataPoint.setDescription("Voltage scale factor");
         V_SFDataPoint.setSize(1);
+        V_SFDataPoint.setAddressOffset(3);
+        V_SFDataPoint.setBlockOffset(1);
         V_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints << V_SFDataPoint;
+        m_dataPoints.insert(V_SFDataPoint.name(), V_SFDataPoint);
 
         SunSpecDataPoint W_SFDataPoint;
         W_SFDataPoint.setName("W_SF");
         W_SFDataPoint.setDescription("Power scale factor");
         W_SFDataPoint.setSize(1);
+        W_SFDataPoint.setAddressOffset(4);
+        W_SFDataPoint.setBlockOffset(2);
         W_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints << W_SFDataPoint;
+        m_dataPoints.insert(W_SFDataPoint.name(), W_SFDataPoint);
 
         SunSpecDataPoint Wh_SFDataPoint;
         Wh_SFDataPoint.setName("Wh_SF");
         Wh_SFDataPoint.setDescription("Energy scale factor");
         Wh_SFDataPoint.setSize(1);
+        Wh_SFDataPoint.setAddressOffset(5);
+        Wh_SFDataPoint.setBlockOffset(3);
         Wh_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-        m_dataPoints << Wh_SFDataPoint;
+        m_dataPoints.insert(Wh_SFDataPoint.name(), Wh_SFDataPoint);
 
         SunSpecDataPoint statusDataPoint;
         statusDataPoint.setName("Stat");
@@ -315,16 +355,20 @@ void SunSpecSolarModuleModel::initDataPoints()
         statusDataPoint.setDescription("Enumerated value.  Module Status Code");
         statusDataPoint.setMandatory(true);
         statusDataPoint.setSize(1);
+        statusDataPoint.setAddressOffset(6);
+        statusDataPoint.setBlockOffset(4);
         statusDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
-        m_dataPoints << statusDataPoint;
+        m_dataPoints.insert(statusDataPoint.name(), statusDataPoint);
 
         SunSpecDataPoint vendorStatusDataPoint;
         vendorStatusDataPoint.setName("StatVend");
         vendorStatusDataPoint.setLabel("Vendor Status");
         vendorStatusDataPoint.setDescription("Module Vendor Status Code");
         vendorStatusDataPoint.setSize(1);
+        vendorStatusDataPoint.setAddressOffset(7);
+        vendorStatusDataPoint.setBlockOffset(5);
         vendorStatusDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
-        m_dataPoints << vendorStatusDataPoint;
+        m_dataPoints.insert(vendorStatusDataPoint.name(), vendorStatusDataPoint);
 
         SunSpecDataPoint eventsDataPoint;
         eventsDataPoint.setName("Evt");
@@ -332,43 +376,53 @@ void SunSpecSolarModuleModel::initDataPoints()
         eventsDataPoint.setDescription("Bitmask value.  Module Event Flags");
         eventsDataPoint.setMandatory(true);
         eventsDataPoint.setSize(2);
+        eventsDataPoint.setAddressOffset(8);
+        eventsDataPoint.setBlockOffset(6);
         eventsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
-        m_dataPoints << eventsDataPoint;
+        m_dataPoints.insert(eventsDataPoint.name(), eventsDataPoint);
 
         SunSpecDataPoint vendorModuleEventFlagsDataPoint;
         vendorModuleEventFlagsDataPoint.setName("EvtVend");
         vendorModuleEventFlagsDataPoint.setLabel("Vendor Module Event Flags");
         vendorModuleEventFlagsDataPoint.setDescription("Vendor specific flags");
         vendorModuleEventFlagsDataPoint.setSize(2);
+        vendorModuleEventFlagsDataPoint.setAddressOffset(10);
+        vendorModuleEventFlagsDataPoint.setBlockOffset(8);
         vendorModuleEventFlagsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
-        m_dataPoints << vendorModuleEventFlagsDataPoint;
+        m_dataPoints.insert(vendorModuleEventFlagsDataPoint.name(), vendorModuleEventFlagsDataPoint);
 
         SunSpecDataPoint controlDataPoint;
         controlDataPoint.setName("Ctl");
         controlDataPoint.setLabel("Control");
         controlDataPoint.setDescription("Module Control");
         controlDataPoint.setSize(1);
+        controlDataPoint.setAddressOffset(12);
+        controlDataPoint.setBlockOffset(10);
         controlDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
         controlDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-        m_dataPoints << controlDataPoint;
+        m_dataPoints.insert(controlDataPoint.name(), controlDataPoint);
 
         SunSpecDataPoint vendorControlDataPoint;
         vendorControlDataPoint.setName("CtlVend");
         vendorControlDataPoint.setLabel("Vendor Control");
         vendorControlDataPoint.setDescription("Vendor Module Control");
         vendorControlDataPoint.setSize(2);
+        vendorControlDataPoint.setAddressOffset(13);
+        vendorControlDataPoint.setBlockOffset(11);
         vendorControlDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum32"));
         vendorControlDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-        m_dataPoints << vendorControlDataPoint;
+        m_dataPoints.insert(vendorControlDataPoint.name(), vendorControlDataPoint);
 
         SunSpecDataPoint controlValueDataPoint;
         controlValueDataPoint.setName("CtlVal");
         controlValueDataPoint.setLabel("Control Value");
         controlValueDataPoint.setDescription("Module Control Value");
         controlValueDataPoint.setSize(2);
+        controlValueDataPoint.setAddressOffset(15);
+        controlValueDataPoint.setBlockOffset(13);
         controlValueDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int32"));
         controlValueDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-        m_dataPoints << controlValueDataPoint;
+        m_dataPoints.insert(controlValueDataPoint.name(), controlValueDataPoint);
 
         SunSpecDataPoint timestampDataPoint;
         timestampDataPoint.setName("Tms");
@@ -376,8 +430,10 @@ void SunSpecSolarModuleModel::initDataPoints()
         timestampDataPoint.setDescription("Time in seconds since 2000 epoch");
         timestampDataPoint.setUnits("Secs");
         timestampDataPoint.setSize(2);
+        timestampDataPoint.setAddressOffset(17);
+        timestampDataPoint.setBlockOffset(15);
         timestampDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint32"));
-        m_dataPoints << timestampDataPoint;
+        m_dataPoints.insert(timestampDataPoint.name(), timestampDataPoint);
 
         SunSpecDataPoint outputCurrentDataPoint;
         outputCurrentDataPoint.setName("OutA");
@@ -385,9 +441,11 @@ void SunSpecSolarModuleModel::initDataPoints()
         outputCurrentDataPoint.setDescription("Output Current");
         outputCurrentDataPoint.setUnits("A");
         outputCurrentDataPoint.setSize(1);
+        outputCurrentDataPoint.setAddressOffset(19);
+        outputCurrentDataPoint.setBlockOffset(17);
         outputCurrentDataPoint.setScaleFactorName("A_SF");
         outputCurrentDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-        m_dataPoints << outputCurrentDataPoint;
+        m_dataPoints.insert(outputCurrentDataPoint.name(), outputCurrentDataPoint);
 
         SunSpecDataPoint outputVoltageDataPoint;
         outputVoltageDataPoint.setName("OutV");
@@ -395,9 +453,11 @@ void SunSpecSolarModuleModel::initDataPoints()
         outputVoltageDataPoint.setDescription("Output Voltage");
         outputVoltageDataPoint.setUnits("V");
         outputVoltageDataPoint.setSize(1);
+        outputVoltageDataPoint.setAddressOffset(20);
+        outputVoltageDataPoint.setBlockOffset(18);
         outputVoltageDataPoint.setScaleFactorName("V_SF");
         outputVoltageDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-        m_dataPoints << outputVoltageDataPoint;
+        m_dataPoints.insert(outputVoltageDataPoint.name(), outputVoltageDataPoint);
 
         SunSpecDataPoint outputEnergyDataPoint;
         outputEnergyDataPoint.setName("OutWh");
@@ -405,9 +465,11 @@ void SunSpecSolarModuleModel::initDataPoints()
         outputEnergyDataPoint.setDescription("Output Energy");
         outputEnergyDataPoint.setUnits("Wh");
         outputEnergyDataPoint.setSize(2);
+        outputEnergyDataPoint.setAddressOffset(21);
+        outputEnergyDataPoint.setBlockOffset(19);
         outputEnergyDataPoint.setScaleFactorName("Wh_SF");
         outputEnergyDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints << outputEnergyDataPoint;
+        m_dataPoints.insert(outputEnergyDataPoint.name(), outputEnergyDataPoint);
 
         SunSpecDataPoint outputPowerDataPoint;
         outputPowerDataPoint.setName("OutPw");
@@ -415,9 +477,11 @@ void SunSpecSolarModuleModel::initDataPoints()
         outputPowerDataPoint.setDescription("Output Power");
         outputPowerDataPoint.setUnits("W");
         outputPowerDataPoint.setSize(1);
+        outputPowerDataPoint.setAddressOffset(23);
+        outputPowerDataPoint.setBlockOffset(21);
         outputPowerDataPoint.setScaleFactorName("W_SF");
         outputPowerDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-        m_dataPoints << outputPowerDataPoint;
+        m_dataPoints.insert(outputPowerDataPoint.name(), outputPowerDataPoint);
 
         SunSpecDataPoint tempDataPoint;
         tempDataPoint.setName("Tmp");
@@ -425,8 +489,10 @@ void SunSpecSolarModuleModel::initDataPoints()
         tempDataPoint.setDescription("Module Temperature");
         tempDataPoint.setUnits("C");
         tempDataPoint.setSize(1);
+        tempDataPoint.setAddressOffset(24);
+        tempDataPoint.setBlockOffset(22);
         tempDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-        m_dataPoints << tempDataPoint;
+        m_dataPoints.insert(tempDataPoint.name(), tempDataPoint);
 
         SunSpecDataPoint inputCurrentDataPoint;
         inputCurrentDataPoint.setName("InA");
@@ -434,9 +500,11 @@ void SunSpecSolarModuleModel::initDataPoints()
         inputCurrentDataPoint.setDescription("Input Current");
         inputCurrentDataPoint.setUnits("A");
         inputCurrentDataPoint.setSize(1);
+        inputCurrentDataPoint.setAddressOffset(25);
+        inputCurrentDataPoint.setBlockOffset(23);
         inputCurrentDataPoint.setScaleFactorName("A_SF");
         inputCurrentDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-        m_dataPoints << inputCurrentDataPoint;
+        m_dataPoints.insert(inputCurrentDataPoint.name(), inputCurrentDataPoint);
 
         SunSpecDataPoint inputVoltageDataPoint;
         inputVoltageDataPoint.setName("InV");
@@ -444,9 +512,11 @@ void SunSpecSolarModuleModel::initDataPoints()
         inputVoltageDataPoint.setDescription("Input Voltage");
         inputVoltageDataPoint.setUnits("V");
         inputVoltageDataPoint.setSize(1);
+        inputVoltageDataPoint.setAddressOffset(26);
+        inputVoltageDataPoint.setBlockOffset(24);
         inputVoltageDataPoint.setScaleFactorName("V_SF");
         inputVoltageDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-        m_dataPoints << inputVoltageDataPoint;
+        m_dataPoints.insert(inputVoltageDataPoint.name(), inputVoltageDataPoint);
 
         SunSpecDataPoint inputEnergyDataPoint;
         inputEnergyDataPoint.setName("InWh");
@@ -454,9 +524,11 @@ void SunSpecSolarModuleModel::initDataPoints()
         inputEnergyDataPoint.setDescription("Input Energy");
         inputEnergyDataPoint.setUnits("Wh");
         inputEnergyDataPoint.setSize(2);
+        inputEnergyDataPoint.setAddressOffset(27);
+        inputEnergyDataPoint.setBlockOffset(25);
         inputEnergyDataPoint.setScaleFactorName("Wh_SF");
         inputEnergyDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
-        m_dataPoints << inputEnergyDataPoint;
+        m_dataPoints.insert(inputEnergyDataPoint.name(), inputEnergyDataPoint);
 
         SunSpecDataPoint inputPowerDataPoint;
         inputPowerDataPoint.setName("InW");
@@ -464,9 +536,11 @@ void SunSpecSolarModuleModel::initDataPoints()
         inputPowerDataPoint.setDescription("Input Power");
         inputPowerDataPoint.setUnits("W");
         inputPowerDataPoint.setSize(1);
+        inputPowerDataPoint.setAddressOffset(29);
+        inputPowerDataPoint.setBlockOffset(27);
         inputPowerDataPoint.setScaleFactorName("W_SF");
         inputPowerDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
-        m_dataPoints << inputPowerDataPoint;
+        m_dataPoints.insert(inputPowerDataPoint.name(), inputPowerDataPoint);
 
         break;
     }

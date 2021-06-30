@@ -34,6 +34,7 @@ SunSpecFlowBatteryModel::SunSpecFlowBatteryModel(SunSpec *connection, quint16 mo
     SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
 {
     initDataPoints();
+    m_supportedModelIds << 806;
 }
 
 SunSpecFlowBatteryModel::~SunSpecFlowBatteryModel()
@@ -74,8 +75,9 @@ void SunSpecFlowBatteryModel::initDataPoints()
     modelIdDataPoint.setDescription("Model identifier");
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
+    modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelIdDataPoint;
+    m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
     modelLengthDataPoint.setName("L");
@@ -83,16 +85,19 @@ void SunSpecFlowBatteryModel::initDataPoints()
     modelLengthDataPoint.setDescription("Model length");
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
+    modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelLengthDataPoint;
+    m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint batteryPointsToBeDeterminedDataPoint;
     batteryPointsToBeDeterminedDataPoint.setName("BatTBD");
     batteryPointsToBeDeterminedDataPoint.setLabel("Battery Points To Be Determined");
     batteryPointsToBeDeterminedDataPoint.setMandatory(true);
     batteryPointsToBeDeterminedDataPoint.setSize(1);
+    batteryPointsToBeDeterminedDataPoint.setAddressOffset(2);
+    batteryPointsToBeDeterminedDataPoint.setBlockOffset(0);
     batteryPointsToBeDeterminedDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << batteryPointsToBeDeterminedDataPoint;
+    m_dataPoints.insert(batteryPointsToBeDeterminedDataPoint.name(), batteryPointsToBeDeterminedDataPoint);
 
 }
 

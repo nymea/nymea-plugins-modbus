@@ -21,6 +21,11 @@ SunSpec *SunSpecModel::connection() const
     return m_connection;
 }
 
+QVector<quint16> SunSpecModel::supportedModelIds() const
+{
+    return m_supportedModelIds;
+}
+
 quint16 SunSpecModel::modelId() const
 {
     return m_modelId;

@@ -34,6 +34,7 @@ SunSpecScheduleModel::SunSpecScheduleModel(SunSpec *connection, quint16 modelId,
     SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
 {
     initDataPoints();
+    m_supportedModelIds << 133;
 }
 
 SunSpecScheduleModel::~SunSpecScheduleModel()
@@ -74,8 +75,9 @@ void SunSpecScheduleModel::initDataPoints()
     modelIdDataPoint.setDescription("Model identifier");
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
+    modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelIdDataPoint;
+    m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
     modelLengthDataPoint.setName("L");
@@ -83,8 +85,9 @@ void SunSpecScheduleModel::initDataPoints()
     modelLengthDataPoint.setDescription("Model length");
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
+    modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelLengthDataPoint;
+    m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint actschdDataPoint;
     actschdDataPoint.setName("ActSchd");
@@ -92,9 +95,11 @@ void SunSpecScheduleModel::initDataPoints()
     actschdDataPoint.setDescription("Bitfield of active schedules");
     actschdDataPoint.setMandatory(true);
     actschdDataPoint.setSize(2);
+    actschdDataPoint.setAddressOffset(2);
+    actschdDataPoint.setBlockOffset(0);
     actschdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
     actschdDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << actschdDataPoint;
+    m_dataPoints.insert(actschdDataPoint.name(), actschdDataPoint);
 
     SunSpecDataPoint modenaDataPoint;
     modenaDataPoint.setName("ModEna");
@@ -102,9 +107,11 @@ void SunSpecScheduleModel::initDataPoints()
     modenaDataPoint.setDescription("Is basic scheduling active.");
     modenaDataPoint.setMandatory(true);
     modenaDataPoint.setSize(1);
+    modenaDataPoint.setAddressOffset(4);
+    modenaDataPoint.setBlockOffset(2);
     modenaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield16"));
     modenaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << modenaDataPoint;
+    m_dataPoints.insert(modenaDataPoint.name(), modenaDataPoint);
 
     SunSpecDataPoint nschdDataPoint;
     nschdDataPoint.setName("NSchd");
@@ -112,8 +119,10 @@ void SunSpecScheduleModel::initDataPoints()
     nschdDataPoint.setDescription("Number of schedules supported (recommend min. 4, max 32)");
     nschdDataPoint.setMandatory(true);
     nschdDataPoint.setSize(1);
+    nschdDataPoint.setAddressOffset(5);
+    nschdDataPoint.setBlockOffset(3);
     nschdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << nschdDataPoint;
+    m_dataPoints.insert(nschdDataPoint.name(), nschdDataPoint);
 
     SunSpecDataPoint nptsDataPoint;
     nptsDataPoint.setName("NPts");
@@ -121,16 +130,20 @@ void SunSpecScheduleModel::initDataPoints()
     nptsDataPoint.setDescription("Number of schedule entries supported (maximum of 10).");
     nptsDataPoint.setMandatory(true);
     nptsDataPoint.setSize(1);
+    nptsDataPoint.setAddressOffset(6);
+    nptsDataPoint.setBlockOffset(4);
     nptsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << nptsDataPoint;
+    m_dataPoints.insert(nptsDataPoint.name(), nptsDataPoint);
 
     SunSpecDataPoint padDataPoint;
     padDataPoint.setName("Pad");
     padDataPoint.setLabel("Pad");
     padDataPoint.setDescription("Pad register.");
     padDataPoint.setSize(1);
+    padDataPoint.setAddressOffset(7);
+    padDataPoint.setBlockOffset(5);
     padDataPoint.setDataType(SunSpecDataPoint::stringToDataType("pad"));
-    m_dataPoints << padDataPoint;
+    m_dataPoints.insert(padDataPoint.name(), padDataPoint);
 
 }
 

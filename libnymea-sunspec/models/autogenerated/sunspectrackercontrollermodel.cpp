@@ -34,6 +34,7 @@ SunSpecTrackerControllerModel::SunSpecTrackerControllerModel(SunSpec *connection
     SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
 {
     initDataPoints();
+    m_supportedModelIds << 601;
 }
 
 SunSpecTrackerControllerModel::~SunSpecTrackerControllerModel()
@@ -74,8 +75,9 @@ void SunSpecTrackerControllerModel::initDataPoints()
     modelIdDataPoint.setDescription("Model identifier");
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
+    modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelIdDataPoint;
+    m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
     modelLengthDataPoint.setName("L");
@@ -83,16 +85,19 @@ void SunSpecTrackerControllerModel::initDataPoints()
     modelLengthDataPoint.setDescription("Model length");
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
+    modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelLengthDataPoint;
+    m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint controllerDataPoint;
     controllerDataPoint.setName("Nam");
     controllerDataPoint.setLabel("Controller");
     controllerDataPoint.setDescription("Descriptive name for this control unit");
     controllerDataPoint.setSize(8);
+    controllerDataPoint.setAddressOffset(2);
+    controllerDataPoint.setBlockOffset(0);
     controllerDataPoint.setDataType(SunSpecDataPoint::stringToDataType("string"));
-    m_dataPoints << controllerDataPoint;
+    m_dataPoints.insert(controllerDataPoint.name(), controllerDataPoint);
 
     SunSpecDataPoint typeDataPoint;
     typeDataPoint.setName("Typ");
@@ -100,8 +105,10 @@ void SunSpecTrackerControllerModel::initDataPoints()
     typeDataPoint.setDescription("Type of tracker");
     typeDataPoint.setMandatory(true);
     typeDataPoint.setSize(1);
+    typeDataPoint.setAddressOffset(10);
+    typeDataPoint.setBlockOffset(8);
     typeDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
-    m_dataPoints << typeDataPoint;
+    m_dataPoints.insert(typeDataPoint.name(), typeDataPoint);
 
     SunSpecDataPoint dateDataPoint;
     dateDataPoint.setName("DtLoc");
@@ -109,8 +116,10 @@ void SunSpecTrackerControllerModel::initDataPoints()
     dateDataPoint.setDescription("Local date in YYYYMMDD format");
     dateDataPoint.setUnits("YYYYMMDD");
     dateDataPoint.setSize(5);
+    dateDataPoint.setAddressOffset(11);
+    dateDataPoint.setBlockOffset(9);
     dateDataPoint.setDataType(SunSpecDataPoint::stringToDataType("string"));
-    m_dataPoints << dateDataPoint;
+    m_dataPoints.insert(dateDataPoint.name(), dateDataPoint);
 
     SunSpecDataPoint timeDataPoint;
     timeDataPoint.setName("TmLoc");
@@ -118,16 +127,20 @@ void SunSpecTrackerControllerModel::initDataPoints()
     timeDataPoint.setDescription("24 hour local time stamp to second");
     timeDataPoint.setUnits("hhmmss");
     timeDataPoint.setSize(3);
+    timeDataPoint.setAddressOffset(16);
+    timeDataPoint.setBlockOffset(14);
     timeDataPoint.setDataType(SunSpecDataPoint::stringToDataType("string"));
-    m_dataPoints << timeDataPoint;
+    m_dataPoints.insert(timeDataPoint.name(), timeDataPoint);
 
     SunSpecDataPoint dayDataPoint;
     dayDataPoint.setName("Day");
     dayDataPoint.setLabel("Day");
     dayDataPoint.setDescription("Number of the day in the year (1-366)");
     dayDataPoint.setSize(1);
+    dayDataPoint.setAddressOffset(19);
+    dayDataPoint.setBlockOffset(17);
     dayDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << dayDataPoint;
+    m_dataPoints.insert(dayDataPoint.name(), dayDataPoint);
 
     SunSpecDataPoint manualElevationDataPoint;
     manualElevationDataPoint.setName("GlblElCtl");
@@ -135,10 +148,12 @@ void SunSpecTrackerControllerModel::initDataPoints()
     manualElevationDataPoint.setDescription("Global manual override target position of elevation in degrees from horizontal.  Unimplemented for single axis azimuth tracker type");
     manualElevationDataPoint.setUnits("Degrees");
     manualElevationDataPoint.setSize(2);
+    manualElevationDataPoint.setAddressOffset(20);
+    manualElevationDataPoint.setBlockOffset(18);
     manualElevationDataPoint.setScaleFactorName("Dgr_SF");
     manualElevationDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int32"));
     manualElevationDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << manualElevationDataPoint;
+    m_dataPoints.insert(manualElevationDataPoint.name(), manualElevationDataPoint);
 
     SunSpecDataPoint manualAzimuthDataPoint;
     manualAzimuthDataPoint.setName("GlblAzCtl");
@@ -146,27 +161,33 @@ void SunSpecTrackerControllerModel::initDataPoints()
     manualAzimuthDataPoint.setDescription("Global manual override target position of azimuth in degrees from true north towards east.  Unimplemented for single axis azimuth tracker type");
     manualAzimuthDataPoint.setUnits("Degrees");
     manualAzimuthDataPoint.setSize(2);
+    manualAzimuthDataPoint.setAddressOffset(22);
+    manualAzimuthDataPoint.setBlockOffset(20);
     manualAzimuthDataPoint.setScaleFactorName("Dgr_SF");
     manualAzimuthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int32"));
     manualAzimuthDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << manualAzimuthDataPoint;
+    m_dataPoints.insert(manualAzimuthDataPoint.name(), manualAzimuthDataPoint);
 
     SunSpecDataPoint globalModeDataPoint;
     globalModeDataPoint.setName("GlblCtl");
     globalModeDataPoint.setLabel("Global Mode");
     globalModeDataPoint.setDescription("Global Control register operates on all trackers. Normal operation is automatic.  Operator can override the position by setting the ElCtl, AzCtl and enabling Manual operation. Entering calibration mode will revert to automatic operation after calibration is complete.");
     globalModeDataPoint.setSize(1);
+    globalModeDataPoint.setAddressOffset(24);
+    globalModeDataPoint.setBlockOffset(22);
     globalModeDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
     globalModeDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
-    m_dataPoints << globalModeDataPoint;
+    m_dataPoints.insert(globalModeDataPoint.name(), globalModeDataPoint);
 
     SunSpecDataPoint globalAlarmDataPoint;
     globalAlarmDataPoint.setName("GlblAlm");
     globalAlarmDataPoint.setLabel("Global Alarm");
     globalAlarmDataPoint.setDescription("Global tracker alarm conditions");
     globalAlarmDataPoint.setSize(1);
+    globalAlarmDataPoint.setAddressOffset(25);
+    globalAlarmDataPoint.setBlockOffset(23);
     globalAlarmDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield16"));
-    m_dataPoints << globalAlarmDataPoint;
+    m_dataPoints.insert(globalAlarmDataPoint.name(), globalAlarmDataPoint);
 
     SunSpecDataPoint sfDataPoint;
     sfDataPoint.setName("Dgr_SF");
@@ -174,8 +195,10 @@ void SunSpecTrackerControllerModel::initDataPoints()
     sfDataPoint.setDescription("Scale Factor for targets and position measurements in degrees");
     sfDataPoint.setMandatory(true);
     sfDataPoint.setSize(1);
+    sfDataPoint.setAddressOffset(26);
+    sfDataPoint.setBlockOffset(24);
     sfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
-    m_dataPoints << sfDataPoint;
+    m_dataPoints.insert(sfDataPoint.name(), sfDataPoint);
 
     SunSpecDataPoint trackersDataPoint;
     trackersDataPoint.setName("N");
@@ -183,8 +206,10 @@ void SunSpecTrackerControllerModel::initDataPoints()
     trackersDataPoint.setDescription("Number of trackers being controlled.  Size of repeating block.");
     trackersDataPoint.setMandatory(true);
     trackersDataPoint.setSize(1);
+    trackersDataPoint.setAddressOffset(27);
+    trackersDataPoint.setBlockOffset(25);
     trackersDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << trackersDataPoint;
+    m_dataPoints.insert(trackersDataPoint.name(), trackersDataPoint);
 
 }
 

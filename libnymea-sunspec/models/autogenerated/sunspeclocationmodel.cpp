@@ -34,6 +34,7 @@ SunSpecLocationModel::SunSpecLocationModel(SunSpec *connection, quint16 modelId,
     SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
 {
     initDataPoints();
+    m_supportedModelIds << 305;
 }
 
 SunSpecLocationModel::~SunSpecLocationModel()
@@ -74,8 +75,9 @@ void SunSpecLocationModel::initDataPoints()
     modelIdDataPoint.setDescription("Model identifier");
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
+    modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelIdDataPoint;
+    m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
     modelLengthDataPoint.setName("L");
@@ -83,8 +85,9 @@ void SunSpecLocationModel::initDataPoints()
     modelLengthDataPoint.setDescription("Model length");
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
+    modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
-    m_dataPoints << modelLengthDataPoint;
+    m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint tmDataPoint;
     tmDataPoint.setName("Tm");
@@ -92,8 +95,10 @@ void SunSpecLocationModel::initDataPoints()
     tmDataPoint.setDescription("UTC 24 hour time stamp to millisecond hhmmss.sssZ format");
     tmDataPoint.setUnits("hhmmss.sssZ");
     tmDataPoint.setSize(6);
+    tmDataPoint.setAddressOffset(2);
+    tmDataPoint.setBlockOffset(0);
     tmDataPoint.setDataType(SunSpecDataPoint::stringToDataType("string"));
-    m_dataPoints << tmDataPoint;
+    m_dataPoints.insert(tmDataPoint.name(), tmDataPoint);
 
     SunSpecDataPoint dateDataPoint;
     dateDataPoint.setName("Date");
@@ -101,8 +106,10 @@ void SunSpecLocationModel::initDataPoints()
     dateDataPoint.setDescription("UTC Date string YYYYMMDD format");
     dateDataPoint.setUnits("YYYYMMDD");
     dateDataPoint.setSize(4);
+    dateDataPoint.setAddressOffset(8);
+    dateDataPoint.setBlockOffset(6);
     dateDataPoint.setDataType(SunSpecDataPoint::stringToDataType("string"));
-    m_dataPoints << dateDataPoint;
+    m_dataPoints.insert(dateDataPoint.name(), dateDataPoint);
 
     SunSpecDataPoint locationDataPoint;
     locationDataPoint.setName("Loc");
@@ -110,8 +117,10 @@ void SunSpecLocationModel::initDataPoints()
     locationDataPoint.setDescription("Location string (40 chars max)");
     locationDataPoint.setUnits("text");
     locationDataPoint.setSize(20);
+    locationDataPoint.setAddressOffset(12);
+    locationDataPoint.setBlockOffset(10);
     locationDataPoint.setDataType(SunSpecDataPoint::stringToDataType("string"));
-    m_dataPoints << locationDataPoint;
+    m_dataPoints.insert(locationDataPoint.name(), locationDataPoint);
 
     SunSpecDataPoint latDataPoint;
     latDataPoint.setName("Lat");
@@ -119,9 +128,11 @@ void SunSpecLocationModel::initDataPoints()
     latDataPoint.setDescription("Latitude with seven degrees of precision");
     latDataPoint.setUnits("Degrees");
     latDataPoint.setSize(2);
+    latDataPoint.setAddressOffset(32);
+    latDataPoint.setBlockOffset(30);
     latDataPoint.setScaleFactorName("-7");
     latDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int32"));
-    m_dataPoints << latDataPoint;
+    m_dataPoints.insert(latDataPoint.name(), latDataPoint);
 
     SunSpecDataPoint longDataPoint;
     longDataPoint.setName("Long");
@@ -129,9 +140,11 @@ void SunSpecLocationModel::initDataPoints()
     longDataPoint.setDescription("Longitude with seven degrees of precision");
     longDataPoint.setUnits("Degrees");
     longDataPoint.setSize(2);
+    longDataPoint.setAddressOffset(34);
+    longDataPoint.setBlockOffset(32);
     longDataPoint.setScaleFactorName("-7");
     longDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int32"));
-    m_dataPoints << longDataPoint;
+    m_dataPoints.insert(longDataPoint.name(), longDataPoint);
 
     SunSpecDataPoint altitudeDataPoint;
     altitudeDataPoint.setName("Alt");
@@ -139,8 +152,10 @@ void SunSpecLocationModel::initDataPoints()
     altitudeDataPoint.setDescription("Altitude measurement in meters");
     altitudeDataPoint.setUnits("meters");
     altitudeDataPoint.setSize(2);
+    altitudeDataPoint.setAddressOffset(36);
+    altitudeDataPoint.setBlockOffset(34);
     altitudeDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int32"));
-    m_dataPoints << altitudeDataPoint;
+    m_dataPoints.insert(altitudeDataPoint.name(), altitudeDataPoint);
 
 }
 
