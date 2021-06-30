@@ -6,9 +6,7 @@ QT += \
 
 SOURCES += \
     integrationplugindrexelundweiss.cpp \
-    ../modbus/modbusrtumaster.cpp \
 
 HEADERS += \
     integrationplugindrexelundweiss.h \
-    modbusdegisterdefinition.h \
-    ../modbus/modbusrtumaster.h \
+    modbusregisterdefinition.h

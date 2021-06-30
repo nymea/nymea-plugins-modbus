@@ -28,52 +28,73 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef INTEGRATIONPLUGINDREXELUNDWEISS_H
-#define INTEGRATIONPLUGINDREXELUNDWEISS_H
+#ifndef INTEGRATIONPLUGINENERGYMETERS_H
+#define INTEGRATIONPLUGINENERGYMETERS_H
 
 #include "integrations/integrationplugin.h"
-#include "hardware/modbus/modbusrtumaster.h"
+#include "hardware/modbus/modbusrtuhardwareresource.h"
 #include "plugintimer.h"
-#include "modbusregisterdefinition.h"
 
-#include <QDateTime>
+#include "energymeter.h"
 
-class IntegrationPluginDrexelUndWeiss : public IntegrationPlugin
+#include <QObject>
+#include <QTimer>
+
+class IntegrationPluginEnergyMeters : public IntegrationPlugin
 {
     Q_OBJECT
 
-    Q_PLUGIN_METADATA(IID "io.nymea.IntegrationPlugin" FILE "integrationplugindrexelundweiss.json")
+    Q_PLUGIN_METADATA(IID "io.nymea.IntegrationPlugin" FILE "integrationpluginenergymeters.json")
     Q_INTERFACES(IntegrationPlugin)
 
 public:
-    explicit IntegrationPluginDrexelUndWeiss();
-
+    explicit IntegrationPluginEnergyMeters();
     void init() override;
     void discoverThings(ThingDiscoveryInfo *info) override;
     void setupThing(ThingSetupInfo *info) override;
     void postSetupThing(Thing *thing) override;
     void thingRemoved(Thing *thing) override;
-    void executeAction(ThingActionInfo *info) override;
 
 private:
-    QHash<Thing *, ModbusRtuMaster *> m_modbusRtuMasters;
-    PluginTimer *m_refreshTimer = nullptr;
+    PluginTimer *m_reconnectTimer = nullptr;
+    QHash<ThingClassId, StateTypeId> m_connectionStateTypeIds;
+    QHash<ThingClassId, StateTypeId> m_voltageL1StateTypeIds;
+    QHash<ThingClassId, StateTypeId> m_voltageL2StateTypeIds;
+    QHash<ThingClassId, StateTypeId> m_voltageL3StateTypeIds;
+    QHash<ThingClassId, StateTypeId> m_currentL1StateTypeIds;
+    QHash<ThingClassId, StateTypeId> m_currentL2StateTypeIds;
+    QHash<ThingClassId, StateTypeId> m_currentL3StateTypeIds;
+    QHash<ThingClassId, StateTypeId> m_activePowerStateTypeIds;
+    QHash<ThingClassId, StateTypeId> m_frequencyStateTypeIds;
+    QHash<ThingClassId, StateTypeId> m_powerFactorStateTypeIds;
+    QHash<ThingClassId, StateTypeId> m_totalEnergyConsumedStateTypeIds;
+    QHash<ThingClassId, StateTypeId> m_totalEnergyProducedStateTypeIds;
 
-    QHash<ThingClassId, StateTypeId> m_connectedStateTypeIds;
     QHash<ThingClassId, ParamTypeId> m_discoverySlaveAddressParamTypeIds;
     QHash<ThingClassId, ParamTypeId> m_slaveIdParamTypeIds;
     QHash<ThingClassId, ParamTypeId> m_modbusUuidParamTypeIds;
-    void sendWriteRequest(ThingActionInfo *info, uint slaveAddress, uint modbusRegister, uint32_t value);
-    void updateStates(Thing *thing);
-    void discoverModbusSlaves(ModbusRtuMaster *modbus, uint slaveAddress);
-    void readHoldingRegister(Thing *thing, ModbusRtuMaster *modbus, uint slaveAddress, uint modbusRegister);
 
-    VentilationMode getVentilationModeFromString(const QString &modeString);
+    QHash<ThingClassId, QHash<ModbusRegisterType, ModbusRegisterDescriptor>> m_registerMaps;
+
+    QHash<Thing *, EnergyMeter *> m_energyMeters;
+
+    QHash<EnergyMeter *, bool> m_updateCycleInProgress;
+    void startUpdateCycle(EnergyMeter *meter);
+    void updateCycleFinished(EnergyMeter *meter);
 
 private slots:
-    void onRefreshTimer();
-    void onPluginConfigurationChanged(const ParamTypeId &paramTypeId, const QVariant &value);
     void onConnectionStateChanged(bool status);
+    void onVoltageL1Received(double voltage);
+    void onVoltageL2Received(double voltage);
+    void onVoltageL3Received(double voltage);
+    void onCurrentL1Received(double current);
+    void onCurrentL2Received(double current);
+    void onCurrentL3Received(double current);
+    void onActivePowerReceived(double power);
+    void onFrequencyReceived(double frequency);
+    void onPowerFactorReceived(double powerFactor);
+    void onProducedEnergyReceived(double energy);
+    void onConsumedEnergyReceived(double energy);
 };
 
-#endif // INTEGRATIONPLUGINDREXELUNDWEISS_H
+#endif // INTEGRATIONPLUGINENERGYMETERS_H

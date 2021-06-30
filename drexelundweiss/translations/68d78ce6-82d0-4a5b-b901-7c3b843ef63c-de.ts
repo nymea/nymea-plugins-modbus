@@ -36,11 +36,6 @@ The name of the StateType ({0a6b44c8-e7af-4148-92ff-682ae717f3a8}) of ThingClass
         <translation>Setze Zielwassertemperatur</translation>
     </message>
     <message>
-        <source>Discover devices</source>
-        <extracomment>The name of the ActionType ({b9a24ecc-4433-4f31-99ba-596033bda421}) of ThingClass modbusConnection</extracomment>
-        <translation>Suche Geräte</translation>
-    </message>
-    <message>
         <source>Drexel und Weiss</source>
         <extracomment>The name of the vendor ({9f476e8b-7e95-448e-b03b-874747e8fb1f})
 ----------
@@ -137,12 +132,20 @@ The name of the StateType ({32378843-5478-4b86-9c0e-ccbf978c02be}) of ThingClass
 ----------
 The name of the ParamType (ThingClass: x2wp, EventType: power, ID: {f2ce8389-c33f-4f10-8484-f2e993841762})
 ----------
-The name of the StateType ({f2ce8389-c33f-4f10-8484-f2e993841762}) of ThingClass x2wp</extracomment>
+The name of the StateType ({f2ce8389-c33f-4f10-8484-f2e993841762}) of ThingClass x2wp
+----------
+The name of the ParamType (ThingClass: x2lu, ActionType: power, ID: {c9df6349-2bf6-46cc-bce3-d4155836dbe5})
+----------
+The name of the ParamType (ThingClass: x2lu, EventType: power, ID: {c9df6349-2bf6-46cc-bce3-d4155836dbe5})
+----------
+The name of the StateType ({c9df6349-2bf6-46cc-bce3-d4155836dbe5}) of ThingClass x2lu</extracomment>
         <translation>Eingeschalten</translation>
     </message>
     <message>
         <source>Power changed</source>
-        <extracomment>The name of the EventType ({f2ce8389-c33f-4f10-8484-f2e993841762}) of ThingClass x2wp</extracomment>
+        <extracomment>The name of the EventType ({f2ce8389-c33f-4f10-8484-f2e993841762}) of ThingClass x2wp
+----------
+The name of the EventType ({c9df6349-2bf6-46cc-bce3-d4155836dbe5}) of ThingClass x2lu</extracomment>
         <translation>Eingeschalten geändert</translation>
     </message>
     <message>
@@ -206,25 +209,15 @@ The name of the StateType ({3ab2d609-1686-4fd7-84e3-580c8e0537d0}) of ThingClass
         <translation>Raumtemperatur geändert</translation>
     </message>
     <message>
-        <source>Serial port</source>
-        <extracomment>The name of the ParamType (ThingClass: modbusConnection, Type: thing, ID: {ed49f7d8-ab18-4c37-9b80-1004b75dcb91})</extracomment>
-        <translation>Serielle Schnittstelle</translation>
-    </message>
-    <message>
         <source>Slave address</source>
-        <extracomment>The name of the ParamType (ThingClass: x2wp, Type: thing, ID: {b551d138-b006-4290-bfef-97072ff677c6})
+        <extracomment>The name of the ParamType (ThingClass: x2wp, Type: discovery, ID: {d4923c90-22c8-477e-a37a-341858e59dcb})
 ----------
-The name of the ParamType (ThingClass: x2lu, Type: thing, ID: {28a72cb7-3cd0-4704-b604-44fb090d5a88})
+The name of the ParamType (ThingClass: x2wp, Type: thing, ID: {b551d138-b006-4290-bfef-97072ff677c6})
 ----------
-The name of the ParamType (ThingClass: modbusConnection, ActionType: discoverDevices, ID: {22413a22-31d4-4b8c-b855-8a29da5946bc})</extracomment>
+The name of the ParamType (ThingClass: x2lu, Type: discovery, ID: {8dd4ba9f-51f6-4711-a917-abac5e1aa82b})
+----------
+The name of the ParamType (ThingClass: x2lu, Type: thing, ID: {28a72cb7-3cd0-4704-b604-44fb090d5a88})</extracomment>
         <translation>Slave-Adresse</translation>
-    </message>
-    <message>
-        <source>Software version</source>
-        <extracomment>The name of the ParamType (ThingClass: x2wp, Type: thing, ID: {1ffd72a9-7b3f-4287-b671-7f22e159f9b8})
-----------
-The name of the ParamType (ThingClass: x2lu, Type: thing, ID: {91ef76cf-6c53-4a8a-a278-6f6e2ef68cc6})</extracomment>
-        <translation>Softwareversion</translation>
     </message>
     <message>
         <source>Target room temperature</source>
@@ -308,11 +301,6 @@ The name of the StateType ({77a96b57-fa0a-4946-af5b-39c3b66d9422}) of ThingClass
         <translation>X2 WP</translation>
     </message>
     <message>
-        <source>Baud rate</source>
-        <extracomment>The name of the ParamType (ThingClass: modbusConnection, Type: thing, ID: {d0c04612-cc3e-4d38-b4c9-708e28dc4eb3})</extracomment>
-        <translation>Baudrate</translation>
-    </message>
-    <message>
         <source>Connected</source>
         <extracomment>The name of the ParamType (ThingClass: x2wp, EventType: connected, ID: {baf203be-a391-4bfc-8198-53b4ecbcce80})
 ----------
@@ -320,26 +308,62 @@ The name of the StateType ({baf203be-a391-4bfc-8198-53b4ecbcce80}) of ThingClass
 ----------
 The name of the ParamType (ThingClass: x2lu, EventType: connected, ID: {b4c4726f-d3d7-46e8-badb-0d590e7f5fac})
 ----------
-The name of the StateType ({b4c4726f-d3d7-46e8-badb-0d590e7f5fac}) of ThingClass x2lu
-----------
-The name of the ParamType (ThingClass: modbusConnection, EventType: connected, ID: {181ce6e2-9c55-45c6-b329-adf379679e07})
-----------
-The name of the StateType ({181ce6e2-9c55-45c6-b329-adf379679e07}) of ThingClass modbusConnection</extracomment>
+The name of the StateType ({b4c4726f-d3d7-46e8-badb-0d590e7f5fac}) of ThingClass x2lu</extracomment>
         <translation>Verbunden</translation>
     </message>
     <message>
         <source>Connected changed</source>
         <extracomment>The name of the EventType ({baf203be-a391-4bfc-8198-53b4ecbcce80}) of ThingClass x2wp
 ----------
-The name of the EventType ({b4c4726f-d3d7-46e8-badb-0d590e7f5fac}) of ThingClass x2lu
-----------
-The name of the EventType ({181ce6e2-9c55-45c6-b329-adf379679e07}) of ThingClass modbusConnection</extracomment>
+The name of the EventType ({b4c4726f-d3d7-46e8-badb-0d590e7f5fac}) of ThingClass x2lu</extracomment>
         <translation>Verbunden geändert</translation>
     </message>
     <message>
-        <source>Modbus connection</source>
-        <extracomment>The name of the ThingClass ({06d04eec-ab5d-479a-b9e6-8c89efc18a8b})</extracomment>
-        <translation>Modbusverbindung</translation>
+        <source>Modbus RTU master</source>
+        <extracomment>The name of the ParamType (ThingClass: x2wp, Type: thing, ID: {db8358f3-f573-44e3-b024-c4613ee3a270})
+----------
+The name of the ParamType (ThingClass: x2lu, Type: thing, ID: {d25197d1-b1b9-45a9-b6fa-60583ed469fb})</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set power</source>
+        <extracomment>The name of the ActionType ({c9df6349-2bf6-46cc-bce3-d4155836dbe5}) of ThingClass x2lu</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>IntegrationPluginDrexelUndWeiss</name>
+    <message>
+        <source>Modbus RTU interface not available.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Modbus RTU interface is not connected.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Modbus RTU interface not connected.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No Modbus RTU interface available.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Modbus slave address must be between 1 and 254</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>X2 Heat pump</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>X2 Ventilation unit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Slave address </source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>
