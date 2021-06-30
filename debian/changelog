@@ -1,3 +1,30 @@
+nymea-plugins-modbus (0.24.5) xenial; urgency=medium
+
+  [ Bernhard Trinnes ]
+  * New Plugin: iDM
+
+  [ Simon Stürz ]
+  * ModbusCommander: Use new modbus RTU hardware resource for the modbus
+    commander plugin
+
+  [ Bernhard Trinnes ]
+  * New plugin: Energy meters
+
+  [ Simon Stürz ]
+  * New Plugin: M-Tec
+
+  [ Bernhard Trinnes ]
+  * Drexel & Weiss: Switched to modbus rtu resource
+
+  [ Simon Stürz ]
+  * Improve modbus TCP class and reconnect mechanism
+  * Update plugins to make use of the nymea internal network discovery
+
+  [ Michael Zanetti ]
+  * Update to new smartmeter interfaces
+
+ -- Jenkins <jenkins@nymea.io>  Wed, 30 Jun 2021 12:44:16 +0200
+
 nymea-plugins-modbus (0.24.4) xenial; urgency=medium
 
   [ Michael Zanetti ]
