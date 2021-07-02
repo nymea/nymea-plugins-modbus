@@ -47,15 +47,13 @@ public:
     Q_DECLARE_FLAGS(ModenaFlags, Modena)
     Q_FLAG(Modena)
 
-    explicit SunSpecVoltWattModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
+    explicit SunSpecVoltWattModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecVoltWattModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
-    quint16 modelId() const;
-    quint16 modelLength() const;
     quint16 actCrv() const;
     ModenaFlags modEna() const;
     quint16 winTms() const;
@@ -64,9 +62,10 @@ public:
     quint16 nCrv() const;
     quint16 nPt() const;
 
+protected:
+    void processBlockData() override;
+
 private:
-    quint16 m_modelId;
-    quint16 m_modelLength;
     quint16 m_actCrv;
     ModenaFlags m_modEna;
     quint16 m_winTms;

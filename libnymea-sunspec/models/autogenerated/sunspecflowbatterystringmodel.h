@@ -87,15 +87,13 @@ public:
     Q_DECLARE_FLAGS(Evt2Flags, Evt2)
     Q_FLAG(Evt2)
 
-    explicit SunSpecFlowBatteryStringModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
+    explicit SunSpecFlowBatteryStringModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecFlowBatteryStringModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
-    quint16 modelId() const;
-    quint16 modelLength() const;
     quint16 stringIndex() const;
     quint16 moduleCount() const;
     quint16 connectedModuleCount() const;
@@ -111,20 +109,21 @@ public:
     quint16 minCellVoltageModule() const;
     quint16 minCellVoltageStack() const;
     float averageCellVoltage() const;
-    qint16 maxTemperature() const;
+    float maxTemperature() const;
     quint16 maxTemperatureModule() const;
-    qint16 minTemperature() const;
+    float minTemperature() const;
     quint16 minTemperatureModule() const;
-    qint16 averageTemperature() const;
+    float averageTemperature() const;
     Evt1Flags stringEvent1() const;
     Evt2Flags stringEvent2() const;
     quint32 vendorEventBitfield1() const;
     quint32 vendorEventBitfield2() const;
     quint16 pad() const;
 
+protected:
+    void processBlockData() override;
+
 private:
-    quint16 m_modelId;
-    quint16 m_modelLength;
     quint16 m_stringIndex;
     quint16 m_moduleCount;
     quint16 m_connectedModuleCount;
@@ -140,11 +139,11 @@ private:
     quint16 m_minCellVoltageModule;
     quint16 m_minCellVoltageStack;
     float m_averageCellVoltage;
-    qint16 m_maxTemperature;
+    float m_maxTemperature;
     quint16 m_maxTemperatureModule;
-    qint16 m_minTemperature;
+    float m_minTemperature;
     quint16 m_minTemperatureModule;
-    qint16 m_averageTemperature;
+    float m_averageTemperature;
     Evt1Flags m_stringEvent1;
     Evt2Flags m_stringEvent2;
     quint32 m_vendorEventBitfield1;

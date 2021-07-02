@@ -109,15 +109,13 @@ public:
     Q_DECLARE_FLAGS(RtstFlags, Rtst)
     Q_FLAG(Rtst)
 
-    explicit SunSpecStatusModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
+    explicit SunSpecStatusModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecStatusModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
-    quint16 modelId() const;
-    quint16 modelLength() const;
     PvconnFlags pvConn() const;
     StorconnFlags storConn() const;
     EcpconnFlags ecpConn() const;
@@ -127,7 +125,7 @@ public:
     quint64 actVArhQ2() const;
     quint64 actVArhQ3() const;
     quint64 actVArhQ4() const;
-    qint16 vArAval() const;
+    float vArAval() const;
     float wAval() const;
     StsetlimmskFlags stSetLimMsk() const;
     StactctlFlags stActCtl() const;
@@ -136,9 +134,10 @@ public:
     RtstFlags rtSt() const;
     float ris() const;
 
+protected:
+    void processBlockData() override;
+
 private:
-    quint16 m_modelId;
-    quint16 m_modelLength;
     PvconnFlags m_pvConn;
     StorconnFlags m_storConn;
     EcpconnFlags m_ecpConn;
@@ -148,7 +147,7 @@ private:
     quint64 m_actVArhQ2;
     quint64 m_actVArhQ3;
     quint64 m_actVArhQ4;
-    qint16 m_vArAval;
+    float m_vArAval;
     qint16 m_vArAvalSf;
     float m_wAval;
     qint16 m_wAvalSf;

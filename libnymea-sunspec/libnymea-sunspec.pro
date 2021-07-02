@@ -15,6 +15,7 @@ SOURCES += \
     sunspecinverter.cpp \
     sunspecmeter.cpp \
     sunspecmodel.cpp \
+    sunspecmodelfactory.cpp \
     sunspecstorage.cpp
 
 HEADERS += \
@@ -24,6 +25,7 @@ HEADERS += \
     sunspecinverter.h \
     sunspecmeter.h \
     sunspecmodel.h \
+    sunspecmodelfactory.h \
     sunspecstorage.h
 
 # define install target

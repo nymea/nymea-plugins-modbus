@@ -30,11 +30,10 @@
 
 #include "sunspecflowbatterymodulemodel.h"
 
-SunSpecFlowBatteryModuleModel::SunSpecFlowBatteryModuleModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecFlowBatteryModuleModel::SunSpecFlowBatteryModuleModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 808, 1, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 808;
 }
 
 SunSpecFlowBatteryModuleModel::~SunSpecFlowBatteryModuleModel()
@@ -57,18 +56,18 @@ QString SunSpecFlowBatteryModuleModel::label() const
     return "Flow Battery Module Model";
 }
 
-quint16 SunSpecFlowBatteryModuleModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecFlowBatteryModuleModel::modelLength() const
-{
-    return m_modelLength;
-}
 quint16 SunSpecFlowBatteryModuleModel::modulePointsToBeDetermined() const
 {
     return m_modulePointsToBeDetermined;
 }
+void SunSpecFlowBatteryModuleModel::processBlockData()
+{
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_modulePointsToBeDetermined = m_dataPoints.value("ModuleTBD").toUInt16();
+}
+
 void SunSpecFlowBatteryModuleModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

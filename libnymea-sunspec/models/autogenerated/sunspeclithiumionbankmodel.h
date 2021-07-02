@@ -41,21 +41,19 @@ class SunSpecLithiumIonBankModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    explicit SunSpecLithiumIonBankModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
+    explicit SunSpecLithiumIonBankModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecLithiumIonBankModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
-    quint16 modelId() const;
-    quint16 modelLength() const;
     quint16 stringCount() const;
     quint16 connectedStringCount() const;
-    qint16 maxModuleTemperature() const;
+    float maxModuleTemperature() const;
     quint16 maxModuleTemperatureString() const;
     quint16 maxModuleTemperatureModule() const;
-    qint16 minModuleTemperature() const;
+    float minModuleTemperature() const;
     quint16 minModuleTemperatureString() const;
     quint16 minModuleTemperatureModule() const;
     qint16 averageModuleTemperature() const;
@@ -64,22 +62,23 @@ public:
     float minStringVoltage() const;
     quint16 minStringVoltageString() const;
     float averageStringVoltage() const;
-    qint16 maxStringCurrent() const;
+    float maxStringCurrent() const;
     quint16 maxStringCurrentString() const;
-    qint16 minStringCurrent() const;
+    float minStringCurrent() const;
     quint16 minStringCurrentString() const;
-    qint16 averageStringCurrent() const;
+    float averageStringCurrent() const;
     quint16 batteryCellBalancingCount() const;
 
+protected:
+    void processBlockData() override;
+
 private:
-    quint16 m_modelId;
-    quint16 m_modelLength;
     quint16 m_stringCount;
     quint16 m_connectedStringCount;
-    qint16 m_maxModuleTemperature;
+    float m_maxModuleTemperature;
     quint16 m_maxModuleTemperatureString;
     quint16 m_maxModuleTemperatureModule;
-    qint16 m_minModuleTemperature;
+    float m_minModuleTemperature;
     quint16 m_minModuleTemperatureString;
     quint16 m_minModuleTemperatureModule;
     qint16 m_averageModuleTemperature;
@@ -88,11 +87,11 @@ private:
     float m_minStringVoltage;
     quint16 m_minStringVoltageString;
     float m_averageStringVoltage;
-    qint16 m_maxStringCurrent;
+    float m_maxStringCurrent;
     quint16 m_maxStringCurrentString;
-    qint16 m_minStringCurrent;
+    float m_minStringCurrent;
     quint16 m_minStringCurrentString;
-    qint16 m_averageStringCurrent;
+    float m_averageStringCurrent;
     quint16 m_batteryCellBalancingCount;
     qint16 m_cellV_SF;
     qint16 m_modTmp_SF;

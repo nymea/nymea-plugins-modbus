@@ -21,11 +21,6 @@ SunSpec *SunSpecModel::connection() const
     return m_connection;
 }
 
-QVector<quint16> SunSpecModel::supportedModelIds() const
-{
-    return m_supportedModelIds;
-}
-
 quint16 SunSpecModel::modelId() const
 {
     return m_modelId;
@@ -41,6 +36,11 @@ quint16 SunSpecModel::modbusStartRegister() const
     return m_modbusStartRegister;
 }
 
+QVector<quint16> SunSpecModel::blockData() const
+{
+    return m_blockData;
+}
+
 void SunSpecModel::init()
 {
     m_initialized = false;
@@ -50,7 +50,8 @@ void SunSpecModel::init()
 
 void SunSpecModel::readBlockData()
 {
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister, m_modelLength);
+    // Read the block data, start register + 2 header reisters (id, length)
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + 2, m_modelLength);
     if (QModbusReply *reply = m_connection->modbusTcpClient()->sendReadRequest(request, m_connection->slaveId())) {
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
@@ -63,13 +64,25 @@ void SunSpecModel::readBlockData()
                 const QModbusDataUnit unit = reply->result();
                 qCDebug(dcSunSpec()) << name() << description() << "Received block data" << m_modbusStartRegister << unit.values().count();
                 m_blockData = unit.values();
+                emit blockDataChanged(m_blockData);
+
+                if (m_blockData.count() != m_modelLength) {
+                    qCWarning(dcSunSpec()) << "Received invalid block data count from read block data request. Model lenght:" << m_modelLength << "Response block count:" << m_blockData.count();
+                    return;
+                }
 
                 // Fill the data points
                 foreach (const QString &dataPointName, m_dataPoints.keys()) {
                     m_dataPoints[dataPointName].setRawData(m_blockData.mid(m_dataPoints[dataPointName].addressOffset(), m_dataPoints[dataPointName].size()));
                 }
 
+                // Fill the private member data using the data points
+                processBlockData();
+
+                // Make sure initialized gets called
                 setInitializedFinished();
+
+                // Inform about the new block data
                 emit blockUpdated();
             });
 

@@ -30,11 +30,10 @@
 
 #include "sunspeclithiumionbankmodel.h"
 
-SunSpecLithiumIonBankModel::SunSpecLithiumIonBankModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecLithiumIonBankModel::SunSpecLithiumIonBankModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 803, 26, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 803;
 }
 
 SunSpecLithiumIonBankModel::~SunSpecLithiumIonBankModel()
@@ -57,14 +56,6 @@ QString SunSpecLithiumIonBankModel::label() const
     return "Lithium-Ion Battery Bank Model";
 }
 
-quint16 SunSpecLithiumIonBankModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecLithiumIonBankModel::modelLength() const
-{
-    return m_modelLength;
-}
 quint16 SunSpecLithiumIonBankModel::stringCount() const
 {
     return m_stringCount;
@@ -73,7 +64,7 @@ quint16 SunSpecLithiumIonBankModel::connectedStringCount() const
 {
     return m_connectedStringCount;
 }
-qint16 SunSpecLithiumIonBankModel::maxModuleTemperature() const
+float SunSpecLithiumIonBankModel::maxModuleTemperature() const
 {
     return m_maxModuleTemperature;
 }
@@ -85,7 +76,7 @@ quint16 SunSpecLithiumIonBankModel::maxModuleTemperatureModule() const
 {
     return m_maxModuleTemperatureModule;
 }
-qint16 SunSpecLithiumIonBankModel::minModuleTemperature() const
+float SunSpecLithiumIonBankModel::minModuleTemperature() const
 {
     return m_minModuleTemperature;
 }
@@ -121,7 +112,7 @@ float SunSpecLithiumIonBankModel::averageStringVoltage() const
 {
     return m_averageStringVoltage;
 }
-qint16 SunSpecLithiumIonBankModel::maxStringCurrent() const
+float SunSpecLithiumIonBankModel::maxStringCurrent() const
 {
     return m_maxStringCurrent;
 }
@@ -129,7 +120,7 @@ quint16 SunSpecLithiumIonBankModel::maxStringCurrentString() const
 {
     return m_maxStringCurrentString;
 }
-qint16 SunSpecLithiumIonBankModel::minStringCurrent() const
+float SunSpecLithiumIonBankModel::minStringCurrent() const
 {
     return m_minStringCurrent;
 }
@@ -137,7 +128,7 @@ quint16 SunSpecLithiumIonBankModel::minStringCurrentString() const
 {
     return m_minStringCurrentString;
 }
-qint16 SunSpecLithiumIonBankModel::averageStringCurrent() const
+float SunSpecLithiumIonBankModel::averageStringCurrent() const
 {
     return m_averageStringCurrent;
 }
@@ -145,6 +136,41 @@ quint16 SunSpecLithiumIonBankModel::batteryCellBalancingCount() const
 {
     return m_batteryCellBalancingCount;
 }
+void SunSpecLithiumIonBankModel::processBlockData()
+{
+    // Scale factors
+    m_cellV_SF = m_dataPoints.value("CellV_SF").toInt16();
+    m_modTmp_SF = m_dataPoints.value("ModTmp_SF").toInt16();
+    m_a_SF = m_dataPoints.value("A_SF").toInt16();
+    m_soH_SF = m_dataPoints.value("SoH_SF").toInt16();
+    m_soC_SF = m_dataPoints.value("SoC_SF").toInt16();
+    m_v_SF = m_dataPoints.value("V_SF").toInt16();
+
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_stringCount = m_dataPoints.value("NStr").toUInt16();
+    m_connectedStringCount = m_dataPoints.value("NStrCon").toUInt16();
+    m_maxModuleTemperature = m_dataPoints.value("ModTmpMax").toFloatWithSSF(m_modTmp_SF);
+    m_maxModuleTemperatureString = m_dataPoints.value("ModTmpMaxStr").toUInt16();
+    m_maxModuleTemperatureModule = m_dataPoints.value("ModTmpMaxMod").toUInt16();
+    m_minModuleTemperature = m_dataPoints.value("ModTmpMin").toFloatWithSSF(m_modTmp_SF);
+    m_minModuleTemperatureString = m_dataPoints.value("ModTmpMinStr").toUInt16();
+    m_minModuleTemperatureModule = m_dataPoints.value("ModTmpMinMod").toUInt16();
+    m_averageModuleTemperature = m_dataPoints.value("ModTmpAvg").toInt16();
+    m_maxStringVoltage = m_dataPoints.value("StrVMax").toFloatWithSSF(m_v_SF);
+    m_maxStringVoltageString = m_dataPoints.value("StrVMaxStr").toUInt16();
+    m_minStringVoltage = m_dataPoints.value("StrVMin").toFloatWithSSF(m_v_SF);
+    m_minStringVoltageString = m_dataPoints.value("StrVMinStr").toUInt16();
+    m_averageStringVoltage = m_dataPoints.value("StrVAvg").toFloatWithSSF(m_v_SF);
+    m_maxStringCurrent = m_dataPoints.value("StrAMax").toFloatWithSSF(m_a_SF);
+    m_maxStringCurrentString = m_dataPoints.value("StrAMaxStr").toUInt16();
+    m_minStringCurrent = m_dataPoints.value("StrAMin").toFloatWithSSF(m_a_SF);
+    m_minStringCurrentString = m_dataPoints.value("StrAMinStr").toUInt16();
+    m_averageStringCurrent = m_dataPoints.value("StrAAvg").toFloatWithSSF(m_a_SF);
+    m_batteryCellBalancingCount = m_dataPoints.value("NCellBal").toUInt16();
+}
+
 void SunSpecLithiumIonBankModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

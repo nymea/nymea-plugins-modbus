@@ -30,11 +30,10 @@
 
 #include "sunspecrefpointmodel.h"
 
-SunSpecRefPointModel::SunSpecRefPointModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecRefPointModel::SunSpecRefPointModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 306, 4, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 306;
 }
 
 SunSpecRefPointModel::~SunSpecRefPointModel()
@@ -57,14 +56,6 @@ QString SunSpecRefPointModel::label() const
     return "Reference Point Model";
 }
 
-quint16 SunSpecRefPointModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecRefPointModel::modelLength() const
-{
-    return m_modelLength;
-}
 quint16 SunSpecRefPointModel::ghi() const
 {
     return m_ghi;
@@ -81,6 +72,17 @@ quint16 SunSpecRefPointModel::temperature() const
 {
     return m_temperature;
 }
+void SunSpecRefPointModel::processBlockData()
+{
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_ghi = m_dataPoints.value("GHI").toUInt16();
+    m_amps = m_dataPoints.value("A").toUInt16();
+    m_voltage = m_dataPoints.value("V").toUInt16();
+    m_temperature = m_dataPoints.value("Tmp").toUInt16();
+}
+
 void SunSpecRefPointModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

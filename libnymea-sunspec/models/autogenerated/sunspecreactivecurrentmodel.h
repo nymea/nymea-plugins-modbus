@@ -53,15 +53,13 @@ public:
     Q_DECLARE_FLAGS(ModenaFlags, Modena)
     Q_FLAG(Modena)
 
-    explicit SunSpecReactiveCurrentModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
+    explicit SunSpecReactiveCurrentModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecReactiveCurrentModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
-    quint16 modelId() const;
-    quint16 modelLength() const;
     Argramod arGraMod() const;
     float arGraSag() const;
     float arGraSwell() const;
@@ -75,9 +73,10 @@ public:
     quint16 holdTmms() const;
     quint16 pad() const;
 
+protected:
+    void processBlockData() override;
+
 private:
-    quint16 m_modelId;
-    quint16 m_modelLength;
     Argramod m_arGraMod;
     float m_arGraSag;
     float m_arGraSwell;

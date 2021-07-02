@@ -30,11 +30,10 @@
 
 #include "sunspecbomtempmodel.h"
 
-SunSpecBomTempModel::SunSpecBomTempModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecBomTempModel::SunSpecBomTempModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 303, 0, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 303;
 }
 
 SunSpecBomTempModel::~SunSpecBomTempModel()
@@ -57,14 +56,13 @@ QString SunSpecBomTempModel::label() const
     return "Back of Module Temperature Model";
 }
 
-quint16 SunSpecBomTempModel::modelId() const
+void SunSpecBomTempModel::processBlockData()
 {
-    return m_modelId;
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
 }
-quint16 SunSpecBomTempModel::modelLength() const
-{
-    return m_modelLength;
-}
+
 void SunSpecBomTempModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

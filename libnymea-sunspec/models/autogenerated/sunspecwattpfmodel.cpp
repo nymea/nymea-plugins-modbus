@@ -30,11 +30,10 @@
 
 #include "sunspecwattpfmodel.h"
 
-SunSpecWattPfModel::SunSpecWattPfModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecWattPfModel::SunSpecWattPfModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 131, 10, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 131;
 }
 
 SunSpecWattPfModel::~SunSpecWattPfModel()
@@ -57,14 +56,6 @@ QString SunSpecWattPfModel::label() const
     return "Watt-PF";
 }
 
-quint16 SunSpecWattPfModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecWattPfModel::modelLength() const
-{
-    return m_modelLength;
-}
 quint16 SunSpecWattPfModel::actCrv() const
 {
     return m_actCrv;
@@ -93,6 +84,25 @@ quint16 SunSpecWattPfModel::nPt() const
 {
     return m_nPt;
 }
+void SunSpecWattPfModel::processBlockData()
+{
+    // Scale factors
+    m_wSf = m_dataPoints.value("W_SF").toInt16();
+    m_pfSf = m_dataPoints.value("PF_SF").toInt16();
+    m_rmpIncDecSf = m_dataPoints.value("RmpIncDec_SF").toInt16();
+
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_actCrv = m_dataPoints.value("ActCrv").toUInt16();
+    m_modEna = static_cast<ModenaFlags>(m_dataPoints.value("ModEna").toUInt16());
+    m_winTms = m_dataPoints.value("WinTms").toUInt16();
+    m_rvrtTms = m_dataPoints.value("RvrtTms").toUInt16();
+    m_rmpTms = m_dataPoints.value("RmpTms").toUInt16();
+    m_nCrv = m_dataPoints.value("NCrv").toUInt16();
+    m_nPt = m_dataPoints.value("NPt").toUInt16();
+}
+
 void SunSpecWattPfModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

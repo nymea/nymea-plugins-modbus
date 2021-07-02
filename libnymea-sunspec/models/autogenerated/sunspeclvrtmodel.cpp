@@ -30,11 +30,10 @@
 
 #include "sunspeclvrtmodel.h"
 
-SunSpecLvrtModel::SunSpecLvrtModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecLvrtModel::SunSpecLvrtModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 129, 10, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 129;
 }
 
 SunSpecLvrtModel::~SunSpecLvrtModel()
@@ -57,14 +56,6 @@ QString SunSpecLvrtModel::label() const
     return "LVRTD";
 }
 
-quint16 SunSpecLvrtModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecLvrtModel::modelLength() const
-{
-    return m_modelLength;
-}
 quint16 SunSpecLvrtModel::actCrv() const
 {
     return m_actCrv;
@@ -97,6 +88,25 @@ quint16 SunSpecLvrtModel::pad() const
 {
     return m_pad;
 }
+void SunSpecLvrtModel::processBlockData()
+{
+    // Scale factors
+    m_tmsSf = m_dataPoints.value("Tms_SF").toInt16();
+    m_vSf = m_dataPoints.value("V_SF").toInt16();
+
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_actCrv = m_dataPoints.value("ActCrv").toUInt16();
+    m_modEna = static_cast<ModenaFlags>(m_dataPoints.value("ModEna").toUInt16());
+    m_winTms = m_dataPoints.value("WinTms").toUInt16();
+    m_rvrtTms = m_dataPoints.value("RvrtTms").toUInt16();
+    m_rmpTms = m_dataPoints.value("RmpTms").toUInt16();
+    m_nCrv = m_dataPoints.value("NCrv").toUInt16();
+    m_nPt = m_dataPoints.value("NPt").toUInt16();
+    m_pad = m_dataPoints.value("Pad").toUInt16();
+}
+
 void SunSpecLvrtModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

@@ -73,15 +73,13 @@ public:
     };
     Q_ENUM(Varpct_ena)
 
-    explicit SunSpecControlsModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
+    explicit SunSpecControlsModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecControlsModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
-    quint16 modelId() const;
-    quint16 modelLength() const;
     quint16 connWinTms() const;
     quint16 connRvrtTms() const;
     Conn conn() const;
@@ -90,23 +88,24 @@ public:
     quint16 wMaxLimPctRvrtTms() const;
     quint16 wMaxLimPctRmpTms() const;
     Wmaxlim_ena wMaxLimEna() const;
-    qint16 outPfSet() const;
+    float outPfSet() const;
     quint16 outPfSetWinTms() const;
     quint16 outPfSetRvrtTms() const;
     quint16 outPfSetRmpTms() const;
     Outpfset_ena outPfSetEna() const;
-    qint16 vArWMaxPct() const;
-    qint16 vArMaxPct() const;
-    qint16 vArAvalPct() const;
+    float vArWMaxPct() const;
+    float vArMaxPct() const;
+    float vArAvalPct() const;
     quint16 vArPctWinTms() const;
     quint16 vArPctRvrtTms() const;
     quint16 vArPctRmpTms() const;
     Varpct_mod vArPctMod() const;
     Varpct_ena vArPctEna() const;
 
+protected:
+    void processBlockData() override;
+
 private:
-    quint16 m_modelId;
-    quint16 m_modelLength;
     quint16 m_connWinTms;
     quint16 m_connRvrtTms;
     Conn m_conn;
@@ -115,14 +114,14 @@ private:
     quint16 m_wMaxLimPctRvrtTms;
     quint16 m_wMaxLimPctRmpTms;
     Wmaxlim_ena m_wMaxLimEna;
-    qint16 m_outPfSet;
+    float m_outPfSet;
     quint16 m_outPfSetWinTms;
     quint16 m_outPfSetRvrtTms;
     quint16 m_outPfSetRmpTms;
     Outpfset_ena m_outPfSetEna;
-    qint16 m_vArWMaxPct;
-    qint16 m_vArMaxPct;
-    qint16 m_vArAvalPct;
+    float m_vArWMaxPct;
+    float m_vArMaxPct;
+    float m_vArAvalPct;
     quint16 m_vArPctWinTms;
     quint16 m_vArPctRvrtTms;
     quint16 m_vArPctRmpTms;

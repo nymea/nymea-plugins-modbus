@@ -41,23 +41,22 @@ class SunSpecRefPointModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    explicit SunSpecRefPointModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
+    explicit SunSpecRefPointModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecRefPointModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
-    quint16 modelId() const;
-    quint16 modelLength() const;
     quint16 ghi() const;
     quint16 amps() const;
     quint16 voltage() const;
     quint16 temperature() const;
 
+protected:
+    void processBlockData() override;
+
 private:
-    quint16 m_modelId;
-    quint16 m_modelLength;
     quint16 m_ghi;
     quint16 m_amps;
     quint16 m_voltage;

@@ -30,11 +30,10 @@
 
 #include "sunspeclithiumionstringmodel.h"
 
-SunSpecLithiumIonStringModel::SunSpecLithiumIonStringModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecLithiumIonStringModel::SunSpecLithiumIonStringModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 804, 46, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 804;
 }
 
 SunSpecLithiumIonStringModel::~SunSpecLithiumIonStringModel()
@@ -57,14 +56,6 @@ QString SunSpecLithiumIonStringModel::label() const
     return "Lithium-Ion String Model";
 }
 
-quint16 SunSpecLithiumIonStringModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecLithiumIonStringModel::modelLength() const
-{
-    return m_modelLength;
-}
 quint16 SunSpecLithiumIonStringModel::stringIndex() const
 {
     return m_stringIndex;
@@ -101,7 +92,7 @@ float SunSpecLithiumIonStringModel::stringStateOfHealth() const
 {
     return m_stringStateOfHealth;
 }
-qint16 SunSpecLithiumIonStringModel::stringCurrent() const
+float SunSpecLithiumIonStringModel::stringCurrent() const
 {
     return m_stringCurrent;
 }
@@ -129,7 +120,7 @@ float SunSpecLithiumIonStringModel::averageCellVoltage() const
 {
     return m_averageCellVoltage;
 }
-qint16 SunSpecLithiumIonStringModel::maxModuleTemperature() const
+float SunSpecLithiumIonStringModel::maxModuleTemperature() const
 {
     return m_maxModuleTemperature;
 }
@@ -137,7 +128,7 @@ quint16 SunSpecLithiumIonStringModel::maxModuleTemperatureModule() const
 {
     return m_maxModuleTemperatureModule;
 }
-qint16 SunSpecLithiumIonStringModel::minModuleTemperature() const
+float SunSpecLithiumIonStringModel::minModuleTemperature() const
 {
     return m_minModuleTemperature;
 }
@@ -145,7 +136,7 @@ quint16 SunSpecLithiumIonStringModel::minModuleTemperatureModule() const
 {
     return m_minModuleTemperatureModule;
 }
-qint16 SunSpecLithiumIonStringModel::averageModuleTemperature() const
+float SunSpecLithiumIonStringModel::averageModuleTemperature() const
 {
     return m_averageModuleTemperature;
 }
@@ -193,6 +184,54 @@ quint16 SunSpecLithiumIonStringModel::pad4() const
 {
     return m_pad4;
 }
+void SunSpecLithiumIonStringModel::processBlockData()
+{
+    // Scale factors
+    m_soC_SF = m_dataPoints.value("SoC_SF").toInt16();
+    m_soH_SF = m_dataPoints.value("SoH_SF").toInt16();
+    m_doD_SF = m_dataPoints.value("DoD_SF").toInt16();
+    m_a_SF = m_dataPoints.value("A_SF").toInt16();
+    m_v_SF = m_dataPoints.value("V_SF").toInt16();
+    m_cellV_SF = m_dataPoints.value("CellV_SF").toInt16();
+    m_modTmp_SF = m_dataPoints.value("ModTmp_SF").toInt16();
+
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_stringIndex = m_dataPoints.value("Idx").toUInt16();
+    m_moduleCount = m_dataPoints.value("NMod").toUInt16();
+    m_stringStatus = static_cast<StFlags>(m_dataPoints.value("St").toUInt32());
+    m_connectionFailureReason = static_cast<Confail>(m_dataPoints.value("ConFail").toUInt16());
+    m_stringCellBalancingCount = m_dataPoints.value("NCellBal").toUInt16();
+    m_stringStateOfCharge = m_dataPoints.value("SoC").toFloatWithSSF(m_soC_SF);
+    m_stringDepthOfDischarge = m_dataPoints.value("DoD").toFloatWithSSF(m_doD_SF);
+    m_stringCycleCount = m_dataPoints.value("NCyc").toUInt32();
+    m_stringStateOfHealth = m_dataPoints.value("SoH").toFloatWithSSF(m_soH_SF);
+    m_stringCurrent = m_dataPoints.value("A").toFloatWithSSF(m_a_SF);
+    m_stringVoltage = m_dataPoints.value("V").toFloatWithSSF(m_v_SF);
+    m_maxCellVoltage = m_dataPoints.value("CellVMax").toFloatWithSSF(m_cellV_SF);
+    m_maxCellVoltageModule = m_dataPoints.value("CellVMaxMod").toUInt16();
+    m_minCellVoltage = m_dataPoints.value("CellVMin").toFloatWithSSF(m_cellV_SF);
+    m_minCellVoltageModule = m_dataPoints.value("CellVMinMod").toUInt16();
+    m_averageCellVoltage = m_dataPoints.value("CellVAvg").toFloatWithSSF(m_cellV_SF);
+    m_maxModuleTemperature = m_dataPoints.value("ModTmpMax").toFloatWithSSF(m_modTmp_SF);
+    m_maxModuleTemperatureModule = m_dataPoints.value("ModTmpMaxMod").toUInt16();
+    m_minModuleTemperature = m_dataPoints.value("ModTmpMin").toFloatWithSSF(m_modTmp_SF);
+    m_minModuleTemperatureModule = m_dataPoints.value("ModTmpMinMod").toUInt16();
+    m_averageModuleTemperature = m_dataPoints.value("ModTmpAvg").toFloatWithSSF(m_modTmp_SF);
+    m_pad = m_dataPoints.value("Pad1").toUInt16();
+    m_contactorStatus = static_cast<ConstFlags>(m_dataPoints.value("ConSt").toUInt32());
+    m_stringEvent1 = static_cast<Evt1Flags>(m_dataPoints.value("Evt1").toUInt32());
+    m_stringEvent2 = m_dataPoints.value("Evt2").toUInt32();
+    m_vendorEventBitfield1 = m_dataPoints.value("EvtVnd1").toUInt32();
+    m_vendorEventBitfield2 = m_dataPoints.value("EvtVnd2").toUInt32();
+    m_enableDisableString = m_dataPoints.value("SetEna").toUInt16();
+    m_connectDisconnectString = static_cast<Setcon>(m_dataPoints.value("SetCon").toUInt16());
+    m_pad2 = m_dataPoints.value("Pad2").toUInt16();
+    m_pad3 = m_dataPoints.value("Pad3").toUInt16();
+    m_pad4 = m_dataPoints.value("Pad4").toUInt16();
+}
+
 void SunSpecLithiumIonStringModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

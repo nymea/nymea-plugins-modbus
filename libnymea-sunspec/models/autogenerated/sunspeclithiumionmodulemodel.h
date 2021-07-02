@@ -41,15 +41,13 @@ class SunSpecLithiumIonModuleModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    explicit SunSpecLithiumIonModuleModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
+    explicit SunSpecLithiumIonModuleModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecLithiumIonModuleModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
-    quint16 modelId() const;
-    quint16 modelLength() const;
     quint16 stringIndex() const;
     quint16 moduleIndex() const;
     quint16 moduleCellCount() const;
@@ -63,17 +61,18 @@ public:
     float minCellVoltage() const;
     quint16 minCellVoltageCell() const;
     float averageCellVoltage() const;
-    qint16 maxCellTemperature() const;
+    float maxCellTemperature() const;
     quint16 maxCellTemperatureCell() const;
-    qint16 minCellTemperature() const;
+    float minCellTemperature() const;
     quint16 minCellTemperatureCell() const;
-    qint16 averageCellTemperature() const;
+    float averageCellTemperature() const;
     quint16 balancedCellCount() const;
     QString serialNumber() const;
 
+protected:
+    void processBlockData() override;
+
 private:
-    quint16 m_modelId;
-    quint16 m_modelLength;
     quint16 m_stringIndex;
     quint16 m_moduleIndex;
     quint16 m_moduleCellCount;
@@ -87,11 +86,11 @@ private:
     float m_minCellVoltage;
     quint16 m_minCellVoltageCell;
     float m_averageCellVoltage;
-    qint16 m_maxCellTemperature;
+    float m_maxCellTemperature;
     quint16 m_maxCellTemperatureCell;
-    qint16 m_minCellTemperature;
+    float m_minCellTemperature;
     quint16 m_minCellTemperatureCell;
-    qint16 m_averageCellTemperature;
+    float m_averageCellTemperature;
     quint16 m_balancedCellCount;
     QString m_serialNumber;
     qint16 m_soC_SF;

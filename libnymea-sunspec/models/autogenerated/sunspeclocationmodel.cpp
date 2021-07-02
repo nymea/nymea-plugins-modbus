@@ -30,11 +30,10 @@
 
 #include "sunspeclocationmodel.h"
 
-SunSpecLocationModel::SunSpecLocationModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecLocationModel::SunSpecLocationModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 305, 36, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 305;
 }
 
 SunSpecLocationModel::~SunSpecLocationModel()
@@ -57,14 +56,6 @@ QString SunSpecLocationModel::label() const
     return "GPS";
 }
 
-quint16 SunSpecLocationModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecLocationModel::modelLength() const
-{
-    return m_modelLength;
-}
 QString SunSpecLocationModel::tm() const
 {
     return m_tm;
@@ -77,11 +68,11 @@ QString SunSpecLocationModel::location() const
 {
     return m_location;
 }
-qint32 SunSpecLocationModel::lat() const
+float SunSpecLocationModel::lat() const
 {
     return m_lat;
 }
-qint32 SunSpecLocationModel::longitude() const
+float SunSpecLocationModel::longitude() const
 {
     return m_longitude;
 }
@@ -89,6 +80,19 @@ qint32 SunSpecLocationModel::altitude() const
 {
     return m_altitude;
 }
+void SunSpecLocationModel::processBlockData()
+{
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_tm = m_dataPoints.value("Tm").toString();
+    m_date = m_dataPoints.value("Date").toString();
+    m_location = m_dataPoints.value("Loc").toString();
+    m_lat = m_dataPoints.value("Lat").toFloatWithSSF(-7);
+    m_longitude = m_dataPoints.value("Long").toFloatWithSSF(-7);
+    m_altitude = m_dataPoints.value("Alt").toInt32();
+}
+
 void SunSpecLocationModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

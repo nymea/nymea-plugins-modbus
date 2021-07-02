@@ -41,15 +41,13 @@ class SunSpecExtSettingsModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    explicit SunSpecExtSettingsModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
+    explicit SunSpecExtSettingsModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecExtSettingsModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
-    quint16 modelId() const;
-    quint16 modelLength() const;
     float rampUpRate() const;
     float nomRmpDnRte() const;
     float emergencyRampUpRate() const;
@@ -58,9 +56,10 @@ public:
     float connectRampDownRate() const;
     float defaultRampRate() const;
 
+protected:
+    void processBlockData() override;
+
 private:
-    quint16 m_modelId;
-    quint16 m_modelLength;
     float m_rampUpRate;
     float m_nomRmpDnRte;
     float m_emergencyRampUpRate;

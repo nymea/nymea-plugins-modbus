@@ -30,11 +30,10 @@
 
 #include "sunspecpricingmodel.h"
 
-SunSpecPricingModel::SunSpecPricingModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecPricingModel::SunSpecPricingModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 125, 8, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 125;
 }
 
 SunSpecPricingModel::~SunSpecPricingModel()
@@ -57,14 +56,6 @@ QString SunSpecPricingModel::label() const
     return "Pricing";
 }
 
-quint16 SunSpecPricingModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecPricingModel::modelLength() const
-{
-    return m_modelLength;
-}
 SunSpecPricingModel::ModenaFlags SunSpecPricingModel::modEna() const
 {
     return m_modEna;
@@ -73,7 +64,7 @@ SunSpecPricingModel::Sigtype SunSpecPricingModel::sigType() const
 {
     return m_sigType;
 }
-qint16 SunSpecPricingModel::sig() const
+float SunSpecPricingModel::sig() const
 {
     return m_sig;
 }
@@ -93,6 +84,23 @@ quint16 SunSpecPricingModel::pad() const
 {
     return m_pad;
 }
+void SunSpecPricingModel::processBlockData()
+{
+    // Scale factors
+    m_sigSf = m_dataPoints.value("Sig_SF").toInt16();
+
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_modEna = static_cast<ModenaFlags>(m_dataPoints.value("ModEna").toUInt16());
+    m_sigType = static_cast<Sigtype>(m_dataPoints.value("SigType").toUInt16());
+    m_sig = m_dataPoints.value("Sig").toFloatWithSSF(m_sigSf);
+    m_winTms = m_dataPoints.value("WinTms").toUInt16();
+    m_rvtTms = m_dataPoints.value("RvtTms").toUInt16();
+    m_rmpTms = m_dataPoints.value("RmpTms").toUInt16();
+    m_pad = m_dataPoints.value("Pad").toUInt16();
+}
+
 void SunSpecPricingModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

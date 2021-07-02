@@ -222,35 +222,35 @@
                 "size": 1,
                 "symbols": [
                     {
-                        "name": "ggOFF",
+                        "name": "OFF",
                         "value": 1
                     },
                     {
-                        "name": "ggSLEEPING",
+                        "name": "SLEEPING",
                         "value": 2
                     },
                     {
-                        "name": "ggSTARTING",
+                        "name": "STARTING",
                         "value": 3
                     },
                     {
-                        "name": "ggMPPT",
+                        "name": "MPPT",
                         "value": 4
                     },
                     {
-                        "name": "ggTHROTTLED",
+                        "name": "THROTTLED",
                         "value": 5
                     },
                     {
-                        "name": "ggSHUTTING_DOWN",
+                        "name": "SHUTTING_DOWN",
                         "value": 6
                     },
                     {
-                        "name": "ggFAULT",
+                        "name": "FAULT",
                         "value": 7
                     },
                     {
-                        "name": "ggSTANDBY",
+                        "name": "STANDBY",
                         "value": 8
                     }
                 ],

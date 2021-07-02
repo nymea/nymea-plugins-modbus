@@ -60,54 +60,53 @@ public:
     };
     Q_ENUM(Connph)
 
-    explicit SunSpecSettingsModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
+    explicit SunSpecSettingsModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecSettingsModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
-    quint16 modelId() const;
-    quint16 modelLength() const;
     float wMax() const;
     float vRef() const;
-    qint16 vRefOfs() const;
+    float vRefOfs() const;
     float vMax() const;
     float vMin() const;
     float vaMax() const;
-    qint16 vArMaxQ1() const;
-    qint16 vArMaxQ2() const;
-    qint16 vArMaxQ3() const;
-    qint16 vArMaxQ4() const;
+    float vArMaxQ1() const;
+    float vArMaxQ2() const;
+    float vArMaxQ3() const;
+    float vArMaxQ4() const;
     float wGra() const;
-    qint16 pfMinQ1() const;
-    qint16 pfMinQ2() const;
-    qint16 pfMinQ3() const;
-    qint16 pfMinQ4() const;
+    float pfMinQ1() const;
+    float pfMinQ2() const;
+    float pfMinQ3() const;
+    float pfMinQ4() const;
     Varact vArAct() const;
     Clctotva clcTotVa() const;
     float maxRmpRte() const;
     float ecpNomHz() const;
     Connph connPh() const;
 
+protected:
+    void processBlockData() override;
+
 private:
-    quint16 m_modelId;
-    quint16 m_modelLength;
     float m_wMax;
     float m_vRef;
-    qint16 m_vRefOfs;
+    float m_vRefOfs;
     float m_vMax;
     float m_vMin;
     float m_vaMax;
-    qint16 m_vArMaxQ1;
-    qint16 m_vArMaxQ2;
-    qint16 m_vArMaxQ3;
-    qint16 m_vArMaxQ4;
+    float m_vArMaxQ1;
+    float m_vArMaxQ2;
+    float m_vArMaxQ3;
+    float m_vArMaxQ4;
     float m_wGra;
-    qint16 m_pfMinQ1;
-    qint16 m_pfMinQ2;
-    qint16 m_pfMinQ3;
-    qint16 m_pfMinQ4;
+    float m_pfMinQ1;
+    float m_pfMinQ2;
+    float m_pfMinQ3;
+    float m_pfMinQ4;
     Varact m_vArAct;
     Clctotva m_clcTotVa;
     float m_maxRmpRte;

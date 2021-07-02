@@ -1,6 +1,6 @@
 {
     "group": {
-        "label": "single phase (AN or AB) meter",
+        "label": "Meter (Single Phase) FLOAT",
         "name": "ac_meter",
         "points": [
             {

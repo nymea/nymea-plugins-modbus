@@ -28,15 +28,15 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef SUNSPECSTRINGCOMBINERMODEL_H
-#define SUNSPECSTRINGCOMBINERMODEL_H
+#ifndef SUNSPECSTRINGCOMBINERCURRENTMODEL_H
+#define SUNSPECSTRINGCOMBINERCURRENTMODEL_H
 
 #include <QObject>
 
 #include "sunspec.h"
 #include "sunspecmodel.h"
 
-class SunSpecStringCombinerModel : public SunSpecModel
+class SunSpecStringCombinerCurrentModel : public SunSpecModel
 {
     Q_OBJECT
 public:
@@ -65,27 +65,26 @@ public:
     Q_DECLARE_FLAGS(EvtFlags, Evt)
     Q_FLAG(Evt)
 
-    explicit SunSpecStringCombinerModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
-    ~SunSpecStringCombinerModel() override; 
+    explicit SunSpecStringCombinerCurrentModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent = nullptr);
+    ~SunSpecStringCombinerCurrentModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
-    quint16 modelId() const;
-    quint16 modelLength() const;
     float rating() const;
     int n() const;
     EvtFlags event() const;
     quint32 vendorEvent() const;
-    qint16 amps() const;
+    float amps() const;
     quint32 ampHours() const;
     float voltage() const;
     qint16 temp() const;
 
+protected:
+    void processBlockData() override;
+
 private:
-    quint16 m_modelId;
-    quint16 m_modelLength;
     qint16 m_dCA_SF;
     qint16 m_dCAhr_SF;
     qint16 m_dCV_SF;
@@ -93,13 +92,15 @@ private:
     int m_n;
     EvtFlags m_event;
     quint32 m_vendorEvent;
-    qint16 m_amps;
+    float m_amps;
     quint32 m_ampHours;
     float m_voltage;
     qint16 m_temp;
+    qint16 m_inDCA_SF;
+    qint16 m_inDCAhr_SF;
 
     void initDataPoints();
 
 };
 
-#endif // SUNSPECSTRINGCOMBINERMODEL_H
+#endif // SUNSPECSTRINGCOMBINERCURRENTMODEL_H

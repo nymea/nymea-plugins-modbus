@@ -41,19 +41,18 @@ class SunSpecBomTempModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    explicit SunSpecBomTempModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
+    explicit SunSpecBomTempModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecBomTempModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
-    quint16 modelId() const;
-    quint16 modelLength() const;
+
+protected:
+    void processBlockData() override;
 
 private:
-    quint16 m_modelId;
-    quint16 m_modelLength;
 
     void initDataPoints();
 

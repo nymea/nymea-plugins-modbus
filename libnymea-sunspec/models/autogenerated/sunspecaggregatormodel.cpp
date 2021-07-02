@@ -30,11 +30,10 @@
 
 #include "sunspecaggregatormodel.h"
 
-SunSpecAggregatorModel::SunSpecAggregatorModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecAggregatorModel::SunSpecAggregatorModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 2, 14, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 2;
 }
 
 SunSpecAggregatorModel::~SunSpecAggregatorModel()
@@ -57,14 +56,6 @@ QString SunSpecAggregatorModel::label() const
     return "Basic Aggregator";
 }
 
-quint16 SunSpecAggregatorModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecAggregatorModel::modelLength() const
-{
-    return m_modelLength;
-}
 quint16 SunSpecAggregatorModel::aid() const
 {
     return m_aid;
@@ -105,6 +96,23 @@ quint32 SunSpecAggregatorModel::controlValue() const
 {
     return m_controlValue;
 }
+void SunSpecAggregatorModel::processBlockData()
+{
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_aid = m_dataPoints.value("AID").toUInt16();
+    m_n = m_dataPoints.value("N").toUInt16();
+    m_un = m_dataPoints.value("UN").toUInt16();
+    m_status = static_cast<St>(m_dataPoints.value("St").toUInt16());
+    m_vendorStatus = m_dataPoints.value("StVnd").toUInt16();
+    m_eventCode = static_cast<EvtFlags>(m_dataPoints.value("Evt").toUInt32());
+    m_vendorEventCode = m_dataPoints.value("EvtVnd").toUInt32();
+    m_control = static_cast<Ctl>(m_dataPoints.value("Ctl").toUInt16());
+    m_vendorControl = m_dataPoints.value("CtlVnd").toUInt32();
+    m_controlValue = m_dataPoints.value("CtlVl").toUInt32();
+}
+
 void SunSpecAggregatorModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

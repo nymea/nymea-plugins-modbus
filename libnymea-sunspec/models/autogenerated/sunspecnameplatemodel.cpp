@@ -30,11 +30,10 @@
 
 #include "sunspecnameplatemodel.h"
 
-SunSpecNameplateModel::SunSpecNameplateModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecNameplateModel::SunSpecNameplateModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 120, 26, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 120;
 }
 
 SunSpecNameplateModel::~SunSpecNameplateModel()
@@ -57,14 +56,6 @@ QString SunSpecNameplateModel::label() const
     return "Nameplate";
 }
 
-quint16 SunSpecNameplateModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecNameplateModel::modelLength() const
-{
-    return m_modelLength;
-}
 SunSpecNameplateModel::Dertyp SunSpecNameplateModel::derTyp() const
 {
     return m_derTyp;
@@ -77,19 +68,19 @@ float SunSpecNameplateModel::vaRtg() const
 {
     return m_vaRtg;
 }
-qint16 SunSpecNameplateModel::vArRtgQ1() const
+float SunSpecNameplateModel::vArRtgQ1() const
 {
     return m_vArRtgQ1;
 }
-qint16 SunSpecNameplateModel::vArRtgQ2() const
+float SunSpecNameplateModel::vArRtgQ2() const
 {
     return m_vArRtgQ2;
 }
-qint16 SunSpecNameplateModel::vArRtgQ3() const
+float SunSpecNameplateModel::vArRtgQ3() const
 {
     return m_vArRtgQ3;
 }
-qint16 SunSpecNameplateModel::vArRtgQ4() const
+float SunSpecNameplateModel::vArRtgQ4() const
 {
     return m_vArRtgQ4;
 }
@@ -97,19 +88,19 @@ float SunSpecNameplateModel::aRtg() const
 {
     return m_aRtg;
 }
-qint16 SunSpecNameplateModel::pfRtgQ1() const
+float SunSpecNameplateModel::pfRtgQ1() const
 {
     return m_pfRtgQ1;
 }
-qint16 SunSpecNameplateModel::pfRtgQ2() const
+float SunSpecNameplateModel::pfRtgQ2() const
 {
     return m_pfRtgQ2;
 }
-qint16 SunSpecNameplateModel::pfRtgQ3() const
+float SunSpecNameplateModel::pfRtgQ3() const
 {
     return m_pfRtgQ3;
 }
-qint16 SunSpecNameplateModel::pfRtgQ4() const
+float SunSpecNameplateModel::pfRtgQ4() const
 {
     return m_pfRtgQ4;
 }
@@ -133,6 +124,41 @@ quint16 SunSpecNameplateModel::pad() const
 {
     return m_pad;
 }
+void SunSpecNameplateModel::processBlockData()
+{
+    // Scale factors
+    m_wRtgSf = m_dataPoints.value("WRtg_SF").toInt16();
+    m_vaRtgSf = m_dataPoints.value("VARtg_SF").toInt16();
+    m_vArRtgSf = m_dataPoints.value("VArRtg_SF").toInt16();
+    m_aRtgSf = m_dataPoints.value("ARtg_SF").toInt16();
+    m_pfRtgSf = m_dataPoints.value("PFRtg_SF").toInt16();
+    m_whRtgSf = m_dataPoints.value("WHRtg_SF").toInt16();
+    m_ahrRtgSf = m_dataPoints.value("AhrRtg_SF").toInt16();
+    m_maxChaRteSf = m_dataPoints.value("MaxChaRte_SF").toInt16();
+    m_maxDisChaRteSf = m_dataPoints.value("MaxDisChaRte_SF").toInt16();
+
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_derTyp = static_cast<Dertyp>(m_dataPoints.value("DERTyp").toUInt16());
+    m_wRtg = m_dataPoints.value("WRtg").toFloatWithSSF(m_wRtgSf);
+    m_vaRtg = m_dataPoints.value("VARtg").toFloatWithSSF(m_vaRtgSf);
+    m_vArRtgQ1 = m_dataPoints.value("VArRtgQ1").toFloatWithSSF(m_vArRtgSf);
+    m_vArRtgQ2 = m_dataPoints.value("VArRtgQ2").toFloatWithSSF(m_vArRtgSf);
+    m_vArRtgQ3 = m_dataPoints.value("VArRtgQ3").toFloatWithSSF(m_vArRtgSf);
+    m_vArRtgQ4 = m_dataPoints.value("VArRtgQ4").toFloatWithSSF(m_vArRtgSf);
+    m_aRtg = m_dataPoints.value("ARtg").toFloatWithSSF(m_aRtgSf);
+    m_pfRtgQ1 = m_dataPoints.value("PFRtgQ1").toFloatWithSSF(m_pfRtgSf);
+    m_pfRtgQ2 = m_dataPoints.value("PFRtgQ2").toFloatWithSSF(m_pfRtgSf);
+    m_pfRtgQ3 = m_dataPoints.value("PFRtgQ3").toFloatWithSSF(m_pfRtgSf);
+    m_pfRtgQ4 = m_dataPoints.value("PFRtgQ4").toFloatWithSSF(m_pfRtgSf);
+    m_whRtg = m_dataPoints.value("WHRtg").toFloatWithSSF(m_whRtgSf);
+    m_ahrRtg = m_dataPoints.value("AhrRtg").toFloatWithSSF(m_ahrRtgSf);
+    m_maxChaRte = m_dataPoints.value("MaxChaRte").toFloatWithSSF(m_maxChaRteSf);
+    m_maxDisChaRte = m_dataPoints.value("MaxDisChaRte").toFloatWithSSF(m_maxDisChaRteSf);
+    m_pad = m_dataPoints.value("Pad").toUInt16();
+}
+
 void SunSpecNameplateModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

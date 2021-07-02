@@ -30,11 +30,10 @@
 
 #include "sunspecbatterymodel.h"
 
-SunSpecBatteryModel::SunSpecBatteryModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecBatteryModel::SunSpecBatteryModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 802, 62, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 802;
 }
 
 SunSpecBatteryModel::~SunSpecBatteryModel()
@@ -57,14 +56,6 @@ QString SunSpecBatteryModel::label() const
     return "Battery Base Model";
 }
 
-quint16 SunSpecBatteryModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecBatteryModel::modelLength() const
-{
-    return m_modelLength;
-}
 float SunSpecBatteryModel::nameplateChargeCapacity() const
 {
     return m_nameplateChargeCapacity;
@@ -209,7 +200,7 @@ float SunSpecBatteryModel::averageCellVoltage() const
 {
     return m_averageCellVoltage;
 }
-qint16 SunSpecBatteryModel::totalDcCurrent() const
+float SunSpecBatteryModel::totalDcCurrent() const
 {
     return m_totalDcCurrent;
 }
@@ -221,7 +212,7 @@ float SunSpecBatteryModel::maxDischargeCurrent() const
 {
     return m_maxDischargeCurrent;
 }
-qint16 SunSpecBatteryModel::totalPower() const
+float SunSpecBatteryModel::totalPower() const
 {
     return m_totalPower;
 }
@@ -229,7 +220,7 @@ SunSpecBatteryModel::Reqinvstate SunSpecBatteryModel::inverterStateRequest() con
 {
     return m_inverterStateRequest;
 }
-qint16 SunSpecBatteryModel::batteryPowerRequest() const
+float SunSpecBatteryModel::batteryPowerRequest() const
 {
     return m_batteryPowerRequest;
 }
@@ -241,6 +232,71 @@ SunSpecBatteryModel::Setinvstate SunSpecBatteryModel::setInverterState() const
 {
     return m_setInverterState;
 }
+void SunSpecBatteryModel::processBlockData()
+{
+    // Scale factors
+    m_aHRtg_SF = m_dataPoints.value("AHRtg_SF").toInt16();
+    m_wHRtg_SF = m_dataPoints.value("WHRtg_SF").toInt16();
+    m_wChaDisChaMax_SF = m_dataPoints.value("WChaDisChaMax_SF").toInt16();
+    m_disChaRte_SF = m_dataPoints.value("DisChaRte_SF").toInt16();
+    m_soC_SF = m_dataPoints.value("SoC_SF").toInt16();
+    m_doD_SF = m_dataPoints.value("DoD_SF").toInt16();
+    m_soH_SF = m_dataPoints.value("SoH_SF").toInt16();
+    m_v_SF = m_dataPoints.value("V_SF").toInt16();
+    m_cellV_SF = m_dataPoints.value("CellV_SF").toInt16();
+    m_a_SF = m_dataPoints.value("A_SF").toInt16();
+    m_aMax_SF = m_dataPoints.value("AMax_SF").toInt16();
+    m_w_SF = m_dataPoints.value("W_SF").toInt16();
+
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_nameplateChargeCapacity = m_dataPoints.value("AHRtg").toFloatWithSSF(m_aHRtg_SF);
+    m_nameplateEnergyCapacity = m_dataPoints.value("WHRtg").toFloatWithSSF(m_wHRtg_SF);
+    m_nameplateMaxChargeRate = m_dataPoints.value("WChaRteMax").toFloatWithSSF(m_wChaDisChaMax_SF);
+    m_nameplateMaxDischargeRate = m_dataPoints.value("WDisChaRteMax").toFloatWithSSF(m_wChaDisChaMax_SF);
+    m_selfDischargeRate = m_dataPoints.value("DisChaRte").toFloatWithSSF(m_disChaRte_SF);
+    m_nameplateMaxSoC = m_dataPoints.value("SoCMax").toFloatWithSSF(m_soC_SF);
+    m_nameplateMinSoC = m_dataPoints.value("SoCMin").toFloatWithSSF(m_soC_SF);
+    m_maxReservePercent = m_dataPoints.value("SocRsvMax").toFloatWithSSF(m_soC_SF);
+    m_minReservePercent = m_dataPoints.value("SoCRsvMin").toFloatWithSSF(m_soC_SF);
+    m_stateOfCharge = m_dataPoints.value("SoC").toFloatWithSSF(m_soC_SF);
+    m_depthOfDischarge = m_dataPoints.value("DoD").toFloatWithSSF(m_doD_SF);
+    m_stateOfHealth = m_dataPoints.value("SoH").toFloatWithSSF(m_soH_SF);
+    m_cycleCount = m_dataPoints.value("NCyc").toUInt32();
+    m_chargeStatus = static_cast<Chast>(m_dataPoints.value("ChaSt").toUInt16());
+    m_controlMode = static_cast<Locremctl>(m_dataPoints.value("LocRemCtl").toUInt16());
+    m_batteryHeartbeat = m_dataPoints.value("Hb").toUInt16();
+    m_controllerHeartbeat = m_dataPoints.value("CtrlHb").toUInt16();
+    m_alarmReset = m_dataPoints.value("AlmRst").toUInt16();
+    m_batteryType = static_cast<Typ>(m_dataPoints.value("Typ").toUInt16());
+    m_stateOfTheBatteryBank = static_cast<State>(m_dataPoints.value("State").toUInt16());
+    m_vendorBatteryBankState = m_dataPoints.value("StateVnd").toUInt16();
+    m_warrantyDate = m_dataPoints.value("WarrDt").toUInt32();
+    m_batteryEvent1Bitfield = static_cast<Evt1Flags>(m_dataPoints.value("Evt1").toUInt32());
+    m_batteryEvent2Bitfield = m_dataPoints.value("Evt2").toUInt32();
+    m_vendorEventBitfield1 = m_dataPoints.value("EvtVnd1").toUInt32();
+    m_vendorEventBitfield2 = m_dataPoints.value("EvtVnd2").toUInt32();
+    m_externalBatteryVoltage = m_dataPoints.value("V").toFloatWithSSF(m_v_SF);
+    m_maxBatteryVoltage = m_dataPoints.value("VMax").toFloatWithSSF(m_v_SF);
+    m_minBatteryVoltage = m_dataPoints.value("VMin").toFloatWithSSF(m_v_SF);
+    m_maxCellVoltage = m_dataPoints.value("CellVMax").toFloatWithSSF(m_cellV_SF);
+    m_maxCellVoltageString = m_dataPoints.value("CellVMaxStr").toUInt16();
+    m_maxCellVoltageModule = m_dataPoints.value("CellVMaxMod").toUInt16();
+    m_minCellVoltage = m_dataPoints.value("CellVMin").toFloatWithSSF(m_cellV_SF);
+    m_minCellVoltageString = m_dataPoints.value("CellVMinStr").toUInt16();
+    m_minCellVoltageModule = m_dataPoints.value("CellVMinMod").toUInt16();
+    m_averageCellVoltage = m_dataPoints.value("CellVAvg").toFloatWithSSF(m_cellV_SF);
+    m_totalDcCurrent = m_dataPoints.value("A").toFloatWithSSF(m_a_SF);
+    m_maxChargeCurrent = m_dataPoints.value("AChaMax").toFloatWithSSF(m_aMax_SF);
+    m_maxDischargeCurrent = m_dataPoints.value("ADisChaMax").toFloatWithSSF(m_aMax_SF);
+    m_totalPower = m_dataPoints.value("W").toFloatWithSSF(m_w_SF);
+    m_inverterStateRequest = static_cast<Reqinvstate>(m_dataPoints.value("ReqInvState").toUInt16());
+    m_batteryPowerRequest = m_dataPoints.value("ReqW").toFloatWithSSF(m_w_SF);
+    m_setOperation = static_cast<Setop>(m_dataPoints.value("SetOp").toUInt16());
+    m_setInverterState = static_cast<Setinvstate>(m_dataPoints.value("SetInvState").toUInt16());
+}
+
 void SunSpecBatteryModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

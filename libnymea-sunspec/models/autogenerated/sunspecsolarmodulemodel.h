@@ -81,15 +81,13 @@ public:
     Q_DECLARE_FLAGS(EvtFlags, Evt)
     Q_FLAG(Evt)
 
-    explicit SunSpecSolarModuleModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
+    explicit SunSpecSolarModuleModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecSolarModuleModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
-    quint16 modelId() const;
-    quint16 modelLength() const;
     Stat status() const;
     quint16 vendorStatus() const;
     EvtFlags events() const;
@@ -100,17 +98,22 @@ public:
     quint32 timestamp() const;
     float outputCurrent() const;
     float outputVoltage() const;
-    float outputEnergy() const;
+    quint32 outputEnergy() const;
     float outputPower() const;
-    float temp() const;
+    qint16 temp() const;
     float inputCurrent() const;
     float inputVoltage() const;
-    float inputEnergy() const;
+    quint32 inputEnergy() const;
     float inputPower() const;
 
+protected:
+    void processBlockData() override;
+
 private:
-    quint16 m_modelId;
-    quint16 m_modelLength;
+    qint16 m_a_SF;
+    qint16 m_v_SF;
+    qint16 m_w_SF;
+    qint16 m_wh_SF;
     Stat m_status;
     quint16 m_vendorStatus;
     EvtFlags m_events;
@@ -121,12 +124,12 @@ private:
     quint32 m_timestamp;
     float m_outputCurrent;
     float m_outputVoltage;
-    float m_outputEnergy;
+    quint32 m_outputEnergy;
     float m_outputPower;
-    float m_temp;
+    qint16 m_temp;
     float m_inputCurrent;
     float m_inputVoltage;
-    float m_inputEnergy;
+    quint32 m_inputEnergy;
     float m_inputPower;
 
     void initDataPoints();

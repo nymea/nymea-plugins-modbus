@@ -30,11 +30,10 @@
 
 #include "sunspecstatusmodel.h"
 
-SunSpecStatusModel::SunSpecStatusModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecStatusModel::SunSpecStatusModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 122, 44, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 122;
 }
 
 SunSpecStatusModel::~SunSpecStatusModel()
@@ -57,14 +56,6 @@ QString SunSpecStatusModel::label() const
     return "Measurements_Status";
 }
 
-quint16 SunSpecStatusModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecStatusModel::modelLength() const
-{
-    return m_modelLength;
-}
 SunSpecStatusModel::PvconnFlags SunSpecStatusModel::pvConn() const
 {
     return m_pvConn;
@@ -101,7 +92,7 @@ quint64 SunSpecStatusModel::actVArhQ4() const
 {
     return m_actVArhQ4;
 }
-qint16 SunSpecStatusModel::vArAval() const
+float SunSpecStatusModel::vArAval() const
 {
     return m_vArAval;
 }
@@ -133,6 +124,35 @@ float SunSpecStatusModel::ris() const
 {
     return m_ris;
 }
+void SunSpecStatusModel::processBlockData()
+{
+    // Scale factors
+    m_vArAvalSf = m_dataPoints.value("VArAval_SF").toInt16();
+    m_wAvalSf = m_dataPoints.value("WAval_SF").toInt16();
+    m_risSf = m_dataPoints.value("Ris_SF").toInt16();
+
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_pvConn = static_cast<PvconnFlags>(m_dataPoints.value("PVConn").toUInt16());
+    m_storConn = static_cast<StorconnFlags>(m_dataPoints.value("StorConn").toUInt16());
+    m_ecpConn = static_cast<EcpconnFlags>(m_dataPoints.value("ECPConn").toUInt16());
+    m_actWh = m_dataPoints.value("ActWh").toUInt64();
+    m_actVAh = m_dataPoints.value("ActVAh").toUInt64();
+    m_actVArhQ1 = m_dataPoints.value("ActVArhQ1").toUInt64();
+    m_actVArhQ2 = m_dataPoints.value("ActVArhQ2").toUInt64();
+    m_actVArhQ3 = m_dataPoints.value("ActVArhQ3").toUInt64();
+    m_actVArhQ4 = m_dataPoints.value("ActVArhQ4").toUInt64();
+    m_vArAval = m_dataPoints.value("VArAval").toFloatWithSSF(m_vArAvalSf);
+    m_wAval = m_dataPoints.value("WAval").toFloatWithSSF(m_wAvalSf);
+    m_stSetLimMsk = static_cast<StsetlimmskFlags>(m_dataPoints.value("StSetLimMsk").toUInt32());
+    m_stActCtl = static_cast<StactctlFlags>(m_dataPoints.value("StActCtl").toUInt32());
+    m_tmSrc = m_dataPoints.value("TmSrc").toString();
+    m_tms = m_dataPoints.value("Tms").toUInt32();
+    m_rtSt = static_cast<RtstFlags>(m_dataPoints.value("RtSt").toUInt16());
+    m_ris = m_dataPoints.value("Ris").toFloatWithSSF(m_risSf);
+}
+
 void SunSpecStatusModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

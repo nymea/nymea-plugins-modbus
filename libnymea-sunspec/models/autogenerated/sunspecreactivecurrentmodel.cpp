@@ -30,11 +30,10 @@
 
 #include "sunspecreactivecurrentmodel.h"
 
-SunSpecReactiveCurrentModel::SunSpecReactiveCurrentModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecReactiveCurrentModel::SunSpecReactiveCurrentModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 128, 14, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 128;
 }
 
 SunSpecReactiveCurrentModel::~SunSpecReactiveCurrentModel()
@@ -57,14 +56,6 @@ QString SunSpecReactiveCurrentModel::label() const
     return "Dynamic Reactive Current";
 }
 
-quint16 SunSpecReactiveCurrentModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecReactiveCurrentModel::modelLength() const
-{
-    return m_modelLength;
-}
 SunSpecReactiveCurrentModel::Argramod SunSpecReactiveCurrentModel::arGraMod() const
 {
     return m_arGraMod;
@@ -113,6 +104,29 @@ quint16 SunSpecReactiveCurrentModel::pad() const
 {
     return m_pad;
 }
+void SunSpecReactiveCurrentModel::processBlockData()
+{
+    // Scale factors
+    m_arGraSf = m_dataPoints.value("ArGra_SF").toInt16();
+    m_vRefPctSf = m_dataPoints.value("VRefPct_SF").toInt16();
+
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_arGraMod = static_cast<Argramod>(m_dataPoints.value("ArGraMod").toUInt16());
+    m_arGraSag = m_dataPoints.value("ArGraSag").toFloatWithSSF(m_arGraSf);
+    m_arGraSwell = m_dataPoints.value("ArGraSwell").toFloatWithSSF(m_arGraSf);
+    m_modEna = static_cast<ModenaFlags>(m_dataPoints.value("ModEna").toUInt16());
+    m_filTms = m_dataPoints.value("FilTms").toUInt16();
+    m_dbVMin = m_dataPoints.value("DbVMin").toFloatWithSSF(m_vRefPctSf);
+    m_dbVMax = m_dataPoints.value("DbVMax").toFloatWithSSF(m_vRefPctSf);
+    m_blkZnV = m_dataPoints.value("BlkZnV").toFloatWithSSF(m_vRefPctSf);
+    m_hysBlkZnV = m_dataPoints.value("HysBlkZnV").toFloatWithSSF(m_vRefPctSf);
+    m_blkZnTmms = m_dataPoints.value("BlkZnTmms").toUInt16();
+    m_holdTmms = m_dataPoints.value("HoldTmms").toUInt16();
+    m_pad = m_dataPoints.value("Pad").toUInt16();
+}
+
 void SunSpecReactiveCurrentModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

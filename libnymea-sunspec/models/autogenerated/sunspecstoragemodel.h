@@ -65,15 +65,13 @@ public:
     Q_DECLARE_FLAGS(Storctl_modFlags, Storctl_mod)
     Q_FLAG(Storctl_mod)
 
-    explicit SunSpecStorageModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
+    explicit SunSpecStorageModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecStorageModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
-    quint16 modelId() const;
-    quint16 modelLength() const;
     float wChaMax() const;
     float wChaGra() const;
     float wDisChaGra() const;
@@ -84,16 +82,17 @@ public:
     float storAval() const;
     float inBatV() const;
     Chast chaSt() const;
-    qint16 outWRte() const;
-    qint16 inWRte() const;
+    float outWRte() const;
+    float inWRte() const;
     quint16 inOutWRteWinTms() const;
     quint16 inOutWRteRvrtTms() const;
     quint16 inOutWRteRmpTms() const;
     Chagriset chaGriSet() const;
 
+protected:
+    void processBlockData() override;
+
 private:
-    quint16 m_modelId;
-    quint16 m_modelLength;
     float m_wChaMax;
     float m_wChaGra;
     float m_wDisChaGra;
@@ -104,8 +103,8 @@ private:
     float m_storAval;
     float m_inBatV;
     Chast m_chaSt;
-    qint16 m_outWRte;
-    qint16 m_inWRte;
+    float m_outWRte;
+    float m_inWRte;
     quint16 m_inOutWRteWinTms;
     quint16 m_inOutWRteRvrtTms;
     quint16 m_inOutWRteRmpTms;

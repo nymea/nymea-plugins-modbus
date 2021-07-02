@@ -30,11 +30,10 @@
 
 #include "sunspecminimetmodel.h"
 
-SunSpecMiniMetModel::SunSpecMiniMetModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecMiniMetModel::SunSpecMiniMetModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 308, 4, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 308;
 }
 
 SunSpecMiniMetModel::~SunSpecMiniMetModel()
@@ -57,23 +56,15 @@ QString SunSpecMiniMetModel::label() const
     return "Mini Met Model";
 }
 
-quint16 SunSpecMiniMetModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecMiniMetModel::modelLength() const
-{
-    return m_modelLength;
-}
 quint16 SunSpecMiniMetModel::ghi() const
 {
     return m_ghi;
 }
-qint16 SunSpecMiniMetModel::temp() const
+float SunSpecMiniMetModel::temp() const
 {
     return m_temp;
 }
-qint16 SunSpecMiniMetModel::ambientTemperature() const
+float SunSpecMiniMetModel::ambientTemperature() const
 {
     return m_ambientTemperature;
 }
@@ -81,6 +72,17 @@ quint16 SunSpecMiniMetModel::windSpeed() const
 {
     return m_windSpeed;
 }
+void SunSpecMiniMetModel::processBlockData()
+{
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_ghi = m_dataPoints.value("GHI").toUInt16();
+    m_temp = m_dataPoints.value("TmpBOM").toFloatWithSSF(-1);
+    m_ambientTemperature = m_dataPoints.value("TmpAmb").toFloatWithSSF(-1);
+    m_windSpeed = m_dataPoints.value("WndSpd").toUInt16();
+}
+
 void SunSpecMiniMetModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

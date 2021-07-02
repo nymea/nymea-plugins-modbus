@@ -1,6 +1,6 @@
 {
     "group": {
-        "label": "split single phase (ABN) meter",
+        "label": "Meter split single phase FLOAT",
         "name": "ac_meter",
         "points": [
             {

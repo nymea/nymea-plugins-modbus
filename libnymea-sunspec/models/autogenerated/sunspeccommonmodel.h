@@ -41,15 +41,13 @@ class SunSpecCommonModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    explicit SunSpecCommonModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
+    explicit SunSpecCommonModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecCommonModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
-    quint16 modelId() const;
-    quint16 modelLength() const;
     QString manufacturer() const;
     QString model() const;
     QString options() const;
@@ -58,9 +56,10 @@ public:
     quint16 deviceAddress() const;
     quint16 pad() const;
 
+protected:
+    void processBlockData() override;
+
 private:
-    quint16 m_modelId;
-    quint16 m_modelLength;
     QString m_manufacturer;
     QString m_model;
     QString m_options;

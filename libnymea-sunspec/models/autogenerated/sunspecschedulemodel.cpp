@@ -30,11 +30,10 @@
 
 #include "sunspecschedulemodel.h"
 
-SunSpecScheduleModel::SunSpecScheduleModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecScheduleModel::SunSpecScheduleModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 133, 6, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 133;
 }
 
 SunSpecScheduleModel::~SunSpecScheduleModel()
@@ -57,14 +56,6 @@ QString SunSpecScheduleModel::label() const
     return "Basic Scheduling";
 }
 
-quint16 SunSpecScheduleModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecScheduleModel::modelLength() const
-{
-    return m_modelLength;
-}
 SunSpecScheduleModel::ActschdFlags SunSpecScheduleModel::actSchd() const
 {
     return m_actSchd;
@@ -85,6 +76,18 @@ quint16 SunSpecScheduleModel::pad() const
 {
     return m_pad;
 }
+void SunSpecScheduleModel::processBlockData()
+{
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_actSchd = static_cast<ActschdFlags>(m_dataPoints.value("ActSchd").toUInt32());
+    m_modEna = static_cast<ModenaFlags>(m_dataPoints.value("ModEna").toUInt16());
+    m_nSchd = m_dataPoints.value("NSchd").toUInt16();
+    m_nPts = m_dataPoints.value("NPts").toUInt16();
+    m_pad = m_dataPoints.value("Pad").toUInt16();
+}
+
 void SunSpecScheduleModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

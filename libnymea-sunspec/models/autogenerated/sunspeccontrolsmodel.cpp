@@ -30,11 +30,10 @@
 
 #include "sunspeccontrolsmodel.h"
 
-SunSpecControlsModel::SunSpecControlsModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecControlsModel::SunSpecControlsModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 123, 24, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 123;
 }
 
 SunSpecControlsModel::~SunSpecControlsModel()
@@ -57,14 +56,6 @@ QString SunSpecControlsModel::label() const
     return "Immediate Controls";
 }
 
-quint16 SunSpecControlsModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecControlsModel::modelLength() const
-{
-    return m_modelLength;
-}
 quint16 SunSpecControlsModel::connWinTms() const
 {
     return m_connWinTms;
@@ -97,7 +88,7 @@ SunSpecControlsModel::Wmaxlim_ena SunSpecControlsModel::wMaxLimEna() const
 {
     return m_wMaxLimEna;
 }
-qint16 SunSpecControlsModel::outPfSet() const
+float SunSpecControlsModel::outPfSet() const
 {
     return m_outPfSet;
 }
@@ -117,15 +108,15 @@ SunSpecControlsModel::Outpfset_ena SunSpecControlsModel::outPfSetEna() const
 {
     return m_outPfSetEna;
 }
-qint16 SunSpecControlsModel::vArWMaxPct() const
+float SunSpecControlsModel::vArWMaxPct() const
 {
     return m_vArWMaxPct;
 }
-qint16 SunSpecControlsModel::vArMaxPct() const
+float SunSpecControlsModel::vArMaxPct() const
 {
     return m_vArMaxPct;
 }
-qint16 SunSpecControlsModel::vArAvalPct() const
+float SunSpecControlsModel::vArAvalPct() const
 {
     return m_vArAvalPct;
 }
@@ -149,6 +140,39 @@ SunSpecControlsModel::Varpct_ena SunSpecControlsModel::vArPctEna() const
 {
     return m_vArPctEna;
 }
+void SunSpecControlsModel::processBlockData()
+{
+    // Scale factors
+    m_wMaxLimPctSf = m_dataPoints.value("WMaxLimPct_SF").toInt16();
+    m_outPfSetSf = m_dataPoints.value("OutPFSet_SF").toInt16();
+    m_vArPctSf = m_dataPoints.value("VArPct_SF").toInt16();
+
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_connWinTms = m_dataPoints.value("Conn_WinTms").toUInt16();
+    m_connRvrtTms = m_dataPoints.value("Conn_RvrtTms").toUInt16();
+    m_conn = static_cast<Conn>(m_dataPoints.value("Conn").toUInt16());
+    m_wMaxLimPct = m_dataPoints.value("WMaxLimPct").toFloatWithSSF(m_wMaxLimPctSf);
+    m_wMaxLimPctWinTms = m_dataPoints.value("WMaxLimPct_WinTms").toUInt16();
+    m_wMaxLimPctRvrtTms = m_dataPoints.value("WMaxLimPct_RvrtTms").toUInt16();
+    m_wMaxLimPctRmpTms = m_dataPoints.value("WMaxLimPct_RmpTms").toUInt16();
+    m_wMaxLimEna = static_cast<Wmaxlim_ena>(m_dataPoints.value("WMaxLim_Ena").toUInt16());
+    m_outPfSet = m_dataPoints.value("OutPFSet").toFloatWithSSF(m_outPfSetSf);
+    m_outPfSetWinTms = m_dataPoints.value("OutPFSet_WinTms").toUInt16();
+    m_outPfSetRvrtTms = m_dataPoints.value("OutPFSet_RvrtTms").toUInt16();
+    m_outPfSetRmpTms = m_dataPoints.value("OutPFSet_RmpTms").toUInt16();
+    m_outPfSetEna = static_cast<Outpfset_ena>(m_dataPoints.value("OutPFSet_Ena").toUInt16());
+    m_vArWMaxPct = m_dataPoints.value("VArWMaxPct").toFloatWithSSF(m_vArPctSf);
+    m_vArMaxPct = m_dataPoints.value("VArMaxPct").toFloatWithSSF(m_vArPctSf);
+    m_vArAvalPct = m_dataPoints.value("VArAvalPct").toFloatWithSSF(m_vArPctSf);
+    m_vArPctWinTms = m_dataPoints.value("VArPct_WinTms").toUInt16();
+    m_vArPctRvrtTms = m_dataPoints.value("VArPct_RvrtTms").toUInt16();
+    m_vArPctRmpTms = m_dataPoints.value("VArPct_RmpTms").toUInt16();
+    m_vArPctMod = static_cast<Varpct_mod>(m_dataPoints.value("VArPct_Mod").toUInt16());
+    m_vArPctEna = static_cast<Varpct_ena>(m_dataPoints.value("VArPct_Ena").toUInt16());
+}
+
 void SunSpecControlsModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

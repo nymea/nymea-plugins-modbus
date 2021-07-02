@@ -30,11 +30,10 @@
 
 #include "sunspecfreqwattparammodel.h"
 
-SunSpecFreqWattParamModel::SunSpecFreqWattParamModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecFreqWattParamModel::SunSpecFreqWattParamModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 127, 10, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 127;
 }
 
 SunSpecFreqWattParamModel::~SunSpecFreqWattParamModel()
@@ -57,23 +56,15 @@ QString SunSpecFreqWattParamModel::label() const
     return "Freq-Watt Param";
 }
 
-quint16 SunSpecFreqWattParamModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecFreqWattParamModel::modelLength() const
-{
-    return m_modelLength;
-}
 float SunSpecFreqWattParamModel::wGra() const
 {
     return m_wGra;
 }
-qint16 SunSpecFreqWattParamModel::hzStr() const
+float SunSpecFreqWattParamModel::hzStr() const
 {
     return m_hzStr;
 }
-qint16 SunSpecFreqWattParamModel::hzStop() const
+float SunSpecFreqWattParamModel::hzStop() const
 {
     return m_hzStop;
 }
@@ -93,6 +84,25 @@ quint16 SunSpecFreqWattParamModel::pad() const
 {
     return m_pad;
 }
+void SunSpecFreqWattParamModel::processBlockData()
+{
+    // Scale factors
+    m_wGraSf = m_dataPoints.value("WGra_SF").toInt16();
+    m_hzStrStopSf = m_dataPoints.value("HzStrStop_SF").toInt16();
+    m_rmpIncDecSf = m_dataPoints.value("RmpIncDec_SF").toInt16();
+
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_wGra = m_dataPoints.value("WGra").toFloatWithSSF(m_wGraSf);
+    m_hzStr = m_dataPoints.value("HzStr").toFloatWithSSF(m_hzStrStopSf);
+    m_hzStop = m_dataPoints.value("HzStop").toFloatWithSSF(m_hzStrStopSf);
+    m_hysEna = static_cast<HysenaFlags>(m_dataPoints.value("HysEna").toUInt16());
+    m_modEna = static_cast<ModenaFlags>(m_dataPoints.value("ModEna").toUInt16());
+    m_hzStopWGra = m_dataPoints.value("HzStopWGra").toFloatWithSSF(m_rmpIncDecSf);
+    m_pad = m_dataPoints.value("Pad").toUInt16();
+}
+
 void SunSpecFreqWattParamModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

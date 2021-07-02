@@ -30,11 +30,10 @@
 
 #include "sunspeccommonmodel.h"
 
-SunSpecCommonModel::SunSpecCommonModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecCommonModel::SunSpecCommonModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 1, 66, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 1;
 }
 
 SunSpecCommonModel::~SunSpecCommonModel()
@@ -57,14 +56,6 @@ QString SunSpecCommonModel::label() const
     return "Common";
 }
 
-quint16 SunSpecCommonModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecCommonModel::modelLength() const
-{
-    return m_modelLength;
-}
 QString SunSpecCommonModel::manufacturer() const
 {
     return m_manufacturer;
@@ -93,6 +84,20 @@ quint16 SunSpecCommonModel::pad() const
 {
     return m_pad;
 }
+void SunSpecCommonModel::processBlockData()
+{
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_manufacturer = m_dataPoints.value("Mn").toString();
+    m_model = m_dataPoints.value("Md").toString();
+    m_options = m_dataPoints.value("Opt").toString();
+    m_version = m_dataPoints.value("Vr").toString();
+    m_serialNumber = m_dataPoints.value("SN").toString();
+    m_deviceAddress = m_dataPoints.value("DA").toUInt16();
+    m_pad = m_dataPoints.value("Pad").toUInt16();
+}
+
 void SunSpecCommonModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

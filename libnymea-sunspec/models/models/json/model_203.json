@@ -1,6 +1,6 @@
 {
     "group": {
-        "label": "wye-connect three phase (abcn) meter",
+        "label": "Meter (Three Phase)",
         "name": "ac_meter",
         "points": [
             {

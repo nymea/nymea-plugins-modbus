@@ -28,15 +28,15 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef SUNSPECINVERTERMODEL_H
-#define SUNSPECINVERTERMODEL_H
+#ifndef SUNSPECINVERTERTHREEPHASEMODEL_H
+#define SUNSPECINVERTERTHREEPHASEMODEL_H
 
 #include <QObject>
 
 #include "sunspec.h"
 #include "sunspecmodel.h"
 
-class SunSpecInverterModel : public SunSpecModel
+class SunSpecInverterThreePhaseModel : public SunSpecModel
 {
     Q_OBJECT
 public:
@@ -74,15 +74,13 @@ public:
     Q_DECLARE_FLAGS(Evt1Flags, Evt1)
     Q_FLAG(Evt1)
 
-    explicit SunSpecInverterModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
-    ~SunSpecInverterModel() override; 
+    explicit SunSpecInverterThreePhaseModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent = nullptr);
+    ~SunSpecInverterThreePhaseModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
-    quint16 modelId() const;
-    quint16 modelLength() const;
     float amps() const;
     float ampsPhaseA() const;
     float ampsPhaseB() const;
@@ -93,19 +91,19 @@ public:
     float phaseVoltageAn() const;
     float phaseVoltageBn() const;
     float phaseVoltageCn() const;
-    qint16 watts() const;
+    float watts() const;
     float hz() const;
-    qint16 va() const;
-    qint16 vAr() const;
-    qint16 pf() const;
+    float va() const;
+    float vAr() const;
+    float pf() const;
     quint32 wattHours() const;
     float dcAmps() const;
     float dcVoltage() const;
-    qint16 dcWatts() const;
-    qint16 cabinetTemperature() const;
-    qint16 heatSinkTemperature() const;
-    qint16 transformerTemperature() const;
-    qint16 otherTemperature() const;
+    float dcWatts() const;
+    float cabinetTemperature() const;
+    float heatSinkTemperature() const;
+    float transformerTemperature() const;
+    float otherTemperature() const;
     St operatingState() const;
     quint16 vendorOperatingState() const;
     Evt1Flags event1() const;
@@ -115,9 +113,10 @@ public:
     quint32 vendorEventBitfield3() const;
     quint32 vendorEventBitfield4() const;
 
+protected:
+    void processBlockData() override;
+
 private:
-    quint16 m_modelId;
-    quint16 m_modelLength;
     float m_amps;
     float m_ampsPhaseA;
     float m_ampsPhaseB;
@@ -130,15 +129,15 @@ private:
     float m_phaseVoltageBn;
     float m_phaseVoltageCn;
     qint16 m_v_SF;
-    qint16 m_watts;
+    float m_watts;
     qint16 m_w_SF;
     float m_hz;
     qint16 m_hz_SF;
-    qint16 m_va;
+    float m_va;
     qint16 m_vA_SF;
-    qint16 m_vAr;
+    float m_vAr;
     qint16 m_vAr_SF;
-    qint16 m_pf;
+    float m_pf;
     qint16 m_pF_SF;
     quint32 m_wattHours;
     qint16 m_wH_SF;
@@ -146,12 +145,12 @@ private:
     qint16 m_dCA_SF;
     float m_dcVoltage;
     qint16 m_dCV_SF;
-    qint16 m_dcWatts;
+    float m_dcWatts;
     qint16 m_dCW_SF;
-    qint16 m_cabinetTemperature;
-    qint16 m_heatSinkTemperature;
-    qint16 m_transformerTemperature;
-    qint16 m_otherTemperature;
+    float m_cabinetTemperature;
+    float m_heatSinkTemperature;
+    float m_transformerTemperature;
+    float m_otherTemperature;
     qint16 m_tmp_SF;
     St m_operatingState;
     quint16 m_vendorOperatingState;
@@ -166,4 +165,4 @@ private:
 
 };
 
-#endif // SUNSPECINVERTERMODEL_H
+#endif // SUNSPECINVERTERTHREEPHASEMODEL_H

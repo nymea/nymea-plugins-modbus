@@ -41,26 +41,25 @@ class SunSpecMiniMetModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    explicit SunSpecMiniMetModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
+    explicit SunSpecMiniMetModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecMiniMetModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
-    quint16 modelId() const;
-    quint16 modelLength() const;
     quint16 ghi() const;
-    qint16 temp() const;
-    qint16 ambientTemperature() const;
+    float temp() const;
+    float ambientTemperature() const;
     quint16 windSpeed() const;
 
+protected:
+    void processBlockData() override;
+
 private:
-    quint16 m_modelId;
-    quint16 m_modelLength;
     quint16 m_ghi;
-    qint16 m_temp;
-    qint16 m_ambientTemperature;
+    float m_temp;
+    float m_ambientTemperature;
     quint16 m_windSpeed;
 
     void initDataPoints();

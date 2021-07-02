@@ -16,8 +16,6 @@ public:
 
     SunSpec *connection() const;
 
-    QVector<quint16> supportedModelIds() const;
-
     virtual QString name() const = 0;
     virtual QString description() const = 0;
     virtual QString label() const = 0;
@@ -25,6 +23,8 @@ public:
     quint16 modelId() const;
     quint16 modelLength() const;
     quint16 modbusStartRegister() const;
+
+    QVector<quint16> blockData() const;
 
     virtual void init();
     virtual void readBlockData();
@@ -36,7 +36,7 @@ protected:
     quint16 m_modelId;
     quint16 m_modelLength = 0;
     quint16 m_modbusStartRegister = 0;
-    QVector<quint16> m_supportedModelIds;
+
     bool m_initialized = false;
 
     QVector<quint16> m_blockData;
@@ -44,8 +44,12 @@ protected:
 
     void setInitializedFinished();
 
+    virtual void processBlockData() = 0;
+
 signals:
     void initFinished(bool success);
+    void blockDataChanged(const QVector<quint16> blockData);
+
     void blockUpdated();
 
 };

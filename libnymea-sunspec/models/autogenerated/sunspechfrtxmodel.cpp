@@ -30,11 +30,10 @@
 
 #include "sunspechfrtxmodel.h"
 
-SunSpecHfrtxModel::SunSpecHfrtxModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecHfrtxModel::SunSpecHfrtxModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 144, 10, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 144;
 }
 
 SunSpecHfrtxModel::~SunSpecHfrtxModel()
@@ -57,14 +56,6 @@ QString SunSpecHfrtxModel::label() const
     return "HFRTX";
 }
 
-quint16 SunSpecHfrtxModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecHfrtxModel::modelLength() const
-{
-    return m_modelLength;
-}
 quint16 SunSpecHfrtxModel::actCrv() const
 {
     return m_actCrv;
@@ -97,6 +88,25 @@ SunSpecHfrtxModel::Crvtype SunSpecHfrtxModel::crvType() const
 {
     return m_crvType;
 }
+void SunSpecHfrtxModel::processBlockData()
+{
+    // Scale factors
+    m_tmsSf = m_dataPoints.value("Tms_SF").toInt16();
+    m_hzSf = m_dataPoints.value("Hz_SF").toInt16();
+
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_actCrv = m_dataPoints.value("ActCrv").toUInt16();
+    m_modEna = static_cast<ModenaFlags>(m_dataPoints.value("ModEna").toUInt16());
+    m_winTms = m_dataPoints.value("WinTms").toUInt16();
+    m_rvrtTms = m_dataPoints.value("RvrtTms").toUInt16();
+    m_rmpTms = m_dataPoints.value("RmpTms").toUInt16();
+    m_nCrv = m_dataPoints.value("NCrv").toUInt16();
+    m_nPt = m_dataPoints.value("NPt").toUInt16();
+    m_crvType = static_cast<Crvtype>(m_dataPoints.value("CrvType").toUInt16());
+}
+
 void SunSpecHfrtxModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

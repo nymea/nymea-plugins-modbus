@@ -140,15 +140,13 @@ public:
     Q_DECLARE_FLAGS(Evt1Flags, Evt1)
     Q_FLAG(Evt1)
 
-    explicit SunSpecBatteryModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
+    explicit SunSpecBatteryModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecBatteryModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
-    quint16 modelId() const;
-    quint16 modelLength() const;
     float nameplateChargeCapacity() const;
     float nameplateEnergyCapacity() const;
     float nameplateMaxChargeRate() const;
@@ -185,18 +183,19 @@ public:
     quint16 minCellVoltageString() const;
     quint16 minCellVoltageModule() const;
     float averageCellVoltage() const;
-    qint16 totalDcCurrent() const;
+    float totalDcCurrent() const;
     float maxChargeCurrent() const;
     float maxDischargeCurrent() const;
-    qint16 totalPower() const;
+    float totalPower() const;
     Reqinvstate inverterStateRequest() const;
-    qint16 batteryPowerRequest() const;
+    float batteryPowerRequest() const;
     Setop setOperation() const;
     Setinvstate setInverterState() const;
 
+protected:
+    void processBlockData() override;
+
 private:
-    quint16 m_modelId;
-    quint16 m_modelLength;
     float m_nameplateChargeCapacity;
     float m_nameplateEnergyCapacity;
     float m_nameplateMaxChargeRate;
@@ -233,12 +232,12 @@ private:
     quint16 m_minCellVoltageString;
     quint16 m_minCellVoltageModule;
     float m_averageCellVoltage;
-    qint16 m_totalDcCurrent;
+    float m_totalDcCurrent;
     float m_maxChargeCurrent;
     float m_maxDischargeCurrent;
-    qint16 m_totalPower;
+    float m_totalPower;
     Reqinvstate m_inverterStateRequest;
-    qint16 m_batteryPowerRequest;
+    float m_batteryPowerRequest;
     Setop m_setOperation;
     Setinvstate m_setInverterState;
     qint16 m_aHRtg_SF;

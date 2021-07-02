@@ -28,90 +28,89 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef SUNSPECACMETERMODEL_H
-#define SUNSPECACMETERMODEL_H
+#ifndef SUNSPECMETERTHREEPHASEMODEL_H
+#define SUNSPECMETERTHREEPHASEMODEL_H
 
 #include <QObject>
 
 #include "sunspec.h"
 #include "sunspecmodel.h"
 
-class SunSpecAcMeterModel : public SunSpecModel
+class SunSpecMeterThreePhaseModel : public SunSpecModel
 {
     Q_OBJECT
 public:
 
-    enum Alg {
-        AlgNone = 0,
-        AlgAesGmac64 = 1,
-        AlgEcc256 = 2
-    };
-    Q_ENUM(Alg)
-
     enum Evt {
-        EvtPowerFailure = 0x4,
-        EvtUnderVoltage = 0x8,
-        EvtLowPf = 0x10,
-        EvtOverCurrent = 0x20,
-        EvtOverVoltage = 0x40,
-        EvtMissingSensor = 0x80,
-        EvtOem01 = 0x10000,
-        EvtOem02 = 0x20000,
-        EvtOem03 = 0x40000,
-        EvtOem04 = 0x80000,
-        EvtOem05 = 0x100000,
-        EvtOem06 = 0x200000,
-        EvtOem07 = 0x400000,
-        EvtOem08 = 0x800000,
-        EvtOem09 = 0x1000000,
-        EvtOem10 = 0x2000000,
-        EvtOem11 = 0x4000000,
-        EvtOem12 = 0x8000000,
-        EvtOem13 = 0x10000000,
-        EvtOem14 = 0x20000000,
-        EvtOem15 = 0x40000000
+        EvtMEventPowerFailure = 0x4,
+        EvtMEventUnderVoltage = 0x8,
+        EvtMEventLowPf = 0x10,
+        EvtMEventOverCurrent = 0x20,
+        EvtMEventOverVoltage = 0x40,
+        EvtMEventMissingSensor = 0x80,
+        EvtMEventReserved1 = 0x100,
+        EvtMEventReserved2 = 0x200,
+        EvtMEventReserved3 = 0x400,
+        EvtMEventReserved4 = 0x800,
+        EvtMEventReserved5 = 0x1000,
+        EvtMEventReserved6 = 0x2000,
+        EvtMEventReserved7 = 0x4000,
+        EvtMEventReserved8 = 0x8000,
+        EvtMEventOem01 = 0x10000,
+        EvtMEventOem02 = 0x20000,
+        EvtMEventOem03 = 0x40000,
+        EvtMEventOem04 = 0x80000,
+        EvtMEventOem05 = 0x100000,
+        EvtMEventOem06 = 0x200000,
+        EvtMEventOem07 = 0x400000,
+        EvtMEventOem08 = 0x800000,
+        EvtMEventOem09 = 0x1000000,
+        EvtMEventOem10 = 0x2000000,
+        EvtMEventOem11 = 0x4000000,
+        EvtMEventOem12 = 0x8000000,
+        EvtMEventOem13 = 0x10000000,
+        EvtMEventOem14 = 0x20000000,
+        EvtMEventOem15 = 0x40000000
     };
     Q_DECLARE_FLAGS(EvtFlags, Evt)
     Q_FLAG(Evt)
 
-    explicit SunSpecAcMeterModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
-    ~SunSpecAcMeterModel() override; 
+    explicit SunSpecMeterThreePhaseModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent = nullptr);
+    ~SunSpecMeterThreePhaseModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
-    quint16 modelId() const;
-    quint16 modelLength() const;
-    qint16 amps() const;
-    qint16 ampsPhaseA() const;
-    qint16 ampsPhaseB() const;
-    qint16 ampsPhaseC() const;
-    qint16 voltageLn() const;
-    qint16 phaseVoltageAn() const;
-    qint16 phaseVoltageBn() const;
-    qint16 phaseVoltageCn() const;
-    qint16 voltageLl() const;
-    qint16 phaseVoltageAb() const;
-    qint16 phaseVoltageBc() const;
-    qint16 phaseVoltageCa() const;
-    qint16 hz() const;
-    qint16 watts() const;
-    qint16 wattsPhaseA() const;
-    qint16 wattsPhaseB() const;
-    qint16 wattsPhaseC() const;
-    qint16 va() const;
-    qint16 vaPhaseA() const;
-    qint16 vaPhaseB() const;
-    qint16 vaPhaseC() const;
-    qint16 var() const;
-    qint16 varPhaseA() const;
-    qint16 varPhaseB() const;
-    qint16 varPhaseC() const;
-    qint16 pf() const;
-    qint16 pfPhaseA() const;
-    qint16 pfPhaseB() const;
-    qint16 pfPhaseC() const;
+    float amps() const;
+    float ampsPhaseA() const;
+    float ampsPhaseB() const;
+    float ampsPhaseC() const;
+    float voltageLn() const;
+    float phaseVoltageAn() const;
+    float phaseVoltageBn() const;
+    float phaseVoltageCn() const;
+    float voltageLl() const;
+    float phaseVoltageAb() const;
+    float phaseVoltageBc() const;
+    float phaseVoltageCa() const;
+    float hz() const;
+    float watts() const;
+    float wattsPhaseA() const;
+    float wattsPhaseB() const;
+    float wattsPhaseC() const;
+    float va() const;
+    float vaPhaseA() const;
+    float vaPhaseB() const;
+    float vaPhaseC() const;
+    float var() const;
+    float varPhaseA() const;
+    float varPhaseB() const;
+    float varPhaseC() const;
+    float pf() const;
+    float pfPhaseA() const;
+    float pfPhaseB() const;
+    float pfPhaseC() const;
     quint32 totalWattHoursExported() const;
     quint32 totalWattHoursExportedPhaseA() const;
     quint32 totalWattHoursExportedPhaseB() const;
@@ -146,44 +145,45 @@ public:
     quint32 totalVArHoursExportedQ4ImportedPhaseC() const;
     EvtFlags events() const;
 
+protected:
+    void processBlockData() override;
+
 private:
-    quint16 m_modelId;
-    quint16 m_modelLength;
-    qint16 m_amps;
-    qint16 m_ampsPhaseA;
-    qint16 m_ampsPhaseB;
-    qint16 m_ampsPhaseC;
+    float m_amps;
+    float m_ampsPhaseA;
+    float m_ampsPhaseB;
+    float m_ampsPhaseC;
     qint16 m_a_SF;
-    qint16 m_voltageLn;
-    qint16 m_phaseVoltageAn;
-    qint16 m_phaseVoltageBn;
-    qint16 m_phaseVoltageCn;
-    qint16 m_voltageLl;
-    qint16 m_phaseVoltageAb;
-    qint16 m_phaseVoltageBc;
-    qint16 m_phaseVoltageCa;
+    float m_voltageLn;
+    float m_phaseVoltageAn;
+    float m_phaseVoltageBn;
+    float m_phaseVoltageCn;
+    float m_voltageLl;
+    float m_phaseVoltageAb;
+    float m_phaseVoltageBc;
+    float m_phaseVoltageCa;
     qint16 m_v_SF;
-    qint16 m_hz;
+    float m_hz;
     qint16 m_hz_SF;
-    qint16 m_watts;
-    qint16 m_wattsPhaseA;
-    qint16 m_wattsPhaseB;
-    qint16 m_wattsPhaseC;
+    float m_watts;
+    float m_wattsPhaseA;
+    float m_wattsPhaseB;
+    float m_wattsPhaseC;
     qint16 m_w_SF;
-    qint16 m_va;
-    qint16 m_vaPhaseA;
-    qint16 m_vaPhaseB;
-    qint16 m_vaPhaseC;
+    float m_va;
+    float m_vaPhaseA;
+    float m_vaPhaseB;
+    float m_vaPhaseC;
     qint16 m_vA_SF;
-    qint16 m_var;
-    qint16 m_varPhaseA;
-    qint16 m_varPhaseB;
-    qint16 m_varPhaseC;
+    float m_var;
+    float m_varPhaseA;
+    float m_varPhaseB;
+    float m_varPhaseC;
     qint16 m_vAR_SF;
-    qint16 m_pf;
-    qint16 m_pfPhaseA;
-    qint16 m_pfPhaseB;
-    qint16 m_pfPhaseC;
+    float m_pf;
+    float m_pfPhaseA;
+    float m_pfPhaseB;
+    float m_pfPhaseC;
     qint16 m_pF_SF;
     quint32 m_totalWattHoursExported;
     quint32 m_totalWattHoursExportedPhaseA;
@@ -226,4 +226,4 @@ private:
 
 };
 
-#endif // SUNSPECACMETERMODEL_H
+#endif // SUNSPECMETERTHREEPHASEMODEL_H

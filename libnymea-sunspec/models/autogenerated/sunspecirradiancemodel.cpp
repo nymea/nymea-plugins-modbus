@@ -30,11 +30,10 @@
 
 #include "sunspecirradiancemodel.h"
 
-SunSpecIrradianceModel::SunSpecIrradianceModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecIrradianceModel::SunSpecIrradianceModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 302, 0, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 302;
 }
 
 SunSpecIrradianceModel::~SunSpecIrradianceModel()
@@ -57,14 +56,13 @@ QString SunSpecIrradianceModel::label() const
     return "Irradiance Model";
 }
 
-quint16 SunSpecIrradianceModel::modelId() const
+void SunSpecIrradianceModel::processBlockData()
 {
-    return m_modelId;
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
 }
-quint16 SunSpecIrradianceModel::modelLength() const
-{
-    return m_modelLength;
-}
+
 void SunSpecIrradianceModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

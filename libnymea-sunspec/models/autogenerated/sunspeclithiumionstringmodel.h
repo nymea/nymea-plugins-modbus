@@ -138,15 +138,13 @@ public:
     Q_DECLARE_FLAGS(Evt1Flags, Evt1)
     Q_FLAG(Evt1)
 
-    explicit SunSpecLithiumIonStringModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
+    explicit SunSpecLithiumIonStringModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecLithiumIonStringModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
-    quint16 modelId() const;
-    quint16 modelLength() const;
     quint16 stringIndex() const;
     quint16 moduleCount() const;
     StFlags stringStatus() const;
@@ -156,18 +154,18 @@ public:
     float stringDepthOfDischarge() const;
     quint32 stringCycleCount() const;
     float stringStateOfHealth() const;
-    qint16 stringCurrent() const;
+    float stringCurrent() const;
     float stringVoltage() const;
     float maxCellVoltage() const;
     quint16 maxCellVoltageModule() const;
     float minCellVoltage() const;
     quint16 minCellVoltageModule() const;
     float averageCellVoltage() const;
-    qint16 maxModuleTemperature() const;
+    float maxModuleTemperature() const;
     quint16 maxModuleTemperatureModule() const;
-    qint16 minModuleTemperature() const;
+    float minModuleTemperature() const;
     quint16 minModuleTemperatureModule() const;
-    qint16 averageModuleTemperature() const;
+    float averageModuleTemperature() const;
     quint16 pad() const;
     ConstFlags contactorStatus() const;
     Evt1Flags stringEvent1() const;
@@ -180,9 +178,10 @@ public:
     quint16 pad3() const;
     quint16 pad4() const;
 
+protected:
+    void processBlockData() override;
+
 private:
-    quint16 m_modelId;
-    quint16 m_modelLength;
     quint16 m_stringIndex;
     quint16 m_moduleCount;
     StFlags m_stringStatus;
@@ -192,18 +191,18 @@ private:
     float m_stringDepthOfDischarge;
     quint32 m_stringCycleCount;
     float m_stringStateOfHealth;
-    qint16 m_stringCurrent;
+    float m_stringCurrent;
     float m_stringVoltage;
     float m_maxCellVoltage;
     quint16 m_maxCellVoltageModule;
     float m_minCellVoltage;
     quint16 m_minCellVoltageModule;
     float m_averageCellVoltage;
-    qint16 m_maxModuleTemperature;
+    float m_maxModuleTemperature;
     quint16 m_maxModuleTemperatureModule;
-    qint16 m_minModuleTemperature;
+    float m_minModuleTemperature;
     quint16 m_minModuleTemperatureModule;
-    qint16 m_averageModuleTemperature;
+    float m_averageModuleTemperature;
     quint16 m_pad;
     ConstFlags m_contactorStatus;
     Evt1Flags m_stringEvent1;

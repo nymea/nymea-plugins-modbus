@@ -47,52 +47,51 @@ public:
     };
     Q_ENUM(Dertyp)
 
-    explicit SunSpecNameplateModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
+    explicit SunSpecNameplateModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecNameplateModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
-    quint16 modelId() const;
-    quint16 modelLength() const;
     Dertyp derTyp() const;
     float wRtg() const;
     float vaRtg() const;
-    qint16 vArRtgQ1() const;
-    qint16 vArRtgQ2() const;
-    qint16 vArRtgQ3() const;
-    qint16 vArRtgQ4() const;
+    float vArRtgQ1() const;
+    float vArRtgQ2() const;
+    float vArRtgQ3() const;
+    float vArRtgQ4() const;
     float aRtg() const;
-    qint16 pfRtgQ1() const;
-    qint16 pfRtgQ2() const;
-    qint16 pfRtgQ3() const;
-    qint16 pfRtgQ4() const;
+    float pfRtgQ1() const;
+    float pfRtgQ2() const;
+    float pfRtgQ3() const;
+    float pfRtgQ4() const;
     float whRtg() const;
     float ahrRtg() const;
     float maxChaRte() const;
     float maxDisChaRte() const;
     quint16 pad() const;
 
+protected:
+    void processBlockData() override;
+
 private:
-    quint16 m_modelId;
-    quint16 m_modelLength;
     Dertyp m_derTyp;
     float m_wRtg;
     qint16 m_wRtgSf;
     float m_vaRtg;
     qint16 m_vaRtgSf;
-    qint16 m_vArRtgQ1;
-    qint16 m_vArRtgQ2;
-    qint16 m_vArRtgQ3;
-    qint16 m_vArRtgQ4;
+    float m_vArRtgQ1;
+    float m_vArRtgQ2;
+    float m_vArRtgQ3;
+    float m_vArRtgQ4;
     qint16 m_vArRtgSf;
     float m_aRtg;
     qint16 m_aRtgSf;
-    qint16 m_pfRtgQ1;
-    qint16 m_pfRtgQ2;
-    qint16 m_pfRtgQ3;
-    qint16 m_pfRtgQ4;
+    float m_pfRtgQ1;
+    float m_pfRtgQ2;
+    float m_pfRtgQ3;
+    float m_pfRtgQ4;
     qint16 m_pfRtgSf;
     float m_whRtg;
     qint16 m_whRtgSf;

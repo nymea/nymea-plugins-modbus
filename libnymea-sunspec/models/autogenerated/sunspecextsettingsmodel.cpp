@@ -30,11 +30,10 @@
 
 #include "sunspecextsettingsmodel.h"
 
-SunSpecExtSettingsModel::SunSpecExtSettingsModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecExtSettingsModel::SunSpecExtSettingsModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 145, 8, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 145;
 }
 
 SunSpecExtSettingsModel::~SunSpecExtSettingsModel()
@@ -57,14 +56,6 @@ QString SunSpecExtSettingsModel::label() const
     return "Extended Settings";
 }
 
-quint16 SunSpecExtSettingsModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecExtSettingsModel::modelLength() const
-{
-    return m_modelLength;
-}
 float SunSpecExtSettingsModel::rampUpRate() const
 {
     return m_rampUpRate;
@@ -93,6 +84,23 @@ float SunSpecExtSettingsModel::defaultRampRate() const
 {
     return m_defaultRampRate;
 }
+void SunSpecExtSettingsModel::processBlockData()
+{
+    // Scale factors
+    m_rampRateScaleFactor = m_dataPoints.value("Rmp_SF").toInt16();
+
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_rampUpRate = m_dataPoints.value("NomRmpUpRte").toFloatWithSSF(m_rampRateScaleFactor);
+    m_nomRmpDnRte = m_dataPoints.value("NomRmpDnRte").toFloatWithSSF(m_rampRateScaleFactor);
+    m_emergencyRampUpRate = m_dataPoints.value("EmgRmpUpRte").toFloatWithSSF(m_rampRateScaleFactor);
+    m_emergencyRampDownRate = m_dataPoints.value("EmgRmpDnRte").toFloatWithSSF(m_rampRateScaleFactor);
+    m_connectRampUpRate = m_dataPoints.value("ConnRmpUpRte").toFloatWithSSF(m_rampRateScaleFactor);
+    m_connectRampDownRate = m_dataPoints.value("ConnRmpDnRte").toFloatWithSSF(m_rampRateScaleFactor);
+    m_defaultRampRate = m_dataPoints.value("AGra").toFloatWithSSF(m_rampRateScaleFactor);
+}
+
 void SunSpecExtSettingsModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

@@ -1,6 +1,6 @@
 {
     "group": {
-        "label": "delta-connect three phase (abc) meter",
+        "label": "Meter (Three Phase) delta connect",
         "name": "ac_meter",
         "points": [
             {

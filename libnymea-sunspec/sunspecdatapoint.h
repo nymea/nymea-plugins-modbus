@@ -30,6 +30,7 @@ public:
         Enum16,
         Enum32,
         Float32,
+        Float64,
         String,
         ScaleFactor,
         Pad,
@@ -85,6 +86,18 @@ public:
     bool isValid() const;
 
     static DataType stringToDataType(const QString &typString);
+
+    quint16 toUInt16() const;
+    qint16 toInt16() const;
+    quint32 toUInt32() const;
+    qint32 toInt32() const;
+    quint64 toUInt64() const;
+    qint64 toInt64() const;
+    QString toString() const;
+
+    float toFloat() const;
+    float toFloatWithSSF(qint16 scaleFactor) const;
+    double toDouble() const;
 
 private:
     QString m_name;

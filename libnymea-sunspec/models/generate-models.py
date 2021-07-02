@@ -36,6 +36,7 @@ def convertToAlphaNumeric(text):
 def splitCamelCase(text):
     return re.sub('([A-Z][a-z]+)', r' \1', re.sub('([A-Z]+)', r' \1', text)).split()
 
+
 def convertToCamelCase(text, capitalize = False):
     s = convertToAlphaNumeric(text)
     s = s.replace("-", " ").replace("_", " ")
@@ -60,7 +61,7 @@ def convertToCamelCase(text, capitalize = False):
         finalText = finalWords[0].capitalize() + ''.join(i.capitalize() for i in finalWords[1:])
     else:
         finalText = finalWords[0].lower() + ''.join(i.capitalize() for i in finalWords[1:])
-    print('Convert camel case:', text, '-->', finalText)
+    #print('Convert camel case:', text, '-->', finalText)
     return finalText
 
 
@@ -169,23 +170,21 @@ def writeLicenseHeader(fileDescriptor):
     writeLine(fileDescriptor)
 
 
-def writeClassEnums(fileDescriptor, className, modelIds):
+def writeClassEnums(fileDescriptor, className, modelId):
     print('--> Writing enums for', className)
     # name, symbols[]
     enumDefinitions = {}
     # Get unique enums
-    for i in range(len(modelIds)):
-        modelId = int(modelIds[i])
-        modelData = models[modelId]
-        points = modelData['group']['points']
-        for pointData in points:
-            if 'type' in pointData and pointData['type'].startswith('enum') and 'symbols' in pointData:
-                #print('Found enum in point data:', pointData['name'], pointData['symbols'])
-                enumName = getEnumName(pointData)
-                if enumName in enumDefinitions.keys():
-                    continue
-                else:
-                    enumDefinitions[enumName] = pointData['symbols']
+    modelData = models[modelId]
+    points = modelData['group']['points']
+    for pointData in points:
+        if 'type' in pointData and pointData['type'].startswith('enum') and 'symbols' in pointData:
+            #print('Found enum in point data:', pointData['name'], pointData['symbols'])
+            enumName = getEnumName(pointData)
+            if enumName in enumDefinitions.keys():
+                continue
+            else:
+                enumDefinitions[enumName] = pointData['symbols']
 
     # Write actual enum declaration
     for enumDefinition in enumDefinitions:
@@ -206,23 +205,22 @@ def writeClassEnums(fileDescriptor, className, modelIds):
         writeLine(fileDescriptor)
 
 
-def writeClassFlags(fileDescriptor, className, modelIds):
+def writeClassFlags(fileDescriptor, className, modelId):
     print('--> Writing flags for', className)
     # name, symbols[]
     enumDefinitions = {}
+
     # Get unique flags
-    for i in range(len(modelIds)):
-        modelId = int(modelIds[i])
-        modelData = models[modelId]
-        points = modelData['group']['points']
-        for pointData in points:
-            if 'type' in pointData and pointData['type'].startswith('bitfield') and 'symbols' in pointData:
-                #print('Found enum in point data:', pointData['name'], pointData['symbols'])
-                enumName = getEnumName(pointData)
-                if enumName in enumDefinitions.keys():
-                    continue
-                else:
-                    enumDefinitions[enumName] = pointData['symbols']
+    modelData = models[modelId]
+    points = modelData['group']['points']
+    for pointData in points:
+        if 'type' in pointData and pointData['type'].startswith('bitfield') and 'symbols' in pointData:
+            #print('Found enum in point data:', pointData['name'], pointData['symbols'])
+            enumName = getEnumName(pointData)
+            if enumName in enumDefinitions.keys():
+                continue
+            else:
+                enumDefinitions[enumName] = pointData['symbols']
 
     # Write actual enum declaration
     for enumDefinition in enumDefinitions:
@@ -315,6 +313,15 @@ def getPropertyName(dataPoint):
     return propertyName[0].lower() + propertyName[1:] 
 
 
+def getModelLength(modelData):
+    dataPoints = modelData['group']['points']
+    modelLength = 0
+    for dataPoint in dataPoints:
+        modelLength += dataPoint['size']    
+
+    return modelLength - modelHeaderSize
+
+
 def getCppType(dataPoint):
     if dataPoint['type'] == 'uint16':
         # If we have a scale factor set, this is gonna be a float value
@@ -322,14 +329,25 @@ def getCppType(dataPoint):
             return 'float'
         else:
             return 'quint16'
-    elif dataPoint['type'] == 'acc16' or dataPoint['type'] == 'pad' or dataPoint['type'] == 'raq16':
+    elif dataPoint['type'] == 'acc16' or dataPoint['type'] == 'pad' or dataPoint['type'] == 'raw16':
         return 'quint16'
     elif dataPoint['type'] == 'int16':
-        return 'qint16'
-    elif dataPoint['type'] == 'uint32' or dataPoint['type'] == 'acc32':
+        if 'sf' in dataPoint:
+            return 'float'
+        else:
+            return 'qint16'
+    elif dataPoint['type'] == 'uint32':
+        if 'sf' in dataPoint:
+            return 'float'
+        else:
+            return 'quint32'
+    elif dataPoint['type'] == 'acc32':
         return 'quint32'
     elif dataPoint['type'] == 'int32':
-        return 'qint32'
+        if 'sf' in dataPoint:
+            return 'float'
+        else:
+            return 'qint32'
     elif dataPoint['type'] == 'uint64' or dataPoint['type'] == 'acc64':
         return 'quint64'
     elif dataPoint['type'] == 'int64':
@@ -367,14 +385,135 @@ def getCppType(dataPoint):
         return dataPoint['type']
 
 
+def getConvertionMethodFromSunspecType(dataPoint, scaleFactorProperty):
+    typeString = dataPoint['type']
+    if typeString == 'uint16' or typeString == 'acc16' or typeString == 'pad' or typeString == 'raw16':
+        # If we have a scale factor set, this is gonna be a float value
+        if 'sf' in dataPoint:
+            # This is a float value with scale factor
+            if scaleFactorProperty == '':
+                return ('m_dataPoints.value("%s").toFloatWithSSF(%s)' % (dataPoint['name'], dataPoint['sf']))
+            else:
+                return ('m_dataPoints.value("%s").toFloatWithSSF(%s)' % (dataPoint['name'], scaleFactorProperty))
+        else:
+            return ('m_dataPoints.value("%s").toUInt16()' % dataPoint['name'])
 
-def addPropertiesMethodDeclaration(fileDescriptor, modelIds):
+    elif typeString == 'int16':
+        # If we have a scale factor set, this is gonna be a float value
+        if 'sf' in dataPoint:
+            # This is a float value with scale factor
+            if scaleFactorProperty == '':
+                return ('m_dataPoints.value("%s").toFloatWithSSF(%s)' % (dataPoint['name'], dataPoint['sf']))
+            else:
+                return ('m_dataPoints.value("%s").toFloatWithSSF(%s)' % (dataPoint['name'], scaleFactorProperty))
+        else:
+            return ('m_dataPoints.value("%s").toInt16()' % dataPoint['name'])
+    
+    elif typeString == 'uint32' or typeString == 'acc32' or typeString == 'pad32':
+        # If we have a scale factor set, this is gonna be a float value
+        if 'sf' in dataPoint:
+            # This is a float value with scale factor
+            if scaleFactorProperty == '':
+                return ('m_dataPoints.value("%s").toFloatWithSSF(%s)' % (dataPoint['name'], dataPoint['sf']))
+            else:
+                return ('m_dataPoints.value("%s").toFloatWithSSF(%s)' % (dataPoint['name'], scaleFactorProperty))
+        else:
+            return ('m_dataPoints.value("%s").toUInt32()' % dataPoint['name'])
+
+    elif typeString == 'int32':
+        # If we have a scale factor set, this is gonna be a float value
+        if 'sf' in dataPoint:
+            # This is a float value with scale factor
+            if scaleFactorProperty == '':
+                return ('m_dataPoints.value("%s").toFloatWithSSF(%s)' % (dataPoint['name'], dataPoint['sf']))
+            else:
+                return ('m_dataPoints.value("%s").toFloatWithSSF(%s)' % (dataPoint['name'], scaleFactorProperty))
+        else:
+            return ('m_dataPoints.value("%s").toInt32()' % dataPoint['name'])
+
+    elif typeString == 'uint64' or typeString == 'acc64':
+        # If we have a scale factor set, this is gonna be a float value
+        if 'sf' in dataPoint:
+            # This is a float value with scale factor
+            if scaleFactorProperty == '':
+                return ('m_dataPoints.value("%s").toFloatWithSSF(%s)' % (dataPoint['name'], dataPoint['sf']))
+            else:
+                return ('m_dataPoints.value("%s").toFloatWithSSF(%s)' % (dataPoint['name'], scaleFactorProperty))
+        else:
+            return ('m_dataPoints.value("%s").toUInt64()' % dataPoint['name'])
+
+    elif typeString == 'int64':
+        # If we have a scale factor set, this is gonna be a float value
+        if 'sf' in dataPoint:
+            # This is a float value with scale factor
+            if scaleFactorProperty == '':
+                return ('m_dataPoints.value("%s").toFloatWithSSF(%s)' % (dataPoint['name'], dataPoint['sf']))
+            else:
+                return ('m_dataPoints.value("%s").toFloatWithSSF(%s)' % (dataPoint['name'], scaleFactorProperty))
+        else:
+            return ('m_dataPoints.value("%s").toInt64()' % dataPoint['name'])
+
+
+    elif typeString == 'sunssf':
+        return ('m_dataPoints.value("%s").toInt16()' % dataPoint['name'])
+
+    elif typeString == 'count':
+        return ('m_dataPoints.value("%s").toUInt16()' % dataPoint['name'])
+
+    elif typeString == 'string':
+        return ('m_dataPoints.value("%s").toString()' % dataPoint['name'])
+
+    elif typeString == 'float32':
+        return ('m_dataPoints.value("%s").toFloat()' % dataPoint['name'])
+
+    elif typeString == 'float64':
+        return ('m_dataPoints.value("%s").toDouble()' % dataPoint['name'])
+
+    elif typeString == 'enum16':
+        if 'symbols' in dataPoint:
+            return ('static_cast<%s>(m_dataPoints.value("%s").toUInt16())' % (getEnumName(dataPoint), dataPoint['name']))
+        else:
+            return ('m_dataPoints.value("%s").toUInt16()' % dataPoint['name'])
+
+    elif typeString == 'enum32':
+        if 'symbols' in dataPoint:
+            return ('static_cast<%s>(m_dataPoints.value("%s").toUInt32())' % (getEnumName(dataPoint), dataPoint['name']))
+        else:
+            return ('m_dataPoints.value("%s").toUInt32()' % dataPoint['name'])
+
+    elif typeString == 'bitfield16':
+        if 'symbols' in dataPoint:
+            return ('static_cast<%sFlags>(m_dataPoints.value("%s").toUInt16())' % (getEnumName(dataPoint), dataPoint['name']))
+        else:
+            return ('m_dataPoints.value("%s").toUInt16()' % dataPoint['name'])
+
+    elif typeString == 'bitfield32':
+        if 'symbols' in dataPoint:
+            return ('static_cast<%sFlags>(m_dataPoints.value("%s").toUInt32())' % (getEnumName(dataPoint), dataPoint['name']))
+        else:
+            return ('m_dataPoints.value("%s").toUInt32()' % dataPoint['name'])
+
+    elif typeString == 'bitfield64':
+        if 'symbols' in dataPoint:
+            return ('static_cast<%sFlags>(m_dataPoints.value("%s").toUInt64())' % (getEnumName(dataPoint), dataPoint['name']))
+        else:
+            return ('m_dataPoints.value("%s").toUInt64()' % dataPoint['name'])
+
+
+
+
+def addPropertiesMethodDeclaration(fileDescriptor, modelId):
     print('Write member get method declarations')
     # Picking the first model for now, since they should work all the same within one group
-    modelData = models[modelIds[0]]
+    modelData = models[modelId]
     dataPoints = modelData['group']['points']
     for dataPoint in dataPoints:
         propertyName = getPropertyName(dataPoint)
+        
+        # Those properties are static defined from this script
+        if propertyName == 'modelId' or propertyName == 'modelLength':
+            continue
+
         typeName = dataPoint['type']
         # Note: we don't want to provide public access to scale factors
         if typeName == 'sunssf':
@@ -383,13 +522,18 @@ def addPropertiesMethodDeclaration(fileDescriptor, modelIds):
         writeLine(fileDescriptor, '    %s %s() const;' %(getCppType(dataPoint), propertyName))
 
 
-def addPropertiesMethodImplementation(fileDescriptor, className, modelIds):
+def addPropertiesMethodImplementation(fileDescriptor, className, modelId):
     print('Write member get method implementations')
     # Picking the first model for now, since they should work all the same within one group
-    modelData = models[modelIds[0]]
+    modelData = models[modelId]
     dataPoints = modelData['group']['points']
     for dataPoint in dataPoints:
         propertyName = getPropertyName(dataPoint)
+
+        # Those properties are static defined from this script
+        if propertyName == 'modelId' or propertyName == 'modelLength':
+            continue
+
         typeName = dataPoint['type']
         # Note: we don't want to provide public access to scale factors
         if typeName == 'sunssf':
@@ -405,20 +549,65 @@ def addPropertiesMethodImplementation(fileDescriptor, className, modelIds):
         writeLine(fileDescriptor, '    return m_%s;' % propertyName)
         writeLine(fileDescriptor, '}')
 
-def addPropertiesDeclaration(fileDescriptor, modelIds):
+
+def addPropertiesDeclaration(fileDescriptor, modelId):
     print('Write private members')
     # Picking the first model for now, since they should work all the same within one group
-    modelData = models[modelIds[0]]
+    modelData = models[modelId]
     dataPoints = modelData['group']['points']
     for dataPoint in dataPoints:
         propertyName = getPropertyName(dataPoint)
+
+        # Those properties are static defined from this script
+        if propertyName == 'modelId' or propertyName == 'modelLength':
+            continue
 
         cppType = getCppType(dataPoint)
         writeLine(fileDescriptor, '    %s m_%s;' %(cppType, propertyName))
 
 
+def writeProcessDataImplementation(fileDescriptor, className, modelId):
+    print('Write processData() implementation')
+    modelData = models[modelId]
+    dataPoints = modelData['group']['points']
 
-def writeHeaderFile(headerFileName, className, modelIds):
+    # Parse first the scale factors:
+    hasScaleFactors = False
+    for dataPoint in dataPoints:
+        if dataPoint['type'] == 'sunssf':
+            hasScaleFactors = True
+            break
+
+    if hasScaleFactors:
+        writeLine(fileDescriptor, '    // Scale factors')
+        for dataPoint in dataPoints:
+            if dataPoint['type'] == 'sunssf':
+                convertionMethod = getConvertionMethodFromSunspecType(dataPoint, '')
+                writeLine(fileDescriptor, '    m_%s = %s;' % (getPropertyName(dataPoint), convertionMethod))
+
+        writeLine(fileDescriptor)
+    
+    writeLine(fileDescriptor, '    // Update properties according to the data point type')
+    for dataPoint in dataPoints:
+        if dataPoint['type'] == 'sunssf':
+            continue
+
+        propertyName = getPropertyName(dataPoint)
+        if 'sf' in dataPoint:
+            # Get the scale factor propery
+            scaleFactorProperty = ''
+            for dp in dataPoints:
+                if dp['name'] == dataPoint['sf']:
+                    scaleFactorProperty = 'm_' + getPropertyName(dp)
+
+            convertionMethod = getConvertionMethodFromSunspecType(dataPoint, scaleFactorProperty)
+            writeLine(fileDescriptor, '    m_%s = %s;' % (getPropertyName(dataPoint), convertionMethod))
+        else:
+            convertionMethod = getConvertionMethodFromSunspecType(dataPoint, '')
+            writeLine(fileDescriptor, '    m_%s = %s;' % (getPropertyName(dataPoint), convertionMethod))
+
+
+def writeHeaderFile(headerFileName, className, modelId):
     headerFileBaseName = os.path.basename(headerFileName)
     headerFiles.append(headerFileBaseName)
     print('Writing header file', headerFileBaseName)
@@ -444,11 +633,11 @@ def writeHeaderFile(headerFileName, className, modelIds):
 
     # Enum declarations
     writeLine(fileDescriptor)
-    writeClassEnums(fileDescriptor, className, modelIds)
-    writeClassFlags(fileDescriptor, className, modelIds)
+    writeClassEnums(fileDescriptor, className, modelId)
+    writeClassFlags(fileDescriptor, className, modelId)
 
     # Constructor
-    writeLine(fileDescriptor, '    explicit %s(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);' % className)
+    writeLine(fileDescriptor, '    explicit %s(SunSpec *connection, quint16 modbusStartRegister, QObject *parent = nullptr);' % className)
     writeLine(fileDescriptor, '    ~%s() override; ' % className)
     writeLine(fileDescriptor)
 
@@ -459,12 +648,17 @@ def writeHeaderFile(headerFileName, className, modelIds):
     writeLine(fileDescriptor)
 
     # Properties
-    addPropertiesMethodDeclaration(fileDescriptor, modelIds)
+    addPropertiesMethodDeclaration(fileDescriptor, modelId)
+
+    # Protected members
+    writeLine(fileDescriptor)
+    writeLine(fileDescriptor, 'protected:')
+    writeLine(fileDescriptor, '    void processBlockData() override;')
 
     # Private members
     writeLine(fileDescriptor)
     writeLine(fileDescriptor, 'private:')
-    addPropertiesDeclaration(fileDescriptor, modelIds)
+    addPropertiesDeclaration(fileDescriptor, modelId)
     writeLine(fileDescriptor)
 
     writeLine(fileDescriptor, '    void initDataPoints();')
@@ -477,7 +671,7 @@ def writeHeaderFile(headerFileName, className, modelIds):
     fileDescriptor.close()
 
 
-def writeSourceFile(sourceFileName, className, modelIds):
+def writeSourceFile(sourceFileName, className, modelId):
     sourceFileBaseName = os.path.basename(sourceFileName)
     sourceFiles.append(str(sourceFileBaseName))
     print('Writing cpp file', sourceFileBaseName)
@@ -487,16 +681,10 @@ def writeSourceFile(sourceFileName, className, modelIds):
     writeLine(fileDescriptor)
     
     # Constructor
-    writeLine(fileDescriptor, '%s::%s(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :' % (className, className))
-    writeLine(fileDescriptor, '    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)')
+    writeLine(fileDescriptor, '%s::%s(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :' % (className, className))
+    writeLine(fileDescriptor, '    SunSpecModel(connection, %s, %s, modbusStartRegister, parent)' % (modelId, getModelLength(models[modelId])))
     writeLine(fileDescriptor, '{')
     writeLine(fileDescriptor, '    initDataPoints();')
-    # Write supported model ids
-    modelIdsLine = ''
-    for i in range(len(modelIds)):
-        modelIdsLine += (' << %s' % modelIds[i])
-
-    writeLine(fileDescriptor, '    m_supportedModelIds' + modelIdsLine + ';')
     writeLine(fileDescriptor, '}')
     writeLine(fileDescriptor)
 
@@ -513,69 +701,20 @@ def writeSourceFile(sourceFileName, className, modelIds):
     # Name
     writeLine(fileDescriptor, 'QString %s::name() const' % className)
     writeLine(fileDescriptor, '{')
-    if len(modelIds) == 1:
-        modelId = modelIds[0]
-        if 'name' in models[modelId]['group']:
-            writeLine(fileDescriptor, '    return "%s";' % models[modelId]['group']['name'])
-        else:
-            writeLine(fileDescriptor, '    return QString();')
+    if 'name' in models[modelId]['group']:
+        writeLine(fileDescriptor, '    return "%s";' % models[modelId]['group']['name'])
     else:
-        # Check if all names are the same
-        name = ''
-        requireSwitch = False
-        for i in range(len(modelIds)):
-            modelId = modelIds[i]
-            if i == 0: 
-                name = models[modelId]['group']['name']
-                continue
-            
-            if name != models[modelId]['group']['name']:
-                requireSwitch = True
-
-        if not requireSwitch:
-            writeLine(fileDescriptor, '    return "%s";' % models[modelId]['group']['name'])
-        else:
-            # Return value depending on the modelId
-            writeLine(fileDescriptor, '    switch (m_modelId) {')
-            for i in range(len(modelIds)):
-                modelId = modelIds[i]
-                writeLine(fileDescriptor, '    case %s:' % modelId)
-                if 'name' in models[modelId]['group']:
-                    writeLine(fileDescriptor, '        return "%s";' % models[modelId]['group']['name'])
-                else:
-                    writeLine(fileDescriptor, '        return QString();')
-
-            writeLine(fileDescriptor, '    default:')
-            writeLine(fileDescriptor, '        return QString();')
-            writeLine(fileDescriptor, '    }')
-
+        writeLine(fileDescriptor, '    return QString();')
     writeLine(fileDescriptor, '}')
     writeLine(fileDescriptor)
 
     # Description
     writeLine(fileDescriptor, 'QString %s::description() const' % className)
     writeLine(fileDescriptor, '{')
-    if len(modelIds) == 1:
-        modelId = modelIds[0]
-        if 'desc' in models[modelId]['group']:
-            writeLine(fileDescriptor, '    return "%s";' % models[modelId]['group']['desc'])
-        else:
-            writeLine(fileDescriptor, '    return QString();')
+    if 'desc' in models[modelId]['group']:
+        writeLine(fileDescriptor, '    return "%s";' % models[modelId]['group']['desc'])
     else:
-        # Return value depending on the modelId
-        writeLine(fileDescriptor, '    switch (m_modelId) {')
-        for i in range(len(modelIds)):
-            modelId = modelIds[i]
-            writeLine(fileDescriptor, '    case %s:' % modelId)
-            if 'desc' in models[modelId]['group']:
-                writeLine(fileDescriptor, '        return "%s";' % models[modelId]['group']['desc'])
-            else:
-                writeLine(fileDescriptor, '        return QString();')
-
-        writeLine(fileDescriptor, '    default:')
-        writeLine(fileDescriptor, '        return QString();')
-        writeLine(fileDescriptor, '    }')
-
+        writeLine(fileDescriptor, '    return QString();')
     writeLine(fileDescriptor, '}')
     writeLine(fileDescriptor)
 
@@ -583,68 +722,40 @@ def writeSourceFile(sourceFileName, className, modelIds):
     # Label
     writeLine(fileDescriptor, 'QString %s::label() const' % className)
     writeLine(fileDescriptor, '{')
-    if len(modelIds) == 1:
-        modelId = modelIds[0]
-        if 'label' in models[modelId]['group']:
-            writeLine(fileDescriptor, '    return "%s";' % models[modelId]['group']['label'])
-        else:
-            writeLine(fileDescriptor, '    return QString();')
+    if 'label' in models[modelId]['group']:
+        writeLine(fileDescriptor, '    return "%s";' % models[modelId]['group']['label'])
     else:
-        # Return value depending on the modelId
-        writeLine(fileDescriptor, '    switch (m_modelId) {')
-        for i in range(len(modelIds)):
-            modelId = modelIds[i]
-            writeLine(fileDescriptor, '    case %s:' % modelId)
-            if 'label' in models[modelId]['group']:
-                writeLine(fileDescriptor, '        return "%s";' % models[modelId]['group']['label'])
-            else:
-                writeLine(fileDescriptor, '        return QString();')
-
-        writeLine(fileDescriptor, '    default:')
-        writeLine(fileDescriptor, '        return QString();')
-        writeLine(fileDescriptor, '    }')
+        writeLine(fileDescriptor, '    return QString();')
 
     writeLine(fileDescriptor, '}')
     writeLine(fileDescriptor)
 
     # Property get methods
-    addPropertiesMethodImplementation(fileDescriptor, className, modelIds)
+    addPropertiesMethodImplementation(fileDescriptor, className, modelId)
+
+    # Process data 
+    writeLine(fileDescriptor, 'void %s::processBlockData()' % className)
+    writeLine(fileDescriptor, '{')  
+    writeProcessDataImplementation(fileDescriptor, className, modelId)
+    writeLine(fileDescriptor, '}')
+    writeLine(fileDescriptor)
 
     # Init data points
     writeLine(fileDescriptor, 'void %s::initDataPoints()' % className)
     writeLine(fileDescriptor, '{')
-    if len(modelIds) == 1:
-        modelId = modelIds[0]
-        dataPoints = models[modelId]['group']['points']
-        addressOffset = 0
-        for dataPoint in dataPoints:
-            dataSize = addDataPointInitialization(fileDescriptor, dataPoint, addressOffset)
-            addressOffset += dataSize
-    else:
-        # Return value depending on the modelId
-        writeLine(fileDescriptor, '    switch (m_modelId) {')
-        for i in range(len(modelIds)):
-            modelId = modelIds[i]
-            dataPoints = models[modelId]['group']['points']
-            writeLine(fileDescriptor, '    case %s: {' % modelId)
-            addressOffset = 0
-            for dataPoint in dataPoints:
-                dataSize = addDataPointInitialization(fileDescriptor, dataPoint, addressOffset, 2)
-                addressOffset += dataSize
-            
-            writeLine(fileDescriptor, '        break;')
-            writeLine(fileDescriptor, '    }')
+    dataPoints = models[modelId]['group']['points']
+    addressOffset = 0
+    for dataPoint in dataPoints:
+        dataSize = addDataPointInitialization(fileDescriptor, dataPoint, addressOffset)
+        addressOffset += dataSize
 
-        writeLine(fileDescriptor, '    default:')
-        writeLine(fileDescriptor, '        break;')
-        writeLine(fileDescriptor, '    }')
     writeLine(fileDescriptor, '}')
     writeLine(fileDescriptor)
 
     fileDescriptor.close()
 
 
-def createClass(groupName, modelIds):
+def getClassName(groupName):
     className = 'SunSpec'
     groupNameCamelCase = convertToCamelCase(groupName, True)
     if groupNameCamelCase.endswith('Model'):
@@ -652,11 +763,15 @@ def createClass(groupName, modelIds):
     else:
         className += groupNameCamelCase + 'Model'
 
-    print('Creating class for group', groupName, '-->', className, 'using model ids', modelIds)
+    return className
+
+
+def createClass(className, modelId):
+    print('Creating class -->', className, 'using model id', modelId)
     headerFileName = os.path.join(outputDirectory, className.lower() + '.h')
     sourceFileName = os.path.join(outputDirectory, className.lower() + '.cpp')
-    writeHeaderFile(headerFileName, className, modelIds)
-    writeSourceFile(sourceFileName, className, modelIds)
+    writeHeaderFile(headerFileName, className, modelId)
+    writeSourceFile(sourceFileName, className, modelId)
         
 
 
@@ -674,6 +789,7 @@ outputDirectory = os.path.join(scriptPath, 'autogenerated')
 
 # id, {name, lable}
 models = {}
+modelHeaderSize = 2
 
 init()
 loadModels()
@@ -683,8 +799,25 @@ sourceFiles = []
 
 # Create a class for each group
 groups = loadGroups()
+
+# name, modelId
+classes = {}
 for group in groups.keys():
-    createClass(group, groups[group])
+    if len(groups[group]) > 1:
+        for modelId in groups[group]:
+            modelData = models[modelId]
+            lable = modelData['group']['label']
+            className = getClassName(lable)
+            classes[className] = modelId
+            # Use the lable instead of the group name for the class name
+    else:
+        className = getClassName(group)
+        classes[className] = groups[group][0]
+
+# Print defined class names for models
+for className in classes.keys():
+    print(classes[className], '-->', className)
+    createClass(className, classes[className])
 
 print('Generated header files')
 for headerFile in headerFiles:

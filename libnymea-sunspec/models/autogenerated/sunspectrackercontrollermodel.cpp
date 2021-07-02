@@ -30,11 +30,10 @@
 
 #include "sunspectrackercontrollermodel.h"
 
-SunSpecTrackerControllerModel::SunSpecTrackerControllerModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecTrackerControllerModel::SunSpecTrackerControllerModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 601, 26, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 601;
 }
 
 SunSpecTrackerControllerModel::~SunSpecTrackerControllerModel()
@@ -57,14 +56,6 @@ QString SunSpecTrackerControllerModel::label() const
     return "Tracker Controller DRAFT 2";
 }
 
-quint16 SunSpecTrackerControllerModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecTrackerControllerModel::modelLength() const
-{
-    return m_modelLength;
-}
 QString SunSpecTrackerControllerModel::controller() const
 {
     return m_controller;
@@ -85,11 +76,11 @@ quint16 SunSpecTrackerControllerModel::day() const
 {
     return m_day;
 }
-qint32 SunSpecTrackerControllerModel::manualElevation() const
+float SunSpecTrackerControllerModel::manualElevation() const
 {
     return m_manualElevation;
 }
-qint32 SunSpecTrackerControllerModel::manualAzimuth() const
+float SunSpecTrackerControllerModel::manualAzimuth() const
 {
     return m_manualAzimuth;
 }
@@ -105,6 +96,26 @@ quint16 SunSpecTrackerControllerModel::trackers() const
 {
     return m_trackers;
 }
+void SunSpecTrackerControllerModel::processBlockData()
+{
+    // Scale factors
+    m_sf = m_dataPoints.value("Dgr_SF").toInt16();
+
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_controller = m_dataPoints.value("Nam").toString();
+    m_type = static_cast<Typ>(m_dataPoints.value("Typ").toUInt16());
+    m_date = m_dataPoints.value("DtLoc").toString();
+    m_time = m_dataPoints.value("TmLoc").toString();
+    m_day = m_dataPoints.value("Day").toUInt16();
+    m_manualElevation = m_dataPoints.value("GlblElCtl").toFloatWithSSF(m_sf);
+    m_manualAzimuth = m_dataPoints.value("GlblAzCtl").toFloatWithSSF(m_sf);
+    m_globalMode = static_cast<Glblctl>(m_dataPoints.value("GlblCtl").toUInt16());
+    m_globalAlarm = static_cast<GlblalmFlags>(m_dataPoints.value("GlblAlm").toUInt16());
+    m_trackers = m_dataPoints.value("N").toUInt16();
+}
+
 void SunSpecTrackerControllerModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

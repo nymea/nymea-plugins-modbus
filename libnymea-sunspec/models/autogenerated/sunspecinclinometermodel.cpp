@@ -30,11 +30,10 @@
 
 #include "sunspecinclinometermodel.h"
 
-SunSpecInclinometerModel::SunSpecInclinometerModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecInclinometerModel::SunSpecInclinometerModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 304, 0, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 304;
 }
 
 SunSpecInclinometerModel::~SunSpecInclinometerModel()
@@ -57,14 +56,13 @@ QString SunSpecInclinometerModel::label() const
     return "Inclinometer Model";
 }
 
-quint16 SunSpecInclinometerModel::modelId() const
+void SunSpecInclinometerModel::processBlockData()
 {
-    return m_modelId;
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
 }
-quint16 SunSpecInclinometerModel::modelLength() const
-{
-    return m_modelLength;
-}
+
 void SunSpecInclinometerModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

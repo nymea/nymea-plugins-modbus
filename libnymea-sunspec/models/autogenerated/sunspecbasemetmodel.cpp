@@ -30,11 +30,10 @@
 
 #include "sunspecbasemetmodel.h"
 
-SunSpecBaseMetModel::SunSpecBaseMetModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecBaseMetModel::SunSpecBaseMetModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 307, 11, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 307;
 }
 
 SunSpecBaseMetModel::~SunSpecBaseMetModel()
@@ -57,15 +56,7 @@ QString SunSpecBaseMetModel::label() const
     return "Base Met";
 }
 
-quint16 SunSpecBaseMetModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecBaseMetModel::modelLength() const
-{
-    return m_modelLength;
-}
-qint16 SunSpecBaseMetModel::ambientTemperature() const
+float SunSpecBaseMetModel::ambientTemperature() const
 {
     return m_ambientTemperature;
 }
@@ -109,6 +100,24 @@ qint16 SunSpecBaseMetModel::soilWetness() const
 {
     return m_soilWetness;
 }
+void SunSpecBaseMetModel::processBlockData()
+{
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_ambientTemperature = m_dataPoints.value("TmpAmb").toFloatWithSSF(-1);
+    m_relativeHumidity = m_dataPoints.value("RH").toInt16();
+    m_barometricPressure = m_dataPoints.value("Pres").toInt16();
+    m_windSpeed = m_dataPoints.value("WndSpd").toInt16();
+    m_windDirection = m_dataPoints.value("WndDir").toInt16();
+    m_rainfall = m_dataPoints.value("Rain").toInt16();
+    m_snowDepth = m_dataPoints.value("Snw").toInt16();
+    m_precipitationType = m_dataPoints.value("PPT").toInt16();
+    m_electricField = m_dataPoints.value("ElecFld").toInt16();
+    m_surfaceWetness = m_dataPoints.value("SurWet").toInt16();
+    m_soilWetness = m_dataPoints.value("SoilWet").toInt16();
+}
+
 void SunSpecBaseMetModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

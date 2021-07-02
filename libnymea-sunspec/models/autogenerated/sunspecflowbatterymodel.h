@@ -41,20 +41,19 @@ class SunSpecFlowBatteryModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    explicit SunSpecFlowBatteryModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
+    explicit SunSpecFlowBatteryModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecFlowBatteryModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
-    quint16 modelId() const;
-    quint16 modelLength() const;
     quint16 batteryPointsToBeDetermined() const;
 
+protected:
+    void processBlockData() override;
+
 private:
-    quint16 m_modelId;
-    quint16 m_modelLength;
     quint16 m_batteryPointsToBeDetermined;
 
     void initDataPoints();

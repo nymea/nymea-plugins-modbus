@@ -30,11 +30,10 @@
 
 #include "sunspecsettingsmodel.h"
 
-SunSpecSettingsModel::SunSpecSettingsModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecSettingsModel::SunSpecSettingsModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 121, 30, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 121;
 }
 
 SunSpecSettingsModel::~SunSpecSettingsModel()
@@ -57,14 +56,6 @@ QString SunSpecSettingsModel::label() const
     return "Basic Settings";
 }
 
-quint16 SunSpecSettingsModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecSettingsModel::modelLength() const
-{
-    return m_modelLength;
-}
 float SunSpecSettingsModel::wMax() const
 {
     return m_wMax;
@@ -73,7 +64,7 @@ float SunSpecSettingsModel::vRef() const
 {
     return m_vRef;
 }
-qint16 SunSpecSettingsModel::vRefOfs() const
+float SunSpecSettingsModel::vRefOfs() const
 {
     return m_vRefOfs;
 }
@@ -89,19 +80,19 @@ float SunSpecSettingsModel::vaMax() const
 {
     return m_vaMax;
 }
-qint16 SunSpecSettingsModel::vArMaxQ1() const
+float SunSpecSettingsModel::vArMaxQ1() const
 {
     return m_vArMaxQ1;
 }
-qint16 SunSpecSettingsModel::vArMaxQ2() const
+float SunSpecSettingsModel::vArMaxQ2() const
 {
     return m_vArMaxQ2;
 }
-qint16 SunSpecSettingsModel::vArMaxQ3() const
+float SunSpecSettingsModel::vArMaxQ3() const
 {
     return m_vArMaxQ3;
 }
-qint16 SunSpecSettingsModel::vArMaxQ4() const
+float SunSpecSettingsModel::vArMaxQ4() const
 {
     return m_vArMaxQ4;
 }
@@ -109,19 +100,19 @@ float SunSpecSettingsModel::wGra() const
 {
     return m_wGra;
 }
-qint16 SunSpecSettingsModel::pfMinQ1() const
+float SunSpecSettingsModel::pfMinQ1() const
 {
     return m_pfMinQ1;
 }
-qint16 SunSpecSettingsModel::pfMinQ2() const
+float SunSpecSettingsModel::pfMinQ2() const
 {
     return m_pfMinQ2;
 }
-qint16 SunSpecSettingsModel::pfMinQ3() const
+float SunSpecSettingsModel::pfMinQ3() const
 {
     return m_pfMinQ3;
 }
-qint16 SunSpecSettingsModel::pfMinQ4() const
+float SunSpecSettingsModel::pfMinQ4() const
 {
     return m_pfMinQ4;
 }
@@ -145,6 +136,45 @@ SunSpecSettingsModel::Connph SunSpecSettingsModel::connPh() const
 {
     return m_connPh;
 }
+void SunSpecSettingsModel::processBlockData()
+{
+    // Scale factors
+    m_wMaxSf = m_dataPoints.value("WMax_SF").toInt16();
+    m_vRefSf = m_dataPoints.value("VRef_SF").toInt16();
+    m_vRefOfsSf = m_dataPoints.value("VRefOfs_SF").toInt16();
+    m_vMinMaxSf = m_dataPoints.value("VMinMax_SF").toInt16();
+    m_vaMaxSf = m_dataPoints.value("VAMax_SF").toInt16();
+    m_vArMaxSf = m_dataPoints.value("VArMax_SF").toInt16();
+    m_wGraSf = m_dataPoints.value("WGra_SF").toInt16();
+    m_pfMinSf = m_dataPoints.value("PFMin_SF").toInt16();
+    m_maxRmpRteSf = m_dataPoints.value("MaxRmpRte_SF").toInt16();
+    m_ecpNomHzSf = m_dataPoints.value("ECPNomHz_SF").toInt16();
+
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_wMax = m_dataPoints.value("WMax").toFloatWithSSF(m_wMaxSf);
+    m_vRef = m_dataPoints.value("VRef").toFloatWithSSF(m_vRefSf);
+    m_vRefOfs = m_dataPoints.value("VRefOfs").toFloatWithSSF(m_vRefOfsSf);
+    m_vMax = m_dataPoints.value("VMax").toFloatWithSSF(m_vMinMaxSf);
+    m_vMin = m_dataPoints.value("VMin").toFloatWithSSF(m_vMinMaxSf);
+    m_vaMax = m_dataPoints.value("VAMax").toFloatWithSSF(m_vaMaxSf);
+    m_vArMaxQ1 = m_dataPoints.value("VArMaxQ1").toFloatWithSSF(m_vArMaxSf);
+    m_vArMaxQ2 = m_dataPoints.value("VArMaxQ2").toFloatWithSSF(m_vArMaxSf);
+    m_vArMaxQ3 = m_dataPoints.value("VArMaxQ3").toFloatWithSSF(m_vArMaxSf);
+    m_vArMaxQ4 = m_dataPoints.value("VArMaxQ4").toFloatWithSSF(m_vArMaxSf);
+    m_wGra = m_dataPoints.value("WGra").toFloatWithSSF(m_wGraSf);
+    m_pfMinQ1 = m_dataPoints.value("PFMinQ1").toFloatWithSSF(m_pfMinSf);
+    m_pfMinQ2 = m_dataPoints.value("PFMinQ2").toFloatWithSSF(m_pfMinSf);
+    m_pfMinQ3 = m_dataPoints.value("PFMinQ3").toFloatWithSSF(m_pfMinSf);
+    m_pfMinQ4 = m_dataPoints.value("PFMinQ4").toFloatWithSSF(m_pfMinSf);
+    m_vArAct = static_cast<Varact>(m_dataPoints.value("VArAct").toUInt16());
+    m_clcTotVa = static_cast<Clctotva>(m_dataPoints.value("ClcTotVA").toUInt16());
+    m_maxRmpRte = m_dataPoints.value("MaxRmpRte").toFloatWithSSF(m_maxRmpRteSf);
+    m_ecpNomHz = m_dataPoints.value("ECPNomHz").toFloatWithSSF(m_ecpNomHzSf);
+    m_connPh = static_cast<Connph>(m_dataPoints.value("ConnPh").toUInt16());
+}
+
 void SunSpecSettingsModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

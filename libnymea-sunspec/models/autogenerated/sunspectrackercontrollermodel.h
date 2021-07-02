@@ -67,36 +67,35 @@ public:
     Q_DECLARE_FLAGS(GlblalmFlags, Glblalm)
     Q_FLAG(Glblalm)
 
-    explicit SunSpecTrackerControllerModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
+    explicit SunSpecTrackerControllerModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent = nullptr);
     ~SunSpecTrackerControllerModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
-    quint16 modelId() const;
-    quint16 modelLength() const;
     QString controller() const;
     Typ type() const;
     QString date() const;
     QString time() const;
     quint16 day() const;
-    qint32 manualElevation() const;
-    qint32 manualAzimuth() const;
+    float manualElevation() const;
+    float manualAzimuth() const;
     Glblctl globalMode() const;
     GlblalmFlags globalAlarm() const;
     quint16 trackers() const;
 
+protected:
+    void processBlockData() override;
+
 private:
-    quint16 m_modelId;
-    quint16 m_modelLength;
     QString m_controller;
     Typ m_type;
     QString m_date;
     QString m_time;
     quint16 m_day;
-    qint32 m_manualElevation;
-    qint32 m_manualAzimuth;
+    float m_manualElevation;
+    float m_manualAzimuth;
     Glblctl m_globalMode;
     GlblalmFlags m_globalAlarm;
     qint16 m_sf;

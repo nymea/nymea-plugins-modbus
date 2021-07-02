@@ -1,12 +1,18 @@
 HEADERS += \
     $$PWD/sunspeccommonmodel.h \
     $$PWD/sunspecaggregatormodel.h \
-    $$PWD/sunspecinvertermodel.h \
+    $$PWD/sunspecinvertersinglephasemodel.h \
+    $$PWD/sunspecinvertersplitphasemodel.h \
+    $$PWD/sunspecinverterthreephasemodel.h \
+    $$PWD/sunspecinvertersinglephasefloatmodel.h \
+    $$PWD/sunspecinvertersplitphasefloatmodel.h \
+    $$PWD/sunspecinverterthreephasefloatmodel.h \
     $$PWD/sunspecnameplatemodel.h \
     $$PWD/sunspecsettingsmodel.h \
     $$PWD/sunspecstatusmodel.h \
     $$PWD/sunspeccontrolsmodel.h \
     $$PWD/sunspecstoragemodel.h \
+    $$PWD/sunspecenergystoragebasemodeldeprecatedmodel.h \
     $$PWD/sunspecpricingmodel.h \
     $$PWD/sunspecvoltvarmodel.h \
     $$PWD/sunspecfreqwattparammodel.h \
@@ -29,7 +35,15 @@ HEADERS += \
     $$PWD/sunspechfrtxmodel.h \
     $$PWD/sunspecextsettingsmodel.h \
     $$PWD/sunspecmpptmodel.h \
-    $$PWD/sunspecacmetermodel.h \
+    $$PWD/sunspecmetersinglephasemodel.h \
+    $$PWD/sunspecmetersplitsinglephaseabnmodel.h \
+    $$PWD/sunspecmeterthreephasemodel.h \
+    $$PWD/sunspecmeterthreephasedeltaconnectmodel.h \
+    $$PWD/sunspecmetersinglephasefloatmodel.h \
+    $$PWD/sunspecmetersplitsinglephasefloatmodel.h \
+    $$PWD/sunspecmeterthreephasewyeconnectmodel.h \
+    $$PWD/sunspecdeltaconnectthreephaseabcmetermodel.h \
+    $$PWD/sunspecsecureacmeterselectedreadingsmodel.h \
     $$PWD/sunspecirradiancemodel.h \
     $$PWD/sunspecbomtempmodel.h \
     $$PWD/sunspecinclinometermodel.h \
@@ -37,7 +51,8 @@ HEADERS += \
     $$PWD/sunspecrefpointmodel.h \
     $$PWD/sunspecbasemetmodel.h \
     $$PWD/sunspecminimetmodel.h \
-    $$PWD/sunspecstringcombinermodel.h \
+    $$PWD/sunspecstringcombinercurrentmodel.h \
+    $$PWD/sunspecstringcombineradvancedmodel.h \
     $$PWD/sunspecsolarmodulemodel.h \
     $$PWD/sunspectrackercontrollermodel.h \
     $$PWD/sunspecbatterymodel.h \
@@ -52,12 +67,18 @@ HEADERS += \
 SOURCES += \
     $$PWD/sunspeccommonmodel.cpp \
     $$PWD/sunspecaggregatormodel.cpp \
-    $$PWD/sunspecinvertermodel.cpp \
+    $$PWD/sunspecinvertersinglephasemodel.cpp \
+    $$PWD/sunspecinvertersplitphasemodel.cpp \
+    $$PWD/sunspecinverterthreephasemodel.cpp \
+    $$PWD/sunspecinvertersinglephasefloatmodel.cpp \
+    $$PWD/sunspecinvertersplitphasefloatmodel.cpp \
+    $$PWD/sunspecinverterthreephasefloatmodel.cpp \
     $$PWD/sunspecnameplatemodel.cpp \
     $$PWD/sunspecsettingsmodel.cpp \
     $$PWD/sunspecstatusmodel.cpp \
     $$PWD/sunspeccontrolsmodel.cpp \
     $$PWD/sunspecstoragemodel.cpp \
+    $$PWD/sunspecenergystoragebasemodeldeprecatedmodel.cpp \
     $$PWD/sunspecpricingmodel.cpp \
     $$PWD/sunspecvoltvarmodel.cpp \
     $$PWD/sunspecfreqwattparammodel.cpp \
@@ -80,7 +101,15 @@ SOURCES += \
     $$PWD/sunspechfrtxmodel.cpp \
     $$PWD/sunspecextsettingsmodel.cpp \
     $$PWD/sunspecmpptmodel.cpp \
-    $$PWD/sunspecacmetermodel.cpp \
+    $$PWD/sunspecmetersinglephasemodel.cpp \
+    $$PWD/sunspecmetersplitsinglephaseabnmodel.cpp \
+    $$PWD/sunspecmeterthreephasemodel.cpp \
+    $$PWD/sunspecmeterthreephasedeltaconnectmodel.cpp \
+    $$PWD/sunspecmetersinglephasefloatmodel.cpp \
+    $$PWD/sunspecmetersplitsinglephasefloatmodel.cpp \
+    $$PWD/sunspecmeterthreephasewyeconnectmodel.cpp \
+    $$PWD/sunspecdeltaconnectthreephaseabcmetermodel.cpp \
+    $$PWD/sunspecsecureacmeterselectedreadingsmodel.cpp \
     $$PWD/sunspecirradiancemodel.cpp \
     $$PWD/sunspecbomtempmodel.cpp \
     $$PWD/sunspecinclinometermodel.cpp \
@@ -88,7 +117,8 @@ SOURCES += \
     $$PWD/sunspecrefpointmodel.cpp \
     $$PWD/sunspecbasemetmodel.cpp \
     $$PWD/sunspecminimetmodel.cpp \
-    $$PWD/sunspecstringcombinermodel.cpp \
+    $$PWD/sunspecstringcombinercurrentmodel.cpp \
+    $$PWD/sunspecstringcombineradvancedmodel.cpp \
     $$PWD/sunspecsolarmodulemodel.cpp \
     $$PWD/sunspectrackercontrollermodel.cpp \
     $$PWD/sunspecbatterymodel.cpp \

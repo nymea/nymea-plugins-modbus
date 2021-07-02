@@ -30,11 +30,10 @@
 
 #include "sunspecmpptmodel.h"
 
-SunSpecMpptModel::SunSpecMpptModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecMpptModel::SunSpecMpptModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 160, 8, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 160;
 }
 
 SunSpecMpptModel::~SunSpecMpptModel()
@@ -57,14 +56,6 @@ QString SunSpecMpptModel::label() const
     return "Multiple MPPT Inverter Extension Model";
 }
 
-quint16 SunSpecMpptModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecMpptModel::modelLength() const
-{
-    return m_modelLength;
-}
 SunSpecMpptModel::EvtFlags SunSpecMpptModel::globalEvents() const
 {
     return m_globalEvents;
@@ -77,6 +68,22 @@ quint16 SunSpecMpptModel::timestampPeriod() const
 {
     return m_timestampPeriod;
 }
+void SunSpecMpptModel::processBlockData()
+{
+    // Scale factors
+    m_currentScaleFactor = m_dataPoints.value("DCA_SF").toInt16();
+    m_voltageScaleFactor = m_dataPoints.value("DCV_SF").toInt16();
+    m_powerScaleFactor = m_dataPoints.value("DCW_SF").toInt16();
+    m_energyScaleFactor = m_dataPoints.value("DCWH_SF").toInt16();
+
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_globalEvents = static_cast<EvtFlags>(m_dataPoints.value("Evt").toUInt32());
+    m_numberOfModules = m_dataPoints.value("N").toUInt16();
+    m_timestampPeriod = m_dataPoints.value("TmsPer").toUInt16();
+}
+
 void SunSpecMpptModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

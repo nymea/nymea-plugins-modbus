@@ -30,11 +30,10 @@
 
 #include "sunspeclithiumionmodulemodel.h"
 
-SunSpecLithiumIonModuleModel::SunSpecLithiumIonModuleModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecLithiumIonModuleModel::SunSpecLithiumIonModuleModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 805, 42, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 805;
 }
 
 SunSpecLithiumIonModuleModel::~SunSpecLithiumIonModuleModel()
@@ -57,14 +56,6 @@ QString SunSpecLithiumIonModuleModel::label() const
     return "Lithium-Ion Module Model";
 }
 
-quint16 SunSpecLithiumIonModuleModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecLithiumIonModuleModel::modelLength() const
-{
-    return m_modelLength;
-}
 quint16 SunSpecLithiumIonModuleModel::stringIndex() const
 {
     return m_stringIndex;
@@ -117,7 +108,7 @@ float SunSpecLithiumIonModuleModel::averageCellVoltage() const
 {
     return m_averageCellVoltage;
 }
-qint16 SunSpecLithiumIonModuleModel::maxCellTemperature() const
+float SunSpecLithiumIonModuleModel::maxCellTemperature() const
 {
     return m_maxCellTemperature;
 }
@@ -125,7 +116,7 @@ quint16 SunSpecLithiumIonModuleModel::maxCellTemperatureCell() const
 {
     return m_maxCellTemperatureCell;
 }
-qint16 SunSpecLithiumIonModuleModel::minCellTemperature() const
+float SunSpecLithiumIonModuleModel::minCellTemperature() const
 {
     return m_minCellTemperature;
 }
@@ -133,7 +124,7 @@ quint16 SunSpecLithiumIonModuleModel::minCellTemperatureCell() const
 {
     return m_minCellTemperatureCell;
 }
-qint16 SunSpecLithiumIonModuleModel::averageCellTemperature() const
+float SunSpecLithiumIonModuleModel::averageCellTemperature() const
 {
     return m_averageCellTemperature;
 }
@@ -145,6 +136,41 @@ QString SunSpecLithiumIonModuleModel::serialNumber() const
 {
     return m_serialNumber;
 }
+void SunSpecLithiumIonModuleModel::processBlockData()
+{
+    // Scale factors
+    m_soC_SF = m_dataPoints.value("SoC_SF").toInt16();
+    m_soH_SF = m_dataPoints.value("SoH_SF").toInt16();
+    m_doD_SF = m_dataPoints.value("DoD_SF").toInt16();
+    m_v_SF = m_dataPoints.value("V_SF").toInt16();
+    m_cellV_SF = m_dataPoints.value("CellV_SF").toInt16();
+    m_tmp_SF = m_dataPoints.value("Tmp_SF").toInt16();
+
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_stringIndex = m_dataPoints.value("StrIdx").toUInt16();
+    m_moduleIndex = m_dataPoints.value("ModIdx").toUInt16();
+    m_moduleCellCount = m_dataPoints.value("NCell").toUInt16();
+    m_moduleSoC = m_dataPoints.value("SoC").toFloatWithSSF(m_soC_SF);
+    m_depthOfDischarge = m_dataPoints.value("DoD").toFloatWithSSF(m_doD_SF);
+    m_moduleSoH = m_dataPoints.value("SoH").toFloatWithSSF(m_soH_SF);
+    m_cycleCount = m_dataPoints.value("NCyc").toUInt32();
+    m_moduleVoltage = m_dataPoints.value("V").toFloatWithSSF(m_v_SF);
+    m_maxCellVoltage = m_dataPoints.value("CellVMax").toFloatWithSSF(m_cellV_SF);
+    m_maxCellVoltageCell = m_dataPoints.value("CellVMaxCell").toUInt16();
+    m_minCellVoltage = m_dataPoints.value("CellVMin").toFloatWithSSF(m_cellV_SF);
+    m_minCellVoltageCell = m_dataPoints.value("CellVMinCell").toUInt16();
+    m_averageCellVoltage = m_dataPoints.value("CellVAvg").toFloatWithSSF(m_cellV_SF);
+    m_maxCellTemperature = m_dataPoints.value("CellTmpMax").toFloatWithSSF(m_tmp_SF);
+    m_maxCellTemperatureCell = m_dataPoints.value("CellTmpMaxCell").toUInt16();
+    m_minCellTemperature = m_dataPoints.value("CellTmpMin").toFloatWithSSF(m_tmp_SF);
+    m_minCellTemperatureCell = m_dataPoints.value("CellTmpMinCell").toUInt16();
+    m_averageCellTemperature = m_dataPoints.value("CellTmpAvg").toFloatWithSSF(m_tmp_SF);
+    m_balancedCellCount = m_dataPoints.value("NCellBal").toUInt16();
+    m_serialNumber = m_dataPoints.value("SN").toString();
+}
+
 void SunSpecLithiumIonModuleModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;

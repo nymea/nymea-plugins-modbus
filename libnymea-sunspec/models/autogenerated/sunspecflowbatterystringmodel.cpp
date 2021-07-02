@@ -30,11 +30,10 @@
 
 #include "sunspecflowbatterystringmodel.h"
 
-SunSpecFlowBatteryStringModel::SunSpecFlowBatteryStringModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
-    SunSpecModel(connection, modelId, modelLength, modbusStartRegister, parent)
+SunSpecFlowBatteryStringModel::SunSpecFlowBatteryStringModel(SunSpec *connection, quint16 modbusStartRegister, QObject *parent) :
+    SunSpecModel(connection, 807, 34, modbusStartRegister, parent)
 {
     initDataPoints();
-    m_supportedModelIds << 807;
 }
 
 SunSpecFlowBatteryStringModel::~SunSpecFlowBatteryStringModel()
@@ -57,14 +56,6 @@ QString SunSpecFlowBatteryStringModel::label() const
     return "Flow Battery String Model";
 }
 
-quint16 SunSpecFlowBatteryStringModel::modelId() const
-{
-    return m_modelId;
-}
-quint16 SunSpecFlowBatteryStringModel::modelLength() const
-{
-    return m_modelLength;
-}
 quint16 SunSpecFlowBatteryStringModel::stringIndex() const
 {
     return m_stringIndex;
@@ -125,7 +116,7 @@ float SunSpecFlowBatteryStringModel::averageCellVoltage() const
 {
     return m_averageCellVoltage;
 }
-qint16 SunSpecFlowBatteryStringModel::maxTemperature() const
+float SunSpecFlowBatteryStringModel::maxTemperature() const
 {
     return m_maxTemperature;
 }
@@ -133,7 +124,7 @@ quint16 SunSpecFlowBatteryStringModel::maxTemperatureModule() const
 {
     return m_maxTemperatureModule;
 }
-qint16 SunSpecFlowBatteryStringModel::minTemperature() const
+float SunSpecFlowBatteryStringModel::minTemperature() const
 {
     return m_minTemperature;
 }
@@ -141,7 +132,7 @@ quint16 SunSpecFlowBatteryStringModel::minTemperatureModule() const
 {
     return m_minTemperatureModule;
 }
-qint16 SunSpecFlowBatteryStringModel::averageTemperature() const
+float SunSpecFlowBatteryStringModel::averageTemperature() const
 {
     return m_averageTemperature;
 }
@@ -165,6 +156,45 @@ quint16 SunSpecFlowBatteryStringModel::pad() const
 {
     return m_pad;
 }
+void SunSpecFlowBatteryStringModel::processBlockData()
+{
+    // Scale factors
+    m_modV_SF = m_dataPoints.value("ModV_SF").toInt16();
+    m_cellV_SF = m_dataPoints.value("CellV_SF").toInt16();
+    m_tmp_SF = m_dataPoints.value("Tmp_SF").toInt16();
+    m_soC_SF = m_dataPoints.value("SoC_SF").toInt16();
+    m_oCV_SF = m_dataPoints.value("OCV_SF").toInt16();
+
+    // Update properties according to the data point type
+    m_modelId = m_dataPoints.value("ID").toUInt16();
+    m_modelLength = m_dataPoints.value("L").toUInt16();
+    m_stringIndex = m_dataPoints.value("Idx").toUInt16();
+    m_moduleCount = m_dataPoints.value("NMod").toUInt16();
+    m_connectedModuleCount = m_dataPoints.value("NModCon").toUInt16();
+    m_maxModuleVoltage = m_dataPoints.value("ModVMax").toFloatWithSSF(m_modV_SF);
+    m_maxModuleVoltageModule = m_dataPoints.value("ModVMaxMod").toUInt16();
+    m_minModuleVoltage = m_dataPoints.value("ModVMin").toFloatWithSSF(m_modV_SF);
+    m_minModuleVoltageModule = m_dataPoints.value("ModVMinMod").toUInt16();
+    m_averageModuleVoltage = m_dataPoints.value("ModVAvg").toFloatWithSSF(m_modV_SF);
+    m_maxCellVoltage = m_dataPoints.value("CellVMax").toFloatWithSSF(m_cellV_SF);
+    m_maxCellVoltageModule = m_dataPoints.value("CellVMaxMod").toUInt16();
+    m_maxCellVoltageStack = m_dataPoints.value("CellVMaxStk").toUInt16();
+    m_minCellVoltage = m_dataPoints.value("CellVMin").toFloatWithSSF(m_cellV_SF);
+    m_minCellVoltageModule = m_dataPoints.value("CellVMinMod").toUInt16();
+    m_minCellVoltageStack = m_dataPoints.value("CellVMinStk").toUInt16();
+    m_averageCellVoltage = m_dataPoints.value("CellVAvg").toFloatWithSSF(m_cellV_SF);
+    m_maxTemperature = m_dataPoints.value("TmpMax").toFloatWithSSF(m_tmp_SF);
+    m_maxTemperatureModule = m_dataPoints.value("TmpMaxMod").toUInt16();
+    m_minTemperature = m_dataPoints.value("TmpMin").toFloatWithSSF(m_tmp_SF);
+    m_minTemperatureModule = m_dataPoints.value("TmpMinMod").toUInt16();
+    m_averageTemperature = m_dataPoints.value("TmpAvg").toFloatWithSSF(m_tmp_SF);
+    m_stringEvent1 = static_cast<Evt1Flags>(m_dataPoints.value("Evt1").toUInt32());
+    m_stringEvent2 = static_cast<Evt2Flags>(m_dataPoints.value("Evt2").toUInt32());
+    m_vendorEventBitfield1 = m_dataPoints.value("EvtVnd1").toUInt32();
+    m_vendorEventBitfield2 = m_dataPoints.value("EvtVnd2").toUInt32();
+    m_pad = m_dataPoints.value("Pad1").toUInt16();
+}
+
 void SunSpecFlowBatteryStringModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
