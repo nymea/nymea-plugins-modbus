@@ -1,3 +1,33 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+*
+* Copyright 2013 - 2020, nymea GmbH
+* Contact: contact@nymea.io
+*
+* This file is part of nymea.
+* This project including source code and documentation is protected by
+* copyright law, and remains the property of nymea GmbH. All rights, including
+* reproduction, publication, editing and translation, are reserved. The use of
+* this project is subject to the terms of a license agreement to be concluded
+* with nymea GmbH in accordance with the terms of use of nymea GmbH, available
+* under https://nymea.io/license
+*
+* GNU Lesser General Public License Usage
+* Alternatively, this project may be redistributed and/or modified under the
+* terms of the GNU Lesser General Public License as published by the Free
+* Software Foundation; version 3. This project is distributed in the hope that
+* it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+* warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+* Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public License
+* along with this project. If not, see <https://www.gnu.org/licenses/>.
+*
+* For any further details and any questions please contact us under
+* contact@nymea.io or see our FAQ/Licensing Information on
+* https://nymea.io/license/faq
+*
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include "sunspecdatapoint.h"
 #include <math.h>
 
@@ -139,7 +169,95 @@ void SunSpecDataPoint::setRawData(const QVector<quint16> &rawData)
 bool SunSpecDataPoint::isValid() const
 {
     // TODO: verify if value is not invalid code
-    return true;
+    if (m_rawData.isEmpty())
+        return false;
+
+    bool valid = true;
+    switch (m_dataType) {
+    case DataType::Pad:
+    case DataType::Int16:
+    case DataType::ScaleFactor:
+        if (toUInt16() == 0x8000)
+            valid = false;
+
+        break;
+    case DataType::Int32:
+        if (toUInt32() == 0x80000000)
+            valid = false;
+
+        break;
+    case DataType::Int64:
+        if (toUInt64() == 0x8000000000000000)
+            valid = false;
+
+        break;
+    case DataType::Raw16:
+        if (toUInt16() == 0x0000)
+            valid = false;
+        break;
+    case DataType::Acc16:
+        if (toUInt16() == 0x0000)
+            valid = false;
+
+        break;
+    case DataType::IpV4Address:
+    case DataType::Acc32:
+        if (toUInt32() == 0x00000000)
+            valid = false;
+
+        break;
+    case DataType::BitField16:
+    case DataType::Enum16:
+    case DataType::UInt16:
+        if (toUInt16() == 0xFFFF)
+            valid = false;
+        break;
+    case DataType::BitField32:
+    case DataType::Enum32:
+    case DataType::UInt32:
+        if (toUInt32() == 0xFFFFFFFF)
+            valid = false;
+        break;
+    case DataType::IpV6Address:
+    case DataType::Acc64:
+        if (toUInt64() == 0x0000000000000000)
+            valid = false;
+
+        break;
+        break;
+    case DataType::BitField64:
+
+        break;
+    case DataType::Float32:
+        if (toUInt32() == 0x7FC00000)
+            valid = false;
+        break;
+    case DataType::Float64:
+        if (toUInt64() == 0x7FC0000000000000)
+            valid = false;
+        break;
+    case DataType::String: {
+        bool isNull = true;
+        for (int i = 0; i < m_rawData.count(); i++) {
+            if (m_rawData.at(i) != 0x0000) {
+                isNull = false;
+                valid = true;
+                break;
+            }
+        }
+
+        if (isNull)
+            valid = false;
+
+        break;
+    }
+    case DataType::EUI48:
+    case DataType::Group:
+    case DataType::Sync:
+        break;
+    }
+
+    return valid;
 }
 
 SunSpecDataPoint::DataType SunSpecDataPoint::stringToDataType(const QString &typString)
@@ -292,8 +410,31 @@ float SunSpecDataPoint::toFloatWithSSF(qint16 scaleFactor) const
 double SunSpecDataPoint::toDouble() const
 {
     Q_ASSERT_X(m_dataType == Float64,  "SunSpecDataPoint", "invalid raw data size for converting value to double");
-    quint32 rawValue = toUInt64();
+    quint64 rawValue = toUInt64();
     double value = 0;
     memcpy(&value, &rawValue, sizeof(quint64));
     return value;
+}
+
+QVector<quint16> SunSpecDataPoint::convertFromUInt16(quint16 value)
+{
+    return QVector<quint16>() << value;
+}
+
+QVector<quint16> SunSpecDataPoint::convertFromInt16(qint16 value)
+{
+    return SunSpecDataPoint::convertFromUInt16(static_cast<quint16>(value));
+}
+
+QVector<quint16> SunSpecDataPoint::convertFromUInt32(quint32 value)
+{
+    QVector<quint16> values;
+    values << static_cast<quint16>(value | 0x000000FF);
+    values << static_cast<quint16>(value >> 16);
+    return values;
+}
+
+QVector<quint16> SunSpecDataPoint::convertFromInt32(qint32 value)
+{
+    return SunSpecDataPoint::convertFromUInt32(static_cast<quint32>(value));
 }

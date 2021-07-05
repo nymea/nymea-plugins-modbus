@@ -7,14 +7,16 @@
 #include "sunspec.h"
 #include "sunspecdatapoint.h"
 
+class SunSpecConnection;
+
 class SunSpecModel : public QObject
 {
     Q_OBJECT
 public:
-    explicit SunSpecModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
+    explicit SunSpecModel(SunSpecConnection *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
     virtual ~SunSpecModel() = default;
 
-    SunSpec *connection() const;
+    SunSpecConnection *connection() const;
 
     virtual QString name() const = 0;
     virtual QString description() const = 0;
@@ -30,7 +32,7 @@ public:
     virtual void readBlockData();
 
 protected:
-    SunSpec *m_connection = nullptr;
+    SunSpecConnection *m_connection = nullptr;
     QTimer m_initTimer;
 
     quint16 m_modelId;
@@ -53,5 +55,7 @@ signals:
     void blockUpdated();
 
 };
+
+QDebug operator<<(QDebug debug, SunSpecModel *model);
 
 #endif // SUNSPECMODEL_H

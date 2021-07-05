@@ -34,7 +34,7 @@
 #include "integrations/integrationplugin.h"
 #include "plugintimer.h"
 
-#include "../modbus/modbustcpmaster.h"
+#include <sunspecconnection.h>
 
 #include "sunspecinverter.h"
 #include "sunspecstorage.h"
@@ -74,7 +74,7 @@ private:
 
     PluginTimer *m_refreshTimer = nullptr;
     QHash<QUuid, ThingActionInfo *> m_asyncActions;
-    QHash<ThingId, SunSpec *> m_sunSpecConnections;
+    QHash<ThingId, SunSpecConnection *> m_sunSpecConnections;
 
     QHash<Thing *, SunSpecInverter *> m_sunSpecInverters;
     QHash<Thing *, SunSpecStorage *> m_sunSpecStorages;
@@ -90,8 +90,6 @@ private slots:
     void onRefreshTimer();
 
     void onPluginConfigurationChanged(const ParamTypeId &paramTypeId, const QVariant &value);
-
-    void onConnectionStateChanged(bool status);
 
     void onFoundSunSpecModel(SunSpec::ModelId modelId, int modbusStartRegister);
     void onSunSpecModelSearchFinished(const QHash<SunSpec::ModelId, int> &modelIds);

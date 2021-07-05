@@ -1,4 +1,4 @@
-QT += network serialbus
+QT *= network serialbus
 
 top_srcdir=$$PWD
 top_builddir=$$shadowed($$PWD)

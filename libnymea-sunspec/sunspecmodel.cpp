@@ -1,6 +1,7 @@
 #include "sunspecmodel.h"
+#include "sunspecconnection.h"
 
-SunSpecModel::SunSpecModel(SunSpec *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
+SunSpecModel::SunSpecModel(SunSpecConnection *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
     QObject(parent),
     m_connection(connection),
     m_modelId(modelId),
@@ -16,7 +17,7 @@ SunSpecModel::SunSpecModel(SunSpec *connection, quint16 modelId, quint16 modelLe
     });
 }
 
-SunSpec *SunSpecModel::connection() const
+SunSpecConnection *SunSpecModel::connection() const
 {
     return m_connection;
 }
@@ -109,4 +110,10 @@ void SunSpecModel::setInitializedFinished()
         m_initialized = true;
         emit initFinished(true);
     }
+}
+
+QDebug operator<<(QDebug debug, SunSpecModel *model)
+{
+    debug.nospace().noquote() << "SunSpecModel(" << model->modelId() << ", " << model->name() << ", " << model->label() << ")";
+    return debug.space().quote();
 }
