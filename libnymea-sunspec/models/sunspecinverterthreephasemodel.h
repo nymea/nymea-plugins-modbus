@@ -166,4 +166,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecInverterThreePhaseModel *model);
+
 #endif // SUNSPECINVERTERTHREEPHASEMODEL_H

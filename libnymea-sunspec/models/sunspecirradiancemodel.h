@@ -59,4 +59,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecIrradianceModel *model);
+
 #endif // SUNSPECIRRADIANCEMODEL_H

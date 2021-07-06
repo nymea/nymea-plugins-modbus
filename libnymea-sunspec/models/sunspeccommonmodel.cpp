@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecCommonModel::SunSpecCommonModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 1, 66, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 1, 66, parent)
 {
-    Q_ASSERT_X(length == 66,  "SunSpecCommonModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 66,  "SunSpecCommonModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -103,6 +103,8 @@ void SunSpecCommonModel::processBlockData()
     m_serialNumber = m_dataPoints.value("SN").toString();
     m_deviceAddress = m_dataPoints.value("DA").toUInt16();
     m_pad = m_dataPoints.value("Pad").toUInt16();
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecCommonModel::initDataPoints()
@@ -114,7 +116,7 @@ void SunSpecCommonModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -124,7 +126,7 @@ void SunSpecCommonModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint manufacturerDataPoint;
@@ -135,7 +137,7 @@ void SunSpecCommonModel::initDataPoints()
     manufacturerDataPoint.setSize(16);
     manufacturerDataPoint.setAddressOffset(2);
     manufacturerDataPoint.setBlockOffset(0);
-    manufacturerDataPoint.setDataType(SunSpecDataPoint::stringToDataType("string"));
+    manufacturerDataPoint.setSunSpecDataType("string");
     m_dataPoints.insert(manufacturerDataPoint.name(), manufacturerDataPoint);
 
     SunSpecDataPoint modelDataPoint;
@@ -146,7 +148,7 @@ void SunSpecCommonModel::initDataPoints()
     modelDataPoint.setSize(16);
     modelDataPoint.setAddressOffset(18);
     modelDataPoint.setBlockOffset(16);
-    modelDataPoint.setDataType(SunSpecDataPoint::stringToDataType("string"));
+    modelDataPoint.setSunSpecDataType("string");
     m_dataPoints.insert(modelDataPoint.name(), modelDataPoint);
 
     SunSpecDataPoint optionsDataPoint;
@@ -156,7 +158,7 @@ void SunSpecCommonModel::initDataPoints()
     optionsDataPoint.setSize(8);
     optionsDataPoint.setAddressOffset(34);
     optionsDataPoint.setBlockOffset(32);
-    optionsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("string"));
+    optionsDataPoint.setSunSpecDataType("string");
     m_dataPoints.insert(optionsDataPoint.name(), optionsDataPoint);
 
     SunSpecDataPoint versionDataPoint;
@@ -166,7 +168,7 @@ void SunSpecCommonModel::initDataPoints()
     versionDataPoint.setSize(8);
     versionDataPoint.setAddressOffset(42);
     versionDataPoint.setBlockOffset(40);
-    versionDataPoint.setDataType(SunSpecDataPoint::stringToDataType("string"));
+    versionDataPoint.setSunSpecDataType("string");
     m_dataPoints.insert(versionDataPoint.name(), versionDataPoint);
 
     SunSpecDataPoint serialNumberDataPoint;
@@ -177,7 +179,7 @@ void SunSpecCommonModel::initDataPoints()
     serialNumberDataPoint.setSize(16);
     serialNumberDataPoint.setAddressOffset(50);
     serialNumberDataPoint.setBlockOffset(48);
-    serialNumberDataPoint.setDataType(SunSpecDataPoint::stringToDataType("string"));
+    serialNumberDataPoint.setSunSpecDataType("string");
     m_dataPoints.insert(serialNumberDataPoint.name(), serialNumberDataPoint);
 
     SunSpecDataPoint deviceAddressDataPoint;
@@ -187,7 +189,7 @@ void SunSpecCommonModel::initDataPoints()
     deviceAddressDataPoint.setSize(1);
     deviceAddressDataPoint.setAddressOffset(66);
     deviceAddressDataPoint.setBlockOffset(64);
-    deviceAddressDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    deviceAddressDataPoint.setSunSpecDataType("uint16");
     deviceAddressDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(deviceAddressDataPoint.name(), deviceAddressDataPoint);
 
@@ -197,8 +199,56 @@ void SunSpecCommonModel::initDataPoints()
     padDataPoint.setSize(1);
     padDataPoint.setAddressOffset(67);
     padDataPoint.setBlockOffset(65);
-    padDataPoint.setDataType(SunSpecDataPoint::stringToDataType("pad"));
+    padDataPoint.setSunSpecDataType("pad");
     m_dataPoints.insert(padDataPoint.name(), padDataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecCommonModel *model)
+{
+    debug.nospace().noquote() << "SunSpecCommonModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    if (model->dataPoints().value("Mn").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Mn") << "--> " << model->manufacturer() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Mn") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Md").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Md") << "--> " << model->model() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Md") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Opt").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Opt") << "--> " << model->options() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Opt") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Vr").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Vr") << "--> " << model->version() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Vr") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("SN").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("SN") << "--> " << model->serialNumber() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("SN") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("DA").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DA") << "--> " << model->deviceAddress() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DA") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Pad").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad") << "--> " << model->pad() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad") << "--> NaN" << endl;
+    }
+
+
+    return debug.space().quote();
+}

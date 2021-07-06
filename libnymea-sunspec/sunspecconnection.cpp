@@ -1,4 +1,35 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+*
+* Copyright 2013 - 2021, nymea GmbH
+* Contact: contact@nymea.io
+*
+* This fileDescriptor is part of nymea.
+* This project including source code and documentation is protected by
+* copyright law, and remains the property of nymea GmbH. All rights, including
+* reproduction, publication, editing and translation, are reserved. The use of
+* this project is subject to the terms of a license agreement to be concluded
+* with nymea GmbH in accordance with the terms of use of nymea GmbH, available
+* under https://nymea.io/license
+*
+* GNU Lesser General Public License Usage
+* Alternatively, this project may be redistributed and/or modified under the
+* terms of the GNU Lesser General Public License as published by the Free
+* Software Foundation; version 3. This project is distributed in the hope that
+* it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+* warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+* Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public License
+* along with this project. If not, see <https://www.gnu.org/licenses/>.
+*
+* For any further details and any questions please contact us under
+* contact@nymea.io or see our FAQ/Licensing Information on
+* https://nymea.io/license/faq
+*
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include "sunspecconnection.h"
+#include "sunspecmodel.h"
 #include "models/sunspecmodelfactory.h"
 
 SunSpecConnection::SunSpecConnection(const QHostAddress &hostAddress, uint port, uint slaveId, QObject *parent) :
@@ -115,6 +146,11 @@ bool SunSpecConnection::connected() const
     return m_modbusTcpClient->state() == QModbusDevice::ConnectedState;
 }
 
+bool SunSpecConnection::discoveryRunning() const
+{
+    return m_discoveryRunning;
+}
+
 bool SunSpecConnection::connectDevice()
 {
     qCDebug(dcSunSpec()) << "Connecting" << this << "...";
@@ -127,12 +163,23 @@ void SunSpecConnection::disconnectDevice()
     m_modbusTcpClient->disconnectDevice();
 }
 
-bool SunSpecConnection::startSunSpecDiscovery()
+QList<SunSpecModel *> SunSpecConnection::models() const
+{
+    return m_models;
+}
+
+bool SunSpecConnection::startDiscovery()
 {
     // Verify connection state
     if (!connected()) {
         qCWarning(dcSunSpec()) << "Could not start SunSpec model discovery." << "The" << this << "is not connected.";
+        setDiscoveryRunning(false);
         return false;
+    }
+
+    if (m_discoveryRunning) {
+        qCDebug(dcSunSpec()) << "Start SunSpec discovery requested but already running on" << this;
+        return true;
     }
 
     // Create base register queue
@@ -142,7 +189,91 @@ bool SunSpecConnection::startSunSpecDiscovery()
     m_baseRegisterQueue.enqueue(0);
 
     qCDebug(dcSunSpec()) << "Starting SunSpec discovery on" << this;
-    return scanSunspecBaseRegister(m_baseRegisterQueue.dequeue());
+    m_modelDiscoveryResult.clear();
+    setDiscoveryRunning(true);
+    if (!scanSunspecBaseRegister(m_baseRegisterQueue.dequeue())) {
+        setDiscoveryRunning(false);
+        return false;
+    }
+
+    return true;
+}
+
+void SunSpecConnection::processDiscoveryResult()
+{
+    qCDebug(dcSunSpec()) << "Creating models from the discovery results...";
+
+    if (!m_uninitializedModels.isEmpty()) {
+        qCWarning(dcSunSpec()) << "Having still uninitialized modules in the pipeline. This should never happen (please report a bug). Removing unintialized modules.";
+        qDeleteAll(m_uninitializedModels);
+        m_uninitializedModels.clear();
+    }
+
+    SunSpecModelFactory factory;
+    foreach (ModuleDiscoveryResult result, m_modelDiscoveryResult) {
+        SunSpecModel *model = factory.createModel(this, result.modbusStartRegister, result.modelId, result.modelLength);
+        if (model) {
+            if (modelAlreadyAdded(model)) {
+                qCWarning(dcSunSpec()) << "Detected an already added model" << model << "and keep the already existing one.";
+                model->deleteLater();
+            } else {
+                m_uninitializedModels.append(model);
+                qCDebug(dcSunSpec()) << "--> [+]" << model;
+            }
+        } else {
+            qCWarning(dcSunSpec()) << "--> [!] Could not create model object for model ID" << result.modelId << "because the model does not get handled yet.";
+        }
+    }
+
+    // If no models found to initialize, we are done
+    if (m_uninitializedModels.isEmpty()) {
+        qCDebug(dcSunSpec()) << "No modules to initialize. Discovery finished successfully.";
+        setDiscoveryRunning(false);
+        emit discoveryFinished(true);
+        return;
+    }
+
+    // Init each model and finish when all uninitialized models are finished.
+    foreach (SunSpecModel *model, m_uninitializedModels) {
+        connect(model, &SunSpecModel::initFinished, this, [this, model](bool success){
+            m_uninitializedModels.removeAll(model);
+            if (success) {
+                m_models.append(model);
+            } else {
+                qCWarning(dcSunSpec()) << "Failed to initialize" << model << "Deleting the object.";
+                model->deleteLater();
+            }
+
+            if (m_uninitializedModels.isEmpty()) {
+                qCDebug(dcSunSpec()) << "All modules initialized. Discovery finished successfully.";
+                setDiscoveryRunning(false);
+                emit discoveryFinished(true);
+            }
+        });
+
+        model->init();
+    }
+
+}
+
+void SunSpecConnection::setDiscoveryRunning(bool discoveryRunning)
+{
+    if (m_discoveryRunning == discoveryRunning)
+        return;
+
+    m_discoveryRunning = discoveryRunning;
+    emit discoveryRunningChanged(m_discoveryRunning);
+}
+
+bool SunSpecConnection::modelAlreadyAdded(SunSpecModel *model) const
+{
+    foreach (SunSpecModel *m, m_models) {
+        if (*m == *model) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool SunSpecConnection::scanSunspecBaseRegister(quint16 baseRegister)
@@ -169,7 +300,7 @@ bool SunSpecConnection::scanSunspecBaseRegister(quint16 baseRegister)
             quint32 registerContent = (unit.value(0) << 16 | unit.value(1));
             if (registerContent == 0x53756e53) {
                 //Well-known value. Uniquely identifies this as a SunSpec Modbus model
-                qCDebug(dcSunSpec()) << "Found 'SunS' identifier on register on" << this << baseRegister;
+                qCDebug(dcSunSpec()) << "Found 'SunS' identifier register" << baseRegister << "on" << this;
                 m_baseRegisterQueue.clear();
 
                 m_baseRegister = baseRegister;
@@ -195,7 +326,8 @@ void SunSpecConnection::scanNextSunspecBaseRegister()
 {
     if (m_baseRegisterQueue.isEmpty()) {
         qCDebug(dcSunSpec()) << "Finished with SunSpec discovery. No SunSpec register has been found on" << this;
-        emit sunSpecDiscoveryFinished(false);
+        setDiscoveryRunning(false);
+        emit discoveryFinished(false);
         return;
     }
 
@@ -225,35 +357,30 @@ void SunSpecConnection::scanModelsOnBaseRegister(quint16 offset)
         if (reply->error() == QModbusDevice::NoError) {
 
             const QModbusDataUnit unit = reply->result();
+            quint16 modbusStartRegister = unit.startAddress();
             quint16 modelId  = unit.value(0);
             int modelLength = unit.value(1);
 
             // Check if we reached the end of models
             if (modelId == 0xFFFF) {
                 qCDebug(dcSunSpec()) << "Scan for SunSpec models on" << this << m_baseRegister << "finished successfully";
-                //emit sunspecModelSearchFinished(m_modelList);
-
-                SunSpecModelFactory factory;
-                foreach (quint16 modelId, m_modelDiscoveryResult.keys()) {
-                    SunSpecModel *model = factory.createModel(this, modelId, m_modelDiscoveryResult[modelId]);
-                    if (model) {
-                        qCDebug(dcSunSpec()) << "-->" << model;
-                    } else {
-                        qCWarning(dcSunSpec()) << "--> Could not create model object for model ID" << modelId;
-                    }
-                }
-
+                processDiscoveryResult();
                 return;
             }
 
-            qCDebug(dcSunSpec()) << "Discovered SunSpec model" << modelId << "with length" << modelLength;
-            m_modelDiscoveryResult.insert(modelId, modelLength);
+            qCDebug(dcSunSpec()) << "Discovered SunSpec model on" << this << modelId << "with length" << modelLength;
+            ModuleDiscoveryResult result;
+            result.modbusStartRegister = modbusStartRegister;
+            result.modelId = modelId;
+            result.modelLength = modelLength;
+            m_modelDiscoveryResult.append(result);
 
             // Scan next model block, current offset + 2 header bytes + model length
             scanModelsOnBaseRegister(offset + 2 + modelLength);
         } else {
             qCWarning(dcSunSpec()) << "Error occured while reading model header from" << this << "using offset" << offset << m_modbusTcpClient->errorString();
-            // TODO: finish scan with error
+            setDiscoveryRunning(false);
+            emit discoveryFinished(false);
         }
     });
 }

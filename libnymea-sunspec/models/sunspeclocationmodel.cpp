@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecLocationModel::SunSpecLocationModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 305, 36, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 305, 36, parent)
 {
-    Q_ASSERT_X(length == 36,  "SunSpecLocationModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 36,  "SunSpecLocationModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -92,6 +92,8 @@ void SunSpecLocationModel::processBlockData()
     m_lat = m_dataPoints.value("Lat").toFloatWithSSF(-7);
     m_longitude = m_dataPoints.value("Long").toFloatWithSSF(-7);
     m_altitude = m_dataPoints.value("Alt").toInt32();
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecLocationModel::initDataPoints()
@@ -103,7 +105,7 @@ void SunSpecLocationModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -113,7 +115,7 @@ void SunSpecLocationModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint tmDataPoint;
@@ -124,7 +126,7 @@ void SunSpecLocationModel::initDataPoints()
     tmDataPoint.setSize(6);
     tmDataPoint.setAddressOffset(2);
     tmDataPoint.setBlockOffset(0);
-    tmDataPoint.setDataType(SunSpecDataPoint::stringToDataType("string"));
+    tmDataPoint.setSunSpecDataType("string");
     m_dataPoints.insert(tmDataPoint.name(), tmDataPoint);
 
     SunSpecDataPoint dateDataPoint;
@@ -135,7 +137,7 @@ void SunSpecLocationModel::initDataPoints()
     dateDataPoint.setSize(4);
     dateDataPoint.setAddressOffset(8);
     dateDataPoint.setBlockOffset(6);
-    dateDataPoint.setDataType(SunSpecDataPoint::stringToDataType("string"));
+    dateDataPoint.setSunSpecDataType("string");
     m_dataPoints.insert(dateDataPoint.name(), dateDataPoint);
 
     SunSpecDataPoint locationDataPoint;
@@ -146,7 +148,7 @@ void SunSpecLocationModel::initDataPoints()
     locationDataPoint.setSize(20);
     locationDataPoint.setAddressOffset(12);
     locationDataPoint.setBlockOffset(10);
-    locationDataPoint.setDataType(SunSpecDataPoint::stringToDataType("string"));
+    locationDataPoint.setSunSpecDataType("string");
     m_dataPoints.insert(locationDataPoint.name(), locationDataPoint);
 
     SunSpecDataPoint latDataPoint;
@@ -158,7 +160,7 @@ void SunSpecLocationModel::initDataPoints()
     latDataPoint.setAddressOffset(32);
     latDataPoint.setBlockOffset(30);
     latDataPoint.setScaleFactorName("-7");
-    latDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int32"));
+    latDataPoint.setSunSpecDataType("int32");
     m_dataPoints.insert(latDataPoint.name(), latDataPoint);
 
     SunSpecDataPoint longitudeDataPoint;
@@ -170,7 +172,7 @@ void SunSpecLocationModel::initDataPoints()
     longitudeDataPoint.setAddressOffset(34);
     longitudeDataPoint.setBlockOffset(32);
     longitudeDataPoint.setScaleFactorName("-7");
-    longitudeDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int32"));
+    longitudeDataPoint.setSunSpecDataType("int32");
     m_dataPoints.insert(longitudeDataPoint.name(), longitudeDataPoint);
 
     SunSpecDataPoint altitudeDataPoint;
@@ -181,8 +183,50 @@ void SunSpecLocationModel::initDataPoints()
     altitudeDataPoint.setSize(2);
     altitudeDataPoint.setAddressOffset(36);
     altitudeDataPoint.setBlockOffset(34);
-    altitudeDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int32"));
+    altitudeDataPoint.setSunSpecDataType("int32");
     m_dataPoints.insert(altitudeDataPoint.name(), altitudeDataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecLocationModel *model)
+{
+    debug.nospace().noquote() << "SunSpecLocationModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    if (model->dataPoints().value("Tm").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Tm") << "--> " << model->tm() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Tm") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Date").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Date") << "--> " << model->date() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Date") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Loc").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Loc") << "--> " << model->location() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Loc") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Lat").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Lat") << "--> " << model->lat() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Lat") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Long").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Long") << "--> " << model->longitude() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Long") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Alt").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Alt") << "--> " << model->altitude() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Alt") << "--> NaN" << endl;
+    }
+
+
+    return debug.space().quote();
+}

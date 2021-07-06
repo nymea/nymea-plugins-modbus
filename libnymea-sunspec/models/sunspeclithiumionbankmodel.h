@@ -105,4 +105,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecLithiumIonBankModel *model);
+
 #endif // SUNSPECLITHIUMIONBANKMODEL_H

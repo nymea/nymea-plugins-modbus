@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecTrackerControllerModel::SunSpecTrackerControllerModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 601, 26, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 601, 26, parent)
 {
-    Q_ASSERT_X(length == 26,  "SunSpecTrackerControllerModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 26,  "SunSpecTrackerControllerModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -133,6 +133,8 @@ void SunSpecTrackerControllerModel::processBlockData()
     m_globalMode = static_cast<Glblctl>(m_dataPoints.value("GlblCtl").toUInt16());
     m_globalAlarm = static_cast<GlblalmFlags>(m_dataPoints.value("GlblAlm").toUInt16());
     m_trackers = m_dataPoints.value("N").toUInt16();
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecTrackerControllerModel::initDataPoints()
@@ -144,7 +146,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -154,7 +156,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint controllerDataPoint;
@@ -164,7 +166,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     controllerDataPoint.setSize(8);
     controllerDataPoint.setAddressOffset(2);
     controllerDataPoint.setBlockOffset(0);
-    controllerDataPoint.setDataType(SunSpecDataPoint::stringToDataType("string"));
+    controllerDataPoint.setSunSpecDataType("string");
     m_dataPoints.insert(controllerDataPoint.name(), controllerDataPoint);
 
     SunSpecDataPoint typeDataPoint;
@@ -175,7 +177,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     typeDataPoint.setSize(1);
     typeDataPoint.setAddressOffset(10);
     typeDataPoint.setBlockOffset(8);
-    typeDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    typeDataPoint.setSunSpecDataType("enum16");
     m_dataPoints.insert(typeDataPoint.name(), typeDataPoint);
 
     SunSpecDataPoint dateDataPoint;
@@ -186,7 +188,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     dateDataPoint.setSize(5);
     dateDataPoint.setAddressOffset(11);
     dateDataPoint.setBlockOffset(9);
-    dateDataPoint.setDataType(SunSpecDataPoint::stringToDataType("string"));
+    dateDataPoint.setSunSpecDataType("string");
     m_dataPoints.insert(dateDataPoint.name(), dateDataPoint);
 
     SunSpecDataPoint timeDataPoint;
@@ -197,7 +199,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     timeDataPoint.setSize(3);
     timeDataPoint.setAddressOffset(16);
     timeDataPoint.setBlockOffset(14);
-    timeDataPoint.setDataType(SunSpecDataPoint::stringToDataType("string"));
+    timeDataPoint.setSunSpecDataType("string");
     m_dataPoints.insert(timeDataPoint.name(), timeDataPoint);
 
     SunSpecDataPoint dayDataPoint;
@@ -207,7 +209,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     dayDataPoint.setSize(1);
     dayDataPoint.setAddressOffset(19);
     dayDataPoint.setBlockOffset(17);
-    dayDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    dayDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(dayDataPoint.name(), dayDataPoint);
 
     SunSpecDataPoint manualElevationDataPoint;
@@ -219,7 +221,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     manualElevationDataPoint.setAddressOffset(20);
     manualElevationDataPoint.setBlockOffset(18);
     manualElevationDataPoint.setScaleFactorName("Dgr_SF");
-    manualElevationDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int32"));
+    manualElevationDataPoint.setSunSpecDataType("int32");
     manualElevationDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(manualElevationDataPoint.name(), manualElevationDataPoint);
 
@@ -232,7 +234,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     manualAzimuthDataPoint.setAddressOffset(22);
     manualAzimuthDataPoint.setBlockOffset(20);
     manualAzimuthDataPoint.setScaleFactorName("Dgr_SF");
-    manualAzimuthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int32"));
+    manualAzimuthDataPoint.setSunSpecDataType("int32");
     manualAzimuthDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(manualAzimuthDataPoint.name(), manualAzimuthDataPoint);
 
@@ -243,7 +245,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     globalModeDataPoint.setSize(1);
     globalModeDataPoint.setAddressOffset(24);
     globalModeDataPoint.setBlockOffset(22);
-    globalModeDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    globalModeDataPoint.setSunSpecDataType("enum16");
     globalModeDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(globalModeDataPoint.name(), globalModeDataPoint);
 
@@ -254,7 +256,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     globalAlarmDataPoint.setSize(1);
     globalAlarmDataPoint.setAddressOffset(25);
     globalAlarmDataPoint.setBlockOffset(23);
-    globalAlarmDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield16"));
+    globalAlarmDataPoint.setSunSpecDataType("bitfield16");
     m_dataPoints.insert(globalAlarmDataPoint.name(), globalAlarmDataPoint);
 
     SunSpecDataPoint sfDataPoint;
@@ -265,7 +267,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     sfDataPoint.setSize(1);
     sfDataPoint.setAddressOffset(26);
     sfDataPoint.setBlockOffset(24);
-    sfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    sfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(sfDataPoint.name(), sfDataPoint);
 
     SunSpecDataPoint trackersDataPoint;
@@ -276,8 +278,74 @@ void SunSpecTrackerControllerModel::initDataPoints()
     trackersDataPoint.setSize(1);
     trackersDataPoint.setAddressOffset(27);
     trackersDataPoint.setBlockOffset(25);
-    trackersDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    trackersDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(trackersDataPoint.name(), trackersDataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecTrackerControllerModel *model)
+{
+    debug.nospace().noquote() << "SunSpecTrackerControllerModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    if (model->dataPoints().value("Nam").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Nam") << "--> " << model->controller() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Nam") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Typ").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Typ") << "--> " << model->type() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Typ") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("DtLoc").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DtLoc") << "--> " << model->date() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DtLoc") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TmLoc").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmLoc") << "--> " << model->time() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmLoc") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Day").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Day") << "--> " << model->day() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Day") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("GlblElCtl").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("GlblElCtl") << "--> " << model->manualElevation() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("GlblElCtl") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("GlblAzCtl").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("GlblAzCtl") << "--> " << model->manualAzimuth() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("GlblAzCtl") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("GlblCtl").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("GlblCtl") << "--> " << model->globalMode() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("GlblCtl") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("GlblAlm").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("GlblAlm") << "--> " << model->globalAlarm() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("GlblAlm") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("N").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("N") << "--> " << model->trackers() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("N") << "--> NaN" << endl;
+    }
+
+
+    return debug.space().quote();
+}

@@ -93,4 +93,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecVoltVarModel *model);
+
 #endif // SUNSPECVOLTVARMODEL_H

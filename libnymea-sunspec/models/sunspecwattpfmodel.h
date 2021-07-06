@@ -93,4 +93,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecWattPfModel *model);
+
 #endif // SUNSPECWATTPFMODEL_H

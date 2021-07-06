@@ -120,4 +120,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecReactiveCurrentModel *model);
+
 #endif // SUNSPECREACTIVECURRENTMODEL_H

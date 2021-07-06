@@ -67,4 +67,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecMiniMetModel *model);
+
 #endif // SUNSPECMINIMETMODEL_H

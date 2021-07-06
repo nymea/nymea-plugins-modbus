@@ -13,7 +13,7 @@ class SunSpecModel : public QObject
 {
     Q_OBJECT
 public:
-    explicit SunSpecModel(SunSpecConnection *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent = nullptr);
+    explicit SunSpecModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelId, quint16 modelLength, QObject *parent = nullptr);
     virtual ~SunSpecModel() = default;
 
     SunSpecConnection *connection() const;
@@ -26,18 +26,22 @@ public:
     quint16 modelLength() const;
     quint16 modbusStartRegister() const;
 
+    QHash<QString, SunSpecDataPoint> dataPoints() const;
+
     QVector<quint16> blockData() const;
 
     virtual void init();
     virtual void readBlockData();
 
+    bool operator==(const SunSpecModel &other) const;
+
 protected:
     SunSpecConnection *m_connection = nullptr;
     QTimer m_initTimer;
 
+    quint16 m_modbusStartRegister = 0;
     quint16 m_modelId;
     quint16 m_modelLength = 0;
-    quint16 m_modbusStartRegister = 0;
 
     bool m_initialized = false;
 

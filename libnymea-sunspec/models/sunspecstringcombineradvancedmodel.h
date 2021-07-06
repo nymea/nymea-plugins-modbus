@@ -115,4 +115,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecStringCombinerAdvancedModel *model);
+
 #endif // SUNSPECSTRINGCOMBINERADVANCEDMODEL_H

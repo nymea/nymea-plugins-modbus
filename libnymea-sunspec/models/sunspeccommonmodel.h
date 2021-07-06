@@ -76,4 +76,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecCommonModel *model);
+
 #endif // SUNSPECCOMMONMODEL_H

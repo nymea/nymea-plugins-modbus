@@ -113,4 +113,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecTrackerControllerModel *model);
+
 #endif // SUNSPECTRACKERCONTROLLERMODEL_H

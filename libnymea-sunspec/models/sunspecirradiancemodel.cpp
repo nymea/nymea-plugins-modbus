@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecIrradianceModel::SunSpecIrradianceModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 302, 0, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 302, 0, parent)
 {
-    Q_ASSERT_X(length == 0,  "SunSpecIrradianceModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 0,  "SunSpecIrradianceModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -62,6 +62,8 @@ QString SunSpecIrradianceModel::label() const
 void SunSpecIrradianceModel::processBlockData()
 {
     // Update properties according to the data point type
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecIrradianceModel::initDataPoints()
@@ -73,7 +75,7 @@ void SunSpecIrradianceModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -83,8 +85,14 @@ void SunSpecIrradianceModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecIrradianceModel *model)
+{
+    debug.nospace().noquote() << "SunSpecIrradianceModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+
+    return debug.space().quote();
+}

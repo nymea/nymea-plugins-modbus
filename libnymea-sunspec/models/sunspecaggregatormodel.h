@@ -122,4 +122,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecAggregatorModel *model);
+
 #endif // SUNSPECAGGREGATORMODEL_H

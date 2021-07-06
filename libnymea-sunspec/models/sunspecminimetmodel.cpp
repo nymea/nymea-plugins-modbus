@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecMiniMetModel::SunSpecMiniMetModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 308, 4, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 308, 4, parent)
 {
-    Q_ASSERT_X(length == 4,  "SunSpecMiniMetModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 4,  "SunSpecMiniMetModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -82,6 +82,8 @@ void SunSpecMiniMetModel::processBlockData()
     m_temp = m_dataPoints.value("TmpBOM").toFloatWithSSF(-1);
     m_ambientTemperature = m_dataPoints.value("TmpAmb").toFloatWithSSF(-1);
     m_windSpeed = m_dataPoints.value("WndSpd").toUInt16();
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecMiniMetModel::initDataPoints()
@@ -93,7 +95,7 @@ void SunSpecMiniMetModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -103,7 +105,7 @@ void SunSpecMiniMetModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint ghiDataPoint;
@@ -114,7 +116,7 @@ void SunSpecMiniMetModel::initDataPoints()
     ghiDataPoint.setSize(1);
     ghiDataPoint.setAddressOffset(2);
     ghiDataPoint.setBlockOffset(0);
-    ghiDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    ghiDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(ghiDataPoint.name(), ghiDataPoint);
 
     SunSpecDataPoint tempDataPoint;
@@ -126,7 +128,7 @@ void SunSpecMiniMetModel::initDataPoints()
     tempDataPoint.setAddressOffset(3);
     tempDataPoint.setBlockOffset(1);
     tempDataPoint.setScaleFactorName("-1");
-    tempDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    tempDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(tempDataPoint.name(), tempDataPoint);
 
     SunSpecDataPoint ambientTemperatureDataPoint;
@@ -137,7 +139,7 @@ void SunSpecMiniMetModel::initDataPoints()
     ambientTemperatureDataPoint.setAddressOffset(4);
     ambientTemperatureDataPoint.setBlockOffset(2);
     ambientTemperatureDataPoint.setScaleFactorName("-1");
-    ambientTemperatureDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    ambientTemperatureDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(ambientTemperatureDataPoint.name(), ambientTemperatureDataPoint);
 
     SunSpecDataPoint windSpeedDataPoint;
@@ -147,8 +149,38 @@ void SunSpecMiniMetModel::initDataPoints()
     windSpeedDataPoint.setSize(1);
     windSpeedDataPoint.setAddressOffset(5);
     windSpeedDataPoint.setBlockOffset(3);
-    windSpeedDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    windSpeedDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(windSpeedDataPoint.name(), windSpeedDataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecMiniMetModel *model)
+{
+    debug.nospace().noquote() << "SunSpecMiniMetModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    if (model->dataPoints().value("GHI").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("GHI") << "--> " << model->ghi() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("GHI") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TmpBOM").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpBOM") << "--> " << model->temp() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpBOM") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TmpAmb").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpAmb") << "--> " << model->ambientTemperature() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpAmb") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("WndSpd").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WndSpd") << "--> " << model->windSpeed() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WndSpd") << "--> NaN" << endl;
+    }
+
+
+    return debug.space().quote();
+}

@@ -126,6 +126,17 @@ void SunSpecDataPoint::setBlockOffset(quint16 blockOffset)
     m_blockOffset = blockOffset;
 }
 
+QString SunSpecDataPoint::sunSpecDataType() const
+{
+    return m_sunSpecDataType;
+}
+
+void SunSpecDataPoint::setSunSpecDataType(const QString &sunSpecDataType)
+{
+    m_sunSpecDataType = sunSpecDataType;
+    setDataType(SunSpecDataPoint::stringToDataType(m_sunSpecDataType));
+}
+
 SunSpecDataPoint::DataType SunSpecDataPoint::dataType() const
 {
     return m_dataType;
@@ -387,12 +398,14 @@ float SunSpecDataPoint::toFloatWithSSF(qint16 scaleFactor) const
 {
     float value = 0;
     switch (m_dataType) {
+    case Acc16:
     case UInt16:
         value = toUInt16() * pow(10, scaleFactor);
         break;
     case Int16:
         value = toInt16() * pow(10, scaleFactor);
         break;
+    case Acc32:
     case UInt32:
         value = toUInt32() * pow(10, scaleFactor);
         break;
@@ -400,7 +413,7 @@ float SunSpecDataPoint::toFloatWithSSF(qint16 scaleFactor) const
         value = toInt32() * pow(10, scaleFactor);
         break;
     default:
-        Q_ASSERT_X(false,  "SunSpecDataPoint", "invalid raw data size for converting value to float with sunspec scale factor");
+        Q_ASSERT_X(false,  "SunSpecDataPoint", QString("unhandled data type for converting float with scale factor %1").arg(dataType()).toLatin1());
         break;
     }
 
@@ -414,6 +427,18 @@ double SunSpecDataPoint::toDouble() const
     double value = 0;
     memcpy(&value, &rawValue, sizeof(quint64));
     return value;
+}
+
+QString SunSpecDataPoint::registersToString(const QVector<quint16> &registers)
+{
+    QStringList valueStrings;
+    for (int i = 0; i < registers.count(); i++) {
+        QString hexString(QStringLiteral("0x%1"));
+        valueStrings.append(hexString.arg(registers.at(i), 4, 16, QLatin1Char('0')));
+    }
+
+    QString registersString = "(" + valueStrings.join(", ") + ")";
+    return registersString;
 }
 
 QVector<quint16> SunSpecDataPoint::convertFromUInt16(quint16 value)
@@ -438,3 +463,35 @@ QVector<quint16> SunSpecDataPoint::convertFromInt32(qint32 value)
 {
     return SunSpecDataPoint::convertFromUInt32(static_cast<quint32>(value));
 }
+
+QDebug operator<<(QDebug debug, const SunSpecDataPoint &dataPoint)
+{
+    debug.nospace().noquote() << "DataPoint(";
+    if (dataPoint.description().isEmpty()) {
+        debug.nospace().noquote() << dataPoint.name();
+    } else {
+        debug.nospace().noquote() << dataPoint.description() << ", " << dataPoint.name() << ", ";
+    }
+
+    if (dataPoint.access() == SunSpecDataPoint::AccessReadWrite) {
+        debug.nospace().noquote() << "RW, ";
+    } else {
+        debug.nospace().noquote() << "R, ";
+    }
+
+    if (dataPoint.mandatory()) {
+        debug.nospace().noquote() << "M, ";
+    } else {
+        debug.nospace().noquote() << "O, ";
+    }
+
+    debug.nospace().noquote() << dataPoint.sunSpecDataType();
+
+    if (!dataPoint.units().isEmpty()) {
+        debug.nospace().noquote() << ", [" << dataPoint.units() << "]";
+    }
+
+    debug.nospace().noquote() << ")";
+    return debug.space().quote();
+}
+

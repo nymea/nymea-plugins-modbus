@@ -61,4 +61,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecEnergyStorageBaseModelDeprecatedModel *model);
+
 #endif // SUNSPECENERGYSTORAGEBASEMODELDEPRECATEDMODEL_H

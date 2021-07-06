@@ -166,4 +166,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecInverterSplitPhaseModel *model);
+
 #endif // SUNSPECINVERTERSPLITPHASEMODEL_H

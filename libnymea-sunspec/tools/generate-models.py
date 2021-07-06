@@ -286,7 +286,7 @@ def addDataPointInitialization(fileDescriptor, dataPoint, addressOffset, indenta
         writeLine(fileDescriptor, linePrepend + '%s.setScaleFactorName("%s");' % (propertyName, dataPoint['sf']))
 
     if 'type' in dataPoint:
-        writeLine(fileDescriptor, linePrepend + '%s.setDataType(SunSpecDataPoint::stringToDataType("%s"));' % (propertyName, dataPoint['type']))
+        writeLine(fileDescriptor, linePrepend + '%s.setSunSpecDataType("%s");' % (propertyName, dataPoint['type']))
 
     if 'access' in dataPoint and dataPoint['access'] == 'RW':
         writeLine(fileDescriptor, linePrepend + '%s.setAccess(SunSpecDataPoint::AccessReadWrite);' % (propertyName))
@@ -646,6 +646,36 @@ def writeProcessDataImplementation(fileDescriptor, className, modelId):
             convertionMethod = getConvertionMethodFromSunspecType(dataPoint, '')
             writeLine(fileDescriptor, '    m_%s = %s;' % (getPropertyName(dataPoint), convertionMethod))
 
+    writeLine(fileDescriptor)
+    writeLine(fileDescriptor, '    qCDebug(dcSunSpec()) << this;')
+
+
+def writePropertyDebugLine(fileDescriptor, className, modelId):
+    print('Write class debug properties')
+    modelData = models[modelId]
+    dataPoints = modelData['group']['points']
+    for dataPoint in dataPoints:
+        propertyName = getPropertyName(dataPoint)
+        if propertyName == 'modelId' or propertyName == 'modelLength':
+            continue
+
+        typeName = dataPoint['type']
+        # Note: we don't want to provide public access to scale factors
+        if typeName == 'sunssf':
+            continue
+
+        propertyName = getPropertyName(dataPoint)
+        dataPointString = ('model->dataPoints().value("%s")' % dataPoint['name'])
+
+        writeLine(fileDescriptor, '    if (%s.isValid()) {' % (dataPointString))
+        writeLine(fileDescriptor, '        debug.nospace().noquote() << "    - " << %s << "--> " << model->%s() << endl;' % (dataPointString, propertyName))
+        writeLine(fileDescriptor, '    } else {')
+        writeLine(fileDescriptor, '        debug.nospace().noquote() << "    - " << %s << "--> NaN" << endl;' % (dataPointString))
+        writeLine(fileDescriptor, '    }')
+        writeLine(fileDescriptor)
+    
+    writeLine(fileDescriptor)
+
 
 def writeHeaderFile(headerFileName, className, modelId):
     headerFileBaseName = os.path.basename(headerFileName)
@@ -709,6 +739,8 @@ def writeHeaderFile(headerFileName, className, modelId):
     writeLine(fileDescriptor)
     writeLine(fileDescriptor, '};')
     writeLine(fileDescriptor)
+    writeLine(fileDescriptor, 'QDebug operator<<(QDebug debug, %s *model);' % className)
+    writeLine(fileDescriptor)
     writeLine(fileDescriptor, '#endif // %s_H' % className.upper())
     fileDescriptor.close()
 
@@ -725,10 +757,10 @@ def writeSourceFile(sourceFileName, className, modelId):
     
     # Constructor
     writeLine(fileDescriptor, '%s::%s(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :' % (className, className))
-    writeLine(fileDescriptor, '    SunSpecModel(connection, %s, %s, modbusStartRegister, parent)' % (modelId, getModelLength(models[modelId])))
+    writeLine(fileDescriptor, '    SunSpecModel(connection, modbusStartRegister, %s, %s, parent)' % (modelId, getModelLength(models[modelId])))
     writeLine(fileDescriptor, '{')
     assertMessage = 'QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1()'
-    writeLine(fileDescriptor, '    Q_ASSERT_X(length == %s,  "%s", %s);' % (getModelLength(models[modelId]), className, assertMessage))
+    writeLine(fileDescriptor, '    //Q_ASSERT_X(length == %s,  "%s", %s);' % (getModelLength(models[modelId]), className, assertMessage))
     writeLine(fileDescriptor, '    Q_UNUSED(length)')
     writeLine(fileDescriptor, '    initDataPoints();')
     writeLine(fileDescriptor, '}')
@@ -798,6 +830,14 @@ def writeSourceFile(sourceFileName, className, modelId):
     writeLine(fileDescriptor, '}')
     writeLine(fileDescriptor)
 
+    # Debug operator
+    writeLine(fileDescriptor, 'QDebug operator<<(QDebug debug, %s *model)' % className)
+    writeLine(fileDescriptor, '{')
+    writeLine(fileDescriptor, '    debug.nospace().noquote() << "%s(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;' % className)
+    writePropertyDebugLine(fileDescriptor, className, modelId)
+    writeLine(fileDescriptor, '    return debug.space().quote();')
+    writeLine(fileDescriptor, '}')
+
     fileDescriptor.close()
 
 
@@ -849,14 +889,27 @@ def writeModelFactoryHeader(fileDescriptor):
     writeLine(fileDescriptor, 'public:')
 
     # Enum declarations
- 
+    writeLine(fileDescriptor, '    enum ModelId {')
+    classIndex = 0
+    for cn, mid in classes.items():
+        print('Name', cn, mid)
+        classIndex += 1
+        line = ('    ModelId%s = %s' % (cn.replace('Model', '').replace('SunSpec', ''), mid)) 
+        if classIndex < len(classes):
+            writeLine(fileDescriptor, '    %s,' % line)
+        else:
+            writeLine(fileDescriptor, '    %s' % line)
+
+    writeLine(fileDescriptor, '    };')
+    writeLine(fileDescriptor, '    Q_ENUM(ModelId)')
+    writeLine(fileDescriptor)
+
     # Constructor
     writeLine(fileDescriptor, '    explicit %s(QObject *parent = nullptr);' % className)
     writeLine(fileDescriptor, '    ~%s() = default;' % className)
     writeLine(fileDescriptor)
 
-    writeLine(fileDescriptor, '    SunSpecModel *createModel(SunSpecConnection *connection, quint16 modelId, quint16 modelLength);')
-
+    writeLine(fileDescriptor, '    SunSpecModel *createModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelId, quint16 modelLength);')
 
     # Private members
     writeLine(fileDescriptor)
@@ -892,14 +945,14 @@ def writeModelFactorySource(fileDescriptor):
     writeLine(fileDescriptor)
 
     # Write factory class
-    writeLine(fileDescriptor, 'SunSpecModel *%s::createModel(SunSpecConnection *connection, quint16 modelId, quint16 modelLength)' % className)
+    writeLine(fileDescriptor, 'SunSpecModel *%s::createModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelId, quint16 modelLength)' % className)
     writeLine(fileDescriptor, '{')  
-
     writeLine(fileDescriptor, '    switch(modelId) {')
 
     for cn in classes:
-        writeLine(fileDescriptor, '    case %s:' % classes[cn])
-        writeLine(fileDescriptor, '        return new %s(connection, modelId, modelLength, connection);' % cn)
+        enumName = 'ModelId' + cn.replace('Model', '').replace('SunSpec', '')
+        writeLine(fileDescriptor, '    case %s:' % enumName)
+        writeLine(fileDescriptor, '        return new %s(connection, modbusStartRegister, modelLength, connection);' % cn)
 
     writeLine(fileDescriptor, '    default:')
     writeLine(fileDescriptor, '        return nullptr;')

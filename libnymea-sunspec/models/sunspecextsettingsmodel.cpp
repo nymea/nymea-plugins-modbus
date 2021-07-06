@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecExtSettingsModel::SunSpecExtSettingsModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 145, 8, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 145, 8, parent)
 {
-    Q_ASSERT_X(length == 8,  "SunSpecExtSettingsModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 8,  "SunSpecExtSettingsModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -142,6 +142,8 @@ void SunSpecExtSettingsModel::processBlockData()
     m_connectRampUpRate = m_dataPoints.value("ConnRmpUpRte").toFloatWithSSF(m_rampRateScaleFactor);
     m_connectRampDownRate = m_dataPoints.value("ConnRmpDnRte").toFloatWithSSF(m_rampRateScaleFactor);
     m_defaultRampRate = m_dataPoints.value("AGra").toFloatWithSSF(m_rampRateScaleFactor);
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecExtSettingsModel::initDataPoints()
@@ -153,7 +155,7 @@ void SunSpecExtSettingsModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -163,7 +165,7 @@ void SunSpecExtSettingsModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint rampUpRateDataPoint;
@@ -175,7 +177,7 @@ void SunSpecExtSettingsModel::initDataPoints()
     rampUpRateDataPoint.setAddressOffset(2);
     rampUpRateDataPoint.setBlockOffset(0);
     rampUpRateDataPoint.setScaleFactorName("Rmp_SF");
-    rampUpRateDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    rampUpRateDataPoint.setSunSpecDataType("uint16");
     rampUpRateDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(rampUpRateDataPoint.name(), rampUpRateDataPoint);
 
@@ -188,7 +190,7 @@ void SunSpecExtSettingsModel::initDataPoints()
     nomRmpDnRteDataPoint.setAddressOffset(3);
     nomRmpDnRteDataPoint.setBlockOffset(1);
     nomRmpDnRteDataPoint.setScaleFactorName("Rmp_SF");
-    nomRmpDnRteDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    nomRmpDnRteDataPoint.setSunSpecDataType("uint16");
     nomRmpDnRteDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(nomRmpDnRteDataPoint.name(), nomRmpDnRteDataPoint);
 
@@ -201,7 +203,7 @@ void SunSpecExtSettingsModel::initDataPoints()
     emergencyRampUpRateDataPoint.setAddressOffset(4);
     emergencyRampUpRateDataPoint.setBlockOffset(2);
     emergencyRampUpRateDataPoint.setScaleFactorName("Rmp_SF");
-    emergencyRampUpRateDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    emergencyRampUpRateDataPoint.setSunSpecDataType("uint16");
     emergencyRampUpRateDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(emergencyRampUpRateDataPoint.name(), emergencyRampUpRateDataPoint);
 
@@ -214,7 +216,7 @@ void SunSpecExtSettingsModel::initDataPoints()
     emergencyRampDownRateDataPoint.setAddressOffset(5);
     emergencyRampDownRateDataPoint.setBlockOffset(3);
     emergencyRampDownRateDataPoint.setScaleFactorName("Rmp_SF");
-    emergencyRampDownRateDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    emergencyRampDownRateDataPoint.setSunSpecDataType("uint16");
     emergencyRampDownRateDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(emergencyRampDownRateDataPoint.name(), emergencyRampDownRateDataPoint);
 
@@ -227,7 +229,7 @@ void SunSpecExtSettingsModel::initDataPoints()
     connectRampUpRateDataPoint.setAddressOffset(6);
     connectRampUpRateDataPoint.setBlockOffset(4);
     connectRampUpRateDataPoint.setScaleFactorName("Rmp_SF");
-    connectRampUpRateDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    connectRampUpRateDataPoint.setSunSpecDataType("uint16");
     connectRampUpRateDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(connectRampUpRateDataPoint.name(), connectRampUpRateDataPoint);
 
@@ -240,7 +242,7 @@ void SunSpecExtSettingsModel::initDataPoints()
     connectRampDownRateDataPoint.setAddressOffset(7);
     connectRampDownRateDataPoint.setBlockOffset(5);
     connectRampDownRateDataPoint.setScaleFactorName("Rmp_SF");
-    connectRampDownRateDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    connectRampDownRateDataPoint.setSunSpecDataType("uint16");
     connectRampDownRateDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(connectRampDownRateDataPoint.name(), connectRampDownRateDataPoint);
 
@@ -253,7 +255,7 @@ void SunSpecExtSettingsModel::initDataPoints()
     defaultRampRateDataPoint.setAddressOffset(8);
     defaultRampRateDataPoint.setBlockOffset(6);
     defaultRampRateDataPoint.setScaleFactorName("Rmp_SF");
-    defaultRampRateDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    defaultRampRateDataPoint.setSunSpecDataType("uint16");
     defaultRampRateDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(defaultRampRateDataPoint.name(), defaultRampRateDataPoint);
 
@@ -264,8 +266,56 @@ void SunSpecExtSettingsModel::initDataPoints()
     rampRateScaleFactorDataPoint.setSize(1);
     rampRateScaleFactorDataPoint.setAddressOffset(9);
     rampRateScaleFactorDataPoint.setBlockOffset(7);
-    rampRateScaleFactorDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    rampRateScaleFactorDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(rampRateScaleFactorDataPoint.name(), rampRateScaleFactorDataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecExtSettingsModel *model)
+{
+    debug.nospace().noquote() << "SunSpecExtSettingsModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    if (model->dataPoints().value("NomRmpUpRte").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("NomRmpUpRte") << "--> " << model->rampUpRate() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("NomRmpUpRte") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("NomRmpDnRte").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("NomRmpDnRte") << "--> " << model->nomRmpDnRte() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("NomRmpDnRte") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("EmgRmpUpRte").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("EmgRmpUpRte") << "--> " << model->emergencyRampUpRate() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("EmgRmpUpRte") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("EmgRmpDnRte").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("EmgRmpDnRte") << "--> " << model->emergencyRampDownRate() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("EmgRmpDnRte") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ConnRmpUpRte").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ConnRmpUpRte") << "--> " << model->connectRampUpRate() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ConnRmpUpRte") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ConnRmpDnRte").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ConnRmpDnRte") << "--> " << model->connectRampDownRate() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ConnRmpDnRte") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("AGra").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("AGra") << "--> " << model->defaultRampRate() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("AGra") << "--> NaN" << endl;
+    }
+
+
+    return debug.space().quote();
+}

@@ -89,4 +89,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecExtSettingsModel *model);
+
 #endif // SUNSPECEXTSETTINGSMODEL_H

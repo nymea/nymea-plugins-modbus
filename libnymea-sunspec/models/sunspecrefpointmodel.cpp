@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecRefPointModel::SunSpecRefPointModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 306, 4, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 306, 4, parent)
 {
-    Q_ASSERT_X(length == 4,  "SunSpecRefPointModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 4,  "SunSpecRefPointModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -82,6 +82,8 @@ void SunSpecRefPointModel::processBlockData()
     m_amps = m_dataPoints.value("A").toUInt16();
     m_voltage = m_dataPoints.value("V").toUInt16();
     m_temperature = m_dataPoints.value("Tmp").toUInt16();
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecRefPointModel::initDataPoints()
@@ -93,7 +95,7 @@ void SunSpecRefPointModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -103,7 +105,7 @@ void SunSpecRefPointModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint ghiDataPoint;
@@ -114,7 +116,7 @@ void SunSpecRefPointModel::initDataPoints()
     ghiDataPoint.setSize(1);
     ghiDataPoint.setAddressOffset(2);
     ghiDataPoint.setBlockOffset(0);
-    ghiDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    ghiDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(ghiDataPoint.name(), ghiDataPoint);
 
     SunSpecDataPoint ampsDataPoint;
@@ -125,7 +127,7 @@ void SunSpecRefPointModel::initDataPoints()
     ampsDataPoint.setSize(1);
     ampsDataPoint.setAddressOffset(3);
     ampsDataPoint.setBlockOffset(1);
-    ampsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    ampsDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
     SunSpecDataPoint voltageDataPoint;
@@ -136,7 +138,7 @@ void SunSpecRefPointModel::initDataPoints()
     voltageDataPoint.setSize(1);
     voltageDataPoint.setAddressOffset(4);
     voltageDataPoint.setBlockOffset(2);
-    voltageDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    voltageDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(voltageDataPoint.name(), voltageDataPoint);
 
     SunSpecDataPoint temperatureDataPoint;
@@ -147,8 +149,38 @@ void SunSpecRefPointModel::initDataPoints()
     temperatureDataPoint.setSize(1);
     temperatureDataPoint.setAddressOffset(5);
     temperatureDataPoint.setBlockOffset(3);
-    temperatureDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    temperatureDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(temperatureDataPoint.name(), temperatureDataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecRefPointModel *model)
+{
+    debug.nospace().noquote() << "SunSpecRefPointModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    if (model->dataPoints().value("GHI").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("GHI") << "--> " << model->ghi() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("GHI") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("A").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("A") << "--> " << model->amps() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("A") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("V").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("V") << "--> " << model->voltage() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("V") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Tmp").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Tmp") << "--> " << model->temperature() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Tmp") << "--> NaN" << endl;
+    }
+
+
+    return debug.space().quote();
+}

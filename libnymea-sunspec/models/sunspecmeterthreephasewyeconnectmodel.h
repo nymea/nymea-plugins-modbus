@@ -217,4 +217,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecMeterThreePhaseWyeConnectModel *model);
+
 #endif // SUNSPECMETERTHREEPHASEWYECONNECTMODEL_H

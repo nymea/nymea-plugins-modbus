@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecWattPfModel::SunSpecWattPfModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 131, 10, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 131, 10, parent)
 {
-    Q_ASSERT_X(length == 10,  "SunSpecWattPfModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 10,  "SunSpecWattPfModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -132,6 +132,8 @@ void SunSpecWattPfModel::processBlockData()
     m_rmpTms = m_dataPoints.value("RmpTms").toUInt16();
     m_nCrv = m_dataPoints.value("NCrv").toUInt16();
     m_nPt = m_dataPoints.value("NPt").toUInt16();
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecWattPfModel::initDataPoints()
@@ -143,7 +145,7 @@ void SunSpecWattPfModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -153,7 +155,7 @@ void SunSpecWattPfModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint actCrvDataPoint;
@@ -164,7 +166,7 @@ void SunSpecWattPfModel::initDataPoints()
     actCrvDataPoint.setSize(1);
     actCrvDataPoint.setAddressOffset(2);
     actCrvDataPoint.setBlockOffset(0);
-    actCrvDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    actCrvDataPoint.setSunSpecDataType("uint16");
     actCrvDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(actCrvDataPoint.name(), actCrvDataPoint);
 
@@ -176,7 +178,7 @@ void SunSpecWattPfModel::initDataPoints()
     modEnaDataPoint.setSize(1);
     modEnaDataPoint.setAddressOffset(3);
     modEnaDataPoint.setBlockOffset(1);
-    modEnaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield16"));
+    modEnaDataPoint.setSunSpecDataType("bitfield16");
     modEnaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(modEnaDataPoint.name(), modEnaDataPoint);
 
@@ -188,7 +190,7 @@ void SunSpecWattPfModel::initDataPoints()
     winTmsDataPoint.setSize(1);
     winTmsDataPoint.setAddressOffset(4);
     winTmsDataPoint.setBlockOffset(2);
-    winTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    winTmsDataPoint.setSunSpecDataType("uint16");
     winTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(winTmsDataPoint.name(), winTmsDataPoint);
 
@@ -200,7 +202,7 @@ void SunSpecWattPfModel::initDataPoints()
     rvrtTmsDataPoint.setSize(1);
     rvrtTmsDataPoint.setAddressOffset(5);
     rvrtTmsDataPoint.setBlockOffset(3);
-    rvrtTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    rvrtTmsDataPoint.setSunSpecDataType("uint16");
     rvrtTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(rvrtTmsDataPoint.name(), rvrtTmsDataPoint);
 
@@ -212,7 +214,7 @@ void SunSpecWattPfModel::initDataPoints()
     rmpTmsDataPoint.setSize(1);
     rmpTmsDataPoint.setAddressOffset(6);
     rmpTmsDataPoint.setBlockOffset(4);
-    rmpTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    rmpTmsDataPoint.setSunSpecDataType("uint16");
     rmpTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(rmpTmsDataPoint.name(), rmpTmsDataPoint);
 
@@ -224,7 +226,7 @@ void SunSpecWattPfModel::initDataPoints()
     nCrvDataPoint.setSize(1);
     nCrvDataPoint.setAddressOffset(7);
     nCrvDataPoint.setBlockOffset(5);
-    nCrvDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    nCrvDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(nCrvDataPoint.name(), nCrvDataPoint);
 
     SunSpecDataPoint nPtDataPoint;
@@ -235,7 +237,7 @@ void SunSpecWattPfModel::initDataPoints()
     nPtDataPoint.setSize(1);
     nPtDataPoint.setAddressOffset(8);
     nPtDataPoint.setBlockOffset(6);
-    nPtDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    nPtDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(nPtDataPoint.name(), nPtDataPoint);
 
     SunSpecDataPoint wSfDataPoint;
@@ -246,7 +248,7 @@ void SunSpecWattPfModel::initDataPoints()
     wSfDataPoint.setSize(1);
     wSfDataPoint.setAddressOffset(9);
     wSfDataPoint.setBlockOffset(7);
-    wSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    wSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(wSfDataPoint.name(), wSfDataPoint);
 
     SunSpecDataPoint pfSfDataPoint;
@@ -257,7 +259,7 @@ void SunSpecWattPfModel::initDataPoints()
     pfSfDataPoint.setSize(1);
     pfSfDataPoint.setAddressOffset(10);
     pfSfDataPoint.setBlockOffset(8);
-    pfSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    pfSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(pfSfDataPoint.name(), pfSfDataPoint);
 
     SunSpecDataPoint rmpIncDecSfDataPoint;
@@ -267,8 +269,56 @@ void SunSpecWattPfModel::initDataPoints()
     rmpIncDecSfDataPoint.setSize(1);
     rmpIncDecSfDataPoint.setAddressOffset(11);
     rmpIncDecSfDataPoint.setBlockOffset(9);
-    rmpIncDecSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    rmpIncDecSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(rmpIncDecSfDataPoint.name(), rmpIncDecSfDataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecWattPfModel *model)
+{
+    debug.nospace().noquote() << "SunSpecWattPfModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    if (model->dataPoints().value("ActCrv").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActCrv") << "--> " << model->actCrv() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActCrv") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ModEna").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModEna") << "--> " << model->modEna() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModEna") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("WinTms").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WinTms") << "--> " << model->winTms() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WinTms") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("RvrtTms").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("RvrtTms") << "--> " << model->rvrtTms() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("RvrtTms") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("RmpTms").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("RmpTms") << "--> " << model->rmpTms() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("RmpTms") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("NCrv").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("NCrv") << "--> " << model->nCrv() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("NCrv") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("NPt").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("NPt") << "--> " << model->nPt() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("NPt") << "--> NaN" << endl;
+    }
+
+
+    return debug.space().quote();
+}

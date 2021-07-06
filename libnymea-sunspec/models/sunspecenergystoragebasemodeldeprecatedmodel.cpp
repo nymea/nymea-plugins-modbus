@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecEnergyStorageBaseModelDeprecatedModel::SunSpecEnergyStorageBaseModelDeprecatedModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 801, 1, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 801, 1, parent)
 {
-    Q_ASSERT_X(length == 1,  "SunSpecEnergyStorageBaseModelDeprecatedModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 1,  "SunSpecEnergyStorageBaseModelDeprecatedModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -67,6 +67,8 @@ void SunSpecEnergyStorageBaseModelDeprecatedModel::processBlockData()
 {
     // Update properties according to the data point type
     m_deprecatedModel = m_dataPoints.value("DEPRECATED").toUInt16();
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecEnergyStorageBaseModelDeprecatedModel::initDataPoints()
@@ -78,7 +80,7 @@ void SunSpecEnergyStorageBaseModelDeprecatedModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -88,7 +90,7 @@ void SunSpecEnergyStorageBaseModelDeprecatedModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint deprecatedModelDataPoint;
@@ -99,8 +101,20 @@ void SunSpecEnergyStorageBaseModelDeprecatedModel::initDataPoints()
     deprecatedModelDataPoint.setSize(1);
     deprecatedModelDataPoint.setAddressOffset(2);
     deprecatedModelDataPoint.setBlockOffset(0);
-    deprecatedModelDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    deprecatedModelDataPoint.setSunSpecDataType("enum16");
     m_dataPoints.insert(deprecatedModelDataPoint.name(), deprecatedModelDataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecEnergyStorageBaseModelDeprecatedModel *model)
+{
+    debug.nospace().noquote() << "SunSpecEnergyStorageBaseModelDeprecatedModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    if (model->dataPoints().value("DEPRECATED").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DEPRECATED") << "--> " << model->deprecatedModel() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DEPRECATED") << "--> NaN" << endl;
+    }
+
+
+    return debug.space().quote();
+}

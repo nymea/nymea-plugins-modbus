@@ -108,4 +108,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecNameplateModel *model);
+
 #endif // SUNSPECNAMEPLATEMODEL_H

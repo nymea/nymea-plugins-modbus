@@ -99,4 +99,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecHfrtxModel *model);
+
 #endif // SUNSPECHFRTXMODEL_H

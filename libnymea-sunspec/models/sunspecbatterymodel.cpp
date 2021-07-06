@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecBatteryModel::SunSpecBatteryModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 802, 62, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 802, 62, parent)
 {
-    Q_ASSERT_X(length == 62,  "SunSpecBatteryModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 62,  "SunSpecBatteryModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -332,6 +332,8 @@ void SunSpecBatteryModel::processBlockData()
     m_batteryPowerRequest = m_dataPoints.value("ReqW").toFloatWithSSF(m_w_SF);
     m_setOperation = static_cast<Setop>(m_dataPoints.value("SetOp").toUInt16());
     m_setInverterState = static_cast<Setinvstate>(m_dataPoints.value("SetInvState").toUInt16());
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecBatteryModel::initDataPoints()
@@ -343,7 +345,7 @@ void SunSpecBatteryModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -353,7 +355,7 @@ void SunSpecBatteryModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint nameplateChargeCapacityDataPoint;
@@ -366,7 +368,7 @@ void SunSpecBatteryModel::initDataPoints()
     nameplateChargeCapacityDataPoint.setAddressOffset(2);
     nameplateChargeCapacityDataPoint.setBlockOffset(0);
     nameplateChargeCapacityDataPoint.setScaleFactorName("AHRtg_SF");
-    nameplateChargeCapacityDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    nameplateChargeCapacityDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(nameplateChargeCapacityDataPoint.name(), nameplateChargeCapacityDataPoint);
 
     SunSpecDataPoint nameplateEnergyCapacityDataPoint;
@@ -379,7 +381,7 @@ void SunSpecBatteryModel::initDataPoints()
     nameplateEnergyCapacityDataPoint.setAddressOffset(3);
     nameplateEnergyCapacityDataPoint.setBlockOffset(1);
     nameplateEnergyCapacityDataPoint.setScaleFactorName("WHRtg_SF");
-    nameplateEnergyCapacityDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    nameplateEnergyCapacityDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(nameplateEnergyCapacityDataPoint.name(), nameplateEnergyCapacityDataPoint);
 
     SunSpecDataPoint nameplateMaxChargeRateDataPoint;
@@ -392,7 +394,7 @@ void SunSpecBatteryModel::initDataPoints()
     nameplateMaxChargeRateDataPoint.setAddressOffset(4);
     nameplateMaxChargeRateDataPoint.setBlockOffset(2);
     nameplateMaxChargeRateDataPoint.setScaleFactorName("WChaDisChaMax_SF");
-    nameplateMaxChargeRateDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    nameplateMaxChargeRateDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(nameplateMaxChargeRateDataPoint.name(), nameplateMaxChargeRateDataPoint);
 
     SunSpecDataPoint nameplateMaxDischargeRateDataPoint;
@@ -405,7 +407,7 @@ void SunSpecBatteryModel::initDataPoints()
     nameplateMaxDischargeRateDataPoint.setAddressOffset(5);
     nameplateMaxDischargeRateDataPoint.setBlockOffset(3);
     nameplateMaxDischargeRateDataPoint.setScaleFactorName("WChaDisChaMax_SF");
-    nameplateMaxDischargeRateDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    nameplateMaxDischargeRateDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(nameplateMaxDischargeRateDataPoint.name(), nameplateMaxDischargeRateDataPoint);
 
     SunSpecDataPoint selfDischargeRateDataPoint;
@@ -417,7 +419,7 @@ void SunSpecBatteryModel::initDataPoints()
     selfDischargeRateDataPoint.setAddressOffset(6);
     selfDischargeRateDataPoint.setBlockOffset(4);
     selfDischargeRateDataPoint.setScaleFactorName("DisChaRte_SF");
-    selfDischargeRateDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    selfDischargeRateDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(selfDischargeRateDataPoint.name(), selfDischargeRateDataPoint);
 
     SunSpecDataPoint nameplateMaxSoCDataPoint;
@@ -429,7 +431,7 @@ void SunSpecBatteryModel::initDataPoints()
     nameplateMaxSoCDataPoint.setAddressOffset(7);
     nameplateMaxSoCDataPoint.setBlockOffset(5);
     nameplateMaxSoCDataPoint.setScaleFactorName("SoC_SF");
-    nameplateMaxSoCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    nameplateMaxSoCDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(nameplateMaxSoCDataPoint.name(), nameplateMaxSoCDataPoint);
 
     SunSpecDataPoint nameplateMinSoCDataPoint;
@@ -441,7 +443,7 @@ void SunSpecBatteryModel::initDataPoints()
     nameplateMinSoCDataPoint.setAddressOffset(8);
     nameplateMinSoCDataPoint.setBlockOffset(6);
     nameplateMinSoCDataPoint.setScaleFactorName("SoC_SF");
-    nameplateMinSoCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    nameplateMinSoCDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(nameplateMinSoCDataPoint.name(), nameplateMinSoCDataPoint);
 
     SunSpecDataPoint maxReservePercentDataPoint;
@@ -453,7 +455,7 @@ void SunSpecBatteryModel::initDataPoints()
     maxReservePercentDataPoint.setAddressOffset(9);
     maxReservePercentDataPoint.setBlockOffset(7);
     maxReservePercentDataPoint.setScaleFactorName("SoC_SF");
-    maxReservePercentDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    maxReservePercentDataPoint.setSunSpecDataType("uint16");
     maxReservePercentDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(maxReservePercentDataPoint.name(), maxReservePercentDataPoint);
 
@@ -466,7 +468,7 @@ void SunSpecBatteryModel::initDataPoints()
     minReservePercentDataPoint.setAddressOffset(10);
     minReservePercentDataPoint.setBlockOffset(8);
     minReservePercentDataPoint.setScaleFactorName("SoC_SF");
-    minReservePercentDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    minReservePercentDataPoint.setSunSpecDataType("uint16");
     minReservePercentDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(minReservePercentDataPoint.name(), minReservePercentDataPoint);
 
@@ -480,7 +482,7 @@ void SunSpecBatteryModel::initDataPoints()
     stateOfChargeDataPoint.setAddressOffset(11);
     stateOfChargeDataPoint.setBlockOffset(9);
     stateOfChargeDataPoint.setScaleFactorName("SoC_SF");
-    stateOfChargeDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    stateOfChargeDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(stateOfChargeDataPoint.name(), stateOfChargeDataPoint);
 
     SunSpecDataPoint depthOfDischargeDataPoint;
@@ -492,7 +494,7 @@ void SunSpecBatteryModel::initDataPoints()
     depthOfDischargeDataPoint.setAddressOffset(12);
     depthOfDischargeDataPoint.setBlockOffset(10);
     depthOfDischargeDataPoint.setScaleFactorName("DoD_SF");
-    depthOfDischargeDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    depthOfDischargeDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(depthOfDischargeDataPoint.name(), depthOfDischargeDataPoint);
 
     SunSpecDataPoint stateOfHealthDataPoint;
@@ -504,7 +506,7 @@ void SunSpecBatteryModel::initDataPoints()
     stateOfHealthDataPoint.setAddressOffset(13);
     stateOfHealthDataPoint.setBlockOffset(11);
     stateOfHealthDataPoint.setScaleFactorName("SoH_SF");
-    stateOfHealthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    stateOfHealthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(stateOfHealthDataPoint.name(), stateOfHealthDataPoint);
 
     SunSpecDataPoint cycleCountDataPoint;
@@ -514,7 +516,7 @@ void SunSpecBatteryModel::initDataPoints()
     cycleCountDataPoint.setSize(2);
     cycleCountDataPoint.setAddressOffset(14);
     cycleCountDataPoint.setBlockOffset(12);
-    cycleCountDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint32"));
+    cycleCountDataPoint.setSunSpecDataType("uint32");
     m_dataPoints.insert(cycleCountDataPoint.name(), cycleCountDataPoint);
 
     SunSpecDataPoint chargeStatusDataPoint;
@@ -524,7 +526,7 @@ void SunSpecBatteryModel::initDataPoints()
     chargeStatusDataPoint.setSize(1);
     chargeStatusDataPoint.setAddressOffset(16);
     chargeStatusDataPoint.setBlockOffset(14);
-    chargeStatusDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    chargeStatusDataPoint.setSunSpecDataType("enum16");
     m_dataPoints.insert(chargeStatusDataPoint.name(), chargeStatusDataPoint);
 
     SunSpecDataPoint controlModeDataPoint;
@@ -535,7 +537,7 @@ void SunSpecBatteryModel::initDataPoints()
     controlModeDataPoint.setSize(1);
     controlModeDataPoint.setAddressOffset(17);
     controlModeDataPoint.setBlockOffset(15);
-    controlModeDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    controlModeDataPoint.setSunSpecDataType("enum16");
     m_dataPoints.insert(controlModeDataPoint.name(), controlModeDataPoint);
 
     SunSpecDataPoint batteryHeartbeatDataPoint;
@@ -545,7 +547,7 @@ void SunSpecBatteryModel::initDataPoints()
     batteryHeartbeatDataPoint.setSize(1);
     batteryHeartbeatDataPoint.setAddressOffset(18);
     batteryHeartbeatDataPoint.setBlockOffset(16);
-    batteryHeartbeatDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    batteryHeartbeatDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(batteryHeartbeatDataPoint.name(), batteryHeartbeatDataPoint);
 
     SunSpecDataPoint controllerHeartbeatDataPoint;
@@ -555,7 +557,7 @@ void SunSpecBatteryModel::initDataPoints()
     controllerHeartbeatDataPoint.setSize(1);
     controllerHeartbeatDataPoint.setAddressOffset(19);
     controllerHeartbeatDataPoint.setBlockOffset(17);
-    controllerHeartbeatDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    controllerHeartbeatDataPoint.setSunSpecDataType("uint16");
     controllerHeartbeatDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(controllerHeartbeatDataPoint.name(), controllerHeartbeatDataPoint);
 
@@ -567,7 +569,7 @@ void SunSpecBatteryModel::initDataPoints()
     alarmResetDataPoint.setSize(1);
     alarmResetDataPoint.setAddressOffset(20);
     alarmResetDataPoint.setBlockOffset(18);
-    alarmResetDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    alarmResetDataPoint.setSunSpecDataType("uint16");
     alarmResetDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(alarmResetDataPoint.name(), alarmResetDataPoint);
 
@@ -579,7 +581,7 @@ void SunSpecBatteryModel::initDataPoints()
     batteryTypeDataPoint.setSize(1);
     batteryTypeDataPoint.setAddressOffset(21);
     batteryTypeDataPoint.setBlockOffset(19);
-    batteryTypeDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    batteryTypeDataPoint.setSunSpecDataType("enum16");
     m_dataPoints.insert(batteryTypeDataPoint.name(), batteryTypeDataPoint);
 
     SunSpecDataPoint stateOfTheBatteryBankDataPoint;
@@ -590,7 +592,7 @@ void SunSpecBatteryModel::initDataPoints()
     stateOfTheBatteryBankDataPoint.setSize(1);
     stateOfTheBatteryBankDataPoint.setAddressOffset(22);
     stateOfTheBatteryBankDataPoint.setBlockOffset(20);
-    stateOfTheBatteryBankDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    stateOfTheBatteryBankDataPoint.setSunSpecDataType("enum16");
     m_dataPoints.insert(stateOfTheBatteryBankDataPoint.name(), stateOfTheBatteryBankDataPoint);
 
     SunSpecDataPoint vendorBatteryBankStateDataPoint;
@@ -600,7 +602,7 @@ void SunSpecBatteryModel::initDataPoints()
     vendorBatteryBankStateDataPoint.setSize(1);
     vendorBatteryBankStateDataPoint.setAddressOffset(23);
     vendorBatteryBankStateDataPoint.setBlockOffset(21);
-    vendorBatteryBankStateDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    vendorBatteryBankStateDataPoint.setSunSpecDataType("enum16");
     m_dataPoints.insert(vendorBatteryBankStateDataPoint.name(), vendorBatteryBankStateDataPoint);
 
     SunSpecDataPoint warrantyDateDataPoint;
@@ -610,7 +612,7 @@ void SunSpecBatteryModel::initDataPoints()
     warrantyDateDataPoint.setSize(2);
     warrantyDateDataPoint.setAddressOffset(24);
     warrantyDateDataPoint.setBlockOffset(22);
-    warrantyDateDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint32"));
+    warrantyDateDataPoint.setSunSpecDataType("uint32");
     m_dataPoints.insert(warrantyDateDataPoint.name(), warrantyDateDataPoint);
 
     SunSpecDataPoint batteryEvent1BitfieldDataPoint;
@@ -621,7 +623,7 @@ void SunSpecBatteryModel::initDataPoints()
     batteryEvent1BitfieldDataPoint.setSize(2);
     batteryEvent1BitfieldDataPoint.setAddressOffset(26);
     batteryEvent1BitfieldDataPoint.setBlockOffset(24);
-    batteryEvent1BitfieldDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
+    batteryEvent1BitfieldDataPoint.setSunSpecDataType("bitfield32");
     m_dataPoints.insert(batteryEvent1BitfieldDataPoint.name(), batteryEvent1BitfieldDataPoint);
 
     SunSpecDataPoint batteryEvent2BitfieldDataPoint;
@@ -632,7 +634,7 @@ void SunSpecBatteryModel::initDataPoints()
     batteryEvent2BitfieldDataPoint.setSize(2);
     batteryEvent2BitfieldDataPoint.setAddressOffset(28);
     batteryEvent2BitfieldDataPoint.setBlockOffset(26);
-    batteryEvent2BitfieldDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
+    batteryEvent2BitfieldDataPoint.setSunSpecDataType("bitfield32");
     m_dataPoints.insert(batteryEvent2BitfieldDataPoint.name(), batteryEvent2BitfieldDataPoint);
 
     SunSpecDataPoint vendorEventBitfield1DataPoint;
@@ -643,7 +645,7 @@ void SunSpecBatteryModel::initDataPoints()
     vendorEventBitfield1DataPoint.setSize(2);
     vendorEventBitfield1DataPoint.setAddressOffset(30);
     vendorEventBitfield1DataPoint.setBlockOffset(28);
-    vendorEventBitfield1DataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
+    vendorEventBitfield1DataPoint.setSunSpecDataType("bitfield32");
     m_dataPoints.insert(vendorEventBitfield1DataPoint.name(), vendorEventBitfield1DataPoint);
 
     SunSpecDataPoint vendorEventBitfield2DataPoint;
@@ -654,7 +656,7 @@ void SunSpecBatteryModel::initDataPoints()
     vendorEventBitfield2DataPoint.setSize(2);
     vendorEventBitfield2DataPoint.setAddressOffset(32);
     vendorEventBitfield2DataPoint.setBlockOffset(30);
-    vendorEventBitfield2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
+    vendorEventBitfield2DataPoint.setSunSpecDataType("bitfield32");
     m_dataPoints.insert(vendorEventBitfield2DataPoint.name(), vendorEventBitfield2DataPoint);
 
     SunSpecDataPoint externalBatteryVoltageDataPoint;
@@ -667,7 +669,7 @@ void SunSpecBatteryModel::initDataPoints()
     externalBatteryVoltageDataPoint.setAddressOffset(34);
     externalBatteryVoltageDataPoint.setBlockOffset(32);
     externalBatteryVoltageDataPoint.setScaleFactorName("V_SF");
-    externalBatteryVoltageDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    externalBatteryVoltageDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(externalBatteryVoltageDataPoint.name(), externalBatteryVoltageDataPoint);
 
     SunSpecDataPoint maxBatteryVoltageDataPoint;
@@ -679,7 +681,7 @@ void SunSpecBatteryModel::initDataPoints()
     maxBatteryVoltageDataPoint.setAddressOffset(35);
     maxBatteryVoltageDataPoint.setBlockOffset(33);
     maxBatteryVoltageDataPoint.setScaleFactorName("V_SF");
-    maxBatteryVoltageDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    maxBatteryVoltageDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(maxBatteryVoltageDataPoint.name(), maxBatteryVoltageDataPoint);
 
     SunSpecDataPoint minBatteryVoltageDataPoint;
@@ -691,7 +693,7 @@ void SunSpecBatteryModel::initDataPoints()
     minBatteryVoltageDataPoint.setAddressOffset(36);
     minBatteryVoltageDataPoint.setBlockOffset(34);
     minBatteryVoltageDataPoint.setScaleFactorName("V_SF");
-    minBatteryVoltageDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    minBatteryVoltageDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(minBatteryVoltageDataPoint.name(), minBatteryVoltageDataPoint);
 
     SunSpecDataPoint maxCellVoltageDataPoint;
@@ -703,7 +705,7 @@ void SunSpecBatteryModel::initDataPoints()
     maxCellVoltageDataPoint.setAddressOffset(37);
     maxCellVoltageDataPoint.setBlockOffset(35);
     maxCellVoltageDataPoint.setScaleFactorName("CellV_SF");
-    maxCellVoltageDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    maxCellVoltageDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(maxCellVoltageDataPoint.name(), maxCellVoltageDataPoint);
 
     SunSpecDataPoint maxCellVoltageStringDataPoint;
@@ -713,7 +715,7 @@ void SunSpecBatteryModel::initDataPoints()
     maxCellVoltageStringDataPoint.setSize(1);
     maxCellVoltageStringDataPoint.setAddressOffset(38);
     maxCellVoltageStringDataPoint.setBlockOffset(36);
-    maxCellVoltageStringDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    maxCellVoltageStringDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(maxCellVoltageStringDataPoint.name(), maxCellVoltageStringDataPoint);
 
     SunSpecDataPoint maxCellVoltageModuleDataPoint;
@@ -723,7 +725,7 @@ void SunSpecBatteryModel::initDataPoints()
     maxCellVoltageModuleDataPoint.setSize(1);
     maxCellVoltageModuleDataPoint.setAddressOffset(39);
     maxCellVoltageModuleDataPoint.setBlockOffset(37);
-    maxCellVoltageModuleDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    maxCellVoltageModuleDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(maxCellVoltageModuleDataPoint.name(), maxCellVoltageModuleDataPoint);
 
     SunSpecDataPoint minCellVoltageDataPoint;
@@ -735,7 +737,7 @@ void SunSpecBatteryModel::initDataPoints()
     minCellVoltageDataPoint.setAddressOffset(40);
     minCellVoltageDataPoint.setBlockOffset(38);
     minCellVoltageDataPoint.setScaleFactorName("CellV_SF");
-    minCellVoltageDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    minCellVoltageDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(minCellVoltageDataPoint.name(), minCellVoltageDataPoint);
 
     SunSpecDataPoint minCellVoltageStringDataPoint;
@@ -745,7 +747,7 @@ void SunSpecBatteryModel::initDataPoints()
     minCellVoltageStringDataPoint.setSize(1);
     minCellVoltageStringDataPoint.setAddressOffset(41);
     minCellVoltageStringDataPoint.setBlockOffset(39);
-    minCellVoltageStringDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    minCellVoltageStringDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(minCellVoltageStringDataPoint.name(), minCellVoltageStringDataPoint);
 
     SunSpecDataPoint minCellVoltageModuleDataPoint;
@@ -755,7 +757,7 @@ void SunSpecBatteryModel::initDataPoints()
     minCellVoltageModuleDataPoint.setSize(1);
     minCellVoltageModuleDataPoint.setAddressOffset(42);
     minCellVoltageModuleDataPoint.setBlockOffset(40);
-    minCellVoltageModuleDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    minCellVoltageModuleDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(minCellVoltageModuleDataPoint.name(), minCellVoltageModuleDataPoint);
 
     SunSpecDataPoint averageCellVoltageDataPoint;
@@ -767,7 +769,7 @@ void SunSpecBatteryModel::initDataPoints()
     averageCellVoltageDataPoint.setAddressOffset(43);
     averageCellVoltageDataPoint.setBlockOffset(41);
     averageCellVoltageDataPoint.setScaleFactorName("CellV_SF");
-    averageCellVoltageDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    averageCellVoltageDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(averageCellVoltageDataPoint.name(), averageCellVoltageDataPoint);
 
     SunSpecDataPoint totalDcCurrentDataPoint;
@@ -780,7 +782,7 @@ void SunSpecBatteryModel::initDataPoints()
     totalDcCurrentDataPoint.setAddressOffset(44);
     totalDcCurrentDataPoint.setBlockOffset(42);
     totalDcCurrentDataPoint.setScaleFactorName("A_SF");
-    totalDcCurrentDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    totalDcCurrentDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(totalDcCurrentDataPoint.name(), totalDcCurrentDataPoint);
 
     SunSpecDataPoint maxChargeCurrentDataPoint;
@@ -792,7 +794,7 @@ void SunSpecBatteryModel::initDataPoints()
     maxChargeCurrentDataPoint.setAddressOffset(45);
     maxChargeCurrentDataPoint.setBlockOffset(43);
     maxChargeCurrentDataPoint.setScaleFactorName("AMax_SF");
-    maxChargeCurrentDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    maxChargeCurrentDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(maxChargeCurrentDataPoint.name(), maxChargeCurrentDataPoint);
 
     SunSpecDataPoint maxDischargeCurrentDataPoint;
@@ -804,7 +806,7 @@ void SunSpecBatteryModel::initDataPoints()
     maxDischargeCurrentDataPoint.setAddressOffset(46);
     maxDischargeCurrentDataPoint.setBlockOffset(44);
     maxDischargeCurrentDataPoint.setScaleFactorName("AMax_SF");
-    maxDischargeCurrentDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    maxDischargeCurrentDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(maxDischargeCurrentDataPoint.name(), maxDischargeCurrentDataPoint);
 
     SunSpecDataPoint totalPowerDataPoint;
@@ -817,7 +819,7 @@ void SunSpecBatteryModel::initDataPoints()
     totalPowerDataPoint.setAddressOffset(47);
     totalPowerDataPoint.setBlockOffset(45);
     totalPowerDataPoint.setScaleFactorName("W_SF");
-    totalPowerDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    totalPowerDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(totalPowerDataPoint.name(), totalPowerDataPoint);
 
     SunSpecDataPoint inverterStateRequestDataPoint;
@@ -827,7 +829,7 @@ void SunSpecBatteryModel::initDataPoints()
     inverterStateRequestDataPoint.setSize(1);
     inverterStateRequestDataPoint.setAddressOffset(48);
     inverterStateRequestDataPoint.setBlockOffset(46);
-    inverterStateRequestDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    inverterStateRequestDataPoint.setSunSpecDataType("enum16");
     m_dataPoints.insert(inverterStateRequestDataPoint.name(), inverterStateRequestDataPoint);
 
     SunSpecDataPoint batteryPowerRequestDataPoint;
@@ -839,7 +841,7 @@ void SunSpecBatteryModel::initDataPoints()
     batteryPowerRequestDataPoint.setAddressOffset(49);
     batteryPowerRequestDataPoint.setBlockOffset(47);
     batteryPowerRequestDataPoint.setScaleFactorName("W_SF");
-    batteryPowerRequestDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    batteryPowerRequestDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(batteryPowerRequestDataPoint.name(), batteryPowerRequestDataPoint);
 
     SunSpecDataPoint setOperationDataPoint;
@@ -850,7 +852,7 @@ void SunSpecBatteryModel::initDataPoints()
     setOperationDataPoint.setSize(1);
     setOperationDataPoint.setAddressOffset(50);
     setOperationDataPoint.setBlockOffset(48);
-    setOperationDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    setOperationDataPoint.setSunSpecDataType("enum16");
     setOperationDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(setOperationDataPoint.name(), setOperationDataPoint);
 
@@ -862,7 +864,7 @@ void SunSpecBatteryModel::initDataPoints()
     setInverterStateDataPoint.setSize(1);
     setInverterStateDataPoint.setAddressOffset(51);
     setInverterStateDataPoint.setBlockOffset(49);
-    setInverterStateDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    setInverterStateDataPoint.setSunSpecDataType("enum16");
     setInverterStateDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(setInverterStateDataPoint.name(), setInverterStateDataPoint);
 
@@ -873,7 +875,7 @@ void SunSpecBatteryModel::initDataPoints()
     aHRtg_SFDataPoint.setSize(1);
     aHRtg_SFDataPoint.setAddressOffset(52);
     aHRtg_SFDataPoint.setBlockOffset(50);
-    aHRtg_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    aHRtg_SFDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(aHRtg_SFDataPoint.name(), aHRtg_SFDataPoint);
 
     SunSpecDataPoint wHRtg_SFDataPoint;
@@ -883,7 +885,7 @@ void SunSpecBatteryModel::initDataPoints()
     wHRtg_SFDataPoint.setSize(1);
     wHRtg_SFDataPoint.setAddressOffset(53);
     wHRtg_SFDataPoint.setBlockOffset(51);
-    wHRtg_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    wHRtg_SFDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(wHRtg_SFDataPoint.name(), wHRtg_SFDataPoint);
 
     SunSpecDataPoint wChaDisChaMax_SFDataPoint;
@@ -893,7 +895,7 @@ void SunSpecBatteryModel::initDataPoints()
     wChaDisChaMax_SFDataPoint.setSize(1);
     wChaDisChaMax_SFDataPoint.setAddressOffset(54);
     wChaDisChaMax_SFDataPoint.setBlockOffset(52);
-    wChaDisChaMax_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    wChaDisChaMax_SFDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(wChaDisChaMax_SFDataPoint.name(), wChaDisChaMax_SFDataPoint);
 
     SunSpecDataPoint disChaRte_SFDataPoint;
@@ -902,7 +904,7 @@ void SunSpecBatteryModel::initDataPoints()
     disChaRte_SFDataPoint.setSize(1);
     disChaRte_SFDataPoint.setAddressOffset(55);
     disChaRte_SFDataPoint.setBlockOffset(53);
-    disChaRte_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    disChaRte_SFDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(disChaRte_SFDataPoint.name(), disChaRte_SFDataPoint);
 
     SunSpecDataPoint soC_SFDataPoint;
@@ -912,7 +914,7 @@ void SunSpecBatteryModel::initDataPoints()
     soC_SFDataPoint.setSize(1);
     soC_SFDataPoint.setAddressOffset(56);
     soC_SFDataPoint.setBlockOffset(54);
-    soC_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    soC_SFDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(soC_SFDataPoint.name(), soC_SFDataPoint);
 
     SunSpecDataPoint doD_SFDataPoint;
@@ -921,7 +923,7 @@ void SunSpecBatteryModel::initDataPoints()
     doD_SFDataPoint.setSize(1);
     doD_SFDataPoint.setAddressOffset(57);
     doD_SFDataPoint.setBlockOffset(55);
-    doD_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    doD_SFDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(doD_SFDataPoint.name(), doD_SFDataPoint);
 
     SunSpecDataPoint soH_SFDataPoint;
@@ -930,7 +932,7 @@ void SunSpecBatteryModel::initDataPoints()
     soH_SFDataPoint.setSize(1);
     soH_SFDataPoint.setAddressOffset(58);
     soH_SFDataPoint.setBlockOffset(56);
-    soH_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    soH_SFDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(soH_SFDataPoint.name(), soH_SFDataPoint);
 
     SunSpecDataPoint v_SFDataPoint;
@@ -940,7 +942,7 @@ void SunSpecBatteryModel::initDataPoints()
     v_SFDataPoint.setSize(1);
     v_SFDataPoint.setAddressOffset(59);
     v_SFDataPoint.setBlockOffset(57);
-    v_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    v_SFDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(v_SFDataPoint.name(), v_SFDataPoint);
 
     SunSpecDataPoint cellV_SFDataPoint;
@@ -950,7 +952,7 @@ void SunSpecBatteryModel::initDataPoints()
     cellV_SFDataPoint.setSize(1);
     cellV_SFDataPoint.setAddressOffset(60);
     cellV_SFDataPoint.setBlockOffset(58);
-    cellV_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    cellV_SFDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(cellV_SFDataPoint.name(), cellV_SFDataPoint);
 
     SunSpecDataPoint a_SFDataPoint;
@@ -960,7 +962,7 @@ void SunSpecBatteryModel::initDataPoints()
     a_SFDataPoint.setSize(1);
     a_SFDataPoint.setAddressOffset(61);
     a_SFDataPoint.setBlockOffset(59);
-    a_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    a_SFDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(a_SFDataPoint.name(), a_SFDataPoint);
 
     SunSpecDataPoint aMax_SFDataPoint;
@@ -970,7 +972,7 @@ void SunSpecBatteryModel::initDataPoints()
     aMax_SFDataPoint.setSize(1);
     aMax_SFDataPoint.setAddressOffset(62);
     aMax_SFDataPoint.setBlockOffset(60);
-    aMax_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    aMax_SFDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(aMax_SFDataPoint.name(), aMax_SFDataPoint);
 
     SunSpecDataPoint w_SFDataPoint;
@@ -979,8 +981,278 @@ void SunSpecBatteryModel::initDataPoints()
     w_SFDataPoint.setSize(1);
     w_SFDataPoint.setAddressOffset(63);
     w_SFDataPoint.setBlockOffset(61);
-    w_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    w_SFDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(w_SFDataPoint.name(), w_SFDataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecBatteryModel *model)
+{
+    debug.nospace().noquote() << "SunSpecBatteryModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    if (model->dataPoints().value("AHRtg").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("AHRtg") << "--> " << model->nameplateChargeCapacity() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("AHRtg") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("WHRtg").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WHRtg") << "--> " << model->nameplateEnergyCapacity() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WHRtg") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("WChaRteMax").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WChaRteMax") << "--> " << model->nameplateMaxChargeRate() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WChaRteMax") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("WDisChaRteMax").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WDisChaRteMax") << "--> " << model->nameplateMaxDischargeRate() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WDisChaRteMax") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("DisChaRte").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DisChaRte") << "--> " << model->selfDischargeRate() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DisChaRte") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("SoCMax").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("SoCMax") << "--> " << model->nameplateMaxSoC() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("SoCMax") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("SoCMin").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("SoCMin") << "--> " << model->nameplateMinSoC() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("SoCMin") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("SocRsvMax").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("SocRsvMax") << "--> " << model->maxReservePercent() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("SocRsvMax") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("SoCRsvMin").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("SoCRsvMin") << "--> " << model->minReservePercent() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("SoCRsvMin") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("SoC").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("SoC") << "--> " << model->stateOfCharge() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("SoC") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("DoD").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DoD") << "--> " << model->depthOfDischarge() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DoD") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("SoH").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("SoH") << "--> " << model->stateOfHealth() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("SoH") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("NCyc").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("NCyc") << "--> " << model->cycleCount() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("NCyc") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ChaSt").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ChaSt") << "--> " << model->chargeStatus() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ChaSt") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("LocRemCtl").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("LocRemCtl") << "--> " << model->controlMode() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("LocRemCtl") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Hb").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Hb") << "--> " << model->batteryHeartbeat() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Hb") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("CtrlHb").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("CtrlHb") << "--> " << model->controllerHeartbeat() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("CtrlHb") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("AlmRst").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("AlmRst") << "--> " << model->alarmReset() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("AlmRst") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Typ").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Typ") << "--> " << model->batteryType() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Typ") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("State").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("State") << "--> " << model->stateOfTheBatteryBank() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("State") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("StateVnd").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StateVnd") << "--> " << model->vendorBatteryBankState() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StateVnd") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("WarrDt").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WarrDt") << "--> " << model->warrantyDate() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WarrDt") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Evt1").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt1") << "--> " << model->batteryEvent1Bitfield() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt1") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Evt2").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt2") << "--> " << model->batteryEvent2Bitfield() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt2") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("EvtVnd1").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd1") << "--> " << model->vendorEventBitfield1() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd1") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("EvtVnd2").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd2") << "--> " << model->vendorEventBitfield2() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd2") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("V").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("V") << "--> " << model->externalBatteryVoltage() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("V") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VMax").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VMax") << "--> " << model->maxBatteryVoltage() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VMax") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VMin").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VMin") << "--> " << model->minBatteryVoltage() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VMin") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("CellVMax").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("CellVMax") << "--> " << model->maxCellVoltage() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("CellVMax") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("CellVMaxStr").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("CellVMaxStr") << "--> " << model->maxCellVoltageString() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("CellVMaxStr") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("CellVMaxMod").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("CellVMaxMod") << "--> " << model->maxCellVoltageModule() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("CellVMaxMod") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("CellVMin").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("CellVMin") << "--> " << model->minCellVoltage() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("CellVMin") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("CellVMinStr").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("CellVMinStr") << "--> " << model->minCellVoltageString() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("CellVMinStr") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("CellVMinMod").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("CellVMinMod") << "--> " << model->minCellVoltageModule() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("CellVMinMod") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("CellVAvg").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("CellVAvg") << "--> " << model->averageCellVoltage() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("CellVAvg") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("A").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("A") << "--> " << model->totalDcCurrent() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("A") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("AChaMax").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("AChaMax") << "--> " << model->maxChargeCurrent() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("AChaMax") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ADisChaMax").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ADisChaMax") << "--> " << model->maxDischargeCurrent() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ADisChaMax") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("W").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("W") << "--> " << model->totalPower() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("W") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ReqInvState").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ReqInvState") << "--> " << model->inverterStateRequest() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ReqInvState") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ReqW").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ReqW") << "--> " << model->batteryPowerRequest() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ReqW") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("SetOp").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("SetOp") << "--> " << model->setOperation() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("SetOp") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("SetInvState").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("SetInvState") << "--> " << model->setInverterState() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("SetInvState") << "--> NaN" << endl;
+    }
+
+
+    return debug.space().quote();
+}

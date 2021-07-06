@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecPricingModel::SunSpecPricingModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 125, 8, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 125, 8, parent)
 {
-    Q_ASSERT_X(length == 8,  "SunSpecPricingModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 8,  "SunSpecPricingModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -136,6 +136,8 @@ void SunSpecPricingModel::processBlockData()
     m_rvtTms = m_dataPoints.value("RvtTms").toUInt16();
     m_rmpTms = m_dataPoints.value("RmpTms").toUInt16();
     m_pad = m_dataPoints.value("Pad").toUInt16();
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecPricingModel::initDataPoints()
@@ -147,7 +149,7 @@ void SunSpecPricingModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -157,7 +159,7 @@ void SunSpecPricingModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint modEnaDataPoint;
@@ -168,7 +170,7 @@ void SunSpecPricingModel::initDataPoints()
     modEnaDataPoint.setSize(1);
     modEnaDataPoint.setAddressOffset(2);
     modEnaDataPoint.setBlockOffset(0);
-    modEnaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield16"));
+    modEnaDataPoint.setSunSpecDataType("bitfield16");
     modEnaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(modEnaDataPoint.name(), modEnaDataPoint);
 
@@ -179,7 +181,7 @@ void SunSpecPricingModel::initDataPoints()
     sigTypeDataPoint.setSize(1);
     sigTypeDataPoint.setAddressOffset(3);
     sigTypeDataPoint.setBlockOffset(1);
-    sigTypeDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    sigTypeDataPoint.setSunSpecDataType("enum16");
     sigTypeDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(sigTypeDataPoint.name(), sigTypeDataPoint);
 
@@ -192,7 +194,7 @@ void SunSpecPricingModel::initDataPoints()
     sigDataPoint.setAddressOffset(4);
     sigDataPoint.setBlockOffset(2);
     sigDataPoint.setScaleFactorName("Sig_SF");
-    sigDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    sigDataPoint.setSunSpecDataType("int16");
     sigDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(sigDataPoint.name(), sigDataPoint);
 
@@ -204,7 +206,7 @@ void SunSpecPricingModel::initDataPoints()
     winTmsDataPoint.setSize(1);
     winTmsDataPoint.setAddressOffset(5);
     winTmsDataPoint.setBlockOffset(3);
-    winTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    winTmsDataPoint.setSunSpecDataType("uint16");
     winTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(winTmsDataPoint.name(), winTmsDataPoint);
 
@@ -216,7 +218,7 @@ void SunSpecPricingModel::initDataPoints()
     rvtTmsDataPoint.setSize(1);
     rvtTmsDataPoint.setAddressOffset(6);
     rvtTmsDataPoint.setBlockOffset(4);
-    rvtTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    rvtTmsDataPoint.setSunSpecDataType("uint16");
     rvtTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(rvtTmsDataPoint.name(), rvtTmsDataPoint);
 
@@ -228,7 +230,7 @@ void SunSpecPricingModel::initDataPoints()
     rmpTmsDataPoint.setSize(1);
     rmpTmsDataPoint.setAddressOffset(7);
     rmpTmsDataPoint.setBlockOffset(5);
-    rmpTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    rmpTmsDataPoint.setSunSpecDataType("uint16");
     rmpTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(rmpTmsDataPoint.name(), rmpTmsDataPoint);
 
@@ -240,7 +242,7 @@ void SunSpecPricingModel::initDataPoints()
     sigSfDataPoint.setSize(1);
     sigSfDataPoint.setAddressOffset(8);
     sigSfDataPoint.setBlockOffset(6);
-    sigSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    sigSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(sigSfDataPoint.name(), sigSfDataPoint);
 
     SunSpecDataPoint padDataPoint;
@@ -248,8 +250,56 @@ void SunSpecPricingModel::initDataPoints()
     padDataPoint.setSize(1);
     padDataPoint.setAddressOffset(9);
     padDataPoint.setBlockOffset(7);
-    padDataPoint.setDataType(SunSpecDataPoint::stringToDataType("pad"));
+    padDataPoint.setSunSpecDataType("pad");
     m_dataPoints.insert(padDataPoint.name(), padDataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecPricingModel *model)
+{
+    debug.nospace().noquote() << "SunSpecPricingModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    if (model->dataPoints().value("ModEna").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModEna") << "--> " << model->modEna() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModEna") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("SigType").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("SigType") << "--> " << model->sigType() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("SigType") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Sig").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Sig") << "--> " << model->sig() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Sig") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("WinTms").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WinTms") << "--> " << model->winTms() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WinTms") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("RvtTms").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("RvtTms") << "--> " << model->rvtTms() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("RvtTms") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("RmpTms").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("RmpTms") << "--> " << model->rmpTms() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("RmpTms") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Pad").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad") << "--> " << model->pad() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad") << "--> NaN" << endl;
+    }
+
+
+    return debug.space().quote();
+}

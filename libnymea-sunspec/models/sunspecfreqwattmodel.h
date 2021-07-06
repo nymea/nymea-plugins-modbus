@@ -93,4 +93,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecFreqWattModel *model);
+
 #endif // SUNSPECFREQWATTMODEL_H

@@ -94,4 +94,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecLvrtModel *model);
+
 #endif // SUNSPECLVRTMODEL_H

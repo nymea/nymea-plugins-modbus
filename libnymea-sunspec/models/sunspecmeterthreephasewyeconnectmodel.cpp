@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecMeterThreePhaseWyeConnectModel::SunSpecMeterThreePhaseWyeConnectModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 213, 124, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 213, 124, parent)
 {
-    Q_ASSERT_X(length == 124,  "SunSpecMeterThreePhaseWyeConnectModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 124,  "SunSpecMeterThreePhaseWyeConnectModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -372,6 +372,8 @@ void SunSpecMeterThreePhaseWyeConnectModel::processBlockData()
     m_totalVArHoursExportedQ4ImportedPhaseB = m_dataPoints.value("TotVArhExpQ4phB").toFloat();
     m_totalVArHoursExportedQ4ImportedPhaseC = m_dataPoints.value("TotVArhExpQ4phC").toFloat();
     m_events = static_cast<EvtFlags>(m_dataPoints.value("Evt").toUInt32());
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
@@ -383,7 +385,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -393,7 +395,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint ampsDataPoint;
@@ -405,7 +407,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     ampsDataPoint.setSize(2);
     ampsDataPoint.setAddressOffset(2);
     ampsDataPoint.setBlockOffset(0);
-    ampsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    ampsDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
     SunSpecDataPoint ampsPhaseADataPoint;
@@ -417,7 +419,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     ampsPhaseADataPoint.setSize(2);
     ampsPhaseADataPoint.setAddressOffset(4);
     ampsPhaseADataPoint.setBlockOffset(2);
-    ampsPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    ampsPhaseADataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(ampsPhaseADataPoint.name(), ampsPhaseADataPoint);
 
     SunSpecDataPoint ampsPhaseBDataPoint;
@@ -429,7 +431,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     ampsPhaseBDataPoint.setSize(2);
     ampsPhaseBDataPoint.setAddressOffset(6);
     ampsPhaseBDataPoint.setBlockOffset(4);
-    ampsPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    ampsPhaseBDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(ampsPhaseBDataPoint.name(), ampsPhaseBDataPoint);
 
     SunSpecDataPoint ampsPhaseCDataPoint;
@@ -441,7 +443,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     ampsPhaseCDataPoint.setSize(2);
     ampsPhaseCDataPoint.setAddressOffset(8);
     ampsPhaseCDataPoint.setBlockOffset(6);
-    ampsPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    ampsPhaseCDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(ampsPhaseCDataPoint.name(), ampsPhaseCDataPoint);
 
     SunSpecDataPoint voltageLnDataPoint;
@@ -453,7 +455,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     voltageLnDataPoint.setSize(2);
     voltageLnDataPoint.setAddressOffset(10);
     voltageLnDataPoint.setBlockOffset(8);
-    voltageLnDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    voltageLnDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(voltageLnDataPoint.name(), voltageLnDataPoint);
 
     SunSpecDataPoint phaseVoltageAnDataPoint;
@@ -465,7 +467,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     phaseVoltageAnDataPoint.setSize(2);
     phaseVoltageAnDataPoint.setAddressOffset(12);
     phaseVoltageAnDataPoint.setBlockOffset(10);
-    phaseVoltageAnDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    phaseVoltageAnDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(phaseVoltageAnDataPoint.name(), phaseVoltageAnDataPoint);
 
     SunSpecDataPoint phaseVoltageBnDataPoint;
@@ -477,7 +479,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     phaseVoltageBnDataPoint.setSize(2);
     phaseVoltageBnDataPoint.setAddressOffset(14);
     phaseVoltageBnDataPoint.setBlockOffset(12);
-    phaseVoltageBnDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    phaseVoltageBnDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(phaseVoltageBnDataPoint.name(), phaseVoltageBnDataPoint);
 
     SunSpecDataPoint phaseVoltageCnDataPoint;
@@ -489,7 +491,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     phaseVoltageCnDataPoint.setSize(2);
     phaseVoltageCnDataPoint.setAddressOffset(16);
     phaseVoltageCnDataPoint.setBlockOffset(14);
-    phaseVoltageCnDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    phaseVoltageCnDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(phaseVoltageCnDataPoint.name(), phaseVoltageCnDataPoint);
 
     SunSpecDataPoint voltageLlDataPoint;
@@ -501,7 +503,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     voltageLlDataPoint.setSize(2);
     voltageLlDataPoint.setAddressOffset(18);
     voltageLlDataPoint.setBlockOffset(16);
-    voltageLlDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    voltageLlDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(voltageLlDataPoint.name(), voltageLlDataPoint);
 
     SunSpecDataPoint phaseVoltageAbDataPoint;
@@ -513,7 +515,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     phaseVoltageAbDataPoint.setSize(2);
     phaseVoltageAbDataPoint.setAddressOffset(20);
     phaseVoltageAbDataPoint.setBlockOffset(18);
-    phaseVoltageAbDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    phaseVoltageAbDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(phaseVoltageAbDataPoint.name(), phaseVoltageAbDataPoint);
 
     SunSpecDataPoint phaseVoltageBcDataPoint;
@@ -525,7 +527,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     phaseVoltageBcDataPoint.setSize(2);
     phaseVoltageBcDataPoint.setAddressOffset(22);
     phaseVoltageBcDataPoint.setBlockOffset(20);
-    phaseVoltageBcDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    phaseVoltageBcDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(phaseVoltageBcDataPoint.name(), phaseVoltageBcDataPoint);
 
     SunSpecDataPoint phaseVoltageCaDataPoint;
@@ -537,7 +539,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     phaseVoltageCaDataPoint.setSize(2);
     phaseVoltageCaDataPoint.setAddressOffset(24);
     phaseVoltageCaDataPoint.setBlockOffset(22);
-    phaseVoltageCaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    phaseVoltageCaDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(phaseVoltageCaDataPoint.name(), phaseVoltageCaDataPoint);
 
     SunSpecDataPoint hzDataPoint;
@@ -549,7 +551,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     hzDataPoint.setSize(2);
     hzDataPoint.setAddressOffset(26);
     hzDataPoint.setBlockOffset(24);
-    hzDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    hzDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(hzDataPoint.name(), hzDataPoint);
 
     SunSpecDataPoint wattsDataPoint;
@@ -561,7 +563,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     wattsDataPoint.setSize(2);
     wattsDataPoint.setAddressOffset(28);
     wattsDataPoint.setBlockOffset(26);
-    wattsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    wattsDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(wattsDataPoint.name(), wattsDataPoint);
 
     SunSpecDataPoint wattsPhaseADataPoint;
@@ -571,7 +573,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     wattsPhaseADataPoint.setSize(2);
     wattsPhaseADataPoint.setAddressOffset(30);
     wattsPhaseADataPoint.setBlockOffset(28);
-    wattsPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    wattsPhaseADataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(wattsPhaseADataPoint.name(), wattsPhaseADataPoint);
 
     SunSpecDataPoint wattsPhaseBDataPoint;
@@ -581,7 +583,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     wattsPhaseBDataPoint.setSize(2);
     wattsPhaseBDataPoint.setAddressOffset(32);
     wattsPhaseBDataPoint.setBlockOffset(30);
-    wattsPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    wattsPhaseBDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(wattsPhaseBDataPoint.name(), wattsPhaseBDataPoint);
 
     SunSpecDataPoint wattsPhaseCDataPoint;
@@ -591,7 +593,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     wattsPhaseCDataPoint.setSize(2);
     wattsPhaseCDataPoint.setAddressOffset(34);
     wattsPhaseCDataPoint.setBlockOffset(32);
-    wattsPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    wattsPhaseCDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(wattsPhaseCDataPoint.name(), wattsPhaseCDataPoint);
 
     SunSpecDataPoint vaDataPoint;
@@ -602,7 +604,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     vaDataPoint.setSize(2);
     vaDataPoint.setAddressOffset(36);
     vaDataPoint.setBlockOffset(34);
-    vaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    vaDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(vaDataPoint.name(), vaDataPoint);
 
     SunSpecDataPoint vaPhaseADataPoint;
@@ -612,7 +614,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     vaPhaseADataPoint.setSize(2);
     vaPhaseADataPoint.setAddressOffset(38);
     vaPhaseADataPoint.setBlockOffset(36);
-    vaPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    vaPhaseADataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(vaPhaseADataPoint.name(), vaPhaseADataPoint);
 
     SunSpecDataPoint vaPhaseBDataPoint;
@@ -622,7 +624,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     vaPhaseBDataPoint.setSize(2);
     vaPhaseBDataPoint.setAddressOffset(40);
     vaPhaseBDataPoint.setBlockOffset(38);
-    vaPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    vaPhaseBDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(vaPhaseBDataPoint.name(), vaPhaseBDataPoint);
 
     SunSpecDataPoint vaPhaseCDataPoint;
@@ -632,7 +634,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     vaPhaseCDataPoint.setSize(2);
     vaPhaseCDataPoint.setAddressOffset(42);
     vaPhaseCDataPoint.setBlockOffset(40);
-    vaPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    vaPhaseCDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(vaPhaseCDataPoint.name(), vaPhaseCDataPoint);
 
     SunSpecDataPoint varDataPoint;
@@ -643,7 +645,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     varDataPoint.setSize(2);
     varDataPoint.setAddressOffset(44);
     varDataPoint.setBlockOffset(42);
-    varDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    varDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(varDataPoint.name(), varDataPoint);
 
     SunSpecDataPoint varPhaseADataPoint;
@@ -653,7 +655,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     varPhaseADataPoint.setSize(2);
     varPhaseADataPoint.setAddressOffset(46);
     varPhaseADataPoint.setBlockOffset(44);
-    varPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    varPhaseADataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(varPhaseADataPoint.name(), varPhaseADataPoint);
 
     SunSpecDataPoint varPhaseBDataPoint;
@@ -663,7 +665,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     varPhaseBDataPoint.setSize(2);
     varPhaseBDataPoint.setAddressOffset(48);
     varPhaseBDataPoint.setBlockOffset(46);
-    varPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    varPhaseBDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(varPhaseBDataPoint.name(), varPhaseBDataPoint);
 
     SunSpecDataPoint varPhaseCDataPoint;
@@ -673,7 +675,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     varPhaseCDataPoint.setSize(2);
     varPhaseCDataPoint.setAddressOffset(50);
     varPhaseCDataPoint.setBlockOffset(48);
-    varPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    varPhaseCDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(varPhaseCDataPoint.name(), varPhaseCDataPoint);
 
     SunSpecDataPoint pfDataPoint;
@@ -684,7 +686,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     pfDataPoint.setSize(2);
     pfDataPoint.setAddressOffset(52);
     pfDataPoint.setBlockOffset(50);
-    pfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    pfDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(pfDataPoint.name(), pfDataPoint);
 
     SunSpecDataPoint pfPhaseADataPoint;
@@ -694,7 +696,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     pfPhaseADataPoint.setSize(2);
     pfPhaseADataPoint.setAddressOffset(54);
     pfPhaseADataPoint.setBlockOffset(52);
-    pfPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    pfPhaseADataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(pfPhaseADataPoint.name(), pfPhaseADataPoint);
 
     SunSpecDataPoint pfPhaseBDataPoint;
@@ -704,7 +706,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     pfPhaseBDataPoint.setSize(2);
     pfPhaseBDataPoint.setAddressOffset(56);
     pfPhaseBDataPoint.setBlockOffset(54);
-    pfPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    pfPhaseBDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(pfPhaseBDataPoint.name(), pfPhaseBDataPoint);
 
     SunSpecDataPoint pfPhaseCDataPoint;
@@ -714,7 +716,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     pfPhaseCDataPoint.setSize(2);
     pfPhaseCDataPoint.setAddressOffset(58);
     pfPhaseCDataPoint.setBlockOffset(56);
-    pfPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    pfPhaseCDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(pfPhaseCDataPoint.name(), pfPhaseCDataPoint);
 
     SunSpecDataPoint totalWattHoursExportedDataPoint;
@@ -726,7 +728,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalWattHoursExportedDataPoint.setSize(2);
     totalWattHoursExportedDataPoint.setAddressOffset(60);
     totalWattHoursExportedDataPoint.setBlockOffset(58);
-    totalWattHoursExportedDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalWattHoursExportedDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalWattHoursExportedDataPoint.name(), totalWattHoursExportedDataPoint);
 
     SunSpecDataPoint totalWattHoursExportedPhaseADataPoint;
@@ -736,7 +738,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalWattHoursExportedPhaseADataPoint.setSize(2);
     totalWattHoursExportedPhaseADataPoint.setAddressOffset(62);
     totalWattHoursExportedPhaseADataPoint.setBlockOffset(60);
-    totalWattHoursExportedPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalWattHoursExportedPhaseADataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalWattHoursExportedPhaseADataPoint.name(), totalWattHoursExportedPhaseADataPoint);
 
     SunSpecDataPoint totalWattHoursExportedPhaseBDataPoint;
@@ -746,7 +748,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalWattHoursExportedPhaseBDataPoint.setSize(2);
     totalWattHoursExportedPhaseBDataPoint.setAddressOffset(64);
     totalWattHoursExportedPhaseBDataPoint.setBlockOffset(62);
-    totalWattHoursExportedPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalWattHoursExportedPhaseBDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalWattHoursExportedPhaseBDataPoint.name(), totalWattHoursExportedPhaseBDataPoint);
 
     SunSpecDataPoint totalWattHoursExportedPhaseCDataPoint;
@@ -756,7 +758,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalWattHoursExportedPhaseCDataPoint.setSize(2);
     totalWattHoursExportedPhaseCDataPoint.setAddressOffset(66);
     totalWattHoursExportedPhaseCDataPoint.setBlockOffset(64);
-    totalWattHoursExportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalWattHoursExportedPhaseCDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalWattHoursExportedPhaseCDataPoint.name(), totalWattHoursExportedPhaseCDataPoint);
 
     SunSpecDataPoint totalWattHoursImportedDataPoint;
@@ -768,7 +770,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalWattHoursImportedDataPoint.setSize(2);
     totalWattHoursImportedDataPoint.setAddressOffset(68);
     totalWattHoursImportedDataPoint.setBlockOffset(66);
-    totalWattHoursImportedDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalWattHoursImportedDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalWattHoursImportedDataPoint.name(), totalWattHoursImportedDataPoint);
 
     SunSpecDataPoint totalWattHoursImportedPhaseADataPoint;
@@ -778,7 +780,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalWattHoursImportedPhaseADataPoint.setSize(2);
     totalWattHoursImportedPhaseADataPoint.setAddressOffset(70);
     totalWattHoursImportedPhaseADataPoint.setBlockOffset(68);
-    totalWattHoursImportedPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalWattHoursImportedPhaseADataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalWattHoursImportedPhaseADataPoint.name(), totalWattHoursImportedPhaseADataPoint);
 
     SunSpecDataPoint totalWattHoursImportedPhaseBDataPoint;
@@ -788,7 +790,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalWattHoursImportedPhaseBDataPoint.setSize(2);
     totalWattHoursImportedPhaseBDataPoint.setAddressOffset(72);
     totalWattHoursImportedPhaseBDataPoint.setBlockOffset(70);
-    totalWattHoursImportedPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalWattHoursImportedPhaseBDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalWattHoursImportedPhaseBDataPoint.name(), totalWattHoursImportedPhaseBDataPoint);
 
     SunSpecDataPoint totalWattHoursImportedPhaseCDataPoint;
@@ -798,7 +800,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalWattHoursImportedPhaseCDataPoint.setSize(2);
     totalWattHoursImportedPhaseCDataPoint.setAddressOffset(74);
     totalWattHoursImportedPhaseCDataPoint.setBlockOffset(72);
-    totalWattHoursImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalWattHoursImportedPhaseCDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalWattHoursImportedPhaseCDataPoint.name(), totalWattHoursImportedPhaseCDataPoint);
 
     SunSpecDataPoint totalVaHoursExportedDataPoint;
@@ -809,7 +811,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalVaHoursExportedDataPoint.setSize(2);
     totalVaHoursExportedDataPoint.setAddressOffset(76);
     totalVaHoursExportedDataPoint.setBlockOffset(74);
-    totalVaHoursExportedDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalVaHoursExportedDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalVaHoursExportedDataPoint.name(), totalVaHoursExportedDataPoint);
 
     SunSpecDataPoint totalVaHoursExportedPhaseADataPoint;
@@ -819,7 +821,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalVaHoursExportedPhaseADataPoint.setSize(2);
     totalVaHoursExportedPhaseADataPoint.setAddressOffset(78);
     totalVaHoursExportedPhaseADataPoint.setBlockOffset(76);
-    totalVaHoursExportedPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalVaHoursExportedPhaseADataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalVaHoursExportedPhaseADataPoint.name(), totalVaHoursExportedPhaseADataPoint);
 
     SunSpecDataPoint totalVaHoursExportedPhaseBDataPoint;
@@ -829,7 +831,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalVaHoursExportedPhaseBDataPoint.setSize(2);
     totalVaHoursExportedPhaseBDataPoint.setAddressOffset(80);
     totalVaHoursExportedPhaseBDataPoint.setBlockOffset(78);
-    totalVaHoursExportedPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalVaHoursExportedPhaseBDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalVaHoursExportedPhaseBDataPoint.name(), totalVaHoursExportedPhaseBDataPoint);
 
     SunSpecDataPoint totalVaHoursExportedPhaseCDataPoint;
@@ -839,7 +841,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalVaHoursExportedPhaseCDataPoint.setSize(2);
     totalVaHoursExportedPhaseCDataPoint.setAddressOffset(82);
     totalVaHoursExportedPhaseCDataPoint.setBlockOffset(80);
-    totalVaHoursExportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalVaHoursExportedPhaseCDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalVaHoursExportedPhaseCDataPoint.name(), totalVaHoursExportedPhaseCDataPoint);
 
     SunSpecDataPoint totalVaHoursImportedDataPoint;
@@ -850,7 +852,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalVaHoursImportedDataPoint.setSize(2);
     totalVaHoursImportedDataPoint.setAddressOffset(84);
     totalVaHoursImportedDataPoint.setBlockOffset(82);
-    totalVaHoursImportedDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalVaHoursImportedDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalVaHoursImportedDataPoint.name(), totalVaHoursImportedDataPoint);
 
     SunSpecDataPoint totalVaHoursImportedPhaseADataPoint;
@@ -860,7 +862,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalVaHoursImportedPhaseADataPoint.setSize(2);
     totalVaHoursImportedPhaseADataPoint.setAddressOffset(86);
     totalVaHoursImportedPhaseADataPoint.setBlockOffset(84);
-    totalVaHoursImportedPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalVaHoursImportedPhaseADataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalVaHoursImportedPhaseADataPoint.name(), totalVaHoursImportedPhaseADataPoint);
 
     SunSpecDataPoint totalVaHoursImportedPhaseBDataPoint;
@@ -870,7 +872,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalVaHoursImportedPhaseBDataPoint.setSize(2);
     totalVaHoursImportedPhaseBDataPoint.setAddressOffset(88);
     totalVaHoursImportedPhaseBDataPoint.setBlockOffset(86);
-    totalVaHoursImportedPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalVaHoursImportedPhaseBDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalVaHoursImportedPhaseBDataPoint.name(), totalVaHoursImportedPhaseBDataPoint);
 
     SunSpecDataPoint totalVaHoursImportedPhaseCDataPoint;
@@ -880,7 +882,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalVaHoursImportedPhaseCDataPoint.setSize(2);
     totalVaHoursImportedPhaseCDataPoint.setAddressOffset(90);
     totalVaHoursImportedPhaseCDataPoint.setBlockOffset(88);
-    totalVaHoursImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalVaHoursImportedPhaseCDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalVaHoursImportedPhaseCDataPoint.name(), totalVaHoursImportedPhaseCDataPoint);
 
     SunSpecDataPoint totalVarHoursImportedQ1DataPoint;
@@ -891,7 +893,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalVarHoursImportedQ1DataPoint.setSize(2);
     totalVarHoursImportedQ1DataPoint.setAddressOffset(92);
     totalVarHoursImportedQ1DataPoint.setBlockOffset(90);
-    totalVarHoursImportedQ1DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalVarHoursImportedQ1DataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalVarHoursImportedQ1DataPoint.name(), totalVarHoursImportedQ1DataPoint);
 
     SunSpecDataPoint totalVArHoursImportedQ1PhaseADataPoint;
@@ -901,7 +903,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalVArHoursImportedQ1PhaseADataPoint.setSize(2);
     totalVArHoursImportedQ1PhaseADataPoint.setAddressOffset(94);
     totalVArHoursImportedQ1PhaseADataPoint.setBlockOffset(92);
-    totalVArHoursImportedQ1PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalVArHoursImportedQ1PhaseADataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalVArHoursImportedQ1PhaseADataPoint.name(), totalVArHoursImportedQ1PhaseADataPoint);
 
     SunSpecDataPoint totalVArHoursImportedQ1PhaseBDataPoint;
@@ -911,7 +913,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalVArHoursImportedQ1PhaseBDataPoint.setSize(2);
     totalVArHoursImportedQ1PhaseBDataPoint.setAddressOffset(96);
     totalVArHoursImportedQ1PhaseBDataPoint.setBlockOffset(94);
-    totalVArHoursImportedQ1PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalVArHoursImportedQ1PhaseBDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalVArHoursImportedQ1PhaseBDataPoint.name(), totalVArHoursImportedQ1PhaseBDataPoint);
 
     SunSpecDataPoint totalVArHoursImportedQ1PhaseCDataPoint;
@@ -921,7 +923,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalVArHoursImportedQ1PhaseCDataPoint.setSize(2);
     totalVArHoursImportedQ1PhaseCDataPoint.setAddressOffset(98);
     totalVArHoursImportedQ1PhaseCDataPoint.setBlockOffset(96);
-    totalVArHoursImportedQ1PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalVArHoursImportedQ1PhaseCDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalVArHoursImportedQ1PhaseCDataPoint.name(), totalVArHoursImportedQ1PhaseCDataPoint);
 
     SunSpecDataPoint totalVArHoursImportedQ2DataPoint;
@@ -932,7 +934,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalVArHoursImportedQ2DataPoint.setSize(2);
     totalVArHoursImportedQ2DataPoint.setAddressOffset(100);
     totalVArHoursImportedQ2DataPoint.setBlockOffset(98);
-    totalVArHoursImportedQ2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalVArHoursImportedQ2DataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalVArHoursImportedQ2DataPoint.name(), totalVArHoursImportedQ2DataPoint);
 
     SunSpecDataPoint totalVArHoursImportedQ2PhaseADataPoint;
@@ -942,7 +944,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalVArHoursImportedQ2PhaseADataPoint.setSize(2);
     totalVArHoursImportedQ2PhaseADataPoint.setAddressOffset(102);
     totalVArHoursImportedQ2PhaseADataPoint.setBlockOffset(100);
-    totalVArHoursImportedQ2PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalVArHoursImportedQ2PhaseADataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalVArHoursImportedQ2PhaseADataPoint.name(), totalVArHoursImportedQ2PhaseADataPoint);
 
     SunSpecDataPoint totalVArHoursImportedQ2PhaseBDataPoint;
@@ -952,7 +954,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalVArHoursImportedQ2PhaseBDataPoint.setSize(2);
     totalVArHoursImportedQ2PhaseBDataPoint.setAddressOffset(104);
     totalVArHoursImportedQ2PhaseBDataPoint.setBlockOffset(102);
-    totalVArHoursImportedQ2PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalVArHoursImportedQ2PhaseBDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalVArHoursImportedQ2PhaseBDataPoint.name(), totalVArHoursImportedQ2PhaseBDataPoint);
 
     SunSpecDataPoint totalVArHoursImportedQ2PhaseCDataPoint;
@@ -962,7 +964,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalVArHoursImportedQ2PhaseCDataPoint.setSize(2);
     totalVArHoursImportedQ2PhaseCDataPoint.setAddressOffset(106);
     totalVArHoursImportedQ2PhaseCDataPoint.setBlockOffset(104);
-    totalVArHoursImportedQ2PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalVArHoursImportedQ2PhaseCDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalVArHoursImportedQ2PhaseCDataPoint.name(), totalVArHoursImportedQ2PhaseCDataPoint);
 
     SunSpecDataPoint totalVArHoursExportedQ3DataPoint;
@@ -973,7 +975,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalVArHoursExportedQ3DataPoint.setSize(2);
     totalVArHoursExportedQ3DataPoint.setAddressOffset(108);
     totalVArHoursExportedQ3DataPoint.setBlockOffset(106);
-    totalVArHoursExportedQ3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalVArHoursExportedQ3DataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalVArHoursExportedQ3DataPoint.name(), totalVArHoursExportedQ3DataPoint);
 
     SunSpecDataPoint totalVArHoursExportedQ3PhaseADataPoint;
@@ -983,7 +985,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalVArHoursExportedQ3PhaseADataPoint.setSize(2);
     totalVArHoursExportedQ3PhaseADataPoint.setAddressOffset(110);
     totalVArHoursExportedQ3PhaseADataPoint.setBlockOffset(108);
-    totalVArHoursExportedQ3PhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalVArHoursExportedQ3PhaseADataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalVArHoursExportedQ3PhaseADataPoint.name(), totalVArHoursExportedQ3PhaseADataPoint);
 
     SunSpecDataPoint totalVArHoursExportedQ3PhaseBDataPoint;
@@ -993,7 +995,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalVArHoursExportedQ3PhaseBDataPoint.setSize(2);
     totalVArHoursExportedQ3PhaseBDataPoint.setAddressOffset(112);
     totalVArHoursExportedQ3PhaseBDataPoint.setBlockOffset(110);
-    totalVArHoursExportedQ3PhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalVArHoursExportedQ3PhaseBDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalVArHoursExportedQ3PhaseBDataPoint.name(), totalVArHoursExportedQ3PhaseBDataPoint);
 
     SunSpecDataPoint totalVArHoursExportedQ3PhaseCDataPoint;
@@ -1003,7 +1005,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalVArHoursExportedQ3PhaseCDataPoint.setSize(2);
     totalVArHoursExportedQ3PhaseCDataPoint.setAddressOffset(114);
     totalVArHoursExportedQ3PhaseCDataPoint.setBlockOffset(112);
-    totalVArHoursExportedQ3PhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalVArHoursExportedQ3PhaseCDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalVArHoursExportedQ3PhaseCDataPoint.name(), totalVArHoursExportedQ3PhaseCDataPoint);
 
     SunSpecDataPoint totalVArHoursExportedQ4DataPoint;
@@ -1014,7 +1016,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalVArHoursExportedQ4DataPoint.setSize(2);
     totalVArHoursExportedQ4DataPoint.setAddressOffset(116);
     totalVArHoursExportedQ4DataPoint.setBlockOffset(114);
-    totalVArHoursExportedQ4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalVArHoursExportedQ4DataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalVArHoursExportedQ4DataPoint.name(), totalVArHoursExportedQ4DataPoint);
 
     SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseADataPoint;
@@ -1024,7 +1026,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalVArHoursExportedQ4ImportedPhaseADataPoint.setSize(2);
     totalVArHoursExportedQ4ImportedPhaseADataPoint.setAddressOffset(118);
     totalVArHoursExportedQ4ImportedPhaseADataPoint.setBlockOffset(116);
-    totalVArHoursExportedQ4ImportedPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalVArHoursExportedQ4ImportedPhaseADataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseADataPoint.name(), totalVArHoursExportedQ4ImportedPhaseADataPoint);
 
     SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseBDataPoint;
@@ -1034,7 +1036,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalVArHoursExportedQ4ImportedPhaseBDataPoint.setSize(2);
     totalVArHoursExportedQ4ImportedPhaseBDataPoint.setAddressOffset(120);
     totalVArHoursExportedQ4ImportedPhaseBDataPoint.setBlockOffset(118);
-    totalVArHoursExportedQ4ImportedPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalVArHoursExportedQ4ImportedPhaseBDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseBDataPoint.name(), totalVArHoursExportedQ4ImportedPhaseBDataPoint);
 
     SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseCDataPoint;
@@ -1044,7 +1046,7 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     totalVArHoursExportedQ4ImportedPhaseCDataPoint.setSize(2);
     totalVArHoursExportedQ4ImportedPhaseCDataPoint.setAddressOffset(122);
     totalVArHoursExportedQ4ImportedPhaseCDataPoint.setBlockOffset(120);
-    totalVArHoursExportedQ4ImportedPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    totalVArHoursExportedQ4ImportedPhaseCDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseCDataPoint.name(), totalVArHoursExportedQ4ImportedPhaseCDataPoint);
 
     SunSpecDataPoint eventsDataPoint;
@@ -1055,8 +1057,386 @@ void SunSpecMeterThreePhaseWyeConnectModel::initDataPoints()
     eventsDataPoint.setSize(2);
     eventsDataPoint.setAddressOffset(124);
     eventsDataPoint.setBlockOffset(122);
-    eventsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
+    eventsDataPoint.setSunSpecDataType("bitfield32");
     m_dataPoints.insert(eventsDataPoint.name(), eventsDataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecMeterThreePhaseWyeConnectModel *model)
+{
+    debug.nospace().noquote() << "SunSpecMeterThreePhaseWyeConnectModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    if (model->dataPoints().value("A").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("A") << "--> " << model->amps() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("A") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("AphA").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("AphA") << "--> " << model->ampsPhaseA() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("AphA") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("AphB").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("AphB") << "--> " << model->ampsPhaseB() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("AphB") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("AphC").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("AphC") << "--> " << model->ampsPhaseC() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("AphC") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("PhV").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhV") << "--> " << model->voltageLn() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhV") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("PhVphA").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphA") << "--> " << model->phaseVoltageAn() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphA") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("PhVphB").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphB") << "--> " << model->phaseVoltageBn() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphB") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("PhVphC").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphC") << "--> " << model->phaseVoltageCn() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphC") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("PPV").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PPV") << "--> " << model->voltageLl() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PPV") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("PPVphAB").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PPVphAB") << "--> " << model->phaseVoltageAb() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PPVphAB") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("PPVphBC").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PPVphBC") << "--> " << model->phaseVoltageBc() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PPVphBC") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("PPVphCA").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PPVphCA") << "--> " << model->phaseVoltageCa() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PPVphCA") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Hz").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Hz") << "--> " << model->hz() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Hz") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("W").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("W") << "--> " << model->watts() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("W") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("WphA").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WphA") << "--> " << model->wattsPhaseA() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WphA") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("WphB").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WphB") << "--> " << model->wattsPhaseB() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WphB") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("WphC").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WphC") << "--> " << model->wattsPhaseC() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WphC") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VA").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VA") << "--> " << model->va() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VA") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VAphA").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VAphA") << "--> " << model->vaPhaseA() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VAphA") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VAphB").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VAphB") << "--> " << model->vaPhaseB() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VAphB") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VAphC").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VAphC") << "--> " << model->vaPhaseC() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VAphC") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VAR").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VAR") << "--> " << model->var() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VAR") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VARphA").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VARphA") << "--> " << model->varPhaseA() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VARphA") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VARphB").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VARphB") << "--> " << model->varPhaseB() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VARphB") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VARphC").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VARphC") << "--> " << model->varPhaseC() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VARphC") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("PF").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PF") << "--> " << model->pf() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PF") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("PFphA").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFphA") << "--> " << model->pfPhaseA() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFphA") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("PFphB").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFphB") << "--> " << model->pfPhaseB() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFphB") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("PFphC").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFphC") << "--> " << model->pfPhaseC() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFphC") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotWhExp").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhExp") << "--> " << model->totalWattHoursExported() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhExp") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotWhExpPhA").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhExpPhA") << "--> " << model->totalWattHoursExportedPhaseA() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhExpPhA") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotWhExpPhB").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhExpPhB") << "--> " << model->totalWattHoursExportedPhaseB() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhExpPhB") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotWhExpPhC").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhExpPhC") << "--> " << model->totalWattHoursExportedPhaseC() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhExpPhC") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotWhImp").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhImp") << "--> " << model->totalWattHoursImported() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhImp") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotWhImpPhA").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhImpPhA") << "--> " << model->totalWattHoursImportedPhaseA() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhImpPhA") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotWhImpPhB").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhImpPhB") << "--> " << model->totalWattHoursImportedPhaseB() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhImpPhB") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotWhImpPhC").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhImpPhC") << "--> " << model->totalWattHoursImportedPhaseC() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhImpPhC") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotVAhExp").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhExp") << "--> " << model->totalVaHoursExported() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhExp") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotVAhExpPhA").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhExpPhA") << "--> " << model->totalVaHoursExportedPhaseA() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhExpPhA") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotVAhExpPhB").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhExpPhB") << "--> " << model->totalVaHoursExportedPhaseB() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhExpPhB") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotVAhExpPhC").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhExpPhC") << "--> " << model->totalVaHoursExportedPhaseC() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhExpPhC") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotVAhImp").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhImp") << "--> " << model->totalVaHoursImported() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhImp") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotVAhImpPhA").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhImpPhA") << "--> " << model->totalVaHoursImportedPhaseA() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhImpPhA") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotVAhImpPhB").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhImpPhB") << "--> " << model->totalVaHoursImportedPhaseB() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhImpPhB") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotVAhImpPhC").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhImpPhC") << "--> " << model->totalVaHoursImportedPhaseC() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhImpPhC") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotVArhImpQ1").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ1") << "--> " << model->totalVarHoursImportedQ1() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ1") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotVArhImpQ1phA").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ1phA") << "--> " << model->totalVArHoursImportedQ1PhaseA() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ1phA") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotVArhImpQ1phB").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ1phB") << "--> " << model->totalVArHoursImportedQ1PhaseB() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ1phB") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotVArhImpQ1phC").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ1phC") << "--> " << model->totalVArHoursImportedQ1PhaseC() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ1phC") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotVArhImpQ2").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ2") << "--> " << model->totalVArHoursImportedQ2() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ2") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotVArhImpQ2phA").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ2phA") << "--> " << model->totalVArHoursImportedQ2PhaseA() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ2phA") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotVArhImpQ2phB").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ2phB") << "--> " << model->totalVArHoursImportedQ2PhaseB() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ2phB") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotVArhImpQ2phC").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ2phC") << "--> " << model->totalVArHoursImportedQ2PhaseC() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ2phC") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotVArhExpQ3").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ3") << "--> " << model->totalVArHoursExportedQ3() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ3") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotVArhExpQ3phA").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ3phA") << "--> " << model->totalVArHoursExportedQ3PhaseA() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ3phA") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotVArhExpQ3phB").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ3phB") << "--> " << model->totalVArHoursExportedQ3PhaseB() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ3phB") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotVArhExpQ3phC").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ3phC") << "--> " << model->totalVArHoursExportedQ3PhaseC() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ3phC") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotVArhExpQ4").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ4") << "--> " << model->totalVArHoursExportedQ4() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ4") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotVArhExpQ4phA").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ4phA") << "--> " << model->totalVArHoursExportedQ4ImportedPhaseA() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ4phA") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotVArhExpQ4phB").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ4phB") << "--> " << model->totalVArHoursExportedQ4ImportedPhaseB() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ4phB") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TotVArhExpQ4phC").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ4phC") << "--> " << model->totalVArHoursExportedQ4ImportedPhaseC() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ4phC") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Evt").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt") << "--> " << model->events() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt") << "--> NaN" << endl;
+    }
+
+
+    return debug.space().quote();
+}

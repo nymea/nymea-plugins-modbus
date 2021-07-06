@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecFreqWattParamModel::SunSpecFreqWattParamModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 127, 10, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 127, 10, parent)
 {
-    Q_ASSERT_X(length == 10,  "SunSpecFreqWattParamModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 10,  "SunSpecFreqWattParamModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -138,6 +138,8 @@ void SunSpecFreqWattParamModel::processBlockData()
     m_modEna = static_cast<ModenaFlags>(m_dataPoints.value("ModEna").toUInt16());
     m_hzStopWGra = m_dataPoints.value("HzStopWGra").toFloatWithSSF(m_rmpIncDecSf);
     m_pad = m_dataPoints.value("Pad").toUInt16();
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecFreqWattParamModel::initDataPoints()
@@ -149,7 +151,7 @@ void SunSpecFreqWattParamModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -159,7 +161,7 @@ void SunSpecFreqWattParamModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint wGraDataPoint;
@@ -172,7 +174,7 @@ void SunSpecFreqWattParamModel::initDataPoints()
     wGraDataPoint.setAddressOffset(2);
     wGraDataPoint.setBlockOffset(0);
     wGraDataPoint.setScaleFactorName("WGra_SF");
-    wGraDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    wGraDataPoint.setSunSpecDataType("uint16");
     wGraDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(wGraDataPoint.name(), wGraDataPoint);
 
@@ -186,7 +188,7 @@ void SunSpecFreqWattParamModel::initDataPoints()
     hzStrDataPoint.setAddressOffset(3);
     hzStrDataPoint.setBlockOffset(1);
     hzStrDataPoint.setScaleFactorName("HzStrStop_SF");
-    hzStrDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    hzStrDataPoint.setSunSpecDataType("int16");
     hzStrDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(hzStrDataPoint.name(), hzStrDataPoint);
 
@@ -200,7 +202,7 @@ void SunSpecFreqWattParamModel::initDataPoints()
     hzStopDataPoint.setAddressOffset(4);
     hzStopDataPoint.setBlockOffset(2);
     hzStopDataPoint.setScaleFactorName("HzStrStop_SF");
-    hzStopDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    hzStopDataPoint.setSunSpecDataType("int16");
     hzStopDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(hzStopDataPoint.name(), hzStopDataPoint);
 
@@ -212,7 +214,7 @@ void SunSpecFreqWattParamModel::initDataPoints()
     hysEnaDataPoint.setSize(1);
     hysEnaDataPoint.setAddressOffset(5);
     hysEnaDataPoint.setBlockOffset(3);
-    hysEnaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield16"));
+    hysEnaDataPoint.setSunSpecDataType("bitfield16");
     hysEnaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(hysEnaDataPoint.name(), hysEnaDataPoint);
 
@@ -224,7 +226,7 @@ void SunSpecFreqWattParamModel::initDataPoints()
     modEnaDataPoint.setSize(1);
     modEnaDataPoint.setAddressOffset(6);
     modEnaDataPoint.setBlockOffset(4);
-    modEnaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield16"));
+    modEnaDataPoint.setSunSpecDataType("bitfield16");
     modEnaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(modEnaDataPoint.name(), modEnaDataPoint);
 
@@ -237,7 +239,7 @@ void SunSpecFreqWattParamModel::initDataPoints()
     hzStopWGraDataPoint.setAddressOffset(7);
     hzStopWGraDataPoint.setBlockOffset(5);
     hzStopWGraDataPoint.setScaleFactorName("RmpIncDec_SF");
-    hzStopWGraDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    hzStopWGraDataPoint.setSunSpecDataType("uint16");
     hzStopWGraDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(hzStopWGraDataPoint.name(), hzStopWGraDataPoint);
 
@@ -248,7 +250,7 @@ void SunSpecFreqWattParamModel::initDataPoints()
     wGraSfDataPoint.setSize(1);
     wGraSfDataPoint.setAddressOffset(8);
     wGraSfDataPoint.setBlockOffset(6);
-    wGraSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    wGraSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(wGraSfDataPoint.name(), wGraSfDataPoint);
 
     SunSpecDataPoint hzStrStopSfDataPoint;
@@ -258,7 +260,7 @@ void SunSpecFreqWattParamModel::initDataPoints()
     hzStrStopSfDataPoint.setSize(1);
     hzStrStopSfDataPoint.setAddressOffset(9);
     hzStrStopSfDataPoint.setBlockOffset(7);
-    hzStrStopSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    hzStrStopSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(hzStrStopSfDataPoint.name(), hzStrStopSfDataPoint);
 
     SunSpecDataPoint rmpIncDecSfDataPoint;
@@ -268,7 +270,7 @@ void SunSpecFreqWattParamModel::initDataPoints()
     rmpIncDecSfDataPoint.setSize(1);
     rmpIncDecSfDataPoint.setAddressOffset(10);
     rmpIncDecSfDataPoint.setBlockOffset(8);
-    rmpIncDecSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    rmpIncDecSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(rmpIncDecSfDataPoint.name(), rmpIncDecSfDataPoint);
 
     SunSpecDataPoint padDataPoint;
@@ -276,8 +278,56 @@ void SunSpecFreqWattParamModel::initDataPoints()
     padDataPoint.setSize(1);
     padDataPoint.setAddressOffset(11);
     padDataPoint.setBlockOffset(9);
-    padDataPoint.setDataType(SunSpecDataPoint::stringToDataType("pad"));
+    padDataPoint.setSunSpecDataType("pad");
     m_dataPoints.insert(padDataPoint.name(), padDataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecFreqWattParamModel *model)
+{
+    debug.nospace().noquote() << "SunSpecFreqWattParamModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    if (model->dataPoints().value("WGra").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WGra") << "--> " << model->wGra() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WGra") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("HzStr").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("HzStr") << "--> " << model->hzStr() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("HzStr") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("HzStop").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("HzStop") << "--> " << model->hzStop() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("HzStop") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("HysEna").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("HysEna") << "--> " << model->hysEna() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("HysEna") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ModEna").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModEna") << "--> " << model->modEna() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModEna") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("HzStopWGra").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("HzStopWGra") << "--> " << model->hzStopWGra() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("HzStopWGra") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Pad").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad") << "--> " << model->pad() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad") << "--> NaN" << endl;
+    }
+
+
+    return debug.space().quote();
+}

@@ -35,6 +35,7 @@
 #include "plugintimer.h"
 
 #include <sunspecconnection.h>
+#include <models/sunspecmodelfactory.h>
 
 #include "sunspecinverter.h"
 #include "sunspecstorage.h"

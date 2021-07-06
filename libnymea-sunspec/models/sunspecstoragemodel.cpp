@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecStorageModel::SunSpecStorageModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 124, 24, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 124, 24, parent)
 {
-    Q_ASSERT_X(length == 24,  "SunSpecStorageModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 24,  "SunSpecStorageModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -224,6 +224,8 @@ void SunSpecStorageModel::processBlockData()
     m_inOutWRteRvrtTms = m_dataPoints.value("InOutWRte_RvrtTms").toUInt16();
     m_inOutWRteRmpTms = m_dataPoints.value("InOutWRte_RmpTms").toUInt16();
     m_chaGriSet = static_cast<Chagriset>(m_dataPoints.value("ChaGriSet").toUInt16());
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecStorageModel::initDataPoints()
@@ -235,7 +237,7 @@ void SunSpecStorageModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -245,7 +247,7 @@ void SunSpecStorageModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint wChaMaxDataPoint;
@@ -258,7 +260,7 @@ void SunSpecStorageModel::initDataPoints()
     wChaMaxDataPoint.setAddressOffset(2);
     wChaMaxDataPoint.setBlockOffset(0);
     wChaMaxDataPoint.setScaleFactorName("WChaMax_SF");
-    wChaMaxDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    wChaMaxDataPoint.setSunSpecDataType("uint16");
     wChaMaxDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(wChaMaxDataPoint.name(), wChaMaxDataPoint);
 
@@ -272,7 +274,7 @@ void SunSpecStorageModel::initDataPoints()
     wChaGraDataPoint.setAddressOffset(3);
     wChaGraDataPoint.setBlockOffset(1);
     wChaGraDataPoint.setScaleFactorName("WChaDisChaGra_SF");
-    wChaGraDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    wChaGraDataPoint.setSunSpecDataType("uint16");
     wChaGraDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(wChaGraDataPoint.name(), wChaGraDataPoint);
 
@@ -286,7 +288,7 @@ void SunSpecStorageModel::initDataPoints()
     wDisChaGraDataPoint.setAddressOffset(4);
     wDisChaGraDataPoint.setBlockOffset(2);
     wDisChaGraDataPoint.setScaleFactorName("WChaDisChaGra_SF");
-    wDisChaGraDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    wDisChaGraDataPoint.setSunSpecDataType("uint16");
     wDisChaGraDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(wDisChaGraDataPoint.name(), wDisChaGraDataPoint);
 
@@ -298,7 +300,7 @@ void SunSpecStorageModel::initDataPoints()
     storCtlModDataPoint.setSize(1);
     storCtlModDataPoint.setAddressOffset(5);
     storCtlModDataPoint.setBlockOffset(3);
-    storCtlModDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield16"));
+    storCtlModDataPoint.setSunSpecDataType("bitfield16");
     storCtlModDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(storCtlModDataPoint.name(), storCtlModDataPoint);
 
@@ -311,7 +313,7 @@ void SunSpecStorageModel::initDataPoints()
     vaChaMaxDataPoint.setAddressOffset(6);
     vaChaMaxDataPoint.setBlockOffset(4);
     vaChaMaxDataPoint.setScaleFactorName("VAChaMax_SF");
-    vaChaMaxDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    vaChaMaxDataPoint.setSunSpecDataType("uint16");
     vaChaMaxDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(vaChaMaxDataPoint.name(), vaChaMaxDataPoint);
 
@@ -324,7 +326,7 @@ void SunSpecStorageModel::initDataPoints()
     minRsvPctDataPoint.setAddressOffset(7);
     minRsvPctDataPoint.setBlockOffset(5);
     minRsvPctDataPoint.setScaleFactorName("MinRsvPct_SF");
-    minRsvPctDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    minRsvPctDataPoint.setSunSpecDataType("uint16");
     minRsvPctDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(minRsvPctDataPoint.name(), minRsvPctDataPoint);
 
@@ -337,7 +339,7 @@ void SunSpecStorageModel::initDataPoints()
     chaStateDataPoint.setAddressOffset(8);
     chaStateDataPoint.setBlockOffset(6);
     chaStateDataPoint.setScaleFactorName("ChaState_SF");
-    chaStateDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    chaStateDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(chaStateDataPoint.name(), chaStateDataPoint);
 
     SunSpecDataPoint storAvalDataPoint;
@@ -349,7 +351,7 @@ void SunSpecStorageModel::initDataPoints()
     storAvalDataPoint.setAddressOffset(9);
     storAvalDataPoint.setBlockOffset(7);
     storAvalDataPoint.setScaleFactorName("StorAval_SF");
-    storAvalDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    storAvalDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(storAvalDataPoint.name(), storAvalDataPoint);
 
     SunSpecDataPoint inBatVDataPoint;
@@ -361,7 +363,7 @@ void SunSpecStorageModel::initDataPoints()
     inBatVDataPoint.setAddressOffset(10);
     inBatVDataPoint.setBlockOffset(8);
     inBatVDataPoint.setScaleFactorName("InBatV_SF");
-    inBatVDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    inBatVDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(inBatVDataPoint.name(), inBatVDataPoint);
 
     SunSpecDataPoint chaStDataPoint;
@@ -371,7 +373,7 @@ void SunSpecStorageModel::initDataPoints()
     chaStDataPoint.setSize(1);
     chaStDataPoint.setAddressOffset(11);
     chaStDataPoint.setBlockOffset(9);
-    chaStDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    chaStDataPoint.setSunSpecDataType("enum16");
     m_dataPoints.insert(chaStDataPoint.name(), chaStDataPoint);
 
     SunSpecDataPoint outWRteDataPoint;
@@ -383,7 +385,7 @@ void SunSpecStorageModel::initDataPoints()
     outWRteDataPoint.setAddressOffset(12);
     outWRteDataPoint.setBlockOffset(10);
     outWRteDataPoint.setScaleFactorName("InOutWRte_SF");
-    outWRteDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    outWRteDataPoint.setSunSpecDataType("int16");
     outWRteDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(outWRteDataPoint.name(), outWRteDataPoint);
 
@@ -396,7 +398,7 @@ void SunSpecStorageModel::initDataPoints()
     inWRteDataPoint.setAddressOffset(13);
     inWRteDataPoint.setBlockOffset(11);
     inWRteDataPoint.setScaleFactorName("InOutWRte_SF");
-    inWRteDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    inWRteDataPoint.setSunSpecDataType("int16");
     inWRteDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(inWRteDataPoint.name(), inWRteDataPoint);
 
@@ -408,7 +410,7 @@ void SunSpecStorageModel::initDataPoints()
     inOutWRteWinTmsDataPoint.setSize(1);
     inOutWRteWinTmsDataPoint.setAddressOffset(14);
     inOutWRteWinTmsDataPoint.setBlockOffset(12);
-    inOutWRteWinTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    inOutWRteWinTmsDataPoint.setSunSpecDataType("uint16");
     inOutWRteWinTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(inOutWRteWinTmsDataPoint.name(), inOutWRteWinTmsDataPoint);
 
@@ -420,7 +422,7 @@ void SunSpecStorageModel::initDataPoints()
     inOutWRteRvrtTmsDataPoint.setSize(1);
     inOutWRteRvrtTmsDataPoint.setAddressOffset(15);
     inOutWRteRvrtTmsDataPoint.setBlockOffset(13);
-    inOutWRteRvrtTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    inOutWRteRvrtTmsDataPoint.setSunSpecDataType("uint16");
     inOutWRteRvrtTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(inOutWRteRvrtTmsDataPoint.name(), inOutWRteRvrtTmsDataPoint);
 
@@ -432,7 +434,7 @@ void SunSpecStorageModel::initDataPoints()
     inOutWRteRmpTmsDataPoint.setSize(1);
     inOutWRteRmpTmsDataPoint.setAddressOffset(16);
     inOutWRteRmpTmsDataPoint.setBlockOffset(14);
-    inOutWRteRmpTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    inOutWRteRmpTmsDataPoint.setSunSpecDataType("uint16");
     inOutWRteRmpTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(inOutWRteRmpTmsDataPoint.name(), inOutWRteRmpTmsDataPoint);
 
@@ -441,7 +443,7 @@ void SunSpecStorageModel::initDataPoints()
     chaGriSetDataPoint.setSize(1);
     chaGriSetDataPoint.setAddressOffset(17);
     chaGriSetDataPoint.setBlockOffset(15);
-    chaGriSetDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    chaGriSetDataPoint.setSunSpecDataType("enum16");
     chaGriSetDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(chaGriSetDataPoint.name(), chaGriSetDataPoint);
 
@@ -453,7 +455,7 @@ void SunSpecStorageModel::initDataPoints()
     wChaMaxSfDataPoint.setSize(1);
     wChaMaxSfDataPoint.setAddressOffset(18);
     wChaMaxSfDataPoint.setBlockOffset(16);
-    wChaMaxSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    wChaMaxSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(wChaMaxSfDataPoint.name(), wChaMaxSfDataPoint);
 
     SunSpecDataPoint wChaDisChaGraSfDataPoint;
@@ -464,7 +466,7 @@ void SunSpecStorageModel::initDataPoints()
     wChaDisChaGraSfDataPoint.setSize(1);
     wChaDisChaGraSfDataPoint.setAddressOffset(19);
     wChaDisChaGraSfDataPoint.setBlockOffset(17);
-    wChaDisChaGraSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    wChaDisChaGraSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(wChaDisChaGraSfDataPoint.name(), wChaDisChaGraSfDataPoint);
 
     SunSpecDataPoint vaChaMaxSfDataPoint;
@@ -474,7 +476,7 @@ void SunSpecStorageModel::initDataPoints()
     vaChaMaxSfDataPoint.setSize(1);
     vaChaMaxSfDataPoint.setAddressOffset(20);
     vaChaMaxSfDataPoint.setBlockOffset(18);
-    vaChaMaxSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    vaChaMaxSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(vaChaMaxSfDataPoint.name(), vaChaMaxSfDataPoint);
 
     SunSpecDataPoint minRsvPctSfDataPoint;
@@ -484,7 +486,7 @@ void SunSpecStorageModel::initDataPoints()
     minRsvPctSfDataPoint.setSize(1);
     minRsvPctSfDataPoint.setAddressOffset(21);
     minRsvPctSfDataPoint.setBlockOffset(19);
-    minRsvPctSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    minRsvPctSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(minRsvPctSfDataPoint.name(), minRsvPctSfDataPoint);
 
     SunSpecDataPoint chaStateSfDataPoint;
@@ -494,7 +496,7 @@ void SunSpecStorageModel::initDataPoints()
     chaStateSfDataPoint.setSize(1);
     chaStateSfDataPoint.setAddressOffset(22);
     chaStateSfDataPoint.setBlockOffset(20);
-    chaStateSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    chaStateSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(chaStateSfDataPoint.name(), chaStateSfDataPoint);
 
     SunSpecDataPoint storAvalSfDataPoint;
@@ -504,7 +506,7 @@ void SunSpecStorageModel::initDataPoints()
     storAvalSfDataPoint.setSize(1);
     storAvalSfDataPoint.setAddressOffset(23);
     storAvalSfDataPoint.setBlockOffset(21);
-    storAvalSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    storAvalSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(storAvalSfDataPoint.name(), storAvalSfDataPoint);
 
     SunSpecDataPoint inBatVSfDataPoint;
@@ -514,7 +516,7 @@ void SunSpecStorageModel::initDataPoints()
     inBatVSfDataPoint.setSize(1);
     inBatVSfDataPoint.setAddressOffset(24);
     inBatVSfDataPoint.setBlockOffset(22);
-    inBatVSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    inBatVSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(inBatVSfDataPoint.name(), inBatVSfDataPoint);
 
     SunSpecDataPoint inOutWRteSfDataPoint;
@@ -524,8 +526,110 @@ void SunSpecStorageModel::initDataPoints()
     inOutWRteSfDataPoint.setSize(1);
     inOutWRteSfDataPoint.setAddressOffset(25);
     inOutWRteSfDataPoint.setBlockOffset(23);
-    inOutWRteSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    inOutWRteSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(inOutWRteSfDataPoint.name(), inOutWRteSfDataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecStorageModel *model)
+{
+    debug.nospace().noquote() << "SunSpecStorageModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    if (model->dataPoints().value("WChaMax").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WChaMax") << "--> " << model->wChaMax() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WChaMax") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("WChaGra").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WChaGra") << "--> " << model->wChaGra() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WChaGra") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("WDisChaGra").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WDisChaGra") << "--> " << model->wDisChaGra() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WDisChaGra") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("StorCtl_Mod").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StorCtl_Mod") << "--> " << model->storCtlMod() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StorCtl_Mod") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VAChaMax").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VAChaMax") << "--> " << model->vaChaMax() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VAChaMax") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("MinRsvPct").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("MinRsvPct") << "--> " << model->minRsvPct() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("MinRsvPct") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ChaState").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ChaState") << "--> " << model->chaState() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ChaState") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("StorAval").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StorAval") << "--> " << model->storAval() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StorAval") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("InBatV").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("InBatV") << "--> " << model->inBatV() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("InBatV") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ChaSt").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ChaSt") << "--> " << model->chaSt() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ChaSt") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("OutWRte").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutWRte") << "--> " << model->outWRte() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutWRte") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("InWRte").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("InWRte") << "--> " << model->inWRte() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("InWRte") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("InOutWRte_WinTms").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("InOutWRte_WinTms") << "--> " << model->inOutWRteWinTms() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("InOutWRte_WinTms") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("InOutWRte_RvrtTms").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("InOutWRte_RvrtTms") << "--> " << model->inOutWRteRvrtTms() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("InOutWRte_RvrtTms") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("InOutWRte_RmpTms").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("InOutWRte_RmpTms") << "--> " << model->inOutWRteRmpTms() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("InOutWRte_RmpTms") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ChaGriSet").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ChaGriSet") << "--> " << model->chaGriSet() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ChaGriSet") << "--> NaN" << endl;
+    }
+
+
+    return debug.space().quote();
+}

@@ -164,4 +164,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecStatusModel *model);
+
 #endif // SUNSPECSTATUSMODEL_H

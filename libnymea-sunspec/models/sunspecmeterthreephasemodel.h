@@ -227,4 +227,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecMeterThreePhaseModel *model);
+
 #endif // SUNSPECMETERTHREEPHASEMODEL_H

@@ -81,4 +81,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecBaseMetModel *model);
+
 #endif // SUNSPECBASEMETMODEL_H

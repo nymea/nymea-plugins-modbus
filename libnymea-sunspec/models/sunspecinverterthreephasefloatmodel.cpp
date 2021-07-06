@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecInverterThreePhaseFloatModel::SunSpecInverterThreePhaseFloatModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 113, 60, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 113, 60, parent)
 {
-    Q_ASSERT_X(length == 60,  "SunSpecInverterThreePhaseFloatModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 60,  "SunSpecInverterThreePhaseFloatModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -217,6 +217,8 @@ void SunSpecInverterThreePhaseFloatModel::processBlockData()
     m_vendorEventBitfield2 = m_dataPoints.value("EvtVnd2").toUInt32();
     m_vendorEventBitfield3 = m_dataPoints.value("EvtVnd3").toUInt32();
     m_vendorEventBitfield4 = m_dataPoints.value("EvtVnd4").toUInt32();
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecInverterThreePhaseFloatModel::initDataPoints()
@@ -228,7 +230,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -238,7 +240,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint ampsDataPoint;
@@ -250,7 +252,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     ampsDataPoint.setSize(2);
     ampsDataPoint.setAddressOffset(2);
     ampsDataPoint.setBlockOffset(0);
-    ampsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    ampsDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
     SunSpecDataPoint ampsPhaseADataPoint;
@@ -262,7 +264,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     ampsPhaseADataPoint.setSize(2);
     ampsPhaseADataPoint.setAddressOffset(4);
     ampsPhaseADataPoint.setBlockOffset(2);
-    ampsPhaseADataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    ampsPhaseADataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(ampsPhaseADataPoint.name(), ampsPhaseADataPoint);
 
     SunSpecDataPoint ampsPhaseBDataPoint;
@@ -274,7 +276,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     ampsPhaseBDataPoint.setSize(2);
     ampsPhaseBDataPoint.setAddressOffset(6);
     ampsPhaseBDataPoint.setBlockOffset(4);
-    ampsPhaseBDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    ampsPhaseBDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(ampsPhaseBDataPoint.name(), ampsPhaseBDataPoint);
 
     SunSpecDataPoint ampsPhaseCDataPoint;
@@ -286,7 +288,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     ampsPhaseCDataPoint.setSize(2);
     ampsPhaseCDataPoint.setAddressOffset(8);
     ampsPhaseCDataPoint.setBlockOffset(6);
-    ampsPhaseCDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    ampsPhaseCDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(ampsPhaseCDataPoint.name(), ampsPhaseCDataPoint);
 
     SunSpecDataPoint phaseVoltageAbDataPoint;
@@ -297,7 +299,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     phaseVoltageAbDataPoint.setSize(2);
     phaseVoltageAbDataPoint.setAddressOffset(10);
     phaseVoltageAbDataPoint.setBlockOffset(8);
-    phaseVoltageAbDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    phaseVoltageAbDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(phaseVoltageAbDataPoint.name(), phaseVoltageAbDataPoint);
 
     SunSpecDataPoint phaseVoltageBcDataPoint;
@@ -308,7 +310,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     phaseVoltageBcDataPoint.setSize(2);
     phaseVoltageBcDataPoint.setAddressOffset(12);
     phaseVoltageBcDataPoint.setBlockOffset(10);
-    phaseVoltageBcDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    phaseVoltageBcDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(phaseVoltageBcDataPoint.name(), phaseVoltageBcDataPoint);
 
     SunSpecDataPoint phaseVoltageCaDataPoint;
@@ -319,7 +321,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     phaseVoltageCaDataPoint.setSize(2);
     phaseVoltageCaDataPoint.setAddressOffset(14);
     phaseVoltageCaDataPoint.setBlockOffset(12);
-    phaseVoltageCaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    phaseVoltageCaDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(phaseVoltageCaDataPoint.name(), phaseVoltageCaDataPoint);
 
     SunSpecDataPoint phaseVoltageAnDataPoint;
@@ -331,7 +333,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     phaseVoltageAnDataPoint.setSize(2);
     phaseVoltageAnDataPoint.setAddressOffset(16);
     phaseVoltageAnDataPoint.setBlockOffset(14);
-    phaseVoltageAnDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    phaseVoltageAnDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(phaseVoltageAnDataPoint.name(), phaseVoltageAnDataPoint);
 
     SunSpecDataPoint phaseVoltageBnDataPoint;
@@ -343,7 +345,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     phaseVoltageBnDataPoint.setSize(2);
     phaseVoltageBnDataPoint.setAddressOffset(18);
     phaseVoltageBnDataPoint.setBlockOffset(16);
-    phaseVoltageBnDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    phaseVoltageBnDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(phaseVoltageBnDataPoint.name(), phaseVoltageBnDataPoint);
 
     SunSpecDataPoint phaseVoltageCnDataPoint;
@@ -355,7 +357,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     phaseVoltageCnDataPoint.setSize(2);
     phaseVoltageCnDataPoint.setAddressOffset(20);
     phaseVoltageCnDataPoint.setBlockOffset(18);
-    phaseVoltageCnDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    phaseVoltageCnDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(phaseVoltageCnDataPoint.name(), phaseVoltageCnDataPoint);
 
     SunSpecDataPoint wattsDataPoint;
@@ -367,7 +369,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     wattsDataPoint.setSize(2);
     wattsDataPoint.setAddressOffset(22);
     wattsDataPoint.setBlockOffset(20);
-    wattsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    wattsDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(wattsDataPoint.name(), wattsDataPoint);
 
     SunSpecDataPoint hzDataPoint;
@@ -379,7 +381,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     hzDataPoint.setSize(2);
     hzDataPoint.setAddressOffset(24);
     hzDataPoint.setBlockOffset(22);
-    hzDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    hzDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(hzDataPoint.name(), hzDataPoint);
 
     SunSpecDataPoint vaDataPoint;
@@ -390,7 +392,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     vaDataPoint.setSize(2);
     vaDataPoint.setAddressOffset(26);
     vaDataPoint.setBlockOffset(24);
-    vaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    vaDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(vaDataPoint.name(), vaDataPoint);
 
     SunSpecDataPoint vArDataPoint;
@@ -401,7 +403,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     vArDataPoint.setSize(2);
     vArDataPoint.setAddressOffset(28);
     vArDataPoint.setBlockOffset(26);
-    vArDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    vArDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(vArDataPoint.name(), vArDataPoint);
 
     SunSpecDataPoint pfDataPoint;
@@ -412,7 +414,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     pfDataPoint.setSize(2);
     pfDataPoint.setAddressOffset(30);
     pfDataPoint.setBlockOffset(28);
-    pfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    pfDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(pfDataPoint.name(), pfDataPoint);
 
     SunSpecDataPoint wattHoursDataPoint;
@@ -424,7 +426,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     wattHoursDataPoint.setSize(2);
     wattHoursDataPoint.setAddressOffset(32);
     wattHoursDataPoint.setBlockOffset(30);
-    wattHoursDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    wattHoursDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(wattHoursDataPoint.name(), wattHoursDataPoint);
 
     SunSpecDataPoint dcAmpsDataPoint;
@@ -435,7 +437,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     dcAmpsDataPoint.setSize(2);
     dcAmpsDataPoint.setAddressOffset(34);
     dcAmpsDataPoint.setBlockOffset(32);
-    dcAmpsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    dcAmpsDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(dcAmpsDataPoint.name(), dcAmpsDataPoint);
 
     SunSpecDataPoint dcVoltageDataPoint;
@@ -446,7 +448,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     dcVoltageDataPoint.setSize(2);
     dcVoltageDataPoint.setAddressOffset(36);
     dcVoltageDataPoint.setBlockOffset(34);
-    dcVoltageDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    dcVoltageDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(dcVoltageDataPoint.name(), dcVoltageDataPoint);
 
     SunSpecDataPoint dcWattsDataPoint;
@@ -457,7 +459,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     dcWattsDataPoint.setSize(2);
     dcWattsDataPoint.setAddressOffset(38);
     dcWattsDataPoint.setBlockOffset(36);
-    dcWattsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    dcWattsDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(dcWattsDataPoint.name(), dcWattsDataPoint);
 
     SunSpecDataPoint cabinetTemperatureDataPoint;
@@ -469,7 +471,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     cabinetTemperatureDataPoint.setSize(2);
     cabinetTemperatureDataPoint.setAddressOffset(40);
     cabinetTemperatureDataPoint.setBlockOffset(38);
-    cabinetTemperatureDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    cabinetTemperatureDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(cabinetTemperatureDataPoint.name(), cabinetTemperatureDataPoint);
 
     SunSpecDataPoint heatSinkTemperatureDataPoint;
@@ -480,7 +482,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     heatSinkTemperatureDataPoint.setSize(2);
     heatSinkTemperatureDataPoint.setAddressOffset(42);
     heatSinkTemperatureDataPoint.setBlockOffset(40);
-    heatSinkTemperatureDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    heatSinkTemperatureDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(heatSinkTemperatureDataPoint.name(), heatSinkTemperatureDataPoint);
 
     SunSpecDataPoint transformerTemperatureDataPoint;
@@ -491,7 +493,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     transformerTemperatureDataPoint.setSize(2);
     transformerTemperatureDataPoint.setAddressOffset(44);
     transformerTemperatureDataPoint.setBlockOffset(42);
-    transformerTemperatureDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    transformerTemperatureDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(transformerTemperatureDataPoint.name(), transformerTemperatureDataPoint);
 
     SunSpecDataPoint otherTemperatureDataPoint;
@@ -502,7 +504,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     otherTemperatureDataPoint.setSize(2);
     otherTemperatureDataPoint.setAddressOffset(46);
     otherTemperatureDataPoint.setBlockOffset(44);
-    otherTemperatureDataPoint.setDataType(SunSpecDataPoint::stringToDataType("float32"));
+    otherTemperatureDataPoint.setSunSpecDataType("float32");
     m_dataPoints.insert(otherTemperatureDataPoint.name(), otherTemperatureDataPoint);
 
     SunSpecDataPoint operatingStateDataPoint;
@@ -513,7 +515,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     operatingStateDataPoint.setSize(1);
     operatingStateDataPoint.setAddressOffset(48);
     operatingStateDataPoint.setBlockOffset(46);
-    operatingStateDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    operatingStateDataPoint.setSunSpecDataType("enum16");
     m_dataPoints.insert(operatingStateDataPoint.name(), operatingStateDataPoint);
 
     SunSpecDataPoint vendorOperatingStateDataPoint;
@@ -523,7 +525,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     vendorOperatingStateDataPoint.setSize(1);
     vendorOperatingStateDataPoint.setAddressOffset(49);
     vendorOperatingStateDataPoint.setBlockOffset(47);
-    vendorOperatingStateDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    vendorOperatingStateDataPoint.setSunSpecDataType("enum16");
     m_dataPoints.insert(vendorOperatingStateDataPoint.name(), vendorOperatingStateDataPoint);
 
     SunSpecDataPoint event1DataPoint;
@@ -534,7 +536,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     event1DataPoint.setSize(2);
     event1DataPoint.setAddressOffset(50);
     event1DataPoint.setBlockOffset(48);
-    event1DataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
+    event1DataPoint.setSunSpecDataType("bitfield32");
     m_dataPoints.insert(event1DataPoint.name(), event1DataPoint);
 
     SunSpecDataPoint eventBitfield2DataPoint;
@@ -545,7 +547,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     eventBitfield2DataPoint.setSize(2);
     eventBitfield2DataPoint.setAddressOffset(52);
     eventBitfield2DataPoint.setBlockOffset(50);
-    eventBitfield2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
+    eventBitfield2DataPoint.setSunSpecDataType("bitfield32");
     m_dataPoints.insert(eventBitfield2DataPoint.name(), eventBitfield2DataPoint);
 
     SunSpecDataPoint vendorEventBitfield1DataPoint;
@@ -555,7 +557,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     vendorEventBitfield1DataPoint.setSize(2);
     vendorEventBitfield1DataPoint.setAddressOffset(54);
     vendorEventBitfield1DataPoint.setBlockOffset(52);
-    vendorEventBitfield1DataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
+    vendorEventBitfield1DataPoint.setSunSpecDataType("bitfield32");
     m_dataPoints.insert(vendorEventBitfield1DataPoint.name(), vendorEventBitfield1DataPoint);
 
     SunSpecDataPoint vendorEventBitfield2DataPoint;
@@ -565,7 +567,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     vendorEventBitfield2DataPoint.setSize(2);
     vendorEventBitfield2DataPoint.setAddressOffset(56);
     vendorEventBitfield2DataPoint.setBlockOffset(54);
-    vendorEventBitfield2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
+    vendorEventBitfield2DataPoint.setSunSpecDataType("bitfield32");
     m_dataPoints.insert(vendorEventBitfield2DataPoint.name(), vendorEventBitfield2DataPoint);
 
     SunSpecDataPoint vendorEventBitfield3DataPoint;
@@ -575,7 +577,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     vendorEventBitfield3DataPoint.setSize(2);
     vendorEventBitfield3DataPoint.setAddressOffset(58);
     vendorEventBitfield3DataPoint.setBlockOffset(56);
-    vendorEventBitfield3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
+    vendorEventBitfield3DataPoint.setSunSpecDataType("bitfield32");
     m_dataPoints.insert(vendorEventBitfield3DataPoint.name(), vendorEventBitfield3DataPoint);
 
     SunSpecDataPoint vendorEventBitfield4DataPoint;
@@ -585,8 +587,200 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     vendorEventBitfield4DataPoint.setSize(2);
     vendorEventBitfield4DataPoint.setAddressOffset(60);
     vendorEventBitfield4DataPoint.setBlockOffset(58);
-    vendorEventBitfield4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
+    vendorEventBitfield4DataPoint.setSunSpecDataType("bitfield32");
     m_dataPoints.insert(vendorEventBitfield4DataPoint.name(), vendorEventBitfield4DataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecInverterThreePhaseFloatModel *model)
+{
+    debug.nospace().noquote() << "SunSpecInverterThreePhaseFloatModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    if (model->dataPoints().value("A").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("A") << "--> " << model->amps() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("A") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("AphA").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("AphA") << "--> " << model->ampsPhaseA() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("AphA") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("AphB").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("AphB") << "--> " << model->ampsPhaseB() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("AphB") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("AphC").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("AphC") << "--> " << model->ampsPhaseC() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("AphC") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("PPVphAB").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PPVphAB") << "--> " << model->phaseVoltageAb() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PPVphAB") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("PPVphBC").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PPVphBC") << "--> " << model->phaseVoltageBc() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PPVphBC") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("PPVphCA").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PPVphCA") << "--> " << model->phaseVoltageCa() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PPVphCA") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("PhVphA").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphA") << "--> " << model->phaseVoltageAn() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphA") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("PhVphB").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphB") << "--> " << model->phaseVoltageBn() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphB") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("PhVphC").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphC") << "--> " << model->phaseVoltageCn() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphC") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("W").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("W") << "--> " << model->watts() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("W") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Hz").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Hz") << "--> " << model->hz() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Hz") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VA").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VA") << "--> " << model->va() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VA") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VAr").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VAr") << "--> " << model->vAr() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VAr") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("PF").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PF") << "--> " << model->pf() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PF") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("WH").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WH") << "--> " << model->wattHours() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WH") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("DCA").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DCA") << "--> " << model->dcAmps() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DCA") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("DCV").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DCV") << "--> " << model->dcVoltage() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DCV") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("DCW").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DCW") << "--> " << model->dcWatts() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DCW") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TmpCab").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpCab") << "--> " << model->cabinetTemperature() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpCab") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TmpSnk").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpSnk") << "--> " << model->heatSinkTemperature() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpSnk") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TmpTrns").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpTrns") << "--> " << model->transformerTemperature() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpTrns") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TmpOt").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpOt") << "--> " << model->otherTemperature() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpOt") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("St").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("St") << "--> " << model->operatingState() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("St") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("StVnd").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StVnd") << "--> " << model->vendorOperatingState() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StVnd") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Evt1").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt1") << "--> " << model->event1() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt1") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Evt2").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt2") << "--> " << model->eventBitfield2() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt2") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("EvtVnd1").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd1") << "--> " << model->vendorEventBitfield1() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd1") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("EvtVnd2").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd2") << "--> " << model->vendorEventBitfield2() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd2") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("EvtVnd3").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd3") << "--> " << model->vendorEventBitfield3() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd3") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("EvtVnd4").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd4") << "--> " << model->vendorEventBitfield4() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd4") << "--> NaN" << endl;
+    }
+
+
+    return debug.space().quote();
+}

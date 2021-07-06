@@ -217,4 +217,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecDeltaConnectThreePhaseAbcMeterModel *model);
+
 #endif // SUNSPECDELTACONNECTTHREEPHASEABCMETERMODEL_H

@@ -32,6 +32,9 @@
 #include "integrationpluginsunspec.h"
 #include "network/networkdevicediscovery.h"
 
+#include "sunspecmodel.h"
+#include <models/sunspeccommonmodel.h>
+
 #include <QHostAddress>
 
 IntegrationPluginSunSpec::IntegrationPluginSunSpec()
@@ -183,7 +186,7 @@ void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
                     info->finish(Thing::ThingErrorNoError);
                 });
                 // Perform initial discovery, finish if a valid base register has been found
-                connection->startSunSpecDiscovery();
+                connection->startDiscovery();
             } else {
                 info->finish(Thing::ThingErrorHardwareNotAvailable);
             }
@@ -200,8 +203,18 @@ void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
 
         m_sunSpecConnections.insert(thing->id(), connection);
 
+        connect(connection, &SunSpecConnection::discoveryFinished, thing, [connection](bool success){
+            qCDebug(dcSunSpec()) << connection << "discovery finished" << (success ? "successfully" : "with errors.");
+            if (success) {
+                foreach (SunSpecModel *model, connection->models()) {
+                    if (model->modelId() == SunSpecModelFactory::ModelIdCommon) {
+                        SunSpecCommonModel *common = qobject_cast<SunSpecCommonModel *>(model);
+                        qCDebug(dcSunSpec()) << "###########" << common;
+                    }
+                }
+            }
 
-
+        });
 
 //        connect(sunSpec, &SunSpec::foundSunSpecModel, this, &IntegrationPluginSunSpec::onFoundSunSpecModel);
 //        connect(sunSpec, &SunSpec::sunspecModelSearchFinished, this, &IntegrationPluginSunSpec::onSunSpecModelSearchFinished);
@@ -269,7 +282,7 @@ void IntegrationPluginSunSpec::postSetupThing(Thing *thing)
             qCDebug(dcSunSpec()) << "SunSpecConnection not found for" << thing;
             return;
         }
-        //connection->startSunSpecDiscovery();
+        //connection->startDiscovery();
     } else if (thing->thingClassId() == sunspecSinglePhaseInverterThingClassId ||
                thing->thingClassId() == sunspecSplitPhaseInverterThingClassId ||
                thing->thingClassId() == sunspecThreePhaseInverterThingClassId) {
@@ -513,7 +526,7 @@ void IntegrationPluginSunSpec::onRefreshTimer()
 {
 //    foreach (SunSpecConnection *connection, m_sunSpecConnections) {
 //        if (connection->connected()) {
-//            connection->startSunSpecDiscovery();
+//            connection->startDiscovery();
 //        }
 //    }
 

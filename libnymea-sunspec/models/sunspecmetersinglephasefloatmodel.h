@@ -217,4 +217,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecMeterSinglePhaseFloatModel *model);
+
 #endif // SUNSPECMETERSINGLEPHASEFLOATMODEL_H

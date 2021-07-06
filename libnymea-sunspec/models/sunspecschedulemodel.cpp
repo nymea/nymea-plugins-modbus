@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecScheduleModel::SunSpecScheduleModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 133, 6, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 133, 6, parent)
 {
-    Q_ASSERT_X(length == 6,  "SunSpecScheduleModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 6,  "SunSpecScheduleModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -99,6 +99,8 @@ void SunSpecScheduleModel::processBlockData()
     m_nSchd = m_dataPoints.value("NSchd").toUInt16();
     m_nPts = m_dataPoints.value("NPts").toUInt16();
     m_pad = m_dataPoints.value("Pad").toUInt16();
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecScheduleModel::initDataPoints()
@@ -110,7 +112,7 @@ void SunSpecScheduleModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -120,7 +122,7 @@ void SunSpecScheduleModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint actSchdDataPoint;
@@ -131,7 +133,7 @@ void SunSpecScheduleModel::initDataPoints()
     actSchdDataPoint.setSize(2);
     actSchdDataPoint.setAddressOffset(2);
     actSchdDataPoint.setBlockOffset(0);
-    actSchdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
+    actSchdDataPoint.setSunSpecDataType("bitfield32");
     actSchdDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(actSchdDataPoint.name(), actSchdDataPoint);
 
@@ -143,7 +145,7 @@ void SunSpecScheduleModel::initDataPoints()
     modEnaDataPoint.setSize(1);
     modEnaDataPoint.setAddressOffset(4);
     modEnaDataPoint.setBlockOffset(2);
-    modEnaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield16"));
+    modEnaDataPoint.setSunSpecDataType("bitfield16");
     modEnaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(modEnaDataPoint.name(), modEnaDataPoint);
 
@@ -155,7 +157,7 @@ void SunSpecScheduleModel::initDataPoints()
     nSchdDataPoint.setSize(1);
     nSchdDataPoint.setAddressOffset(5);
     nSchdDataPoint.setBlockOffset(3);
-    nSchdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    nSchdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(nSchdDataPoint.name(), nSchdDataPoint);
 
     SunSpecDataPoint nPtsDataPoint;
@@ -166,7 +168,7 @@ void SunSpecScheduleModel::initDataPoints()
     nPtsDataPoint.setSize(1);
     nPtsDataPoint.setAddressOffset(6);
     nPtsDataPoint.setBlockOffset(4);
-    nPtsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    nPtsDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(nPtsDataPoint.name(), nPtsDataPoint);
 
     SunSpecDataPoint padDataPoint;
@@ -176,8 +178,44 @@ void SunSpecScheduleModel::initDataPoints()
     padDataPoint.setSize(1);
     padDataPoint.setAddressOffset(7);
     padDataPoint.setBlockOffset(5);
-    padDataPoint.setDataType(SunSpecDataPoint::stringToDataType("pad"));
+    padDataPoint.setSunSpecDataType("pad");
     m_dataPoints.insert(padDataPoint.name(), padDataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecScheduleModel *model)
+{
+    debug.nospace().noquote() << "SunSpecScheduleModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    if (model->dataPoints().value("ActSchd").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActSchd") << "--> " << model->actSchd() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActSchd") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ModEna").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModEna") << "--> " << model->modEna() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModEna") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("NSchd").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("NSchd") << "--> " << model->nSchd() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("NSchd") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("NPts").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("NPts") << "--> " << model->nPts() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("NPts") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Pad").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad") << "--> " << model->pad() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad") << "--> NaN" << endl;
+    }
+
+
+    return debug.space().quote();
+}

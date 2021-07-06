@@ -67,4 +67,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecRefPointModel *model);
+
 #endif // SUNSPECREFPOINTMODEL_H

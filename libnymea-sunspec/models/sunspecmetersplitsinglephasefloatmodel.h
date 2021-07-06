@@ -217,4 +217,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecMeterSplitSinglePhaseFloatModel *model);
+
 #endif // SUNSPECMETERSPLITSINGLEPHASEFLOATMODEL_H

@@ -104,4 +104,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecStringCombinerCurrentModel *model);
+
 #endif // SUNSPECSTRINGCOMBINERCURRENTMODEL_H

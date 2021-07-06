@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecBaseMetModel::SunSpecBaseMetModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 307, 11, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 307, 11, parent)
 {
-    Q_ASSERT_X(length == 11,  "SunSpecBaseMetModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 11,  "SunSpecBaseMetModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -117,6 +117,8 @@ void SunSpecBaseMetModel::processBlockData()
     m_electricField = m_dataPoints.value("ElecFld").toInt16();
     m_surfaceWetness = m_dataPoints.value("SurWet").toInt16();
     m_soilWetness = m_dataPoints.value("SoilWet").toInt16();
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecBaseMetModel::initDataPoints()
@@ -128,7 +130,7 @@ void SunSpecBaseMetModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -138,7 +140,7 @@ void SunSpecBaseMetModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint ambientTemperatureDataPoint;
@@ -149,7 +151,7 @@ void SunSpecBaseMetModel::initDataPoints()
     ambientTemperatureDataPoint.setAddressOffset(2);
     ambientTemperatureDataPoint.setBlockOffset(0);
     ambientTemperatureDataPoint.setScaleFactorName("-1");
-    ambientTemperatureDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    ambientTemperatureDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(ambientTemperatureDataPoint.name(), ambientTemperatureDataPoint);
 
     SunSpecDataPoint relativeHumidityDataPoint;
@@ -159,7 +161,7 @@ void SunSpecBaseMetModel::initDataPoints()
     relativeHumidityDataPoint.setSize(1);
     relativeHumidityDataPoint.setAddressOffset(3);
     relativeHumidityDataPoint.setBlockOffset(1);
-    relativeHumidityDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    relativeHumidityDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(relativeHumidityDataPoint.name(), relativeHumidityDataPoint);
 
     SunSpecDataPoint barometricPressureDataPoint;
@@ -169,7 +171,7 @@ void SunSpecBaseMetModel::initDataPoints()
     barometricPressureDataPoint.setSize(1);
     barometricPressureDataPoint.setAddressOffset(4);
     barometricPressureDataPoint.setBlockOffset(2);
-    barometricPressureDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    barometricPressureDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(barometricPressureDataPoint.name(), barometricPressureDataPoint);
 
     SunSpecDataPoint windSpeedDataPoint;
@@ -179,7 +181,7 @@ void SunSpecBaseMetModel::initDataPoints()
     windSpeedDataPoint.setSize(1);
     windSpeedDataPoint.setAddressOffset(5);
     windSpeedDataPoint.setBlockOffset(3);
-    windSpeedDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    windSpeedDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(windSpeedDataPoint.name(), windSpeedDataPoint);
 
     SunSpecDataPoint windDirectionDataPoint;
@@ -189,7 +191,7 @@ void SunSpecBaseMetModel::initDataPoints()
     windDirectionDataPoint.setSize(1);
     windDirectionDataPoint.setAddressOffset(6);
     windDirectionDataPoint.setBlockOffset(4);
-    windDirectionDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    windDirectionDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(windDirectionDataPoint.name(), windDirectionDataPoint);
 
     SunSpecDataPoint rainfallDataPoint;
@@ -199,7 +201,7 @@ void SunSpecBaseMetModel::initDataPoints()
     rainfallDataPoint.setSize(1);
     rainfallDataPoint.setAddressOffset(7);
     rainfallDataPoint.setBlockOffset(5);
-    rainfallDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    rainfallDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(rainfallDataPoint.name(), rainfallDataPoint);
 
     SunSpecDataPoint snowDepthDataPoint;
@@ -209,17 +211,17 @@ void SunSpecBaseMetModel::initDataPoints()
     snowDepthDataPoint.setSize(1);
     snowDepthDataPoint.setAddressOffset(8);
     snowDepthDataPoint.setBlockOffset(6);
-    snowDepthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    snowDepthDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(snowDepthDataPoint.name(), snowDepthDataPoint);
 
     SunSpecDataPoint precipitationTypeDataPoint;
     precipitationTypeDataPoint.setName("PPT");
     precipitationTypeDataPoint.setLabel("Precipitation Type");
-    precipitationTypeDataPoint.setDescription(" Precipitation Type (WMO 4680 SYNOP code reference)");
+    precipitationTypeDataPoint.setDescription("Precipitation Type (WMO 4680 SYNOP code reference)");
     precipitationTypeDataPoint.setSize(1);
     precipitationTypeDataPoint.setAddressOffset(9);
     precipitationTypeDataPoint.setBlockOffset(7);
-    precipitationTypeDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    precipitationTypeDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(precipitationTypeDataPoint.name(), precipitationTypeDataPoint);
 
     SunSpecDataPoint electricFieldDataPoint;
@@ -229,7 +231,7 @@ void SunSpecBaseMetModel::initDataPoints()
     electricFieldDataPoint.setSize(1);
     electricFieldDataPoint.setAddressOffset(10);
     electricFieldDataPoint.setBlockOffset(8);
-    electricFieldDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    electricFieldDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(electricFieldDataPoint.name(), electricFieldDataPoint);
 
     SunSpecDataPoint surfaceWetnessDataPoint;
@@ -239,7 +241,7 @@ void SunSpecBaseMetModel::initDataPoints()
     surfaceWetnessDataPoint.setSize(1);
     surfaceWetnessDataPoint.setAddressOffset(11);
     surfaceWetnessDataPoint.setBlockOffset(9);
-    surfaceWetnessDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    surfaceWetnessDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(surfaceWetnessDataPoint.name(), surfaceWetnessDataPoint);
 
     SunSpecDataPoint soilWetnessDataPoint;
@@ -249,8 +251,80 @@ void SunSpecBaseMetModel::initDataPoints()
     soilWetnessDataPoint.setSize(1);
     soilWetnessDataPoint.setAddressOffset(12);
     soilWetnessDataPoint.setBlockOffset(10);
-    soilWetnessDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    soilWetnessDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(soilWetnessDataPoint.name(), soilWetnessDataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecBaseMetModel *model)
+{
+    debug.nospace().noquote() << "SunSpecBaseMetModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    if (model->dataPoints().value("TmpAmb").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpAmb") << "--> " << model->ambientTemperature() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpAmb") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("RH").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("RH") << "--> " << model->relativeHumidity() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("RH") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Pres").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Pres") << "--> " << model->barometricPressure() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Pres") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("WndSpd").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WndSpd") << "--> " << model->windSpeed() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WndSpd") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("WndDir").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WndDir") << "--> " << model->windDirection() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WndDir") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Rain").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Rain") << "--> " << model->rainfall() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Rain") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Snw").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Snw") << "--> " << model->snowDepth() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Snw") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("PPT").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PPT") << "--> " << model->precipitationType() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PPT") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ElecFld").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ElecFld") << "--> " << model->electricField() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ElecFld") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("SurWet").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("SurWet") << "--> " << model->surfaceWetness() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("SurWet") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("SoilWet").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("SoilWet") << "--> " << model->soilWetness() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("SoilWet") << "--> NaN" << endl;
+    }
+
+
+    return debug.space().quote();
+}

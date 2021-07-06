@@ -148,4 +148,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecStorageModel *model);
+
 #endif // SUNSPECSTORAGEMODEL_H

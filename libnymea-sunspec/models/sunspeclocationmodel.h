@@ -71,4 +71,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecLocationModel *model);
+
 #endif // SUNSPECLOCATIONMODEL_H

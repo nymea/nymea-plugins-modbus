@@ -144,4 +144,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecSolarModuleModel *model);
+
 #endif // SUNSPECSOLARMODULEMODEL_H

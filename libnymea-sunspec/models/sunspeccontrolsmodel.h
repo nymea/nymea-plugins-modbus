@@ -179,4 +179,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecControlsModel *model);
+
 #endif // SUNSPECCONTROLSMODEL_H

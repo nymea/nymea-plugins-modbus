@@ -219,4 +219,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecMeterSinglePhaseModel *model);
+
 #endif // SUNSPECMETERSINGLEPHASEMODEL_H

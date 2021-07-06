@@ -232,4 +232,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecLithiumIonStringModel *model);
+
 #endif // SUNSPECLITHIUMIONSTRINGMODEL_H

@@ -116,4 +116,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecScheduleModel *model);
+
 #endif // SUNSPECSCHEDULEMODEL_H

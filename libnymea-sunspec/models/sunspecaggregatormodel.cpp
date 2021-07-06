@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecAggregatorModel::SunSpecAggregatorModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 2, 14, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 2, 14, parent)
 {
-    Q_ASSERT_X(length == 14,  "SunSpecAggregatorModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 14,  "SunSpecAggregatorModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -112,6 +112,8 @@ void SunSpecAggregatorModel::processBlockData()
     m_control = static_cast<Ctl>(m_dataPoints.value("Ctl").toUInt16());
     m_vendorControl = m_dataPoints.value("CtlVnd").toUInt32();
     m_controlValue = m_dataPoints.value("CtlVl").toUInt32();
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecAggregatorModel::initDataPoints()
@@ -123,7 +125,7 @@ void SunSpecAggregatorModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -133,7 +135,7 @@ void SunSpecAggregatorModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint aidDataPoint;
@@ -144,7 +146,7 @@ void SunSpecAggregatorModel::initDataPoints()
     aidDataPoint.setSize(1);
     aidDataPoint.setAddressOffset(2);
     aidDataPoint.setBlockOffset(0);
-    aidDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    aidDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(aidDataPoint.name(), aidDataPoint);
 
     SunSpecDataPoint nDataPoint;
@@ -155,7 +157,7 @@ void SunSpecAggregatorModel::initDataPoints()
     nDataPoint.setSize(1);
     nDataPoint.setAddressOffset(3);
     nDataPoint.setBlockOffset(1);
-    nDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    nDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(nDataPoint.name(), nDataPoint);
 
     SunSpecDataPoint unDataPoint;
@@ -166,7 +168,7 @@ void SunSpecAggregatorModel::initDataPoints()
     unDataPoint.setSize(1);
     unDataPoint.setAddressOffset(4);
     unDataPoint.setBlockOffset(2);
-    unDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    unDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(unDataPoint.name(), unDataPoint);
 
     SunSpecDataPoint statusDataPoint;
@@ -177,7 +179,7 @@ void SunSpecAggregatorModel::initDataPoints()
     statusDataPoint.setSize(1);
     statusDataPoint.setAddressOffset(5);
     statusDataPoint.setBlockOffset(3);
-    statusDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    statusDataPoint.setSunSpecDataType("enum16");
     m_dataPoints.insert(statusDataPoint.name(), statusDataPoint);
 
     SunSpecDataPoint vendorStatusDataPoint;
@@ -187,7 +189,7 @@ void SunSpecAggregatorModel::initDataPoints()
     vendorStatusDataPoint.setSize(1);
     vendorStatusDataPoint.setAddressOffset(6);
     vendorStatusDataPoint.setBlockOffset(4);
-    vendorStatusDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    vendorStatusDataPoint.setSunSpecDataType("enum16");
     m_dataPoints.insert(vendorStatusDataPoint.name(), vendorStatusDataPoint);
 
     SunSpecDataPoint eventCodeDataPoint;
@@ -198,7 +200,7 @@ void SunSpecAggregatorModel::initDataPoints()
     eventCodeDataPoint.setSize(2);
     eventCodeDataPoint.setAddressOffset(7);
     eventCodeDataPoint.setBlockOffset(5);
-    eventCodeDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
+    eventCodeDataPoint.setSunSpecDataType("bitfield32");
     m_dataPoints.insert(eventCodeDataPoint.name(), eventCodeDataPoint);
 
     SunSpecDataPoint vendorEventCodeDataPoint;
@@ -208,7 +210,7 @@ void SunSpecAggregatorModel::initDataPoints()
     vendorEventCodeDataPoint.setSize(2);
     vendorEventCodeDataPoint.setAddressOffset(9);
     vendorEventCodeDataPoint.setBlockOffset(7);
-    vendorEventCodeDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
+    vendorEventCodeDataPoint.setSunSpecDataType("bitfield32");
     m_dataPoints.insert(vendorEventCodeDataPoint.name(), vendorEventCodeDataPoint);
 
     SunSpecDataPoint controlDataPoint;
@@ -218,7 +220,7 @@ void SunSpecAggregatorModel::initDataPoints()
     controlDataPoint.setSize(1);
     controlDataPoint.setAddressOffset(11);
     controlDataPoint.setBlockOffset(9);
-    controlDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    controlDataPoint.setSunSpecDataType("enum16");
     m_dataPoints.insert(controlDataPoint.name(), controlDataPoint);
 
     SunSpecDataPoint vendorControlDataPoint;
@@ -228,7 +230,7 @@ void SunSpecAggregatorModel::initDataPoints()
     vendorControlDataPoint.setSize(2);
     vendorControlDataPoint.setAddressOffset(12);
     vendorControlDataPoint.setBlockOffset(10);
-    vendorControlDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum32"));
+    vendorControlDataPoint.setSunSpecDataType("enum32");
     m_dataPoints.insert(vendorControlDataPoint.name(), vendorControlDataPoint);
 
     SunSpecDataPoint controlValueDataPoint;
@@ -238,8 +240,74 @@ void SunSpecAggregatorModel::initDataPoints()
     controlValueDataPoint.setSize(2);
     controlValueDataPoint.setAddressOffset(14);
     controlValueDataPoint.setBlockOffset(12);
-    controlValueDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum32"));
+    controlValueDataPoint.setSunSpecDataType("enum32");
     m_dataPoints.insert(controlValueDataPoint.name(), controlValueDataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecAggregatorModel *model)
+{
+    debug.nospace().noquote() << "SunSpecAggregatorModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    if (model->dataPoints().value("AID").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("AID") << "--> " << model->aid() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("AID") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("N").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("N") << "--> " << model->n() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("N") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("UN").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("UN") << "--> " << model->un() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("UN") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("St").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("St") << "--> " << model->status() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("St") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("StVnd").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StVnd") << "--> " << model->vendorStatus() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StVnd") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Evt").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt") << "--> " << model->eventCode() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("EvtVnd").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd") << "--> " << model->vendorEventCode() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Ctl").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Ctl") << "--> " << model->control() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Ctl") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("CtlVnd").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("CtlVnd") << "--> " << model->vendorControl() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("CtlVnd") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("CtlVl").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("CtlVl") << "--> " << model->controlValue() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("CtlVl") << "--> NaN" << endl;
+    }
+
+
+    return debug.space().quote();
+}

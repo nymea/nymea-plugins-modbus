@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecNameplateModel::SunSpecNameplateModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 120, 26, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 120, 26, parent)
 {
-    Q_ASSERT_X(length == 26,  "SunSpecNameplateModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 26,  "SunSpecNameplateModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -158,6 +158,8 @@ void SunSpecNameplateModel::processBlockData()
     m_maxChaRte = m_dataPoints.value("MaxChaRte").toFloatWithSSF(m_maxChaRteSf);
     m_maxDisChaRte = m_dataPoints.value("MaxDisChaRte").toFloatWithSSF(m_maxDisChaRteSf);
     m_pad = m_dataPoints.value("Pad").toUInt16();
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecNameplateModel::initDataPoints()
@@ -169,7 +171,7 @@ void SunSpecNameplateModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -179,7 +181,7 @@ void SunSpecNameplateModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint derTypDataPoint;
@@ -190,7 +192,7 @@ void SunSpecNameplateModel::initDataPoints()
     derTypDataPoint.setSize(1);
     derTypDataPoint.setAddressOffset(2);
     derTypDataPoint.setBlockOffset(0);
-    derTypDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    derTypDataPoint.setSunSpecDataType("enum16");
     m_dataPoints.insert(derTypDataPoint.name(), derTypDataPoint);
 
     SunSpecDataPoint wRtgDataPoint;
@@ -203,7 +205,7 @@ void SunSpecNameplateModel::initDataPoints()
     wRtgDataPoint.setAddressOffset(3);
     wRtgDataPoint.setBlockOffset(1);
     wRtgDataPoint.setScaleFactorName("WRtg_SF");
-    wRtgDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    wRtgDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(wRtgDataPoint.name(), wRtgDataPoint);
 
     SunSpecDataPoint wRtgSfDataPoint;
@@ -214,7 +216,7 @@ void SunSpecNameplateModel::initDataPoints()
     wRtgSfDataPoint.setSize(1);
     wRtgSfDataPoint.setAddressOffset(4);
     wRtgSfDataPoint.setBlockOffset(2);
-    wRtgSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    wRtgSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(wRtgSfDataPoint.name(), wRtgSfDataPoint);
 
     SunSpecDataPoint vaRtgDataPoint;
@@ -227,7 +229,7 @@ void SunSpecNameplateModel::initDataPoints()
     vaRtgDataPoint.setAddressOffset(5);
     vaRtgDataPoint.setBlockOffset(3);
     vaRtgDataPoint.setScaleFactorName("VARtg_SF");
-    vaRtgDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    vaRtgDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(vaRtgDataPoint.name(), vaRtgDataPoint);
 
     SunSpecDataPoint vaRtgSfDataPoint;
@@ -238,7 +240,7 @@ void SunSpecNameplateModel::initDataPoints()
     vaRtgSfDataPoint.setSize(1);
     vaRtgSfDataPoint.setAddressOffset(6);
     vaRtgSfDataPoint.setBlockOffset(4);
-    vaRtgSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    vaRtgSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(vaRtgSfDataPoint.name(), vaRtgSfDataPoint);
 
     SunSpecDataPoint vArRtgQ1DataPoint;
@@ -251,7 +253,7 @@ void SunSpecNameplateModel::initDataPoints()
     vArRtgQ1DataPoint.setAddressOffset(7);
     vArRtgQ1DataPoint.setBlockOffset(5);
     vArRtgQ1DataPoint.setScaleFactorName("VArRtg_SF");
-    vArRtgQ1DataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    vArRtgQ1DataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(vArRtgQ1DataPoint.name(), vArRtgQ1DataPoint);
 
     SunSpecDataPoint vArRtgQ2DataPoint;
@@ -264,7 +266,7 @@ void SunSpecNameplateModel::initDataPoints()
     vArRtgQ2DataPoint.setAddressOffset(8);
     vArRtgQ2DataPoint.setBlockOffset(6);
     vArRtgQ2DataPoint.setScaleFactorName("VArRtg_SF");
-    vArRtgQ2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    vArRtgQ2DataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(vArRtgQ2DataPoint.name(), vArRtgQ2DataPoint);
 
     SunSpecDataPoint vArRtgQ3DataPoint;
@@ -277,7 +279,7 @@ void SunSpecNameplateModel::initDataPoints()
     vArRtgQ3DataPoint.setAddressOffset(9);
     vArRtgQ3DataPoint.setBlockOffset(7);
     vArRtgQ3DataPoint.setScaleFactorName("VArRtg_SF");
-    vArRtgQ3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    vArRtgQ3DataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(vArRtgQ3DataPoint.name(), vArRtgQ3DataPoint);
 
     SunSpecDataPoint vArRtgQ4DataPoint;
@@ -290,7 +292,7 @@ void SunSpecNameplateModel::initDataPoints()
     vArRtgQ4DataPoint.setAddressOffset(10);
     vArRtgQ4DataPoint.setBlockOffset(8);
     vArRtgQ4DataPoint.setScaleFactorName("VArRtg_SF");
-    vArRtgQ4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    vArRtgQ4DataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(vArRtgQ4DataPoint.name(), vArRtgQ4DataPoint);
 
     SunSpecDataPoint vArRtgSfDataPoint;
@@ -301,7 +303,7 @@ void SunSpecNameplateModel::initDataPoints()
     vArRtgSfDataPoint.setSize(1);
     vArRtgSfDataPoint.setAddressOffset(11);
     vArRtgSfDataPoint.setBlockOffset(9);
-    vArRtgSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    vArRtgSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(vArRtgSfDataPoint.name(), vArRtgSfDataPoint);
 
     SunSpecDataPoint aRtgDataPoint;
@@ -314,7 +316,7 @@ void SunSpecNameplateModel::initDataPoints()
     aRtgDataPoint.setAddressOffset(12);
     aRtgDataPoint.setBlockOffset(10);
     aRtgDataPoint.setScaleFactorName("ARtg_SF");
-    aRtgDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    aRtgDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(aRtgDataPoint.name(), aRtgDataPoint);
 
     SunSpecDataPoint aRtgSfDataPoint;
@@ -325,7 +327,7 @@ void SunSpecNameplateModel::initDataPoints()
     aRtgSfDataPoint.setSize(1);
     aRtgSfDataPoint.setAddressOffset(13);
     aRtgSfDataPoint.setBlockOffset(11);
-    aRtgSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    aRtgSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(aRtgSfDataPoint.name(), aRtgSfDataPoint);
 
     SunSpecDataPoint pfRtgQ1DataPoint;
@@ -338,7 +340,7 @@ void SunSpecNameplateModel::initDataPoints()
     pfRtgQ1DataPoint.setAddressOffset(14);
     pfRtgQ1DataPoint.setBlockOffset(12);
     pfRtgQ1DataPoint.setScaleFactorName("PFRtg_SF");
-    pfRtgQ1DataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    pfRtgQ1DataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(pfRtgQ1DataPoint.name(), pfRtgQ1DataPoint);
 
     SunSpecDataPoint pfRtgQ2DataPoint;
@@ -351,7 +353,7 @@ void SunSpecNameplateModel::initDataPoints()
     pfRtgQ2DataPoint.setAddressOffset(15);
     pfRtgQ2DataPoint.setBlockOffset(13);
     pfRtgQ2DataPoint.setScaleFactorName("PFRtg_SF");
-    pfRtgQ2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    pfRtgQ2DataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(pfRtgQ2DataPoint.name(), pfRtgQ2DataPoint);
 
     SunSpecDataPoint pfRtgQ3DataPoint;
@@ -364,7 +366,7 @@ void SunSpecNameplateModel::initDataPoints()
     pfRtgQ3DataPoint.setAddressOffset(16);
     pfRtgQ3DataPoint.setBlockOffset(14);
     pfRtgQ3DataPoint.setScaleFactorName("PFRtg_SF");
-    pfRtgQ3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    pfRtgQ3DataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(pfRtgQ3DataPoint.name(), pfRtgQ3DataPoint);
 
     SunSpecDataPoint pfRtgQ4DataPoint;
@@ -377,7 +379,7 @@ void SunSpecNameplateModel::initDataPoints()
     pfRtgQ4DataPoint.setAddressOffset(17);
     pfRtgQ4DataPoint.setBlockOffset(15);
     pfRtgQ4DataPoint.setScaleFactorName("PFRtg_SF");
-    pfRtgQ4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    pfRtgQ4DataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(pfRtgQ4DataPoint.name(), pfRtgQ4DataPoint);
 
     SunSpecDataPoint pfRtgSfDataPoint;
@@ -388,7 +390,7 @@ void SunSpecNameplateModel::initDataPoints()
     pfRtgSfDataPoint.setSize(1);
     pfRtgSfDataPoint.setAddressOffset(18);
     pfRtgSfDataPoint.setBlockOffset(16);
-    pfRtgSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    pfRtgSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(pfRtgSfDataPoint.name(), pfRtgSfDataPoint);
 
     SunSpecDataPoint whRtgDataPoint;
@@ -400,7 +402,7 @@ void SunSpecNameplateModel::initDataPoints()
     whRtgDataPoint.setAddressOffset(19);
     whRtgDataPoint.setBlockOffset(17);
     whRtgDataPoint.setScaleFactorName("WHRtg_SF");
-    whRtgDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    whRtgDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(whRtgDataPoint.name(), whRtgDataPoint);
 
     SunSpecDataPoint whRtgSfDataPoint;
@@ -410,7 +412,7 @@ void SunSpecNameplateModel::initDataPoints()
     whRtgSfDataPoint.setSize(1);
     whRtgSfDataPoint.setAddressOffset(20);
     whRtgSfDataPoint.setBlockOffset(18);
-    whRtgSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    whRtgSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(whRtgSfDataPoint.name(), whRtgSfDataPoint);
 
     SunSpecDataPoint ahrRtgDataPoint;
@@ -422,7 +424,7 @@ void SunSpecNameplateModel::initDataPoints()
     ahrRtgDataPoint.setAddressOffset(21);
     ahrRtgDataPoint.setBlockOffset(19);
     ahrRtgDataPoint.setScaleFactorName("AhrRtg_SF");
-    ahrRtgDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    ahrRtgDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(ahrRtgDataPoint.name(), ahrRtgDataPoint);
 
     SunSpecDataPoint ahrRtgSfDataPoint;
@@ -432,7 +434,7 @@ void SunSpecNameplateModel::initDataPoints()
     ahrRtgSfDataPoint.setSize(1);
     ahrRtgSfDataPoint.setAddressOffset(22);
     ahrRtgSfDataPoint.setBlockOffset(20);
-    ahrRtgSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    ahrRtgSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(ahrRtgSfDataPoint.name(), ahrRtgSfDataPoint);
 
     SunSpecDataPoint maxChaRteDataPoint;
@@ -444,7 +446,7 @@ void SunSpecNameplateModel::initDataPoints()
     maxChaRteDataPoint.setAddressOffset(23);
     maxChaRteDataPoint.setBlockOffset(21);
     maxChaRteDataPoint.setScaleFactorName("MaxChaRte_SF");
-    maxChaRteDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    maxChaRteDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(maxChaRteDataPoint.name(), maxChaRteDataPoint);
 
     SunSpecDataPoint maxChaRteSfDataPoint;
@@ -454,7 +456,7 @@ void SunSpecNameplateModel::initDataPoints()
     maxChaRteSfDataPoint.setSize(1);
     maxChaRteSfDataPoint.setAddressOffset(24);
     maxChaRteSfDataPoint.setBlockOffset(22);
-    maxChaRteSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    maxChaRteSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(maxChaRteSfDataPoint.name(), maxChaRteSfDataPoint);
 
     SunSpecDataPoint maxDisChaRteDataPoint;
@@ -466,7 +468,7 @@ void SunSpecNameplateModel::initDataPoints()
     maxDisChaRteDataPoint.setAddressOffset(25);
     maxDisChaRteDataPoint.setBlockOffset(23);
     maxDisChaRteDataPoint.setScaleFactorName("MaxDisChaRte_SF");
-    maxDisChaRteDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    maxDisChaRteDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(maxDisChaRteDataPoint.name(), maxDisChaRteDataPoint);
 
     SunSpecDataPoint maxDisChaRteSfDataPoint;
@@ -476,7 +478,7 @@ void SunSpecNameplateModel::initDataPoints()
     maxDisChaRteSfDataPoint.setSize(1);
     maxDisChaRteSfDataPoint.setAddressOffset(26);
     maxDisChaRteSfDataPoint.setBlockOffset(24);
-    maxDisChaRteSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    maxDisChaRteSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(maxDisChaRteSfDataPoint.name(), maxDisChaRteSfDataPoint);
 
     SunSpecDataPoint padDataPoint;
@@ -486,8 +488,116 @@ void SunSpecNameplateModel::initDataPoints()
     padDataPoint.setSize(1);
     padDataPoint.setAddressOffset(27);
     padDataPoint.setBlockOffset(25);
-    padDataPoint.setDataType(SunSpecDataPoint::stringToDataType("pad"));
+    padDataPoint.setSunSpecDataType("pad");
     m_dataPoints.insert(padDataPoint.name(), padDataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecNameplateModel *model)
+{
+    debug.nospace().noquote() << "SunSpecNameplateModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    if (model->dataPoints().value("DERTyp").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DERTyp") << "--> " << model->derTyp() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DERTyp") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("WRtg").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WRtg") << "--> " << model->wRtg() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WRtg") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VARtg").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VARtg") << "--> " << model->vaRtg() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VARtg") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VArRtgQ1").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArRtgQ1") << "--> " << model->vArRtgQ1() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArRtgQ1") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VArRtgQ2").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArRtgQ2") << "--> " << model->vArRtgQ2() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArRtgQ2") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VArRtgQ3").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArRtgQ3") << "--> " << model->vArRtgQ3() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArRtgQ3") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VArRtgQ4").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArRtgQ4") << "--> " << model->vArRtgQ4() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArRtgQ4") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ARtg").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ARtg") << "--> " << model->aRtg() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ARtg") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("PFRtgQ1").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFRtgQ1") << "--> " << model->pfRtgQ1() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFRtgQ1") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("PFRtgQ2").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFRtgQ2") << "--> " << model->pfRtgQ2() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFRtgQ2") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("PFRtgQ3").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFRtgQ3") << "--> " << model->pfRtgQ3() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFRtgQ3") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("PFRtgQ4").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFRtgQ4") << "--> " << model->pfRtgQ4() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFRtgQ4") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("WHRtg").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WHRtg") << "--> " << model->whRtg() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WHRtg") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("AhrRtg").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("AhrRtg") << "--> " << model->ahrRtg() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("AhrRtg") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("MaxChaRte").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("MaxChaRte") << "--> " << model->maxChaRte() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("MaxChaRte") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("MaxDisChaRte").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("MaxDisChaRte") << "--> " << model->maxDisChaRte() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("MaxDisChaRte") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Pad").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad") << "--> " << model->pad() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad") << "--> NaN" << endl;
+    }
+
+
+    return debug.space().quote();
+}

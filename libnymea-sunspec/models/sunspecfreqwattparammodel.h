@@ -101,4 +101,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecFreqWattParamModel *model);
+
 #endif // SUNSPECFREQWATTPARAMMODEL_H

@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecFlowBatteryModuleModel::SunSpecFlowBatteryModuleModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 808, 1, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 808, 1, parent)
 {
-    Q_ASSERT_X(length == 1,  "SunSpecFlowBatteryModuleModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 1,  "SunSpecFlowBatteryModuleModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -67,6 +67,8 @@ void SunSpecFlowBatteryModuleModel::processBlockData()
 {
     // Update properties according to the data point type
     m_modulePointsToBeDetermined = m_dataPoints.value("ModuleTBD").toUInt16();
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecFlowBatteryModuleModel::initDataPoints()
@@ -78,7 +80,7 @@ void SunSpecFlowBatteryModuleModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -88,7 +90,7 @@ void SunSpecFlowBatteryModuleModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint modulePointsToBeDeterminedDataPoint;
@@ -98,8 +100,20 @@ void SunSpecFlowBatteryModuleModel::initDataPoints()
     modulePointsToBeDeterminedDataPoint.setSize(1);
     modulePointsToBeDeterminedDataPoint.setAddressOffset(2);
     modulePointsToBeDeterminedDataPoint.setBlockOffset(0);
-    modulePointsToBeDeterminedDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modulePointsToBeDeterminedDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modulePointsToBeDeterminedDataPoint.name(), modulePointsToBeDeterminedDataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecFlowBatteryModuleModel *model)
+{
+    debug.nospace().noquote() << "SunSpecFlowBatteryModuleModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    if (model->dataPoints().value("ModuleTBD").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModuleTBD") << "--> " << model->modulePointsToBeDetermined() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModuleTBD") << "--> NaN" << endl;
+    }
+
+
+    return debug.space().quote();
+}

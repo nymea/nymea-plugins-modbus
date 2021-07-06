@@ -271,4 +271,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecBatteryModel *model);
+
 #endif // SUNSPECBATTERYMODEL_H

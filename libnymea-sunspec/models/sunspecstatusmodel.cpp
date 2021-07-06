@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecStatusModel::SunSpecStatusModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 122, 44, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 122, 44, parent)
 {
-    Q_ASSERT_X(length == 44,  "SunSpecStatusModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 44,  "SunSpecStatusModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -152,6 +152,8 @@ void SunSpecStatusModel::processBlockData()
     m_tms = m_dataPoints.value("Tms").toUInt32();
     m_rtSt = static_cast<RtstFlags>(m_dataPoints.value("RtSt").toUInt16());
     m_ris = m_dataPoints.value("Ris").toFloatWithSSF(m_risSf);
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecStatusModel::initDataPoints()
@@ -163,7 +165,7 @@ void SunSpecStatusModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -173,7 +175,7 @@ void SunSpecStatusModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint pvConnDataPoint;
@@ -184,7 +186,7 @@ void SunSpecStatusModel::initDataPoints()
     pvConnDataPoint.setSize(1);
     pvConnDataPoint.setAddressOffset(2);
     pvConnDataPoint.setBlockOffset(0);
-    pvConnDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield16"));
+    pvConnDataPoint.setSunSpecDataType("bitfield16");
     m_dataPoints.insert(pvConnDataPoint.name(), pvConnDataPoint);
 
     SunSpecDataPoint storConnDataPoint;
@@ -195,7 +197,7 @@ void SunSpecStatusModel::initDataPoints()
     storConnDataPoint.setSize(1);
     storConnDataPoint.setAddressOffset(3);
     storConnDataPoint.setBlockOffset(1);
-    storConnDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield16"));
+    storConnDataPoint.setSunSpecDataType("bitfield16");
     m_dataPoints.insert(storConnDataPoint.name(), storConnDataPoint);
 
     SunSpecDataPoint ecpConnDataPoint;
@@ -206,7 +208,7 @@ void SunSpecStatusModel::initDataPoints()
     ecpConnDataPoint.setSize(1);
     ecpConnDataPoint.setAddressOffset(4);
     ecpConnDataPoint.setBlockOffset(2);
-    ecpConnDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield16"));
+    ecpConnDataPoint.setSunSpecDataType("bitfield16");
     m_dataPoints.insert(ecpConnDataPoint.name(), ecpConnDataPoint);
 
     SunSpecDataPoint actWhDataPoint;
@@ -217,7 +219,7 @@ void SunSpecStatusModel::initDataPoints()
     actWhDataPoint.setSize(4);
     actWhDataPoint.setAddressOffset(5);
     actWhDataPoint.setBlockOffset(3);
-    actWhDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc64"));
+    actWhDataPoint.setSunSpecDataType("acc64");
     m_dataPoints.insert(actWhDataPoint.name(), actWhDataPoint);
 
     SunSpecDataPoint actVAhDataPoint;
@@ -228,7 +230,7 @@ void SunSpecStatusModel::initDataPoints()
     actVAhDataPoint.setSize(4);
     actVAhDataPoint.setAddressOffset(9);
     actVAhDataPoint.setBlockOffset(7);
-    actVAhDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc64"));
+    actVAhDataPoint.setSunSpecDataType("acc64");
     m_dataPoints.insert(actVAhDataPoint.name(), actVAhDataPoint);
 
     SunSpecDataPoint actVArhQ1DataPoint;
@@ -239,7 +241,7 @@ void SunSpecStatusModel::initDataPoints()
     actVArhQ1DataPoint.setSize(4);
     actVArhQ1DataPoint.setAddressOffset(13);
     actVArhQ1DataPoint.setBlockOffset(11);
-    actVArhQ1DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc64"));
+    actVArhQ1DataPoint.setSunSpecDataType("acc64");
     m_dataPoints.insert(actVArhQ1DataPoint.name(), actVArhQ1DataPoint);
 
     SunSpecDataPoint actVArhQ2DataPoint;
@@ -250,7 +252,7 @@ void SunSpecStatusModel::initDataPoints()
     actVArhQ2DataPoint.setSize(4);
     actVArhQ2DataPoint.setAddressOffset(17);
     actVArhQ2DataPoint.setBlockOffset(15);
-    actVArhQ2DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc64"));
+    actVArhQ2DataPoint.setSunSpecDataType("acc64");
     m_dataPoints.insert(actVArhQ2DataPoint.name(), actVArhQ2DataPoint);
 
     SunSpecDataPoint actVArhQ3DataPoint;
@@ -261,7 +263,7 @@ void SunSpecStatusModel::initDataPoints()
     actVArhQ3DataPoint.setSize(4);
     actVArhQ3DataPoint.setAddressOffset(21);
     actVArhQ3DataPoint.setBlockOffset(19);
-    actVArhQ3DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc64"));
+    actVArhQ3DataPoint.setSunSpecDataType("acc64");
     m_dataPoints.insert(actVArhQ3DataPoint.name(), actVArhQ3DataPoint);
 
     SunSpecDataPoint actVArhQ4DataPoint;
@@ -272,7 +274,7 @@ void SunSpecStatusModel::initDataPoints()
     actVArhQ4DataPoint.setSize(4);
     actVArhQ4DataPoint.setAddressOffset(25);
     actVArhQ4DataPoint.setBlockOffset(23);
-    actVArhQ4DataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc64"));
+    actVArhQ4DataPoint.setSunSpecDataType("acc64");
     m_dataPoints.insert(actVArhQ4DataPoint.name(), actVArhQ4DataPoint);
 
     SunSpecDataPoint vArAvalDataPoint;
@@ -284,7 +286,7 @@ void SunSpecStatusModel::initDataPoints()
     vArAvalDataPoint.setAddressOffset(29);
     vArAvalDataPoint.setBlockOffset(27);
     vArAvalDataPoint.setScaleFactorName("VArAval_SF");
-    vArAvalDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    vArAvalDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(vArAvalDataPoint.name(), vArAvalDataPoint);
 
     SunSpecDataPoint vArAvalSfDataPoint;
@@ -294,7 +296,7 @@ void SunSpecStatusModel::initDataPoints()
     vArAvalSfDataPoint.setSize(1);
     vArAvalSfDataPoint.setAddressOffset(30);
     vArAvalSfDataPoint.setBlockOffset(28);
-    vArAvalSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    vArAvalSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(vArAvalSfDataPoint.name(), vArAvalSfDataPoint);
 
     SunSpecDataPoint wAvalDataPoint;
@@ -306,7 +308,7 @@ void SunSpecStatusModel::initDataPoints()
     wAvalDataPoint.setAddressOffset(31);
     wAvalDataPoint.setBlockOffset(29);
     wAvalDataPoint.setScaleFactorName("WAval_SF");
-    wAvalDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    wAvalDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(wAvalDataPoint.name(), wAvalDataPoint);
 
     SunSpecDataPoint wAvalSfDataPoint;
@@ -316,7 +318,7 @@ void SunSpecStatusModel::initDataPoints()
     wAvalSfDataPoint.setSize(1);
     wAvalSfDataPoint.setAddressOffset(32);
     wAvalSfDataPoint.setBlockOffset(30);
-    wAvalSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    wAvalSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(wAvalSfDataPoint.name(), wAvalSfDataPoint);
 
     SunSpecDataPoint stSetLimMskDataPoint;
@@ -326,7 +328,7 @@ void SunSpecStatusModel::initDataPoints()
     stSetLimMskDataPoint.setSize(2);
     stSetLimMskDataPoint.setAddressOffset(33);
     stSetLimMskDataPoint.setBlockOffset(31);
-    stSetLimMskDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
+    stSetLimMskDataPoint.setSunSpecDataType("bitfield32");
     m_dataPoints.insert(stSetLimMskDataPoint.name(), stSetLimMskDataPoint);
 
     SunSpecDataPoint stActCtlDataPoint;
@@ -336,7 +338,7 @@ void SunSpecStatusModel::initDataPoints()
     stActCtlDataPoint.setSize(2);
     stActCtlDataPoint.setAddressOffset(35);
     stActCtlDataPoint.setBlockOffset(33);
-    stActCtlDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
+    stActCtlDataPoint.setSunSpecDataType("bitfield32");
     m_dataPoints.insert(stActCtlDataPoint.name(), stActCtlDataPoint);
 
     SunSpecDataPoint tmSrcDataPoint;
@@ -346,7 +348,7 @@ void SunSpecStatusModel::initDataPoints()
     tmSrcDataPoint.setSize(4);
     tmSrcDataPoint.setAddressOffset(37);
     tmSrcDataPoint.setBlockOffset(35);
-    tmSrcDataPoint.setDataType(SunSpecDataPoint::stringToDataType("string"));
+    tmSrcDataPoint.setSunSpecDataType("string");
     m_dataPoints.insert(tmSrcDataPoint.name(), tmSrcDataPoint);
 
     SunSpecDataPoint tmsDataPoint;
@@ -357,7 +359,7 @@ void SunSpecStatusModel::initDataPoints()
     tmsDataPoint.setSize(2);
     tmsDataPoint.setAddressOffset(41);
     tmsDataPoint.setBlockOffset(39);
-    tmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint32"));
+    tmsDataPoint.setSunSpecDataType("uint32");
     m_dataPoints.insert(tmsDataPoint.name(), tmsDataPoint);
 
     SunSpecDataPoint rtStDataPoint;
@@ -367,7 +369,7 @@ void SunSpecStatusModel::initDataPoints()
     rtStDataPoint.setSize(1);
     rtStDataPoint.setAddressOffset(43);
     rtStDataPoint.setBlockOffset(41);
-    rtStDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield16"));
+    rtStDataPoint.setSunSpecDataType("bitfield16");
     m_dataPoints.insert(rtStDataPoint.name(), rtStDataPoint);
 
     SunSpecDataPoint risDataPoint;
@@ -379,7 +381,7 @@ void SunSpecStatusModel::initDataPoints()
     risDataPoint.setAddressOffset(44);
     risDataPoint.setBlockOffset(42);
     risDataPoint.setScaleFactorName("Ris_SF");
-    risDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    risDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(risDataPoint.name(), risDataPoint);
 
     SunSpecDataPoint risSfDataPoint;
@@ -389,8 +391,116 @@ void SunSpecStatusModel::initDataPoints()
     risSfDataPoint.setSize(1);
     risSfDataPoint.setAddressOffset(45);
     risSfDataPoint.setBlockOffset(43);
-    risSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    risSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(risSfDataPoint.name(), risSfDataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecStatusModel *model)
+{
+    debug.nospace().noquote() << "SunSpecStatusModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    if (model->dataPoints().value("PVConn").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PVConn") << "--> " << model->pvConn() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("PVConn") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("StorConn").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StorConn") << "--> " << model->storConn() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StorConn") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ECPConn").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ECPConn") << "--> " << model->ecpConn() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ECPConn") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ActWh").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActWh") << "--> " << model->actWh() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActWh") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ActVAh").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVAh") << "--> " << model->actVAh() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVAh") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ActVArhQ1").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVArhQ1") << "--> " << model->actVArhQ1() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVArhQ1") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ActVArhQ2").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVArhQ2") << "--> " << model->actVArhQ2() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVArhQ2") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ActVArhQ3").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVArhQ3") << "--> " << model->actVArhQ3() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVArhQ3") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ActVArhQ4").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVArhQ4") << "--> " << model->actVArhQ4() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVArhQ4") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VArAval").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArAval") << "--> " << model->vArAval() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArAval") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("WAval").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WAval") << "--> " << model->wAval() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WAval") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("StSetLimMsk").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StSetLimMsk") << "--> " << model->stSetLimMsk() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StSetLimMsk") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("StActCtl").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StActCtl") << "--> " << model->stActCtl() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StActCtl") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("TmSrc").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmSrc") << "--> " << model->tmSrc() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmSrc") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Tms").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Tms") << "--> " << model->tms() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Tms") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("RtSt").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("RtSt") << "--> " << model->rtSt() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("RtSt") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Ris").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Ris") << "--> " << model->ris() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Ris") << "--> NaN" << endl;
+    }
+
+
+    return debug.space().quote();
+}

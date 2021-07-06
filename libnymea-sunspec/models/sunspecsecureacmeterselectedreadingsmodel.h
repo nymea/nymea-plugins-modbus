@@ -146,4 +146,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecSecureAcMeterSelectedReadingsModel *model);
+
 #endif // SUNSPECSECUREACMETERSELECTEDREADINGSMODEL_H

@@ -97,4 +97,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecMpptModel *model);
+
 #endif // SUNSPECMPPTMODEL_H

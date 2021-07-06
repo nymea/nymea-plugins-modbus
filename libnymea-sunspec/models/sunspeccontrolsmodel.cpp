@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecControlsModel::SunSpecControlsModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 123, 24, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 123, 24, parent)
 {
-    Q_ASSERT_X(length == 24,  "SunSpecControlsModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 24,  "SunSpecControlsModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -298,6 +298,8 @@ void SunSpecControlsModel::processBlockData()
     m_vArPctRmpTms = m_dataPoints.value("VArPct_RmpTms").toUInt16();
     m_vArPctMod = static_cast<Varpct_mod>(m_dataPoints.value("VArPct_Mod").toUInt16());
     m_vArPctEna = static_cast<Varpct_ena>(m_dataPoints.value("VArPct_Ena").toUInt16());
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecControlsModel::initDataPoints()
@@ -309,7 +311,7 @@ void SunSpecControlsModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -319,7 +321,7 @@ void SunSpecControlsModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint connWinTmsDataPoint;
@@ -330,7 +332,7 @@ void SunSpecControlsModel::initDataPoints()
     connWinTmsDataPoint.setSize(1);
     connWinTmsDataPoint.setAddressOffset(2);
     connWinTmsDataPoint.setBlockOffset(0);
-    connWinTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    connWinTmsDataPoint.setSunSpecDataType("uint16");
     connWinTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(connWinTmsDataPoint.name(), connWinTmsDataPoint);
 
@@ -342,7 +344,7 @@ void SunSpecControlsModel::initDataPoints()
     connRvrtTmsDataPoint.setSize(1);
     connRvrtTmsDataPoint.setAddressOffset(3);
     connRvrtTmsDataPoint.setBlockOffset(1);
-    connRvrtTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    connRvrtTmsDataPoint.setSunSpecDataType("uint16");
     connRvrtTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(connRvrtTmsDataPoint.name(), connRvrtTmsDataPoint);
 
@@ -354,7 +356,7 @@ void SunSpecControlsModel::initDataPoints()
     connDataPoint.setSize(1);
     connDataPoint.setAddressOffset(4);
     connDataPoint.setBlockOffset(2);
-    connDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    connDataPoint.setSunSpecDataType("enum16");
     connDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(connDataPoint.name(), connDataPoint);
 
@@ -368,7 +370,7 @@ void SunSpecControlsModel::initDataPoints()
     wMaxLimPctDataPoint.setAddressOffset(5);
     wMaxLimPctDataPoint.setBlockOffset(3);
     wMaxLimPctDataPoint.setScaleFactorName("WMaxLimPct_SF");
-    wMaxLimPctDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    wMaxLimPctDataPoint.setSunSpecDataType("uint16");
     wMaxLimPctDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(wMaxLimPctDataPoint.name(), wMaxLimPctDataPoint);
 
@@ -380,7 +382,7 @@ void SunSpecControlsModel::initDataPoints()
     wMaxLimPctWinTmsDataPoint.setSize(1);
     wMaxLimPctWinTmsDataPoint.setAddressOffset(6);
     wMaxLimPctWinTmsDataPoint.setBlockOffset(4);
-    wMaxLimPctWinTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    wMaxLimPctWinTmsDataPoint.setSunSpecDataType("uint16");
     wMaxLimPctWinTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(wMaxLimPctWinTmsDataPoint.name(), wMaxLimPctWinTmsDataPoint);
 
@@ -392,7 +394,7 @@ void SunSpecControlsModel::initDataPoints()
     wMaxLimPctRvrtTmsDataPoint.setSize(1);
     wMaxLimPctRvrtTmsDataPoint.setAddressOffset(7);
     wMaxLimPctRvrtTmsDataPoint.setBlockOffset(5);
-    wMaxLimPctRvrtTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    wMaxLimPctRvrtTmsDataPoint.setSunSpecDataType("uint16");
     wMaxLimPctRvrtTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(wMaxLimPctRvrtTmsDataPoint.name(), wMaxLimPctRvrtTmsDataPoint);
 
@@ -404,7 +406,7 @@ void SunSpecControlsModel::initDataPoints()
     wMaxLimPctRmpTmsDataPoint.setSize(1);
     wMaxLimPctRmpTmsDataPoint.setAddressOffset(8);
     wMaxLimPctRmpTmsDataPoint.setBlockOffset(6);
-    wMaxLimPctRmpTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    wMaxLimPctRmpTmsDataPoint.setSunSpecDataType("uint16");
     wMaxLimPctRmpTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(wMaxLimPctRmpTmsDataPoint.name(), wMaxLimPctRmpTmsDataPoint);
 
@@ -416,7 +418,7 @@ void SunSpecControlsModel::initDataPoints()
     wMaxLimEnaDataPoint.setSize(1);
     wMaxLimEnaDataPoint.setAddressOffset(9);
     wMaxLimEnaDataPoint.setBlockOffset(7);
-    wMaxLimEnaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    wMaxLimEnaDataPoint.setSunSpecDataType("enum16");
     wMaxLimEnaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(wMaxLimEnaDataPoint.name(), wMaxLimEnaDataPoint);
 
@@ -430,7 +432,7 @@ void SunSpecControlsModel::initDataPoints()
     outPfSetDataPoint.setAddressOffset(10);
     outPfSetDataPoint.setBlockOffset(8);
     outPfSetDataPoint.setScaleFactorName("OutPFSet_SF");
-    outPfSetDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    outPfSetDataPoint.setSunSpecDataType("int16");
     outPfSetDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(outPfSetDataPoint.name(), outPfSetDataPoint);
 
@@ -442,7 +444,7 @@ void SunSpecControlsModel::initDataPoints()
     outPfSetWinTmsDataPoint.setSize(1);
     outPfSetWinTmsDataPoint.setAddressOffset(11);
     outPfSetWinTmsDataPoint.setBlockOffset(9);
-    outPfSetWinTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    outPfSetWinTmsDataPoint.setSunSpecDataType("uint16");
     outPfSetWinTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(outPfSetWinTmsDataPoint.name(), outPfSetWinTmsDataPoint);
 
@@ -454,7 +456,7 @@ void SunSpecControlsModel::initDataPoints()
     outPfSetRvrtTmsDataPoint.setSize(1);
     outPfSetRvrtTmsDataPoint.setAddressOffset(12);
     outPfSetRvrtTmsDataPoint.setBlockOffset(10);
-    outPfSetRvrtTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    outPfSetRvrtTmsDataPoint.setSunSpecDataType("uint16");
     outPfSetRvrtTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(outPfSetRvrtTmsDataPoint.name(), outPfSetRvrtTmsDataPoint);
 
@@ -466,7 +468,7 @@ void SunSpecControlsModel::initDataPoints()
     outPfSetRmpTmsDataPoint.setSize(1);
     outPfSetRmpTmsDataPoint.setAddressOffset(13);
     outPfSetRmpTmsDataPoint.setBlockOffset(11);
-    outPfSetRmpTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    outPfSetRmpTmsDataPoint.setSunSpecDataType("uint16");
     outPfSetRmpTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(outPfSetRmpTmsDataPoint.name(), outPfSetRmpTmsDataPoint);
 
@@ -478,7 +480,7 @@ void SunSpecControlsModel::initDataPoints()
     outPfSetEnaDataPoint.setSize(1);
     outPfSetEnaDataPoint.setAddressOffset(14);
     outPfSetEnaDataPoint.setBlockOffset(12);
-    outPfSetEnaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    outPfSetEnaDataPoint.setSunSpecDataType("enum16");
     outPfSetEnaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(outPfSetEnaDataPoint.name(), outPfSetEnaDataPoint);
 
@@ -491,7 +493,7 @@ void SunSpecControlsModel::initDataPoints()
     vArWMaxPctDataPoint.setAddressOffset(15);
     vArWMaxPctDataPoint.setBlockOffset(13);
     vArWMaxPctDataPoint.setScaleFactorName("VArPct_SF");
-    vArWMaxPctDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    vArWMaxPctDataPoint.setSunSpecDataType("int16");
     vArWMaxPctDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(vArWMaxPctDataPoint.name(), vArWMaxPctDataPoint);
 
@@ -504,7 +506,7 @@ void SunSpecControlsModel::initDataPoints()
     vArMaxPctDataPoint.setAddressOffset(16);
     vArMaxPctDataPoint.setBlockOffset(14);
     vArMaxPctDataPoint.setScaleFactorName("VArPct_SF");
-    vArMaxPctDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    vArMaxPctDataPoint.setSunSpecDataType("int16");
     vArMaxPctDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(vArMaxPctDataPoint.name(), vArMaxPctDataPoint);
 
@@ -517,7 +519,7 @@ void SunSpecControlsModel::initDataPoints()
     vArAvalPctDataPoint.setAddressOffset(17);
     vArAvalPctDataPoint.setBlockOffset(15);
     vArAvalPctDataPoint.setScaleFactorName("VArPct_SF");
-    vArAvalPctDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    vArAvalPctDataPoint.setSunSpecDataType("int16");
     vArAvalPctDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(vArAvalPctDataPoint.name(), vArAvalPctDataPoint);
 
@@ -529,7 +531,7 @@ void SunSpecControlsModel::initDataPoints()
     vArPctWinTmsDataPoint.setSize(1);
     vArPctWinTmsDataPoint.setAddressOffset(18);
     vArPctWinTmsDataPoint.setBlockOffset(16);
-    vArPctWinTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    vArPctWinTmsDataPoint.setSunSpecDataType("uint16");
     vArPctWinTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(vArPctWinTmsDataPoint.name(), vArPctWinTmsDataPoint);
 
@@ -541,7 +543,7 @@ void SunSpecControlsModel::initDataPoints()
     vArPctRvrtTmsDataPoint.setSize(1);
     vArPctRvrtTmsDataPoint.setAddressOffset(19);
     vArPctRvrtTmsDataPoint.setBlockOffset(17);
-    vArPctRvrtTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    vArPctRvrtTmsDataPoint.setSunSpecDataType("uint16");
     vArPctRvrtTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(vArPctRvrtTmsDataPoint.name(), vArPctRvrtTmsDataPoint);
 
@@ -553,7 +555,7 @@ void SunSpecControlsModel::initDataPoints()
     vArPctRmpTmsDataPoint.setSize(1);
     vArPctRmpTmsDataPoint.setAddressOffset(20);
     vArPctRmpTmsDataPoint.setBlockOffset(18);
-    vArPctRmpTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    vArPctRmpTmsDataPoint.setSunSpecDataType("uint16");
     vArPctRmpTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(vArPctRmpTmsDataPoint.name(), vArPctRmpTmsDataPoint);
 
@@ -564,7 +566,7 @@ void SunSpecControlsModel::initDataPoints()
     vArPctModDataPoint.setSize(1);
     vArPctModDataPoint.setAddressOffset(21);
     vArPctModDataPoint.setBlockOffset(19);
-    vArPctModDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    vArPctModDataPoint.setSunSpecDataType("enum16");
     vArPctModDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(vArPctModDataPoint.name(), vArPctModDataPoint);
 
@@ -576,7 +578,7 @@ void SunSpecControlsModel::initDataPoints()
     vArPctEnaDataPoint.setSize(1);
     vArPctEnaDataPoint.setAddressOffset(22);
     vArPctEnaDataPoint.setBlockOffset(20);
-    vArPctEnaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    vArPctEnaDataPoint.setSunSpecDataType("enum16");
     vArPctEnaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(vArPctEnaDataPoint.name(), vArPctEnaDataPoint);
 
@@ -588,7 +590,7 @@ void SunSpecControlsModel::initDataPoints()
     wMaxLimPctSfDataPoint.setSize(1);
     wMaxLimPctSfDataPoint.setAddressOffset(23);
     wMaxLimPctSfDataPoint.setBlockOffset(21);
-    wMaxLimPctSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    wMaxLimPctSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(wMaxLimPctSfDataPoint.name(), wMaxLimPctSfDataPoint);
 
     SunSpecDataPoint outPfSetSfDataPoint;
@@ -599,7 +601,7 @@ void SunSpecControlsModel::initDataPoints()
     outPfSetSfDataPoint.setSize(1);
     outPfSetSfDataPoint.setAddressOffset(24);
     outPfSetSfDataPoint.setBlockOffset(22);
-    outPfSetSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    outPfSetSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(outPfSetSfDataPoint.name(), outPfSetSfDataPoint);
 
     SunSpecDataPoint vArPctSfDataPoint;
@@ -609,8 +611,140 @@ void SunSpecControlsModel::initDataPoints()
     vArPctSfDataPoint.setSize(1);
     vArPctSfDataPoint.setAddressOffset(25);
     vArPctSfDataPoint.setBlockOffset(23);
-    vArPctSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    vArPctSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(vArPctSfDataPoint.name(), vArPctSfDataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecControlsModel *model)
+{
+    debug.nospace().noquote() << "SunSpecControlsModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    if (model->dataPoints().value("Conn_WinTms").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Conn_WinTms") << "--> " << model->connWinTms() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Conn_WinTms") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Conn_RvrtTms").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Conn_RvrtTms") << "--> " << model->connRvrtTms() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Conn_RvrtTms") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Conn").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Conn") << "--> " << model->conn() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Conn") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("WMaxLimPct").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLimPct") << "--> " << model->wMaxLimPct() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLimPct") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("WMaxLimPct_WinTms").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLimPct_WinTms") << "--> " << model->wMaxLimPctWinTms() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLimPct_WinTms") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("WMaxLimPct_RvrtTms").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLimPct_RvrtTms") << "--> " << model->wMaxLimPctRvrtTms() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLimPct_RvrtTms") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("WMaxLimPct_RmpTms").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLimPct_RmpTms") << "--> " << model->wMaxLimPctRmpTms() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLimPct_RmpTms") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("WMaxLim_Ena").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLim_Ena") << "--> " << model->wMaxLimEna() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLim_Ena") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("OutPFSet").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet") << "--> " << model->outPfSet() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("OutPFSet_WinTms").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet_WinTms") << "--> " << model->outPfSetWinTms() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet_WinTms") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("OutPFSet_RvrtTms").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet_RvrtTms") << "--> " << model->outPfSetRvrtTms() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet_RvrtTms") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("OutPFSet_RmpTms").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet_RmpTms") << "--> " << model->outPfSetRmpTms() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet_RmpTms") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("OutPFSet_Ena").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet_Ena") << "--> " << model->outPfSetEna() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet_Ena") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VArWMaxPct").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArWMaxPct") << "--> " << model->vArWMaxPct() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArWMaxPct") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VArMaxPct").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArMaxPct") << "--> " << model->vArMaxPct() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArMaxPct") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VArAvalPct").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArAvalPct") << "--> " << model->vArAvalPct() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArAvalPct") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VArPct_WinTms").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_WinTms") << "--> " << model->vArPctWinTms() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_WinTms") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VArPct_RvrtTms").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_RvrtTms") << "--> " << model->vArPctRvrtTms() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_RvrtTms") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VArPct_RmpTms").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_RmpTms") << "--> " << model->vArPctRmpTms() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_RmpTms") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VArPct_Mod").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_Mod") << "--> " << model->vArPctMod() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_Mod") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("VArPct_Ena").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_Ena") << "--> " << model->vArPctEna() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_Ena") << "--> NaN" << endl;
+    }
+
+
+    return debug.space().quote();
+}

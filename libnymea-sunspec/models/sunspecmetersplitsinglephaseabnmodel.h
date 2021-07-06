@@ -227,4 +227,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecMeterSplitSinglePhaseAbnModel *model);
+
 #endif // SUNSPECMETERSPLITSINGLEPHASEABNMODEL_H

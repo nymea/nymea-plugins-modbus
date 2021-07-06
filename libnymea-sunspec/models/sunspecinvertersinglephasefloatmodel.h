@@ -154,4 +154,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecInverterSinglePhaseFloatModel *model);
+
 #endif // SUNSPECINVERTERSINGLEPHASEFLOATMODEL_H

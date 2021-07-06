@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecReactiveCurrentModel::SunSpecReactiveCurrentModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 128, 14, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 128, 14, parent)
 {
-    Q_ASSERT_X(length == 14,  "SunSpecReactiveCurrentModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 14,  "SunSpecReactiveCurrentModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -192,6 +192,8 @@ void SunSpecReactiveCurrentModel::processBlockData()
     m_blkZnTmms = m_dataPoints.value("BlkZnTmms").toUInt16();
     m_holdTmms = m_dataPoints.value("HoldTmms").toUInt16();
     m_pad = m_dataPoints.value("Pad").toUInt16();
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecReactiveCurrentModel::initDataPoints()
@@ -203,7 +205,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -213,7 +215,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint arGraModDataPoint;
@@ -224,7 +226,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     arGraModDataPoint.setSize(1);
     arGraModDataPoint.setAddressOffset(2);
     arGraModDataPoint.setBlockOffset(0);
-    arGraModDataPoint.setDataType(SunSpecDataPoint::stringToDataType("enum16"));
+    arGraModDataPoint.setSunSpecDataType("enum16");
     arGraModDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(arGraModDataPoint.name(), arGraModDataPoint);
 
@@ -238,7 +240,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     arGraSagDataPoint.setAddressOffset(3);
     arGraSagDataPoint.setBlockOffset(1);
     arGraSagDataPoint.setScaleFactorName("ArGra_SF");
-    arGraSagDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    arGraSagDataPoint.setSunSpecDataType("uint16");
     arGraSagDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(arGraSagDataPoint.name(), arGraSagDataPoint);
 
@@ -252,7 +254,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     arGraSwellDataPoint.setAddressOffset(4);
     arGraSwellDataPoint.setBlockOffset(2);
     arGraSwellDataPoint.setScaleFactorName("ArGra_SF");
-    arGraSwellDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    arGraSwellDataPoint.setSunSpecDataType("uint16");
     arGraSwellDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(arGraSwellDataPoint.name(), arGraSwellDataPoint);
 
@@ -264,7 +266,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     modEnaDataPoint.setSize(1);
     modEnaDataPoint.setAddressOffset(5);
     modEnaDataPoint.setBlockOffset(3);
-    modEnaDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield16"));
+    modEnaDataPoint.setSunSpecDataType("bitfield16");
     modEnaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(modEnaDataPoint.name(), modEnaDataPoint);
 
@@ -276,7 +278,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     filTmsDataPoint.setSize(1);
     filTmsDataPoint.setAddressOffset(6);
     filTmsDataPoint.setBlockOffset(4);
-    filTmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    filTmsDataPoint.setSunSpecDataType("uint16");
     filTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(filTmsDataPoint.name(), filTmsDataPoint);
 
@@ -289,7 +291,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     dbVMinDataPoint.setAddressOffset(7);
     dbVMinDataPoint.setBlockOffset(5);
     dbVMinDataPoint.setScaleFactorName("VRefPct_SF");
-    dbVMinDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    dbVMinDataPoint.setSunSpecDataType("uint16");
     dbVMinDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(dbVMinDataPoint.name(), dbVMinDataPoint);
 
@@ -302,7 +304,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     dbVMaxDataPoint.setAddressOffset(8);
     dbVMaxDataPoint.setBlockOffset(6);
     dbVMaxDataPoint.setScaleFactorName("VRefPct_SF");
-    dbVMaxDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    dbVMaxDataPoint.setSunSpecDataType("uint16");
     dbVMaxDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(dbVMaxDataPoint.name(), dbVMaxDataPoint);
 
@@ -315,7 +317,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     blkZnVDataPoint.setAddressOffset(9);
     blkZnVDataPoint.setBlockOffset(7);
     blkZnVDataPoint.setScaleFactorName("VRefPct_SF");
-    blkZnVDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    blkZnVDataPoint.setSunSpecDataType("uint16");
     blkZnVDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(blkZnVDataPoint.name(), blkZnVDataPoint);
 
@@ -328,7 +330,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     hysBlkZnVDataPoint.setAddressOffset(10);
     hysBlkZnVDataPoint.setBlockOffset(8);
     hysBlkZnVDataPoint.setScaleFactorName("VRefPct_SF");
-    hysBlkZnVDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    hysBlkZnVDataPoint.setSunSpecDataType("uint16");
     hysBlkZnVDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(hysBlkZnVDataPoint.name(), hysBlkZnVDataPoint);
 
@@ -340,7 +342,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     blkZnTmmsDataPoint.setSize(1);
     blkZnTmmsDataPoint.setAddressOffset(11);
     blkZnTmmsDataPoint.setBlockOffset(9);
-    blkZnTmmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    blkZnTmmsDataPoint.setSunSpecDataType("uint16");
     blkZnTmmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(blkZnTmmsDataPoint.name(), blkZnTmmsDataPoint);
 
@@ -352,7 +354,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     holdTmmsDataPoint.setSize(1);
     holdTmmsDataPoint.setAddressOffset(12);
     holdTmmsDataPoint.setBlockOffset(10);
-    holdTmmsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    holdTmmsDataPoint.setSunSpecDataType("uint16");
     holdTmmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
     m_dataPoints.insert(holdTmmsDataPoint.name(), holdTmmsDataPoint);
 
@@ -364,7 +366,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     arGraSfDataPoint.setSize(1);
     arGraSfDataPoint.setAddressOffset(13);
     arGraSfDataPoint.setBlockOffset(11);
-    arGraSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    arGraSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(arGraSfDataPoint.name(), arGraSfDataPoint);
 
     SunSpecDataPoint vRefPctSfDataPoint;
@@ -374,7 +376,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     vRefPctSfDataPoint.setSize(1);
     vRefPctSfDataPoint.setAddressOffset(14);
     vRefPctSfDataPoint.setBlockOffset(12);
-    vRefPctSfDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    vRefPctSfDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(vRefPctSfDataPoint.name(), vRefPctSfDataPoint);
 
     SunSpecDataPoint padDataPoint;
@@ -382,8 +384,86 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     padDataPoint.setSize(1);
     padDataPoint.setAddressOffset(15);
     padDataPoint.setBlockOffset(13);
-    padDataPoint.setDataType(SunSpecDataPoint::stringToDataType("pad"));
+    padDataPoint.setSunSpecDataType("pad");
     m_dataPoints.insert(padDataPoint.name(), padDataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecReactiveCurrentModel *model)
+{
+    debug.nospace().noquote() << "SunSpecReactiveCurrentModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    if (model->dataPoints().value("ArGraMod").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ArGraMod") << "--> " << model->arGraMod() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ArGraMod") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ArGraSag").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ArGraSag") << "--> " << model->arGraSag() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ArGraSag") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ArGraSwell").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ArGraSwell") << "--> " << model->arGraSwell() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ArGraSwell") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ModEna").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModEna") << "--> " << model->modEna() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModEna") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("FilTms").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("FilTms") << "--> " << model->filTms() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("FilTms") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("DbVMin").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DbVMin") << "--> " << model->dbVMin() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DbVMin") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("DbVMax").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DbVMax") << "--> " << model->dbVMax() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DbVMax") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("BlkZnV").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("BlkZnV") << "--> " << model->blkZnV() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("BlkZnV") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("HysBlkZnV").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("HysBlkZnV") << "--> " << model->hysBlkZnV() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("HysBlkZnV") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("BlkZnTmms").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("BlkZnTmms") << "--> " << model->blkZnTmms() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("BlkZnTmms") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("HoldTmms").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("HoldTmms") << "--> " << model->holdTmms() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("HoldTmms") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Pad").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad") << "--> " << model->pad() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad") << "--> NaN" << endl;
+    }
+
+
+    return debug.space().quote();
+}

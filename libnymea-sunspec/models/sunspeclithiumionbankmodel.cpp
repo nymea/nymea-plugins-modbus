@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecLithiumIonBankModel::SunSpecLithiumIonBankModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 803, 26, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 803, 26, parent)
 {
-    Q_ASSERT_X(length == 26,  "SunSpecLithiumIonBankModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 26,  "SunSpecLithiumIonBankModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -170,6 +170,8 @@ void SunSpecLithiumIonBankModel::processBlockData()
     m_minStringCurrentString = m_dataPoints.value("StrAMinStr").toUInt16();
     m_averageStringCurrent = m_dataPoints.value("StrAAvg").toFloatWithSSF(m_a_SF);
     m_batteryCellBalancingCount = m_dataPoints.value("NCellBal").toUInt16();
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecLithiumIonBankModel::initDataPoints()
@@ -181,7 +183,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -191,7 +193,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint stringCountDataPoint;
@@ -202,7 +204,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     stringCountDataPoint.setSize(1);
     stringCountDataPoint.setAddressOffset(2);
     stringCountDataPoint.setBlockOffset(0);
-    stringCountDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    stringCountDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(stringCountDataPoint.name(), stringCountDataPoint);
 
     SunSpecDataPoint connectedStringCountDataPoint;
@@ -213,7 +215,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     connectedStringCountDataPoint.setSize(1);
     connectedStringCountDataPoint.setAddressOffset(3);
     connectedStringCountDataPoint.setBlockOffset(1);
-    connectedStringCountDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    connectedStringCountDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(connectedStringCountDataPoint.name(), connectedStringCountDataPoint);
 
     SunSpecDataPoint maxModuleTemperatureDataPoint;
@@ -225,7 +227,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     maxModuleTemperatureDataPoint.setAddressOffset(4);
     maxModuleTemperatureDataPoint.setBlockOffset(2);
     maxModuleTemperatureDataPoint.setScaleFactorName("ModTmp_SF");
-    maxModuleTemperatureDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    maxModuleTemperatureDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(maxModuleTemperatureDataPoint.name(), maxModuleTemperatureDataPoint);
 
     SunSpecDataPoint maxModuleTemperatureStringDataPoint;
@@ -235,7 +237,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     maxModuleTemperatureStringDataPoint.setSize(1);
     maxModuleTemperatureStringDataPoint.setAddressOffset(5);
     maxModuleTemperatureStringDataPoint.setBlockOffset(3);
-    maxModuleTemperatureStringDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    maxModuleTemperatureStringDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(maxModuleTemperatureStringDataPoint.name(), maxModuleTemperatureStringDataPoint);
 
     SunSpecDataPoint maxModuleTemperatureModuleDataPoint;
@@ -245,7 +247,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     maxModuleTemperatureModuleDataPoint.setSize(1);
     maxModuleTemperatureModuleDataPoint.setAddressOffset(6);
     maxModuleTemperatureModuleDataPoint.setBlockOffset(4);
-    maxModuleTemperatureModuleDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    maxModuleTemperatureModuleDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(maxModuleTemperatureModuleDataPoint.name(), maxModuleTemperatureModuleDataPoint);
 
     SunSpecDataPoint minModuleTemperatureDataPoint;
@@ -258,7 +260,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     minModuleTemperatureDataPoint.setAddressOffset(7);
     minModuleTemperatureDataPoint.setBlockOffset(5);
     minModuleTemperatureDataPoint.setScaleFactorName("ModTmp_SF");
-    minModuleTemperatureDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    minModuleTemperatureDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(minModuleTemperatureDataPoint.name(), minModuleTemperatureDataPoint);
 
     SunSpecDataPoint minModuleTemperatureStringDataPoint;
@@ -268,7 +270,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     minModuleTemperatureStringDataPoint.setSize(1);
     minModuleTemperatureStringDataPoint.setAddressOffset(8);
     minModuleTemperatureStringDataPoint.setBlockOffset(6);
-    minModuleTemperatureStringDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    minModuleTemperatureStringDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(minModuleTemperatureStringDataPoint.name(), minModuleTemperatureStringDataPoint);
 
     SunSpecDataPoint minModuleTemperatureModuleDataPoint;
@@ -278,7 +280,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     minModuleTemperatureModuleDataPoint.setSize(1);
     minModuleTemperatureModuleDataPoint.setAddressOffset(9);
     minModuleTemperatureModuleDataPoint.setBlockOffset(7);
-    minModuleTemperatureModuleDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    minModuleTemperatureModuleDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(minModuleTemperatureModuleDataPoint.name(), minModuleTemperatureModuleDataPoint);
 
     SunSpecDataPoint averageModuleTemperatureDataPoint;
@@ -288,7 +290,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     averageModuleTemperatureDataPoint.setSize(1);
     averageModuleTemperatureDataPoint.setAddressOffset(10);
     averageModuleTemperatureDataPoint.setBlockOffset(8);
-    averageModuleTemperatureDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    averageModuleTemperatureDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(averageModuleTemperatureDataPoint.name(), averageModuleTemperatureDataPoint);
 
     SunSpecDataPoint maxStringVoltageDataPoint;
@@ -300,7 +302,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     maxStringVoltageDataPoint.setAddressOffset(11);
     maxStringVoltageDataPoint.setBlockOffset(9);
     maxStringVoltageDataPoint.setScaleFactorName("V_SF");
-    maxStringVoltageDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    maxStringVoltageDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(maxStringVoltageDataPoint.name(), maxStringVoltageDataPoint);
 
     SunSpecDataPoint maxStringVoltageStringDataPoint;
@@ -310,7 +312,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     maxStringVoltageStringDataPoint.setSize(1);
     maxStringVoltageStringDataPoint.setAddressOffset(12);
     maxStringVoltageStringDataPoint.setBlockOffset(10);
-    maxStringVoltageStringDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    maxStringVoltageStringDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(maxStringVoltageStringDataPoint.name(), maxStringVoltageStringDataPoint);
 
     SunSpecDataPoint minStringVoltageDataPoint;
@@ -322,7 +324,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     minStringVoltageDataPoint.setAddressOffset(13);
     minStringVoltageDataPoint.setBlockOffset(11);
     minStringVoltageDataPoint.setScaleFactorName("V_SF");
-    minStringVoltageDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    minStringVoltageDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(minStringVoltageDataPoint.name(), minStringVoltageDataPoint);
 
     SunSpecDataPoint minStringVoltageStringDataPoint;
@@ -332,7 +334,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     minStringVoltageStringDataPoint.setSize(1);
     minStringVoltageStringDataPoint.setAddressOffset(14);
     minStringVoltageStringDataPoint.setBlockOffset(12);
-    minStringVoltageStringDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    minStringVoltageStringDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(minStringVoltageStringDataPoint.name(), minStringVoltageStringDataPoint);
 
     SunSpecDataPoint averageStringVoltageDataPoint;
@@ -344,7 +346,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     averageStringVoltageDataPoint.setAddressOffset(15);
     averageStringVoltageDataPoint.setBlockOffset(13);
     averageStringVoltageDataPoint.setScaleFactorName("V_SF");
-    averageStringVoltageDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    averageStringVoltageDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(averageStringVoltageDataPoint.name(), averageStringVoltageDataPoint);
 
     SunSpecDataPoint maxStringCurrentDataPoint;
@@ -356,7 +358,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     maxStringCurrentDataPoint.setAddressOffset(16);
     maxStringCurrentDataPoint.setBlockOffset(14);
     maxStringCurrentDataPoint.setScaleFactorName("A_SF");
-    maxStringCurrentDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    maxStringCurrentDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(maxStringCurrentDataPoint.name(), maxStringCurrentDataPoint);
 
     SunSpecDataPoint maxStringCurrentStringDataPoint;
@@ -366,7 +368,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     maxStringCurrentStringDataPoint.setSize(1);
     maxStringCurrentStringDataPoint.setAddressOffset(17);
     maxStringCurrentStringDataPoint.setBlockOffset(15);
-    maxStringCurrentStringDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    maxStringCurrentStringDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(maxStringCurrentStringDataPoint.name(), maxStringCurrentStringDataPoint);
 
     SunSpecDataPoint minStringCurrentDataPoint;
@@ -378,7 +380,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     minStringCurrentDataPoint.setAddressOffset(18);
     minStringCurrentDataPoint.setBlockOffset(16);
     minStringCurrentDataPoint.setScaleFactorName("A_SF");
-    minStringCurrentDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    minStringCurrentDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(minStringCurrentDataPoint.name(), minStringCurrentDataPoint);
 
     SunSpecDataPoint minStringCurrentStringDataPoint;
@@ -388,7 +390,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     minStringCurrentStringDataPoint.setSize(1);
     minStringCurrentStringDataPoint.setAddressOffset(19);
     minStringCurrentStringDataPoint.setBlockOffset(17);
-    minStringCurrentStringDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    minStringCurrentStringDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(minStringCurrentStringDataPoint.name(), minStringCurrentStringDataPoint);
 
     SunSpecDataPoint averageStringCurrentDataPoint;
@@ -400,7 +402,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     averageStringCurrentDataPoint.setAddressOffset(20);
     averageStringCurrentDataPoint.setBlockOffset(18);
     averageStringCurrentDataPoint.setScaleFactorName("A_SF");
-    averageStringCurrentDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    averageStringCurrentDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(averageStringCurrentDataPoint.name(), averageStringCurrentDataPoint);
 
     SunSpecDataPoint batteryCellBalancingCountDataPoint;
@@ -410,7 +412,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     batteryCellBalancingCountDataPoint.setSize(1);
     batteryCellBalancingCountDataPoint.setAddressOffset(21);
     batteryCellBalancingCountDataPoint.setBlockOffset(19);
-    batteryCellBalancingCountDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    batteryCellBalancingCountDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(batteryCellBalancingCountDataPoint.name(), batteryCellBalancingCountDataPoint);
 
     SunSpecDataPoint cellV_SFDataPoint;
@@ -420,7 +422,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     cellV_SFDataPoint.setSize(1);
     cellV_SFDataPoint.setAddressOffset(22);
     cellV_SFDataPoint.setBlockOffset(20);
-    cellV_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    cellV_SFDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(cellV_SFDataPoint.name(), cellV_SFDataPoint);
 
     SunSpecDataPoint modTmp_SFDataPoint;
@@ -430,7 +432,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     modTmp_SFDataPoint.setSize(1);
     modTmp_SFDataPoint.setAddressOffset(23);
     modTmp_SFDataPoint.setBlockOffset(21);
-    modTmp_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    modTmp_SFDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(modTmp_SFDataPoint.name(), modTmp_SFDataPoint);
 
     SunSpecDataPoint a_SFDataPoint;
@@ -440,7 +442,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     a_SFDataPoint.setSize(1);
     a_SFDataPoint.setAddressOffset(24);
     a_SFDataPoint.setBlockOffset(22);
-    a_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    a_SFDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(a_SFDataPoint.name(), a_SFDataPoint);
 
     SunSpecDataPoint soH_SFDataPoint;
@@ -449,7 +451,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     soH_SFDataPoint.setSize(1);
     soH_SFDataPoint.setAddressOffset(25);
     soH_SFDataPoint.setBlockOffset(23);
-    soH_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    soH_SFDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(soH_SFDataPoint.name(), soH_SFDataPoint);
 
     SunSpecDataPoint soC_SFDataPoint;
@@ -459,7 +461,7 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     soC_SFDataPoint.setSize(1);
     soC_SFDataPoint.setAddressOffset(26);
     soC_SFDataPoint.setBlockOffset(24);
-    soC_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    soC_SFDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(soC_SFDataPoint.name(), soC_SFDataPoint);
 
     SunSpecDataPoint v_SFDataPoint;
@@ -468,8 +470,134 @@ void SunSpecLithiumIonBankModel::initDataPoints()
     v_SFDataPoint.setSize(1);
     v_SFDataPoint.setAddressOffset(27);
     v_SFDataPoint.setBlockOffset(25);
-    v_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    v_SFDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(v_SFDataPoint.name(), v_SFDataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecLithiumIonBankModel *model)
+{
+    debug.nospace().noquote() << "SunSpecLithiumIonBankModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    if (model->dataPoints().value("NStr").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("NStr") << "--> " << model->stringCount() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("NStr") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("NStrCon").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("NStrCon") << "--> " << model->connectedStringCount() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("NStrCon") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ModTmpMax").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMax") << "--> " << model->maxModuleTemperature() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMax") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ModTmpMaxStr").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMaxStr") << "--> " << model->maxModuleTemperatureString() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMaxStr") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ModTmpMaxMod").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMaxMod") << "--> " << model->maxModuleTemperatureModule() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMaxMod") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ModTmpMin").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMin") << "--> " << model->minModuleTemperature() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMin") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ModTmpMinStr").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMinStr") << "--> " << model->minModuleTemperatureString() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMinStr") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ModTmpMinMod").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMinMod") << "--> " << model->minModuleTemperatureModule() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMinMod") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("ModTmpAvg").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpAvg") << "--> " << model->averageModuleTemperature() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpAvg") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("StrVMax").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVMax") << "--> " << model->maxStringVoltage() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVMax") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("StrVMaxStr").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVMaxStr") << "--> " << model->maxStringVoltageString() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVMaxStr") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("StrVMin").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVMin") << "--> " << model->minStringVoltage() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVMin") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("StrVMinStr").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVMinStr") << "--> " << model->minStringVoltageString() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVMinStr") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("StrVAvg").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVAvg") << "--> " << model->averageStringVoltage() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVAvg") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("StrAMax").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAMax") << "--> " << model->maxStringCurrent() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAMax") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("StrAMaxStr").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAMaxStr") << "--> " << model->maxStringCurrentString() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAMaxStr") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("StrAMin").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAMin") << "--> " << model->minStringCurrent() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAMin") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("StrAMinStr").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAMinStr") << "--> " << model->minStringCurrentString() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAMinStr") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("StrAAvg").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAAvg") << "--> " << model->averageStringCurrent() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAAvg") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("NCellBal").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("NCellBal") << "--> " << model->batteryCellBalancingCount() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("NCellBal") << "--> NaN" << endl;
+    }
+
+
+    return debug.space().quote();
+}

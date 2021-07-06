@@ -102,4 +102,6 @@ private:
 
 };
 
+QDebug operator<<(QDebug debug, SunSpecPricingModel *model);
+
 #endif // SUNSPECPRICINGMODEL_H

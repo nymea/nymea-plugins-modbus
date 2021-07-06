@@ -33,6 +33,7 @@
 
 #include <QObject>
 #include <QVector>
+#include <QDebug>
 
 class SunSpecDataPoint
 {
@@ -101,6 +102,9 @@ public:
     quint16 blockOffset() const;
     void setBlockOffset(quint16 blockOffset);
 
+    QString sunSpecDataType() const;
+    void setSunSpecDataType(const QString &sunSpecDataType);
+
     DataType dataType() const;
     void setDataType(DataType dataType);
 
@@ -129,6 +133,8 @@ public:
     float toFloatWithSSF(qint16 scaleFactor) const;
     double toDouble() const;
 
+    static QString registersToString(const QVector<quint16> &registers);
+
     static QVector<quint16> convertFromUInt16(quint16 value);
     static QVector<quint16> convertFromInt16(qint16 value);
     static QVector<quint16> convertFromUInt32(quint32 value);
@@ -144,11 +150,15 @@ private:
     Access m_access = AccessReadOnly;
     quint16 m_addressOffset = 0;
     quint16 m_blockOffset = 0;
+    QString m_sunSpecDataType = "uint16";
     DataType m_dataType = DataType::UInt16;
     int m_size = 1;
     QString m_scaleFactorName;
 
     QVector<quint16> m_rawData;
 };
+
+QDebug operator<<(QDebug debug, const SunSpecDataPoint &dataPoint);
+
 
 #endif // SUNSPECDATAPOINT_H

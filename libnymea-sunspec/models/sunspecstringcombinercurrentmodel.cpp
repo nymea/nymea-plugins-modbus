@@ -32,9 +32,9 @@
 #include "sunspecconnection.h"
 
 SunSpecStringCombinerCurrentModel::SunSpecStringCombinerCurrentModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, 403, 16, modbusStartRegister, parent)
+    SunSpecModel(connection, modbusStartRegister, 403, 16, parent)
 {
-    Q_ASSERT_X(length == 16,  "SunSpecStringCombinerCurrentModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
+    //Q_ASSERT_X(length == 16,  "SunSpecStringCombinerCurrentModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
     Q_UNUSED(length)
     initDataPoints();
 }
@@ -109,6 +109,8 @@ void SunSpecStringCombinerCurrentModel::processBlockData()
     m_ampHours = m_dataPoints.value("DCAhr").toFloatWithSSF(m_dCAhr_SF);
     m_voltage = m_dataPoints.value("DCV").toFloatWithSSF(m_dCV_SF);
     m_temp = m_dataPoints.value("Tmp").toInt16();
+
+    qCDebug(dcSunSpec()) << this;
 }
 
 void SunSpecStringCombinerCurrentModel::initDataPoints()
@@ -120,7 +122,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     modelIdDataPoint.setMandatory(true);
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
-    modelIdDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelIdDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -130,7 +132,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     modelLengthDataPoint.setMandatory(true);
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
-    modelLengthDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    modelLengthDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint dCA_SFDataPoint;
@@ -140,7 +142,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     dCA_SFDataPoint.setSize(1);
     dCA_SFDataPoint.setAddressOffset(2);
     dCA_SFDataPoint.setBlockOffset(0);
-    dCA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    dCA_SFDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(dCA_SFDataPoint.name(), dCA_SFDataPoint);
 
     SunSpecDataPoint dCAhr_SFDataPoint;
@@ -149,7 +151,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     dCAhr_SFDataPoint.setSize(1);
     dCAhr_SFDataPoint.setAddressOffset(3);
     dCAhr_SFDataPoint.setBlockOffset(1);
-    dCAhr_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    dCAhr_SFDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(dCAhr_SFDataPoint.name(), dCAhr_SFDataPoint);
 
     SunSpecDataPoint dCV_SFDataPoint;
@@ -158,7 +160,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     dCV_SFDataPoint.setSize(1);
     dCV_SFDataPoint.setAddressOffset(4);
     dCV_SFDataPoint.setBlockOffset(2);
-    dCV_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    dCV_SFDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(dCV_SFDataPoint.name(), dCV_SFDataPoint);
 
     SunSpecDataPoint ratingDataPoint;
@@ -171,7 +173,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     ratingDataPoint.setAddressOffset(5);
     ratingDataPoint.setBlockOffset(3);
     ratingDataPoint.setScaleFactorName("DCA_SF");
-    ratingDataPoint.setDataType(SunSpecDataPoint::stringToDataType("uint16"));
+    ratingDataPoint.setSunSpecDataType("uint16");
     m_dataPoints.insert(ratingDataPoint.name(), ratingDataPoint);
 
     SunSpecDataPoint nDataPoint;
@@ -182,7 +184,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     nDataPoint.setSize(1);
     nDataPoint.setAddressOffset(6);
     nDataPoint.setBlockOffset(4);
-    nDataPoint.setDataType(SunSpecDataPoint::stringToDataType("count"));
+    nDataPoint.setSunSpecDataType("count");
     m_dataPoints.insert(nDataPoint.name(), nDataPoint);
 
     SunSpecDataPoint eventFlagsDataPoint;
@@ -193,7 +195,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     eventFlagsDataPoint.setSize(2);
     eventFlagsDataPoint.setAddressOffset(7);
     eventFlagsDataPoint.setBlockOffset(5);
-    eventFlagsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
+    eventFlagsDataPoint.setSunSpecDataType("bitfield32");
     m_dataPoints.insert(eventFlagsDataPoint.name(), eventFlagsDataPoint);
 
     SunSpecDataPoint vendorEventDataPoint;
@@ -203,7 +205,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     vendorEventDataPoint.setSize(2);
     vendorEventDataPoint.setAddressOffset(9);
     vendorEventDataPoint.setBlockOffset(7);
-    vendorEventDataPoint.setDataType(SunSpecDataPoint::stringToDataType("bitfield32"));
+    vendorEventDataPoint.setSunSpecDataType("bitfield32");
     m_dataPoints.insert(vendorEventDataPoint.name(), vendorEventDataPoint);
 
     SunSpecDataPoint ampsDataPoint;
@@ -216,7 +218,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     ampsDataPoint.setAddressOffset(11);
     ampsDataPoint.setBlockOffset(9);
     ampsDataPoint.setScaleFactorName("DCA_SF");
-    ampsDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    ampsDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
     SunSpecDataPoint ampHoursDataPoint;
@@ -228,7 +230,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     ampHoursDataPoint.setAddressOffset(12);
     ampHoursDataPoint.setBlockOffset(10);
     ampHoursDataPoint.setScaleFactorName("DCAhr_SF");
-    ampHoursDataPoint.setDataType(SunSpecDataPoint::stringToDataType("acc32"));
+    ampHoursDataPoint.setSunSpecDataType("acc32");
     m_dataPoints.insert(ampHoursDataPoint.name(), ampHoursDataPoint);
 
     SunSpecDataPoint voltageDataPoint;
@@ -240,7 +242,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     voltageDataPoint.setAddressOffset(14);
     voltageDataPoint.setBlockOffset(12);
     voltageDataPoint.setScaleFactorName("DCV_SF");
-    voltageDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    voltageDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(voltageDataPoint.name(), voltageDataPoint);
 
     SunSpecDataPoint tempDataPoint;
@@ -251,7 +253,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     tempDataPoint.setSize(1);
     tempDataPoint.setAddressOffset(15);
     tempDataPoint.setBlockOffset(13);
-    tempDataPoint.setDataType(SunSpecDataPoint::stringToDataType("int16"));
+    tempDataPoint.setSunSpecDataType("int16");
     m_dataPoints.insert(tempDataPoint.name(), tempDataPoint);
 
     SunSpecDataPoint inDCA_SFDataPoint;
@@ -260,7 +262,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     inDCA_SFDataPoint.setSize(1);
     inDCA_SFDataPoint.setAddressOffset(16);
     inDCA_SFDataPoint.setBlockOffset(14);
-    inDCA_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    inDCA_SFDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(inDCA_SFDataPoint.name(), inDCA_SFDataPoint);
 
     SunSpecDataPoint inDCAhr_SFDataPoint;
@@ -269,8 +271,62 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     inDCAhr_SFDataPoint.setSize(1);
     inDCAhr_SFDataPoint.setAddressOffset(17);
     inDCAhr_SFDataPoint.setBlockOffset(15);
-    inDCAhr_SFDataPoint.setDataType(SunSpecDataPoint::stringToDataType("sunssf"));
+    inDCAhr_SFDataPoint.setSunSpecDataType("sunssf");
     m_dataPoints.insert(inDCAhr_SFDataPoint.name(), inDCAhr_SFDataPoint);
 
 }
 
+QDebug operator<<(QDebug debug, SunSpecStringCombinerCurrentModel *model)
+{
+    debug.nospace().noquote() << "SunSpecStringCombinerCurrentModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    if (model->dataPoints().value("DCAMax").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DCAMax") << "--> " << model->rating() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DCAMax") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("N").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("N") << "--> " << model->n() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("N") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Evt").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt") << "--> " << model->eventFlags() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("EvtVnd").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd") << "--> " << model->vendorEvent() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("DCA").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DCA") << "--> " << model->amps() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DCA") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("DCAhr").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DCAhr") << "--> " << model->ampHours() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DCAhr") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("DCV").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DCV") << "--> " << model->voltage() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("DCV") << "--> NaN" << endl;
+    }
+
+    if (model->dataPoints().value("Tmp").isValid()) {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Tmp") << "--> " << model->temp() << endl;
+    } else {
+        debug.nospace().noquote() << "    - " << model->dataPoints().value("Tmp") << "--> NaN" << endl;
+    }
+
+
+    return debug.space().quote();
+}

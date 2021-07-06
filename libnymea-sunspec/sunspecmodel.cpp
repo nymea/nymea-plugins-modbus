@@ -1,12 +1,12 @@
 #include "sunspecmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecModel::SunSpecModel(SunSpecConnection *connection, quint16 modelId, quint16 modelLength, quint16 modbusStartRegister, QObject *parent) :
+SunSpecModel::SunSpecModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelId, quint16 modelLength, QObject *parent) :
     QObject(parent),
     m_connection(connection),
+    m_modbusStartRegister(modbusStartRegister),
     m_modelId(modelId),
-    m_modelLength(modelLength),
-    m_modbusStartRegister(modbusStartRegister)
+    m_modelLength(modelLength)
 {
     m_initTimer.setSingleShot(true);
     m_initTimer.setInterval(10000);
@@ -37,6 +37,11 @@ quint16 SunSpecModel::modbusStartRegister() const
     return m_modbusStartRegister;
 }
 
+QHash<QString, SunSpecDataPoint> SunSpecModel::dataPoints() const
+{
+    return m_dataPoints;
+}
+
 QVector<quint16> SunSpecModel::blockData() const
 {
     return m_blockData;
@@ -52,7 +57,7 @@ void SunSpecModel::init()
 void SunSpecModel::readBlockData()
 {
     // Read the block data, start register + 2 header reisters (id, length)
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + 2, m_modelLength);
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister, m_modelLength + 2);
     if (QModbusReply *reply = m_connection->modbusTcpClient()->sendReadRequest(request, m_connection->slaveId())) {
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
@@ -63,18 +68,20 @@ void SunSpecModel::readBlockData()
                 }
 
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcSunSpec()) << name() << description() << "Received block data" << m_modbusStartRegister << unit.values().count();
+                qCDebug(dcSunSpec()) << "-->" << "Received block data" << this << unit.values().count();
                 m_blockData = unit.values();
                 emit blockDataChanged(m_blockData);
 
-                if (m_blockData.count() != m_modelLength) {
+                if (m_blockData.count() != m_modelLength + 2) {
                     qCWarning(dcSunSpec()) << "Received invalid block data count from read block data request. Model lenght:" << m_modelLength << "Response block count:" << m_blockData.count();
                     return;
                 }
 
                 // Fill the data points
                 foreach (const QString &dataPointName, m_dataPoints.keys()) {
-                    m_dataPoints[dataPointName].setRawData(m_blockData.mid(m_dataPoints[dataPointName].addressOffset(), m_dataPoints[dataPointName].size()));
+                    QVector<quint16> rawData = m_blockData.mid(m_dataPoints[dataPointName].addressOffset(), m_dataPoints[dataPointName].size());
+                    m_dataPoints[dataPointName].setRawData(rawData);
+                    qCDebug(dcSunSpec()) << "Set raw data:" << m_dataPoints[dataPointName] << SunSpecDataPoint::registersToString(rawData) << (m_dataPoints[dataPointName].isValid() ? "Valid" : "Invalid");
                 }
 
                 // Fill the private member data using the data points
@@ -103,6 +110,14 @@ void SunSpecModel::readBlockData()
     }
 }
 
+bool SunSpecModel::operator ==(const SunSpecModel &other) const
+{
+    return m_connection == other.connection() &&
+            m_modbusStartRegister == other.modbusStartRegister() &&
+            m_modelId == other.modelId() &&
+            m_modelLength == other.modelLength();
+}
+
 void SunSpecModel::setInitializedFinished()
 {
     if (!m_initialized) {
@@ -114,6 +129,6 @@ void SunSpecModel::setInitializedFinished()
 
 QDebug operator<<(QDebug debug, SunSpecModel *model)
 {
-    debug.nospace().noquote() << "SunSpecModel(" << model->modelId() << ", " << model->name() << ", " << model->label() << ")";
+    debug.nospace().noquote() << "SunSpecModel(Model: " << model->modelId() << ", " << model->name() << ", " << model->label() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")";
     return debug.space().quote();
 }
