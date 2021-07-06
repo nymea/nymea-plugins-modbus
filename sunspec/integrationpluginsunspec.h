@@ -60,9 +60,22 @@ public:
     void executeAction(ThingActionInfo *info) override;
 
 private:
+    // SunSpec Connection params map
+    QHash<ThingClassId, ParamTypeId> m_connectionIpParamTypeIds;
+    QHash<ThingClassId, ParamTypeId> m_connectionPortParamTypeIds;
+    QHash<ThingClassId, ParamTypeId> m_connectionMacAddressParamTypeIds;
+    QHash<ThingClassId, ParamTypeId> m_connectionSlaveIdParamTypeIds;
+
+    // SunSpec Connection states map
+    QHash<ThingClassId, StateTypeId> m_connectionManufacturerStateTypeIds;
+    QHash<ThingClassId, StateTypeId> m_connectionDeviceModelStateTypeIds;
+    QHash<ThingClassId, StateTypeId> m_connectionSerialNumberStateTypeIds;
+
+    // SunSpec thing params map
     QHash<ThingClassId, ParamTypeId> m_modelIdParamTypeIds;
     QHash<ThingClassId, ParamTypeId> m_modbusAddressParamTypeIds;
 
+    // Thing state maps
     QHash<ThingClassId, StateTypeId> m_connectedStateTypeIds;
     QHash<ThingClassId, StateTypeId> m_frequencyStateTypeIds;
 
@@ -81,7 +94,9 @@ private:
     QHash<Thing *, SunSpecStorage *> m_sunSpecStorages;
     QHash<Thing *, SunSpecMeter *> m_sunSpecMeters;
 
-    bool checkIfThingExists(uint modelId, uint modbusAddress);
+    bool sunspecThingAlreadyAdded(uint modelId, uint modbusAddress, const ThingId &parentId);
+
+    void processDiscoveryResult(Thing *thing, SunSpecConnection *connection);
 
     void setupInverter(ThingSetupInfo *info);
     void setupMeter(ThingSetupInfo *info);

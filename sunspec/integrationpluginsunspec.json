@@ -57,6 +57,13 @@
                             "defaultValue": 502
                         },
                         {
+                            "id": "f65d6c36-1672-44cb-b52a-62d71837ae67",
+                            "name":"macAddress",
+                            "displayName": "MAC address",
+                            "type": "QString",
+                            "defaultValue": ""
+                        },
+                        {
                             "id": "953064e0-4675-4538-a9a2-fa22ce2f347c",
                             "name":"slaveId",
                             "displayName": "Slave ID",
@@ -1068,6 +1075,85 @@
                             "defaultValue": false,
                             "writable": true,
                             "displayNameAction": "Set discharging rate"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "solarEdge",
+            "displayName": "SolarEdge",
+            "id": "addd7dd8-13e1-405b-ba61-b2d82eaf0426",
+            "thingClasses": [
+                {
+                    "name": "solarEdgeConnection",
+                    "displayName": "SolarEdge connection",
+                    "id": "7a92bf65-b443-4491-a012-2bec35eb5bf0",
+                    "createMethods": [ "User", "Discovery" ],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                        {
+                            "id": "94f6ba3c-6b8b-47a9-a5cb-73a091ae4cf7",
+                            "name":"ipAddress",
+                            "displayName": "IP address",
+                            "type": "QString",
+                            "defaultValue": "127.0.0.1"
+                        },
+                        {
+                            "id": "bb395c12-54d6-4139-b0a6-e31b28bc4d2e",
+                            "name":"macAddress",
+                            "displayName": "MAC address",
+                            "type": "QString",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "1bcede48-d167-4ced-8f1b-bea6302dd43f",
+                            "name":"port",
+                            "displayName": "Port",
+                            "type": "int",
+                            "defaultValue": 502
+                        },
+                        {
+                            "id": "b9cc58cf-ad15-447a-a94d-17b9204313bc",
+                            "name":"slaveId",
+                            "displayName": "Slave ID",
+                            "type": "int",
+                            "defaultValue": 1
+                        }
+                    ],
+                    "stateTypes":[
+                        {
+                            "id": "f51d4e5a-24ea-41f9-a453-d2bdd68d804c",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "3f783971-ba6f-498d-8e31-1ecfc6efa0a3",
+                            "name":"manufacturer",
+                            "displayName": "Manufacturer",
+                            "displayNameEvent": "Manufacturer changed",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "ce075b2c-12c8-4279-99ef-7ba39aba4d53",
+                            "name":"deviceModel",
+                            "displayName": "Device model",
+                            "displayNameEvent": "Device model changed",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "a71286ed-1851-4324-bd72-567696c2aebb",
+                            "name":"serialNumber",
+                            "displayName": "Serial number",
+                            "displayNameEvent": "Serial number changed",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
                         }
                     ]
                 }
