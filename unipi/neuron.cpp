@@ -285,6 +285,12 @@ bool Neuron::loadModbusMap()
                 } else if (list[5].contains("Analog Output Value", Qt::CaseSensitivity::CaseInsensitive)) {
                     m_modbusAnalogOutputRegisters.insert(modbusAddress, registerDescriptorFromStringList(list));
                     qDebug(dcUniPi()) << "Neuron: Found analog output register" << modbusAddress;
+                } else if (list[5].contains("Analog Output Configuration", Qt::CaseSensitivity::CaseInsensitive)) {
+                    m_modbusAnalogOutputConfigurationRegisters.insert(list[5].split(" ").last(), modbusAddress);
+                    qDebug(dcUniPi()) << "Neuron: Found analog output configuration register" << list[5].split(" ").last() << modbusAddress;
+                } else if (list[5].contains("Analog Input Configuration", Qt::CaseSensitivity::CaseInsensitive)) {
+                    m_modbusAnalogInputConfigurationRegisters.insert(list[5].split(" ").last(), modbusAddress);
+                    qDebug(dcUniPi()) << "Neuron: Found analog input configuration register" << list[5].split(" ").last() << modbusAddress;
                 }
             }
         }

@@ -32,7 +32,9 @@
 #define INTEGRATIONPLUGINUNIPI_H
 
 #include "integrations/integrationplugin.h"
+#include "hardware/modbus/modbusrtumaster.h"
 #include "plugintimer.h"
+
 #include "unipi.h"
 #include "neuron.h"
 #include "neuronextension.h"
@@ -62,18 +64,17 @@ public:
 
 private:
     UniPi *m_unipi = nullptr;
-    QHash<ThingId, Neuron *> m_neurons;
+    Neuron *m_neuron = nullptr;
     QHash<ThingId, NeuronExtension *> m_neuronExtensions;
-    QModbusTcpClient *m_modbusTCPMaster = nullptr;
-    QModbusRtuSerialMaster *m_modbusRTUMaster = nullptr;
 
-    QHash<Thing *, QTimer *> m_unlatchTimer;
+    QModbusTcpClient *m_modbusTCPMaster = nullptr;
+    QHash<Thing *, ModbusRtuMaster *> m_modbusRtuMasters;
+
     QTimer *m_reconnectTimer = nullptr;
     QHash<QUuid, ThingActionInfo *> m_asyncActions;
     QHash<ThingClassId, StateTypeId> m_connectionStateTypeIds;
-
-    bool neuronDeviceInit();
-    bool neuronExtensionInterfaceInit();
+    QHash<ThingClassId, QString> m_neuronMigration;
+    QHash<ThingClassId, QString> m_neuronExtensionMigration;
 
 private slots:
     void onPluginConfigurationChanged(const ParamTypeId &paramTypeId, const QVariant &value);

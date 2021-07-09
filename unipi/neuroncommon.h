@@ -34,11 +34,41 @@
 #include <QObject>
 #include <QtSerialBus>
 
+#include "hardware/modbus/modbusrtumaster.h"
+
 class NeuronCommon : public QObject
 {
     Q_OBJECT
 public:
+
+    enum ModbusType {
+      ModbusTypeTcp,
+        ModbusTypeRtu
+    };
+
+    enum AnalogIOConfiguration {
+        Voltage,
+        Current,
+        Resistance
+    };
+    Q_ENUM(AnalogIOConfiguration)
+
+    struct DeviceInformation {
+        int firmwareVersion;
+        int numberOfDIs;
+        int numberOfDOs;
+        int numberOfPeripherals;
+        int numberOfInternalRS485Lines;
+        int numberOfAOs;
+        int numberOfAIs;
+        int firmwareId;
+        int hardwareId;
+        int serialNumber;
+    };
+
     explicit NeuronCommon(QModbusClient *modbusInterface, int slaveAddress, QObject *parent = nullptr);
+    explicit NeuronCommon(ModbusRtuMaster *modbusInterface, int slaveAddress, QObject *parent = nullptr);
+
     bool init();
     int slaveAddress();
     void setSlaveAddress(int slaveAddress);
@@ -52,6 +82,11 @@ public:
     QUuid setDigitalOutput(const QString &circuit, bool value);
     QUuid setAnalogOutput(const QString &circuit, double value);
     QUuid setUserLED(const QString &circuit, bool value);
+
+    QUuid setAnalogOutputConfiguration(const QString &circuit, AnalogIOConfiguration value);
+    QUuid setAnalogInputConfiguration(const QString &circuit, AnalogIOConfiguration value);
+
+    bool getDeviceInformation();
 
     bool getDigitalOutput(const QString &circuit);
     bool getDigitalInput(const QString &circuit);
@@ -91,6 +126,8 @@ protected:
     QHash<QString, int> m_modbusUserLEDRegisters;
     QHash<int, RegisterDescriptor> m_modbusAnalogInputRegisters;
     QHash<int, RegisterDescriptor> m_modbusAnalogOutputRegisters;
+    QHash<QString, int> m_modbusAnalogOutputConfigurationRegisters;
+    QHash<QString, int> m_modbusAnalogInputConfigurationRegisters;
 
 private:
     struct Request {
@@ -100,7 +137,9 @@ private:
 
     int m_slaveAddress = 0;
     uint m_responseTimeoutTime = 2000;
-    QModbusClient *m_modbusInterface = nullptr;
+    ModbusType m_modbusType;
+    QModbusClient *m_modbusTcpInterface = nullptr;
+    ModbusRtuMaster *m_modbusRtuInterface = nullptr;
 
     QTimer *m_inputPollingTimer = nullptr;
     QTimer *m_outputPollingTimer = nullptr;
@@ -110,13 +149,22 @@ private:
 
     QHash<QString, uint16_t> m_previousCircuitValue;
 
+    void initTimers();
+
     bool circuitValueChanged(const QString &circuit, quint32 value);
     bool getAnalogIO(const RegisterDescriptor &descriptor);
-    bool modbusReadRequest(const QModbusDataUnit &request);
-    bool modbusWriteRequest(const Request &request);
+
+    bool readRequest(const QModbusDataUnit &request);
+    bool sendModbusReadRequest(const QModbusDataUnit &request);
+    void readRequestReceived(const QVector<uint16_t> &data, int startAddress, QModbusDataUnit::RegisterType registerType);
+
+    bool writeRequest(const Request &request);
+    bool sendModbusWriteRequest(const Request &request);
+    void writeRequestReceived(const QVector<uint16_t> &data, int startAddress, QModbusDataUnit::RegisterType registerType);
     void getCoils(QList<int> registers);
 
 signals:
+    void deviceInformationReceived(DeviceInformation info);
     void requestExecuted(const QUuid &requestId, bool success);
     void requestError(const QUuid &requestId, const QString &error);
     void digitalInputStatusChanged(const QString &circuit, bool value);

@@ -32,6 +32,7 @@
 #define NEURONEXTENSION_H
 
 #include "neuroncommon.h"
+#include "hardware/modbus/modbusrtumaster.h"
 
 #include <QObject>
 #include <QHash>
@@ -50,16 +51,45 @@ public:
         xS40,
         xS50,
         xS11,
-        xS51
+        xS51,
+        Unknown
     };
     Q_ENUM(ExtensionTypes)
 
-    explicit NeuronExtension(ExtensionTypes extensionType, QModbusClient *modbusInterface, int slaveAddress, QObject *parent = nullptr);
+    explicit NeuronExtension(ExtensionTypes extensionType, ModbusRtuMaster *modbusInterface, int slaveAddress, QObject *parent = nullptr);
     ~NeuronExtension();
     QString type();
+    static QString stringFromType(ExtensionTypes extensionType);
 
 private:
     ExtensionTypes m_extensionType = ExtensionTypes::xS10;
     bool loadModbusMap() override;
+};
+
+
+class NeuronExtensionDiscovery : public QObject
+{
+    Q_OBJECT
+public:
+    NeuronExtensionDiscovery(ModbusRtuMaster *modbusRtuMaster, int startAddress = 1, int endAddress = 7);
+    void setModbusRtuMaster(ModbusRtuMaster *modbusRtuMaster);
+
+    bool startDiscovery();
+    void stopDiscovery();
+
+private:
+    ModbusRtuMaster *m_modbusRtuMaster;
+    QHash<int, NeuronExtension::ExtensionTypes> m_discoveredExtensions;
+
+    int m_startAddress;
+    int m_endAddress;
+    int m_sweepingAddress = 1;
+    bool m_discoveryOngoing = false;
+
+    void getNext(int address);
+
+signals:
+    void deviceFound(int address, NeuronExtension::ExtensionTypes model);
+    void finished(QHash<int, NeuronExtension::ExtensionTypes> devices);
 };
 #endif // NEURONEXTENSION_H

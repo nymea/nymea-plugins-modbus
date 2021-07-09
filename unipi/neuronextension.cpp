@@ -36,23 +36,26 @@
 #include <QModbusDataUnit>
 #include <QStandardPaths>
 
-NeuronExtension::NeuronExtension(ExtensionTypes extensionType, QModbusClient *modbusInterface, int slaveAddress, QObject *parent) :
+NeuronExtension::NeuronExtension(ExtensionTypes extensionType, ModbusRtuMaster *modbusInterface, int slaveAddress, QObject *parent) :
     NeuronCommon(modbusInterface, slaveAddress, parent),
     m_extensionType(extensionType)
 {
-    qCDebug(dcUniPi()) << "Neuron: Creating extension" << extensionType;
+    qCDebug(dcUniPi()) << "Neuron Extension: Creating extension" << extensionType;
 }
 
 NeuronExtension::~NeuronExtension()
 {
-    qCDebug(dcUniPi()) << "Neuron: Deleting extension" << m_extensionType;
+    qCDebug(dcUniPi()) << "Neuron Extension: Deleting extension" << m_extensionType;
 }
-
-
 
 QString NeuronExtension::type()
 {
-    switch(m_extensionType) {
+    return stringFromType(m_extensionType);
+}
+
+QString NeuronExtension::stringFromType(NeuronExtension::ExtensionTypes extensionType)
+{
+    switch(extensionType) {
     case ExtensionTypes::xS10:
         return "xS10";
     case ExtensionTypes::xS20:
@@ -101,6 +104,8 @@ bool NeuronExtension::loadModbusMap()
     case ExtensionTypes::xS51:
         fileCoilList.append(QString("/Extension_xS51/Extension_xS51-Coils-group-1.csv"));
         break;
+    case ExtensionTypes::Unknown:
+        return false;
     }
 
     foreach (QString relativeFilePath, fileCoilList) {
@@ -164,6 +169,8 @@ bool NeuronExtension::loadModbusMap()
     case ExtensionTypes::xS51:
         fileRegisterList.append(QString("/Extension_xS51/Extension_xS51-Registers-group-1.csv"));
         break;
+    case ExtensionTypes::Unknown:
+        return false;
     }
 
     foreach (QString relativeFilePath, fileRegisterList) {
@@ -204,4 +211,94 @@ bool NeuronExtension::loadModbusMap()
         csvFile->deleteLater();
     }
     return true;
+}
+
+NeuronExtensionDiscovery::NeuronExtensionDiscovery(ModbusRtuMaster *modbusRtuMaster, int startAddress, int endAddress) :
+    m_modbusRtuMaster(modbusRtuMaster),
+    m_startAddress(startAddress),
+    m_endAddress(endAddress)
+{
+}
+
+bool NeuronExtensionDiscovery::startDiscovery()
+{
+    qCDebug(dcUniPi()) << "NeuronExtensionDiscovery: start Discovery, start Address" << m_startAddress << "end address" << m_endAddress;
+    if (!m_modbusRtuMaster->connected()) {
+        qCDebug(dcUniPi()) << "NeuronExtensionDiscovery: Modbus RTU interface is not connected";
+        return false;
+    }
+
+    if (m_discoveryOngoing) {
+        qCDebug(dcUniPi()) << "NeuronExtensionDiscovery: Discovery is already in progress";
+        return false;
+    }
+    getNext(m_startAddress);
+
+    m_sweepingAddress = 1;
+    m_discoveredExtensions.clear();
+    m_discoveryOngoing = true;
+    return true;
+}
+
+void NeuronExtensionDiscovery::stopDiscovery()
+{
+    qCDebug(dcUniPi()) << "NeuronExtensionDiscovery: stopping discovery";
+    m_sweepingAddress = 1;
+    m_discoveryOngoing = false;
+}
+
+void NeuronExtensionDiscovery::getNext(int address)
+{
+    ModbusRtuReply *reply = m_modbusRtuMaster->readHoldingRegister(address, 1000, 7);
+    connect(reply, &ModbusRtuReply::finished, reply, &ModbusRtuReply::deleteLater);
+    connect(reply, &ModbusRtuReply::finished, this, [this, reply] {
+
+        if (reply->slaveAddress() == m_sweepingAddress) {
+            m_sweepingAddress = reply->slaveAddress()+1;
+        } else if (reply->slaveAddress() < m_sweepingAddress){
+            // A reply returns multiple finish signals depending on the retry
+            qCWarning(dcUniPi()) << "NeuronExtensionDiscovery: Got modbus reply from previous request, ignoring";
+            return;
+        }
+
+        QVector<quint16> result = reply->result();
+        if (result.length() == 7) {
+            qCDebug(dcUniPi()) << "NeuronExtensionDiscovery: Found Extension";
+            qCDebug(dcUniPi()) << "     - Serial port" << m_modbusRtuMaster->serialPort();
+            qCDebug(dcUniPi()) << "     - Modbus master uuid" << m_modbusRtuMaster->modbusUuid().toString();
+            qCDebug(dcUniPi()) << "     - Slave Address" << reply->slaveAddress();
+            qCDebug(dcUniPi()) << "     - Hardware Id" << result[4];
+            qCDebug(dcUniPi()) << "     - Serial number" << (static_cast<quint32>(result[6])<<16 | result[5]);
+
+            NeuronExtension::ExtensionTypes model;
+            if (result[4] == 1) {
+                model = NeuronExtension::ExtensionTypes::xS10;
+            } else if (result[4] == 2) {
+                model = NeuronExtension::ExtensionTypes::xS20;
+            } else if (result[4] == 3) {
+                model = NeuronExtension::ExtensionTypes::xS30;
+            } else if (result[4] == 4) {
+                model = NeuronExtension::ExtensionTypes::xS40;
+            } else if (result[4] == 5) {
+                model = NeuronExtension::ExtensionTypes::xS50;
+            } else if (result[4] == 272) {
+                model = NeuronExtension::ExtensionTypes::xS11;
+            } else if (result[4] == 273) {
+                model = NeuronExtension::ExtensionTypes::xS51;
+            } else {
+                model = NeuronExtension::ExtensionTypes::Unknown;
+            }
+            qCDebug(dcUniPi()) << "     - Model" << model;
+            emit deviceFound(reply->slaveAddress(), model);
+            m_discoveredExtensions.insert(reply->slaveAddress(), model);
+        }
+        if (reply->slaveAddress() >= m_endAddress) {
+            m_discoveryOngoing = false;
+            qCWarning(dcUniPi()) << "NeuronExtensionDiscovery: Discovery finished, found" << m_discoveredExtensions.count() << "devices";
+            emit finished(m_discoveredExtensions);
+        } else {
+            if (m_discoveryOngoing)
+                getNext(m_sweepingAddress);
+        }
+    });
 }
