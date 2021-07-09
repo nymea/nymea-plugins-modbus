@@ -1,7 +1,9 @@
-nymea-plugins-modbus (0.29.0) UNRELEASED; urgency=medium
+nymea-plugins-modbus (0.29.0) xenial; urgency=medium
 
+  [ Michael Zanetti ]
+  * Bump version to 0.29.0
 
- -- Michael Zanetti <michael.zanetti@nymea.io>  Fri, 09 Jul 2021 13:43:35 +0200
+ -- Jenkins <jenkins@nymea.io>  Fri, 09 Jul 2021 13:45:03 +0200
 
 nymea-plugins-modbus (0.24.5) xenial; urgency=medium
 
