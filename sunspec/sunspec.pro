@@ -3,7 +3,7 @@ include(../sunspec.pri)
 
 SOURCES += \
     integrationpluginsunspec.cpp \
-    solaredgebattery.cpp \
+    #solaredgebattery.cpp \
     sunspecinverter.cpp \
     sunspecmeter.cpp \
     sunspecstorage.cpp \
@@ -11,7 +11,7 @@ SOURCES += \
 
 HEADERS += \
     integrationpluginsunspec.h \
-    solaredgebattery.h \
+    #solaredgebattery.h \
     sunspecinverter.h \
     sunspecmeter.h \
     sunspecstorage.h \
