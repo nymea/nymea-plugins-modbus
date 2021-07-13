@@ -121,7 +121,7 @@ public:
 
     static DataType stringToDataType(const QString &typString);
 
-    // Convert to
+    // Convert to this data point type
     quint16 toUInt16() const;
     qint16 toInt16() const;
     quint32 toUInt32() const;
@@ -135,6 +135,15 @@ public:
     double toDouble() const;
 
     static QString registersToString(const QVector<quint16> &registers);
+
+    // Convert to
+    static quint16 convertToUInt16(const QVector<quint16> &registers);
+    static qint16 convertToInt16(const QVector<quint16> &registers);
+    static quint32 convertToUInt32(const QVector<quint16> &registers);
+    static qint32 convertToInt32(const QVector<quint16> &registers);
+    static quint64 convertToUInt64(const QVector<quint16> &registers);
+    static qint64 convertToInt64(const QVector<quint16> &registers);
+
 
     // Convert from
     static QVector<quint16> convertFromUInt16(quint16 value);
