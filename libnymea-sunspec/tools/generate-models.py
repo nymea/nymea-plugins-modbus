@@ -505,6 +505,22 @@ def getConvertionMethodFromSunspecType(dataPoint, scaleFactorProperty):
             return ('m_dataPoints.value("%s").toUInt64()' % dataPoint['name'])
 
 
+def getConvertionMethodToSunspecType(dataPoint, scaleFactorProperty):
+    typeString = dataPoint['type']
+    cppType = getCppType(dataPoint)
+    if typeString == 'uint16' or typeString == 'acc16' or typeString == 'pad' or typeString == 'raw16':
+    # If we have a scale factor set, this is gonna be a float value
+    if 'sf' in dataPoint:
+        # This is a float value with scale factor
+        if scaleFactorProperty == '':
+            return ('m_dataPoints.value("%s").toFloatWithSSF(%s)' % (dataPoint['name'], dataPoint['sf']))
+        else:
+            return ('m_dataPoints.value("%s").toFloatWithSSF(%s)' % (dataPoint['name'], scaleFactorProperty))
+    else:
+        return ('m_dataPoints.value("%s").toUInt16()' % dataPoint['name'])
+
+
+
 
 def addPropertiesMethodDeclaration(fileDescriptor, modelId):
     print('Write member get method declarations')
@@ -578,6 +594,18 @@ def addPropertiesMethodImplementation(fileDescriptor, className, modelId):
                 writeLine(fileDescriptor, 'QModbusReply *%s::set%s(%s %s)' % (className,convertToCamelCase(propertyName, True), getCppType(dataPoint), propertyName))
 
             writeLine(fileDescriptor, '{')
+            writeLine(fileDescriptor, '    if !m_initialized:')
+            writeLine(fileDescriptor, '        return nullptr;')
+            writeLine(fileDescriptor)
+
+            if 'sf' in dataPoint:
+                # Get the scale factor propery
+                scaleFactorProperty = ''
+                for dp in dataPoints:
+                    if dp['name'] == dataPoint['sf']:
+                        scaleFactorProperty = 'm_' + getPropertyName(dp)
+
+
             writeLine(fileDescriptor, '    Q_UNUSED(%s)' % propertyName)
             writeLine(fileDescriptor, '    return nullptr;')
             writeLine(fileDescriptor, '}')
@@ -621,9 +649,10 @@ def writeProcessDataImplementation(fileDescriptor, className, modelId):
         for dataPoint in dataPoints:
             if dataPoint['type'] == 'sunssf':
                 convertionMethod = getConvertionMethodFromSunspecType(dataPoint, '')
-
-                writeLine(fileDescriptor, '    m_%s = %s;' % (getPropertyName(dataPoint), convertionMethod))
-
+                writeLine(fileDescriptor, '    if (m_dataPoints.value("%s").isValid())' % (dataPoint['name']))
+                writeLine(fileDescriptor, '        m_%s = %s;' % (getPropertyName(dataPoint), convertionMethod))
+                writeLine(fileDescriptor)
+                
         writeLine(fileDescriptor)
     
     writeLine(fileDescriptor, '    // Update properties according to the data point type')
@@ -633,6 +662,8 @@ def writeProcessDataImplementation(fileDescriptor, className, modelId):
         if dataPoint['type'] == 'sunssf' or propertyName == 'modelId' or propertyName == 'modelLength':
             continue
 
+        writeLine(fileDescriptor, '    if (m_dataPoints.value("%s").isValid())' % (dataPoint['name']))
+
         if 'sf' in dataPoint:
             # Get the scale factor propery
             scaleFactorProperty = ''
@@ -641,13 +672,14 @@ def writeProcessDataImplementation(fileDescriptor, className, modelId):
                     scaleFactorProperty = 'm_' + getPropertyName(dp)
 
             convertionMethod = getConvertionMethodFromSunspecType(dataPoint, scaleFactorProperty)
-            writeLine(fileDescriptor, '    m_%s = %s;' % (getPropertyName(dataPoint), convertionMethod))
+            writeLine(fileDescriptor, '        m_%s = %s;' % (getPropertyName(dataPoint), convertionMethod))
         else:
             convertionMethod = getConvertionMethodFromSunspecType(dataPoint, '')
-            writeLine(fileDescriptor, '    m_%s = %s;' % (getPropertyName(dataPoint), convertionMethod))
-
+            writeLine(fileDescriptor, '        m_%s = %s;' % (getPropertyName(dataPoint), convertionMethod))
+        
+        writeLine(fileDescriptor)
     writeLine(fileDescriptor)
-    writeLine(fileDescriptor, '    qCDebug(dcSunSpec()) << this;')
+    writeLine(fileDescriptor, '    qCDebug(dcSunSpecModelData()) << this;')
 
 
 def writePropertyDebugLine(fileDescriptor, className, modelId):

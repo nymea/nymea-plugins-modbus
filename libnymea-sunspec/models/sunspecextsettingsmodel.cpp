@@ -132,16 +132,32 @@ QModbusReply *SunSpecExtSettingsModel::setDefaultRampRate(float defaultRampRate)
 void SunSpecExtSettingsModel::processBlockData()
 {
     // Scale factors
-    m_rampRateScaleFactor = m_dataPoints.value("Rmp_SF").toInt16();
+    if (m_dataPoints.value("Rmp_SF").isValid())
+        m_rampRateScaleFactor = m_dataPoints.value("Rmp_SF").toInt16();
+
 
     // Update properties according to the data point type
-    m_rampUpRate = m_dataPoints.value("NomRmpUpRte").toFloatWithSSF(m_rampRateScaleFactor);
-    m_nomRmpDnRte = m_dataPoints.value("NomRmpDnRte").toFloatWithSSF(m_rampRateScaleFactor);
-    m_emergencyRampUpRate = m_dataPoints.value("EmgRmpUpRte").toFloatWithSSF(m_rampRateScaleFactor);
-    m_emergencyRampDownRate = m_dataPoints.value("EmgRmpDnRte").toFloatWithSSF(m_rampRateScaleFactor);
-    m_connectRampUpRate = m_dataPoints.value("ConnRmpUpRte").toFloatWithSSF(m_rampRateScaleFactor);
-    m_connectRampDownRate = m_dataPoints.value("ConnRmpDnRte").toFloatWithSSF(m_rampRateScaleFactor);
-    m_defaultRampRate = m_dataPoints.value("AGra").toFloatWithSSF(m_rampRateScaleFactor);
+    if (m_dataPoints.value("NomRmpUpRte").isValid())
+        m_rampUpRate = m_dataPoints.value("NomRmpUpRte").toFloatWithSSF(m_rampRateScaleFactor);
+
+    if (m_dataPoints.value("NomRmpDnRte").isValid())
+        m_nomRmpDnRte = m_dataPoints.value("NomRmpDnRte").toFloatWithSSF(m_rampRateScaleFactor);
+
+    if (m_dataPoints.value("EmgRmpUpRte").isValid())
+        m_emergencyRampUpRate = m_dataPoints.value("EmgRmpUpRte").toFloatWithSSF(m_rampRateScaleFactor);
+
+    if (m_dataPoints.value("EmgRmpDnRte").isValid())
+        m_emergencyRampDownRate = m_dataPoints.value("EmgRmpDnRte").toFloatWithSSF(m_rampRateScaleFactor);
+
+    if (m_dataPoints.value("ConnRmpUpRte").isValid())
+        m_connectRampUpRate = m_dataPoints.value("ConnRmpUpRte").toFloatWithSSF(m_rampRateScaleFactor);
+
+    if (m_dataPoints.value("ConnRmpDnRte").isValid())
+        m_connectRampDownRate = m_dataPoints.value("ConnRmpDnRte").toFloatWithSSF(m_rampRateScaleFactor);
+
+    if (m_dataPoints.value("AGra").isValid())
+        m_defaultRampRate = m_dataPoints.value("AGra").toFloatWithSSF(m_rampRateScaleFactor);
+
 
     qCDebug(dcSunSpec()) << this;
 }

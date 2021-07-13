@@ -202,47 +202,125 @@ quint16 SunSpecLithiumIonStringModel::pad4() const
 void SunSpecLithiumIonStringModel::processBlockData()
 {
     // Scale factors
-    m_soC_SF = m_dataPoints.value("SoC_SF").toInt16();
-    m_soH_SF = m_dataPoints.value("SoH_SF").toInt16();
-    m_doD_SF = m_dataPoints.value("DoD_SF").toInt16();
-    m_a_SF = m_dataPoints.value("A_SF").toInt16();
-    m_v_SF = m_dataPoints.value("V_SF").toInt16();
-    m_cellV_SF = m_dataPoints.value("CellV_SF").toInt16();
-    m_modTmp_SF = m_dataPoints.value("ModTmp_SF").toInt16();
+    if (m_dataPoints.value("SoC_SF").isValid())
+        m_soC_SF = m_dataPoints.value("SoC_SF").toInt16();
+
+    if (m_dataPoints.value("SoH_SF").isValid())
+        m_soH_SF = m_dataPoints.value("SoH_SF").toInt16();
+
+    if (m_dataPoints.value("DoD_SF").isValid())
+        m_doD_SF = m_dataPoints.value("DoD_SF").toInt16();
+
+    if (m_dataPoints.value("A_SF").isValid())
+        m_a_SF = m_dataPoints.value("A_SF").toInt16();
+
+    if (m_dataPoints.value("V_SF").isValid())
+        m_v_SF = m_dataPoints.value("V_SF").toInt16();
+
+    if (m_dataPoints.value("CellV_SF").isValid())
+        m_cellV_SF = m_dataPoints.value("CellV_SF").toInt16();
+
+    if (m_dataPoints.value("ModTmp_SF").isValid())
+        m_modTmp_SF = m_dataPoints.value("ModTmp_SF").toInt16();
+
 
     // Update properties according to the data point type
-    m_stringIndex = m_dataPoints.value("Idx").toUInt16();
-    m_moduleCount = m_dataPoints.value("NMod").toUInt16();
-    m_stringStatus = static_cast<StFlags>(m_dataPoints.value("St").toUInt32());
-    m_connectionFailureReason = static_cast<Confail>(m_dataPoints.value("ConFail").toUInt16());
-    m_stringCellBalancingCount = m_dataPoints.value("NCellBal").toUInt16();
-    m_stringStateOfCharge = m_dataPoints.value("SoC").toFloatWithSSF(m_soC_SF);
-    m_stringDepthOfDischarge = m_dataPoints.value("DoD").toFloatWithSSF(m_doD_SF);
-    m_stringCycleCount = m_dataPoints.value("NCyc").toUInt32();
-    m_stringStateOfHealth = m_dataPoints.value("SoH").toFloatWithSSF(m_soH_SF);
-    m_stringCurrent = m_dataPoints.value("A").toFloatWithSSF(m_a_SF);
-    m_stringVoltage = m_dataPoints.value("V").toFloatWithSSF(m_v_SF);
-    m_maxCellVoltage = m_dataPoints.value("CellVMax").toFloatWithSSF(m_cellV_SF);
-    m_maxCellVoltageModule = m_dataPoints.value("CellVMaxMod").toUInt16();
-    m_minCellVoltage = m_dataPoints.value("CellVMin").toFloatWithSSF(m_cellV_SF);
-    m_minCellVoltageModule = m_dataPoints.value("CellVMinMod").toUInt16();
-    m_averageCellVoltage = m_dataPoints.value("CellVAvg").toFloatWithSSF(m_cellV_SF);
-    m_maxModuleTemperature = m_dataPoints.value("ModTmpMax").toFloatWithSSF(m_modTmp_SF);
-    m_maxModuleTemperatureModule = m_dataPoints.value("ModTmpMaxMod").toUInt16();
-    m_minModuleTemperature = m_dataPoints.value("ModTmpMin").toFloatWithSSF(m_modTmp_SF);
-    m_minModuleTemperatureModule = m_dataPoints.value("ModTmpMinMod").toUInt16();
-    m_averageModuleTemperature = m_dataPoints.value("ModTmpAvg").toFloatWithSSF(m_modTmp_SF);
-    m_pad = m_dataPoints.value("Pad1").toUInt16();
-    m_contactorStatus = static_cast<ConstFlags>(m_dataPoints.value("ConSt").toUInt32());
-    m_stringEvent1 = static_cast<Evt1Flags>(m_dataPoints.value("Evt1").toUInt32());
-    m_stringEvent2 = m_dataPoints.value("Evt2").toUInt32();
-    m_vendorEventBitfield1 = m_dataPoints.value("EvtVnd1").toUInt32();
-    m_vendorEventBitfield2 = m_dataPoints.value("EvtVnd2").toUInt32();
-    m_enableDisableString = m_dataPoints.value("SetEna").toUInt16();
-    m_connectDisconnectString = static_cast<Setcon>(m_dataPoints.value("SetCon").toUInt16());
-    m_pad2 = m_dataPoints.value("Pad2").toUInt16();
-    m_pad3 = m_dataPoints.value("Pad3").toUInt16();
-    m_pad4 = m_dataPoints.value("Pad4").toUInt16();
+    if (m_dataPoints.value("Idx").isValid())
+        m_stringIndex = m_dataPoints.value("Idx").toUInt16();
+
+    if (m_dataPoints.value("NMod").isValid())
+        m_moduleCount = m_dataPoints.value("NMod").toUInt16();
+
+    if (m_dataPoints.value("St").isValid())
+        m_stringStatus = static_cast<StFlags>(m_dataPoints.value("St").toUInt32());
+
+    if (m_dataPoints.value("ConFail").isValid())
+        m_connectionFailureReason = static_cast<Confail>(m_dataPoints.value("ConFail").toUInt16());
+
+    if (m_dataPoints.value("NCellBal").isValid())
+        m_stringCellBalancingCount = m_dataPoints.value("NCellBal").toUInt16();
+
+    if (m_dataPoints.value("SoC").isValid())
+        m_stringStateOfCharge = m_dataPoints.value("SoC").toFloatWithSSF(m_soC_SF);
+
+    if (m_dataPoints.value("DoD").isValid())
+        m_stringDepthOfDischarge = m_dataPoints.value("DoD").toFloatWithSSF(m_doD_SF);
+
+    if (m_dataPoints.value("NCyc").isValid())
+        m_stringCycleCount = m_dataPoints.value("NCyc").toUInt32();
+
+    if (m_dataPoints.value("SoH").isValid())
+        m_stringStateOfHealth = m_dataPoints.value("SoH").toFloatWithSSF(m_soH_SF);
+
+    if (m_dataPoints.value("A").isValid())
+        m_stringCurrent = m_dataPoints.value("A").toFloatWithSSF(m_a_SF);
+
+    if (m_dataPoints.value("V").isValid())
+        m_stringVoltage = m_dataPoints.value("V").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("CellVMax").isValid())
+        m_maxCellVoltage = m_dataPoints.value("CellVMax").toFloatWithSSF(m_cellV_SF);
+
+    if (m_dataPoints.value("CellVMaxMod").isValid())
+        m_maxCellVoltageModule = m_dataPoints.value("CellVMaxMod").toUInt16();
+
+    if (m_dataPoints.value("CellVMin").isValid())
+        m_minCellVoltage = m_dataPoints.value("CellVMin").toFloatWithSSF(m_cellV_SF);
+
+    if (m_dataPoints.value("CellVMinMod").isValid())
+        m_minCellVoltageModule = m_dataPoints.value("CellVMinMod").toUInt16();
+
+    if (m_dataPoints.value("CellVAvg").isValid())
+        m_averageCellVoltage = m_dataPoints.value("CellVAvg").toFloatWithSSF(m_cellV_SF);
+
+    if (m_dataPoints.value("ModTmpMax").isValid())
+        m_maxModuleTemperature = m_dataPoints.value("ModTmpMax").toFloatWithSSF(m_modTmp_SF);
+
+    if (m_dataPoints.value("ModTmpMaxMod").isValid())
+        m_maxModuleTemperatureModule = m_dataPoints.value("ModTmpMaxMod").toUInt16();
+
+    if (m_dataPoints.value("ModTmpMin").isValid())
+        m_minModuleTemperature = m_dataPoints.value("ModTmpMin").toFloatWithSSF(m_modTmp_SF);
+
+    if (m_dataPoints.value("ModTmpMinMod").isValid())
+        m_minModuleTemperatureModule = m_dataPoints.value("ModTmpMinMod").toUInt16();
+
+    if (m_dataPoints.value("ModTmpAvg").isValid())
+        m_averageModuleTemperature = m_dataPoints.value("ModTmpAvg").toFloatWithSSF(m_modTmp_SF);
+
+    if (m_dataPoints.value("Pad1").isValid())
+        m_pad = m_dataPoints.value("Pad1").toUInt16();
+
+    if (m_dataPoints.value("ConSt").isValid())
+        m_contactorStatus = static_cast<ConstFlags>(m_dataPoints.value("ConSt").toUInt32());
+
+    if (m_dataPoints.value("Evt1").isValid())
+        m_stringEvent1 = static_cast<Evt1Flags>(m_dataPoints.value("Evt1").toUInt32());
+
+    if (m_dataPoints.value("Evt2").isValid())
+        m_stringEvent2 = m_dataPoints.value("Evt2").toUInt32();
+
+    if (m_dataPoints.value("EvtVnd1").isValid())
+        m_vendorEventBitfield1 = m_dataPoints.value("EvtVnd1").toUInt32();
+
+    if (m_dataPoints.value("EvtVnd2").isValid())
+        m_vendorEventBitfield2 = m_dataPoints.value("EvtVnd2").toUInt32();
+
+    if (m_dataPoints.value("SetEna").isValid())
+        m_enableDisableString = m_dataPoints.value("SetEna").toUInt16();
+
+    if (m_dataPoints.value("SetCon").isValid())
+        m_connectDisconnectString = static_cast<Setcon>(m_dataPoints.value("SetCon").toUInt16());
+
+    if (m_dataPoints.value("Pad2").isValid())
+        m_pad2 = m_dataPoints.value("Pad2").toUInt16();
+
+    if (m_dataPoints.value("Pad3").isValid())
+        m_pad3 = m_dataPoints.value("Pad3").toUInt16();
+
+    if (m_dataPoints.value("Pad4").isValid())
+        m_pad4 = m_dataPoints.value("Pad4").toUInt16();
+
 
     qCDebug(dcSunSpec()) << this;
 }

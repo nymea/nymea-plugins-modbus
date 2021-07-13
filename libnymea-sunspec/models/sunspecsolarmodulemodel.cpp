@@ -148,29 +148,71 @@ float SunSpecSolarModuleModel::inputPower() const
 void SunSpecSolarModuleModel::processBlockData()
 {
     // Scale factors
-    m_a_SF = m_dataPoints.value("A_SF").toInt16();
-    m_v_SF = m_dataPoints.value("V_SF").toInt16();
-    m_w_SF = m_dataPoints.value("W_SF").toInt16();
-    m_wh_SF = m_dataPoints.value("Wh_SF").toInt16();
+    if (m_dataPoints.value("A_SF").isValid())
+        m_a_SF = m_dataPoints.value("A_SF").toInt16();
+
+    if (m_dataPoints.value("V_SF").isValid())
+        m_v_SF = m_dataPoints.value("V_SF").toInt16();
+
+    if (m_dataPoints.value("W_SF").isValid())
+        m_w_SF = m_dataPoints.value("W_SF").toInt16();
+
+    if (m_dataPoints.value("Wh_SF").isValid())
+        m_wh_SF = m_dataPoints.value("Wh_SF").toInt16();
+
 
     // Update properties according to the data point type
-    m_status = static_cast<Stat>(m_dataPoints.value("Stat").toUInt16());
-    m_vendorStatus = m_dataPoints.value("StatVend").toUInt16();
-    m_events = static_cast<EvtFlags>(m_dataPoints.value("Evt").toUInt32());
-    m_vendorModuleEventFlags = m_dataPoints.value("EvtVend").toUInt32();
-    m_control = m_dataPoints.value("Ctl").toUInt16();
-    m_vendorControl = m_dataPoints.value("CtlVend").toUInt32();
-    m_controlValue = m_dataPoints.value("CtlVal").toInt32();
-    m_timestamp = m_dataPoints.value("Tms").toUInt32();
-    m_outputCurrent = m_dataPoints.value("OutA").toFloatWithSSF(m_a_SF);
-    m_outputVoltage = m_dataPoints.value("OutV").toFloatWithSSF(m_v_SF);
-    m_outputEnergy = m_dataPoints.value("OutWh").toFloatWithSSF(m_wh_SF);
-    m_outputPower = m_dataPoints.value("OutPw").toFloatWithSSF(m_w_SF);
-    m_temp = m_dataPoints.value("Tmp").toInt16();
-    m_inputCurrent = m_dataPoints.value("InA").toFloatWithSSF(m_a_SF);
-    m_inputVoltage = m_dataPoints.value("InV").toFloatWithSSF(m_v_SF);
-    m_inputEnergy = m_dataPoints.value("InWh").toFloatWithSSF(m_wh_SF);
-    m_inputPower = m_dataPoints.value("InW").toFloatWithSSF(m_w_SF);
+    if (m_dataPoints.value("Stat").isValid())
+        m_status = static_cast<Stat>(m_dataPoints.value("Stat").toUInt16());
+
+    if (m_dataPoints.value("StatVend").isValid())
+        m_vendorStatus = m_dataPoints.value("StatVend").toUInt16();
+
+    if (m_dataPoints.value("Evt").isValid())
+        m_events = static_cast<EvtFlags>(m_dataPoints.value("Evt").toUInt32());
+
+    if (m_dataPoints.value("EvtVend").isValid())
+        m_vendorModuleEventFlags = m_dataPoints.value("EvtVend").toUInt32();
+
+    if (m_dataPoints.value("Ctl").isValid())
+        m_control = m_dataPoints.value("Ctl").toUInt16();
+
+    if (m_dataPoints.value("CtlVend").isValid())
+        m_vendorControl = m_dataPoints.value("CtlVend").toUInt32();
+
+    if (m_dataPoints.value("CtlVal").isValid())
+        m_controlValue = m_dataPoints.value("CtlVal").toInt32();
+
+    if (m_dataPoints.value("Tms").isValid())
+        m_timestamp = m_dataPoints.value("Tms").toUInt32();
+
+    if (m_dataPoints.value("OutA").isValid())
+        m_outputCurrent = m_dataPoints.value("OutA").toFloatWithSSF(m_a_SF);
+
+    if (m_dataPoints.value("OutV").isValid())
+        m_outputVoltage = m_dataPoints.value("OutV").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("OutWh").isValid())
+        m_outputEnergy = m_dataPoints.value("OutWh").toFloatWithSSF(m_wh_SF);
+
+    if (m_dataPoints.value("OutPw").isValid())
+        m_outputPower = m_dataPoints.value("OutPw").toFloatWithSSF(m_w_SF);
+
+    if (m_dataPoints.value("Tmp").isValid())
+        m_temp = m_dataPoints.value("Tmp").toInt16();
+
+    if (m_dataPoints.value("InA").isValid())
+        m_inputCurrent = m_dataPoints.value("InA").toFloatWithSSF(m_a_SF);
+
+    if (m_dataPoints.value("InV").isValid())
+        m_inputVoltage = m_dataPoints.value("InV").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("InWh").isValid())
+        m_inputEnergy = m_dataPoints.value("InWh").toFloatWithSSF(m_wh_SF);
+
+    if (m_dataPoints.value("InW").isValid())
+        m_inputPower = m_dataPoints.value("InW").toFloatWithSSF(m_w_SF);
+
 
     qCDebug(dcSunSpec()) << this;
 }

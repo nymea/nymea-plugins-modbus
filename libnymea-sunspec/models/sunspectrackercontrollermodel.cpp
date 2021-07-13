@@ -120,19 +120,41 @@ quint16 SunSpecTrackerControllerModel::trackers() const
 void SunSpecTrackerControllerModel::processBlockData()
 {
     // Scale factors
-    m_sf = m_dataPoints.value("Dgr_SF").toInt16();
+    if (m_dataPoints.value("Dgr_SF").isValid())
+        m_sf = m_dataPoints.value("Dgr_SF").toInt16();
+
 
     // Update properties according to the data point type
-    m_controller = m_dataPoints.value("Nam").toString();
-    m_type = static_cast<Typ>(m_dataPoints.value("Typ").toUInt16());
-    m_date = m_dataPoints.value("DtLoc").toString();
-    m_time = m_dataPoints.value("TmLoc").toString();
-    m_day = m_dataPoints.value("Day").toUInt16();
-    m_manualElevation = m_dataPoints.value("GlblElCtl").toFloatWithSSF(m_sf);
-    m_manualAzimuth = m_dataPoints.value("GlblAzCtl").toFloatWithSSF(m_sf);
-    m_globalMode = static_cast<Glblctl>(m_dataPoints.value("GlblCtl").toUInt16());
-    m_globalAlarm = static_cast<GlblalmFlags>(m_dataPoints.value("GlblAlm").toUInt16());
-    m_trackers = m_dataPoints.value("N").toUInt16();
+    if (m_dataPoints.value("Nam").isValid())
+        m_controller = m_dataPoints.value("Nam").toString();
+
+    if (m_dataPoints.value("Typ").isValid())
+        m_type = static_cast<Typ>(m_dataPoints.value("Typ").toUInt16());
+
+    if (m_dataPoints.value("DtLoc").isValid())
+        m_date = m_dataPoints.value("DtLoc").toString();
+
+    if (m_dataPoints.value("TmLoc").isValid())
+        m_time = m_dataPoints.value("TmLoc").toString();
+
+    if (m_dataPoints.value("Day").isValid())
+        m_day = m_dataPoints.value("Day").toUInt16();
+
+    if (m_dataPoints.value("GlblElCtl").isValid())
+        m_manualElevation = m_dataPoints.value("GlblElCtl").toFloatWithSSF(m_sf);
+
+    if (m_dataPoints.value("GlblAzCtl").isValid())
+        m_manualAzimuth = m_dataPoints.value("GlblAzCtl").toFloatWithSSF(m_sf);
+
+    if (m_dataPoints.value("GlblCtl").isValid())
+        m_globalMode = static_cast<Glblctl>(m_dataPoints.value("GlblCtl").toUInt16());
+
+    if (m_dataPoints.value("GlblAlm").isValid())
+        m_globalAlarm = static_cast<GlblalmFlags>(m_dataPoints.value("GlblAlm").toUInt16());
+
+    if (m_dataPoints.value("N").isValid())
+        m_trackers = m_dataPoints.value("N").toUInt16();
+
 
     qCDebug(dcSunSpec()) << this;
 }

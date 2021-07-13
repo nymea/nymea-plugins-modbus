@@ -66,7 +66,9 @@ quint16 SunSpecEnergyStorageBaseModelDeprecatedModel::deprecatedModel() const
 void SunSpecEnergyStorageBaseModelDeprecatedModel::processBlockData()
 {
     // Update properties according to the data point type
-    m_deprecatedModel = m_dataPoints.value("DEPRECATED").toUInt16();
+    if (m_dataPoints.value("DEPRECATED").isValid())
+        m_deprecatedModel = m_dataPoints.value("DEPRECATED").toUInt16();
+
 
     qCDebug(dcSunSpec()) << this;
 }

@@ -142,34 +142,86 @@ QString SunSpecLithiumIonModuleModel::serialNumber() const
 void SunSpecLithiumIonModuleModel::processBlockData()
 {
     // Scale factors
-    m_soC_SF = m_dataPoints.value("SoC_SF").toInt16();
-    m_soH_SF = m_dataPoints.value("SoH_SF").toInt16();
-    m_doD_SF = m_dataPoints.value("DoD_SF").toInt16();
-    m_v_SF = m_dataPoints.value("V_SF").toInt16();
-    m_cellV_SF = m_dataPoints.value("CellV_SF").toInt16();
-    m_tmp_SF = m_dataPoints.value("Tmp_SF").toInt16();
+    if (m_dataPoints.value("SoC_SF").isValid())
+        m_soC_SF = m_dataPoints.value("SoC_SF").toInt16();
+
+    if (m_dataPoints.value("SoH_SF").isValid())
+        m_soH_SF = m_dataPoints.value("SoH_SF").toInt16();
+
+    if (m_dataPoints.value("DoD_SF").isValid())
+        m_doD_SF = m_dataPoints.value("DoD_SF").toInt16();
+
+    if (m_dataPoints.value("V_SF").isValid())
+        m_v_SF = m_dataPoints.value("V_SF").toInt16();
+
+    if (m_dataPoints.value("CellV_SF").isValid())
+        m_cellV_SF = m_dataPoints.value("CellV_SF").toInt16();
+
+    if (m_dataPoints.value("Tmp_SF").isValid())
+        m_tmp_SF = m_dataPoints.value("Tmp_SF").toInt16();
+
 
     // Update properties according to the data point type
-    m_stringIndex = m_dataPoints.value("StrIdx").toUInt16();
-    m_moduleIndex = m_dataPoints.value("ModIdx").toUInt16();
-    m_moduleCellCount = m_dataPoints.value("NCell").toUInt16();
-    m_moduleSoC = m_dataPoints.value("SoC").toFloatWithSSF(m_soC_SF);
-    m_depthOfDischarge = m_dataPoints.value("DoD").toFloatWithSSF(m_doD_SF);
-    m_moduleSoH = m_dataPoints.value("SoH").toFloatWithSSF(m_soH_SF);
-    m_cycleCount = m_dataPoints.value("NCyc").toUInt32();
-    m_moduleVoltage = m_dataPoints.value("V").toFloatWithSSF(m_v_SF);
-    m_maxCellVoltage = m_dataPoints.value("CellVMax").toFloatWithSSF(m_cellV_SF);
-    m_maxCellVoltageCell = m_dataPoints.value("CellVMaxCell").toUInt16();
-    m_minCellVoltage = m_dataPoints.value("CellVMin").toFloatWithSSF(m_cellV_SF);
-    m_minCellVoltageCell = m_dataPoints.value("CellVMinCell").toUInt16();
-    m_averageCellVoltage = m_dataPoints.value("CellVAvg").toFloatWithSSF(m_cellV_SF);
-    m_maxCellTemperature = m_dataPoints.value("CellTmpMax").toFloatWithSSF(m_tmp_SF);
-    m_maxCellTemperatureCell = m_dataPoints.value("CellTmpMaxCell").toUInt16();
-    m_minCellTemperature = m_dataPoints.value("CellTmpMin").toFloatWithSSF(m_tmp_SF);
-    m_minCellTemperatureCell = m_dataPoints.value("CellTmpMinCell").toUInt16();
-    m_averageCellTemperature = m_dataPoints.value("CellTmpAvg").toFloatWithSSF(m_tmp_SF);
-    m_balancedCellCount = m_dataPoints.value("NCellBal").toUInt16();
-    m_serialNumber = m_dataPoints.value("SN").toString();
+    if (m_dataPoints.value("StrIdx").isValid())
+        m_stringIndex = m_dataPoints.value("StrIdx").toUInt16();
+
+    if (m_dataPoints.value("ModIdx").isValid())
+        m_moduleIndex = m_dataPoints.value("ModIdx").toUInt16();
+
+    if (m_dataPoints.value("NCell").isValid())
+        m_moduleCellCount = m_dataPoints.value("NCell").toUInt16();
+
+    if (m_dataPoints.value("SoC").isValid())
+        m_moduleSoC = m_dataPoints.value("SoC").toFloatWithSSF(m_soC_SF);
+
+    if (m_dataPoints.value("DoD").isValid())
+        m_depthOfDischarge = m_dataPoints.value("DoD").toFloatWithSSF(m_doD_SF);
+
+    if (m_dataPoints.value("SoH").isValid())
+        m_moduleSoH = m_dataPoints.value("SoH").toFloatWithSSF(m_soH_SF);
+
+    if (m_dataPoints.value("NCyc").isValid())
+        m_cycleCount = m_dataPoints.value("NCyc").toUInt32();
+
+    if (m_dataPoints.value("V").isValid())
+        m_moduleVoltage = m_dataPoints.value("V").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("CellVMax").isValid())
+        m_maxCellVoltage = m_dataPoints.value("CellVMax").toFloatWithSSF(m_cellV_SF);
+
+    if (m_dataPoints.value("CellVMaxCell").isValid())
+        m_maxCellVoltageCell = m_dataPoints.value("CellVMaxCell").toUInt16();
+
+    if (m_dataPoints.value("CellVMin").isValid())
+        m_minCellVoltage = m_dataPoints.value("CellVMin").toFloatWithSSF(m_cellV_SF);
+
+    if (m_dataPoints.value("CellVMinCell").isValid())
+        m_minCellVoltageCell = m_dataPoints.value("CellVMinCell").toUInt16();
+
+    if (m_dataPoints.value("CellVAvg").isValid())
+        m_averageCellVoltage = m_dataPoints.value("CellVAvg").toFloatWithSSF(m_cellV_SF);
+
+    if (m_dataPoints.value("CellTmpMax").isValid())
+        m_maxCellTemperature = m_dataPoints.value("CellTmpMax").toFloatWithSSF(m_tmp_SF);
+
+    if (m_dataPoints.value("CellTmpMaxCell").isValid())
+        m_maxCellTemperatureCell = m_dataPoints.value("CellTmpMaxCell").toUInt16();
+
+    if (m_dataPoints.value("CellTmpMin").isValid())
+        m_minCellTemperature = m_dataPoints.value("CellTmpMin").toFloatWithSSF(m_tmp_SF);
+
+    if (m_dataPoints.value("CellTmpMinCell").isValid())
+        m_minCellTemperatureCell = m_dataPoints.value("CellTmpMinCell").toUInt16();
+
+    if (m_dataPoints.value("CellTmpAvg").isValid())
+        m_averageCellTemperature = m_dataPoints.value("CellTmpAvg").toFloatWithSSF(m_tmp_SF);
+
+    if (m_dataPoints.value("NCellBal").isValid())
+        m_balancedCellCount = m_dataPoints.value("NCellBal").toUInt16();
+
+    if (m_dataPoints.value("SN").isValid())
+        m_serialNumber = m_dataPoints.value("SN").toString();
+
 
     qCDebug(dcSunSpec()) << this;
 }

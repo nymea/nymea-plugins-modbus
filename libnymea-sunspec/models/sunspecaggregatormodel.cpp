@@ -102,16 +102,36 @@ quint32 SunSpecAggregatorModel::controlValue() const
 void SunSpecAggregatorModel::processBlockData()
 {
     // Update properties according to the data point type
-    m_aid = m_dataPoints.value("AID").toUInt16();
-    m_n = m_dataPoints.value("N").toUInt16();
-    m_un = m_dataPoints.value("UN").toUInt16();
-    m_status = static_cast<St>(m_dataPoints.value("St").toUInt16());
-    m_vendorStatus = m_dataPoints.value("StVnd").toUInt16();
-    m_eventCode = static_cast<EvtFlags>(m_dataPoints.value("Evt").toUInt32());
-    m_vendorEventCode = m_dataPoints.value("EvtVnd").toUInt32();
-    m_control = static_cast<Ctl>(m_dataPoints.value("Ctl").toUInt16());
-    m_vendorControl = m_dataPoints.value("CtlVnd").toUInt32();
-    m_controlValue = m_dataPoints.value("CtlVl").toUInt32();
+    if (m_dataPoints.value("AID").isValid())
+        m_aid = m_dataPoints.value("AID").toUInt16();
+
+    if (m_dataPoints.value("N").isValid())
+        m_n = m_dataPoints.value("N").toUInt16();
+
+    if (m_dataPoints.value("UN").isValid())
+        m_un = m_dataPoints.value("UN").toUInt16();
+
+    if (m_dataPoints.value("St").isValid())
+        m_status = static_cast<St>(m_dataPoints.value("St").toUInt16());
+
+    if (m_dataPoints.value("StVnd").isValid())
+        m_vendorStatus = m_dataPoints.value("StVnd").toUInt16();
+
+    if (m_dataPoints.value("Evt").isValid())
+        m_eventCode = static_cast<EvtFlags>(m_dataPoints.value("Evt").toUInt32());
+
+    if (m_dataPoints.value("EvtVnd").isValid())
+        m_vendorEventCode = m_dataPoints.value("EvtVnd").toUInt32();
+
+    if (m_dataPoints.value("Ctl").isValid())
+        m_control = static_cast<Ctl>(m_dataPoints.value("Ctl").toUInt16());
+
+    if (m_dataPoints.value("CtlVnd").isValid())
+        m_vendorControl = m_dataPoints.value("CtlVnd").toUInt32();
+
+    if (m_dataPoints.value("CtlVl").isValid())
+        m_controlValue = m_dataPoints.value("CtlVl").toUInt32();
+
 
     qCDebug(dcSunSpec()) << this;
 }

@@ -94,11 +94,21 @@ quint16 SunSpecScheduleModel::pad() const
 void SunSpecScheduleModel::processBlockData()
 {
     // Update properties according to the data point type
-    m_actSchd = static_cast<ActschdFlags>(m_dataPoints.value("ActSchd").toUInt32());
-    m_modEna = static_cast<ModenaFlags>(m_dataPoints.value("ModEna").toUInt16());
-    m_nSchd = m_dataPoints.value("NSchd").toUInt16();
-    m_nPts = m_dataPoints.value("NPts").toUInt16();
-    m_pad = m_dataPoints.value("Pad").toUInt16();
+    if (m_dataPoints.value("ActSchd").isValid())
+        m_actSchd = static_cast<ActschdFlags>(m_dataPoints.value("ActSchd").toUInt32());
+
+    if (m_dataPoints.value("ModEna").isValid())
+        m_modEna = static_cast<ModenaFlags>(m_dataPoints.value("ModEna").toUInt16());
+
+    if (m_dataPoints.value("NSchd").isValid())
+        m_nSchd = m_dataPoints.value("NSchd").toUInt16();
+
+    if (m_dataPoints.value("NPts").isValid())
+        m_nPts = m_dataPoints.value("NPts").toUInt16();
+
+    if (m_dataPoints.value("Pad").isValid())
+        m_pad = m_dataPoints.value("Pad").toUInt16();
+
 
     qCDebug(dcSunSpec()) << this;
 }

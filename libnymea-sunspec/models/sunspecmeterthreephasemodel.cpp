@@ -310,80 +310,224 @@ SunSpecMeterThreePhaseModel::EvtFlags SunSpecMeterThreePhaseModel::events() cons
 void SunSpecMeterThreePhaseModel::processBlockData()
 {
     // Scale factors
-    m_a_SF = m_dataPoints.value("A_SF").toInt16();
-    m_v_SF = m_dataPoints.value("V_SF").toInt16();
-    m_hz_SF = m_dataPoints.value("Hz_SF").toInt16();
-    m_w_SF = m_dataPoints.value("W_SF").toInt16();
-    m_vA_SF = m_dataPoints.value("VA_SF").toInt16();
-    m_vAR_SF = m_dataPoints.value("VAR_SF").toInt16();
-    m_pF_SF = m_dataPoints.value("PF_SF").toInt16();
-    m_totWh_SF = m_dataPoints.value("TotWh_SF").toInt16();
-    m_totVAh_SF = m_dataPoints.value("TotVAh_SF").toInt16();
-    m_totVArh_SF = m_dataPoints.value("TotVArh_SF").toInt16();
+    if (m_dataPoints.value("A_SF").isValid())
+        m_a_SF = m_dataPoints.value("A_SF").toInt16();
+
+    if (m_dataPoints.value("V_SF").isValid())
+        m_v_SF = m_dataPoints.value("V_SF").toInt16();
+
+    if (m_dataPoints.value("Hz_SF").isValid())
+        m_hz_SF = m_dataPoints.value("Hz_SF").toInt16();
+
+    if (m_dataPoints.value("W_SF").isValid())
+        m_w_SF = m_dataPoints.value("W_SF").toInt16();
+
+    if (m_dataPoints.value("VA_SF").isValid())
+        m_vA_SF = m_dataPoints.value("VA_SF").toInt16();
+
+    if (m_dataPoints.value("VAR_SF").isValid())
+        m_vAR_SF = m_dataPoints.value("VAR_SF").toInt16();
+
+    if (m_dataPoints.value("PF_SF").isValid())
+        m_pF_SF = m_dataPoints.value("PF_SF").toInt16();
+
+    if (m_dataPoints.value("TotWh_SF").isValid())
+        m_totWh_SF = m_dataPoints.value("TotWh_SF").toInt16();
+
+    if (m_dataPoints.value("TotVAh_SF").isValid())
+        m_totVAh_SF = m_dataPoints.value("TotVAh_SF").toInt16();
+
+    if (m_dataPoints.value("TotVArh_SF").isValid())
+        m_totVArh_SF = m_dataPoints.value("TotVArh_SF").toInt16();
+
 
     // Update properties according to the data point type
-    m_amps = m_dataPoints.value("A").toFloatWithSSF(m_a_SF);
-    m_ampsPhaseA = m_dataPoints.value("AphA").toFloatWithSSF(m_a_SF);
-    m_ampsPhaseB = m_dataPoints.value("AphB").toFloatWithSSF(m_a_SF);
-    m_ampsPhaseC = m_dataPoints.value("AphC").toFloatWithSSF(m_a_SF);
-    m_voltageLn = m_dataPoints.value("PhV").toFloatWithSSF(m_v_SF);
-    m_phaseVoltageAn = m_dataPoints.value("PhVphA").toFloatWithSSF(m_v_SF);
-    m_phaseVoltageBn = m_dataPoints.value("PhVphB").toFloatWithSSF(m_v_SF);
-    m_phaseVoltageCn = m_dataPoints.value("PhVphC").toFloatWithSSF(m_v_SF);
-    m_voltageLl = m_dataPoints.value("PPV").toFloatWithSSF(m_v_SF);
-    m_phaseVoltageAb = m_dataPoints.value("PhVphAB").toFloatWithSSF(m_v_SF);
-    m_phaseVoltageBc = m_dataPoints.value("PhVphBC").toFloatWithSSF(m_v_SF);
-    m_phaseVoltageCa = m_dataPoints.value("PhVphCA").toFloatWithSSF(m_v_SF);
-    m_hz = m_dataPoints.value("Hz").toFloatWithSSF(m_hz_SF);
-    m_watts = m_dataPoints.value("W").toFloatWithSSF(m_w_SF);
-    m_wattsPhaseA = m_dataPoints.value("WphA").toFloatWithSSF(m_w_SF);
-    m_wattsPhaseB = m_dataPoints.value("WphB").toFloatWithSSF(m_w_SF);
-    m_wattsPhaseC = m_dataPoints.value("WphC").toFloatWithSSF(m_w_SF);
-    m_va = m_dataPoints.value("VA").toFloatWithSSF(m_vA_SF);
-    m_vaPhaseA = m_dataPoints.value("VAphA").toFloatWithSSF(m_vA_SF);
-    m_vaPhaseB = m_dataPoints.value("VAphB").toFloatWithSSF(m_vA_SF);
-    m_vaPhaseC = m_dataPoints.value("VAphC").toFloatWithSSF(m_vA_SF);
-    m_var = m_dataPoints.value("VAR").toFloatWithSSF(m_vAR_SF);
-    m_varPhaseA = m_dataPoints.value("VARphA").toFloatWithSSF(m_vAR_SF);
-    m_varPhaseB = m_dataPoints.value("VARphB").toFloatWithSSF(m_vAR_SF);
-    m_varPhaseC = m_dataPoints.value("VARphC").toFloatWithSSF(m_vAR_SF);
-    m_pf = m_dataPoints.value("PF").toFloatWithSSF(m_pF_SF);
-    m_pfPhaseA = m_dataPoints.value("PFphA").toFloatWithSSF(m_pF_SF);
-    m_pfPhaseB = m_dataPoints.value("PFphB").toFloatWithSSF(m_pF_SF);
-    m_pfPhaseC = m_dataPoints.value("PFphC").toFloatWithSSF(m_pF_SF);
-    m_totalWattHoursExported = m_dataPoints.value("TotWhExp").toFloatWithSSF(m_totWh_SF);
-    m_totalWattHoursExportedPhaseA = m_dataPoints.value("TotWhExpPhA").toFloatWithSSF(m_totWh_SF);
-    m_totalWattHoursExportedPhaseB = m_dataPoints.value("TotWhExpPhB").toFloatWithSSF(m_totWh_SF);
-    m_totalWattHoursExportedPhaseC = m_dataPoints.value("TotWhExpPhC").toFloatWithSSF(m_totWh_SF);
-    m_totalWattHoursImported = m_dataPoints.value("TotWhImp").toFloatWithSSF(m_totWh_SF);
-    m_totalWattHoursImportedPhaseA = m_dataPoints.value("TotWhImpPhA").toFloatWithSSF(m_totWh_SF);
-    m_totalWattHoursImportedPhaseB = m_dataPoints.value("TotWhImpPhB").toFloatWithSSF(m_totWh_SF);
-    m_totalWattHoursImportedPhaseC = m_dataPoints.value("TotWhImpPhC").toFloatWithSSF(m_totWh_SF);
-    m_totalVaHoursExported = m_dataPoints.value("TotVAhExp").toFloatWithSSF(m_totVAh_SF);
-    m_totalVaHoursExportedPhaseA = m_dataPoints.value("TotVAhExpPhA").toFloatWithSSF(m_totVAh_SF);
-    m_totalVaHoursExportedPhaseB = m_dataPoints.value("TotVAhExpPhB").toFloatWithSSF(m_totVAh_SF);
-    m_totalVaHoursExportedPhaseC = m_dataPoints.value("TotVAhExpPhC").toFloatWithSSF(m_totVAh_SF);
-    m_totalVaHoursImported = m_dataPoints.value("TotVAhImp").toFloatWithSSF(m_totVAh_SF);
-    m_totalVaHoursImportedPhaseA = m_dataPoints.value("TotVAhImpPhA").toFloatWithSSF(m_totVAh_SF);
-    m_totalVaHoursImportedPhaseB = m_dataPoints.value("TotVAhImpPhB").toFloatWithSSF(m_totVAh_SF);
-    m_totalVaHoursImportedPhaseC = m_dataPoints.value("TotVAhImpPhC").toFloatWithSSF(m_totVAh_SF);
-    m_totalVarHoursImportedQ1 = m_dataPoints.value("TotVArhImpQ1").toFloatWithSSF(m_totVArh_SF);
-    m_totalVArHoursImportedQ1PhaseA = m_dataPoints.value("TotVArhImpQ1PhA").toFloatWithSSF(m_totVArh_SF);
-    m_totalVArHoursImportedQ1PhaseB = m_dataPoints.value("TotVArhImpQ1PhB").toFloatWithSSF(m_totVArh_SF);
-    m_totalVArHoursImportedQ1PhaseC = m_dataPoints.value("TotVArhImpQ1PhC").toFloatWithSSF(m_totVArh_SF);
-    m_totalVArHoursImportedQ2 = m_dataPoints.value("TotVArhImpQ2").toFloatWithSSF(m_totVArh_SF);
-    m_totalVArHoursImportedQ2PhaseA = m_dataPoints.value("TotVArhImpQ2PhA").toFloatWithSSF(m_totVArh_SF);
-    m_totalVArHoursImportedQ2PhaseB = m_dataPoints.value("TotVArhImpQ2PhB").toFloatWithSSF(m_totVArh_SF);
-    m_totalVArHoursImportedQ2PhaseC = m_dataPoints.value("TotVArhImpQ2PhC").toFloatWithSSF(m_totVArh_SF);
-    m_totalVArHoursExportedQ3 = m_dataPoints.value("TotVArhExpQ3").toFloatWithSSF(m_totVArh_SF);
-    m_totalVArHoursExportedQ3PhaseA = m_dataPoints.value("TotVArhExpQ3PhA").toFloatWithSSF(m_totVArh_SF);
-    m_totalVArHoursExportedQ3PhaseB = m_dataPoints.value("TotVArhExpQ3PhB").toFloatWithSSF(m_totVArh_SF);
-    m_totalVArHoursExportedQ3PhaseC = m_dataPoints.value("TotVArhExpQ3PhC").toFloatWithSSF(m_totVArh_SF);
-    m_totalVArHoursExportedQ4 = m_dataPoints.value("TotVArhExpQ4").toFloatWithSSF(m_totVArh_SF);
-    m_totalVArHoursExportedQ4ImportedPhaseA = m_dataPoints.value("TotVArhExpQ4PhA").toFloatWithSSF(m_totVArh_SF);
-    m_totalVArHoursExportedQ4ImportedPhaseB = m_dataPoints.value("TotVArhExpQ4PhB").toFloatWithSSF(m_totVArh_SF);
-    m_totalVArHoursExportedQ4ImportedPhaseC = m_dataPoints.value("TotVArhExpQ4PhC").toFloatWithSSF(m_totVArh_SF);
-    m_events = static_cast<EvtFlags>(m_dataPoints.value("Evt").toUInt32());
+    if (m_dataPoints.value("A").isValid())
+        m_amps = m_dataPoints.value("A").toFloatWithSSF(m_a_SF);
+
+    if (m_dataPoints.value("AphA").isValid())
+        m_ampsPhaseA = m_dataPoints.value("AphA").toFloatWithSSF(m_a_SF);
+
+    if (m_dataPoints.value("AphB").isValid())
+        m_ampsPhaseB = m_dataPoints.value("AphB").toFloatWithSSF(m_a_SF);
+
+    if (m_dataPoints.value("AphC").isValid())
+        m_ampsPhaseC = m_dataPoints.value("AphC").toFloatWithSSF(m_a_SF);
+
+    if (m_dataPoints.value("PhV").isValid())
+        m_voltageLn = m_dataPoints.value("PhV").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("PhVphA").isValid())
+        m_phaseVoltageAn = m_dataPoints.value("PhVphA").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("PhVphB").isValid())
+        m_phaseVoltageBn = m_dataPoints.value("PhVphB").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("PhVphC").isValid())
+        m_phaseVoltageCn = m_dataPoints.value("PhVphC").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("PPV").isValid())
+        m_voltageLl = m_dataPoints.value("PPV").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("PhVphAB").isValid())
+        m_phaseVoltageAb = m_dataPoints.value("PhVphAB").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("PhVphBC").isValid())
+        m_phaseVoltageBc = m_dataPoints.value("PhVphBC").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("PhVphCA").isValid())
+        m_phaseVoltageCa = m_dataPoints.value("PhVphCA").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("Hz").isValid())
+        m_hz = m_dataPoints.value("Hz").toFloatWithSSF(m_hz_SF);
+
+    if (m_dataPoints.value("W").isValid())
+        m_watts = m_dataPoints.value("W").toFloatWithSSF(m_w_SF);
+
+    if (m_dataPoints.value("WphA").isValid())
+        m_wattsPhaseA = m_dataPoints.value("WphA").toFloatWithSSF(m_w_SF);
+
+    if (m_dataPoints.value("WphB").isValid())
+        m_wattsPhaseB = m_dataPoints.value("WphB").toFloatWithSSF(m_w_SF);
+
+    if (m_dataPoints.value("WphC").isValid())
+        m_wattsPhaseC = m_dataPoints.value("WphC").toFloatWithSSF(m_w_SF);
+
+    if (m_dataPoints.value("VA").isValid())
+        m_va = m_dataPoints.value("VA").toFloatWithSSF(m_vA_SF);
+
+    if (m_dataPoints.value("VAphA").isValid())
+        m_vaPhaseA = m_dataPoints.value("VAphA").toFloatWithSSF(m_vA_SF);
+
+    if (m_dataPoints.value("VAphB").isValid())
+        m_vaPhaseB = m_dataPoints.value("VAphB").toFloatWithSSF(m_vA_SF);
+
+    if (m_dataPoints.value("VAphC").isValid())
+        m_vaPhaseC = m_dataPoints.value("VAphC").toFloatWithSSF(m_vA_SF);
+
+    if (m_dataPoints.value("VAR").isValid())
+        m_var = m_dataPoints.value("VAR").toFloatWithSSF(m_vAR_SF);
+
+    if (m_dataPoints.value("VARphA").isValid())
+        m_varPhaseA = m_dataPoints.value("VARphA").toFloatWithSSF(m_vAR_SF);
+
+    if (m_dataPoints.value("VARphB").isValid())
+        m_varPhaseB = m_dataPoints.value("VARphB").toFloatWithSSF(m_vAR_SF);
+
+    if (m_dataPoints.value("VARphC").isValid())
+        m_varPhaseC = m_dataPoints.value("VARphC").toFloatWithSSF(m_vAR_SF);
+
+    if (m_dataPoints.value("PF").isValid())
+        m_pf = m_dataPoints.value("PF").toFloatWithSSF(m_pF_SF);
+
+    if (m_dataPoints.value("PFphA").isValid())
+        m_pfPhaseA = m_dataPoints.value("PFphA").toFloatWithSSF(m_pF_SF);
+
+    if (m_dataPoints.value("PFphB").isValid())
+        m_pfPhaseB = m_dataPoints.value("PFphB").toFloatWithSSF(m_pF_SF);
+
+    if (m_dataPoints.value("PFphC").isValid())
+        m_pfPhaseC = m_dataPoints.value("PFphC").toFloatWithSSF(m_pF_SF);
+
+    if (m_dataPoints.value("TotWhExp").isValid())
+        m_totalWattHoursExported = m_dataPoints.value("TotWhExp").toFloatWithSSF(m_totWh_SF);
+
+    if (m_dataPoints.value("TotWhExpPhA").isValid())
+        m_totalWattHoursExportedPhaseA = m_dataPoints.value("TotWhExpPhA").toFloatWithSSF(m_totWh_SF);
+
+    if (m_dataPoints.value("TotWhExpPhB").isValid())
+        m_totalWattHoursExportedPhaseB = m_dataPoints.value("TotWhExpPhB").toFloatWithSSF(m_totWh_SF);
+
+    if (m_dataPoints.value("TotWhExpPhC").isValid())
+        m_totalWattHoursExportedPhaseC = m_dataPoints.value("TotWhExpPhC").toFloatWithSSF(m_totWh_SF);
+
+    if (m_dataPoints.value("TotWhImp").isValid())
+        m_totalWattHoursImported = m_dataPoints.value("TotWhImp").toFloatWithSSF(m_totWh_SF);
+
+    if (m_dataPoints.value("TotWhImpPhA").isValid())
+        m_totalWattHoursImportedPhaseA = m_dataPoints.value("TotWhImpPhA").toFloatWithSSF(m_totWh_SF);
+
+    if (m_dataPoints.value("TotWhImpPhB").isValid())
+        m_totalWattHoursImportedPhaseB = m_dataPoints.value("TotWhImpPhB").toFloatWithSSF(m_totWh_SF);
+
+    if (m_dataPoints.value("TotWhImpPhC").isValid())
+        m_totalWattHoursImportedPhaseC = m_dataPoints.value("TotWhImpPhC").toFloatWithSSF(m_totWh_SF);
+
+    if (m_dataPoints.value("TotVAhExp").isValid())
+        m_totalVaHoursExported = m_dataPoints.value("TotVAhExp").toFloatWithSSF(m_totVAh_SF);
+
+    if (m_dataPoints.value("TotVAhExpPhA").isValid())
+        m_totalVaHoursExportedPhaseA = m_dataPoints.value("TotVAhExpPhA").toFloatWithSSF(m_totVAh_SF);
+
+    if (m_dataPoints.value("TotVAhExpPhB").isValid())
+        m_totalVaHoursExportedPhaseB = m_dataPoints.value("TotVAhExpPhB").toFloatWithSSF(m_totVAh_SF);
+
+    if (m_dataPoints.value("TotVAhExpPhC").isValid())
+        m_totalVaHoursExportedPhaseC = m_dataPoints.value("TotVAhExpPhC").toFloatWithSSF(m_totVAh_SF);
+
+    if (m_dataPoints.value("TotVAhImp").isValid())
+        m_totalVaHoursImported = m_dataPoints.value("TotVAhImp").toFloatWithSSF(m_totVAh_SF);
+
+    if (m_dataPoints.value("TotVAhImpPhA").isValid())
+        m_totalVaHoursImportedPhaseA = m_dataPoints.value("TotVAhImpPhA").toFloatWithSSF(m_totVAh_SF);
+
+    if (m_dataPoints.value("TotVAhImpPhB").isValid())
+        m_totalVaHoursImportedPhaseB = m_dataPoints.value("TotVAhImpPhB").toFloatWithSSF(m_totVAh_SF);
+
+    if (m_dataPoints.value("TotVAhImpPhC").isValid())
+        m_totalVaHoursImportedPhaseC = m_dataPoints.value("TotVAhImpPhC").toFloatWithSSF(m_totVAh_SF);
+
+    if (m_dataPoints.value("TotVArhImpQ1").isValid())
+        m_totalVarHoursImportedQ1 = m_dataPoints.value("TotVArhImpQ1").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhImpQ1PhA").isValid())
+        m_totalVArHoursImportedQ1PhaseA = m_dataPoints.value("TotVArhImpQ1PhA").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhImpQ1PhB").isValid())
+        m_totalVArHoursImportedQ1PhaseB = m_dataPoints.value("TotVArhImpQ1PhB").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhImpQ1PhC").isValid())
+        m_totalVArHoursImportedQ1PhaseC = m_dataPoints.value("TotVArhImpQ1PhC").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhImpQ2").isValid())
+        m_totalVArHoursImportedQ2 = m_dataPoints.value("TotVArhImpQ2").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhImpQ2PhA").isValid())
+        m_totalVArHoursImportedQ2PhaseA = m_dataPoints.value("TotVArhImpQ2PhA").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhImpQ2PhB").isValid())
+        m_totalVArHoursImportedQ2PhaseB = m_dataPoints.value("TotVArhImpQ2PhB").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhImpQ2PhC").isValid())
+        m_totalVArHoursImportedQ2PhaseC = m_dataPoints.value("TotVArhImpQ2PhC").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhExpQ3").isValid())
+        m_totalVArHoursExportedQ3 = m_dataPoints.value("TotVArhExpQ3").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhExpQ3PhA").isValid())
+        m_totalVArHoursExportedQ3PhaseA = m_dataPoints.value("TotVArhExpQ3PhA").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhExpQ3PhB").isValid())
+        m_totalVArHoursExportedQ3PhaseB = m_dataPoints.value("TotVArhExpQ3PhB").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhExpQ3PhC").isValid())
+        m_totalVArHoursExportedQ3PhaseC = m_dataPoints.value("TotVArhExpQ3PhC").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhExpQ4").isValid())
+        m_totalVArHoursExportedQ4 = m_dataPoints.value("TotVArhExpQ4").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhExpQ4PhA").isValid())
+        m_totalVArHoursExportedQ4ImportedPhaseA = m_dataPoints.value("TotVArhExpQ4PhA").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhExpQ4PhB").isValid())
+        m_totalVArHoursExportedQ4ImportedPhaseB = m_dataPoints.value("TotVArhExpQ4PhB").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhExpQ4PhC").isValid())
+        m_totalVArHoursExportedQ4ImportedPhaseC = m_dataPoints.value("TotVArhExpQ4PhC").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("Evt").isValid())
+        m_events = static_cast<EvtFlags>(m_dataPoints.value("Evt").toUInt32());
+
 
     qCDebug(dcSunSpec()) << this;
 }

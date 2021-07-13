@@ -162,38 +162,98 @@ quint16 SunSpecFlowBatteryStringModel::pad() const
 void SunSpecFlowBatteryStringModel::processBlockData()
 {
     // Scale factors
-    m_modV_SF = m_dataPoints.value("ModV_SF").toInt16();
-    m_cellV_SF = m_dataPoints.value("CellV_SF").toInt16();
-    m_tmp_SF = m_dataPoints.value("Tmp_SF").toInt16();
-    m_soC_SF = m_dataPoints.value("SoC_SF").toInt16();
-    m_oCV_SF = m_dataPoints.value("OCV_SF").toInt16();
+    if (m_dataPoints.value("ModV_SF").isValid())
+        m_modV_SF = m_dataPoints.value("ModV_SF").toInt16();
+
+    if (m_dataPoints.value("CellV_SF").isValid())
+        m_cellV_SF = m_dataPoints.value("CellV_SF").toInt16();
+
+    if (m_dataPoints.value("Tmp_SF").isValid())
+        m_tmp_SF = m_dataPoints.value("Tmp_SF").toInt16();
+
+    if (m_dataPoints.value("SoC_SF").isValid())
+        m_soC_SF = m_dataPoints.value("SoC_SF").toInt16();
+
+    if (m_dataPoints.value("OCV_SF").isValid())
+        m_oCV_SF = m_dataPoints.value("OCV_SF").toInt16();
+
 
     // Update properties according to the data point type
-    m_stringIndex = m_dataPoints.value("Idx").toUInt16();
-    m_moduleCount = m_dataPoints.value("NMod").toUInt16();
-    m_connectedModuleCount = m_dataPoints.value("NModCon").toUInt16();
-    m_maxModuleVoltage = m_dataPoints.value("ModVMax").toFloatWithSSF(m_modV_SF);
-    m_maxModuleVoltageModule = m_dataPoints.value("ModVMaxMod").toUInt16();
-    m_minModuleVoltage = m_dataPoints.value("ModVMin").toFloatWithSSF(m_modV_SF);
-    m_minModuleVoltageModule = m_dataPoints.value("ModVMinMod").toUInt16();
-    m_averageModuleVoltage = m_dataPoints.value("ModVAvg").toFloatWithSSF(m_modV_SF);
-    m_maxCellVoltage = m_dataPoints.value("CellVMax").toFloatWithSSF(m_cellV_SF);
-    m_maxCellVoltageModule = m_dataPoints.value("CellVMaxMod").toUInt16();
-    m_maxCellVoltageStack = m_dataPoints.value("CellVMaxStk").toUInt16();
-    m_minCellVoltage = m_dataPoints.value("CellVMin").toFloatWithSSF(m_cellV_SF);
-    m_minCellVoltageModule = m_dataPoints.value("CellVMinMod").toUInt16();
-    m_minCellVoltageStack = m_dataPoints.value("CellVMinStk").toUInt16();
-    m_averageCellVoltage = m_dataPoints.value("CellVAvg").toFloatWithSSF(m_cellV_SF);
-    m_maxTemperature = m_dataPoints.value("TmpMax").toFloatWithSSF(m_tmp_SF);
-    m_maxTemperatureModule = m_dataPoints.value("TmpMaxMod").toUInt16();
-    m_minTemperature = m_dataPoints.value("TmpMin").toFloatWithSSF(m_tmp_SF);
-    m_minTemperatureModule = m_dataPoints.value("TmpMinMod").toUInt16();
-    m_averageTemperature = m_dataPoints.value("TmpAvg").toFloatWithSSF(m_tmp_SF);
-    m_stringEvent1 = static_cast<Evt1Flags>(m_dataPoints.value("Evt1").toUInt32());
-    m_stringEvent2 = static_cast<Evt2Flags>(m_dataPoints.value("Evt2").toUInt32());
-    m_vendorEventBitfield1 = m_dataPoints.value("EvtVnd1").toUInt32();
-    m_vendorEventBitfield2 = m_dataPoints.value("EvtVnd2").toUInt32();
-    m_pad = m_dataPoints.value("Pad1").toUInt16();
+    if (m_dataPoints.value("Idx").isValid())
+        m_stringIndex = m_dataPoints.value("Idx").toUInt16();
+
+    if (m_dataPoints.value("NMod").isValid())
+        m_moduleCount = m_dataPoints.value("NMod").toUInt16();
+
+    if (m_dataPoints.value("NModCon").isValid())
+        m_connectedModuleCount = m_dataPoints.value("NModCon").toUInt16();
+
+    if (m_dataPoints.value("ModVMax").isValid())
+        m_maxModuleVoltage = m_dataPoints.value("ModVMax").toFloatWithSSF(m_modV_SF);
+
+    if (m_dataPoints.value("ModVMaxMod").isValid())
+        m_maxModuleVoltageModule = m_dataPoints.value("ModVMaxMod").toUInt16();
+
+    if (m_dataPoints.value("ModVMin").isValid())
+        m_minModuleVoltage = m_dataPoints.value("ModVMin").toFloatWithSSF(m_modV_SF);
+
+    if (m_dataPoints.value("ModVMinMod").isValid())
+        m_minModuleVoltageModule = m_dataPoints.value("ModVMinMod").toUInt16();
+
+    if (m_dataPoints.value("ModVAvg").isValid())
+        m_averageModuleVoltage = m_dataPoints.value("ModVAvg").toFloatWithSSF(m_modV_SF);
+
+    if (m_dataPoints.value("CellVMax").isValid())
+        m_maxCellVoltage = m_dataPoints.value("CellVMax").toFloatWithSSF(m_cellV_SF);
+
+    if (m_dataPoints.value("CellVMaxMod").isValid())
+        m_maxCellVoltageModule = m_dataPoints.value("CellVMaxMod").toUInt16();
+
+    if (m_dataPoints.value("CellVMaxStk").isValid())
+        m_maxCellVoltageStack = m_dataPoints.value("CellVMaxStk").toUInt16();
+
+    if (m_dataPoints.value("CellVMin").isValid())
+        m_minCellVoltage = m_dataPoints.value("CellVMin").toFloatWithSSF(m_cellV_SF);
+
+    if (m_dataPoints.value("CellVMinMod").isValid())
+        m_minCellVoltageModule = m_dataPoints.value("CellVMinMod").toUInt16();
+
+    if (m_dataPoints.value("CellVMinStk").isValid())
+        m_minCellVoltageStack = m_dataPoints.value("CellVMinStk").toUInt16();
+
+    if (m_dataPoints.value("CellVAvg").isValid())
+        m_averageCellVoltage = m_dataPoints.value("CellVAvg").toFloatWithSSF(m_cellV_SF);
+
+    if (m_dataPoints.value("TmpMax").isValid())
+        m_maxTemperature = m_dataPoints.value("TmpMax").toFloatWithSSF(m_tmp_SF);
+
+    if (m_dataPoints.value("TmpMaxMod").isValid())
+        m_maxTemperatureModule = m_dataPoints.value("TmpMaxMod").toUInt16();
+
+    if (m_dataPoints.value("TmpMin").isValid())
+        m_minTemperature = m_dataPoints.value("TmpMin").toFloatWithSSF(m_tmp_SF);
+
+    if (m_dataPoints.value("TmpMinMod").isValid())
+        m_minTemperatureModule = m_dataPoints.value("TmpMinMod").toUInt16();
+
+    if (m_dataPoints.value("TmpAvg").isValid())
+        m_averageTemperature = m_dataPoints.value("TmpAvg").toFloatWithSSF(m_tmp_SF);
+
+    if (m_dataPoints.value("Evt1").isValid())
+        m_stringEvent1 = static_cast<Evt1Flags>(m_dataPoints.value("Evt1").toUInt32());
+
+    if (m_dataPoints.value("Evt2").isValid())
+        m_stringEvent2 = static_cast<Evt2Flags>(m_dataPoints.value("Evt2").toUInt32());
+
+    if (m_dataPoints.value("EvtVnd1").isValid())
+        m_vendorEventBitfield1 = m_dataPoints.value("EvtVnd1").toUInt32();
+
+    if (m_dataPoints.value("EvtVnd2").isValid())
+        m_vendorEventBitfield2 = m_dataPoints.value("EvtVnd2").toUInt32();
+
+    if (m_dataPoints.value("Pad1").isValid())
+        m_pad = m_dataPoints.value("Pad1").toUInt16();
+
 
     qCDebug(dcSunSpec()) << this;
 }

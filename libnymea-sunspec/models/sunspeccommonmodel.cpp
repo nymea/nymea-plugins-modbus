@@ -96,13 +96,27 @@ quint16 SunSpecCommonModel::pad() const
 void SunSpecCommonModel::processBlockData()
 {
     // Update properties according to the data point type
-    m_manufacturer = m_dataPoints.value("Mn").toString();
-    m_model = m_dataPoints.value("Md").toString();
-    m_options = m_dataPoints.value("Opt").toString();
-    m_version = m_dataPoints.value("Vr").toString();
-    m_serialNumber = m_dataPoints.value("SN").toString();
-    m_deviceAddress = m_dataPoints.value("DA").toUInt16();
-    m_pad = m_dataPoints.value("Pad").toUInt16();
+    if (m_dataPoints.value("Mn").isValid())
+        m_manufacturer = m_dataPoints.value("Mn").toString();
+
+    if (m_dataPoints.value("Md").isValid())
+        m_model = m_dataPoints.value("Md").toString();
+
+    if (m_dataPoints.value("Opt").isValid())
+        m_options = m_dataPoints.value("Opt").toString();
+
+    if (m_dataPoints.value("Vr").isValid())
+        m_version = m_dataPoints.value("Vr").toString();
+
+    if (m_dataPoints.value("SN").isValid())
+        m_serialNumber = m_dataPoints.value("SN").toString();
+
+    if (m_dataPoints.value("DA").isValid())
+        m_deviceAddress = m_dataPoints.value("DA").toUInt16();
+
+    if (m_dataPoints.value("Pad").isValid())
+        m_pad = m_dataPoints.value("Pad").toUInt16();
+
 
     qCDebug(dcSunSpec()) << this;
 }

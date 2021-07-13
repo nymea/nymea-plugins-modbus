@@ -124,18 +124,38 @@ quint16 SunSpecHfrtModel::pad() const
 void SunSpecHfrtModel::processBlockData()
 {
     // Scale factors
-    m_tmsSf = m_dataPoints.value("Tms_SF").toInt16();
-    m_hzSf = m_dataPoints.value("Hz_SF").toInt16();
+    if (m_dataPoints.value("Tms_SF").isValid())
+        m_tmsSf = m_dataPoints.value("Tms_SF").toInt16();
+
+    if (m_dataPoints.value("Hz_SF").isValid())
+        m_hzSf = m_dataPoints.value("Hz_SF").toInt16();
+
 
     // Update properties according to the data point type
-    m_actCrv = m_dataPoints.value("ActCrv").toUInt16();
-    m_modEna = static_cast<ModenaFlags>(m_dataPoints.value("ModEna").toUInt16());
-    m_winTms = m_dataPoints.value("WinTms").toUInt16();
-    m_rvrtTms = m_dataPoints.value("RvrtTms").toUInt16();
-    m_rmpTms = m_dataPoints.value("RmpTms").toUInt16();
-    m_nCrv = m_dataPoints.value("NCrv").toUInt16();
-    m_nPt = m_dataPoints.value("NPt").toUInt16();
-    m_pad = m_dataPoints.value("Pad").toUInt16();
+    if (m_dataPoints.value("ActCrv").isValid())
+        m_actCrv = m_dataPoints.value("ActCrv").toUInt16();
+
+    if (m_dataPoints.value("ModEna").isValid())
+        m_modEna = static_cast<ModenaFlags>(m_dataPoints.value("ModEna").toUInt16());
+
+    if (m_dataPoints.value("WinTms").isValid())
+        m_winTms = m_dataPoints.value("WinTms").toUInt16();
+
+    if (m_dataPoints.value("RvrtTms").isValid())
+        m_rvrtTms = m_dataPoints.value("RvrtTms").toUInt16();
+
+    if (m_dataPoints.value("RmpTms").isValid())
+        m_rmpTms = m_dataPoints.value("RmpTms").toUInt16();
+
+    if (m_dataPoints.value("NCrv").isValid())
+        m_nCrv = m_dataPoints.value("NCrv").toUInt16();
+
+    if (m_dataPoints.value("NPt").isValid())
+        m_nPt = m_dataPoints.value("NPt").toUInt16();
+
+    if (m_dataPoints.value("Pad").isValid())
+        m_pad = m_dataPoints.value("Pad").toUInt16();
+
 
     qCDebug(dcSunSpec()) << this;
 }

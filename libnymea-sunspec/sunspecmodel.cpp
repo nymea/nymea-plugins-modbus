@@ -1,5 +1,37 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+*
+* Copyright 2013 - 2021, nymea GmbH
+* Contact: contact@nymea.io
+*
+* This fileDescriptor is part of nymea.
+* This project including source code and documentation is protected by
+* copyright law, and remains the property of nymea GmbH. All rights, including
+* reproduction, publication, editing and translation, are reserved. The use of
+* this project is subject to the terms of a license agreement to be concluded
+* with nymea GmbH in accordance with the terms of use of nymea GmbH, available
+* under https://nymea.io/license
+*
+* GNU Lesser General Public License Usage
+* Alternatively, this project may be redistributed and/or modified under the
+* terms of the GNU Lesser General Public License as published by the Free
+* Software Foundation; version 3. This project is distributed in the hope that
+* it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+* warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+* Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public License
+* along with this project. If not, see <https://www.gnu.org/licenses/>.
+*
+* For any further details and any questions please contact us under
+* contact@nymea.io or see our FAQ/Licensing Information on
+* https://nymea.io/license/faq
+*
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include "sunspecmodel.h"
 #include "sunspecconnection.h"
+
+Q_LOGGING_CATEGORY(dcSunSpecModelData, "SunSpecModelData")
 
 SunSpecModel::SunSpecModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelId, quint16 modelLength, QObject *parent) :
     QObject(parent),
@@ -20,6 +52,11 @@ SunSpecModel::SunSpecModel(SunSpecConnection *connection, quint16 modbusStartReg
 SunSpecConnection *SunSpecModel::connection() const
 {
     return m_connection;
+}
+
+bool SunSpecModel::initialized() const
+{
+    return m_initialized;
 }
 
 quint16 SunSpecModel::modelId() const
@@ -68,12 +105,12 @@ void SunSpecModel::readBlockData()
                 }
 
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcSunSpec()) << "-->" << "Received block data" << this << unit.values().count();
+                qCDebug(dcSunSpecModelData()) << "-->" << "Received block data" << this << unit.values().count();
                 m_blockData = unit.values();
                 emit blockDataChanged(m_blockData);
 
                 if (m_blockData.count() != m_modelLength + 2) {
-                    qCWarning(dcSunSpec()) << "Received invalid block data count from read block data request. Model lenght:" << m_modelLength << "Response block count:" << m_blockData.count();
+                    qCWarning(dcSunSpecModelData()) << "Received invalid block data count from read block data request. Model lenght:" << m_modelLength << "Response block count:" << m_blockData.count();
                     return;
                 }
 
@@ -81,7 +118,7 @@ void SunSpecModel::readBlockData()
                 foreach (const QString &dataPointName, m_dataPoints.keys()) {
                     QVector<quint16> rawData = m_blockData.mid(m_dataPoints[dataPointName].addressOffset(), m_dataPoints[dataPointName].size());
                     m_dataPoints[dataPointName].setRawData(rawData);
-                    qCDebug(dcSunSpec()) << "Set raw data:" << m_dataPoints[dataPointName] << SunSpecDataPoint::registersToString(rawData) << (m_dataPoints[dataPointName].isValid() ? "Valid" : "Invalid");
+                    qCDebug(dcSunSpecModelData()) << "Set raw data:" << m_dataPoints[dataPointName] << SunSpecDataPoint::registersToString(rawData) << (m_dataPoints[dataPointName].isValid() ? "Valid" : "Invalid");
                 }
 
                 // Fill the private member data using the data points
@@ -95,17 +132,17 @@ void SunSpecModel::readBlockData()
             });
 
             connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error) {
-                qCWarning(dcSunSpec())  << name() << description() << "Modbus reply while reading block data. Error:" << error;
+                qCWarning(dcSunSpecModelData())  << name() << description() << "Modbus reply while reading block data. Error:" << error;
                 emit reply->finished(); // To make sure it will be deleted
             });
 
         } else {
-            qCWarning(dcSunSpec()) << "Read block data error: " << m_connection->modbusTcpClient()->errorString();
+            qCWarning(dcSunSpecModelData()) << "Read block data error: " << m_connection->modbusTcpClient()->errorString();
             delete reply; // broadcast replies return immediately
             return;
         }
     } else {
-        qCWarning(dcSunSpec()) << "Read block data error: " << m_connection->modbusTcpClient()->errorString();
+        qCWarning(dcSunSpecModelData()) << "Read block data error: " << m_connection->modbusTcpClient()->errorString();
         return;
     }
 }

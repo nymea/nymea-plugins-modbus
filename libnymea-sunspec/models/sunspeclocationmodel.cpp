@@ -86,12 +86,24 @@ qint32 SunSpecLocationModel::altitude() const
 void SunSpecLocationModel::processBlockData()
 {
     // Update properties according to the data point type
-    m_tm = m_dataPoints.value("Tm").toString();
-    m_date = m_dataPoints.value("Date").toString();
-    m_location = m_dataPoints.value("Loc").toString();
-    m_lat = m_dataPoints.value("Lat").toFloatWithSSF(-7);
-    m_longitude = m_dataPoints.value("Long").toFloatWithSSF(-7);
-    m_altitude = m_dataPoints.value("Alt").toInt32();
+    if (m_dataPoints.value("Tm").isValid())
+        m_tm = m_dataPoints.value("Tm").toString();
+
+    if (m_dataPoints.value("Date").isValid())
+        m_date = m_dataPoints.value("Date").toString();
+
+    if (m_dataPoints.value("Loc").isValid())
+        m_location = m_dataPoints.value("Loc").toString();
+
+    if (m_dataPoints.value("Lat").isValid())
+        m_lat = m_dataPoints.value("Lat").toFloatWithSSF(-7);
+
+    if (m_dataPoints.value("Long").isValid())
+        m_longitude = m_dataPoints.value("Long").toFloatWithSSF(-7);
+
+    if (m_dataPoints.value("Alt").isValid())
+        m_altitude = m_dataPoints.value("Alt").toInt32();
+
 
     qCDebug(dcSunSpec()) << this;
 }

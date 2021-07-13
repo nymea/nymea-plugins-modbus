@@ -272,32 +272,80 @@ QModbusReply *SunSpecControlsModel::setVArPctEna(Varpct_ena vArPctEna)
 void SunSpecControlsModel::processBlockData()
 {
     // Scale factors
-    m_wMaxLimPctSf = m_dataPoints.value("WMaxLimPct_SF").toInt16();
-    m_outPfSetSf = m_dataPoints.value("OutPFSet_SF").toInt16();
-    m_vArPctSf = m_dataPoints.value("VArPct_SF").toInt16();
+    if (m_dataPoints.value("WMaxLimPct_SF").isValid())
+        m_wMaxLimPctSf = m_dataPoints.value("WMaxLimPct_SF").toInt16();
+
+    if (m_dataPoints.value("OutPFSet_SF").isValid())
+        m_outPfSetSf = m_dataPoints.value("OutPFSet_SF").toInt16();
+
+    if (m_dataPoints.value("VArPct_SF").isValid())
+        m_vArPctSf = m_dataPoints.value("VArPct_SF").toInt16();
+
 
     // Update properties according to the data point type
-    m_connWinTms = m_dataPoints.value("Conn_WinTms").toUInt16();
-    m_connRvrtTms = m_dataPoints.value("Conn_RvrtTms").toUInt16();
-    m_conn = static_cast<Conn>(m_dataPoints.value("Conn").toUInt16());
-    m_wMaxLimPct = m_dataPoints.value("WMaxLimPct").toFloatWithSSF(m_wMaxLimPctSf);
-    m_wMaxLimPctWinTms = m_dataPoints.value("WMaxLimPct_WinTms").toUInt16();
-    m_wMaxLimPctRvrtTms = m_dataPoints.value("WMaxLimPct_RvrtTms").toUInt16();
-    m_wMaxLimPctRmpTms = m_dataPoints.value("WMaxLimPct_RmpTms").toUInt16();
-    m_wMaxLimEna = static_cast<Wmaxlim_ena>(m_dataPoints.value("WMaxLim_Ena").toUInt16());
-    m_outPfSet = m_dataPoints.value("OutPFSet").toFloatWithSSF(m_outPfSetSf);
-    m_outPfSetWinTms = m_dataPoints.value("OutPFSet_WinTms").toUInt16();
-    m_outPfSetRvrtTms = m_dataPoints.value("OutPFSet_RvrtTms").toUInt16();
-    m_outPfSetRmpTms = m_dataPoints.value("OutPFSet_RmpTms").toUInt16();
-    m_outPfSetEna = static_cast<Outpfset_ena>(m_dataPoints.value("OutPFSet_Ena").toUInt16());
-    m_vArWMaxPct = m_dataPoints.value("VArWMaxPct").toFloatWithSSF(m_vArPctSf);
-    m_vArMaxPct = m_dataPoints.value("VArMaxPct").toFloatWithSSF(m_vArPctSf);
-    m_vArAvalPct = m_dataPoints.value("VArAvalPct").toFloatWithSSF(m_vArPctSf);
-    m_vArPctWinTms = m_dataPoints.value("VArPct_WinTms").toUInt16();
-    m_vArPctRvrtTms = m_dataPoints.value("VArPct_RvrtTms").toUInt16();
-    m_vArPctRmpTms = m_dataPoints.value("VArPct_RmpTms").toUInt16();
-    m_vArPctMod = static_cast<Varpct_mod>(m_dataPoints.value("VArPct_Mod").toUInt16());
-    m_vArPctEna = static_cast<Varpct_ena>(m_dataPoints.value("VArPct_Ena").toUInt16());
+    if (m_dataPoints.value("Conn_WinTms").isValid())
+        m_connWinTms = m_dataPoints.value("Conn_WinTms").toUInt16();
+
+    if (m_dataPoints.value("Conn_RvrtTms").isValid())
+        m_connRvrtTms = m_dataPoints.value("Conn_RvrtTms").toUInt16();
+
+    if (m_dataPoints.value("Conn").isValid())
+        m_conn = static_cast<Conn>(m_dataPoints.value("Conn").toUInt16());
+
+    if (m_dataPoints.value("WMaxLimPct").isValid())
+        m_wMaxLimPct = m_dataPoints.value("WMaxLimPct").toFloatWithSSF(m_wMaxLimPctSf);
+
+    if (m_dataPoints.value("WMaxLimPct_WinTms").isValid())
+        m_wMaxLimPctWinTms = m_dataPoints.value("WMaxLimPct_WinTms").toUInt16();
+
+    if (m_dataPoints.value("WMaxLimPct_RvrtTms").isValid())
+        m_wMaxLimPctRvrtTms = m_dataPoints.value("WMaxLimPct_RvrtTms").toUInt16();
+
+    if (m_dataPoints.value("WMaxLimPct_RmpTms").isValid())
+        m_wMaxLimPctRmpTms = m_dataPoints.value("WMaxLimPct_RmpTms").toUInt16();
+
+    if (m_dataPoints.value("WMaxLim_Ena").isValid())
+        m_wMaxLimEna = static_cast<Wmaxlim_ena>(m_dataPoints.value("WMaxLim_Ena").toUInt16());
+
+    if (m_dataPoints.value("OutPFSet").isValid())
+        m_outPfSet = m_dataPoints.value("OutPFSet").toFloatWithSSF(m_outPfSetSf);
+
+    if (m_dataPoints.value("OutPFSet_WinTms").isValid())
+        m_outPfSetWinTms = m_dataPoints.value("OutPFSet_WinTms").toUInt16();
+
+    if (m_dataPoints.value("OutPFSet_RvrtTms").isValid())
+        m_outPfSetRvrtTms = m_dataPoints.value("OutPFSet_RvrtTms").toUInt16();
+
+    if (m_dataPoints.value("OutPFSet_RmpTms").isValid())
+        m_outPfSetRmpTms = m_dataPoints.value("OutPFSet_RmpTms").toUInt16();
+
+    if (m_dataPoints.value("OutPFSet_Ena").isValid())
+        m_outPfSetEna = static_cast<Outpfset_ena>(m_dataPoints.value("OutPFSet_Ena").toUInt16());
+
+    if (m_dataPoints.value("VArWMaxPct").isValid())
+        m_vArWMaxPct = m_dataPoints.value("VArWMaxPct").toFloatWithSSF(m_vArPctSf);
+
+    if (m_dataPoints.value("VArMaxPct").isValid())
+        m_vArMaxPct = m_dataPoints.value("VArMaxPct").toFloatWithSSF(m_vArPctSf);
+
+    if (m_dataPoints.value("VArAvalPct").isValid())
+        m_vArAvalPct = m_dataPoints.value("VArAvalPct").toFloatWithSSF(m_vArPctSf);
+
+    if (m_dataPoints.value("VArPct_WinTms").isValid())
+        m_vArPctWinTms = m_dataPoints.value("VArPct_WinTms").toUInt16();
+
+    if (m_dataPoints.value("VArPct_RvrtTms").isValid())
+        m_vArPctRvrtTms = m_dataPoints.value("VArPct_RvrtTms").toUInt16();
+
+    if (m_dataPoints.value("VArPct_RmpTms").isValid())
+        m_vArPctRmpTms = m_dataPoints.value("VArPct_RmpTms").toUInt16();
+
+    if (m_dataPoints.value("VArPct_Mod").isValid())
+        m_vArPctMod = static_cast<Varpct_mod>(m_dataPoints.value("VArPct_Mod").toUInt16());
+
+    if (m_dataPoints.value("VArPct_Ena").isValid())
+        m_vArPctEna = static_cast<Varpct_ena>(m_dataPoints.value("VArPct_Ena").toUInt16());
+
 
     qCDebug(dcSunSpec()) << this;
 }

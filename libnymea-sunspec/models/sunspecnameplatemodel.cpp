@@ -130,34 +130,86 @@ quint16 SunSpecNameplateModel::pad() const
 void SunSpecNameplateModel::processBlockData()
 {
     // Scale factors
-    m_wRtgSf = m_dataPoints.value("WRtg_SF").toInt16();
-    m_vaRtgSf = m_dataPoints.value("VARtg_SF").toInt16();
-    m_vArRtgSf = m_dataPoints.value("VArRtg_SF").toInt16();
-    m_aRtgSf = m_dataPoints.value("ARtg_SF").toInt16();
-    m_pfRtgSf = m_dataPoints.value("PFRtg_SF").toInt16();
-    m_whRtgSf = m_dataPoints.value("WHRtg_SF").toInt16();
-    m_ahrRtgSf = m_dataPoints.value("AhrRtg_SF").toInt16();
-    m_maxChaRteSf = m_dataPoints.value("MaxChaRte_SF").toInt16();
-    m_maxDisChaRteSf = m_dataPoints.value("MaxDisChaRte_SF").toInt16();
+    if (m_dataPoints.value("WRtg_SF").isValid())
+        m_wRtgSf = m_dataPoints.value("WRtg_SF").toInt16();
+
+    if (m_dataPoints.value("VARtg_SF").isValid())
+        m_vaRtgSf = m_dataPoints.value("VARtg_SF").toInt16();
+
+    if (m_dataPoints.value("VArRtg_SF").isValid())
+        m_vArRtgSf = m_dataPoints.value("VArRtg_SF").toInt16();
+
+    if (m_dataPoints.value("ARtg_SF").isValid())
+        m_aRtgSf = m_dataPoints.value("ARtg_SF").toInt16();
+
+    if (m_dataPoints.value("PFRtg_SF").isValid())
+        m_pfRtgSf = m_dataPoints.value("PFRtg_SF").toInt16();
+
+    if (m_dataPoints.value("WHRtg_SF").isValid())
+        m_whRtgSf = m_dataPoints.value("WHRtg_SF").toInt16();
+
+    if (m_dataPoints.value("AhrRtg_SF").isValid())
+        m_ahrRtgSf = m_dataPoints.value("AhrRtg_SF").toInt16();
+
+    if (m_dataPoints.value("MaxChaRte_SF").isValid())
+        m_maxChaRteSf = m_dataPoints.value("MaxChaRte_SF").toInt16();
+
+    if (m_dataPoints.value("MaxDisChaRte_SF").isValid())
+        m_maxDisChaRteSf = m_dataPoints.value("MaxDisChaRte_SF").toInt16();
+
 
     // Update properties according to the data point type
-    m_derTyp = static_cast<Dertyp>(m_dataPoints.value("DERTyp").toUInt16());
-    m_wRtg = m_dataPoints.value("WRtg").toFloatWithSSF(m_wRtgSf);
-    m_vaRtg = m_dataPoints.value("VARtg").toFloatWithSSF(m_vaRtgSf);
-    m_vArRtgQ1 = m_dataPoints.value("VArRtgQ1").toFloatWithSSF(m_vArRtgSf);
-    m_vArRtgQ2 = m_dataPoints.value("VArRtgQ2").toFloatWithSSF(m_vArRtgSf);
-    m_vArRtgQ3 = m_dataPoints.value("VArRtgQ3").toFloatWithSSF(m_vArRtgSf);
-    m_vArRtgQ4 = m_dataPoints.value("VArRtgQ4").toFloatWithSSF(m_vArRtgSf);
-    m_aRtg = m_dataPoints.value("ARtg").toFloatWithSSF(m_aRtgSf);
-    m_pfRtgQ1 = m_dataPoints.value("PFRtgQ1").toFloatWithSSF(m_pfRtgSf);
-    m_pfRtgQ2 = m_dataPoints.value("PFRtgQ2").toFloatWithSSF(m_pfRtgSf);
-    m_pfRtgQ3 = m_dataPoints.value("PFRtgQ3").toFloatWithSSF(m_pfRtgSf);
-    m_pfRtgQ4 = m_dataPoints.value("PFRtgQ4").toFloatWithSSF(m_pfRtgSf);
-    m_whRtg = m_dataPoints.value("WHRtg").toFloatWithSSF(m_whRtgSf);
-    m_ahrRtg = m_dataPoints.value("AhrRtg").toFloatWithSSF(m_ahrRtgSf);
-    m_maxChaRte = m_dataPoints.value("MaxChaRte").toFloatWithSSF(m_maxChaRteSf);
-    m_maxDisChaRte = m_dataPoints.value("MaxDisChaRte").toFloatWithSSF(m_maxDisChaRteSf);
-    m_pad = m_dataPoints.value("Pad").toUInt16();
+    if (m_dataPoints.value("DERTyp").isValid())
+        m_derTyp = static_cast<Dertyp>(m_dataPoints.value("DERTyp").toUInt16());
+
+    if (m_dataPoints.value("WRtg").isValid())
+        m_wRtg = m_dataPoints.value("WRtg").toFloatWithSSF(m_wRtgSf);
+
+    if (m_dataPoints.value("VARtg").isValid())
+        m_vaRtg = m_dataPoints.value("VARtg").toFloatWithSSF(m_vaRtgSf);
+
+    if (m_dataPoints.value("VArRtgQ1").isValid())
+        m_vArRtgQ1 = m_dataPoints.value("VArRtgQ1").toFloatWithSSF(m_vArRtgSf);
+
+    if (m_dataPoints.value("VArRtgQ2").isValid())
+        m_vArRtgQ2 = m_dataPoints.value("VArRtgQ2").toFloatWithSSF(m_vArRtgSf);
+
+    if (m_dataPoints.value("VArRtgQ3").isValid())
+        m_vArRtgQ3 = m_dataPoints.value("VArRtgQ3").toFloatWithSSF(m_vArRtgSf);
+
+    if (m_dataPoints.value("VArRtgQ4").isValid())
+        m_vArRtgQ4 = m_dataPoints.value("VArRtgQ4").toFloatWithSSF(m_vArRtgSf);
+
+    if (m_dataPoints.value("ARtg").isValid())
+        m_aRtg = m_dataPoints.value("ARtg").toFloatWithSSF(m_aRtgSf);
+
+    if (m_dataPoints.value("PFRtgQ1").isValid())
+        m_pfRtgQ1 = m_dataPoints.value("PFRtgQ1").toFloatWithSSF(m_pfRtgSf);
+
+    if (m_dataPoints.value("PFRtgQ2").isValid())
+        m_pfRtgQ2 = m_dataPoints.value("PFRtgQ2").toFloatWithSSF(m_pfRtgSf);
+
+    if (m_dataPoints.value("PFRtgQ3").isValid())
+        m_pfRtgQ3 = m_dataPoints.value("PFRtgQ3").toFloatWithSSF(m_pfRtgSf);
+
+    if (m_dataPoints.value("PFRtgQ4").isValid())
+        m_pfRtgQ4 = m_dataPoints.value("PFRtgQ4").toFloatWithSSF(m_pfRtgSf);
+
+    if (m_dataPoints.value("WHRtg").isValid())
+        m_whRtg = m_dataPoints.value("WHRtg").toFloatWithSSF(m_whRtgSf);
+
+    if (m_dataPoints.value("AhrRtg").isValid())
+        m_ahrRtg = m_dataPoints.value("AhrRtg").toFloatWithSSF(m_ahrRtgSf);
+
+    if (m_dataPoints.value("MaxChaRte").isValid())
+        m_maxChaRte = m_dataPoints.value("MaxChaRte").toFloatWithSSF(m_maxChaRteSf);
+
+    if (m_dataPoints.value("MaxDisChaRte").isValid())
+        m_maxDisChaRte = m_dataPoints.value("MaxDisChaRte").toFloatWithSSF(m_maxDisChaRteSf);
+
+    if (m_dataPoints.value("Pad").isValid())
+        m_pad = m_dataPoints.value("Pad").toUInt16();
+
 
     qCDebug(dcSunSpec()) << this;
 }

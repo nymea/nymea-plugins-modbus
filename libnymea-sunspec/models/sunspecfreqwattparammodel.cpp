@@ -126,18 +126,38 @@ quint16 SunSpecFreqWattParamModel::pad() const
 void SunSpecFreqWattParamModel::processBlockData()
 {
     // Scale factors
-    m_wGraSf = m_dataPoints.value("WGra_SF").toInt16();
-    m_hzStrStopSf = m_dataPoints.value("HzStrStop_SF").toInt16();
-    m_rmpIncDecSf = m_dataPoints.value("RmpIncDec_SF").toInt16();
+    if (m_dataPoints.value("WGra_SF").isValid())
+        m_wGraSf = m_dataPoints.value("WGra_SF").toInt16();
+
+    if (m_dataPoints.value("HzStrStop_SF").isValid())
+        m_hzStrStopSf = m_dataPoints.value("HzStrStop_SF").toInt16();
+
+    if (m_dataPoints.value("RmpIncDec_SF").isValid())
+        m_rmpIncDecSf = m_dataPoints.value("RmpIncDec_SF").toInt16();
+
 
     // Update properties according to the data point type
-    m_wGra = m_dataPoints.value("WGra").toFloatWithSSF(m_wGraSf);
-    m_hzStr = m_dataPoints.value("HzStr").toFloatWithSSF(m_hzStrStopSf);
-    m_hzStop = m_dataPoints.value("HzStop").toFloatWithSSF(m_hzStrStopSf);
-    m_hysEna = static_cast<HysenaFlags>(m_dataPoints.value("HysEna").toUInt16());
-    m_modEna = static_cast<ModenaFlags>(m_dataPoints.value("ModEna").toUInt16());
-    m_hzStopWGra = m_dataPoints.value("HzStopWGra").toFloatWithSSF(m_rmpIncDecSf);
-    m_pad = m_dataPoints.value("Pad").toUInt16();
+    if (m_dataPoints.value("WGra").isValid())
+        m_wGra = m_dataPoints.value("WGra").toFloatWithSSF(m_wGraSf);
+
+    if (m_dataPoints.value("HzStr").isValid())
+        m_hzStr = m_dataPoints.value("HzStr").toFloatWithSSF(m_hzStrStopSf);
+
+    if (m_dataPoints.value("HzStop").isValid())
+        m_hzStop = m_dataPoints.value("HzStop").toFloatWithSSF(m_hzStrStopSf);
+
+    if (m_dataPoints.value("HysEna").isValid())
+        m_hysEna = static_cast<HysenaFlags>(m_dataPoints.value("HysEna").toUInt16());
+
+    if (m_dataPoints.value("ModEna").isValid())
+        m_modEna = static_cast<ModenaFlags>(m_dataPoints.value("ModEna").toUInt16());
+
+    if (m_dataPoints.value("HzStopWGra").isValid())
+        m_hzStopWGra = m_dataPoints.value("HzStopWGra").toFloatWithSSF(m_rmpIncDecSf);
+
+    if (m_dataPoints.value("Pad").isValid())
+        m_pad = m_dataPoints.value("Pad").toUInt16();
+
 
     qCDebug(dcSunSpec()) << this;
 }

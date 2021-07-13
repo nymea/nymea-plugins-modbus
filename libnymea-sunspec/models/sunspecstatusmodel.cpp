@@ -130,28 +130,68 @@ float SunSpecStatusModel::ris() const
 void SunSpecStatusModel::processBlockData()
 {
     // Scale factors
-    m_vArAvalSf = m_dataPoints.value("VArAval_SF").toInt16();
-    m_wAvalSf = m_dataPoints.value("WAval_SF").toInt16();
-    m_risSf = m_dataPoints.value("Ris_SF").toInt16();
+    if (m_dataPoints.value("VArAval_SF").isValid())
+        m_vArAvalSf = m_dataPoints.value("VArAval_SF").toInt16();
+
+    if (m_dataPoints.value("WAval_SF").isValid())
+        m_wAvalSf = m_dataPoints.value("WAval_SF").toInt16();
+
+    if (m_dataPoints.value("Ris_SF").isValid())
+        m_risSf = m_dataPoints.value("Ris_SF").toInt16();
+
 
     // Update properties according to the data point type
-    m_pvConn = static_cast<PvconnFlags>(m_dataPoints.value("PVConn").toUInt16());
-    m_storConn = static_cast<StorconnFlags>(m_dataPoints.value("StorConn").toUInt16());
-    m_ecpConn = static_cast<EcpconnFlags>(m_dataPoints.value("ECPConn").toUInt16());
-    m_actWh = m_dataPoints.value("ActWh").toInt64();
-    m_actVAh = m_dataPoints.value("ActVAh").toInt64();
-    m_actVArhQ1 = m_dataPoints.value("ActVArhQ1").toInt64();
-    m_actVArhQ2 = m_dataPoints.value("ActVArhQ2").toInt64();
-    m_actVArhQ3 = m_dataPoints.value("ActVArhQ3").toInt64();
-    m_actVArhQ4 = m_dataPoints.value("ActVArhQ4").toInt64();
-    m_vArAval = m_dataPoints.value("VArAval").toFloatWithSSF(m_vArAvalSf);
-    m_wAval = m_dataPoints.value("WAval").toFloatWithSSF(m_wAvalSf);
-    m_stSetLimMsk = static_cast<StsetlimmskFlags>(m_dataPoints.value("StSetLimMsk").toUInt32());
-    m_stActCtl = static_cast<StactctlFlags>(m_dataPoints.value("StActCtl").toUInt32());
-    m_tmSrc = m_dataPoints.value("TmSrc").toString();
-    m_tms = m_dataPoints.value("Tms").toUInt32();
-    m_rtSt = static_cast<RtstFlags>(m_dataPoints.value("RtSt").toUInt16());
-    m_ris = m_dataPoints.value("Ris").toFloatWithSSF(m_risSf);
+    if (m_dataPoints.value("PVConn").isValid())
+        m_pvConn = static_cast<PvconnFlags>(m_dataPoints.value("PVConn").toUInt16());
+
+    if (m_dataPoints.value("StorConn").isValid())
+        m_storConn = static_cast<StorconnFlags>(m_dataPoints.value("StorConn").toUInt16());
+
+    if (m_dataPoints.value("ECPConn").isValid())
+        m_ecpConn = static_cast<EcpconnFlags>(m_dataPoints.value("ECPConn").toUInt16());
+
+    if (m_dataPoints.value("ActWh").isValid())
+        m_actWh = m_dataPoints.value("ActWh").toInt64();
+
+    if (m_dataPoints.value("ActVAh").isValid())
+        m_actVAh = m_dataPoints.value("ActVAh").toInt64();
+
+    if (m_dataPoints.value("ActVArhQ1").isValid())
+        m_actVArhQ1 = m_dataPoints.value("ActVArhQ1").toInt64();
+
+    if (m_dataPoints.value("ActVArhQ2").isValid())
+        m_actVArhQ2 = m_dataPoints.value("ActVArhQ2").toInt64();
+
+    if (m_dataPoints.value("ActVArhQ3").isValid())
+        m_actVArhQ3 = m_dataPoints.value("ActVArhQ3").toInt64();
+
+    if (m_dataPoints.value("ActVArhQ4").isValid())
+        m_actVArhQ4 = m_dataPoints.value("ActVArhQ4").toInt64();
+
+    if (m_dataPoints.value("VArAval").isValid())
+        m_vArAval = m_dataPoints.value("VArAval").toFloatWithSSF(m_vArAvalSf);
+
+    if (m_dataPoints.value("WAval").isValid())
+        m_wAval = m_dataPoints.value("WAval").toFloatWithSSF(m_wAvalSf);
+
+    if (m_dataPoints.value("StSetLimMsk").isValid())
+        m_stSetLimMsk = static_cast<StsetlimmskFlags>(m_dataPoints.value("StSetLimMsk").toUInt32());
+
+    if (m_dataPoints.value("StActCtl").isValid())
+        m_stActCtl = static_cast<StactctlFlags>(m_dataPoints.value("StActCtl").toUInt32());
+
+    if (m_dataPoints.value("TmSrc").isValid())
+        m_tmSrc = m_dataPoints.value("TmSrc").toString();
+
+    if (m_dataPoints.value("Tms").isValid())
+        m_tms = m_dataPoints.value("Tms").toUInt32();
+
+    if (m_dataPoints.value("RtSt").isValid())
+        m_rtSt = static_cast<RtstFlags>(m_dataPoints.value("RtSt").toUInt16());
+
+    if (m_dataPoints.value("Ris").isValid())
+        m_ris = m_dataPoints.value("Ris").toFloatWithSSF(m_risSf);
+
 
     qCDebug(dcSunSpec()) << this;
 }

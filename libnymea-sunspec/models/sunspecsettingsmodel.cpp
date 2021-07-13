@@ -262,38 +262,98 @@ QModbusReply *SunSpecSettingsModel::setConnPh(Connph connPh)
 void SunSpecSettingsModel::processBlockData()
 {
     // Scale factors
-    m_wMaxSf = m_dataPoints.value("WMax_SF").toInt16();
-    m_vRefSf = m_dataPoints.value("VRef_SF").toInt16();
-    m_vRefOfsSf = m_dataPoints.value("VRefOfs_SF").toInt16();
-    m_vMinMaxSf = m_dataPoints.value("VMinMax_SF").toInt16();
-    m_vaMaxSf = m_dataPoints.value("VAMax_SF").toInt16();
-    m_vArMaxSf = m_dataPoints.value("VArMax_SF").toInt16();
-    m_wGraSf = m_dataPoints.value("WGra_SF").toInt16();
-    m_pfMinSf = m_dataPoints.value("PFMin_SF").toInt16();
-    m_maxRmpRteSf = m_dataPoints.value("MaxRmpRte_SF").toInt16();
-    m_ecpNomHzSf = m_dataPoints.value("ECPNomHz_SF").toInt16();
+    if (m_dataPoints.value("WMax_SF").isValid())
+        m_wMaxSf = m_dataPoints.value("WMax_SF").toInt16();
+
+    if (m_dataPoints.value("VRef_SF").isValid())
+        m_vRefSf = m_dataPoints.value("VRef_SF").toInt16();
+
+    if (m_dataPoints.value("VRefOfs_SF").isValid())
+        m_vRefOfsSf = m_dataPoints.value("VRefOfs_SF").toInt16();
+
+    if (m_dataPoints.value("VMinMax_SF").isValid())
+        m_vMinMaxSf = m_dataPoints.value("VMinMax_SF").toInt16();
+
+    if (m_dataPoints.value("VAMax_SF").isValid())
+        m_vaMaxSf = m_dataPoints.value("VAMax_SF").toInt16();
+
+    if (m_dataPoints.value("VArMax_SF").isValid())
+        m_vArMaxSf = m_dataPoints.value("VArMax_SF").toInt16();
+
+    if (m_dataPoints.value("WGra_SF").isValid())
+        m_wGraSf = m_dataPoints.value("WGra_SF").toInt16();
+
+    if (m_dataPoints.value("PFMin_SF").isValid())
+        m_pfMinSf = m_dataPoints.value("PFMin_SF").toInt16();
+
+    if (m_dataPoints.value("MaxRmpRte_SF").isValid())
+        m_maxRmpRteSf = m_dataPoints.value("MaxRmpRte_SF").toInt16();
+
+    if (m_dataPoints.value("ECPNomHz_SF").isValid())
+        m_ecpNomHzSf = m_dataPoints.value("ECPNomHz_SF").toInt16();
+
 
     // Update properties according to the data point type
-    m_wMax = m_dataPoints.value("WMax").toFloatWithSSF(m_wMaxSf);
-    m_vRef = m_dataPoints.value("VRef").toFloatWithSSF(m_vRefSf);
-    m_vRefOfs = m_dataPoints.value("VRefOfs").toFloatWithSSF(m_vRefOfsSf);
-    m_vMax = m_dataPoints.value("VMax").toFloatWithSSF(m_vMinMaxSf);
-    m_vMin = m_dataPoints.value("VMin").toFloatWithSSF(m_vMinMaxSf);
-    m_vaMax = m_dataPoints.value("VAMax").toFloatWithSSF(m_vaMaxSf);
-    m_vArMaxQ1 = m_dataPoints.value("VArMaxQ1").toFloatWithSSF(m_vArMaxSf);
-    m_vArMaxQ2 = m_dataPoints.value("VArMaxQ2").toFloatWithSSF(m_vArMaxSf);
-    m_vArMaxQ3 = m_dataPoints.value("VArMaxQ3").toFloatWithSSF(m_vArMaxSf);
-    m_vArMaxQ4 = m_dataPoints.value("VArMaxQ4").toFloatWithSSF(m_vArMaxSf);
-    m_wGra = m_dataPoints.value("WGra").toFloatWithSSF(m_wGraSf);
-    m_pfMinQ1 = m_dataPoints.value("PFMinQ1").toFloatWithSSF(m_pfMinSf);
-    m_pfMinQ2 = m_dataPoints.value("PFMinQ2").toFloatWithSSF(m_pfMinSf);
-    m_pfMinQ3 = m_dataPoints.value("PFMinQ3").toFloatWithSSF(m_pfMinSf);
-    m_pfMinQ4 = m_dataPoints.value("PFMinQ4").toFloatWithSSF(m_pfMinSf);
-    m_vArAct = static_cast<Varact>(m_dataPoints.value("VArAct").toUInt16());
-    m_clcTotVa = static_cast<Clctotva>(m_dataPoints.value("ClcTotVA").toUInt16());
-    m_maxRmpRte = m_dataPoints.value("MaxRmpRte").toFloatWithSSF(m_maxRmpRteSf);
-    m_ecpNomHz = m_dataPoints.value("ECPNomHz").toFloatWithSSF(m_ecpNomHzSf);
-    m_connPh = static_cast<Connph>(m_dataPoints.value("ConnPh").toUInt16());
+    if (m_dataPoints.value("WMax").isValid())
+        m_wMax = m_dataPoints.value("WMax").toFloatWithSSF(m_wMaxSf);
+
+    if (m_dataPoints.value("VRef").isValid())
+        m_vRef = m_dataPoints.value("VRef").toFloatWithSSF(m_vRefSf);
+
+    if (m_dataPoints.value("VRefOfs").isValid())
+        m_vRefOfs = m_dataPoints.value("VRefOfs").toFloatWithSSF(m_vRefOfsSf);
+
+    if (m_dataPoints.value("VMax").isValid())
+        m_vMax = m_dataPoints.value("VMax").toFloatWithSSF(m_vMinMaxSf);
+
+    if (m_dataPoints.value("VMin").isValid())
+        m_vMin = m_dataPoints.value("VMin").toFloatWithSSF(m_vMinMaxSf);
+
+    if (m_dataPoints.value("VAMax").isValid())
+        m_vaMax = m_dataPoints.value("VAMax").toFloatWithSSF(m_vaMaxSf);
+
+    if (m_dataPoints.value("VArMaxQ1").isValid())
+        m_vArMaxQ1 = m_dataPoints.value("VArMaxQ1").toFloatWithSSF(m_vArMaxSf);
+
+    if (m_dataPoints.value("VArMaxQ2").isValid())
+        m_vArMaxQ2 = m_dataPoints.value("VArMaxQ2").toFloatWithSSF(m_vArMaxSf);
+
+    if (m_dataPoints.value("VArMaxQ3").isValid())
+        m_vArMaxQ3 = m_dataPoints.value("VArMaxQ3").toFloatWithSSF(m_vArMaxSf);
+
+    if (m_dataPoints.value("VArMaxQ4").isValid())
+        m_vArMaxQ4 = m_dataPoints.value("VArMaxQ4").toFloatWithSSF(m_vArMaxSf);
+
+    if (m_dataPoints.value("WGra").isValid())
+        m_wGra = m_dataPoints.value("WGra").toFloatWithSSF(m_wGraSf);
+
+    if (m_dataPoints.value("PFMinQ1").isValid())
+        m_pfMinQ1 = m_dataPoints.value("PFMinQ1").toFloatWithSSF(m_pfMinSf);
+
+    if (m_dataPoints.value("PFMinQ2").isValid())
+        m_pfMinQ2 = m_dataPoints.value("PFMinQ2").toFloatWithSSF(m_pfMinSf);
+
+    if (m_dataPoints.value("PFMinQ3").isValid())
+        m_pfMinQ3 = m_dataPoints.value("PFMinQ3").toFloatWithSSF(m_pfMinSf);
+
+    if (m_dataPoints.value("PFMinQ4").isValid())
+        m_pfMinQ4 = m_dataPoints.value("PFMinQ4").toFloatWithSSF(m_pfMinSf);
+
+    if (m_dataPoints.value("VArAct").isValid())
+        m_vArAct = static_cast<Varact>(m_dataPoints.value("VArAct").toUInt16());
+
+    if (m_dataPoints.value("ClcTotVA").isValid())
+        m_clcTotVa = static_cast<Clctotva>(m_dataPoints.value("ClcTotVA").toUInt16());
+
+    if (m_dataPoints.value("MaxRmpRte").isValid())
+        m_maxRmpRte = m_dataPoints.value("MaxRmpRte").toFloatWithSSF(m_maxRmpRteSf);
+
+    if (m_dataPoints.value("ECPNomHz").isValid())
+        m_ecpNomHz = m_dataPoints.value("ECPNomHz").toFloatWithSSF(m_ecpNomHzSf);
+
+    if (m_dataPoints.value("ConnPh").isValid())
+        m_connPh = static_cast<Connph>(m_dataPoints.value("ConnPh").toUInt16());
+
 
     qCDebug(dcSunSpec()) << this;
 }

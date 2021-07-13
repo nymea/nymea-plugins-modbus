@@ -14,8 +14,6 @@ SOURCES += \
     sunspecconnection.cpp \
     sunspecdatapoint.cpp \
     sunspecdevice.cpp \
-    sunspecinverter.cpp \
-    sunspecmeter.cpp \
     sunspecmodel.cpp \
     sunspecstorage.cpp
 
@@ -24,8 +22,6 @@ HEADERS += \
     sunspecconnection.h \
     sunspecdatapoint.h \
     sunspecdevice.h \
-    sunspecinverter.h \
-    sunspecmeter.h \
     sunspecmodel.h \
     sunspecstorage.h
 

@@ -186,37 +186,99 @@ quint32 SunSpecInverterThreePhaseFloatModel::vendorEventBitfield4() const
 void SunSpecInverterThreePhaseFloatModel::processBlockData()
 {
     // Update properties according to the data point type
-    m_amps = m_dataPoints.value("A").toFloat();
-    m_ampsPhaseA = m_dataPoints.value("AphA").toFloat();
-    m_ampsPhaseB = m_dataPoints.value("AphB").toFloat();
-    m_ampsPhaseC = m_dataPoints.value("AphC").toFloat();
-    m_phaseVoltageAb = m_dataPoints.value("PPVphAB").toFloat();
-    m_phaseVoltageBc = m_dataPoints.value("PPVphBC").toFloat();
-    m_phaseVoltageCa = m_dataPoints.value("PPVphCA").toFloat();
-    m_phaseVoltageAn = m_dataPoints.value("PhVphA").toFloat();
-    m_phaseVoltageBn = m_dataPoints.value("PhVphB").toFloat();
-    m_phaseVoltageCn = m_dataPoints.value("PhVphC").toFloat();
-    m_watts = m_dataPoints.value("W").toFloat();
-    m_hz = m_dataPoints.value("Hz").toFloat();
-    m_va = m_dataPoints.value("VA").toFloat();
-    m_vAr = m_dataPoints.value("VAr").toFloat();
-    m_pf = m_dataPoints.value("PF").toFloat();
-    m_wattHours = m_dataPoints.value("WH").toFloat();
-    m_dcAmps = m_dataPoints.value("DCA").toFloat();
-    m_dcVoltage = m_dataPoints.value("DCV").toFloat();
-    m_dcWatts = m_dataPoints.value("DCW").toFloat();
-    m_cabinetTemperature = m_dataPoints.value("TmpCab").toFloat();
-    m_heatSinkTemperature = m_dataPoints.value("TmpSnk").toFloat();
-    m_transformerTemperature = m_dataPoints.value("TmpTrns").toFloat();
-    m_otherTemperature = m_dataPoints.value("TmpOt").toFloat();
-    m_operatingState = static_cast<St>(m_dataPoints.value("St").toUInt16());
-    m_vendorOperatingState = m_dataPoints.value("StVnd").toUInt16();
-    m_event1 = static_cast<Evt1Flags>(m_dataPoints.value("Evt1").toUInt32());
-    m_eventBitfield2 = m_dataPoints.value("Evt2").toUInt32();
-    m_vendorEventBitfield1 = m_dataPoints.value("EvtVnd1").toUInt32();
-    m_vendorEventBitfield2 = m_dataPoints.value("EvtVnd2").toUInt32();
-    m_vendorEventBitfield3 = m_dataPoints.value("EvtVnd3").toUInt32();
-    m_vendorEventBitfield4 = m_dataPoints.value("EvtVnd4").toUInt32();
+    if (m_dataPoints.value("A").isValid())
+        m_amps = m_dataPoints.value("A").toFloat();
+
+    if (m_dataPoints.value("AphA").isValid())
+        m_ampsPhaseA = m_dataPoints.value("AphA").toFloat();
+
+    if (m_dataPoints.value("AphB").isValid())
+        m_ampsPhaseB = m_dataPoints.value("AphB").toFloat();
+
+    if (m_dataPoints.value("AphC").isValid())
+        m_ampsPhaseC = m_dataPoints.value("AphC").toFloat();
+
+    if (m_dataPoints.value("PPVphAB").isValid())
+        m_phaseVoltageAb = m_dataPoints.value("PPVphAB").toFloat();
+
+    if (m_dataPoints.value("PPVphBC").isValid())
+        m_phaseVoltageBc = m_dataPoints.value("PPVphBC").toFloat();
+
+    if (m_dataPoints.value("PPVphCA").isValid())
+        m_phaseVoltageCa = m_dataPoints.value("PPVphCA").toFloat();
+
+    if (m_dataPoints.value("PhVphA").isValid())
+        m_phaseVoltageAn = m_dataPoints.value("PhVphA").toFloat();
+
+    if (m_dataPoints.value("PhVphB").isValid())
+        m_phaseVoltageBn = m_dataPoints.value("PhVphB").toFloat();
+
+    if (m_dataPoints.value("PhVphC").isValid())
+        m_phaseVoltageCn = m_dataPoints.value("PhVphC").toFloat();
+
+    if (m_dataPoints.value("W").isValid())
+        m_watts = m_dataPoints.value("W").toFloat();
+
+    if (m_dataPoints.value("Hz").isValid())
+        m_hz = m_dataPoints.value("Hz").toFloat();
+
+    if (m_dataPoints.value("VA").isValid())
+        m_va = m_dataPoints.value("VA").toFloat();
+
+    if (m_dataPoints.value("VAr").isValid())
+        m_vAr = m_dataPoints.value("VAr").toFloat();
+
+    if (m_dataPoints.value("PF").isValid())
+        m_pf = m_dataPoints.value("PF").toFloat();
+
+    if (m_dataPoints.value("WH").isValid())
+        m_wattHours = m_dataPoints.value("WH").toFloat();
+
+    if (m_dataPoints.value("DCA").isValid())
+        m_dcAmps = m_dataPoints.value("DCA").toFloat();
+
+    if (m_dataPoints.value("DCV").isValid())
+        m_dcVoltage = m_dataPoints.value("DCV").toFloat();
+
+    if (m_dataPoints.value("DCW").isValid())
+        m_dcWatts = m_dataPoints.value("DCW").toFloat();
+
+    if (m_dataPoints.value("TmpCab").isValid())
+        m_cabinetTemperature = m_dataPoints.value("TmpCab").toFloat();
+
+    if (m_dataPoints.value("TmpSnk").isValid())
+        m_heatSinkTemperature = m_dataPoints.value("TmpSnk").toFloat();
+
+    if (m_dataPoints.value("TmpTrns").isValid())
+        m_transformerTemperature = m_dataPoints.value("TmpTrns").toFloat();
+
+    if (m_dataPoints.value("TmpOt").isValid())
+        m_otherTemperature = m_dataPoints.value("TmpOt").toFloat();
+
+    if (m_dataPoints.value("St").isValid())
+        m_operatingState = static_cast<St>(m_dataPoints.value("St").toUInt16());
+
+    if (m_dataPoints.value("StVnd").isValid())
+        m_vendorOperatingState = m_dataPoints.value("StVnd").toUInt16();
+
+    if (m_dataPoints.value("Evt1").isValid())
+        m_event1 = static_cast<Evt1Flags>(m_dataPoints.value("Evt1").toUInt32());
+
+    if (m_dataPoints.value("Evt2").isValid())
+        m_eventBitfield2 = m_dataPoints.value("Evt2").toUInt32();
+
+    if (m_dataPoints.value("EvtVnd1").isValid())
+        m_vendorEventBitfield1 = m_dataPoints.value("EvtVnd1").toUInt32();
+
+    if (m_dataPoints.value("EvtVnd2").isValid())
+        m_vendorEventBitfield2 = m_dataPoints.value("EvtVnd2").toUInt32();
+
+    if (m_dataPoints.value("EvtVnd3").isValid())
+        m_vendorEventBitfield3 = m_dataPoints.value("EvtVnd3").toUInt32();
+
+    if (m_dataPoints.value("EvtVnd4").isValid())
+        m_vendorEventBitfield4 = m_dataPoints.value("EvtVnd4").toUInt32();
+
 
     qCDebug(dcSunSpec()) << this;
 }

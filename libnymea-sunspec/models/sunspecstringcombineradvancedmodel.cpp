@@ -106,29 +106,71 @@ quint32 SunSpecStringCombinerAdvancedModel::wattHours() const
 void SunSpecStringCombinerAdvancedModel::processBlockData()
 {
     // Scale factors
-    m_dCA_SF = m_dataPoints.value("DCA_SF").toInt16();
-    m_dCAhr_SF = m_dataPoints.value("DCAhr_SF").toInt16();
-    m_dCV_SF = m_dataPoints.value("DCV_SF").toInt16();
-    m_dCW_SF = m_dataPoints.value("DCW_SF").toInt16();
-    m_dCWh_SF = m_dataPoints.value("DCWh_SF").toInt16();
-    m_inDCA_SF = m_dataPoints.value("InDCA_SF").toInt16();
-    m_inDCAhr_SF = m_dataPoints.value("InDCAhr_SF").toInt16();
-    m_inDCV_SF = m_dataPoints.value("InDCV_SF").toInt16();
-    m_inDCW_SF = m_dataPoints.value("InDCW_SF").toInt16();
-    m_inDCWh_SF = m_dataPoints.value("InDCWh_SF").toInt16();
+    if (m_dataPoints.value("DCA_SF").isValid())
+        m_dCA_SF = m_dataPoints.value("DCA_SF").toInt16();
+
+    if (m_dataPoints.value("DCAhr_SF").isValid())
+        m_dCAhr_SF = m_dataPoints.value("DCAhr_SF").toInt16();
+
+    if (m_dataPoints.value("DCV_SF").isValid())
+        m_dCV_SF = m_dataPoints.value("DCV_SF").toInt16();
+
+    if (m_dataPoints.value("DCW_SF").isValid())
+        m_dCW_SF = m_dataPoints.value("DCW_SF").toInt16();
+
+    if (m_dataPoints.value("DCWh_SF").isValid())
+        m_dCWh_SF = m_dataPoints.value("DCWh_SF").toInt16();
+
+    if (m_dataPoints.value("InDCA_SF").isValid())
+        m_inDCA_SF = m_dataPoints.value("InDCA_SF").toInt16();
+
+    if (m_dataPoints.value("InDCAhr_SF").isValid())
+        m_inDCAhr_SF = m_dataPoints.value("InDCAhr_SF").toInt16();
+
+    if (m_dataPoints.value("InDCV_SF").isValid())
+        m_inDCV_SF = m_dataPoints.value("InDCV_SF").toInt16();
+
+    if (m_dataPoints.value("InDCW_SF").isValid())
+        m_inDCW_SF = m_dataPoints.value("InDCW_SF").toInt16();
+
+    if (m_dataPoints.value("InDCWh_SF").isValid())
+        m_inDCWh_SF = m_dataPoints.value("InDCWh_SF").toInt16();
+
 
     // Update properties according to the data point type
-    m_rating = m_dataPoints.value("DCAMax").toFloatWithSSF(m_dCA_SF);
-    m_n = m_dataPoints.value("N").toUInt16();
-    m_eventFlags = static_cast<EvtFlags>(m_dataPoints.value("Evt").toUInt32());
-    m_vendorEvent = m_dataPoints.value("EvtVnd").toUInt32();
-    m_amps = m_dataPoints.value("DCA").toFloatWithSSF(m_dCA_SF);
-    m_ampHours = m_dataPoints.value("DCAhr").toFloatWithSSF(m_dCAhr_SF);
-    m_voltage = m_dataPoints.value("DCV").toFloatWithSSF(m_dCV_SF);
-    m_temp = m_dataPoints.value("Tmp").toInt16();
-    m_watts = m_dataPoints.value("DCW").toFloatWithSSF(m_dCW_SF);
-    m_pr = m_dataPoints.value("DCPR").toInt16();
-    m_wattHours = m_dataPoints.value("DCWh").toFloatWithSSF(m_dCWh_SF);
+    if (m_dataPoints.value("DCAMax").isValid())
+        m_rating = m_dataPoints.value("DCAMax").toFloatWithSSF(m_dCA_SF);
+
+    if (m_dataPoints.value("N").isValid())
+        m_n = m_dataPoints.value("N").toUInt16();
+
+    if (m_dataPoints.value("Evt").isValid())
+        m_eventFlags = static_cast<EvtFlags>(m_dataPoints.value("Evt").toUInt32());
+
+    if (m_dataPoints.value("EvtVnd").isValid())
+        m_vendorEvent = m_dataPoints.value("EvtVnd").toUInt32();
+
+    if (m_dataPoints.value("DCA").isValid())
+        m_amps = m_dataPoints.value("DCA").toFloatWithSSF(m_dCA_SF);
+
+    if (m_dataPoints.value("DCAhr").isValid())
+        m_ampHours = m_dataPoints.value("DCAhr").toFloatWithSSF(m_dCAhr_SF);
+
+    if (m_dataPoints.value("DCV").isValid())
+        m_voltage = m_dataPoints.value("DCV").toFloatWithSSF(m_dCV_SF);
+
+    if (m_dataPoints.value("Tmp").isValid())
+        m_temp = m_dataPoints.value("Tmp").toInt16();
+
+    if (m_dataPoints.value("DCW").isValid())
+        m_watts = m_dataPoints.value("DCW").toFloatWithSSF(m_dCW_SF);
+
+    if (m_dataPoints.value("DCPR").isValid())
+        m_pr = m_dataPoints.value("DCPR").toInt16();
+
+    if (m_dataPoints.value("DCWh").isValid())
+        m_wattHours = m_dataPoints.value("DCWh").toFloatWithSSF(m_dCWh_SF);
+
 
     qCDebug(dcSunSpec()) << this;
 }

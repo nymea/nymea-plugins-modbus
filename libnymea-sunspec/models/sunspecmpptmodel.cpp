@@ -74,15 +74,29 @@ quint16 SunSpecMpptModel::timestampPeriod() const
 void SunSpecMpptModel::processBlockData()
 {
     // Scale factors
-    m_currentScaleFactor = m_dataPoints.value("DCA_SF").toInt16();
-    m_voltageScaleFactor = m_dataPoints.value("DCV_SF").toInt16();
-    m_powerScaleFactor = m_dataPoints.value("DCW_SF").toInt16();
-    m_energyScaleFactor = m_dataPoints.value("DCWH_SF").toInt16();
+    if (m_dataPoints.value("DCA_SF").isValid())
+        m_currentScaleFactor = m_dataPoints.value("DCA_SF").toInt16();
+
+    if (m_dataPoints.value("DCV_SF").isValid())
+        m_voltageScaleFactor = m_dataPoints.value("DCV_SF").toInt16();
+
+    if (m_dataPoints.value("DCW_SF").isValid())
+        m_powerScaleFactor = m_dataPoints.value("DCW_SF").toInt16();
+
+    if (m_dataPoints.value("DCWH_SF").isValid())
+        m_energyScaleFactor = m_dataPoints.value("DCWH_SF").toInt16();
+
 
     // Update properties according to the data point type
-    m_globalEvents = static_cast<EvtFlags>(m_dataPoints.value("Evt").toUInt32());
-    m_numberOfModules = m_dataPoints.value("N").toUInt16();
-    m_timestampPeriod = m_dataPoints.value("TmsPer").toUInt16();
+    if (m_dataPoints.value("Evt").isValid())
+        m_globalEvents = static_cast<EvtFlags>(m_dataPoints.value("Evt").toUInt32());
+
+    if (m_dataPoints.value("N").isValid())
+        m_numberOfModules = m_dataPoints.value("N").toUInt16();
+
+    if (m_dataPoints.value("TmsPer").isValid())
+        m_timestampPeriod = m_dataPoints.value("TmsPer").toUInt16();
+
 
     qCDebug(dcSunSpec()) << this;
 }

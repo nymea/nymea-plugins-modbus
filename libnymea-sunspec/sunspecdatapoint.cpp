@@ -454,7 +454,7 @@ QVector<quint16> SunSpecDataPoint::convertFromInt16(qint16 value)
 QVector<quint16> SunSpecDataPoint::convertFromUInt32(quint32 value)
 {
     QVector<quint16> values;
-    values << static_cast<quint16>(value | 0x000000FF);
+    values << static_cast<quint16>(value | 0x0000FFFF);
     values << static_cast<quint16>(value >> 16);
     return values;
 }
@@ -462,6 +462,54 @@ QVector<quint16> SunSpecDataPoint::convertFromUInt32(quint32 value)
 QVector<quint16> SunSpecDataPoint::convertFromInt32(qint32 value)
 {
     return SunSpecDataPoint::convertFromUInt32(static_cast<quint32>(value));
+}
+
+QVector<quint16> SunSpecDataPoint::convertFromUInt64(quint64 value)
+{
+    QVector<quint16> values;
+    values << static_cast<quint16>(value | 0x000000000000FFFF);
+    values << static_cast<quint16>(value >> 16);
+    return values;
+}
+
+QVector<quint16> SunSpecDataPoint::convertFromInt64(qint64 value)
+{
+    Q_UNUSED(value)
+    return QVector<quint16>();
+}
+
+QVector<quint16> SunSpecDataPoint::convertFromFloatWithSSF(float value, qint16 scaleFactor, DataType dataType)
+{
+    QVector<quint16> rawData;
+    switch (dataType) {
+    case Acc16:
+    case UInt16: {
+        quint16 rawValue = static_cast<quint16>(value * pow(10, -1 * scaleFactor));
+        rawData << rawValue;
+        break;
+    }
+    case Int16: {
+        quint16 rawValue = static_cast<quint16>(value * pow(10, -1 * scaleFactor));
+        rawData << rawValue;
+        break;
+    }
+    case Acc32:
+    case UInt32: {
+        quint32 rawValue = static_cast<quint32>(value * pow(10, -1 * scaleFactor));
+        rawData = SunSpecDataPoint::convertFromUInt32(rawValue);
+        break;
+    }
+    case Int32: {
+        qint32 rawValue = static_cast<qint32>(value * pow(10, -1 * scaleFactor));
+        rawData = SunSpecDataPoint::convertFromInt32(rawValue);
+        break;
+    }
+    default:
+        Q_ASSERT_X(false,  "SunSpecDataPoint", QString("unhandled data type for converting from float with scale factor using data type %1").arg(dataType).toLatin1());
+        break;
+    }
+
+    return rawData;
 }
 
 QDebug operator<<(QDebug debug, const SunSpecDataPoint &dataPoint)

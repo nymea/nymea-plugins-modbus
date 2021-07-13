@@ -121,6 +121,7 @@ public:
 
     static DataType stringToDataType(const QString &typString);
 
+    // Convert to
     quint16 toUInt16() const;
     qint16 toInt16() const;
     quint32 toUInt32() const;
@@ -135,10 +136,14 @@ public:
 
     static QString registersToString(const QVector<quint16> &registers);
 
+    // Convert from
     static QVector<quint16> convertFromUInt16(quint16 value);
     static QVector<quint16> convertFromInt16(qint16 value);
     static QVector<quint16> convertFromUInt32(quint32 value);
     static QVector<quint16> convertFromInt32(qint32 value);
+    static QVector<quint16> convertFromUInt64(quint64 value);
+    static QVector<quint16> convertFromInt64(qint64 value);
+    static QVector<quint16> convertFromFloatWithSSF(float value, qint16 scaleFactor, DataType dataType);
 
 private:
     QString m_name;

@@ -66,7 +66,9 @@ quint16 SunSpecFlowBatteryStackModel::stackPointsToBeDetermined() const
 void SunSpecFlowBatteryStackModel::processBlockData()
 {
     // Update properties according to the data point type
-    m_stackPointsToBeDetermined = m_dataPoints.value("StackTBD").toUInt16();
+    if (m_dataPoints.value("StackTBD").isValid())
+        m_stackPointsToBeDetermined = m_dataPoints.value("StackTBD").toUInt16();
+
 
     qCDebug(dcSunSpec()) << this;
 }

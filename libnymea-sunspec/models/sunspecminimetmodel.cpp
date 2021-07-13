@@ -78,10 +78,18 @@ quint16 SunSpecMiniMetModel::windSpeed() const
 void SunSpecMiniMetModel::processBlockData()
 {
     // Update properties according to the data point type
-    m_ghi = m_dataPoints.value("GHI").toUInt16();
-    m_temp = m_dataPoints.value("TmpBOM").toFloatWithSSF(-1);
-    m_ambientTemperature = m_dataPoints.value("TmpAmb").toFloatWithSSF(-1);
-    m_windSpeed = m_dataPoints.value("WndSpd").toUInt16();
+    if (m_dataPoints.value("GHI").isValid())
+        m_ghi = m_dataPoints.value("GHI").toUInt16();
+
+    if (m_dataPoints.value("TmpBOM").isValid())
+        m_temp = m_dataPoints.value("TmpBOM").toFloatWithSSF(-1);
+
+    if (m_dataPoints.value("TmpAmb").isValid())
+        m_ambientTemperature = m_dataPoints.value("TmpAmb").toFloatWithSSF(-1);
+
+    if (m_dataPoints.value("WndSpd").isValid())
+        m_windSpeed = m_dataPoints.value("WndSpd").toUInt16();
+
 
     qCDebug(dcSunSpec()) << this;
 }

@@ -69,6 +69,8 @@ public:
     bool connectDevice();
     void disconnectDevice();
 
+    quint16 baseRegister() const;
+
     QList<SunSpecModel *> models() const;
 
 public slots:

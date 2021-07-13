@@ -126,16 +126,32 @@ quint16 SunSpecPricingModel::pad() const
 void SunSpecPricingModel::processBlockData()
 {
     // Scale factors
-    m_sigSf = m_dataPoints.value("Sig_SF").toInt16();
+    if (m_dataPoints.value("Sig_SF").isValid())
+        m_sigSf = m_dataPoints.value("Sig_SF").toInt16();
+
 
     // Update properties according to the data point type
-    m_modEna = static_cast<ModenaFlags>(m_dataPoints.value("ModEna").toUInt16());
-    m_sigType = static_cast<Sigtype>(m_dataPoints.value("SigType").toUInt16());
-    m_sig = m_dataPoints.value("Sig").toFloatWithSSF(m_sigSf);
-    m_winTms = m_dataPoints.value("WinTms").toUInt16();
-    m_rvtTms = m_dataPoints.value("RvtTms").toUInt16();
-    m_rmpTms = m_dataPoints.value("RmpTms").toUInt16();
-    m_pad = m_dataPoints.value("Pad").toUInt16();
+    if (m_dataPoints.value("ModEna").isValid())
+        m_modEna = static_cast<ModenaFlags>(m_dataPoints.value("ModEna").toUInt16());
+
+    if (m_dataPoints.value("SigType").isValid())
+        m_sigType = static_cast<Sigtype>(m_dataPoints.value("SigType").toUInt16());
+
+    if (m_dataPoints.value("Sig").isValid())
+        m_sig = m_dataPoints.value("Sig").toFloatWithSSF(m_sigSf);
+
+    if (m_dataPoints.value("WinTms").isValid())
+        m_winTms = m_dataPoints.value("WinTms").toUInt16();
+
+    if (m_dataPoints.value("RvtTms").isValid())
+        m_rvtTms = m_dataPoints.value("RvtTms").toUInt16();
+
+    if (m_dataPoints.value("RmpTms").isValid())
+        m_rmpTms = m_dataPoints.value("RmpTms").toUInt16();
+
+    if (m_dataPoints.value("Pad").isValid())
+        m_pad = m_dataPoints.value("Pad").toUInt16();
+
 
     qCDebug(dcSunSpec()) << this;
 }

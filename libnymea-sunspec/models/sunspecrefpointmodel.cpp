@@ -78,10 +78,18 @@ quint16 SunSpecRefPointModel::temperature() const
 void SunSpecRefPointModel::processBlockData()
 {
     // Update properties according to the data point type
-    m_ghi = m_dataPoints.value("GHI").toUInt16();
-    m_amps = m_dataPoints.value("A").toUInt16();
-    m_voltage = m_dataPoints.value("V").toUInt16();
-    m_temperature = m_dataPoints.value("Tmp").toUInt16();
+    if (m_dataPoints.value("GHI").isValid())
+        m_ghi = m_dataPoints.value("GHI").toUInt16();
+
+    if (m_dataPoints.value("A").isValid())
+        m_amps = m_dataPoints.value("A").toUInt16();
+
+    if (m_dataPoints.value("V").isValid())
+        m_voltage = m_dataPoints.value("V").toUInt16();
+
+    if (m_dataPoints.value("Tmp").isValid())
+        m_temperature = m_dataPoints.value("Tmp").toUInt16();
+
 
     qCDebug(dcSunSpec()) << this;
 }

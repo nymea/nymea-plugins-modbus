@@ -176,22 +176,50 @@ quint16 SunSpecReactiveCurrentModel::pad() const
 void SunSpecReactiveCurrentModel::processBlockData()
 {
     // Scale factors
-    m_arGraSf = m_dataPoints.value("ArGra_SF").toInt16();
-    m_vRefPctSf = m_dataPoints.value("VRefPct_SF").toInt16();
+    if (m_dataPoints.value("ArGra_SF").isValid())
+        m_arGraSf = m_dataPoints.value("ArGra_SF").toInt16();
+
+    if (m_dataPoints.value("VRefPct_SF").isValid())
+        m_vRefPctSf = m_dataPoints.value("VRefPct_SF").toInt16();
+
 
     // Update properties according to the data point type
-    m_arGraMod = static_cast<Argramod>(m_dataPoints.value("ArGraMod").toUInt16());
-    m_arGraSag = m_dataPoints.value("ArGraSag").toFloatWithSSF(m_arGraSf);
-    m_arGraSwell = m_dataPoints.value("ArGraSwell").toFloatWithSSF(m_arGraSf);
-    m_modEna = static_cast<ModenaFlags>(m_dataPoints.value("ModEna").toUInt16());
-    m_filTms = m_dataPoints.value("FilTms").toUInt16();
-    m_dbVMin = m_dataPoints.value("DbVMin").toFloatWithSSF(m_vRefPctSf);
-    m_dbVMax = m_dataPoints.value("DbVMax").toFloatWithSSF(m_vRefPctSf);
-    m_blkZnV = m_dataPoints.value("BlkZnV").toFloatWithSSF(m_vRefPctSf);
-    m_hysBlkZnV = m_dataPoints.value("HysBlkZnV").toFloatWithSSF(m_vRefPctSf);
-    m_blkZnTmms = m_dataPoints.value("BlkZnTmms").toUInt16();
-    m_holdTmms = m_dataPoints.value("HoldTmms").toUInt16();
-    m_pad = m_dataPoints.value("Pad").toUInt16();
+    if (m_dataPoints.value("ArGraMod").isValid())
+        m_arGraMod = static_cast<Argramod>(m_dataPoints.value("ArGraMod").toUInt16());
+
+    if (m_dataPoints.value("ArGraSag").isValid())
+        m_arGraSag = m_dataPoints.value("ArGraSag").toFloatWithSSF(m_arGraSf);
+
+    if (m_dataPoints.value("ArGraSwell").isValid())
+        m_arGraSwell = m_dataPoints.value("ArGraSwell").toFloatWithSSF(m_arGraSf);
+
+    if (m_dataPoints.value("ModEna").isValid())
+        m_modEna = static_cast<ModenaFlags>(m_dataPoints.value("ModEna").toUInt16());
+
+    if (m_dataPoints.value("FilTms").isValid())
+        m_filTms = m_dataPoints.value("FilTms").toUInt16();
+
+    if (m_dataPoints.value("DbVMin").isValid())
+        m_dbVMin = m_dataPoints.value("DbVMin").toFloatWithSSF(m_vRefPctSf);
+
+    if (m_dataPoints.value("DbVMax").isValid())
+        m_dbVMax = m_dataPoints.value("DbVMax").toFloatWithSSF(m_vRefPctSf);
+
+    if (m_dataPoints.value("BlkZnV").isValid())
+        m_blkZnV = m_dataPoints.value("BlkZnV").toFloatWithSSF(m_vRefPctSf);
+
+    if (m_dataPoints.value("HysBlkZnV").isValid())
+        m_hysBlkZnV = m_dataPoints.value("HysBlkZnV").toFloatWithSSF(m_vRefPctSf);
+
+    if (m_dataPoints.value("BlkZnTmms").isValid())
+        m_blkZnTmms = m_dataPoints.value("BlkZnTmms").toUInt16();
+
+    if (m_dataPoints.value("HoldTmms").isValid())
+        m_holdTmms = m_dataPoints.value("HoldTmms").toUInt16();
+
+    if (m_dataPoints.value("Pad").isValid())
+        m_pad = m_dataPoints.value("Pad").toUInt16();
+
 
     qCDebug(dcSunSpec()) << this;
 }

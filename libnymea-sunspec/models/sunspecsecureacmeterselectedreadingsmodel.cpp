@@ -150,40 +150,104 @@ quint16 SunSpecSecureAcMeterSelectedReadingsModel::n() const
 void SunSpecSecureAcMeterSelectedReadingsModel::processBlockData()
 {
     // Scale factors
-    m_a_SF = m_dataPoints.value("A_SF").toInt16();
-    m_v_SF = m_dataPoints.value("V_SF").toInt16();
-    m_hz_SF = m_dataPoints.value("Hz_SF").toInt16();
-    m_w_SF = m_dataPoints.value("W_SF").toInt16();
-    m_vA_SF = m_dataPoints.value("VA_SF").toInt16();
-    m_vAR_SF = m_dataPoints.value("VAR_SF").toInt16();
-    m_pF_SF = m_dataPoints.value("PF_SF").toInt16();
-    m_totWh_SF = m_dataPoints.value("TotWh_SF").toInt16();
-    m_totVAh_SF = m_dataPoints.value("TotVAh_SF").toInt16();
-    m_totVArh_SF = m_dataPoints.value("TotVArh_SF").toInt16();
+    if (m_dataPoints.value("A_SF").isValid())
+        m_a_SF = m_dataPoints.value("A_SF").toInt16();
+
+    if (m_dataPoints.value("V_SF").isValid())
+        m_v_SF = m_dataPoints.value("V_SF").toInt16();
+
+    if (m_dataPoints.value("Hz_SF").isValid())
+        m_hz_SF = m_dataPoints.value("Hz_SF").toInt16();
+
+    if (m_dataPoints.value("W_SF").isValid())
+        m_w_SF = m_dataPoints.value("W_SF").toInt16();
+
+    if (m_dataPoints.value("VA_SF").isValid())
+        m_vA_SF = m_dataPoints.value("VA_SF").toInt16();
+
+    if (m_dataPoints.value("VAR_SF").isValid())
+        m_vAR_SF = m_dataPoints.value("VAR_SF").toInt16();
+
+    if (m_dataPoints.value("PF_SF").isValid())
+        m_pF_SF = m_dataPoints.value("PF_SF").toInt16();
+
+    if (m_dataPoints.value("TotWh_SF").isValid())
+        m_totWh_SF = m_dataPoints.value("TotWh_SF").toInt16();
+
+    if (m_dataPoints.value("TotVAh_SF").isValid())
+        m_totVAh_SF = m_dataPoints.value("TotVAh_SF").toInt16();
+
+    if (m_dataPoints.value("TotVArh_SF").isValid())
+        m_totVArh_SF = m_dataPoints.value("TotVArh_SF").toInt16();
+
 
     // Update properties according to the data point type
-    m_amps = m_dataPoints.value("A").toFloatWithSSF(m_a_SF);
-    m_voltage = m_dataPoints.value("PhV").toFloatWithSSF(m_v_SF);
-    m_hz = m_dataPoints.value("Hz").toFloatWithSSF(m_hz_SF);
-    m_watts = m_dataPoints.value("W").toFloatWithSSF(m_w_SF);
-    m_va = m_dataPoints.value("VA").toFloatWithSSF(m_vA_SF);
-    m_var = m_dataPoints.value("VAR").toFloatWithSSF(m_vAR_SF);
-    m_pf = m_dataPoints.value("PF").toFloatWithSSF(m_pF_SF);
-    m_totalWattHoursExported = m_dataPoints.value("TotWhExp").toFloatWithSSF(m_totWh_SF);
-    m_totalWattHoursImported = m_dataPoints.value("TotWhImp").toFloatWithSSF(m_totWh_SF);
-    m_totalVaHoursExported = m_dataPoints.value("TotVAhExp").toFloatWithSSF(m_totVAh_SF);
-    m_totalVaHoursImported = m_dataPoints.value("TotVAhImp").toFloatWithSSF(m_totVAh_SF);
-    m_totalVarHoursImportedQ1 = m_dataPoints.value("TotVArhImpQ1").toFloatWithSSF(m_totVArh_SF);
-    m_totalVArHoursImportedQ2 = m_dataPoints.value("TotVArhImpQ2").toFloatWithSSF(m_totVArh_SF);
-    m_totalVArHoursExportedQ3 = m_dataPoints.value("TotVArhExpQ3").toFloatWithSSF(m_totVArh_SF);
-    m_totalVArHoursExportedQ4 = m_dataPoints.value("TotVArhExpQ4").toFloatWithSSF(m_totVArh_SF);
-    m_events = static_cast<EvtFlags>(m_dataPoints.value("Evt").toUInt32());
-    m_rsrvd = m_dataPoints.value("Rsrvd").toUInt16();
-    m_timestamp = m_dataPoints.value("Ts").toUInt32();
-    m_milliseconds = m_dataPoints.value("Ms").toUInt16();
-    m_sequence = m_dataPoints.value("Seq").toUInt16();
-    m_algorithm = static_cast<Alg>(m_dataPoints.value("Alg").toUInt16());
-    m_n = m_dataPoints.value("N").toUInt16();
+    if (m_dataPoints.value("A").isValid())
+        m_amps = m_dataPoints.value("A").toFloatWithSSF(m_a_SF);
+
+    if (m_dataPoints.value("PhV").isValid())
+        m_voltage = m_dataPoints.value("PhV").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("Hz").isValid())
+        m_hz = m_dataPoints.value("Hz").toFloatWithSSF(m_hz_SF);
+
+    if (m_dataPoints.value("W").isValid())
+        m_watts = m_dataPoints.value("W").toFloatWithSSF(m_w_SF);
+
+    if (m_dataPoints.value("VA").isValid())
+        m_va = m_dataPoints.value("VA").toFloatWithSSF(m_vA_SF);
+
+    if (m_dataPoints.value("VAR").isValid())
+        m_var = m_dataPoints.value("VAR").toFloatWithSSF(m_vAR_SF);
+
+    if (m_dataPoints.value("PF").isValid())
+        m_pf = m_dataPoints.value("PF").toFloatWithSSF(m_pF_SF);
+
+    if (m_dataPoints.value("TotWhExp").isValid())
+        m_totalWattHoursExported = m_dataPoints.value("TotWhExp").toFloatWithSSF(m_totWh_SF);
+
+    if (m_dataPoints.value("TotWhImp").isValid())
+        m_totalWattHoursImported = m_dataPoints.value("TotWhImp").toFloatWithSSF(m_totWh_SF);
+
+    if (m_dataPoints.value("TotVAhExp").isValid())
+        m_totalVaHoursExported = m_dataPoints.value("TotVAhExp").toFloatWithSSF(m_totVAh_SF);
+
+    if (m_dataPoints.value("TotVAhImp").isValid())
+        m_totalVaHoursImported = m_dataPoints.value("TotVAhImp").toFloatWithSSF(m_totVAh_SF);
+
+    if (m_dataPoints.value("TotVArhImpQ1").isValid())
+        m_totalVarHoursImportedQ1 = m_dataPoints.value("TotVArhImpQ1").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhImpQ2").isValid())
+        m_totalVArHoursImportedQ2 = m_dataPoints.value("TotVArhImpQ2").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhExpQ3").isValid())
+        m_totalVArHoursExportedQ3 = m_dataPoints.value("TotVArhExpQ3").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhExpQ4").isValid())
+        m_totalVArHoursExportedQ4 = m_dataPoints.value("TotVArhExpQ4").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("Evt").isValid())
+        m_events = static_cast<EvtFlags>(m_dataPoints.value("Evt").toUInt32());
+
+    if (m_dataPoints.value("Rsrvd").isValid())
+        m_rsrvd = m_dataPoints.value("Rsrvd").toUInt16();
+
+    if (m_dataPoints.value("Ts").isValid())
+        m_timestamp = m_dataPoints.value("Ts").toUInt32();
+
+    if (m_dataPoints.value("Ms").isValid())
+        m_milliseconds = m_dataPoints.value("Ms").toUInt16();
+
+    if (m_dataPoints.value("Seq").isValid())
+        m_sequence = m_dataPoints.value("Seq").toUInt16();
+
+    if (m_dataPoints.value("Alg").isValid())
+        m_algorithm = static_cast<Alg>(m_dataPoints.value("Alg").toUInt16());
+
+    if (m_dataPoints.value("N").isValid())
+        m_n = m_dataPoints.value("N").toUInt16();
+
 
     qCDebug(dcSunSpec()) << this;
 }

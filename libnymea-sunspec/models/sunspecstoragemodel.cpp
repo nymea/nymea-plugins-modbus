@@ -198,32 +198,80 @@ QModbusReply *SunSpecStorageModel::setChaGriSet(Chagriset chaGriSet)
 void SunSpecStorageModel::processBlockData()
 {
     // Scale factors
-    m_wChaMaxSf = m_dataPoints.value("WChaMax_SF").toInt16();
-    m_wChaDisChaGraSf = m_dataPoints.value("WChaDisChaGra_SF").toInt16();
-    m_vaChaMaxSf = m_dataPoints.value("VAChaMax_SF").toInt16();
-    m_minRsvPctSf = m_dataPoints.value("MinRsvPct_SF").toInt16();
-    m_chaStateSf = m_dataPoints.value("ChaState_SF").toInt16();
-    m_storAvalSf = m_dataPoints.value("StorAval_SF").toInt16();
-    m_inBatVSf = m_dataPoints.value("InBatV_SF").toInt16();
-    m_inOutWRteSf = m_dataPoints.value("InOutWRte_SF").toInt16();
+    if (m_dataPoints.value("WChaMax_SF").isValid())
+        m_wChaMaxSf = m_dataPoints.value("WChaMax_SF").toInt16();
+
+    if (m_dataPoints.value("WChaDisChaGra_SF").isValid())
+        m_wChaDisChaGraSf = m_dataPoints.value("WChaDisChaGra_SF").toInt16();
+
+    if (m_dataPoints.value("VAChaMax_SF").isValid())
+        m_vaChaMaxSf = m_dataPoints.value("VAChaMax_SF").toInt16();
+
+    if (m_dataPoints.value("MinRsvPct_SF").isValid())
+        m_minRsvPctSf = m_dataPoints.value("MinRsvPct_SF").toInt16();
+
+    if (m_dataPoints.value("ChaState_SF").isValid())
+        m_chaStateSf = m_dataPoints.value("ChaState_SF").toInt16();
+
+    if (m_dataPoints.value("StorAval_SF").isValid())
+        m_storAvalSf = m_dataPoints.value("StorAval_SF").toInt16();
+
+    if (m_dataPoints.value("InBatV_SF").isValid())
+        m_inBatVSf = m_dataPoints.value("InBatV_SF").toInt16();
+
+    if (m_dataPoints.value("InOutWRte_SF").isValid())
+        m_inOutWRteSf = m_dataPoints.value("InOutWRte_SF").toInt16();
+
 
     // Update properties according to the data point type
-    m_wChaMax = m_dataPoints.value("WChaMax").toFloatWithSSF(m_wChaMaxSf);
-    m_wChaGra = m_dataPoints.value("WChaGra").toFloatWithSSF(m_wChaDisChaGraSf);
-    m_wDisChaGra = m_dataPoints.value("WDisChaGra").toFloatWithSSF(m_wChaDisChaGraSf);
-    m_storCtlMod = static_cast<Storctl_modFlags>(m_dataPoints.value("StorCtl_Mod").toUInt16());
-    m_vaChaMax = m_dataPoints.value("VAChaMax").toFloatWithSSF(m_vaChaMaxSf);
-    m_minRsvPct = m_dataPoints.value("MinRsvPct").toFloatWithSSF(m_minRsvPctSf);
-    m_chaState = m_dataPoints.value("ChaState").toFloatWithSSF(m_chaStateSf);
-    m_storAval = m_dataPoints.value("StorAval").toFloatWithSSF(m_storAvalSf);
-    m_inBatV = m_dataPoints.value("InBatV").toFloatWithSSF(m_inBatVSf);
-    m_chaSt = static_cast<Chast>(m_dataPoints.value("ChaSt").toUInt16());
-    m_outWRte = m_dataPoints.value("OutWRte").toFloatWithSSF(m_inOutWRteSf);
-    m_inWRte = m_dataPoints.value("InWRte").toFloatWithSSF(m_inOutWRteSf);
-    m_inOutWRteWinTms = m_dataPoints.value("InOutWRte_WinTms").toUInt16();
-    m_inOutWRteRvrtTms = m_dataPoints.value("InOutWRte_RvrtTms").toUInt16();
-    m_inOutWRteRmpTms = m_dataPoints.value("InOutWRte_RmpTms").toUInt16();
-    m_chaGriSet = static_cast<Chagriset>(m_dataPoints.value("ChaGriSet").toUInt16());
+    if (m_dataPoints.value("WChaMax").isValid())
+        m_wChaMax = m_dataPoints.value("WChaMax").toFloatWithSSF(m_wChaMaxSf);
+
+    if (m_dataPoints.value("WChaGra").isValid())
+        m_wChaGra = m_dataPoints.value("WChaGra").toFloatWithSSF(m_wChaDisChaGraSf);
+
+    if (m_dataPoints.value("WDisChaGra").isValid())
+        m_wDisChaGra = m_dataPoints.value("WDisChaGra").toFloatWithSSF(m_wChaDisChaGraSf);
+
+    if (m_dataPoints.value("StorCtl_Mod").isValid())
+        m_storCtlMod = static_cast<Storctl_modFlags>(m_dataPoints.value("StorCtl_Mod").toUInt16());
+
+    if (m_dataPoints.value("VAChaMax").isValid())
+        m_vaChaMax = m_dataPoints.value("VAChaMax").toFloatWithSSF(m_vaChaMaxSf);
+
+    if (m_dataPoints.value("MinRsvPct").isValid())
+        m_minRsvPct = m_dataPoints.value("MinRsvPct").toFloatWithSSF(m_minRsvPctSf);
+
+    if (m_dataPoints.value("ChaState").isValid())
+        m_chaState = m_dataPoints.value("ChaState").toFloatWithSSF(m_chaStateSf);
+
+    if (m_dataPoints.value("StorAval").isValid())
+        m_storAval = m_dataPoints.value("StorAval").toFloatWithSSF(m_storAvalSf);
+
+    if (m_dataPoints.value("InBatV").isValid())
+        m_inBatV = m_dataPoints.value("InBatV").toFloatWithSSF(m_inBatVSf);
+
+    if (m_dataPoints.value("ChaSt").isValid())
+        m_chaSt = static_cast<Chast>(m_dataPoints.value("ChaSt").toUInt16());
+
+    if (m_dataPoints.value("OutWRte").isValid())
+        m_outWRte = m_dataPoints.value("OutWRte").toFloatWithSSF(m_inOutWRteSf);
+
+    if (m_dataPoints.value("InWRte").isValid())
+        m_inWRte = m_dataPoints.value("InWRte").toFloatWithSSF(m_inOutWRteSf);
+
+    if (m_dataPoints.value("InOutWRte_WinTms").isValid())
+        m_inOutWRteWinTms = m_dataPoints.value("InOutWRte_WinTms").toUInt16();
+
+    if (m_dataPoints.value("InOutWRte_RvrtTms").isValid())
+        m_inOutWRteRvrtTms = m_dataPoints.value("InOutWRte_RvrtTms").toUInt16();
+
+    if (m_dataPoints.value("InOutWRte_RmpTms").isValid())
+        m_inOutWRteRmpTms = m_dataPoints.value("InOutWRte_RmpTms").toUInt16();
+
+    if (m_dataPoints.value("ChaGriSet").isValid())
+        m_chaGriSet = static_cast<Chagriset>(m_dataPoints.value("ChaGriSet").toUInt16());
+
 
     qCDebug(dcSunSpec()) << this;
 }

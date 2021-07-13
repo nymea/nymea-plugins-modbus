@@ -106,17 +106,39 @@ qint16 SunSpecBaseMetModel::soilWetness() const
 void SunSpecBaseMetModel::processBlockData()
 {
     // Update properties according to the data point type
-    m_ambientTemperature = m_dataPoints.value("TmpAmb").toFloatWithSSF(-1);
-    m_relativeHumidity = m_dataPoints.value("RH").toInt16();
-    m_barometricPressure = m_dataPoints.value("Pres").toInt16();
-    m_windSpeed = m_dataPoints.value("WndSpd").toInt16();
-    m_windDirection = m_dataPoints.value("WndDir").toInt16();
-    m_rainfall = m_dataPoints.value("Rain").toInt16();
-    m_snowDepth = m_dataPoints.value("Snw").toInt16();
-    m_precipitationType = m_dataPoints.value("PPT").toInt16();
-    m_electricField = m_dataPoints.value("ElecFld").toInt16();
-    m_surfaceWetness = m_dataPoints.value("SurWet").toInt16();
-    m_soilWetness = m_dataPoints.value("SoilWet").toInt16();
+    if (m_dataPoints.value("TmpAmb").isValid())
+        m_ambientTemperature = m_dataPoints.value("TmpAmb").toFloatWithSSF(-1);
+
+    if (m_dataPoints.value("RH").isValid())
+        m_relativeHumidity = m_dataPoints.value("RH").toInt16();
+
+    if (m_dataPoints.value("Pres").isValid())
+        m_barometricPressure = m_dataPoints.value("Pres").toInt16();
+
+    if (m_dataPoints.value("WndSpd").isValid())
+        m_windSpeed = m_dataPoints.value("WndSpd").toInt16();
+
+    if (m_dataPoints.value("WndDir").isValid())
+        m_windDirection = m_dataPoints.value("WndDir").toInt16();
+
+    if (m_dataPoints.value("Rain").isValid())
+        m_rainfall = m_dataPoints.value("Rain").toInt16();
+
+    if (m_dataPoints.value("Snw").isValid())
+        m_snowDepth = m_dataPoints.value("Snw").toInt16();
+
+    if (m_dataPoints.value("PPT").isValid())
+        m_precipitationType = m_dataPoints.value("PPT").toInt16();
+
+    if (m_dataPoints.value("ElecFld").isValid())
+        m_electricField = m_dataPoints.value("ElecFld").toInt16();
+
+    if (m_dataPoints.value("SurWet").isValid())
+        m_surfaceWetness = m_dataPoints.value("SurWet").toInt16();
+
+    if (m_dataPoints.value("SoilWet").isValid())
+        m_soilWetness = m_dataPoints.value("SoilWet").toInt16();
+
 
     qCDebug(dcSunSpec()) << this;
 }

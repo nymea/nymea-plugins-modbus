@@ -66,7 +66,9 @@ quint16 SunSpecFlowBatteryModuleModel::modulePointsToBeDetermined() const
 void SunSpecFlowBatteryModuleModel::processBlockData()
 {
     // Update properties according to the data point type
-    m_modulePointsToBeDetermined = m_dataPoints.value("ModuleTBD").toUInt16();
+    if (m_dataPoints.value("ModuleTBD").isValid())
+        m_modulePointsToBeDetermined = m_dataPoints.value("ModuleTBD").toUInt16();
+
 
     qCDebug(dcSunSpec()) << this;
 }

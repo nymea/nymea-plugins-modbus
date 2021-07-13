@@ -186,51 +186,137 @@ quint32 SunSpecInverterSplitPhaseModel::vendorEventBitfield4() const
 void SunSpecInverterSplitPhaseModel::processBlockData()
 {
     // Scale factors
-    m_a_SF = m_dataPoints.value("A_SF").toInt16();
-    m_v_SF = m_dataPoints.value("V_SF").toInt16();
-    m_w_SF = m_dataPoints.value("W_SF").toInt16();
-    m_hz_SF = m_dataPoints.value("Hz_SF").toInt16();
-    m_vA_SF = m_dataPoints.value("VA_SF").toInt16();
-    m_vAr_SF = m_dataPoints.value("VAr_SF").toInt16();
-    m_pF_SF = m_dataPoints.value("PF_SF").toInt16();
-    m_wH_SF = m_dataPoints.value("WH_SF").toInt16();
-    m_dCA_SF = m_dataPoints.value("DCA_SF").toInt16();
-    m_dCV_SF = m_dataPoints.value("DCV_SF").toInt16();
-    m_dCW_SF = m_dataPoints.value("DCW_SF").toInt16();
-    m_tmp_SF = m_dataPoints.value("Tmp_SF").toInt16();
+    if (m_dataPoints.value("A_SF").isValid())
+        m_a_SF = m_dataPoints.value("A_SF").toInt16();
+
+    if (m_dataPoints.value("V_SF").isValid())
+        m_v_SF = m_dataPoints.value("V_SF").toInt16();
+
+    if (m_dataPoints.value("W_SF").isValid())
+        m_w_SF = m_dataPoints.value("W_SF").toInt16();
+
+    if (m_dataPoints.value("Hz_SF").isValid())
+        m_hz_SF = m_dataPoints.value("Hz_SF").toInt16();
+
+    if (m_dataPoints.value("VA_SF").isValid())
+        m_vA_SF = m_dataPoints.value("VA_SF").toInt16();
+
+    if (m_dataPoints.value("VAr_SF").isValid())
+        m_vAr_SF = m_dataPoints.value("VAr_SF").toInt16();
+
+    if (m_dataPoints.value("PF_SF").isValid())
+        m_pF_SF = m_dataPoints.value("PF_SF").toInt16();
+
+    if (m_dataPoints.value("WH_SF").isValid())
+        m_wH_SF = m_dataPoints.value("WH_SF").toInt16();
+
+    if (m_dataPoints.value("DCA_SF").isValid())
+        m_dCA_SF = m_dataPoints.value("DCA_SF").toInt16();
+
+    if (m_dataPoints.value("DCV_SF").isValid())
+        m_dCV_SF = m_dataPoints.value("DCV_SF").toInt16();
+
+    if (m_dataPoints.value("DCW_SF").isValid())
+        m_dCW_SF = m_dataPoints.value("DCW_SF").toInt16();
+
+    if (m_dataPoints.value("Tmp_SF").isValid())
+        m_tmp_SF = m_dataPoints.value("Tmp_SF").toInt16();
+
 
     // Update properties according to the data point type
-    m_amps = m_dataPoints.value("A").toFloatWithSSF(m_a_SF);
-    m_ampsPhaseA = m_dataPoints.value("AphA").toFloatWithSSF(m_a_SF);
-    m_ampsPhaseB = m_dataPoints.value("AphB").toFloatWithSSF(m_a_SF);
-    m_ampsPhaseC = m_dataPoints.value("AphC").toFloatWithSSF(m_a_SF);
-    m_phaseVoltageAb = m_dataPoints.value("PPVphAB").toFloatWithSSF(m_v_SF);
-    m_phaseVoltageBc = m_dataPoints.value("PPVphBC").toFloatWithSSF(m_v_SF);
-    m_phaseVoltageCa = m_dataPoints.value("PPVphCA").toFloatWithSSF(m_v_SF);
-    m_phaseVoltageAn = m_dataPoints.value("PhVphA").toFloatWithSSF(m_v_SF);
-    m_phaseVoltageBn = m_dataPoints.value("PhVphB").toFloatWithSSF(m_v_SF);
-    m_phaseVoltageCn = m_dataPoints.value("PhVphC").toFloatWithSSF(m_v_SF);
-    m_watts = m_dataPoints.value("W").toFloatWithSSF(m_w_SF);
-    m_hz = m_dataPoints.value("Hz").toFloatWithSSF(m_hz_SF);
-    m_va = m_dataPoints.value("VA").toFloatWithSSF(m_vA_SF);
-    m_vAr = m_dataPoints.value("VAr").toFloatWithSSF(m_vAr_SF);
-    m_pf = m_dataPoints.value("PF").toFloatWithSSF(m_pF_SF);
-    m_wattHours = m_dataPoints.value("WH").toFloatWithSSF(m_wH_SF);
-    m_dcAmps = m_dataPoints.value("DCA").toFloatWithSSF(m_dCA_SF);
-    m_dcVoltage = m_dataPoints.value("DCV").toFloatWithSSF(m_dCV_SF);
-    m_dcWatts = m_dataPoints.value("DCW").toFloatWithSSF(m_dCW_SF);
-    m_cabinetTemperature = m_dataPoints.value("TmpCab").toFloatWithSSF(m_tmp_SF);
-    m_heatSinkTemperature = m_dataPoints.value("TmpSnk").toFloatWithSSF(m_tmp_SF);
-    m_transformerTemperature = m_dataPoints.value("TmpTrns").toFloatWithSSF(m_tmp_SF);
-    m_otherTemperature = m_dataPoints.value("TmpOt").toFloatWithSSF(m_tmp_SF);
-    m_operatingState = static_cast<St>(m_dataPoints.value("St").toUInt16());
-    m_vendorOperatingState = m_dataPoints.value("StVnd").toUInt16();
-    m_event1 = static_cast<Evt1Flags>(m_dataPoints.value("Evt1").toUInt32());
-    m_eventBitfield2 = m_dataPoints.value("Evt2").toUInt32();
-    m_vendorEventBitfield1 = m_dataPoints.value("EvtVnd1").toUInt32();
-    m_vendorEventBitfield2 = m_dataPoints.value("EvtVnd2").toUInt32();
-    m_vendorEventBitfield3 = m_dataPoints.value("EvtVnd3").toUInt32();
-    m_vendorEventBitfield4 = m_dataPoints.value("EvtVnd4").toUInt32();
+    if (m_dataPoints.value("A").isValid())
+        m_amps = m_dataPoints.value("A").toFloatWithSSF(m_a_SF);
+
+    if (m_dataPoints.value("AphA").isValid())
+        m_ampsPhaseA = m_dataPoints.value("AphA").toFloatWithSSF(m_a_SF);
+
+    if (m_dataPoints.value("AphB").isValid())
+        m_ampsPhaseB = m_dataPoints.value("AphB").toFloatWithSSF(m_a_SF);
+
+    if (m_dataPoints.value("AphC").isValid())
+        m_ampsPhaseC = m_dataPoints.value("AphC").toFloatWithSSF(m_a_SF);
+
+    if (m_dataPoints.value("PPVphAB").isValid())
+        m_phaseVoltageAb = m_dataPoints.value("PPVphAB").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("PPVphBC").isValid())
+        m_phaseVoltageBc = m_dataPoints.value("PPVphBC").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("PPVphCA").isValid())
+        m_phaseVoltageCa = m_dataPoints.value("PPVphCA").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("PhVphA").isValid())
+        m_phaseVoltageAn = m_dataPoints.value("PhVphA").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("PhVphB").isValid())
+        m_phaseVoltageBn = m_dataPoints.value("PhVphB").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("PhVphC").isValid())
+        m_phaseVoltageCn = m_dataPoints.value("PhVphC").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("W").isValid())
+        m_watts = m_dataPoints.value("W").toFloatWithSSF(m_w_SF);
+
+    if (m_dataPoints.value("Hz").isValid())
+        m_hz = m_dataPoints.value("Hz").toFloatWithSSF(m_hz_SF);
+
+    if (m_dataPoints.value("VA").isValid())
+        m_va = m_dataPoints.value("VA").toFloatWithSSF(m_vA_SF);
+
+    if (m_dataPoints.value("VAr").isValid())
+        m_vAr = m_dataPoints.value("VAr").toFloatWithSSF(m_vAr_SF);
+
+    if (m_dataPoints.value("PF").isValid())
+        m_pf = m_dataPoints.value("PF").toFloatWithSSF(m_pF_SF);
+
+    if (m_dataPoints.value("WH").isValid())
+        m_wattHours = m_dataPoints.value("WH").toFloatWithSSF(m_wH_SF);
+
+    if (m_dataPoints.value("DCA").isValid())
+        m_dcAmps = m_dataPoints.value("DCA").toFloatWithSSF(m_dCA_SF);
+
+    if (m_dataPoints.value("DCV").isValid())
+        m_dcVoltage = m_dataPoints.value("DCV").toFloatWithSSF(m_dCV_SF);
+
+    if (m_dataPoints.value("DCW").isValid())
+        m_dcWatts = m_dataPoints.value("DCW").toFloatWithSSF(m_dCW_SF);
+
+    if (m_dataPoints.value("TmpCab").isValid())
+        m_cabinetTemperature = m_dataPoints.value("TmpCab").toFloatWithSSF(m_tmp_SF);
+
+    if (m_dataPoints.value("TmpSnk").isValid())
+        m_heatSinkTemperature = m_dataPoints.value("TmpSnk").toFloatWithSSF(m_tmp_SF);
+
+    if (m_dataPoints.value("TmpTrns").isValid())
+        m_transformerTemperature = m_dataPoints.value("TmpTrns").toFloatWithSSF(m_tmp_SF);
+
+    if (m_dataPoints.value("TmpOt").isValid())
+        m_otherTemperature = m_dataPoints.value("TmpOt").toFloatWithSSF(m_tmp_SF);
+
+    if (m_dataPoints.value("St").isValid())
+        m_operatingState = static_cast<St>(m_dataPoints.value("St").toUInt16());
+
+    if (m_dataPoints.value("StVnd").isValid())
+        m_vendorOperatingState = m_dataPoints.value("StVnd").toUInt16();
+
+    if (m_dataPoints.value("Evt1").isValid())
+        m_event1 = static_cast<Evt1Flags>(m_dataPoints.value("Evt1").toUInt32());
+
+    if (m_dataPoints.value("Evt2").isValid())
+        m_eventBitfield2 = m_dataPoints.value("Evt2").toUInt32();
+
+    if (m_dataPoints.value("EvtVnd1").isValid())
+        m_vendorEventBitfield1 = m_dataPoints.value("EvtVnd1").toUInt32();
+
+    if (m_dataPoints.value("EvtVnd2").isValid())
+        m_vendorEventBitfield2 = m_dataPoints.value("EvtVnd2").toUInt32();
+
+    if (m_dataPoints.value("EvtVnd3").isValid())
+        m_vendorEventBitfield3 = m_dataPoints.value("EvtVnd3").toUInt32();
+
+    if (m_dataPoints.value("EvtVnd4").isValid())
+        m_vendorEventBitfield4 = m_dataPoints.value("EvtVnd4").toUInt32();
+
 
     qCDebug(dcSunSpec()) << this;
 }

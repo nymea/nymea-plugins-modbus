@@ -45,7 +45,6 @@ SunSpecConnection::SunSpecConnection(const QHostAddress &hostAddress, uint port,
     m_modbusTcpClient->setTimeout(2000);
     m_modbusTcpClient->setNumberOfRetries(3);
 
-
     m_reconnectTimer.setInterval(10000);
     m_reconnectTimer.setSingleShot(false);
     connect(&m_reconnectTimer, &QTimer::timeout, this, [=](){
@@ -159,8 +158,13 @@ bool SunSpecConnection::connectDevice()
 
 void SunSpecConnection::disconnectDevice()
 {
-    qCDebug(dcSunSpec()) << "Disconnecting from" << this;
+    qCDebug(dcSunSpec()) << "Disconnecting from" << this << "...";
     m_modbusTcpClient->disconnectDevice();
+}
+
+quint16 SunSpecConnection::baseRegister() const
+{
+    return m_baseRegister;
 }
 
 QList<SunSpecModel *> SunSpecConnection::models() const
@@ -214,10 +218,14 @@ void SunSpecConnection::processDiscoveryResult()
         SunSpecModel *model = factory.createModel(this, result.modbusStartRegister, result.modelId, result.modelLength);
         if (model) {
             if (modelAlreadyAdded(model)) {
-                qCWarning(dcSunSpec()) << "Detected an already added model" << model << "and keep the already existing one.";
+                qCDebug(dcSunSpec()) << "Detected an already added model" << model << "and keep the already existing one.";
                 model->deleteLater();
             } else {
-                m_uninitializedModels.append(model);
+                if (model->initialized()) {
+                    m_models.append(model);
+                } else {
+                    m_uninitializedModels.append(model);
+                }
                 qCDebug(dcSunSpec()) << "--> [+]" << model;
             }
         } else {
