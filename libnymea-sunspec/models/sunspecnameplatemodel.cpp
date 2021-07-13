@@ -211,7 +211,7 @@ void SunSpecNameplateModel::processBlockData()
         m_pad = m_dataPoints.value("Pad").toUInt16();
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecNameplateModel::initDataPoints()

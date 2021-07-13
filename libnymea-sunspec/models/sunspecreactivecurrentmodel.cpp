@@ -66,8 +66,16 @@ SunSpecReactiveCurrentModel::Argramod SunSpecReactiveCurrentModel::arGraMod() co
 
 QModbusReply *SunSpecReactiveCurrentModel::setArGraMod(Argramod arGraMod)
 {
-    Q_UNUSED(arGraMod)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("ArGraMod");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(static_cast<quint16>(arGraMod));
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecReactiveCurrentModel::arGraSag() const
 {
@@ -76,8 +84,16 @@ float SunSpecReactiveCurrentModel::arGraSag() const
 
 QModbusReply *SunSpecReactiveCurrentModel::setArGraSag(float arGraSag)
 {
-    Q_UNUSED(arGraSag)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("ArGraSag");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(arGraSag, m_arGraSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecReactiveCurrentModel::arGraSwell() const
 {
@@ -86,8 +102,16 @@ float SunSpecReactiveCurrentModel::arGraSwell() const
 
 QModbusReply *SunSpecReactiveCurrentModel::setArGraSwell(float arGraSwell)
 {
-    Q_UNUSED(arGraSwell)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("ArGraSwell");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(arGraSwell, m_arGraSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 SunSpecReactiveCurrentModel::ModenaFlags SunSpecReactiveCurrentModel::modEna() const
 {
@@ -96,8 +120,16 @@ SunSpecReactiveCurrentModel::ModenaFlags SunSpecReactiveCurrentModel::modEna() c
 
 QModbusReply *SunSpecReactiveCurrentModel::setModEna(ModenaFlags modEna)
 {
-    Q_UNUSED(modEna)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("ModEna");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(static_cast<quint16>(modEna));
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 quint16 SunSpecReactiveCurrentModel::filTms() const
 {
@@ -106,8 +138,16 @@ quint16 SunSpecReactiveCurrentModel::filTms() const
 
 QModbusReply *SunSpecReactiveCurrentModel::setFilTms(quint16 filTms)
 {
-    Q_UNUSED(filTms)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("FilTms");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(filTms);
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecReactiveCurrentModel::dbVMin() const
 {
@@ -116,8 +156,16 @@ float SunSpecReactiveCurrentModel::dbVMin() const
 
 QModbusReply *SunSpecReactiveCurrentModel::setDbVMin(float dbVMin)
 {
-    Q_UNUSED(dbVMin)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("DbVMin");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(dbVMin, m_vRefPctSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecReactiveCurrentModel::dbVMax() const
 {
@@ -126,8 +174,16 @@ float SunSpecReactiveCurrentModel::dbVMax() const
 
 QModbusReply *SunSpecReactiveCurrentModel::setDbVMax(float dbVMax)
 {
-    Q_UNUSED(dbVMax)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("DbVMax");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(dbVMax, m_vRefPctSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecReactiveCurrentModel::blkZnV() const
 {
@@ -136,8 +192,16 @@ float SunSpecReactiveCurrentModel::blkZnV() const
 
 QModbusReply *SunSpecReactiveCurrentModel::setBlkZnV(float blkZnV)
 {
-    Q_UNUSED(blkZnV)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("BlkZnV");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(blkZnV, m_vRefPctSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecReactiveCurrentModel::hysBlkZnV() const
 {
@@ -146,8 +210,16 @@ float SunSpecReactiveCurrentModel::hysBlkZnV() const
 
 QModbusReply *SunSpecReactiveCurrentModel::setHysBlkZnV(float hysBlkZnV)
 {
-    Q_UNUSED(hysBlkZnV)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("HysBlkZnV");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(hysBlkZnV, m_vRefPctSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 quint16 SunSpecReactiveCurrentModel::blkZnTmms() const
 {
@@ -156,8 +228,16 @@ quint16 SunSpecReactiveCurrentModel::blkZnTmms() const
 
 QModbusReply *SunSpecReactiveCurrentModel::setBlkZnTmms(quint16 blkZnTmms)
 {
-    Q_UNUSED(blkZnTmms)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("BlkZnTmms");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(blkZnTmms);
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 quint16 SunSpecReactiveCurrentModel::holdTmms() const
 {
@@ -166,8 +246,16 @@ quint16 SunSpecReactiveCurrentModel::holdTmms() const
 
 QModbusReply *SunSpecReactiveCurrentModel::setHoldTmms(quint16 holdTmms)
 {
-    Q_UNUSED(holdTmms)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("HoldTmms");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(holdTmms);
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 quint16 SunSpecReactiveCurrentModel::pad() const
 {
@@ -221,7 +309,7 @@ void SunSpecReactiveCurrentModel::processBlockData()
         m_pad = m_dataPoints.value("Pad").toUInt16();
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecReactiveCurrentModel::initDataPoints()

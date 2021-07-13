@@ -66,8 +66,16 @@ float SunSpecFreqWattParamModel::wGra() const
 
 QModbusReply *SunSpecFreqWattParamModel::setWGra(float wGra)
 {
-    Q_UNUSED(wGra)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("WGra");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(wGra, m_wGraSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecFreqWattParamModel::hzStr() const
 {
@@ -76,8 +84,16 @@ float SunSpecFreqWattParamModel::hzStr() const
 
 QModbusReply *SunSpecFreqWattParamModel::setHzStr(float hzStr)
 {
-    Q_UNUSED(hzStr)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("HzStr");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(hzStr, m_hzStrStopSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecFreqWattParamModel::hzStop() const
 {
@@ -86,8 +102,16 @@ float SunSpecFreqWattParamModel::hzStop() const
 
 QModbusReply *SunSpecFreqWattParamModel::setHzStop(float hzStop)
 {
-    Q_UNUSED(hzStop)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("HzStop");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(hzStop, m_hzStrStopSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 SunSpecFreqWattParamModel::HysenaFlags SunSpecFreqWattParamModel::hysEna() const
 {
@@ -96,8 +120,16 @@ SunSpecFreqWattParamModel::HysenaFlags SunSpecFreqWattParamModel::hysEna() const
 
 QModbusReply *SunSpecFreqWattParamModel::setHysEna(HysenaFlags hysEna)
 {
-    Q_UNUSED(hysEna)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("HysEna");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(static_cast<quint16>(hysEna));
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 SunSpecFreqWattParamModel::ModenaFlags SunSpecFreqWattParamModel::modEna() const
 {
@@ -106,8 +138,16 @@ SunSpecFreqWattParamModel::ModenaFlags SunSpecFreqWattParamModel::modEna() const
 
 QModbusReply *SunSpecFreqWattParamModel::setModEna(ModenaFlags modEna)
 {
-    Q_UNUSED(modEna)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("ModEna");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(static_cast<quint16>(modEna));
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecFreqWattParamModel::hzStopWGra() const
 {
@@ -116,8 +156,16 @@ float SunSpecFreqWattParamModel::hzStopWGra() const
 
 QModbusReply *SunSpecFreqWattParamModel::setHzStopWGra(float hzStopWGra)
 {
-    Q_UNUSED(hzStopWGra)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("HzStopWGra");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(hzStopWGra, m_rmpIncDecSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 quint16 SunSpecFreqWattParamModel::pad() const
 {
@@ -159,7 +207,7 @@ void SunSpecFreqWattParamModel::processBlockData()
         m_pad = m_dataPoints.value("Pad").toUInt16();
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecFreqWattParamModel::initDataPoints()

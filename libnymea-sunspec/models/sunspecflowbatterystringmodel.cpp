@@ -255,7 +255,7 @@ void SunSpecFlowBatteryStringModel::processBlockData()
         m_pad = m_dataPoints.value("Pad1").toUInt16();
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecFlowBatteryStringModel::initDataPoints()

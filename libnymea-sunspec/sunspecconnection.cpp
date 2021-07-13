@@ -32,6 +32,8 @@
 #include "sunspecmodel.h"
 #include "models/sunspecmodelfactory.h"
 
+Q_LOGGING_CATEGORY(dcSunSpec, "SunSpec")
+
 SunSpecConnection::SunSpecConnection(const QHostAddress &hostAddress, uint port, uint slaveId, QObject *parent) :
     QObject(parent),
     m_hostAddress(hostAddress),

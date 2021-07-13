@@ -63,7 +63,7 @@ void SunSpecIrradianceModel::processBlockData()
 {
     // Update properties according to the data point type
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecIrradianceModel::initDataPoints()

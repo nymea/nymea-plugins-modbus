@@ -105,7 +105,7 @@ void SunSpecLocationModel::processBlockData()
         m_altitude = m_dataPoints.value("Alt").toInt32();
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecLocationModel::initDataPoints()

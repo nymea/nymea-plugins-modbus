@@ -91,7 +91,7 @@ void SunSpecMiniMetModel::processBlockData()
         m_windSpeed = m_dataPoints.value("WndSpd").toUInt16();
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecMiniMetModel::initDataPoints()

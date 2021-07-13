@@ -70,7 +70,7 @@ void SunSpecEnergyStorageBaseModelDeprecatedModel::processBlockData()
         m_deprecatedModel = m_dataPoints.value("DEPRECATED").toUInt16();
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecEnergyStorageBaseModelDeprecatedModel::initDataPoints()

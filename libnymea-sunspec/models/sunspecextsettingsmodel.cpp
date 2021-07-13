@@ -66,8 +66,16 @@ float SunSpecExtSettingsModel::rampUpRate() const
 
 QModbusReply *SunSpecExtSettingsModel::setRampUpRate(float rampUpRate)
 {
-    Q_UNUSED(rampUpRate)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("NomRmpUpRte");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(rampUpRate, m_rampRateScaleFactor, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecExtSettingsModel::nomRmpDnRte() const
 {
@@ -76,8 +84,16 @@ float SunSpecExtSettingsModel::nomRmpDnRte() const
 
 QModbusReply *SunSpecExtSettingsModel::setNomRmpDnRte(float nomRmpDnRte)
 {
-    Q_UNUSED(nomRmpDnRte)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("NomRmpDnRte");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(nomRmpDnRte, m_rampRateScaleFactor, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecExtSettingsModel::emergencyRampUpRate() const
 {
@@ -86,8 +102,16 @@ float SunSpecExtSettingsModel::emergencyRampUpRate() const
 
 QModbusReply *SunSpecExtSettingsModel::setEmergencyRampUpRate(float emergencyRampUpRate)
 {
-    Q_UNUSED(emergencyRampUpRate)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("EmgRmpUpRte");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(emergencyRampUpRate, m_rampRateScaleFactor, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecExtSettingsModel::emergencyRampDownRate() const
 {
@@ -96,8 +120,16 @@ float SunSpecExtSettingsModel::emergencyRampDownRate() const
 
 QModbusReply *SunSpecExtSettingsModel::setEmergencyRampDownRate(float emergencyRampDownRate)
 {
-    Q_UNUSED(emergencyRampDownRate)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("EmgRmpDnRte");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(emergencyRampDownRate, m_rampRateScaleFactor, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecExtSettingsModel::connectRampUpRate() const
 {
@@ -106,8 +138,16 @@ float SunSpecExtSettingsModel::connectRampUpRate() const
 
 QModbusReply *SunSpecExtSettingsModel::setConnectRampUpRate(float connectRampUpRate)
 {
-    Q_UNUSED(connectRampUpRate)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("ConnRmpUpRte");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(connectRampUpRate, m_rampRateScaleFactor, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecExtSettingsModel::connectRampDownRate() const
 {
@@ -116,8 +156,16 @@ float SunSpecExtSettingsModel::connectRampDownRate() const
 
 QModbusReply *SunSpecExtSettingsModel::setConnectRampDownRate(float connectRampDownRate)
 {
-    Q_UNUSED(connectRampDownRate)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("ConnRmpDnRte");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(connectRampDownRate, m_rampRateScaleFactor, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecExtSettingsModel::defaultRampRate() const
 {
@@ -126,8 +174,16 @@ float SunSpecExtSettingsModel::defaultRampRate() const
 
 QModbusReply *SunSpecExtSettingsModel::setDefaultRampRate(float defaultRampRate)
 {
-    Q_UNUSED(defaultRampRate)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("AGra");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(defaultRampRate, m_rampRateScaleFactor, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 void SunSpecExtSettingsModel::processBlockData()
 {
@@ -159,7 +215,7 @@ void SunSpecExtSettingsModel::processBlockData()
         m_defaultRampRate = m_dataPoints.value("AGra").toFloatWithSSF(m_rampRateScaleFactor);
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecExtSettingsModel::initDataPoints()

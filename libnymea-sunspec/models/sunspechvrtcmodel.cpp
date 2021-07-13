@@ -66,8 +66,16 @@ quint16 SunSpecHvrtcModel::actCrv() const
 
 QModbusReply *SunSpecHvrtcModel::setActCrv(quint16 actCrv)
 {
-    Q_UNUSED(actCrv)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("ActCrv");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(actCrv);
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 SunSpecHvrtcModel::ModenaFlags SunSpecHvrtcModel::modEna() const
 {
@@ -76,8 +84,16 @@ SunSpecHvrtcModel::ModenaFlags SunSpecHvrtcModel::modEna() const
 
 QModbusReply *SunSpecHvrtcModel::setModEna(ModenaFlags modEna)
 {
-    Q_UNUSED(modEna)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("ModEna");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(static_cast<quint16>(modEna));
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 quint16 SunSpecHvrtcModel::winTms() const
 {
@@ -86,8 +102,16 @@ quint16 SunSpecHvrtcModel::winTms() const
 
 QModbusReply *SunSpecHvrtcModel::setWinTms(quint16 winTms)
 {
-    Q_UNUSED(winTms)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("WinTms");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(winTms);
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 quint16 SunSpecHvrtcModel::rvrtTms() const
 {
@@ -96,8 +120,16 @@ quint16 SunSpecHvrtcModel::rvrtTms() const
 
 QModbusReply *SunSpecHvrtcModel::setRvrtTms(quint16 rvrtTms)
 {
-    Q_UNUSED(rvrtTms)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("RvrtTms");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(rvrtTms);
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 quint16 SunSpecHvrtcModel::rmpTms() const
 {
@@ -106,8 +138,16 @@ quint16 SunSpecHvrtcModel::rmpTms() const
 
 QModbusReply *SunSpecHvrtcModel::setRmpTms(quint16 rmpTms)
 {
-    Q_UNUSED(rmpTms)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("RmpTms");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(rmpTms);
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 quint16 SunSpecHvrtcModel::nCrv() const
 {
@@ -157,7 +197,7 @@ void SunSpecHvrtcModel::processBlockData()
         m_pad = m_dataPoints.value("Pad").toUInt16();
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecHvrtcModel::initDataPoints()

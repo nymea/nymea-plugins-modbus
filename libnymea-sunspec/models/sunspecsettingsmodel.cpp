@@ -66,8 +66,16 @@ float SunSpecSettingsModel::wMax() const
 
 QModbusReply *SunSpecSettingsModel::setWMax(float wMax)
 {
-    Q_UNUSED(wMax)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("WMax");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(wMax, m_wMaxSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecSettingsModel::vRef() const
 {
@@ -76,8 +84,16 @@ float SunSpecSettingsModel::vRef() const
 
 QModbusReply *SunSpecSettingsModel::setVRef(float vRef)
 {
-    Q_UNUSED(vRef)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("VRef");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(vRef, m_vRefSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecSettingsModel::vRefOfs() const
 {
@@ -86,8 +102,16 @@ float SunSpecSettingsModel::vRefOfs() const
 
 QModbusReply *SunSpecSettingsModel::setVRefOfs(float vRefOfs)
 {
-    Q_UNUSED(vRefOfs)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("VRefOfs");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(vRefOfs, m_vRefOfsSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecSettingsModel::vMax() const
 {
@@ -96,8 +120,16 @@ float SunSpecSettingsModel::vMax() const
 
 QModbusReply *SunSpecSettingsModel::setVMax(float vMax)
 {
-    Q_UNUSED(vMax)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("VMax");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(vMax, m_vMinMaxSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecSettingsModel::vMin() const
 {
@@ -106,8 +138,16 @@ float SunSpecSettingsModel::vMin() const
 
 QModbusReply *SunSpecSettingsModel::setVMin(float vMin)
 {
-    Q_UNUSED(vMin)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("VMin");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(vMin, m_vMinMaxSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecSettingsModel::vaMax() const
 {
@@ -116,8 +156,16 @@ float SunSpecSettingsModel::vaMax() const
 
 QModbusReply *SunSpecSettingsModel::setVaMax(float vaMax)
 {
-    Q_UNUSED(vaMax)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("VAMax");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(vaMax, m_vaMaxSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecSettingsModel::vArMaxQ1() const
 {
@@ -126,8 +174,16 @@ float SunSpecSettingsModel::vArMaxQ1() const
 
 QModbusReply *SunSpecSettingsModel::setVArMaxQ1(float vArMaxQ1)
 {
-    Q_UNUSED(vArMaxQ1)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("VArMaxQ1");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(vArMaxQ1, m_vArMaxSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecSettingsModel::vArMaxQ2() const
 {
@@ -136,8 +192,16 @@ float SunSpecSettingsModel::vArMaxQ2() const
 
 QModbusReply *SunSpecSettingsModel::setVArMaxQ2(float vArMaxQ2)
 {
-    Q_UNUSED(vArMaxQ2)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("VArMaxQ2");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(vArMaxQ2, m_vArMaxSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecSettingsModel::vArMaxQ3() const
 {
@@ -146,8 +210,16 @@ float SunSpecSettingsModel::vArMaxQ3() const
 
 QModbusReply *SunSpecSettingsModel::setVArMaxQ3(float vArMaxQ3)
 {
-    Q_UNUSED(vArMaxQ3)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("VArMaxQ3");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(vArMaxQ3, m_vArMaxSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecSettingsModel::vArMaxQ4() const
 {
@@ -156,8 +228,16 @@ float SunSpecSettingsModel::vArMaxQ4() const
 
 QModbusReply *SunSpecSettingsModel::setVArMaxQ4(float vArMaxQ4)
 {
-    Q_UNUSED(vArMaxQ4)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("VArMaxQ4");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(vArMaxQ4, m_vArMaxSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecSettingsModel::wGra() const
 {
@@ -166,8 +246,16 @@ float SunSpecSettingsModel::wGra() const
 
 QModbusReply *SunSpecSettingsModel::setWGra(float wGra)
 {
-    Q_UNUSED(wGra)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("WGra");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(wGra, m_wGraSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecSettingsModel::pfMinQ1() const
 {
@@ -176,8 +264,16 @@ float SunSpecSettingsModel::pfMinQ1() const
 
 QModbusReply *SunSpecSettingsModel::setPfMinQ1(float pfMinQ1)
 {
-    Q_UNUSED(pfMinQ1)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("PFMinQ1");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(pfMinQ1, m_pfMinSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecSettingsModel::pfMinQ2() const
 {
@@ -186,8 +282,16 @@ float SunSpecSettingsModel::pfMinQ2() const
 
 QModbusReply *SunSpecSettingsModel::setPfMinQ2(float pfMinQ2)
 {
-    Q_UNUSED(pfMinQ2)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("PFMinQ2");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(pfMinQ2, m_pfMinSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecSettingsModel::pfMinQ3() const
 {
@@ -196,8 +300,16 @@ float SunSpecSettingsModel::pfMinQ3() const
 
 QModbusReply *SunSpecSettingsModel::setPfMinQ3(float pfMinQ3)
 {
-    Q_UNUSED(pfMinQ3)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("PFMinQ3");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(pfMinQ3, m_pfMinSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecSettingsModel::pfMinQ4() const
 {
@@ -206,8 +318,16 @@ float SunSpecSettingsModel::pfMinQ4() const
 
 QModbusReply *SunSpecSettingsModel::setPfMinQ4(float pfMinQ4)
 {
-    Q_UNUSED(pfMinQ4)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("PFMinQ4");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(pfMinQ4, m_pfMinSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 SunSpecSettingsModel::Varact SunSpecSettingsModel::vArAct() const
 {
@@ -216,8 +336,16 @@ SunSpecSettingsModel::Varact SunSpecSettingsModel::vArAct() const
 
 QModbusReply *SunSpecSettingsModel::setVArAct(Varact vArAct)
 {
-    Q_UNUSED(vArAct)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("VArAct");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(static_cast<quint16>(vArAct));
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 SunSpecSettingsModel::Clctotva SunSpecSettingsModel::clcTotVa() const
 {
@@ -226,8 +354,16 @@ SunSpecSettingsModel::Clctotva SunSpecSettingsModel::clcTotVa() const
 
 QModbusReply *SunSpecSettingsModel::setClcTotVa(Clctotva clcTotVa)
 {
-    Q_UNUSED(clcTotVa)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("ClcTotVA");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(static_cast<quint16>(clcTotVa));
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecSettingsModel::maxRmpRte() const
 {
@@ -236,8 +372,16 @@ float SunSpecSettingsModel::maxRmpRte() const
 
 QModbusReply *SunSpecSettingsModel::setMaxRmpRte(float maxRmpRte)
 {
-    Q_UNUSED(maxRmpRte)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("MaxRmpRte");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(maxRmpRte, m_maxRmpRteSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecSettingsModel::ecpNomHz() const
 {
@@ -246,8 +390,16 @@ float SunSpecSettingsModel::ecpNomHz() const
 
 QModbusReply *SunSpecSettingsModel::setEcpNomHz(float ecpNomHz)
 {
-    Q_UNUSED(ecpNomHz)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("ECPNomHz");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(ecpNomHz, m_ecpNomHzSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 SunSpecSettingsModel::Connph SunSpecSettingsModel::connPh() const
 {
@@ -256,8 +408,16 @@ SunSpecSettingsModel::Connph SunSpecSettingsModel::connPh() const
 
 QModbusReply *SunSpecSettingsModel::setConnPh(Connph connPh)
 {
-    Q_UNUSED(connPh)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("ConnPh");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(static_cast<quint16>(connPh));
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 void SunSpecSettingsModel::processBlockData()
 {
@@ -355,7 +515,7 @@ void SunSpecSettingsModel::processBlockData()
         m_connPh = static_cast<Connph>(m_dataPoints.value("ConnPh").toUInt16());
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecSettingsModel::initDataPoints()

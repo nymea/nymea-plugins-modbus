@@ -223,7 +223,7 @@ void SunSpecLithiumIonModuleModel::processBlockData()
         m_serialNumber = m_dataPoints.value("SN").toString();
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecLithiumIonModuleModel::initDataPoints()

@@ -105,7 +105,7 @@ void SunSpecModel::readBlockData()
                 }
 
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcSunSpecModelData()) << "-->" << "Received block data" << this << unit.values().count();
+                qCDebug(dcSunSpecModelData()) << "-->" << "Received block data" << this << unit.values().count() << SunSpecDataPoint::registersToString(unit.values());
                 m_blockData = unit.values();
                 emit blockDataChanged(m_blockData);
 

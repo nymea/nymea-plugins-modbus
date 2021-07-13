@@ -136,7 +136,7 @@ void SunSpecStringCombinerCurrentModel::processBlockData()
         m_temp = m_dataPoints.value("Tmp").toInt16();
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecStringCombinerCurrentModel::initDataPoints()

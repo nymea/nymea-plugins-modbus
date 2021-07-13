@@ -10,20 +10,14 @@ TEMPLATE = lib
 include(models/models.pri)
 
 SOURCES += \
-    sunspec.cpp \
     sunspecconnection.cpp \
     sunspecdatapoint.cpp \
-    sunspecdevice.cpp \
-    sunspecmodel.cpp \
-    sunspecstorage.cpp
+    sunspecmodel.cpp
 
 HEADERS += \
-    sunspec.h \
     sunspecconnection.h \
     sunspecdatapoint.h \
-    sunspecdevice.h \
-    sunspecmodel.h \
-    sunspecstorage.h
+    sunspecmodel.h
 
 # define install target
 target.path = $$[QT_INSTALL_LIBS]

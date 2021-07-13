@@ -66,8 +66,16 @@ SunSpecPricingModel::ModenaFlags SunSpecPricingModel::modEna() const
 
 QModbusReply *SunSpecPricingModel::setModEna(ModenaFlags modEna)
 {
-    Q_UNUSED(modEna)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("ModEna");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(static_cast<quint16>(modEna));
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 SunSpecPricingModel::Sigtype SunSpecPricingModel::sigType() const
 {
@@ -76,8 +84,16 @@ SunSpecPricingModel::Sigtype SunSpecPricingModel::sigType() const
 
 QModbusReply *SunSpecPricingModel::setSigType(Sigtype sigType)
 {
-    Q_UNUSED(sigType)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("SigType");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(static_cast<quint16>(sigType));
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecPricingModel::sig() const
 {
@@ -86,8 +102,16 @@ float SunSpecPricingModel::sig() const
 
 QModbusReply *SunSpecPricingModel::setSig(float sig)
 {
-    Q_UNUSED(sig)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("Sig");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(sig, m_sigSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 quint16 SunSpecPricingModel::winTms() const
 {
@@ -96,8 +120,16 @@ quint16 SunSpecPricingModel::winTms() const
 
 QModbusReply *SunSpecPricingModel::setWinTms(quint16 winTms)
 {
-    Q_UNUSED(winTms)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("WinTms");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(winTms);
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 quint16 SunSpecPricingModel::rvtTms() const
 {
@@ -106,8 +138,16 @@ quint16 SunSpecPricingModel::rvtTms() const
 
 QModbusReply *SunSpecPricingModel::setRvtTms(quint16 rvtTms)
 {
-    Q_UNUSED(rvtTms)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("RvtTms");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(rvtTms);
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 quint16 SunSpecPricingModel::rmpTms() const
 {
@@ -116,8 +156,16 @@ quint16 SunSpecPricingModel::rmpTms() const
 
 QModbusReply *SunSpecPricingModel::setRmpTms(quint16 rmpTms)
 {
-    Q_UNUSED(rmpTms)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("RmpTms");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(rmpTms);
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 quint16 SunSpecPricingModel::pad() const
 {
@@ -153,7 +201,7 @@ void SunSpecPricingModel::processBlockData()
         m_pad = m_dataPoints.value("Pad").toUInt16();
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecPricingModel::initDataPoints()

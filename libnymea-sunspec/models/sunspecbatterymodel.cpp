@@ -94,8 +94,16 @@ float SunSpecBatteryModel::maxReservePercent() const
 
 QModbusReply *SunSpecBatteryModel::setMaxReservePercent(float maxReservePercent)
 {
-    Q_UNUSED(maxReservePercent)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("SocRsvMax");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(maxReservePercent, m_soC_SF, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecBatteryModel::minReservePercent() const
 {
@@ -104,8 +112,16 @@ float SunSpecBatteryModel::minReservePercent() const
 
 QModbusReply *SunSpecBatteryModel::setMinReservePercent(float minReservePercent)
 {
-    Q_UNUSED(minReservePercent)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("SoCRsvMin");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(minReservePercent, m_soC_SF, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecBatteryModel::stateOfCharge() const
 {
@@ -142,8 +158,16 @@ quint16 SunSpecBatteryModel::controllerHeartbeat() const
 
 QModbusReply *SunSpecBatteryModel::setControllerHeartbeat(quint16 controllerHeartbeat)
 {
-    Q_UNUSED(controllerHeartbeat)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("CtrlHb");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(controllerHeartbeat);
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 quint16 SunSpecBatteryModel::alarmReset() const
 {
@@ -152,8 +176,16 @@ quint16 SunSpecBatteryModel::alarmReset() const
 
 QModbusReply *SunSpecBatteryModel::setAlarmReset(quint16 alarmReset)
 {
-    Q_UNUSED(alarmReset)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("AlmRst");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(alarmReset);
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 SunSpecBatteryModel::Typ SunSpecBatteryModel::batteryType() const
 {
@@ -258,8 +290,16 @@ SunSpecBatteryModel::Setop SunSpecBatteryModel::setOperation() const
 
 QModbusReply *SunSpecBatteryModel::setSetOperation(Setop setOperation)
 {
-    Q_UNUSED(setOperation)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("SetOp");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(static_cast<quint16>(setOperation));
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 SunSpecBatteryModel::Setinvstate SunSpecBatteryModel::setInverterState() const
 {
@@ -268,8 +308,16 @@ SunSpecBatteryModel::Setinvstate SunSpecBatteryModel::setInverterState() const
 
 QModbusReply *SunSpecBatteryModel::setSetInverterState(Setinvstate setInverterState)
 {
-    Q_UNUSED(setInverterState)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("SetInvState");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(static_cast<quint16>(setInverterState));
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 void SunSpecBatteryModel::processBlockData()
 {
@@ -445,7 +493,7 @@ void SunSpecBatteryModel::processBlockData()
         m_setInverterState = static_cast<Setinvstate>(m_dataPoints.value("SetInvState").toUInt16());
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecBatteryModel::initDataPoints()

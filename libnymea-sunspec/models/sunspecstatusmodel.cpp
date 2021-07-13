@@ -193,7 +193,7 @@ void SunSpecStatusModel::processBlockData()
         m_ris = m_dataPoints.value("Ris").toFloatWithSSF(m_risSf);
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecStatusModel::initDataPoints()

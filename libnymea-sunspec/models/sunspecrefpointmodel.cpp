@@ -91,7 +91,7 @@ void SunSpecRefPointModel::processBlockData()
         m_temperature = m_dataPoints.value("Tmp").toUInt16();
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecRefPointModel::initDataPoints()

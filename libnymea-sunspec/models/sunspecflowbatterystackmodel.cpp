@@ -70,7 +70,7 @@ void SunSpecFlowBatteryStackModel::processBlockData()
         m_stackPointsToBeDetermined = m_dataPoints.value("StackTBD").toUInt16();
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecFlowBatteryStackModel::initDataPoints()

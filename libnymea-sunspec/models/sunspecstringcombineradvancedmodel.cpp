@@ -172,7 +172,7 @@ void SunSpecStringCombinerAdvancedModel::processBlockData()
         m_wattHours = m_dataPoints.value("DCWh").toFloatWithSSF(m_dCWh_SF);
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecStringCombinerAdvancedModel::initDataPoints()

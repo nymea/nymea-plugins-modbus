@@ -140,7 +140,7 @@ void SunSpecBaseMetModel::processBlockData()
         m_soilWetness = m_dataPoints.value("SoilWet").toInt16();
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecBaseMetModel::initDataPoints()

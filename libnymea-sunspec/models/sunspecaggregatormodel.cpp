@@ -133,7 +133,7 @@ void SunSpecAggregatorModel::processBlockData()
         m_controlValue = m_dataPoints.value("CtlVl").toUInt32();
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecAggregatorModel::initDataPoints()

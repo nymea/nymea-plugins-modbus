@@ -32,10 +32,12 @@
 #define SUNSPECCONNECTION_H
 
 #include <QObject>
+#include <QtSerialBus>
 #include <QHostAddress>
 #include <QModbusTcpClient>
+#include <QLoggingCategory>
 
-#include "sunspec.h"
+Q_DECLARE_LOGGING_CATEGORY(dcSunSpec)
 
 class SunSpecModel;
 

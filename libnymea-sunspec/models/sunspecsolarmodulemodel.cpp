@@ -82,8 +82,16 @@ quint16 SunSpecSolarModuleModel::control() const
 
 QModbusReply *SunSpecSolarModuleModel::setControl(quint16 control)
 {
-    Q_UNUSED(control)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("Ctl");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(static_cast<quint16>(control));
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 quint32 SunSpecSolarModuleModel::vendorControl() const
 {
@@ -92,8 +100,16 @@ quint32 SunSpecSolarModuleModel::vendorControl() const
 
 QModbusReply *SunSpecSolarModuleModel::setVendorControl(quint32 vendorControl)
 {
-    Q_UNUSED(vendorControl)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("CtlVend");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt32(static_cast<quint32>(vendorControl));
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 qint32 SunSpecSolarModuleModel::controlValue() const
 {
@@ -102,8 +118,16 @@ qint32 SunSpecSolarModuleModel::controlValue() const
 
 QModbusReply *SunSpecSolarModuleModel::setControlValue(qint32 controlValue)
 {
-    Q_UNUSED(controlValue)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("CtlVal");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromInt32(controlValue);
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 quint32 SunSpecSolarModuleModel::timestamp() const
 {
@@ -214,7 +238,7 @@ void SunSpecSolarModuleModel::processBlockData()
         m_inputPower = m_dataPoints.value("InW").toFloatWithSSF(m_w_SF);
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecSolarModuleModel::initDataPoints()

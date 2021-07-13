@@ -86,8 +86,16 @@ float SunSpecTrackerControllerModel::manualElevation() const
 
 QModbusReply *SunSpecTrackerControllerModel::setManualElevation(float manualElevation)
 {
-    Q_UNUSED(manualElevation)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("GlblElCtl");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromInt32(manualElevation);
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecTrackerControllerModel::manualAzimuth() const
 {
@@ -96,8 +104,16 @@ float SunSpecTrackerControllerModel::manualAzimuth() const
 
 QModbusReply *SunSpecTrackerControllerModel::setManualAzimuth(float manualAzimuth)
 {
-    Q_UNUSED(manualAzimuth)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("GlblAzCtl");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromInt32(manualAzimuth);
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 SunSpecTrackerControllerModel::Glblctl SunSpecTrackerControllerModel::globalMode() const
 {
@@ -106,8 +122,16 @@ SunSpecTrackerControllerModel::Glblctl SunSpecTrackerControllerModel::globalMode
 
 QModbusReply *SunSpecTrackerControllerModel::setGlobalMode(Glblctl globalMode)
 {
-    Q_UNUSED(globalMode)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("GlblCtl");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(static_cast<quint16>(globalMode));
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 SunSpecTrackerControllerModel::GlblalmFlags SunSpecTrackerControllerModel::globalAlarm() const
 {
@@ -156,7 +180,7 @@ void SunSpecTrackerControllerModel::processBlockData()
         m_trackers = m_dataPoints.value("N").toUInt16();
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecTrackerControllerModel::initDataPoints()

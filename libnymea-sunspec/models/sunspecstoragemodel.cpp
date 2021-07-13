@@ -66,8 +66,16 @@ float SunSpecStorageModel::wChaMax() const
 
 QModbusReply *SunSpecStorageModel::setWChaMax(float wChaMax)
 {
-    Q_UNUSED(wChaMax)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("WChaMax");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(wChaMax, m_wChaMaxSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecStorageModel::wChaGra() const
 {
@@ -76,8 +84,16 @@ float SunSpecStorageModel::wChaGra() const
 
 QModbusReply *SunSpecStorageModel::setWChaGra(float wChaGra)
 {
-    Q_UNUSED(wChaGra)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("WChaGra");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(wChaGra, m_wChaDisChaGraSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecStorageModel::wDisChaGra() const
 {
@@ -86,8 +102,16 @@ float SunSpecStorageModel::wDisChaGra() const
 
 QModbusReply *SunSpecStorageModel::setWDisChaGra(float wDisChaGra)
 {
-    Q_UNUSED(wDisChaGra)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("WDisChaGra");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(wDisChaGra, m_wChaDisChaGraSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 SunSpecStorageModel::Storctl_modFlags SunSpecStorageModel::storCtlMod() const
 {
@@ -96,8 +120,16 @@ SunSpecStorageModel::Storctl_modFlags SunSpecStorageModel::storCtlMod() const
 
 QModbusReply *SunSpecStorageModel::setStorCtlMod(Storctl_modFlags storCtlMod)
 {
-    Q_UNUSED(storCtlMod)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("StorCtl_Mod");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(static_cast<quint16>(storCtlMod));
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecStorageModel::vaChaMax() const
 {
@@ -106,8 +138,16 @@ float SunSpecStorageModel::vaChaMax() const
 
 QModbusReply *SunSpecStorageModel::setVaChaMax(float vaChaMax)
 {
-    Q_UNUSED(vaChaMax)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("VAChaMax");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(vaChaMax, m_vaChaMaxSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecStorageModel::minRsvPct() const
 {
@@ -116,8 +156,16 @@ float SunSpecStorageModel::minRsvPct() const
 
 QModbusReply *SunSpecStorageModel::setMinRsvPct(float minRsvPct)
 {
-    Q_UNUSED(minRsvPct)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("MinRsvPct");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(minRsvPct, m_minRsvPctSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecStorageModel::chaState() const
 {
@@ -142,8 +190,16 @@ float SunSpecStorageModel::outWRte() const
 
 QModbusReply *SunSpecStorageModel::setOutWRte(float outWRte)
 {
-    Q_UNUSED(outWRte)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("OutWRte");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(outWRte, m_inOutWRteSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 float SunSpecStorageModel::inWRte() const
 {
@@ -152,8 +208,16 @@ float SunSpecStorageModel::inWRte() const
 
 QModbusReply *SunSpecStorageModel::setInWRte(float inWRte)
 {
-    Q_UNUSED(inWRte)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("InWRte");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromFloatWithSSF(inWRte, m_inOutWRteSf, dp.dataType());
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 quint16 SunSpecStorageModel::inOutWRteWinTms() const
 {
@@ -162,8 +226,16 @@ quint16 SunSpecStorageModel::inOutWRteWinTms() const
 
 QModbusReply *SunSpecStorageModel::setInOutWRteWinTms(quint16 inOutWRteWinTms)
 {
-    Q_UNUSED(inOutWRteWinTms)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("InOutWRte_WinTms");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(inOutWRteWinTms);
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 quint16 SunSpecStorageModel::inOutWRteRvrtTms() const
 {
@@ -172,8 +244,16 @@ quint16 SunSpecStorageModel::inOutWRteRvrtTms() const
 
 QModbusReply *SunSpecStorageModel::setInOutWRteRvrtTms(quint16 inOutWRteRvrtTms)
 {
-    Q_UNUSED(inOutWRteRvrtTms)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("InOutWRte_RvrtTms");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(inOutWRteRvrtTms);
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 quint16 SunSpecStorageModel::inOutWRteRmpTms() const
 {
@@ -182,8 +262,16 @@ quint16 SunSpecStorageModel::inOutWRteRmpTms() const
 
 QModbusReply *SunSpecStorageModel::setInOutWRteRmpTms(quint16 inOutWRteRmpTms)
 {
-    Q_UNUSED(inOutWRteRmpTms)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("InOutWRte_RmpTms");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(inOutWRteRmpTms);
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 SunSpecStorageModel::Chagriset SunSpecStorageModel::chaGriSet() const
 {
@@ -192,8 +280,16 @@ SunSpecStorageModel::Chagriset SunSpecStorageModel::chaGriSet() const
 
 QModbusReply *SunSpecStorageModel::setChaGriSet(Chagriset chaGriSet)
 {
-    Q_UNUSED(chaGriSet)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("ChaGriSet");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(static_cast<quint16>(chaGriSet));
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 void SunSpecStorageModel::processBlockData()
 {
@@ -273,7 +369,7 @@ void SunSpecStorageModel::processBlockData()
         m_chaGriSet = static_cast<Chagriset>(m_dataPoints.value("ChaGriSet").toUInt16());
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecStorageModel::initDataPoints()

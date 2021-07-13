@@ -223,7 +223,7 @@ void SunSpecLithiumIonBankModel::processBlockData()
         m_batteryCellBalancingCount = m_dataPoints.value("NCellBal").toUInt16();
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecLithiumIonBankModel::initDataPoints()

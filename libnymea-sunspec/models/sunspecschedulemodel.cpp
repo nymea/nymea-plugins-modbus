@@ -66,8 +66,16 @@ SunSpecScheduleModel::ActschdFlags SunSpecScheduleModel::actSchd() const
 
 QModbusReply *SunSpecScheduleModel::setActSchd(ActschdFlags actSchd)
 {
-    Q_UNUSED(actSchd)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("ActSchd");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt32(static_cast<quint32>(actSchd));
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 SunSpecScheduleModel::ModenaFlags SunSpecScheduleModel::modEna() const
 {
@@ -76,8 +84,16 @@ SunSpecScheduleModel::ModenaFlags SunSpecScheduleModel::modEna() const
 
 QModbusReply *SunSpecScheduleModel::setModEna(ModenaFlags modEna)
 {
-    Q_UNUSED(modEna)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("ModEna");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(static_cast<quint16>(modEna));
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 quint16 SunSpecScheduleModel::nSchd() const
 {
@@ -110,7 +126,7 @@ void SunSpecScheduleModel::processBlockData()
         m_pad = m_dataPoints.value("Pad").toUInt16();
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecScheduleModel::initDataPoints()

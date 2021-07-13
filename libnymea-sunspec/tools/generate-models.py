@@ -508,16 +508,56 @@ def getConvertionMethodFromSunspecType(dataPoint, scaleFactorProperty):
 def getConvertionMethodToSunspecType(dataPoint, scaleFactorProperty):
     typeString = dataPoint['type']
     cppType = getCppType(dataPoint)
+    propertyName = getPropertyName(dataPoint)
+    line = 'QVector<quint16> registers = SunSpecDataPoint::'
     if typeString == 'uint16' or typeString == 'acc16' or typeString == 'pad' or typeString == 'raw16':
-    # If we have a scale factor set, this is gonna be a float value
-    if 'sf' in dataPoint:
-        # This is a float value with scale factor
-        if scaleFactorProperty == '':
-            return ('m_dataPoints.value("%s").toFloatWithSSF(%s)' % (dataPoint['name'], dataPoint['sf']))
+        # If we have a scale factor set, this is gonna be a float value
+        if 'sf' in dataPoint:
+            # This is a float value with scale factor
+            scaleFactor = ''
+            if scaleFactorProperty == '':
+                scaleFactor = dataPoint['sf']
+            else:
+                scaleFactor = scaleFactorProperty
+
+            # Float with scale factor
+            line += ('convertFromFloatWithSSF(%s, %s, dp.dataType());' % (propertyName, scaleFactor))
         else:
-            return ('m_dataPoints.value("%s").toFloatWithSSF(%s)' % (dataPoint['name'], scaleFactorProperty))
+            line +=  ('convertFromUInt16(%s);' % propertyName)
+
+    elif typeString == 'int16':
+        # If we have a scale factor set, this is gonna be a float value
+        if 'sf' in dataPoint:
+            # This is a float value with scale factor
+            scaleFactor = ''
+            if scaleFactorProperty == '':
+                scaleFactor = dataPoint['sf']
+            else:
+                scaleFactor = scaleFactorProperty
+
+            # Float with scale factor
+            line += ('convertFromFloatWithSSF(%s, %s, dp.dataType());' % (propertyName, scaleFactor))
+        else:
+            line +=  ('convertFromInt16(%s);' % propertyName)
+
+
+    elif typeString == 'enum16' or typeString == 'bitfield16':
+        line += ('convertFromUInt16(static_cast<quint16>(%s));' % propertyName)
+    
+    elif typeString == 'enum32' or typeString == 'bitfield32':
+        line += ('convertFromUInt32(static_cast<quint32>(%s));' % propertyName)
+
+    elif typeString == 'uint32':
+        line += ('convertFromUInt32(%s);' % propertyName)
+
+    elif typeString == 'int32':
+        line += ('convertFromInt32(%s);' % propertyName)
+
     else:
-        return ('m_dataPoints.value("%s").toUInt16()' % dataPoint['name'])
+        line = 'QVector<quint16> registers;'
+    
+    return line
+
 
 
 
@@ -594,20 +634,23 @@ def addPropertiesMethodImplementation(fileDescriptor, className, modelId):
                 writeLine(fileDescriptor, 'QModbusReply *%s::set%s(%s %s)' % (className,convertToCamelCase(propertyName, True), getCppType(dataPoint), propertyName))
 
             writeLine(fileDescriptor, '{')
-            writeLine(fileDescriptor, '    if !m_initialized:')
+            writeLine(fileDescriptor, '    if (!m_initialized)')
             writeLine(fileDescriptor, '        return nullptr;')
             writeLine(fileDescriptor)
-
+            writeLine(fileDescriptor, '    SunSpecDataPoint dp = m_dataPoints.value("%s");' % dataPoint['name'])
+            scaleFactorProperty = ''
             if 'sf' in dataPoint:
                 # Get the scale factor propery
-                scaleFactorProperty = ''
                 for dp in dataPoints:
                     if dp['name'] == dataPoint['sf']:
                         scaleFactorProperty = 'm_' + getPropertyName(dp)
 
-
-            writeLine(fileDescriptor, '    Q_UNUSED(%s)' % propertyName)
-            writeLine(fileDescriptor, '    return nullptr;')
+            writeLine(fileDescriptor, '    ' + getConvertionMethodToSunspecType(dataPoint, scaleFactorProperty))
+            writeLine(fileDescriptor)
+            writeLine(fileDescriptor, '    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());')
+            writeLine(fileDescriptor, '    request.setValues(registers);')
+            writeLine(fileDescriptor)
+            writeLine(fileDescriptor, '    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());')
             writeLine(fileDescriptor, '}')
 
 

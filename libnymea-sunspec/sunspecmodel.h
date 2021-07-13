@@ -34,8 +34,8 @@
 #include <QTimer>
 #include <QObject>
 #include <QLoggingCategory>
+#include <QModbusReply>
 
-#include "sunspec.h"
 #include "sunspecdatapoint.h"
 
 Q_DECLARE_LOGGING_CATEGORY(dcSunSpecModelData)

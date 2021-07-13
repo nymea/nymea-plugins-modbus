@@ -33,8 +33,9 @@
 
 #include <QObject>
 #include <QDebug>
+#include <QTimer>
 
-#include <sunspec.h>
+class SunSpecConnection;
 
 class SolarEdgeBattery : public QObject
 {
@@ -104,9 +105,9 @@ public:
         BatteryStatus batteryStatus;
     };
 
-    explicit SolarEdgeBattery(SunSpec *connection, int modbusStartRegister, QObject *parent = nullptr);
+    explicit SolarEdgeBattery(SunSpecConnection *connection, int modbusStartRegister, QObject *parent = nullptr);
 
-    SunSpec *connection() const;
+    SunSpecConnection *connection() const;
     int modbusStartRegister() const;
 
     BatteryData batteryData() const;
@@ -116,7 +117,7 @@ public:
 
 private:
     QTimer m_timer;
-    SunSpec *m_connection = nullptr;
+    SunSpecConnection *m_connection = nullptr;
     int m_modbusStartRegister;
     bool m_initFinishedSuccess = false;
     BatteryData m_batteryData;

@@ -32,9 +32,8 @@
 #include "integrationpluginsunspec.h"
 #include "network/networkdevicediscovery.h"
 
-#include "sunspecmodel.h"
+#include <sunspecmodel.h>
 #include <models/sunspeccommonmodel.h>
-
 
 #include <QHostAddress>
 

@@ -174,8 +174,16 @@ quint16 SunSpecLithiumIonStringModel::enableDisableString() const
 
 QModbusReply *SunSpecLithiumIonStringModel::setEnableDisableString(quint16 enableDisableString)
 {
-    Q_UNUSED(enableDisableString)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("SetEna");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(static_cast<quint16>(enableDisableString));
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 SunSpecLithiumIonStringModel::Setcon SunSpecLithiumIonStringModel::connectDisconnectString() const
 {
@@ -184,8 +192,16 @@ SunSpecLithiumIonStringModel::Setcon SunSpecLithiumIonStringModel::connectDiscon
 
 QModbusReply *SunSpecLithiumIonStringModel::setConnectDisconnectString(Setcon connectDisconnectString)
 {
-    Q_UNUSED(connectDisconnectString)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("SetCon");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(static_cast<quint16>(connectDisconnectString));
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 quint16 SunSpecLithiumIonStringModel::pad2() const
 {
@@ -322,7 +338,7 @@ void SunSpecLithiumIonStringModel::processBlockData()
         m_pad4 = m_dataPoints.value("Pad4").toUInt16();
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecLithiumIonStringModel::initDataPoints()

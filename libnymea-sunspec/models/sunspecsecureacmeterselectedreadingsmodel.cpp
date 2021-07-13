@@ -249,7 +249,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::processBlockData()
         m_n = m_dataPoints.value("N").toUInt16();
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()

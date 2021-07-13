@@ -86,8 +86,16 @@ quint16 SunSpecCommonModel::deviceAddress() const
 
 QModbusReply *SunSpecCommonModel::setDeviceAddress(quint16 deviceAddress)
 {
-    Q_UNUSED(deviceAddress)
-    return nullptr;
+    if (!m_initialized)
+        return nullptr;
+
+    SunSpecDataPoint dp = m_dataPoints.value("DA");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(deviceAddress);
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
 quint16 SunSpecCommonModel::pad() const
 {
@@ -118,7 +126,7 @@ void SunSpecCommonModel::processBlockData()
         m_pad = m_dataPoints.value("Pad").toUInt16();
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecCommonModel::initDataPoints()

@@ -529,7 +529,7 @@ void SunSpecMeterSinglePhaseModel::processBlockData()
         m_events = static_cast<EvtFlags>(m_dataPoints.value("Evt").toUInt32());
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecMeterSinglePhaseModel::initDataPoints()

@@ -318,7 +318,7 @@ void SunSpecInverterThreePhaseModel::processBlockData()
         m_vendorEventBitfield4 = m_dataPoints.value("EvtVnd4").toUInt32();
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecInverterThreePhaseModel::initDataPoints()

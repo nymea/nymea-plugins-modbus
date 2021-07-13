@@ -70,7 +70,7 @@ void SunSpecFlowBatteryModel::processBlockData()
         m_batteryPointsToBeDetermined = m_dataPoints.value("BatTBD").toUInt16();
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecFlowBatteryModel::initDataPoints()

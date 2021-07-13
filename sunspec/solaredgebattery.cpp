@@ -31,7 +31,10 @@
 #include "solaredgebattery.h"
 #include "extern-plugininfo.h"
 
-SolarEdgeBattery::SolarEdgeBattery(SunSpec *connection, int modbusStartRegister, QObject *parent) :
+#include <sunspecdatapoint.h>
+#include <sunspecconnection.h>
+
+SolarEdgeBattery::SolarEdgeBattery(SunSpecConnection *connection, int modbusStartRegister, QObject *parent) :
     QObject(parent),
     m_connection(connection),
     m_modbusStartRegister(modbusStartRegister)
@@ -45,7 +48,7 @@ SolarEdgeBattery::SolarEdgeBattery(SunSpec *connection, int modbusStartRegister,
     });
 }
 
-SunSpec *SolarEdgeBattery::connection() const
+SunSpecConnection *SolarEdgeBattery::connection() const
 {
     return m_connection;
 }

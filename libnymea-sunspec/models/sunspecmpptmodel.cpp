@@ -98,7 +98,7 @@ void SunSpecMpptModel::processBlockData()
         m_timestampPeriod = m_dataPoints.value("TmsPer").toUInt16();
 
 
-    qCDebug(dcSunSpec()) << this;
+    qCDebug(dcSunSpecModelData()) << this;
 }
 
 void SunSpecMpptModel::initDataPoints()
