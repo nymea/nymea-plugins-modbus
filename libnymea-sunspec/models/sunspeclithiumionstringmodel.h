@@ -34,8 +34,67 @@
 #include <QObject>
 
 #include "sunspecmodel.h"
+#include "sunspecmodelrepeatingblock.h"
 
 class SunSpecConnection;
+class SunSpecLithiumIonStringModel;
+
+class SunSpecLithiumIonStringModelRepeatingBlock : public SunSpecModelRepeatingBlock
+{
+    Q_OBJECT
+public:
+
+    explicit SunSpecLithiumIonStringModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecLithiumIonStringModel *parent = nullptr);
+    ~SunSpecLithiumIonStringModelRepeatingBlock() override; 
+
+    SunSpecLithiumIonStringModel *parentModel() const; 
+
+    QString name() const override;
+    quint16 moduleCellCount() const;
+    float moduleSoC() const;
+    float moduleSoH() const;
+    float maxCellVoltage() const;
+    quint16 maxCellVoltageCell() const;
+    float minCellVoltage() const;
+    float minCellVoltageCell() const;
+    float averageCellVoltage() const;
+    float maxCellTemperature() const;
+    quint16 maxCellTemperatureCell() const;
+    float minCellTemperature() const;
+    quint16 minCellTemperatureCell() const;
+    float averageCellTemperature() const;
+    quint16 pad5() const;
+    quint16 pad6() const;
+    quint16 pad7() const;
+
+    void processBlockData(const QVector<quint16> blockData) override;
+
+protected:
+    void initDataPoints() override;
+
+private:
+    SunSpecLithiumIonStringModel *m_parentModel = nullptr; 
+
+    quint16 m_moduleCellCount = 0;
+    float m_moduleSoC = 0;
+    float m_moduleSoH = 0;
+    float m_maxCellVoltage = 0;
+    quint16 m_maxCellVoltageCell = 0;
+    float m_minCellVoltage = 0;
+    float m_minCellVoltageCell = 0;
+    float m_averageCellVoltage = 0;
+    float m_maxCellTemperature = 0;
+    quint16 m_maxCellTemperatureCell = 0;
+    float m_minCellTemperature = 0;
+    quint16 m_minCellTemperatureCell = 0;
+    float m_averageCellTemperature = 0;
+    quint16 m_pad5 = 0;
+    quint16 m_pad6 = 0;
+    quint16 m_pad7 = 0;
+
+};
+
+
 
 class SunSpecLithiumIonStringModel : public SunSpecModel
 {
@@ -139,7 +198,7 @@ public:
     Q_DECLARE_FLAGS(Evt1Flags, Evt1)
     Q_FLAG(Evt1)
 
-    explicit SunSpecLithiumIonStringModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);
+    explicit SunSpecLithiumIonStringModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
     ~SunSpecLithiumIonStringModel() override; 
 
     QString name() const override;
@@ -167,7 +226,7 @@ public:
     float minModuleTemperature() const;
     quint16 minModuleTemperatureModule() const;
     float averageModuleTemperature() const;
-    quint16 pad() const;
+    quint16 pad1() const;
     ConstFlags contactorStatus() const;
     Evt1Flags stringEvent1() const;
     quint32 stringEvent2() const;
@@ -180,11 +239,22 @@ public:
     Setcon connectDisconnectString() const;
     QModbusReply *setConnectDisconnectString(Setcon connectDisconnectString);
 
+    qint16 soC_SF() const;
+    qint16 soH_SF() const;
+    qint16 doD_SF() const;
+    qint16 a_SF() const;
+    qint16 v_SF() const;
+    qint16 cellV_SF() const;
+    qint16 modTmp_SF() const;
     quint16 pad2() const;
     quint16 pad3() const;
     quint16 pad4() const;
 
 protected:
+    quint16 m_fixedBlockLength = 46;
+    quint16 m_repeatingBlockLength = 16;
+
+    void initDataPoints() override;
     void processBlockData() override;
 
 private:
@@ -209,7 +279,7 @@ private:
     float m_minModuleTemperature = 0;
     quint16 m_minModuleTemperatureModule = 0;
     float m_averageModuleTemperature = 0;
-    quint16 m_pad = 0;
+    quint16 m_pad1 = 0;
     ConstFlags m_contactorStatus;
     Evt1Flags m_stringEvent1;
     quint32 m_stringEvent2 = 0;
@@ -228,7 +298,6 @@ private:
     quint16 m_pad3 = 0;
     quint16 m_pad4 = 0;
 
-    void initDataPoints();
 
 };
 

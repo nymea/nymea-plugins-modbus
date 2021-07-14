@@ -129,7 +129,6 @@ public:
     quint64 toUInt64() const;
     qint64 toInt64() const;
     QString toString() const;
-
     float toFloat() const;
     float toFloatWithSSF(qint16 scaleFactor) const;
     double toDouble() const;
@@ -144,6 +143,8 @@ public:
     static quint64 convertToUInt64(const QVector<quint16> &registers);
     static qint64 convertToInt64(const QVector<quint16> &registers);
     static QString convertToString(const QVector<quint16> &registers);
+    static float convertToFloat32(const QVector<quint16> &registers);
+    static double convertToFloat64(const QVector<quint16> &registers);
 
     // Convert from
     static QVector<quint16> convertFromUInt16(quint16 value);
@@ -152,8 +153,10 @@ public:
     static QVector<quint16> convertFromInt32(qint32 value);
     static QVector<quint16> convertFromUInt64(quint64 value);
     static QVector<quint16> convertFromInt64(qint64 value);
-    static QVector<quint16> convertFromString(const QString &value, quint16 registerCount);
+    static QVector<quint16> convertFromString(const QString &value, quint16 stringLength);
     static QVector<quint16> convertFromFloatWithSSF(float value, qint16 scaleFactor, DataType dataType);
+    static QVector<quint16> convertFromFloat32(float value);
+    static QVector<quint16> convertFromFloat64(double value);
 
 private:
     QString m_name;

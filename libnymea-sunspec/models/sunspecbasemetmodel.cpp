@@ -31,11 +31,11 @@
 #include "sunspecbasemetmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecBaseMetModel::SunSpecBaseMetModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 307, 11, parent)
+SunSpecBaseMetModel::SunSpecBaseMetModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 307, modelLength, parent)
 {
-    //Q_ASSERT_X(length == 11,  "SunSpecBaseMetModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
-    Q_UNUSED(length)
+    m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
+
     initDataPoints();
 }
 
@@ -103,46 +103,6 @@ qint16 SunSpecBaseMetModel::soilWetness() const
 {
     return m_soilWetness;
 }
-void SunSpecBaseMetModel::processBlockData()
-{
-    // Update properties according to the data point type
-    if (m_dataPoints.value("TmpAmb").isValid())
-        m_ambientTemperature = m_dataPoints.value("TmpAmb").toFloatWithSSF(-1);
-
-    if (m_dataPoints.value("RH").isValid())
-        m_relativeHumidity = m_dataPoints.value("RH").toInt16();
-
-    if (m_dataPoints.value("Pres").isValid())
-        m_barometricPressure = m_dataPoints.value("Pres").toInt16();
-
-    if (m_dataPoints.value("WndSpd").isValid())
-        m_windSpeed = m_dataPoints.value("WndSpd").toInt16();
-
-    if (m_dataPoints.value("WndDir").isValid())
-        m_windDirection = m_dataPoints.value("WndDir").toInt16();
-
-    if (m_dataPoints.value("Rain").isValid())
-        m_rainfall = m_dataPoints.value("Rain").toInt16();
-
-    if (m_dataPoints.value("Snw").isValid())
-        m_snowDepth = m_dataPoints.value("Snw").toInt16();
-
-    if (m_dataPoints.value("PPT").isValid())
-        m_precipitationType = m_dataPoints.value("PPT").toInt16();
-
-    if (m_dataPoints.value("ElecFld").isValid())
-        m_electricField = m_dataPoints.value("ElecFld").toInt16();
-
-    if (m_dataPoints.value("SurWet").isValid())
-        m_surfaceWetness = m_dataPoints.value("SurWet").toInt16();
-
-    if (m_dataPoints.value("SoilWet").isValid())
-        m_soilWetness = m_dataPoints.value("SoilWet").toInt16();
-
-
-    qCDebug(dcSunSpecModelData()) << this;
-}
-
 void SunSpecBaseMetModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -278,73 +238,124 @@ void SunSpecBaseMetModel::initDataPoints()
 
 }
 
+void SunSpecBaseMetModel::processBlockData()
+{
+    // Update properties according to the data point type
+    if (m_dataPoints.value("TmpAmb").isValid())
+        m_ambientTemperature = m_dataPoints.value("TmpAmb").toFloatWithSSF(-1);
+
+    if (m_dataPoints.value("RH").isValid())
+        m_relativeHumidity = m_dataPoints.value("RH").toInt16();
+
+    if (m_dataPoints.value("Pres").isValid())
+        m_barometricPressure = m_dataPoints.value("Pres").toInt16();
+
+    if (m_dataPoints.value("WndSpd").isValid())
+        m_windSpeed = m_dataPoints.value("WndSpd").toInt16();
+
+    if (m_dataPoints.value("WndDir").isValid())
+        m_windDirection = m_dataPoints.value("WndDir").toInt16();
+
+    if (m_dataPoints.value("Rain").isValid())
+        m_rainfall = m_dataPoints.value("Rain").toInt16();
+
+    if (m_dataPoints.value("Snw").isValid())
+        m_snowDepth = m_dataPoints.value("Snw").toInt16();
+
+    if (m_dataPoints.value("PPT").isValid())
+        m_precipitationType = m_dataPoints.value("PPT").toInt16();
+
+    if (m_dataPoints.value("ElecFld").isValid())
+        m_electricField = m_dataPoints.value("ElecFld").toInt16();
+
+    if (m_dataPoints.value("SurWet").isValid())
+        m_surfaceWetness = m_dataPoints.value("SurWet").toInt16();
+
+    if (m_dataPoints.value("SoilWet").isValid())
+        m_soilWetness = m_dataPoints.value("SoilWet").toInt16();
+
+
+    qCDebug(dcSunSpecModelData()) << this;
+}
+
 QDebug operator<<(QDebug debug, SunSpecBaseMetModel *model)
 {
     debug.nospace().noquote() << "SunSpecBaseMetModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpAmb") << "-->";
     if (model->dataPoints().value("TmpAmb").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpAmb") << "--> " << model->ambientTemperature() << endl;
+        debug.nospace().noquote() << model->ambientTemperature() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpAmb") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("RH") << "-->";
     if (model->dataPoints().value("RH").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("RH") << "--> " << model->relativeHumidity() << endl;
+        debug.nospace().noquote() << model->relativeHumidity() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("RH") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Pres") << "-->";
     if (model->dataPoints().value("Pres").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Pres") << "--> " << model->barometricPressure() << endl;
+        debug.nospace().noquote() << model->barometricPressure() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Pres") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("WndSpd") << "-->";
     if (model->dataPoints().value("WndSpd").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WndSpd") << "--> " << model->windSpeed() << endl;
+        debug.nospace().noquote() << model->windSpeed() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WndSpd") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("WndDir") << "-->";
     if (model->dataPoints().value("WndDir").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WndDir") << "--> " << model->windDirection() << endl;
+        debug.nospace().noquote() << model->windDirection() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WndDir") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Rain") << "-->";
     if (model->dataPoints().value("Rain").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Rain") << "--> " << model->rainfall() << endl;
+        debug.nospace().noquote() << model->rainfall() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Rain") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Snw") << "-->";
     if (model->dataPoints().value("Snw").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Snw") << "--> " << model->snowDepth() << endl;
+        debug.nospace().noquote() << model->snowDepth() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Snw") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("PPT") << "-->";
     if (model->dataPoints().value("PPT").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PPT") << "--> " << model->precipitationType() << endl;
+        debug.nospace().noquote() << model->precipitationType() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PPT") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ElecFld") << "-->";
     if (model->dataPoints().value("ElecFld").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ElecFld") << "--> " << model->electricField() << endl;
+        debug.nospace().noquote() << model->electricField() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ElecFld") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("SurWet") << "-->";
     if (model->dataPoints().value("SurWet").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("SurWet") << "--> " << model->surfaceWetness() << endl;
+        debug.nospace().noquote() << model->surfaceWetness() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("SurWet") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("SoilWet") << "-->";
     if (model->dataPoints().value("SoilWet").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("SoilWet") << "--> " << model->soilWetness() << endl;
+        debug.nospace().noquote() << model->soilWetness() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("SoilWet") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
 

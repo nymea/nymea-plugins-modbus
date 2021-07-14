@@ -368,10 +368,7 @@ QString SunSpecDataPoint::toString() const
 float SunSpecDataPoint::toFloat() const
 {
     Q_ASSERT_X(m_dataType == Float32,  "SunSpecDataPoint", "invalid raw data size for converting value to float");
-    quint32 rawValue = toUInt32();
-    float value = 0;
-    memcpy(&value, &rawValue, sizeof(quint32));
-    return value;
+    return SunSpecDataPoint::convertToFloat32(m_rawData);
 }
 
 float SunSpecDataPoint::toFloatWithSSF(qint16 scaleFactor) const
@@ -403,10 +400,7 @@ float SunSpecDataPoint::toFloatWithSSF(qint16 scaleFactor) const
 double SunSpecDataPoint::toDouble() const
 {
     Q_ASSERT_X(m_dataType == Float64,  "SunSpecDataPoint", "invalid raw data size for converting value to double");
-    quint64 rawValue = toUInt64();
-    double value = 0;
-    memcpy(&value, &rawValue, sizeof(quint64));
-    return value;
+    return SunSpecDataPoint::convertToFloat64(m_rawData);
 }
 
 QString SunSpecDataPoint::registersToString(const QVector<quint16> &registers)
@@ -496,6 +490,24 @@ QString SunSpecDataPoint::convertToString(const QVector<quint16> &registers)
     return QString::fromUtf8(bytes).trimmed();
 }
 
+float SunSpecDataPoint::convertToFloat32(const QVector<quint16> &registers)
+{
+    Q_ASSERT_X(registers.count() == 2,  "SunSpecDataPoint", "invalid raw data size for converting value to float32");
+    quint32 rawValue = SunSpecDataPoint::convertToUInt32(registers);
+    float value = 0;
+    memcpy(&value, &rawValue, sizeof(quint32));
+    return value;
+}
+
+double SunSpecDataPoint::convertToFloat64(const QVector<quint16> &registers)
+{
+    Q_ASSERT_X(registers.count() == 4,  "SunSpecDataPoint", "invalid raw data size for converting value to float64");
+    quint64 rawValue = SunSpecDataPoint::convertToUInt64(registers);
+    double value = 0;
+    memcpy(&value, &rawValue, sizeof(quint64));
+    return value;
+}
+
 QVector<quint16> SunSpecDataPoint::convertFromUInt16(quint16 value)
 {
     return QVector<quint16>() << value;
@@ -553,13 +565,13 @@ QVector<quint16> SunSpecDataPoint::convertFromInt64(qint64 value)
     return values;
 }
 
-QVector<quint16> SunSpecDataPoint::convertFromString(const QString &value, quint16 registerCount)
+QVector<quint16> SunSpecDataPoint::convertFromString(const QString &value, quint16 stringLength)
 {
-    Q_ASSERT_X(value.length() > registerCount * 2, "SunSpecDataPoint", "cannot convert a string which is bigger than the desired register vector.");
-    QByteArray data = value.toLatin1() + QByteArray('\0', registerCount - value.count());
+    Q_ASSERT_X(value.length() > stringLength, "SunSpecDataPoint", "cannot convert a string which is bigger than the desired register vector.");
+    QByteArray data = value.toLatin1() + QByteArray('\0', stringLength - value.count());
     QDataStream stream(&data, QIODevice::ReadOnly);
     QVector<quint16> values;
-    for (int i = 0; i < registerCount; i++) {
+    for (int i = 0; i < stringLength; i++) {
         quint16 value = 0;
         stream >> value;
         values.prepend(value);
@@ -599,6 +611,20 @@ QVector<quint16> SunSpecDataPoint::convertFromFloatWithSSF(float value, qint16 s
     }
 
     return rawData;
+}
+
+QVector<quint16> SunSpecDataPoint::convertFromFloat32(float value)
+{
+    quint32 rawValue = 0;
+    memcpy(&value, &rawValue, sizeof(quint32));
+    return SunSpecDataPoint::convertFromUInt32(rawValue);
+}
+
+QVector<quint16> SunSpecDataPoint::convertFromFloat64(double value)
+{
+    quint64 rawValue = 0;
+    memcpy(&value, &rawValue, sizeof(quint64));
+    return SunSpecDataPoint::convertFromUInt64(rawValue);
 }
 
 QDebug operator<<(QDebug debug, const SunSpecDataPoint &dataPoint)

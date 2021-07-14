@@ -34,8 +34,37 @@
 #include <QObject>
 
 #include "sunspecmodel.h"
+#include "sunspecmodelrepeatingblock.h"
 
 class SunSpecConnection;
+class SunSpecSecureAcMeterSelectedReadingsModel;
+
+class SunSpecSecureAcMeterSelectedReadingsModelRepeatingBlock : public SunSpecModelRepeatingBlock
+{
+    Q_OBJECT
+public:
+
+    explicit SunSpecSecureAcMeterSelectedReadingsModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecSecureAcMeterSelectedReadingsModel *parent = nullptr);
+    ~SunSpecSecureAcMeterSelectedReadingsModelRepeatingBlock() override; 
+
+    SunSpecSecureAcMeterSelectedReadingsModel *parentModel() const; 
+
+    QString name() const override;
+    quint16 dS() const;
+
+    void processBlockData(const QVector<quint16> blockData) override;
+
+protected:
+    void initDataPoints() override;
+
+private:
+    SunSpecSecureAcMeterSelectedReadingsModel *m_parentModel = nullptr; 
+
+    quint16 m_dS = 0;
+
+};
+
+
 
 class SunSpecSecureAcMeterSelectedReadingsModel : public SunSpecModel
 {
@@ -75,7 +104,7 @@ public:
     Q_DECLARE_FLAGS(EvtFlags, Evt)
     Q_FLAG(Evt)
 
-    explicit SunSpecSecureAcMeterSelectedReadingsModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);
+    explicit SunSpecSecureAcMeterSelectedReadingsModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
     ~SunSpecSecureAcMeterSelectedReadingsModel() override; 
 
     QString name() const override;
@@ -83,20 +112,30 @@ public:
     QString label() const override;
 
     float amps() const;
+    qint16 a_SF() const;
     float voltage() const;
+    qint16 v_SF() const;
     float hz() const;
+    qint16 hz_SF() const;
     float watts() const;
+    qint16 w_SF() const;
     float va() const;
+    qint16 vA_SF() const;
     float var() const;
+    qint16 vAR_SF() const;
     float pf() const;
+    qint16 pF_SF() const;
     quint32 totalWattHoursExported() const;
     quint32 totalWattHoursImported() const;
+    qint16 totWh_SF() const;
     quint32 totalVaHoursExported() const;
     quint32 totalVaHoursImported() const;
+    qint16 totVAh_SF() const;
     quint32 totalVarHoursImportedQ1() const;
     quint32 totalVArHoursImportedQ2() const;
     quint32 totalVArHoursExportedQ3() const;
     quint32 totalVArHoursExportedQ4() const;
+    qint16 totVArh_SF() const;
     EvtFlags events() const;
     quint16 rsrvd() const;
     quint32 timestamp() const;
@@ -106,6 +145,10 @@ public:
     quint16 n() const;
 
 protected:
+    quint16 m_fixedBlockLength = 42;
+    quint16 m_repeatingBlockLength = 1;
+
+    void initDataPoints() override;
     void processBlockData() override;
 
 private:
@@ -142,7 +185,6 @@ private:
     Alg m_algorithm;
     quint16 m_n = 0;
 
-    void initDataPoints();
 
 };
 

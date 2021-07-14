@@ -31,11 +31,11 @@
 #include "sunspecsettingsmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecSettingsModel::SunSpecSettingsModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 121, 30, parent)
+SunSpecSettingsModel::SunSpecSettingsModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 121, modelLength, parent)
 {
-    //Q_ASSERT_X(length == 30,  "SunSpecSettingsModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
-    Q_UNUSED(length)
+    m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
+
     initDataPoints();
 }
 
@@ -419,105 +419,46 @@ QModbusReply *SunSpecSettingsModel::setConnPh(Connph connPh)
 
     return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
-void SunSpecSettingsModel::processBlockData()
+qint16 SunSpecSettingsModel::wMaxSf() const
 {
-    // Scale factors
-    if (m_dataPoints.value("WMax_SF").isValid())
-        m_wMaxSf = m_dataPoints.value("WMax_SF").toInt16();
-
-    if (m_dataPoints.value("VRef_SF").isValid())
-        m_vRefSf = m_dataPoints.value("VRef_SF").toInt16();
-
-    if (m_dataPoints.value("VRefOfs_SF").isValid())
-        m_vRefOfsSf = m_dataPoints.value("VRefOfs_SF").toInt16();
-
-    if (m_dataPoints.value("VMinMax_SF").isValid())
-        m_vMinMaxSf = m_dataPoints.value("VMinMax_SF").toInt16();
-
-    if (m_dataPoints.value("VAMax_SF").isValid())
-        m_vaMaxSf = m_dataPoints.value("VAMax_SF").toInt16();
-
-    if (m_dataPoints.value("VArMax_SF").isValid())
-        m_vArMaxSf = m_dataPoints.value("VArMax_SF").toInt16();
-
-    if (m_dataPoints.value("WGra_SF").isValid())
-        m_wGraSf = m_dataPoints.value("WGra_SF").toInt16();
-
-    if (m_dataPoints.value("PFMin_SF").isValid())
-        m_pfMinSf = m_dataPoints.value("PFMin_SF").toInt16();
-
-    if (m_dataPoints.value("MaxRmpRte_SF").isValid())
-        m_maxRmpRteSf = m_dataPoints.value("MaxRmpRte_SF").toInt16();
-
-    if (m_dataPoints.value("ECPNomHz_SF").isValid())
-        m_ecpNomHzSf = m_dataPoints.value("ECPNomHz_SF").toInt16();
-
-
-    // Update properties according to the data point type
-    if (m_dataPoints.value("WMax").isValid())
-        m_wMax = m_dataPoints.value("WMax").toFloatWithSSF(m_wMaxSf);
-
-    if (m_dataPoints.value("VRef").isValid())
-        m_vRef = m_dataPoints.value("VRef").toFloatWithSSF(m_vRefSf);
-
-    if (m_dataPoints.value("VRefOfs").isValid())
-        m_vRefOfs = m_dataPoints.value("VRefOfs").toFloatWithSSF(m_vRefOfsSf);
-
-    if (m_dataPoints.value("VMax").isValid())
-        m_vMax = m_dataPoints.value("VMax").toFloatWithSSF(m_vMinMaxSf);
-
-    if (m_dataPoints.value("VMin").isValid())
-        m_vMin = m_dataPoints.value("VMin").toFloatWithSSF(m_vMinMaxSf);
-
-    if (m_dataPoints.value("VAMax").isValid())
-        m_vaMax = m_dataPoints.value("VAMax").toFloatWithSSF(m_vaMaxSf);
-
-    if (m_dataPoints.value("VArMaxQ1").isValid())
-        m_vArMaxQ1 = m_dataPoints.value("VArMaxQ1").toFloatWithSSF(m_vArMaxSf);
-
-    if (m_dataPoints.value("VArMaxQ2").isValid())
-        m_vArMaxQ2 = m_dataPoints.value("VArMaxQ2").toFloatWithSSF(m_vArMaxSf);
-
-    if (m_dataPoints.value("VArMaxQ3").isValid())
-        m_vArMaxQ3 = m_dataPoints.value("VArMaxQ3").toFloatWithSSF(m_vArMaxSf);
-
-    if (m_dataPoints.value("VArMaxQ4").isValid())
-        m_vArMaxQ4 = m_dataPoints.value("VArMaxQ4").toFloatWithSSF(m_vArMaxSf);
-
-    if (m_dataPoints.value("WGra").isValid())
-        m_wGra = m_dataPoints.value("WGra").toFloatWithSSF(m_wGraSf);
-
-    if (m_dataPoints.value("PFMinQ1").isValid())
-        m_pfMinQ1 = m_dataPoints.value("PFMinQ1").toFloatWithSSF(m_pfMinSf);
-
-    if (m_dataPoints.value("PFMinQ2").isValid())
-        m_pfMinQ2 = m_dataPoints.value("PFMinQ2").toFloatWithSSF(m_pfMinSf);
-
-    if (m_dataPoints.value("PFMinQ3").isValid())
-        m_pfMinQ3 = m_dataPoints.value("PFMinQ3").toFloatWithSSF(m_pfMinSf);
-
-    if (m_dataPoints.value("PFMinQ4").isValid())
-        m_pfMinQ4 = m_dataPoints.value("PFMinQ4").toFloatWithSSF(m_pfMinSf);
-
-    if (m_dataPoints.value("VArAct").isValid())
-        m_vArAct = static_cast<Varact>(m_dataPoints.value("VArAct").toUInt16());
-
-    if (m_dataPoints.value("ClcTotVA").isValid())
-        m_clcTotVa = static_cast<Clctotva>(m_dataPoints.value("ClcTotVA").toUInt16());
-
-    if (m_dataPoints.value("MaxRmpRte").isValid())
-        m_maxRmpRte = m_dataPoints.value("MaxRmpRte").toFloatWithSSF(m_maxRmpRteSf);
-
-    if (m_dataPoints.value("ECPNomHz").isValid())
-        m_ecpNomHz = m_dataPoints.value("ECPNomHz").toFloatWithSSF(m_ecpNomHzSf);
-
-    if (m_dataPoints.value("ConnPh").isValid())
-        m_connPh = static_cast<Connph>(m_dataPoints.value("ConnPh").toUInt16());
-
-
-    qCDebug(dcSunSpecModelData()) << this;
+    return m_wMaxSf;
 }
-
+qint16 SunSpecSettingsModel::vRefSf() const
+{
+    return m_vRefSf;
+}
+qint16 SunSpecSettingsModel::vRefOfsSf() const
+{
+    return m_vRefOfsSf;
+}
+qint16 SunSpecSettingsModel::vMinMaxSf() const
+{
+    return m_vMinMaxSf;
+}
+qint16 SunSpecSettingsModel::vaMaxSf() const
+{
+    return m_vaMaxSf;
+}
+qint16 SunSpecSettingsModel::vArMaxSf() const
+{
+    return m_vArMaxSf;
+}
+qint16 SunSpecSettingsModel::wGraSf() const
+{
+    return m_wGraSf;
+}
+qint16 SunSpecSettingsModel::pfMinSf() const
+{
+    return m_pfMinSf;
+}
+qint16 SunSpecSettingsModel::maxRmpRteSf() const
+{
+    return m_maxRmpRteSf;
+}
+qint16 SunSpecSettingsModel::ecpNomHzSf() const
+{
+    return m_ecpNomHzSf;
+}
 void SunSpecSettingsModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -902,127 +843,276 @@ void SunSpecSettingsModel::initDataPoints()
 
 }
 
+void SunSpecSettingsModel::processBlockData()
+{
+    // Scale factors
+    if (m_dataPoints.value("WMax_SF").isValid())
+        m_wMaxSf = m_dataPoints.value("WMax_SF").toInt16();
+
+    if (m_dataPoints.value("VRef_SF").isValid())
+        m_vRefSf = m_dataPoints.value("VRef_SF").toInt16();
+
+    if (m_dataPoints.value("VRefOfs_SF").isValid())
+        m_vRefOfsSf = m_dataPoints.value("VRefOfs_SF").toInt16();
+
+    if (m_dataPoints.value("VMinMax_SF").isValid())
+        m_vMinMaxSf = m_dataPoints.value("VMinMax_SF").toInt16();
+
+    if (m_dataPoints.value("VAMax_SF").isValid())
+        m_vaMaxSf = m_dataPoints.value("VAMax_SF").toInt16();
+
+    if (m_dataPoints.value("VArMax_SF").isValid())
+        m_vArMaxSf = m_dataPoints.value("VArMax_SF").toInt16();
+
+    if (m_dataPoints.value("WGra_SF").isValid())
+        m_wGraSf = m_dataPoints.value("WGra_SF").toInt16();
+
+    if (m_dataPoints.value("PFMin_SF").isValid())
+        m_pfMinSf = m_dataPoints.value("PFMin_SF").toInt16();
+
+    if (m_dataPoints.value("MaxRmpRte_SF").isValid())
+        m_maxRmpRteSf = m_dataPoints.value("MaxRmpRte_SF").toInt16();
+
+    if (m_dataPoints.value("ECPNomHz_SF").isValid())
+        m_ecpNomHzSf = m_dataPoints.value("ECPNomHz_SF").toInt16();
+
+
+    // Update properties according to the data point type
+    if (m_dataPoints.value("WMax").isValid())
+        m_wMax = m_dataPoints.value("WMax").toFloatWithSSF(m_wMaxSf);
+
+    if (m_dataPoints.value("VRef").isValid())
+        m_vRef = m_dataPoints.value("VRef").toFloatWithSSF(m_vRefSf);
+
+    if (m_dataPoints.value("VRefOfs").isValid())
+        m_vRefOfs = m_dataPoints.value("VRefOfs").toFloatWithSSF(m_vRefOfsSf);
+
+    if (m_dataPoints.value("VMax").isValid())
+        m_vMax = m_dataPoints.value("VMax").toFloatWithSSF(m_vMinMaxSf);
+
+    if (m_dataPoints.value("VMin").isValid())
+        m_vMin = m_dataPoints.value("VMin").toFloatWithSSF(m_vMinMaxSf);
+
+    if (m_dataPoints.value("VAMax").isValid())
+        m_vaMax = m_dataPoints.value("VAMax").toFloatWithSSF(m_vaMaxSf);
+
+    if (m_dataPoints.value("VArMaxQ1").isValid())
+        m_vArMaxQ1 = m_dataPoints.value("VArMaxQ1").toFloatWithSSF(m_vArMaxSf);
+
+    if (m_dataPoints.value("VArMaxQ2").isValid())
+        m_vArMaxQ2 = m_dataPoints.value("VArMaxQ2").toFloatWithSSF(m_vArMaxSf);
+
+    if (m_dataPoints.value("VArMaxQ3").isValid())
+        m_vArMaxQ3 = m_dataPoints.value("VArMaxQ3").toFloatWithSSF(m_vArMaxSf);
+
+    if (m_dataPoints.value("VArMaxQ4").isValid())
+        m_vArMaxQ4 = m_dataPoints.value("VArMaxQ4").toFloatWithSSF(m_vArMaxSf);
+
+    if (m_dataPoints.value("WGra").isValid())
+        m_wGra = m_dataPoints.value("WGra").toFloatWithSSF(m_wGraSf);
+
+    if (m_dataPoints.value("PFMinQ1").isValid())
+        m_pfMinQ1 = m_dataPoints.value("PFMinQ1").toFloatWithSSF(m_pfMinSf);
+
+    if (m_dataPoints.value("PFMinQ2").isValid())
+        m_pfMinQ2 = m_dataPoints.value("PFMinQ2").toFloatWithSSF(m_pfMinSf);
+
+    if (m_dataPoints.value("PFMinQ3").isValid())
+        m_pfMinQ3 = m_dataPoints.value("PFMinQ3").toFloatWithSSF(m_pfMinSf);
+
+    if (m_dataPoints.value("PFMinQ4").isValid())
+        m_pfMinQ4 = m_dataPoints.value("PFMinQ4").toFloatWithSSF(m_pfMinSf);
+
+    if (m_dataPoints.value("VArAct").isValid())
+        m_vArAct = static_cast<Varact>(m_dataPoints.value("VArAct").toUInt16());
+
+    if (m_dataPoints.value("ClcTotVA").isValid())
+        m_clcTotVa = static_cast<Clctotva>(m_dataPoints.value("ClcTotVA").toUInt16());
+
+    if (m_dataPoints.value("MaxRmpRte").isValid())
+        m_maxRmpRte = m_dataPoints.value("MaxRmpRte").toFloatWithSSF(m_maxRmpRteSf);
+
+    if (m_dataPoints.value("ECPNomHz").isValid())
+        m_ecpNomHz = m_dataPoints.value("ECPNomHz").toFloatWithSSF(m_ecpNomHzSf);
+
+    if (m_dataPoints.value("ConnPh").isValid())
+        m_connPh = static_cast<Connph>(m_dataPoints.value("ConnPh").toUInt16());
+
+    if (m_dataPoints.value("WMax_SF").isValid())
+        m_wMaxSf = m_dataPoints.value("WMax_SF").toInt16();
+
+    if (m_dataPoints.value("VRef_SF").isValid())
+        m_vRefSf = m_dataPoints.value("VRef_SF").toInt16();
+
+    if (m_dataPoints.value("VRefOfs_SF").isValid())
+        m_vRefOfsSf = m_dataPoints.value("VRefOfs_SF").toInt16();
+
+    if (m_dataPoints.value("VMinMax_SF").isValid())
+        m_vMinMaxSf = m_dataPoints.value("VMinMax_SF").toInt16();
+
+    if (m_dataPoints.value("VAMax_SF").isValid())
+        m_vaMaxSf = m_dataPoints.value("VAMax_SF").toInt16();
+
+    if (m_dataPoints.value("VArMax_SF").isValid())
+        m_vArMaxSf = m_dataPoints.value("VArMax_SF").toInt16();
+
+    if (m_dataPoints.value("WGra_SF").isValid())
+        m_wGraSf = m_dataPoints.value("WGra_SF").toInt16();
+
+    if (m_dataPoints.value("PFMin_SF").isValid())
+        m_pfMinSf = m_dataPoints.value("PFMin_SF").toInt16();
+
+    if (m_dataPoints.value("MaxRmpRte_SF").isValid())
+        m_maxRmpRteSf = m_dataPoints.value("MaxRmpRte_SF").toInt16();
+
+    if (m_dataPoints.value("ECPNomHz_SF").isValid())
+        m_ecpNomHzSf = m_dataPoints.value("ECPNomHz_SF").toInt16();
+
+
+    qCDebug(dcSunSpecModelData()) << this;
+}
+
 QDebug operator<<(QDebug debug, SunSpecSettingsModel *model)
 {
     debug.nospace().noquote() << "SunSpecSettingsModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("WMax") << "-->";
     if (model->dataPoints().value("WMax").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WMax") << "--> " << model->wMax() << endl;
+        debug.nospace().noquote() << model->wMax() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WMax") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VRef") << "-->";
     if (model->dataPoints().value("VRef").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VRef") << "--> " << model->vRef() << endl;
+        debug.nospace().noquote() << model->vRef() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VRef") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VRefOfs") << "-->";
     if (model->dataPoints().value("VRefOfs").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VRefOfs") << "--> " << model->vRefOfs() << endl;
+        debug.nospace().noquote() << model->vRefOfs() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VRefOfs") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VMax") << "-->";
     if (model->dataPoints().value("VMax").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VMax") << "--> " << model->vMax() << endl;
+        debug.nospace().noquote() << model->vMax() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VMax") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VMin") << "-->";
     if (model->dataPoints().value("VMin").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VMin") << "--> " << model->vMin() << endl;
+        debug.nospace().noquote() << model->vMin() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VMin") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VAMax") << "-->";
     if (model->dataPoints().value("VAMax").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VAMax") << "--> " << model->vaMax() << endl;
+        debug.nospace().noquote() << model->vaMax() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VAMax") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VArMaxQ1") << "-->";
     if (model->dataPoints().value("VArMaxQ1").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArMaxQ1") << "--> " << model->vArMaxQ1() << endl;
+        debug.nospace().noquote() << model->vArMaxQ1() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArMaxQ1") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VArMaxQ2") << "-->";
     if (model->dataPoints().value("VArMaxQ2").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArMaxQ2") << "--> " << model->vArMaxQ2() << endl;
+        debug.nospace().noquote() << model->vArMaxQ2() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArMaxQ2") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VArMaxQ3") << "-->";
     if (model->dataPoints().value("VArMaxQ3").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArMaxQ3") << "--> " << model->vArMaxQ3() << endl;
+        debug.nospace().noquote() << model->vArMaxQ3() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArMaxQ3") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VArMaxQ4") << "-->";
     if (model->dataPoints().value("VArMaxQ4").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArMaxQ4") << "--> " << model->vArMaxQ4() << endl;
+        debug.nospace().noquote() << model->vArMaxQ4() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArMaxQ4") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("WGra") << "-->";
     if (model->dataPoints().value("WGra").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WGra") << "--> " << model->wGra() << endl;
+        debug.nospace().noquote() << model->wGra() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WGra") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("PFMinQ1") << "-->";
     if (model->dataPoints().value("PFMinQ1").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFMinQ1") << "--> " << model->pfMinQ1() << endl;
+        debug.nospace().noquote() << model->pfMinQ1() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFMinQ1") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("PFMinQ2") << "-->";
     if (model->dataPoints().value("PFMinQ2").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFMinQ2") << "--> " << model->pfMinQ2() << endl;
+        debug.nospace().noquote() << model->pfMinQ2() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFMinQ2") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("PFMinQ3") << "-->";
     if (model->dataPoints().value("PFMinQ3").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFMinQ3") << "--> " << model->pfMinQ3() << endl;
+        debug.nospace().noquote() << model->pfMinQ3() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFMinQ3") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("PFMinQ4") << "-->";
     if (model->dataPoints().value("PFMinQ4").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFMinQ4") << "--> " << model->pfMinQ4() << endl;
+        debug.nospace().noquote() << model->pfMinQ4() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFMinQ4") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VArAct") << "-->";
     if (model->dataPoints().value("VArAct").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArAct") << "--> " << model->vArAct() << endl;
+        debug.nospace().noquote() << model->vArAct() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArAct") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ClcTotVA") << "-->";
     if (model->dataPoints().value("ClcTotVA").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ClcTotVA") << "--> " << model->clcTotVa() << endl;
+        debug.nospace().noquote() << model->clcTotVa() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ClcTotVA") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("MaxRmpRte") << "-->";
     if (model->dataPoints().value("MaxRmpRte").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("MaxRmpRte") << "--> " << model->maxRmpRte() << endl;
+        debug.nospace().noquote() << model->maxRmpRte() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("MaxRmpRte") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ECPNomHz") << "-->";
     if (model->dataPoints().value("ECPNomHz").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ECPNomHz") << "--> " << model->ecpNomHz() << endl;
+        debug.nospace().noquote() << model->ecpNomHz() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ECPNomHz") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ConnPh") << "-->";
     if (model->dataPoints().value("ConnPh").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ConnPh") << "--> " << model->connPh() << endl;
+        debug.nospace().noquote() << model->connPh() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ConnPh") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
 

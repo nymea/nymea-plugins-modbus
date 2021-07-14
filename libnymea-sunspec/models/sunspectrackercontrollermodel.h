@@ -34,8 +34,75 @@
 #include <QObject>
 
 #include "sunspecmodel.h"
+#include "sunspecmodelrepeatingblock.h"
 
 class SunSpecConnection;
+class SunSpecTrackerControllerModel;
+
+class SunSpecTrackerControllerModelRepeatingBlock : public SunSpecModelRepeatingBlock
+{
+    Q_OBJECT
+public:
+
+    enum Ctl {
+        CtlAutomatic = 0,
+        CtlManual = 1,
+        CtlCalibrate = 2
+    };
+    Q_ENUM(Ctl)
+
+    enum Alm {
+        AlmSetPoint = 0x1,
+        AlmObsEl = 0x2,
+        AlmObsAz = 0x4
+    };
+    Q_DECLARE_FLAGS(AlmFlags, Alm)
+    Q_FLAG(Alm)
+
+    explicit SunSpecTrackerControllerModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecTrackerControllerModel *parent = nullptr);
+    ~SunSpecTrackerControllerModelRepeatingBlock() override; 
+
+    SunSpecTrackerControllerModel *parentModel() const; 
+
+    QString name() const override;
+    QString tracker() const;
+    float targetElevation() const;
+    float targetAzimuth() const;
+    float elevation() const;
+    float azimuth() const;
+
+    float manualElevation() const;
+    QModbusReply *setManualElevation(float manualElevation);
+
+    float manualAzimuth() const;
+    QModbusReply *setManualAzimuth(float manualAzimuth);
+
+    Ctl mode() const;
+    QModbusReply *setMode(Ctl mode);
+
+    AlmFlags alarm() const;
+
+    void processBlockData(const QVector<quint16> blockData) override;
+
+protected:
+    void initDataPoints() override;
+
+private:
+    SunSpecTrackerControllerModel *m_parentModel = nullptr; 
+
+    QString m_tracker;
+    float m_targetElevation = 0;
+    float m_targetAzimuth = 0;
+    float m_elevation = 0;
+    float m_azimuth = 0;
+    float m_manualElevation = 0;
+    float m_manualAzimuth = 0;
+    Ctl m_mode;
+    AlmFlags m_alarm;
+
+};
+
+
 
 class SunSpecTrackerControllerModel : public SunSpecModel
 {
@@ -68,7 +135,7 @@ public:
     Q_DECLARE_FLAGS(GlblalmFlags, Glblalm)
     Q_FLAG(Glblalm)
 
-    explicit SunSpecTrackerControllerModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);
+    explicit SunSpecTrackerControllerModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
     ~SunSpecTrackerControllerModel() override; 
 
     QString name() const override;
@@ -91,9 +158,14 @@ public:
     QModbusReply *setGlobalMode(Glblctl globalMode);
 
     GlblalmFlags globalAlarm() const;
+    qint16 sf() const;
     quint16 trackers() const;
 
 protected:
+    quint16 m_fixedBlockLength = 26;
+    quint16 m_repeatingBlockLength = 22;
+
+    void initDataPoints() override;
     void processBlockData() override;
 
 private:
@@ -109,7 +181,6 @@ private:
     qint16 m_sf = 0;
     quint16 m_trackers = 0;
 
-    void initDataPoints();
 
 };
 

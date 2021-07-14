@@ -61,7 +61,7 @@ public:
     };
     Q_ENUM(Connph)
 
-    explicit SunSpecSettingsModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);
+    explicit SunSpecSettingsModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
     ~SunSpecSettingsModel() override; 
 
     QString name() const override;
@@ -129,8 +129,21 @@ public:
     Connph connPh() const;
     QModbusReply *setConnPh(Connph connPh);
 
+    qint16 wMaxSf() const;
+    qint16 vRefSf() const;
+    qint16 vRefOfsSf() const;
+    qint16 vMinMaxSf() const;
+    qint16 vaMaxSf() const;
+    qint16 vArMaxSf() const;
+    qint16 wGraSf() const;
+    qint16 pfMinSf() const;
+    qint16 maxRmpRteSf() const;
+    qint16 ecpNomHzSf() const;
 
 protected:
+    quint16 m_fixedBlockLength = 30;
+
+    void initDataPoints() override;
     void processBlockData() override;
 
 private:
@@ -165,7 +178,6 @@ private:
     qint16 m_maxRmpRteSf = 0;
     qint16 m_ecpNomHzSf = 0;
 
-    void initDataPoints();
 
 };
 

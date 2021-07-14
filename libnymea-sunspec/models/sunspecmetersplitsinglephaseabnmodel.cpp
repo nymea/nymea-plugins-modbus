@@ -31,11 +31,11 @@
 #include "sunspecmetersplitsinglephaseabnmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecMeterSplitSinglePhaseAbnModel::SunSpecMeterSplitSinglePhaseAbnModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 202, 105, parent)
+SunSpecMeterSplitSinglePhaseAbnModel::SunSpecMeterSplitSinglePhaseAbnModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 202, modelLength, parent)
 {
-    //Q_ASSERT_X(length == 105,  "SunSpecMeterSplitSinglePhaseAbnModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
-    Q_UNUSED(length)
+    m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
+
     initDataPoints();
 }
 
@@ -75,6 +75,10 @@ float SunSpecMeterSplitSinglePhaseAbnModel::ampsPhaseC() const
 {
     return m_ampsPhaseC;
 }
+qint16 SunSpecMeterSplitSinglePhaseAbnModel::a_SF() const
+{
+    return m_a_SF;
+}
 float SunSpecMeterSplitSinglePhaseAbnModel::voltageLn() const
 {
     return m_voltageLn;
@@ -107,9 +111,17 @@ float SunSpecMeterSplitSinglePhaseAbnModel::phaseVoltageCa() const
 {
     return m_phaseVoltageCa;
 }
+qint16 SunSpecMeterSplitSinglePhaseAbnModel::v_SF() const
+{
+    return m_v_SF;
+}
 float SunSpecMeterSplitSinglePhaseAbnModel::hz() const
 {
     return m_hz;
+}
+qint16 SunSpecMeterSplitSinglePhaseAbnModel::hz_SF() const
+{
+    return m_hz_SF;
 }
 float SunSpecMeterSplitSinglePhaseAbnModel::watts() const
 {
@@ -127,6 +139,10 @@ float SunSpecMeterSplitSinglePhaseAbnModel::wattsPhaseC() const
 {
     return m_wattsPhaseC;
 }
+qint16 SunSpecMeterSplitSinglePhaseAbnModel::w_SF() const
+{
+    return m_w_SF;
+}
 float SunSpecMeterSplitSinglePhaseAbnModel::va() const
 {
     return m_va;
@@ -142,6 +158,10 @@ float SunSpecMeterSplitSinglePhaseAbnModel::vaPhaseB() const
 float SunSpecMeterSplitSinglePhaseAbnModel::vaPhaseC() const
 {
     return m_vaPhaseC;
+}
+qint16 SunSpecMeterSplitSinglePhaseAbnModel::vA_SF() const
+{
+    return m_vA_SF;
 }
 float SunSpecMeterSplitSinglePhaseAbnModel::var() const
 {
@@ -159,6 +179,10 @@ float SunSpecMeterSplitSinglePhaseAbnModel::varPhaseC() const
 {
     return m_varPhaseC;
 }
+qint16 SunSpecMeterSplitSinglePhaseAbnModel::vAR_SF() const
+{
+    return m_vAR_SF;
+}
 float SunSpecMeterSplitSinglePhaseAbnModel::pf() const
 {
     return m_pf;
@@ -174,6 +198,10 @@ float SunSpecMeterSplitSinglePhaseAbnModel::pfPhaseB() const
 float SunSpecMeterSplitSinglePhaseAbnModel::pfPhaseC() const
 {
     return m_pfPhaseC;
+}
+qint16 SunSpecMeterSplitSinglePhaseAbnModel::pF_SF() const
+{
+    return m_pF_SF;
 }
 quint32 SunSpecMeterSplitSinglePhaseAbnModel::totalWattHoursExported() const
 {
@@ -207,6 +235,10 @@ quint32 SunSpecMeterSplitSinglePhaseAbnModel::totalWattHoursImportedPhaseC() con
 {
     return m_totalWattHoursImportedPhaseC;
 }
+qint16 SunSpecMeterSplitSinglePhaseAbnModel::totWh_SF() const
+{
+    return m_totWh_SF;
+}
 quint32 SunSpecMeterSplitSinglePhaseAbnModel::totalVaHoursExported() const
 {
     return m_totalVaHoursExported;
@@ -238,6 +270,10 @@ quint32 SunSpecMeterSplitSinglePhaseAbnModel::totalVaHoursImportedPhaseB() const
 quint32 SunSpecMeterSplitSinglePhaseAbnModel::totalVaHoursImportedPhaseC() const
 {
     return m_totalVaHoursImportedPhaseC;
+}
+qint16 SunSpecMeterSplitSinglePhaseAbnModel::totVAh_SF() const
+{
+    return m_totVAh_SF;
 }
 quint32 SunSpecMeterSplitSinglePhaseAbnModel::totalVarHoursImportedQ1() const
 {
@@ -303,235 +339,14 @@ quint32 SunSpecMeterSplitSinglePhaseAbnModel::totalVArHoursExportedQ4ImportedPha
 {
     return m_totalVArHoursExportedQ4ImportedPhaseC;
 }
+qint16 SunSpecMeterSplitSinglePhaseAbnModel::totVArh_SF() const
+{
+    return m_totVArh_SF;
+}
 SunSpecMeterSplitSinglePhaseAbnModel::EvtFlags SunSpecMeterSplitSinglePhaseAbnModel::events() const
 {
     return m_events;
 }
-void SunSpecMeterSplitSinglePhaseAbnModel::processBlockData()
-{
-    // Scale factors
-    if (m_dataPoints.value("A_SF").isValid())
-        m_a_SF = m_dataPoints.value("A_SF").toInt16();
-
-    if (m_dataPoints.value("V_SF").isValid())
-        m_v_SF = m_dataPoints.value("V_SF").toInt16();
-
-    if (m_dataPoints.value("Hz_SF").isValid())
-        m_hz_SF = m_dataPoints.value("Hz_SF").toInt16();
-
-    if (m_dataPoints.value("W_SF").isValid())
-        m_w_SF = m_dataPoints.value("W_SF").toInt16();
-
-    if (m_dataPoints.value("VA_SF").isValid())
-        m_vA_SF = m_dataPoints.value("VA_SF").toInt16();
-
-    if (m_dataPoints.value("VAR_SF").isValid())
-        m_vAR_SF = m_dataPoints.value("VAR_SF").toInt16();
-
-    if (m_dataPoints.value("PF_SF").isValid())
-        m_pF_SF = m_dataPoints.value("PF_SF").toInt16();
-
-    if (m_dataPoints.value("TotWh_SF").isValid())
-        m_totWh_SF = m_dataPoints.value("TotWh_SF").toInt16();
-
-    if (m_dataPoints.value("TotVAh_SF").isValid())
-        m_totVAh_SF = m_dataPoints.value("TotVAh_SF").toInt16();
-
-    if (m_dataPoints.value("TotVArh_SF").isValid())
-        m_totVArh_SF = m_dataPoints.value("TotVArh_SF").toInt16();
-
-
-    // Update properties according to the data point type
-    if (m_dataPoints.value("A").isValid())
-        m_amps = m_dataPoints.value("A").toFloatWithSSF(m_a_SF);
-
-    if (m_dataPoints.value("AphA").isValid())
-        m_ampsPhaseA = m_dataPoints.value("AphA").toFloatWithSSF(m_a_SF);
-
-    if (m_dataPoints.value("AphB").isValid())
-        m_ampsPhaseB = m_dataPoints.value("AphB").toFloatWithSSF(m_a_SF);
-
-    if (m_dataPoints.value("AphC").isValid())
-        m_ampsPhaseC = m_dataPoints.value("AphC").toFloatWithSSF(m_a_SF);
-
-    if (m_dataPoints.value("PhV").isValid())
-        m_voltageLn = m_dataPoints.value("PhV").toFloatWithSSF(m_v_SF);
-
-    if (m_dataPoints.value("PhVphA").isValid())
-        m_phaseVoltageAn = m_dataPoints.value("PhVphA").toFloatWithSSF(m_v_SF);
-
-    if (m_dataPoints.value("PhVphB").isValid())
-        m_phaseVoltageBn = m_dataPoints.value("PhVphB").toFloatWithSSF(m_v_SF);
-
-    if (m_dataPoints.value("PhVphC").isValid())
-        m_phaseVoltageCn = m_dataPoints.value("PhVphC").toFloatWithSSF(m_v_SF);
-
-    if (m_dataPoints.value("PPV").isValid())
-        m_voltageLl = m_dataPoints.value("PPV").toFloatWithSSF(m_v_SF);
-
-    if (m_dataPoints.value("PhVphAB").isValid())
-        m_phaseVoltageAb = m_dataPoints.value("PhVphAB").toFloatWithSSF(m_v_SF);
-
-    if (m_dataPoints.value("PhVphBC").isValid())
-        m_phaseVoltageBc = m_dataPoints.value("PhVphBC").toFloatWithSSF(m_v_SF);
-
-    if (m_dataPoints.value("PhVphCA").isValid())
-        m_phaseVoltageCa = m_dataPoints.value("PhVphCA").toFloatWithSSF(m_v_SF);
-
-    if (m_dataPoints.value("Hz").isValid())
-        m_hz = m_dataPoints.value("Hz").toFloatWithSSF(m_hz_SF);
-
-    if (m_dataPoints.value("W").isValid())
-        m_watts = m_dataPoints.value("W").toFloatWithSSF(m_w_SF);
-
-    if (m_dataPoints.value("WphA").isValid())
-        m_wattsPhaseA = m_dataPoints.value("WphA").toFloatWithSSF(m_w_SF);
-
-    if (m_dataPoints.value("WphB").isValid())
-        m_wattsPhaseB = m_dataPoints.value("WphB").toFloatWithSSF(m_w_SF);
-
-    if (m_dataPoints.value("WphC").isValid())
-        m_wattsPhaseC = m_dataPoints.value("WphC").toFloatWithSSF(m_w_SF);
-
-    if (m_dataPoints.value("VA").isValid())
-        m_va = m_dataPoints.value("VA").toFloatWithSSF(m_vA_SF);
-
-    if (m_dataPoints.value("VAphA").isValid())
-        m_vaPhaseA = m_dataPoints.value("VAphA").toFloatWithSSF(m_vA_SF);
-
-    if (m_dataPoints.value("VAphB").isValid())
-        m_vaPhaseB = m_dataPoints.value("VAphB").toFloatWithSSF(m_vA_SF);
-
-    if (m_dataPoints.value("VAphC").isValid())
-        m_vaPhaseC = m_dataPoints.value("VAphC").toFloatWithSSF(m_vA_SF);
-
-    if (m_dataPoints.value("VAR").isValid())
-        m_var = m_dataPoints.value("VAR").toFloatWithSSF(m_vAR_SF);
-
-    if (m_dataPoints.value("VARphA").isValid())
-        m_varPhaseA = m_dataPoints.value("VARphA").toFloatWithSSF(m_vAR_SF);
-
-    if (m_dataPoints.value("VARphB").isValid())
-        m_varPhaseB = m_dataPoints.value("VARphB").toFloatWithSSF(m_vAR_SF);
-
-    if (m_dataPoints.value("VARphC").isValid())
-        m_varPhaseC = m_dataPoints.value("VARphC").toFloatWithSSF(m_vAR_SF);
-
-    if (m_dataPoints.value("PF").isValid())
-        m_pf = m_dataPoints.value("PF").toFloatWithSSF(m_pF_SF);
-
-    if (m_dataPoints.value("PFphA").isValid())
-        m_pfPhaseA = m_dataPoints.value("PFphA").toFloatWithSSF(m_pF_SF);
-
-    if (m_dataPoints.value("PFphB").isValid())
-        m_pfPhaseB = m_dataPoints.value("PFphB").toFloatWithSSF(m_pF_SF);
-
-    if (m_dataPoints.value("PFphC").isValid())
-        m_pfPhaseC = m_dataPoints.value("PFphC").toFloatWithSSF(m_pF_SF);
-
-    if (m_dataPoints.value("TotWhExp").isValid())
-        m_totalWattHoursExported = m_dataPoints.value("TotWhExp").toFloatWithSSF(m_totWh_SF);
-
-    if (m_dataPoints.value("TotWhExpPhA").isValid())
-        m_totalWattHoursExportedPhaseA = m_dataPoints.value("TotWhExpPhA").toFloatWithSSF(m_totWh_SF);
-
-    if (m_dataPoints.value("TotWhExpPhB").isValid())
-        m_totalWattHoursExportedPhaseB = m_dataPoints.value("TotWhExpPhB").toFloatWithSSF(m_totWh_SF);
-
-    if (m_dataPoints.value("TotWhExpPhC").isValid())
-        m_totalWattHoursExportedPhaseC = m_dataPoints.value("TotWhExpPhC").toFloatWithSSF(m_totWh_SF);
-
-    if (m_dataPoints.value("TotWhImp").isValid())
-        m_totalWattHoursImported = m_dataPoints.value("TotWhImp").toFloatWithSSF(m_totWh_SF);
-
-    if (m_dataPoints.value("TotWhImpPhA").isValid())
-        m_totalWattHoursImportedPhaseA = m_dataPoints.value("TotWhImpPhA").toFloatWithSSF(m_totWh_SF);
-
-    if (m_dataPoints.value("TotWhImpPhB").isValid())
-        m_totalWattHoursImportedPhaseB = m_dataPoints.value("TotWhImpPhB").toFloatWithSSF(m_totWh_SF);
-
-    if (m_dataPoints.value("TotWhImpPhC").isValid())
-        m_totalWattHoursImportedPhaseC = m_dataPoints.value("TotWhImpPhC").toFloatWithSSF(m_totWh_SF);
-
-    if (m_dataPoints.value("TotVAhExp").isValid())
-        m_totalVaHoursExported = m_dataPoints.value("TotVAhExp").toFloatWithSSF(m_totVAh_SF);
-
-    if (m_dataPoints.value("TotVAhExpPhA").isValid())
-        m_totalVaHoursExportedPhaseA = m_dataPoints.value("TotVAhExpPhA").toFloatWithSSF(m_totVAh_SF);
-
-    if (m_dataPoints.value("TotVAhExpPhB").isValid())
-        m_totalVaHoursExportedPhaseB = m_dataPoints.value("TotVAhExpPhB").toFloatWithSSF(m_totVAh_SF);
-
-    if (m_dataPoints.value("TotVAhExpPhC").isValid())
-        m_totalVaHoursExportedPhaseC = m_dataPoints.value("TotVAhExpPhC").toFloatWithSSF(m_totVAh_SF);
-
-    if (m_dataPoints.value("TotVAhImp").isValid())
-        m_totalVaHoursImported = m_dataPoints.value("TotVAhImp").toFloatWithSSF(m_totVAh_SF);
-
-    if (m_dataPoints.value("TotVAhImpPhA").isValid())
-        m_totalVaHoursImportedPhaseA = m_dataPoints.value("TotVAhImpPhA").toFloatWithSSF(m_totVAh_SF);
-
-    if (m_dataPoints.value("TotVAhImpPhB").isValid())
-        m_totalVaHoursImportedPhaseB = m_dataPoints.value("TotVAhImpPhB").toFloatWithSSF(m_totVAh_SF);
-
-    if (m_dataPoints.value("TotVAhImpPhC").isValid())
-        m_totalVaHoursImportedPhaseC = m_dataPoints.value("TotVAhImpPhC").toFloatWithSSF(m_totVAh_SF);
-
-    if (m_dataPoints.value("TotVArhImpQ1").isValid())
-        m_totalVarHoursImportedQ1 = m_dataPoints.value("TotVArhImpQ1").toFloatWithSSF(m_totVArh_SF);
-
-    if (m_dataPoints.value("TotVArhImpQ1PhA").isValid())
-        m_totalVArHoursImportedQ1PhaseA = m_dataPoints.value("TotVArhImpQ1PhA").toFloatWithSSF(m_totVArh_SF);
-
-    if (m_dataPoints.value("TotVArhImpQ1PhB").isValid())
-        m_totalVArHoursImportedQ1PhaseB = m_dataPoints.value("TotVArhImpQ1PhB").toFloatWithSSF(m_totVArh_SF);
-
-    if (m_dataPoints.value("TotVArhImpQ1PhC").isValid())
-        m_totalVArHoursImportedQ1PhaseC = m_dataPoints.value("TotVArhImpQ1PhC").toFloatWithSSF(m_totVArh_SF);
-
-    if (m_dataPoints.value("TotVArhImpQ2").isValid())
-        m_totalVArHoursImportedQ2 = m_dataPoints.value("TotVArhImpQ2").toFloatWithSSF(m_totVArh_SF);
-
-    if (m_dataPoints.value("TotVArhImpQ2PhA").isValid())
-        m_totalVArHoursImportedQ2PhaseA = m_dataPoints.value("TotVArhImpQ2PhA").toFloatWithSSF(m_totVArh_SF);
-
-    if (m_dataPoints.value("TotVArhImpQ2PhB").isValid())
-        m_totalVArHoursImportedQ2PhaseB = m_dataPoints.value("TotVArhImpQ2PhB").toFloatWithSSF(m_totVArh_SF);
-
-    if (m_dataPoints.value("TotVArhImpQ2PhC").isValid())
-        m_totalVArHoursImportedQ2PhaseC = m_dataPoints.value("TotVArhImpQ2PhC").toFloatWithSSF(m_totVArh_SF);
-
-    if (m_dataPoints.value("TotVArhExpQ3").isValid())
-        m_totalVArHoursExportedQ3 = m_dataPoints.value("TotVArhExpQ3").toFloatWithSSF(m_totVArh_SF);
-
-    if (m_dataPoints.value("TotVArhExpQ3PhA").isValid())
-        m_totalVArHoursExportedQ3PhaseA = m_dataPoints.value("TotVArhExpQ3PhA").toFloatWithSSF(m_totVArh_SF);
-
-    if (m_dataPoints.value("TotVArhExpQ3PhB").isValid())
-        m_totalVArHoursExportedQ3PhaseB = m_dataPoints.value("TotVArhExpQ3PhB").toFloatWithSSF(m_totVArh_SF);
-
-    if (m_dataPoints.value("TotVArhExpQ3PhC").isValid())
-        m_totalVArHoursExportedQ3PhaseC = m_dataPoints.value("TotVArhExpQ3PhC").toFloatWithSSF(m_totVArh_SF);
-
-    if (m_dataPoints.value("TotVArhExpQ4").isValid())
-        m_totalVArHoursExportedQ4 = m_dataPoints.value("TotVArhExpQ4").toFloatWithSSF(m_totVArh_SF);
-
-    if (m_dataPoints.value("TotVArhExpQ4PhA").isValid())
-        m_totalVArHoursExportedQ4ImportedPhaseA = m_dataPoints.value("TotVArhExpQ4PhA").toFloatWithSSF(m_totVArh_SF);
-
-    if (m_dataPoints.value("TotVArhExpQ4PhB").isValid())
-        m_totalVArHoursExportedQ4ImportedPhaseB = m_dataPoints.value("TotVArhExpQ4PhB").toFloatWithSSF(m_totVArh_SF);
-
-    if (m_dataPoints.value("TotVArhExpQ4PhC").isValid())
-        m_totalVArHoursExportedQ4ImportedPhaseC = m_dataPoints.value("TotVArhExpQ4PhC").toFloatWithSSF(m_totVArh_SF);
-
-    if (m_dataPoints.value("Evt").isValid())
-        m_events = static_cast<EvtFlags>(m_dataPoints.value("Evt").toUInt32());
-
-
-    qCDebug(dcSunSpecModelData()) << this;
-}
-
 void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -1369,379 +1184,696 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
 
 }
 
+void SunSpecMeterSplitSinglePhaseAbnModel::processBlockData()
+{
+    // Scale factors
+    if (m_dataPoints.value("A_SF").isValid())
+        m_a_SF = m_dataPoints.value("A_SF").toInt16();
+
+    if (m_dataPoints.value("V_SF").isValid())
+        m_v_SF = m_dataPoints.value("V_SF").toInt16();
+
+    if (m_dataPoints.value("Hz_SF").isValid())
+        m_hz_SF = m_dataPoints.value("Hz_SF").toInt16();
+
+    if (m_dataPoints.value("W_SF").isValid())
+        m_w_SF = m_dataPoints.value("W_SF").toInt16();
+
+    if (m_dataPoints.value("VA_SF").isValid())
+        m_vA_SF = m_dataPoints.value("VA_SF").toInt16();
+
+    if (m_dataPoints.value("VAR_SF").isValid())
+        m_vAR_SF = m_dataPoints.value("VAR_SF").toInt16();
+
+    if (m_dataPoints.value("PF_SF").isValid())
+        m_pF_SF = m_dataPoints.value("PF_SF").toInt16();
+
+    if (m_dataPoints.value("TotWh_SF").isValid())
+        m_totWh_SF = m_dataPoints.value("TotWh_SF").toInt16();
+
+    if (m_dataPoints.value("TotVAh_SF").isValid())
+        m_totVAh_SF = m_dataPoints.value("TotVAh_SF").toInt16();
+
+    if (m_dataPoints.value("TotVArh_SF").isValid())
+        m_totVArh_SF = m_dataPoints.value("TotVArh_SF").toInt16();
+
+
+    // Update properties according to the data point type
+    if (m_dataPoints.value("A").isValid())
+        m_amps = m_dataPoints.value("A").toFloatWithSSF(m_a_SF);
+
+    if (m_dataPoints.value("AphA").isValid())
+        m_ampsPhaseA = m_dataPoints.value("AphA").toFloatWithSSF(m_a_SF);
+
+    if (m_dataPoints.value("AphB").isValid())
+        m_ampsPhaseB = m_dataPoints.value("AphB").toFloatWithSSF(m_a_SF);
+
+    if (m_dataPoints.value("AphC").isValid())
+        m_ampsPhaseC = m_dataPoints.value("AphC").toFloatWithSSF(m_a_SF);
+
+    if (m_dataPoints.value("A_SF").isValid())
+        m_a_SF = m_dataPoints.value("A_SF").toInt16();
+
+    if (m_dataPoints.value("PhV").isValid())
+        m_voltageLn = m_dataPoints.value("PhV").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("PhVphA").isValid())
+        m_phaseVoltageAn = m_dataPoints.value("PhVphA").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("PhVphB").isValid())
+        m_phaseVoltageBn = m_dataPoints.value("PhVphB").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("PhVphC").isValid())
+        m_phaseVoltageCn = m_dataPoints.value("PhVphC").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("PPV").isValid())
+        m_voltageLl = m_dataPoints.value("PPV").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("PhVphAB").isValid())
+        m_phaseVoltageAb = m_dataPoints.value("PhVphAB").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("PhVphBC").isValid())
+        m_phaseVoltageBc = m_dataPoints.value("PhVphBC").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("PhVphCA").isValid())
+        m_phaseVoltageCa = m_dataPoints.value("PhVphCA").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("V_SF").isValid())
+        m_v_SF = m_dataPoints.value("V_SF").toInt16();
+
+    if (m_dataPoints.value("Hz").isValid())
+        m_hz = m_dataPoints.value("Hz").toFloatWithSSF(m_hz_SF);
+
+    if (m_dataPoints.value("Hz_SF").isValid())
+        m_hz_SF = m_dataPoints.value("Hz_SF").toInt16();
+
+    if (m_dataPoints.value("W").isValid())
+        m_watts = m_dataPoints.value("W").toFloatWithSSF(m_w_SF);
+
+    if (m_dataPoints.value("WphA").isValid())
+        m_wattsPhaseA = m_dataPoints.value("WphA").toFloatWithSSF(m_w_SF);
+
+    if (m_dataPoints.value("WphB").isValid())
+        m_wattsPhaseB = m_dataPoints.value("WphB").toFloatWithSSF(m_w_SF);
+
+    if (m_dataPoints.value("WphC").isValid())
+        m_wattsPhaseC = m_dataPoints.value("WphC").toFloatWithSSF(m_w_SF);
+
+    if (m_dataPoints.value("W_SF").isValid())
+        m_w_SF = m_dataPoints.value("W_SF").toInt16();
+
+    if (m_dataPoints.value("VA").isValid())
+        m_va = m_dataPoints.value("VA").toFloatWithSSF(m_vA_SF);
+
+    if (m_dataPoints.value("VAphA").isValid())
+        m_vaPhaseA = m_dataPoints.value("VAphA").toFloatWithSSF(m_vA_SF);
+
+    if (m_dataPoints.value("VAphB").isValid())
+        m_vaPhaseB = m_dataPoints.value("VAphB").toFloatWithSSF(m_vA_SF);
+
+    if (m_dataPoints.value("VAphC").isValid())
+        m_vaPhaseC = m_dataPoints.value("VAphC").toFloatWithSSF(m_vA_SF);
+
+    if (m_dataPoints.value("VA_SF").isValid())
+        m_vA_SF = m_dataPoints.value("VA_SF").toInt16();
+
+    if (m_dataPoints.value("VAR").isValid())
+        m_var = m_dataPoints.value("VAR").toFloatWithSSF(m_vAR_SF);
+
+    if (m_dataPoints.value("VARphA").isValid())
+        m_varPhaseA = m_dataPoints.value("VARphA").toFloatWithSSF(m_vAR_SF);
+
+    if (m_dataPoints.value("VARphB").isValid())
+        m_varPhaseB = m_dataPoints.value("VARphB").toFloatWithSSF(m_vAR_SF);
+
+    if (m_dataPoints.value("VARphC").isValid())
+        m_varPhaseC = m_dataPoints.value("VARphC").toFloatWithSSF(m_vAR_SF);
+
+    if (m_dataPoints.value("VAR_SF").isValid())
+        m_vAR_SF = m_dataPoints.value("VAR_SF").toInt16();
+
+    if (m_dataPoints.value("PF").isValid())
+        m_pf = m_dataPoints.value("PF").toFloatWithSSF(m_pF_SF);
+
+    if (m_dataPoints.value("PFphA").isValid())
+        m_pfPhaseA = m_dataPoints.value("PFphA").toFloatWithSSF(m_pF_SF);
+
+    if (m_dataPoints.value("PFphB").isValid())
+        m_pfPhaseB = m_dataPoints.value("PFphB").toFloatWithSSF(m_pF_SF);
+
+    if (m_dataPoints.value("PFphC").isValid())
+        m_pfPhaseC = m_dataPoints.value("PFphC").toFloatWithSSF(m_pF_SF);
+
+    if (m_dataPoints.value("PF_SF").isValid())
+        m_pF_SF = m_dataPoints.value("PF_SF").toInt16();
+
+    if (m_dataPoints.value("TotWhExp").isValid())
+        m_totalWattHoursExported = m_dataPoints.value("TotWhExp").toFloatWithSSF(m_totWh_SF);
+
+    if (m_dataPoints.value("TotWhExpPhA").isValid())
+        m_totalWattHoursExportedPhaseA = m_dataPoints.value("TotWhExpPhA").toFloatWithSSF(m_totWh_SF);
+
+    if (m_dataPoints.value("TotWhExpPhB").isValid())
+        m_totalWattHoursExportedPhaseB = m_dataPoints.value("TotWhExpPhB").toFloatWithSSF(m_totWh_SF);
+
+    if (m_dataPoints.value("TotWhExpPhC").isValid())
+        m_totalWattHoursExportedPhaseC = m_dataPoints.value("TotWhExpPhC").toFloatWithSSF(m_totWh_SF);
+
+    if (m_dataPoints.value("TotWhImp").isValid())
+        m_totalWattHoursImported = m_dataPoints.value("TotWhImp").toFloatWithSSF(m_totWh_SF);
+
+    if (m_dataPoints.value("TotWhImpPhA").isValid())
+        m_totalWattHoursImportedPhaseA = m_dataPoints.value("TotWhImpPhA").toFloatWithSSF(m_totWh_SF);
+
+    if (m_dataPoints.value("TotWhImpPhB").isValid())
+        m_totalWattHoursImportedPhaseB = m_dataPoints.value("TotWhImpPhB").toFloatWithSSF(m_totWh_SF);
+
+    if (m_dataPoints.value("TotWhImpPhC").isValid())
+        m_totalWattHoursImportedPhaseC = m_dataPoints.value("TotWhImpPhC").toFloatWithSSF(m_totWh_SF);
+
+    if (m_dataPoints.value("TotWh_SF").isValid())
+        m_totWh_SF = m_dataPoints.value("TotWh_SF").toInt16();
+
+    if (m_dataPoints.value("TotVAhExp").isValid())
+        m_totalVaHoursExported = m_dataPoints.value("TotVAhExp").toFloatWithSSF(m_totVAh_SF);
+
+    if (m_dataPoints.value("TotVAhExpPhA").isValid())
+        m_totalVaHoursExportedPhaseA = m_dataPoints.value("TotVAhExpPhA").toFloatWithSSF(m_totVAh_SF);
+
+    if (m_dataPoints.value("TotVAhExpPhB").isValid())
+        m_totalVaHoursExportedPhaseB = m_dataPoints.value("TotVAhExpPhB").toFloatWithSSF(m_totVAh_SF);
+
+    if (m_dataPoints.value("TotVAhExpPhC").isValid())
+        m_totalVaHoursExportedPhaseC = m_dataPoints.value("TotVAhExpPhC").toFloatWithSSF(m_totVAh_SF);
+
+    if (m_dataPoints.value("TotVAhImp").isValid())
+        m_totalVaHoursImported = m_dataPoints.value("TotVAhImp").toFloatWithSSF(m_totVAh_SF);
+
+    if (m_dataPoints.value("TotVAhImpPhA").isValid())
+        m_totalVaHoursImportedPhaseA = m_dataPoints.value("TotVAhImpPhA").toFloatWithSSF(m_totVAh_SF);
+
+    if (m_dataPoints.value("TotVAhImpPhB").isValid())
+        m_totalVaHoursImportedPhaseB = m_dataPoints.value("TotVAhImpPhB").toFloatWithSSF(m_totVAh_SF);
+
+    if (m_dataPoints.value("TotVAhImpPhC").isValid())
+        m_totalVaHoursImportedPhaseC = m_dataPoints.value("TotVAhImpPhC").toFloatWithSSF(m_totVAh_SF);
+
+    if (m_dataPoints.value("TotVAh_SF").isValid())
+        m_totVAh_SF = m_dataPoints.value("TotVAh_SF").toInt16();
+
+    if (m_dataPoints.value("TotVArhImpQ1").isValid())
+        m_totalVarHoursImportedQ1 = m_dataPoints.value("TotVArhImpQ1").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhImpQ1PhA").isValid())
+        m_totalVArHoursImportedQ1PhaseA = m_dataPoints.value("TotVArhImpQ1PhA").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhImpQ1PhB").isValid())
+        m_totalVArHoursImportedQ1PhaseB = m_dataPoints.value("TotVArhImpQ1PhB").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhImpQ1PhC").isValid())
+        m_totalVArHoursImportedQ1PhaseC = m_dataPoints.value("TotVArhImpQ1PhC").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhImpQ2").isValid())
+        m_totalVArHoursImportedQ2 = m_dataPoints.value("TotVArhImpQ2").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhImpQ2PhA").isValid())
+        m_totalVArHoursImportedQ2PhaseA = m_dataPoints.value("TotVArhImpQ2PhA").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhImpQ2PhB").isValid())
+        m_totalVArHoursImportedQ2PhaseB = m_dataPoints.value("TotVArhImpQ2PhB").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhImpQ2PhC").isValid())
+        m_totalVArHoursImportedQ2PhaseC = m_dataPoints.value("TotVArhImpQ2PhC").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhExpQ3").isValid())
+        m_totalVArHoursExportedQ3 = m_dataPoints.value("TotVArhExpQ3").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhExpQ3PhA").isValid())
+        m_totalVArHoursExportedQ3PhaseA = m_dataPoints.value("TotVArhExpQ3PhA").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhExpQ3PhB").isValid())
+        m_totalVArHoursExportedQ3PhaseB = m_dataPoints.value("TotVArhExpQ3PhB").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhExpQ3PhC").isValid())
+        m_totalVArHoursExportedQ3PhaseC = m_dataPoints.value("TotVArhExpQ3PhC").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhExpQ4").isValid())
+        m_totalVArHoursExportedQ4 = m_dataPoints.value("TotVArhExpQ4").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhExpQ4PhA").isValid())
+        m_totalVArHoursExportedQ4ImportedPhaseA = m_dataPoints.value("TotVArhExpQ4PhA").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhExpQ4PhB").isValid())
+        m_totalVArHoursExportedQ4ImportedPhaseB = m_dataPoints.value("TotVArhExpQ4PhB").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArhExpQ4PhC").isValid())
+        m_totalVArHoursExportedQ4ImportedPhaseC = m_dataPoints.value("TotVArhExpQ4PhC").toFloatWithSSF(m_totVArh_SF);
+
+    if (m_dataPoints.value("TotVArh_SF").isValid())
+        m_totVArh_SF = m_dataPoints.value("TotVArh_SF").toInt16();
+
+    if (m_dataPoints.value("Evt").isValid())
+        m_events = static_cast<EvtFlags>(m_dataPoints.value("Evt").toUInt32());
+
+
+    qCDebug(dcSunSpecModelData()) << this;
+}
+
 QDebug operator<<(QDebug debug, SunSpecMeterSplitSinglePhaseAbnModel *model)
 {
     debug.nospace().noquote() << "SunSpecMeterSplitSinglePhaseAbnModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("A") << "-->";
     if (model->dataPoints().value("A").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("A") << "--> " << model->amps() << endl;
+        debug.nospace().noquote() << model->amps() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("A") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("AphA") << "-->";
     if (model->dataPoints().value("AphA").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("AphA") << "--> " << model->ampsPhaseA() << endl;
+        debug.nospace().noquote() << model->ampsPhaseA() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("AphA") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("AphB") << "-->";
     if (model->dataPoints().value("AphB").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("AphB") << "--> " << model->ampsPhaseB() << endl;
+        debug.nospace().noquote() << model->ampsPhaseB() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("AphB") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("AphC") << "-->";
     if (model->dataPoints().value("AphC").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("AphC") << "--> " << model->ampsPhaseC() << endl;
+        debug.nospace().noquote() << model->ampsPhaseC() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("AphC") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("PhV") << "-->";
     if (model->dataPoints().value("PhV").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhV") << "--> " << model->voltageLn() << endl;
+        debug.nospace().noquote() << model->voltageLn() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhV") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphA") << "-->";
     if (model->dataPoints().value("PhVphA").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphA") << "--> " << model->phaseVoltageAn() << endl;
+        debug.nospace().noquote() << model->phaseVoltageAn() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphA") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphB") << "-->";
     if (model->dataPoints().value("PhVphB").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphB") << "--> " << model->phaseVoltageBn() << endl;
+        debug.nospace().noquote() << model->phaseVoltageBn() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphB") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphC") << "-->";
     if (model->dataPoints().value("PhVphC").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphC") << "--> " << model->phaseVoltageCn() << endl;
+        debug.nospace().noquote() << model->phaseVoltageCn() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphC") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("PPV") << "-->";
     if (model->dataPoints().value("PPV").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PPV") << "--> " << model->voltageLl() << endl;
+        debug.nospace().noquote() << model->voltageLl() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PPV") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphAB") << "-->";
     if (model->dataPoints().value("PhVphAB").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphAB") << "--> " << model->phaseVoltageAb() << endl;
+        debug.nospace().noquote() << model->phaseVoltageAb() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphAB") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphBC") << "-->";
     if (model->dataPoints().value("PhVphBC").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphBC") << "--> " << model->phaseVoltageBc() << endl;
+        debug.nospace().noquote() << model->phaseVoltageBc() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphBC") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphCA") << "-->";
     if (model->dataPoints().value("PhVphCA").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphCA") << "--> " << model->phaseVoltageCa() << endl;
+        debug.nospace().noquote() << model->phaseVoltageCa() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PhVphCA") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Hz") << "-->";
     if (model->dataPoints().value("Hz").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Hz") << "--> " << model->hz() << endl;
+        debug.nospace().noquote() << model->hz() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Hz") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("W") << "-->";
     if (model->dataPoints().value("W").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("W") << "--> " << model->watts() << endl;
+        debug.nospace().noquote() << model->watts() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("W") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("WphA") << "-->";
     if (model->dataPoints().value("WphA").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WphA") << "--> " << model->wattsPhaseA() << endl;
+        debug.nospace().noquote() << model->wattsPhaseA() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WphA") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("WphB") << "-->";
     if (model->dataPoints().value("WphB").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WphB") << "--> " << model->wattsPhaseB() << endl;
+        debug.nospace().noquote() << model->wattsPhaseB() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WphB") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("WphC") << "-->";
     if (model->dataPoints().value("WphC").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WphC") << "--> " << model->wattsPhaseC() << endl;
+        debug.nospace().noquote() << model->wattsPhaseC() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WphC") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VA") << "-->";
     if (model->dataPoints().value("VA").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VA") << "--> " << model->va() << endl;
+        debug.nospace().noquote() << model->va() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VA") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VAphA") << "-->";
     if (model->dataPoints().value("VAphA").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VAphA") << "--> " << model->vaPhaseA() << endl;
+        debug.nospace().noquote() << model->vaPhaseA() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VAphA") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VAphB") << "-->";
     if (model->dataPoints().value("VAphB").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VAphB") << "--> " << model->vaPhaseB() << endl;
+        debug.nospace().noquote() << model->vaPhaseB() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VAphB") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VAphC") << "-->";
     if (model->dataPoints().value("VAphC").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VAphC") << "--> " << model->vaPhaseC() << endl;
+        debug.nospace().noquote() << model->vaPhaseC() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VAphC") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VAR") << "-->";
     if (model->dataPoints().value("VAR").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VAR") << "--> " << model->var() << endl;
+        debug.nospace().noquote() << model->var() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VAR") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VARphA") << "-->";
     if (model->dataPoints().value("VARphA").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VARphA") << "--> " << model->varPhaseA() << endl;
+        debug.nospace().noquote() << model->varPhaseA() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VARphA") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VARphB") << "-->";
     if (model->dataPoints().value("VARphB").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VARphB") << "--> " << model->varPhaseB() << endl;
+        debug.nospace().noquote() << model->varPhaseB() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VARphB") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VARphC") << "-->";
     if (model->dataPoints().value("VARphC").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VARphC") << "--> " << model->varPhaseC() << endl;
+        debug.nospace().noquote() << model->varPhaseC() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VARphC") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("PF") << "-->";
     if (model->dataPoints().value("PF").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PF") << "--> " << model->pf() << endl;
+        debug.nospace().noquote() << model->pf() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PF") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("PFphA") << "-->";
     if (model->dataPoints().value("PFphA").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFphA") << "--> " << model->pfPhaseA() << endl;
+        debug.nospace().noquote() << model->pfPhaseA() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFphA") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("PFphB") << "-->";
     if (model->dataPoints().value("PFphB").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFphB") << "--> " << model->pfPhaseB() << endl;
+        debug.nospace().noquote() << model->pfPhaseB() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFphB") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("PFphC") << "-->";
     if (model->dataPoints().value("PFphC").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFphC") << "--> " << model->pfPhaseC() << endl;
+        debug.nospace().noquote() << model->pfPhaseC() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PFphC") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhExp") << "-->";
     if (model->dataPoints().value("TotWhExp").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhExp") << "--> " << model->totalWattHoursExported() << endl;
+        debug.nospace().noquote() << model->totalWattHoursExported() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhExp") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhExpPhA") << "-->";
     if (model->dataPoints().value("TotWhExpPhA").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhExpPhA") << "--> " << model->totalWattHoursExportedPhaseA() << endl;
+        debug.nospace().noquote() << model->totalWattHoursExportedPhaseA() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhExpPhA") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhExpPhB") << "-->";
     if (model->dataPoints().value("TotWhExpPhB").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhExpPhB") << "--> " << model->totalWattHoursExportedPhaseB() << endl;
+        debug.nospace().noquote() << model->totalWattHoursExportedPhaseB() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhExpPhB") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhExpPhC") << "-->";
     if (model->dataPoints().value("TotWhExpPhC").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhExpPhC") << "--> " << model->totalWattHoursExportedPhaseC() << endl;
+        debug.nospace().noquote() << model->totalWattHoursExportedPhaseC() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhExpPhC") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhImp") << "-->";
     if (model->dataPoints().value("TotWhImp").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhImp") << "--> " << model->totalWattHoursImported() << endl;
+        debug.nospace().noquote() << model->totalWattHoursImported() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhImp") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhImpPhA") << "-->";
     if (model->dataPoints().value("TotWhImpPhA").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhImpPhA") << "--> " << model->totalWattHoursImportedPhaseA() << endl;
+        debug.nospace().noquote() << model->totalWattHoursImportedPhaseA() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhImpPhA") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhImpPhB") << "-->";
     if (model->dataPoints().value("TotWhImpPhB").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhImpPhB") << "--> " << model->totalWattHoursImportedPhaseB() << endl;
+        debug.nospace().noquote() << model->totalWattHoursImportedPhaseB() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhImpPhB") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhImpPhC") << "-->";
     if (model->dataPoints().value("TotWhImpPhC").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhImpPhC") << "--> " << model->totalWattHoursImportedPhaseC() << endl;
+        debug.nospace().noquote() << model->totalWattHoursImportedPhaseC() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotWhImpPhC") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhExp") << "-->";
     if (model->dataPoints().value("TotVAhExp").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhExp") << "--> " << model->totalVaHoursExported() << endl;
+        debug.nospace().noquote() << model->totalVaHoursExported() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhExp") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhExpPhA") << "-->";
     if (model->dataPoints().value("TotVAhExpPhA").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhExpPhA") << "--> " << model->totalVaHoursExportedPhaseA() << endl;
+        debug.nospace().noquote() << model->totalVaHoursExportedPhaseA() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhExpPhA") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhExpPhB") << "-->";
     if (model->dataPoints().value("TotVAhExpPhB").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhExpPhB") << "--> " << model->totalVaHoursExportedPhaseB() << endl;
+        debug.nospace().noquote() << model->totalVaHoursExportedPhaseB() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhExpPhB") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhExpPhC") << "-->";
     if (model->dataPoints().value("TotVAhExpPhC").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhExpPhC") << "--> " << model->totalVaHoursExportedPhaseC() << endl;
+        debug.nospace().noquote() << model->totalVaHoursExportedPhaseC() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhExpPhC") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhImp") << "-->";
     if (model->dataPoints().value("TotVAhImp").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhImp") << "--> " << model->totalVaHoursImported() << endl;
+        debug.nospace().noquote() << model->totalVaHoursImported() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhImp") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhImpPhA") << "-->";
     if (model->dataPoints().value("TotVAhImpPhA").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhImpPhA") << "--> " << model->totalVaHoursImportedPhaseA() << endl;
+        debug.nospace().noquote() << model->totalVaHoursImportedPhaseA() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhImpPhA") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhImpPhB") << "-->";
     if (model->dataPoints().value("TotVAhImpPhB").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhImpPhB") << "--> " << model->totalVaHoursImportedPhaseB() << endl;
+        debug.nospace().noquote() << model->totalVaHoursImportedPhaseB() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhImpPhB") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhImpPhC") << "-->";
     if (model->dataPoints().value("TotVAhImpPhC").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhImpPhC") << "--> " << model->totalVaHoursImportedPhaseC() << endl;
+        debug.nospace().noquote() << model->totalVaHoursImportedPhaseC() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVAhImpPhC") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ1") << "-->";
     if (model->dataPoints().value("TotVArhImpQ1").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ1") << "--> " << model->totalVarHoursImportedQ1() << endl;
+        debug.nospace().noquote() << model->totalVarHoursImportedQ1() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ1") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ1PhA") << "-->";
     if (model->dataPoints().value("TotVArhImpQ1PhA").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ1PhA") << "--> " << model->totalVArHoursImportedQ1PhaseA() << endl;
+        debug.nospace().noquote() << model->totalVArHoursImportedQ1PhaseA() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ1PhA") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ1PhB") << "-->";
     if (model->dataPoints().value("TotVArhImpQ1PhB").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ1PhB") << "--> " << model->totalVArHoursImportedQ1PhaseB() << endl;
+        debug.nospace().noquote() << model->totalVArHoursImportedQ1PhaseB() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ1PhB") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ1PhC") << "-->";
     if (model->dataPoints().value("TotVArhImpQ1PhC").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ1PhC") << "--> " << model->totalVArHoursImportedQ1PhaseC() << endl;
+        debug.nospace().noquote() << model->totalVArHoursImportedQ1PhaseC() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ1PhC") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ2") << "-->";
     if (model->dataPoints().value("TotVArhImpQ2").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ2") << "--> " << model->totalVArHoursImportedQ2() << endl;
+        debug.nospace().noquote() << model->totalVArHoursImportedQ2() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ2") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ2PhA") << "-->";
     if (model->dataPoints().value("TotVArhImpQ2PhA").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ2PhA") << "--> " << model->totalVArHoursImportedQ2PhaseA() << endl;
+        debug.nospace().noquote() << model->totalVArHoursImportedQ2PhaseA() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ2PhA") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ2PhB") << "-->";
     if (model->dataPoints().value("TotVArhImpQ2PhB").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ2PhB") << "--> " << model->totalVArHoursImportedQ2PhaseB() << endl;
+        debug.nospace().noquote() << model->totalVArHoursImportedQ2PhaseB() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ2PhB") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ2PhC") << "-->";
     if (model->dataPoints().value("TotVArhImpQ2PhC").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ2PhC") << "--> " << model->totalVArHoursImportedQ2PhaseC() << endl;
+        debug.nospace().noquote() << model->totalVArHoursImportedQ2PhaseC() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhImpQ2PhC") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ3") << "-->";
     if (model->dataPoints().value("TotVArhExpQ3").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ3") << "--> " << model->totalVArHoursExportedQ3() << endl;
+        debug.nospace().noquote() << model->totalVArHoursExportedQ3() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ3") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ3PhA") << "-->";
     if (model->dataPoints().value("TotVArhExpQ3PhA").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ3PhA") << "--> " << model->totalVArHoursExportedQ3PhaseA() << endl;
+        debug.nospace().noquote() << model->totalVArHoursExportedQ3PhaseA() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ3PhA") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ3PhB") << "-->";
     if (model->dataPoints().value("TotVArhExpQ3PhB").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ3PhB") << "--> " << model->totalVArHoursExportedQ3PhaseB() << endl;
+        debug.nospace().noquote() << model->totalVArHoursExportedQ3PhaseB() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ3PhB") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ3PhC") << "-->";
     if (model->dataPoints().value("TotVArhExpQ3PhC").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ3PhC") << "--> " << model->totalVArHoursExportedQ3PhaseC() << endl;
+        debug.nospace().noquote() << model->totalVArHoursExportedQ3PhaseC() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ3PhC") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ4") << "-->";
     if (model->dataPoints().value("TotVArhExpQ4").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ4") << "--> " << model->totalVArHoursExportedQ4() << endl;
+        debug.nospace().noquote() << model->totalVArHoursExportedQ4() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ4") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ4PhA") << "-->";
     if (model->dataPoints().value("TotVArhExpQ4PhA").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ4PhA") << "--> " << model->totalVArHoursExportedQ4ImportedPhaseA() << endl;
+        debug.nospace().noquote() << model->totalVArHoursExportedQ4ImportedPhaseA() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ4PhA") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ4PhB") << "-->";
     if (model->dataPoints().value("TotVArhExpQ4PhB").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ4PhB") << "--> " << model->totalVArHoursExportedQ4ImportedPhaseB() << endl;
+        debug.nospace().noquote() << model->totalVArHoursExportedQ4ImportedPhaseB() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ4PhB") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ4PhC") << "-->";
     if (model->dataPoints().value("TotVArhExpQ4PhC").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ4PhC") << "--> " << model->totalVArHoursExportedQ4ImportedPhaseC() << endl;
+        debug.nospace().noquote() << model->totalVArHoursExportedQ4ImportedPhaseC() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TotVArhExpQ4PhC") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt") << "-->";
     if (model->dataPoints().value("Evt").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt") << "--> " << model->events() << endl;
+        debug.nospace().noquote() << model->events() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
 

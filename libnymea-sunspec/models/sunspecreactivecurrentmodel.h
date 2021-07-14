@@ -54,7 +54,7 @@ public:
     Q_DECLARE_FLAGS(ModenaFlags, Modena)
     Q_FLAG(Modena)
 
-    explicit SunSpecReactiveCurrentModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);
+    explicit SunSpecReactiveCurrentModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
     ~SunSpecReactiveCurrentModel() override; 
 
     QString name() const override;
@@ -95,9 +95,14 @@ public:
     quint16 holdTmms() const;
     QModbusReply *setHoldTmms(quint16 holdTmms);
 
+    qint16 arGraSf() const;
+    qint16 vRefPctSf() const;
     quint16 pad() const;
 
 protected:
+    quint16 m_fixedBlockLength = 14;
+
+    void initDataPoints() override;
     void processBlockData() override;
 
 private:
@@ -116,7 +121,6 @@ private:
     qint16 m_vRefPctSf = 0;
     quint16 m_pad = 0;
 
-    void initDataPoints();
 
 };
 

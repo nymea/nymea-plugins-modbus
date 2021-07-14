@@ -46,6 +46,13 @@ class SunSpecModel : public QObject
 {
     Q_OBJECT
 public:
+    enum ModelBlockType {
+        ModelBlockTypeFixed,
+        ModelBlockTypeRepeating,
+        ModelBlockTypeFixedAndRepeating
+    };
+    Q_ENUM(ModelBlockType)
+
     explicit SunSpecModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelId, quint16 modelLength, QObject *parent = nullptr);
     virtual ~SunSpecModel() = default;
 
@@ -78,6 +85,8 @@ protected:
     quint16 m_modelId;
     quint16 m_modelLength = 0;
 
+    ModelBlockType m_modelBlockType = ModelBlockTypeFixed;
+
     bool m_initialized = false;
 
     QVector<quint16> m_blockData;
@@ -85,6 +94,7 @@ protected:
 
     void setInitializedFinished();
 
+    virtual void initDataPoints() = 0;
     virtual void processBlockData() = 0;
 
 signals:

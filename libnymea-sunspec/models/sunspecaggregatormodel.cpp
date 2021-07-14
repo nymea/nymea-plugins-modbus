@@ -31,11 +31,11 @@
 #include "sunspecaggregatormodel.h"
 #include "sunspecconnection.h"
 
-SunSpecAggregatorModel::SunSpecAggregatorModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 2, 14, parent)
+SunSpecAggregatorModel::SunSpecAggregatorModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 2, modelLength, parent)
 {
-    //Q_ASSERT_X(length == 14,  "SunSpecAggregatorModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
-    Q_UNUSED(length)
+    m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
+
     initDataPoints();
 }
 
@@ -99,43 +99,6 @@ quint32 SunSpecAggregatorModel::controlValue() const
 {
     return m_controlValue;
 }
-void SunSpecAggregatorModel::processBlockData()
-{
-    // Update properties according to the data point type
-    if (m_dataPoints.value("AID").isValid())
-        m_aid = m_dataPoints.value("AID").toUInt16();
-
-    if (m_dataPoints.value("N").isValid())
-        m_n = m_dataPoints.value("N").toUInt16();
-
-    if (m_dataPoints.value("UN").isValid())
-        m_un = m_dataPoints.value("UN").toUInt16();
-
-    if (m_dataPoints.value("St").isValid())
-        m_status = static_cast<St>(m_dataPoints.value("St").toUInt16());
-
-    if (m_dataPoints.value("StVnd").isValid())
-        m_vendorStatus = m_dataPoints.value("StVnd").toUInt16();
-
-    if (m_dataPoints.value("Evt").isValid())
-        m_eventCode = static_cast<EvtFlags>(m_dataPoints.value("Evt").toUInt32());
-
-    if (m_dataPoints.value("EvtVnd").isValid())
-        m_vendorEventCode = m_dataPoints.value("EvtVnd").toUInt32();
-
-    if (m_dataPoints.value("Ctl").isValid())
-        m_control = static_cast<Ctl>(m_dataPoints.value("Ctl").toUInt16());
-
-    if (m_dataPoints.value("CtlVnd").isValid())
-        m_vendorControl = m_dataPoints.value("CtlVnd").toUInt32();
-
-    if (m_dataPoints.value("CtlVl").isValid())
-        m_controlValue = m_dataPoints.value("CtlVl").toUInt32();
-
-
-    qCDebug(dcSunSpecModelData()) << this;
-}
-
 void SunSpecAggregatorModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -265,67 +228,114 @@ void SunSpecAggregatorModel::initDataPoints()
 
 }
 
+void SunSpecAggregatorModel::processBlockData()
+{
+    // Update properties according to the data point type
+    if (m_dataPoints.value("AID").isValid())
+        m_aid = m_dataPoints.value("AID").toUInt16();
+
+    if (m_dataPoints.value("N").isValid())
+        m_n = m_dataPoints.value("N").toUInt16();
+
+    if (m_dataPoints.value("UN").isValid())
+        m_un = m_dataPoints.value("UN").toUInt16();
+
+    if (m_dataPoints.value("St").isValid())
+        m_status = static_cast<St>(m_dataPoints.value("St").toUInt16());
+
+    if (m_dataPoints.value("StVnd").isValid())
+        m_vendorStatus = m_dataPoints.value("StVnd").toUInt16();
+
+    if (m_dataPoints.value("Evt").isValid())
+        m_eventCode = static_cast<EvtFlags>(m_dataPoints.value("Evt").toUInt32());
+
+    if (m_dataPoints.value("EvtVnd").isValid())
+        m_vendorEventCode = m_dataPoints.value("EvtVnd").toUInt32();
+
+    if (m_dataPoints.value("Ctl").isValid())
+        m_control = static_cast<Ctl>(m_dataPoints.value("Ctl").toUInt16());
+
+    if (m_dataPoints.value("CtlVnd").isValid())
+        m_vendorControl = m_dataPoints.value("CtlVnd").toUInt32();
+
+    if (m_dataPoints.value("CtlVl").isValid())
+        m_controlValue = m_dataPoints.value("CtlVl").toUInt32();
+
+
+    qCDebug(dcSunSpecModelData()) << this;
+}
+
 QDebug operator<<(QDebug debug, SunSpecAggregatorModel *model)
 {
     debug.nospace().noquote() << "SunSpecAggregatorModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("AID") << "-->";
     if (model->dataPoints().value("AID").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("AID") << "--> " << model->aid() << endl;
+        debug.nospace().noquote() << model->aid() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("AID") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("N") << "-->";
     if (model->dataPoints().value("N").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("N") << "--> " << model->n() << endl;
+        debug.nospace().noquote() << model->n() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("N") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("UN") << "-->";
     if (model->dataPoints().value("UN").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("UN") << "--> " << model->un() << endl;
+        debug.nospace().noquote() << model->un() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("UN") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("St") << "-->";
     if (model->dataPoints().value("St").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("St") << "--> " << model->status() << endl;
+        debug.nospace().noquote() << model->status() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("St") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("StVnd") << "-->";
     if (model->dataPoints().value("StVnd").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StVnd") << "--> " << model->vendorStatus() << endl;
+        debug.nospace().noquote() << model->vendorStatus() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StVnd") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt") << "-->";
     if (model->dataPoints().value("Evt").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt") << "--> " << model->eventCode() << endl;
+        debug.nospace().noquote() << model->eventCode() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd") << "-->";
     if (model->dataPoints().value("EvtVnd").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd") << "--> " << model->vendorEventCode() << endl;
+        debug.nospace().noquote() << model->vendorEventCode() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Ctl") << "-->";
     if (model->dataPoints().value("Ctl").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Ctl") << "--> " << model->control() << endl;
+        debug.nospace().noquote() << model->control() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Ctl") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("CtlVnd") << "-->";
     if (model->dataPoints().value("CtlVnd").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("CtlVnd") << "--> " << model->vendorControl() << endl;
+        debug.nospace().noquote() << model->vendorControl() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("CtlVnd") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("CtlVl") << "-->";
     if (model->dataPoints().value("CtlVl").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("CtlVl") << "--> " << model->controlValue() << endl;
+        debug.nospace().noquote() << model->controlValue() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("CtlVl") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
 

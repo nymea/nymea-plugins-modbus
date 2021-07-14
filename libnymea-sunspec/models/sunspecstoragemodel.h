@@ -66,7 +66,7 @@ public:
     Q_DECLARE_FLAGS(Storctl_modFlags, Storctl_mod)
     Q_FLAG(Storctl_mod)
 
-    explicit SunSpecStorageModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);
+    explicit SunSpecStorageModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
     ~SunSpecStorageModel() override; 
 
     QString name() const override;
@@ -114,8 +114,19 @@ public:
     Chagriset chaGriSet() const;
     QModbusReply *setChaGriSet(Chagriset chaGriSet);
 
+    qint16 wChaMaxSf() const;
+    qint16 wChaDisChaGraSf() const;
+    qint16 vaChaMaxSf() const;
+    qint16 minRsvPctSf() const;
+    qint16 chaStateSf() const;
+    qint16 storAvalSf() const;
+    qint16 inBatVSf() const;
+    qint16 inOutWRteSf() const;
 
 protected:
+    quint16 m_fixedBlockLength = 24;
+
+    void initDataPoints() override;
     void processBlockData() override;
 
 private:
@@ -144,7 +155,6 @@ private:
     qint16 m_inBatVSf = 0;
     qint16 m_inOutWRteSf = 0;
 
-    void initDataPoints();
 
 };
 

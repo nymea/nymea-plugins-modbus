@@ -31,11 +31,11 @@
 #include "sunspecfreqwattparammodel.h"
 #include "sunspecconnection.h"
 
-SunSpecFreqWattParamModel::SunSpecFreqWattParamModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 127, 10, parent)
+SunSpecFreqWattParamModel::SunSpecFreqWattParamModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 127, modelLength, parent)
 {
-    //Q_ASSERT_X(length == 10,  "SunSpecFreqWattParamModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
-    Q_UNUSED(length)
+    m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
+
     initDataPoints();
 }
 
@@ -167,49 +167,22 @@ QModbusReply *SunSpecFreqWattParamModel::setHzStopWGra(float hzStopWGra)
 
     return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
+qint16 SunSpecFreqWattParamModel::wGraSf() const
+{
+    return m_wGraSf;
+}
+qint16 SunSpecFreqWattParamModel::hzStrStopSf() const
+{
+    return m_hzStrStopSf;
+}
+qint16 SunSpecFreqWattParamModel::rmpIncDecSf() const
+{
+    return m_rmpIncDecSf;
+}
 quint16 SunSpecFreqWattParamModel::pad() const
 {
     return m_pad;
 }
-void SunSpecFreqWattParamModel::processBlockData()
-{
-    // Scale factors
-    if (m_dataPoints.value("WGra_SF").isValid())
-        m_wGraSf = m_dataPoints.value("WGra_SF").toInt16();
-
-    if (m_dataPoints.value("HzStrStop_SF").isValid())
-        m_hzStrStopSf = m_dataPoints.value("HzStrStop_SF").toInt16();
-
-    if (m_dataPoints.value("RmpIncDec_SF").isValid())
-        m_rmpIncDecSf = m_dataPoints.value("RmpIncDec_SF").toInt16();
-
-
-    // Update properties according to the data point type
-    if (m_dataPoints.value("WGra").isValid())
-        m_wGra = m_dataPoints.value("WGra").toFloatWithSSF(m_wGraSf);
-
-    if (m_dataPoints.value("HzStr").isValid())
-        m_hzStr = m_dataPoints.value("HzStr").toFloatWithSSF(m_hzStrStopSf);
-
-    if (m_dataPoints.value("HzStop").isValid())
-        m_hzStop = m_dataPoints.value("HzStop").toFloatWithSSF(m_hzStrStopSf);
-
-    if (m_dataPoints.value("HysEna").isValid())
-        m_hysEna = static_cast<HysenaFlags>(m_dataPoints.value("HysEna").toUInt16());
-
-    if (m_dataPoints.value("ModEna").isValid())
-        m_modEna = static_cast<ModenaFlags>(m_dataPoints.value("ModEna").toUInt16());
-
-    if (m_dataPoints.value("HzStopWGra").isValid())
-        m_hzStopWGra = m_dataPoints.value("HzStopWGra").toFloatWithSSF(m_rmpIncDecSf);
-
-    if (m_dataPoints.value("Pad").isValid())
-        m_pad = m_dataPoints.value("Pad").toUInt16();
-
-
-    qCDebug(dcSunSpecModelData()) << this;
-}
-
 void SunSpecFreqWattParamModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -351,49 +324,104 @@ void SunSpecFreqWattParamModel::initDataPoints()
 
 }
 
+void SunSpecFreqWattParamModel::processBlockData()
+{
+    // Scale factors
+    if (m_dataPoints.value("WGra_SF").isValid())
+        m_wGraSf = m_dataPoints.value("WGra_SF").toInt16();
+
+    if (m_dataPoints.value("HzStrStop_SF").isValid())
+        m_hzStrStopSf = m_dataPoints.value("HzStrStop_SF").toInt16();
+
+    if (m_dataPoints.value("RmpIncDec_SF").isValid())
+        m_rmpIncDecSf = m_dataPoints.value("RmpIncDec_SF").toInt16();
+
+
+    // Update properties according to the data point type
+    if (m_dataPoints.value("WGra").isValid())
+        m_wGra = m_dataPoints.value("WGra").toFloatWithSSF(m_wGraSf);
+
+    if (m_dataPoints.value("HzStr").isValid())
+        m_hzStr = m_dataPoints.value("HzStr").toFloatWithSSF(m_hzStrStopSf);
+
+    if (m_dataPoints.value("HzStop").isValid())
+        m_hzStop = m_dataPoints.value("HzStop").toFloatWithSSF(m_hzStrStopSf);
+
+    if (m_dataPoints.value("HysEna").isValid())
+        m_hysEna = static_cast<HysenaFlags>(m_dataPoints.value("HysEna").toUInt16());
+
+    if (m_dataPoints.value("ModEna").isValid())
+        m_modEna = static_cast<ModenaFlags>(m_dataPoints.value("ModEna").toUInt16());
+
+    if (m_dataPoints.value("HzStopWGra").isValid())
+        m_hzStopWGra = m_dataPoints.value("HzStopWGra").toFloatWithSSF(m_rmpIncDecSf);
+
+    if (m_dataPoints.value("WGra_SF").isValid())
+        m_wGraSf = m_dataPoints.value("WGra_SF").toInt16();
+
+    if (m_dataPoints.value("HzStrStop_SF").isValid())
+        m_hzStrStopSf = m_dataPoints.value("HzStrStop_SF").toInt16();
+
+    if (m_dataPoints.value("RmpIncDec_SF").isValid())
+        m_rmpIncDecSf = m_dataPoints.value("RmpIncDec_SF").toInt16();
+
+    if (m_dataPoints.value("Pad").isValid())
+        m_pad = m_dataPoints.value("Pad").toUInt16();
+
+
+    qCDebug(dcSunSpecModelData()) << this;
+}
+
 QDebug operator<<(QDebug debug, SunSpecFreqWattParamModel *model)
 {
     debug.nospace().noquote() << "SunSpecFreqWattParamModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("WGra") << "-->";
     if (model->dataPoints().value("WGra").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WGra") << "--> " << model->wGra() << endl;
+        debug.nospace().noquote() << model->wGra() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WGra") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("HzStr") << "-->";
     if (model->dataPoints().value("HzStr").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("HzStr") << "--> " << model->hzStr() << endl;
+        debug.nospace().noquote() << model->hzStr() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("HzStr") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("HzStop") << "-->";
     if (model->dataPoints().value("HzStop").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("HzStop") << "--> " << model->hzStop() << endl;
+        debug.nospace().noquote() << model->hzStop() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("HzStop") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("HysEna") << "-->";
     if (model->dataPoints().value("HysEna").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("HysEna") << "--> " << model->hysEna() << endl;
+        debug.nospace().noquote() << model->hysEna() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("HysEna") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ModEna") << "-->";
     if (model->dataPoints().value("ModEna").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModEna") << "--> " << model->modEna() << endl;
+        debug.nospace().noquote() << model->modEna() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModEna") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("HzStopWGra") << "-->";
     if (model->dataPoints().value("HzStopWGra").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("HzStopWGra") << "--> " << model->hzStopWGra() << endl;
+        debug.nospace().noquote() << model->hzStopWGra() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("HzStopWGra") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad") << "-->";
     if (model->dataPoints().value("Pad").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad") << "--> " << model->pad() << endl;
+        debug.nospace().noquote() << model->pad() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
 

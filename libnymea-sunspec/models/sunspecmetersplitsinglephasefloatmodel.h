@@ -76,7 +76,7 @@ public:
     Q_DECLARE_FLAGS(EvtFlags, Evt)
     Q_FLAG(Evt)
 
-    explicit SunSpecMeterSplitSinglePhaseFloatModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);
+    explicit SunSpecMeterSplitSinglePhaseFloatModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
     ~SunSpecMeterSplitSinglePhaseFloatModel() override; 
 
     QString name() const override;
@@ -147,6 +147,9 @@ public:
     EvtFlags events() const;
 
 protected:
+    quint16 m_fixedBlockLength = 124;
+
+    void initDataPoints() override;
     void processBlockData() override;
 
 private:
@@ -213,7 +216,6 @@ private:
     float m_totalVArHoursExportedQ4ImportedPhaseC = 0;
     EvtFlags m_events;
 
-    void initDataPoints();
 
 };
 

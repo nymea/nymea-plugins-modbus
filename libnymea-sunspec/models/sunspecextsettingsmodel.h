@@ -42,7 +42,7 @@ class SunSpecExtSettingsModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    explicit SunSpecExtSettingsModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);
+    explicit SunSpecExtSettingsModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
     ~SunSpecExtSettingsModel() override; 
 
     QString name() const override;
@@ -71,8 +71,12 @@ public:
     float defaultRampRate() const;
     QModbusReply *setDefaultRampRate(float defaultRampRate);
 
+    qint16 rampRateScaleFactor() const;
 
 protected:
+    quint16 m_fixedBlockLength = 8;
+
+    void initDataPoints() override;
     void processBlockData() override;
 
 private:
@@ -85,7 +89,6 @@ private:
     float m_defaultRampRate = 0;
     qint16 m_rampRateScaleFactor = 0;
 
-    void initDataPoints();
 
 };
 

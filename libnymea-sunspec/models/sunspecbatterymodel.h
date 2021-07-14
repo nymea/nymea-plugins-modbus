@@ -141,7 +141,7 @@ public:
     Q_DECLARE_FLAGS(Evt1Flags, Evt1)
     Q_FLAG(Evt1)
 
-    explicit SunSpecBatteryModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);
+    explicit SunSpecBatteryModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
     ~SunSpecBatteryModel() override; 
 
     QString name() const override;
@@ -205,8 +205,23 @@ public:
     Setinvstate setInverterState() const;
     QModbusReply *setSetInverterState(Setinvstate setInverterState);
 
+    qint16 aHRtg_SF() const;
+    qint16 wHRtg_SF() const;
+    qint16 wChaDisChaMax_SF() const;
+    qint16 disChaRte_SF() const;
+    qint16 soC_SF() const;
+    qint16 doD_SF() const;
+    qint16 soH_SF() const;
+    qint16 v_SF() const;
+    qint16 cellV_SF() const;
+    qint16 a_SF() const;
+    qint16 aMax_SF() const;
+    qint16 w_SF() const;
 
 protected:
+    quint16 m_fixedBlockLength = 62;
+
+    void initDataPoints() override;
     void processBlockData() override;
 
 private:
@@ -267,7 +282,6 @@ private:
     qint16 m_aMax_SF = 0;
     qint16 m_w_SF = 0;
 
-    void initDataPoints();
 
 };
 

@@ -31,11 +31,11 @@
 #include "sunspecsolarmodulemodel.h"
 #include "sunspecconnection.h"
 
-SunSpecSolarModuleModel::SunSpecSolarModuleModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 502, 28, parent)
+SunSpecSolarModuleModel::SunSpecSolarModuleModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 502, modelLength, parent)
 {
-    //Q_ASSERT_X(length == 28,  "SunSpecSolarModuleModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
-    Q_UNUSED(length)
+    m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
+
     initDataPoints();
 }
 
@@ -59,6 +59,22 @@ QString SunSpecSolarModuleModel::label() const
     return "Solar Module";
 }
 
+qint16 SunSpecSolarModuleModel::a_SF() const
+{
+    return m_a_SF;
+}
+qint16 SunSpecSolarModuleModel::v_SF() const
+{
+    return m_v_SF;
+}
+qint16 SunSpecSolarModuleModel::w_SF() const
+{
+    return m_w_SF;
+}
+qint16 SunSpecSolarModuleModel::wh_SF() const
+{
+    return m_wh_SF;
+}
 SunSpecSolarModuleModel::Stat SunSpecSolarModuleModel::status() const
 {
     return m_status;
@@ -169,78 +185,6 @@ float SunSpecSolarModuleModel::inputPower() const
 {
     return m_inputPower;
 }
-void SunSpecSolarModuleModel::processBlockData()
-{
-    // Scale factors
-    if (m_dataPoints.value("A_SF").isValid())
-        m_a_SF = m_dataPoints.value("A_SF").toInt16();
-
-    if (m_dataPoints.value("V_SF").isValid())
-        m_v_SF = m_dataPoints.value("V_SF").toInt16();
-
-    if (m_dataPoints.value("W_SF").isValid())
-        m_w_SF = m_dataPoints.value("W_SF").toInt16();
-
-    if (m_dataPoints.value("Wh_SF").isValid())
-        m_wh_SF = m_dataPoints.value("Wh_SF").toInt16();
-
-
-    // Update properties according to the data point type
-    if (m_dataPoints.value("Stat").isValid())
-        m_status = static_cast<Stat>(m_dataPoints.value("Stat").toUInt16());
-
-    if (m_dataPoints.value("StatVend").isValid())
-        m_vendorStatus = m_dataPoints.value("StatVend").toUInt16();
-
-    if (m_dataPoints.value("Evt").isValid())
-        m_events = static_cast<EvtFlags>(m_dataPoints.value("Evt").toUInt32());
-
-    if (m_dataPoints.value("EvtVend").isValid())
-        m_vendorModuleEventFlags = m_dataPoints.value("EvtVend").toUInt32();
-
-    if (m_dataPoints.value("Ctl").isValid())
-        m_control = m_dataPoints.value("Ctl").toUInt16();
-
-    if (m_dataPoints.value("CtlVend").isValid())
-        m_vendorControl = m_dataPoints.value("CtlVend").toUInt32();
-
-    if (m_dataPoints.value("CtlVal").isValid())
-        m_controlValue = m_dataPoints.value("CtlVal").toInt32();
-
-    if (m_dataPoints.value("Tms").isValid())
-        m_timestamp = m_dataPoints.value("Tms").toUInt32();
-
-    if (m_dataPoints.value("OutA").isValid())
-        m_outputCurrent = m_dataPoints.value("OutA").toFloatWithSSF(m_a_SF);
-
-    if (m_dataPoints.value("OutV").isValid())
-        m_outputVoltage = m_dataPoints.value("OutV").toFloatWithSSF(m_v_SF);
-
-    if (m_dataPoints.value("OutWh").isValid())
-        m_outputEnergy = m_dataPoints.value("OutWh").toFloatWithSSF(m_wh_SF);
-
-    if (m_dataPoints.value("OutPw").isValid())
-        m_outputPower = m_dataPoints.value("OutPw").toFloatWithSSF(m_w_SF);
-
-    if (m_dataPoints.value("Tmp").isValid())
-        m_temp = m_dataPoints.value("Tmp").toInt16();
-
-    if (m_dataPoints.value("InA").isValid())
-        m_inputCurrent = m_dataPoints.value("InA").toFloatWithSSF(m_a_SF);
-
-    if (m_dataPoints.value("InV").isValid())
-        m_inputVoltage = m_dataPoints.value("InV").toFloatWithSSF(m_v_SF);
-
-    if (m_dataPoints.value("InWh").isValid())
-        m_inputEnergy = m_dataPoints.value("InWh").toFloatWithSSF(m_wh_SF);
-
-    if (m_dataPoints.value("InW").isValid())
-        m_inputPower = m_dataPoints.value("InW").toFloatWithSSF(m_w_SF);
-
-
-    qCDebug(dcSunSpecModelData()) << this;
-}
-
 void SunSpecSolarModuleModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -494,109 +438,210 @@ void SunSpecSolarModuleModel::initDataPoints()
 
 }
 
+void SunSpecSolarModuleModel::processBlockData()
+{
+    // Scale factors
+    if (m_dataPoints.value("A_SF").isValid())
+        m_a_SF = m_dataPoints.value("A_SF").toInt16();
+
+    if (m_dataPoints.value("V_SF").isValid())
+        m_v_SF = m_dataPoints.value("V_SF").toInt16();
+
+    if (m_dataPoints.value("W_SF").isValid())
+        m_w_SF = m_dataPoints.value("W_SF").toInt16();
+
+    if (m_dataPoints.value("Wh_SF").isValid())
+        m_wh_SF = m_dataPoints.value("Wh_SF").toInt16();
+
+
+    // Update properties according to the data point type
+    if (m_dataPoints.value("A_SF").isValid())
+        m_a_SF = m_dataPoints.value("A_SF").toInt16();
+
+    if (m_dataPoints.value("V_SF").isValid())
+        m_v_SF = m_dataPoints.value("V_SF").toInt16();
+
+    if (m_dataPoints.value("W_SF").isValid())
+        m_w_SF = m_dataPoints.value("W_SF").toInt16();
+
+    if (m_dataPoints.value("Wh_SF").isValid())
+        m_wh_SF = m_dataPoints.value("Wh_SF").toInt16();
+
+    if (m_dataPoints.value("Stat").isValid())
+        m_status = static_cast<Stat>(m_dataPoints.value("Stat").toUInt16());
+
+    if (m_dataPoints.value("StatVend").isValid())
+        m_vendorStatus = m_dataPoints.value("StatVend").toUInt16();
+
+    if (m_dataPoints.value("Evt").isValid())
+        m_events = static_cast<EvtFlags>(m_dataPoints.value("Evt").toUInt32());
+
+    if (m_dataPoints.value("EvtVend").isValid())
+        m_vendorModuleEventFlags = m_dataPoints.value("EvtVend").toUInt32();
+
+    if (m_dataPoints.value("Ctl").isValid())
+        m_control = m_dataPoints.value("Ctl").toUInt16();
+
+    if (m_dataPoints.value("CtlVend").isValid())
+        m_vendorControl = m_dataPoints.value("CtlVend").toUInt32();
+
+    if (m_dataPoints.value("CtlVal").isValid())
+        m_controlValue = m_dataPoints.value("CtlVal").toInt32();
+
+    if (m_dataPoints.value("Tms").isValid())
+        m_timestamp = m_dataPoints.value("Tms").toUInt32();
+
+    if (m_dataPoints.value("OutA").isValid())
+        m_outputCurrent = m_dataPoints.value("OutA").toFloatWithSSF(m_a_SF);
+
+    if (m_dataPoints.value("OutV").isValid())
+        m_outputVoltage = m_dataPoints.value("OutV").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("OutWh").isValid())
+        m_outputEnergy = m_dataPoints.value("OutWh").toFloatWithSSF(m_wh_SF);
+
+    if (m_dataPoints.value("OutPw").isValid())
+        m_outputPower = m_dataPoints.value("OutPw").toFloatWithSSF(m_w_SF);
+
+    if (m_dataPoints.value("Tmp").isValid())
+        m_temp = m_dataPoints.value("Tmp").toInt16();
+
+    if (m_dataPoints.value("InA").isValid())
+        m_inputCurrent = m_dataPoints.value("InA").toFloatWithSSF(m_a_SF);
+
+    if (m_dataPoints.value("InV").isValid())
+        m_inputVoltage = m_dataPoints.value("InV").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("InWh").isValid())
+        m_inputEnergy = m_dataPoints.value("InWh").toFloatWithSSF(m_wh_SF);
+
+    if (m_dataPoints.value("InW").isValid())
+        m_inputPower = m_dataPoints.value("InW").toFloatWithSSF(m_w_SF);
+
+
+    qCDebug(dcSunSpecModelData()) << this;
+}
+
 QDebug operator<<(QDebug debug, SunSpecSolarModuleModel *model)
 {
     debug.nospace().noquote() << "SunSpecSolarModuleModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Stat") << "-->";
     if (model->dataPoints().value("Stat").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Stat") << "--> " << model->status() << endl;
+        debug.nospace().noquote() << model->status() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Stat") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("StatVend") << "-->";
     if (model->dataPoints().value("StatVend").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StatVend") << "--> " << model->vendorStatus() << endl;
+        debug.nospace().noquote() << model->vendorStatus() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StatVend") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt") << "-->";
     if (model->dataPoints().value("Evt").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt") << "--> " << model->events() << endl;
+        debug.nospace().noquote() << model->events() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVend") << "-->";
     if (model->dataPoints().value("EvtVend").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVend") << "--> " << model->vendorModuleEventFlags() << endl;
+        debug.nospace().noquote() << model->vendorModuleEventFlags() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVend") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Ctl") << "-->";
     if (model->dataPoints().value("Ctl").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Ctl") << "--> " << model->control() << endl;
+        debug.nospace().noquote() << model->control() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Ctl") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("CtlVend") << "-->";
     if (model->dataPoints().value("CtlVend").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("CtlVend") << "--> " << model->vendorControl() << endl;
+        debug.nospace().noquote() << model->vendorControl() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("CtlVend") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("CtlVal") << "-->";
     if (model->dataPoints().value("CtlVal").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("CtlVal") << "--> " << model->controlValue() << endl;
+        debug.nospace().noquote() << model->controlValue() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("CtlVal") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Tms") << "-->";
     if (model->dataPoints().value("Tms").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Tms") << "--> " << model->timestamp() << endl;
+        debug.nospace().noquote() << model->timestamp() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Tms") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("OutA") << "-->";
     if (model->dataPoints().value("OutA").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutA") << "--> " << model->outputCurrent() << endl;
+        debug.nospace().noquote() << model->outputCurrent() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutA") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("OutV") << "-->";
     if (model->dataPoints().value("OutV").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutV") << "--> " << model->outputVoltage() << endl;
+        debug.nospace().noquote() << model->outputVoltage() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutV") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("OutWh") << "-->";
     if (model->dataPoints().value("OutWh").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutWh") << "--> " << model->outputEnergy() << endl;
+        debug.nospace().noquote() << model->outputEnergy() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutWh") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPw") << "-->";
     if (model->dataPoints().value("OutPw").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPw") << "--> " << model->outputPower() << endl;
+        debug.nospace().noquote() << model->outputPower() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPw") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Tmp") << "-->";
     if (model->dataPoints().value("Tmp").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Tmp") << "--> " << model->temp() << endl;
+        debug.nospace().noquote() << model->temp() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Tmp") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("InA") << "-->";
     if (model->dataPoints().value("InA").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("InA") << "--> " << model->inputCurrent() << endl;
+        debug.nospace().noquote() << model->inputCurrent() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("InA") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("InV") << "-->";
     if (model->dataPoints().value("InV").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("InV") << "--> " << model->inputVoltage() << endl;
+        debug.nospace().noquote() << model->inputVoltage() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("InV") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("InWh") << "-->";
     if (model->dataPoints().value("InWh").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("InWh") << "--> " << model->inputEnergy() << endl;
+        debug.nospace().noquote() << model->inputEnergy() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("InWh") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("InW") << "-->";
     if (model->dataPoints().value("InW").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("InW") << "--> " << model->inputPower() << endl;
+        debug.nospace().noquote() << model->inputPower() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("InW") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
 

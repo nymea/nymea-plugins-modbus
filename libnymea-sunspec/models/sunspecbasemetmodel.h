@@ -42,7 +42,7 @@ class SunSpecBaseMetModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    explicit SunSpecBaseMetModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);
+    explicit SunSpecBaseMetModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
     ~SunSpecBaseMetModel() override; 
 
     QString name() const override;
@@ -62,6 +62,9 @@ public:
     qint16 soilWetness() const;
 
 protected:
+    quint16 m_fixedBlockLength = 11;
+
+    void initDataPoints() override;
     void processBlockData() override;
 
 private:
@@ -77,7 +80,6 @@ private:
     qint16 m_surfaceWetness = 0;
     qint16 m_soilWetness = 0;
 
-    void initDataPoints();
 
 };
 

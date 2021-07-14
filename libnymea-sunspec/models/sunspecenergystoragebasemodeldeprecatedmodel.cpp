@@ -31,11 +31,11 @@
 #include "sunspecenergystoragebasemodeldeprecatedmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecEnergyStorageBaseModelDeprecatedModel::SunSpecEnergyStorageBaseModelDeprecatedModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 801, 1, parent)
+SunSpecEnergyStorageBaseModelDeprecatedModel::SunSpecEnergyStorageBaseModelDeprecatedModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 801, modelLength, parent)
 {
-    //Q_ASSERT_X(length == 1,  "SunSpecEnergyStorageBaseModelDeprecatedModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
-    Q_UNUSED(length)
+    m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
+
     initDataPoints();
 }
 
@@ -63,16 +63,6 @@ quint16 SunSpecEnergyStorageBaseModelDeprecatedModel::deprecatedModel() const
 {
     return m_deprecatedModel;
 }
-void SunSpecEnergyStorageBaseModelDeprecatedModel::processBlockData()
-{
-    // Update properties according to the data point type
-    if (m_dataPoints.value("DEPRECATED").isValid())
-        m_deprecatedModel = m_dataPoints.value("DEPRECATED").toUInt16();
-
-
-    qCDebug(dcSunSpecModelData()) << this;
-}
-
 void SunSpecEnergyStorageBaseModelDeprecatedModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -108,13 +98,24 @@ void SunSpecEnergyStorageBaseModelDeprecatedModel::initDataPoints()
 
 }
 
+void SunSpecEnergyStorageBaseModelDeprecatedModel::processBlockData()
+{
+    // Update properties according to the data point type
+    if (m_dataPoints.value("DEPRECATED").isValid())
+        m_deprecatedModel = m_dataPoints.value("DEPRECATED").toUInt16();
+
+
+    qCDebug(dcSunSpecModelData()) << this;
+}
+
 QDebug operator<<(QDebug debug, SunSpecEnergyStorageBaseModelDeprecatedModel *model)
 {
     debug.nospace().noquote() << "SunSpecEnergyStorageBaseModelDeprecatedModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("DEPRECATED") << "-->";
     if (model->dataPoints().value("DEPRECATED").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("DEPRECATED") << "--> " << model->deprecatedModel() << endl;
+        debug.nospace().noquote() << model->deprecatedModel() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("DEPRECATED") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
 

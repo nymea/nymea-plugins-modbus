@@ -110,7 +110,7 @@ public:
     Q_DECLARE_FLAGS(RtstFlags, Rtst)
     Q_FLAG(Rtst)
 
-    explicit SunSpecStatusModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);
+    explicit SunSpecStatusModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
     ~SunSpecStatusModel() override; 
 
     QString name() const override;
@@ -127,15 +127,21 @@ public:
     quint64 actVArhQ3() const;
     quint64 actVArhQ4() const;
     float vArAval() const;
+    qint16 vArAvalSf() const;
     float wAval() const;
+    qint16 wAvalSf() const;
     StsetlimmskFlags stSetLimMsk() const;
     StactctlFlags stActCtl() const;
     QString tmSrc() const;
     quint32 tms() const;
     RtstFlags rtSt() const;
     float ris() const;
+    qint16 risSf() const;
 
 protected:
+    quint16 m_fixedBlockLength = 44;
+
+    void initDataPoints() override;
     void processBlockData() override;
 
 private:
@@ -160,7 +166,6 @@ private:
     float m_ris = 0;
     qint16 m_risSf = 0;
 
-    void initDataPoints();
 
 };
 

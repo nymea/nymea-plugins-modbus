@@ -31,11 +31,132 @@
 #include "sunspecstringcombinercurrentmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecStringCombinerCurrentModel::SunSpecStringCombinerCurrentModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 403, 16, parent)
+SunSpecStringCombinerCurrentModelRepeatingBlock::SunSpecStringCombinerCurrentModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecStringCombinerCurrentModel *parent) :
+    SunSpecModelRepeatingBlock(blockIndex, blockSize, modbusStartRegister, parent)
 {
-    //Q_ASSERT_X(length == 16,  "SunSpecStringCombinerCurrentModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
-    Q_UNUSED(length)
+    initDataPoints();
+}
+
+QString SunSpecStringCombinerCurrentModelRepeatingBlock::name() const
+{
+    return "string";
+}
+
+SunSpecStringCombinerCurrentModel *SunSpecStringCombinerCurrentModelRepeatingBlock::parentModel() const
+{
+    return m_parentModel;
+}
+
+quint16 SunSpecStringCombinerCurrentModelRepeatingBlock::id() const
+{
+    return m_id;
+}
+SunSpecStringCombinerCurrentModelRepeatingBlock::InevtFlags SunSpecStringCombinerCurrentModelRepeatingBlock::inputEvent() const
+{
+    return m_inputEvent;
+}
+quint32 SunSpecStringCombinerCurrentModelRepeatingBlock::inputEventVendor() const
+{
+    return m_inputEventVendor;
+}
+float SunSpecStringCombinerCurrentModelRepeatingBlock::amps() const
+{
+    return m_amps;
+}
+quint32 SunSpecStringCombinerCurrentModelRepeatingBlock::ampHours() const
+{
+    return m_ampHours;
+}
+
+void SunSpecStringCombinerCurrentModelRepeatingBlock::initDataPoints()
+{
+    SunSpecDataPoint idDataPoint;
+    idDataPoint.setName("InID");
+    idDataPoint.setLabel("ID");
+    idDataPoint.setDescription("Uniquely identifies this input set");
+    idDataPoint.setMandatory(true);
+    idDataPoint.setSize(1);
+    idDataPoint.setAddressOffset(0);
+    idDataPoint.setSunSpecDataType("uint16");
+    m_dataPoints.insert(idDataPoint.name(), idDataPoint);
+
+    SunSpecDataPoint inputEventDataPoint;
+    inputEventDataPoint.setName("InEvt");
+    inputEventDataPoint.setLabel("Input Event");
+    inputEventDataPoint.setDescription("String Input Event Flags");
+    inputEventDataPoint.setMandatory(true);
+    inputEventDataPoint.setSize(2);
+    inputEventDataPoint.setAddressOffset(1);
+    inputEventDataPoint.setSunSpecDataType("bitfield32");
+    m_dataPoints.insert(inputEventDataPoint.name(), inputEventDataPoint);
+
+    SunSpecDataPoint inputEventVendorDataPoint;
+    inputEventVendorDataPoint.setName("InEvtVnd");
+    inputEventVendorDataPoint.setLabel("Input Event Vendor");
+    inputEventVendorDataPoint.setDescription("String Input Vendor Event Flags");
+    inputEventVendorDataPoint.setSize(2);
+    inputEventVendorDataPoint.setAddressOffset(3);
+    inputEventVendorDataPoint.setBlockOffset(1);
+    inputEventVendorDataPoint.setSunSpecDataType("bitfield32");
+    m_dataPoints.insert(inputEventVendorDataPoint.name(), inputEventVendorDataPoint);
+
+    SunSpecDataPoint ampsDataPoint;
+    ampsDataPoint.setName("InDCA");
+    ampsDataPoint.setLabel("Amps");
+    ampsDataPoint.setDescription("String Input Current");
+    ampsDataPoint.setUnits("A");
+    ampsDataPoint.setMandatory(true);
+    ampsDataPoint.setSize(1);
+    ampsDataPoint.setAddressOffset(5);
+    ampsDataPoint.setBlockOffset(3);
+    ampsDataPoint.setScaleFactorName("InDCA_SF");
+    ampsDataPoint.setSunSpecDataType("int16");
+    m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
+
+    SunSpecDataPoint ampHoursDataPoint;
+    ampHoursDataPoint.setName("InDCAhr");
+    ampHoursDataPoint.setLabel("Amp-hours");
+    ampHoursDataPoint.setDescription("String Input Amp-Hours");
+    ampHoursDataPoint.setUnits("Ah");
+    ampHoursDataPoint.setSize(2);
+    ampHoursDataPoint.setAddressOffset(6);
+    ampHoursDataPoint.setBlockOffset(4);
+    ampHoursDataPoint.setScaleFactorName("InDCAhr_SF");
+    ampHoursDataPoint.setSunSpecDataType("acc32");
+    m_dataPoints.insert(ampHoursDataPoint.name(), ampHoursDataPoint);
+
+}
+
+void SunSpecStringCombinerCurrentModelRepeatingBlock::processBlockData(const QVector<quint16> blockData)
+{
+    m_blockData = blockData;
+
+    // Update properties according to the data point type
+    if (m_dataPoints.value("InID").isValid())
+        m_id = m_dataPoints.value("InID").toUInt16();
+
+    if (m_dataPoints.value("InEvt").isValid())
+        m_inputEvent = static_cast<InevtFlags>(m_dataPoints.value("InEvt").toUInt32());
+
+    if (m_dataPoints.value("InEvtVnd").isValid())
+        m_inputEventVendor = m_dataPoints.value("InEvtVnd").toUInt32();
+
+    if (m_dataPoints.value("InDCA").isValid())
+        m_amps = m_dataPoints.value("InDCA").toFloatWithSSF(m_parentModel->inDCA_SF());
+
+    if (m_dataPoints.value("InDCAhr").isValid())
+        m_ampHours = m_dataPoints.value("InDCAhr").toFloatWithSSF(m_parentModel->inDCAhr_SF());
+
+
+    qCDebug(dcSunSpecModelData()) << this;
+}
+
+
+SunSpecStringCombinerCurrentModel::SunSpecStringCombinerCurrentModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 403, modelLength, parent)
+{
+    m_modelBlockType = SunSpecModel::ModelBlockTypeFixedAndRepeating;
+
     initDataPoints();
 }
 
@@ -59,6 +180,18 @@ QString SunSpecStringCombinerCurrentModel::label() const
     return "String Combiner (Current)";
 }
 
+qint16 SunSpecStringCombinerCurrentModel::dCA_SF() const
+{
+    return m_dCA_SF;
+}
+qint16 SunSpecStringCombinerCurrentModel::dCAhr_SF() const
+{
+    return m_dCAhr_SF;
+}
+qint16 SunSpecStringCombinerCurrentModel::dCV_SF() const
+{
+    return m_dCV_SF;
+}
 float SunSpecStringCombinerCurrentModel::rating() const
 {
     return m_rating;
@@ -91,54 +224,14 @@ qint16 SunSpecStringCombinerCurrentModel::temp() const
 {
     return m_temp;
 }
-void SunSpecStringCombinerCurrentModel::processBlockData()
+qint16 SunSpecStringCombinerCurrentModel::inDCA_SF() const
 {
-    // Scale factors
-    if (m_dataPoints.value("DCA_SF").isValid())
-        m_dCA_SF = m_dataPoints.value("DCA_SF").toInt16();
-
-    if (m_dataPoints.value("DCAhr_SF").isValid())
-        m_dCAhr_SF = m_dataPoints.value("DCAhr_SF").toInt16();
-
-    if (m_dataPoints.value("DCV_SF").isValid())
-        m_dCV_SF = m_dataPoints.value("DCV_SF").toInt16();
-
-    if (m_dataPoints.value("InDCA_SF").isValid())
-        m_inDCA_SF = m_dataPoints.value("InDCA_SF").toInt16();
-
-    if (m_dataPoints.value("InDCAhr_SF").isValid())
-        m_inDCAhr_SF = m_dataPoints.value("InDCAhr_SF").toInt16();
-
-
-    // Update properties according to the data point type
-    if (m_dataPoints.value("DCAMax").isValid())
-        m_rating = m_dataPoints.value("DCAMax").toFloatWithSSF(m_dCA_SF);
-
-    if (m_dataPoints.value("N").isValid())
-        m_n = m_dataPoints.value("N").toUInt16();
-
-    if (m_dataPoints.value("Evt").isValid())
-        m_eventFlags = static_cast<EvtFlags>(m_dataPoints.value("Evt").toUInt32());
-
-    if (m_dataPoints.value("EvtVnd").isValid())
-        m_vendorEvent = m_dataPoints.value("EvtVnd").toUInt32();
-
-    if (m_dataPoints.value("DCA").isValid())
-        m_amps = m_dataPoints.value("DCA").toFloatWithSSF(m_dCA_SF);
-
-    if (m_dataPoints.value("DCAhr").isValid())
-        m_ampHours = m_dataPoints.value("DCAhr").toFloatWithSSF(m_dCAhr_SF);
-
-    if (m_dataPoints.value("DCV").isValid())
-        m_voltage = m_dataPoints.value("DCV").toFloatWithSSF(m_dCV_SF);
-
-    if (m_dataPoints.value("Tmp").isValid())
-        m_temp = m_dataPoints.value("Tmp").toInt16();
-
-
-    qCDebug(dcSunSpecModelData()) << this;
+    return m_inDCA_SF;
 }
-
+qint16 SunSpecStringCombinerCurrentModel::inDCAhr_SF() const
+{
+    return m_inDCAhr_SF;
+}
 void SunSpecStringCombinerCurrentModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -302,55 +395,126 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
 
 }
 
+void SunSpecStringCombinerCurrentModel::processBlockData()
+{
+    // Scale factors
+    if (m_dataPoints.value("DCA_SF").isValid())
+        m_dCA_SF = m_dataPoints.value("DCA_SF").toInt16();
+
+    if (m_dataPoints.value("DCAhr_SF").isValid())
+        m_dCAhr_SF = m_dataPoints.value("DCAhr_SF").toInt16();
+
+    if (m_dataPoints.value("DCV_SF").isValid())
+        m_dCV_SF = m_dataPoints.value("DCV_SF").toInt16();
+
+    if (m_dataPoints.value("InDCA_SF").isValid())
+        m_inDCA_SF = m_dataPoints.value("InDCA_SF").toInt16();
+
+    if (m_dataPoints.value("InDCAhr_SF").isValid())
+        m_inDCAhr_SF = m_dataPoints.value("InDCAhr_SF").toInt16();
+
+
+    // Update properties according to the data point type
+    if (m_dataPoints.value("DCA_SF").isValid())
+        m_dCA_SF = m_dataPoints.value("DCA_SF").toInt16();
+
+    if (m_dataPoints.value("DCAhr_SF").isValid())
+        m_dCAhr_SF = m_dataPoints.value("DCAhr_SF").toInt16();
+
+    if (m_dataPoints.value("DCV_SF").isValid())
+        m_dCV_SF = m_dataPoints.value("DCV_SF").toInt16();
+
+    if (m_dataPoints.value("DCAMax").isValid())
+        m_rating = m_dataPoints.value("DCAMax").toFloatWithSSF(m_dCA_SF);
+
+    if (m_dataPoints.value("N").isValid())
+        m_n = m_dataPoints.value("N").toUInt16();
+
+    if (m_dataPoints.value("Evt").isValid())
+        m_eventFlags = static_cast<EvtFlags>(m_dataPoints.value("Evt").toUInt32());
+
+    if (m_dataPoints.value("EvtVnd").isValid())
+        m_vendorEvent = m_dataPoints.value("EvtVnd").toUInt32();
+
+    if (m_dataPoints.value("DCA").isValid())
+        m_amps = m_dataPoints.value("DCA").toFloatWithSSF(m_dCA_SF);
+
+    if (m_dataPoints.value("DCAhr").isValid())
+        m_ampHours = m_dataPoints.value("DCAhr").toFloatWithSSF(m_dCAhr_SF);
+
+    if (m_dataPoints.value("DCV").isValid())
+        m_voltage = m_dataPoints.value("DCV").toFloatWithSSF(m_dCV_SF);
+
+    if (m_dataPoints.value("Tmp").isValid())
+        m_temp = m_dataPoints.value("Tmp").toInt16();
+
+    if (m_dataPoints.value("InDCA_SF").isValid())
+        m_inDCA_SF = m_dataPoints.value("InDCA_SF").toInt16();
+
+    if (m_dataPoints.value("InDCAhr_SF").isValid())
+        m_inDCAhr_SF = m_dataPoints.value("InDCAhr_SF").toInt16();
+
+
+    qCDebug(dcSunSpecModelData()) << this;
+}
+
 QDebug operator<<(QDebug debug, SunSpecStringCombinerCurrentModel *model)
 {
     debug.nospace().noquote() << "SunSpecStringCombinerCurrentModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("DCAMax") << "-->";
     if (model->dataPoints().value("DCAMax").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("DCAMax") << "--> " << model->rating() << endl;
+        debug.nospace().noquote() << model->rating() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("DCAMax") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("N") << "-->";
     if (model->dataPoints().value("N").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("N") << "--> " << model->n() << endl;
+        debug.nospace().noquote() << model->n() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("N") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt") << "-->";
     if (model->dataPoints().value("Evt").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt") << "--> " << model->eventFlags() << endl;
+        debug.nospace().noquote() << model->eventFlags() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd") << "-->";
     if (model->dataPoints().value("EvtVnd").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd") << "--> " << model->vendorEvent() << endl;
+        debug.nospace().noquote() << model->vendorEvent() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("DCA") << "-->";
     if (model->dataPoints().value("DCA").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("DCA") << "--> " << model->amps() << endl;
+        debug.nospace().noquote() << model->amps() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("DCA") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("DCAhr") << "-->";
     if (model->dataPoints().value("DCAhr").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("DCAhr") << "--> " << model->ampHours() << endl;
+        debug.nospace().noquote() << model->ampHours() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("DCAhr") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("DCV") << "-->";
     if (model->dataPoints().value("DCV").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("DCV") << "--> " << model->voltage() << endl;
+        debug.nospace().noquote() << model->voltage() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("DCV") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Tmp") << "-->";
     if (model->dataPoints().value("Tmp").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Tmp") << "--> " << model->temp() << endl;
+        debug.nospace().noquote() << model->temp() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Tmp") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
 

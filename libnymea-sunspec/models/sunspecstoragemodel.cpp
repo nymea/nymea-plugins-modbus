@@ -31,11 +31,11 @@
 #include "sunspecstoragemodel.h"
 #include "sunspecconnection.h"
 
-SunSpecStorageModel::SunSpecStorageModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 124, 24, parent)
+SunSpecStorageModel::SunSpecStorageModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 124, modelLength, parent)
 {
-    //Q_ASSERT_X(length == 24,  "SunSpecStorageModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
-    Q_UNUSED(length)
+    m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
+
     initDataPoints();
 }
 
@@ -291,87 +291,38 @@ QModbusReply *SunSpecStorageModel::setChaGriSet(Chagriset chaGriSet)
 
     return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
-void SunSpecStorageModel::processBlockData()
+qint16 SunSpecStorageModel::wChaMaxSf() const
 {
-    // Scale factors
-    if (m_dataPoints.value("WChaMax_SF").isValid())
-        m_wChaMaxSf = m_dataPoints.value("WChaMax_SF").toInt16();
-
-    if (m_dataPoints.value("WChaDisChaGra_SF").isValid())
-        m_wChaDisChaGraSf = m_dataPoints.value("WChaDisChaGra_SF").toInt16();
-
-    if (m_dataPoints.value("VAChaMax_SF").isValid())
-        m_vaChaMaxSf = m_dataPoints.value("VAChaMax_SF").toInt16();
-
-    if (m_dataPoints.value("MinRsvPct_SF").isValid())
-        m_minRsvPctSf = m_dataPoints.value("MinRsvPct_SF").toInt16();
-
-    if (m_dataPoints.value("ChaState_SF").isValid())
-        m_chaStateSf = m_dataPoints.value("ChaState_SF").toInt16();
-
-    if (m_dataPoints.value("StorAval_SF").isValid())
-        m_storAvalSf = m_dataPoints.value("StorAval_SF").toInt16();
-
-    if (m_dataPoints.value("InBatV_SF").isValid())
-        m_inBatVSf = m_dataPoints.value("InBatV_SF").toInt16();
-
-    if (m_dataPoints.value("InOutWRte_SF").isValid())
-        m_inOutWRteSf = m_dataPoints.value("InOutWRte_SF").toInt16();
-
-
-    // Update properties according to the data point type
-    if (m_dataPoints.value("WChaMax").isValid())
-        m_wChaMax = m_dataPoints.value("WChaMax").toFloatWithSSF(m_wChaMaxSf);
-
-    if (m_dataPoints.value("WChaGra").isValid())
-        m_wChaGra = m_dataPoints.value("WChaGra").toFloatWithSSF(m_wChaDisChaGraSf);
-
-    if (m_dataPoints.value("WDisChaGra").isValid())
-        m_wDisChaGra = m_dataPoints.value("WDisChaGra").toFloatWithSSF(m_wChaDisChaGraSf);
-
-    if (m_dataPoints.value("StorCtl_Mod").isValid())
-        m_storCtlMod = static_cast<Storctl_modFlags>(m_dataPoints.value("StorCtl_Mod").toUInt16());
-
-    if (m_dataPoints.value("VAChaMax").isValid())
-        m_vaChaMax = m_dataPoints.value("VAChaMax").toFloatWithSSF(m_vaChaMaxSf);
-
-    if (m_dataPoints.value("MinRsvPct").isValid())
-        m_minRsvPct = m_dataPoints.value("MinRsvPct").toFloatWithSSF(m_minRsvPctSf);
-
-    if (m_dataPoints.value("ChaState").isValid())
-        m_chaState = m_dataPoints.value("ChaState").toFloatWithSSF(m_chaStateSf);
-
-    if (m_dataPoints.value("StorAval").isValid())
-        m_storAval = m_dataPoints.value("StorAval").toFloatWithSSF(m_storAvalSf);
-
-    if (m_dataPoints.value("InBatV").isValid())
-        m_inBatV = m_dataPoints.value("InBatV").toFloatWithSSF(m_inBatVSf);
-
-    if (m_dataPoints.value("ChaSt").isValid())
-        m_chaSt = static_cast<Chast>(m_dataPoints.value("ChaSt").toUInt16());
-
-    if (m_dataPoints.value("OutWRte").isValid())
-        m_outWRte = m_dataPoints.value("OutWRte").toFloatWithSSF(m_inOutWRteSf);
-
-    if (m_dataPoints.value("InWRte").isValid())
-        m_inWRte = m_dataPoints.value("InWRte").toFloatWithSSF(m_inOutWRteSf);
-
-    if (m_dataPoints.value("InOutWRte_WinTms").isValid())
-        m_inOutWRteWinTms = m_dataPoints.value("InOutWRte_WinTms").toUInt16();
-
-    if (m_dataPoints.value("InOutWRte_RvrtTms").isValid())
-        m_inOutWRteRvrtTms = m_dataPoints.value("InOutWRte_RvrtTms").toUInt16();
-
-    if (m_dataPoints.value("InOutWRte_RmpTms").isValid())
-        m_inOutWRteRmpTms = m_dataPoints.value("InOutWRte_RmpTms").toUInt16();
-
-    if (m_dataPoints.value("ChaGriSet").isValid())
-        m_chaGriSet = static_cast<Chagriset>(m_dataPoints.value("ChaGriSet").toUInt16());
-
-
-    qCDebug(dcSunSpecModelData()) << this;
+    return m_wChaMaxSf;
 }
-
+qint16 SunSpecStorageModel::wChaDisChaGraSf() const
+{
+    return m_wChaDisChaGraSf;
+}
+qint16 SunSpecStorageModel::vaChaMaxSf() const
+{
+    return m_vaChaMaxSf;
+}
+qint16 SunSpecStorageModel::minRsvPctSf() const
+{
+    return m_minRsvPctSf;
+}
+qint16 SunSpecStorageModel::chaStateSf() const
+{
+    return m_chaStateSf;
+}
+qint16 SunSpecStorageModel::storAvalSf() const
+{
+    return m_storAvalSf;
+}
+qint16 SunSpecStorageModel::inBatVSf() const
+{
+    return m_inBatVSf;
+}
+qint16 SunSpecStorageModel::inOutWRteSf() const
+{
+    return m_inOutWRteSf;
+}
 void SunSpecStorageModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -675,103 +626,224 @@ void SunSpecStorageModel::initDataPoints()
 
 }
 
+void SunSpecStorageModel::processBlockData()
+{
+    // Scale factors
+    if (m_dataPoints.value("WChaMax_SF").isValid())
+        m_wChaMaxSf = m_dataPoints.value("WChaMax_SF").toInt16();
+
+    if (m_dataPoints.value("WChaDisChaGra_SF").isValid())
+        m_wChaDisChaGraSf = m_dataPoints.value("WChaDisChaGra_SF").toInt16();
+
+    if (m_dataPoints.value("VAChaMax_SF").isValid())
+        m_vaChaMaxSf = m_dataPoints.value("VAChaMax_SF").toInt16();
+
+    if (m_dataPoints.value("MinRsvPct_SF").isValid())
+        m_minRsvPctSf = m_dataPoints.value("MinRsvPct_SF").toInt16();
+
+    if (m_dataPoints.value("ChaState_SF").isValid())
+        m_chaStateSf = m_dataPoints.value("ChaState_SF").toInt16();
+
+    if (m_dataPoints.value("StorAval_SF").isValid())
+        m_storAvalSf = m_dataPoints.value("StorAval_SF").toInt16();
+
+    if (m_dataPoints.value("InBatV_SF").isValid())
+        m_inBatVSf = m_dataPoints.value("InBatV_SF").toInt16();
+
+    if (m_dataPoints.value("InOutWRte_SF").isValid())
+        m_inOutWRteSf = m_dataPoints.value("InOutWRte_SF").toInt16();
+
+
+    // Update properties according to the data point type
+    if (m_dataPoints.value("WChaMax").isValid())
+        m_wChaMax = m_dataPoints.value("WChaMax").toFloatWithSSF(m_wChaMaxSf);
+
+    if (m_dataPoints.value("WChaGra").isValid())
+        m_wChaGra = m_dataPoints.value("WChaGra").toFloatWithSSF(m_wChaDisChaGraSf);
+
+    if (m_dataPoints.value("WDisChaGra").isValid())
+        m_wDisChaGra = m_dataPoints.value("WDisChaGra").toFloatWithSSF(m_wChaDisChaGraSf);
+
+    if (m_dataPoints.value("StorCtl_Mod").isValid())
+        m_storCtlMod = static_cast<Storctl_modFlags>(m_dataPoints.value("StorCtl_Mod").toUInt16());
+
+    if (m_dataPoints.value("VAChaMax").isValid())
+        m_vaChaMax = m_dataPoints.value("VAChaMax").toFloatWithSSF(m_vaChaMaxSf);
+
+    if (m_dataPoints.value("MinRsvPct").isValid())
+        m_minRsvPct = m_dataPoints.value("MinRsvPct").toFloatWithSSF(m_minRsvPctSf);
+
+    if (m_dataPoints.value("ChaState").isValid())
+        m_chaState = m_dataPoints.value("ChaState").toFloatWithSSF(m_chaStateSf);
+
+    if (m_dataPoints.value("StorAval").isValid())
+        m_storAval = m_dataPoints.value("StorAval").toFloatWithSSF(m_storAvalSf);
+
+    if (m_dataPoints.value("InBatV").isValid())
+        m_inBatV = m_dataPoints.value("InBatV").toFloatWithSSF(m_inBatVSf);
+
+    if (m_dataPoints.value("ChaSt").isValid())
+        m_chaSt = static_cast<Chast>(m_dataPoints.value("ChaSt").toUInt16());
+
+    if (m_dataPoints.value("OutWRte").isValid())
+        m_outWRte = m_dataPoints.value("OutWRte").toFloatWithSSF(m_inOutWRteSf);
+
+    if (m_dataPoints.value("InWRte").isValid())
+        m_inWRte = m_dataPoints.value("InWRte").toFloatWithSSF(m_inOutWRteSf);
+
+    if (m_dataPoints.value("InOutWRte_WinTms").isValid())
+        m_inOutWRteWinTms = m_dataPoints.value("InOutWRte_WinTms").toUInt16();
+
+    if (m_dataPoints.value("InOutWRte_RvrtTms").isValid())
+        m_inOutWRteRvrtTms = m_dataPoints.value("InOutWRte_RvrtTms").toUInt16();
+
+    if (m_dataPoints.value("InOutWRte_RmpTms").isValid())
+        m_inOutWRteRmpTms = m_dataPoints.value("InOutWRte_RmpTms").toUInt16();
+
+    if (m_dataPoints.value("ChaGriSet").isValid())
+        m_chaGriSet = static_cast<Chagriset>(m_dataPoints.value("ChaGriSet").toUInt16());
+
+    if (m_dataPoints.value("WChaMax_SF").isValid())
+        m_wChaMaxSf = m_dataPoints.value("WChaMax_SF").toInt16();
+
+    if (m_dataPoints.value("WChaDisChaGra_SF").isValid())
+        m_wChaDisChaGraSf = m_dataPoints.value("WChaDisChaGra_SF").toInt16();
+
+    if (m_dataPoints.value("VAChaMax_SF").isValid())
+        m_vaChaMaxSf = m_dataPoints.value("VAChaMax_SF").toInt16();
+
+    if (m_dataPoints.value("MinRsvPct_SF").isValid())
+        m_minRsvPctSf = m_dataPoints.value("MinRsvPct_SF").toInt16();
+
+    if (m_dataPoints.value("ChaState_SF").isValid())
+        m_chaStateSf = m_dataPoints.value("ChaState_SF").toInt16();
+
+    if (m_dataPoints.value("StorAval_SF").isValid())
+        m_storAvalSf = m_dataPoints.value("StorAval_SF").toInt16();
+
+    if (m_dataPoints.value("InBatV_SF").isValid())
+        m_inBatVSf = m_dataPoints.value("InBatV_SF").toInt16();
+
+    if (m_dataPoints.value("InOutWRte_SF").isValid())
+        m_inOutWRteSf = m_dataPoints.value("InOutWRte_SF").toInt16();
+
+
+    qCDebug(dcSunSpecModelData()) << this;
+}
+
 QDebug operator<<(QDebug debug, SunSpecStorageModel *model)
 {
     debug.nospace().noquote() << "SunSpecStorageModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("WChaMax") << "-->";
     if (model->dataPoints().value("WChaMax").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WChaMax") << "--> " << model->wChaMax() << endl;
+        debug.nospace().noquote() << model->wChaMax() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WChaMax") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("WChaGra") << "-->";
     if (model->dataPoints().value("WChaGra").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WChaGra") << "--> " << model->wChaGra() << endl;
+        debug.nospace().noquote() << model->wChaGra() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WChaGra") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("WDisChaGra") << "-->";
     if (model->dataPoints().value("WDisChaGra").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WDisChaGra") << "--> " << model->wDisChaGra() << endl;
+        debug.nospace().noquote() << model->wDisChaGra() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WDisChaGra") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("StorCtl_Mod") << "-->";
     if (model->dataPoints().value("StorCtl_Mod").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StorCtl_Mod") << "--> " << model->storCtlMod() << endl;
+        debug.nospace().noquote() << model->storCtlMod() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StorCtl_Mod") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VAChaMax") << "-->";
     if (model->dataPoints().value("VAChaMax").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VAChaMax") << "--> " << model->vaChaMax() << endl;
+        debug.nospace().noquote() << model->vaChaMax() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VAChaMax") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("MinRsvPct") << "-->";
     if (model->dataPoints().value("MinRsvPct").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("MinRsvPct") << "--> " << model->minRsvPct() << endl;
+        debug.nospace().noquote() << model->minRsvPct() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("MinRsvPct") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ChaState") << "-->";
     if (model->dataPoints().value("ChaState").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ChaState") << "--> " << model->chaState() << endl;
+        debug.nospace().noquote() << model->chaState() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ChaState") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("StorAval") << "-->";
     if (model->dataPoints().value("StorAval").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StorAval") << "--> " << model->storAval() << endl;
+        debug.nospace().noquote() << model->storAval() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StorAval") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("InBatV") << "-->";
     if (model->dataPoints().value("InBatV").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("InBatV") << "--> " << model->inBatV() << endl;
+        debug.nospace().noquote() << model->inBatV() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("InBatV") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ChaSt") << "-->";
     if (model->dataPoints().value("ChaSt").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ChaSt") << "--> " << model->chaSt() << endl;
+        debug.nospace().noquote() << model->chaSt() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ChaSt") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("OutWRte") << "-->";
     if (model->dataPoints().value("OutWRte").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutWRte") << "--> " << model->outWRte() << endl;
+        debug.nospace().noquote() << model->outWRte() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutWRte") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("InWRte") << "-->";
     if (model->dataPoints().value("InWRte").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("InWRte") << "--> " << model->inWRte() << endl;
+        debug.nospace().noquote() << model->inWRte() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("InWRte") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("InOutWRte_WinTms") << "-->";
     if (model->dataPoints().value("InOutWRte_WinTms").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("InOutWRte_WinTms") << "--> " << model->inOutWRteWinTms() << endl;
+        debug.nospace().noquote() << model->inOutWRteWinTms() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("InOutWRte_WinTms") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("InOutWRte_RvrtTms") << "-->";
     if (model->dataPoints().value("InOutWRte_RvrtTms").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("InOutWRte_RvrtTms") << "--> " << model->inOutWRteRvrtTms() << endl;
+        debug.nospace().noquote() << model->inOutWRteRvrtTms() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("InOutWRte_RvrtTms") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("InOutWRte_RmpTms") << "-->";
     if (model->dataPoints().value("InOutWRte_RmpTms").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("InOutWRte_RmpTms") << "--> " << model->inOutWRteRmpTms() << endl;
+        debug.nospace().noquote() << model->inOutWRteRmpTms() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("InOutWRte_RmpTms") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ChaGriSet") << "-->";
     if (model->dataPoints().value("ChaGriSet").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ChaGriSet") << "--> " << model->chaGriSet() << endl;
+        debug.nospace().noquote() << model->chaGriSet() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ChaGriSet") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
 

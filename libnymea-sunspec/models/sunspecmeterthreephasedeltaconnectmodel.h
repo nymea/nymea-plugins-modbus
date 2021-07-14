@@ -76,7 +76,7 @@ public:
     Q_DECLARE_FLAGS(EvtFlags, Evt)
     Q_FLAG(Evt)
 
-    explicit SunSpecMeterThreePhaseDeltaConnectModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);
+    explicit SunSpecMeterThreePhaseDeltaConnectModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
     ~SunSpecMeterThreePhaseDeltaConnectModel() override; 
 
     QString name() const override;
@@ -87,6 +87,7 @@ public:
     float ampsPhaseA() const;
     float ampsPhaseB() const;
     float ampsPhaseC() const;
+    qint16 a_SF() const;
     float voltageLn() const;
     float phaseVoltageAn() const;
     float phaseVoltageBn() const;
@@ -95,23 +96,29 @@ public:
     float phaseVoltageAb() const;
     float phaseVoltageBc() const;
     float phaseVoltageCa() const;
+    qint16 v_SF() const;
     float hz() const;
+    qint16 hz_SF() const;
     float watts() const;
     float wattsPhaseA() const;
     float wattsPhaseB() const;
     float wattsPhaseC() const;
+    qint16 w_SF() const;
     float va() const;
     float vaPhaseA() const;
     float vaPhaseB() const;
     float vaPhaseC() const;
+    qint16 vA_SF() const;
     float var() const;
     float varPhaseA() const;
     float varPhaseB() const;
     float varPhaseC() const;
+    qint16 vAR_SF() const;
     float pf() const;
     float pfPhaseA() const;
     float pfPhaseB() const;
     float pfPhaseC() const;
+    qint16 pF_SF() const;
     quint32 totalWattHoursExported() const;
     quint32 totalWattHoursExportedPhaseA() const;
     quint32 totalWattHoursExportedPhaseB() const;
@@ -120,6 +127,7 @@ public:
     quint32 totalWattHoursImportedPhaseA() const;
     quint32 totalWattHoursImportedPhaseB() const;
     quint32 totalWattHoursImportedPhaseC() const;
+    qint16 totWh_SF() const;
     quint32 totalVaHoursExported() const;
     quint32 totalVaHoursExportedPhaseA() const;
     quint32 totalVaHoursExportedPhaseB() const;
@@ -128,6 +136,7 @@ public:
     quint32 totalVaHoursImportedPhaseA() const;
     quint32 totalVaHoursImportedPhaseB() const;
     quint32 totalVaHoursImportedPhaseC() const;
+    qint16 totVAh_SF() const;
     quint32 totalVarHoursImportedQ1() const;
     quint32 totalVArHoursImportedQ1PhaseA() const;
     quint32 totalVArHoursImportedQ1PhaseB() const;
@@ -144,9 +153,13 @@ public:
     quint32 totalVArHoursExportedQ4ImportedPhaseA() const;
     quint32 totalVArHoursExportedQ4ImportedPhaseB() const;
     quint32 totalVArHoursExportedQ4ImportedPhaseC() const;
+    qint16 totVArh_SF() const;
     EvtFlags events() const;
 
 protected:
+    quint16 m_fixedBlockLength = 105;
+
+    void initDataPoints() override;
     void processBlockData() override;
 
 private:
@@ -223,7 +236,6 @@ private:
     qint16 m_totVArh_SF = 0;
     EvtFlags m_events;
 
-    void initDataPoints();
 
 };
 

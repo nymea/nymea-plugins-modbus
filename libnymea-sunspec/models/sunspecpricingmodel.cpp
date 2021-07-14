@@ -31,11 +31,11 @@
 #include "sunspecpricingmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecPricingModel::SunSpecPricingModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 125, 8, parent)
+SunSpecPricingModel::SunSpecPricingModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 125, modelLength, parent)
 {
-    //Q_ASSERT_X(length == 8,  "SunSpecPricingModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
-    Q_UNUSED(length)
+    m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
+
     initDataPoints();
 }
 
@@ -167,43 +167,14 @@ QModbusReply *SunSpecPricingModel::setRmpTms(quint16 rmpTms)
 
     return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
+qint16 SunSpecPricingModel::sigSf() const
+{
+    return m_sigSf;
+}
 quint16 SunSpecPricingModel::pad() const
 {
     return m_pad;
 }
-void SunSpecPricingModel::processBlockData()
-{
-    // Scale factors
-    if (m_dataPoints.value("Sig_SF").isValid())
-        m_sigSf = m_dataPoints.value("Sig_SF").toInt16();
-
-
-    // Update properties according to the data point type
-    if (m_dataPoints.value("ModEna").isValid())
-        m_modEna = static_cast<ModenaFlags>(m_dataPoints.value("ModEna").toUInt16());
-
-    if (m_dataPoints.value("SigType").isValid())
-        m_sigType = static_cast<Sigtype>(m_dataPoints.value("SigType").toUInt16());
-
-    if (m_dataPoints.value("Sig").isValid())
-        m_sig = m_dataPoints.value("Sig").toFloatWithSSF(m_sigSf);
-
-    if (m_dataPoints.value("WinTms").isValid())
-        m_winTms = m_dataPoints.value("WinTms").toUInt16();
-
-    if (m_dataPoints.value("RvtTms").isValid())
-        m_rvtTms = m_dataPoints.value("RvtTms").toUInt16();
-
-    if (m_dataPoints.value("RmpTms").isValid())
-        m_rmpTms = m_dataPoints.value("RmpTms").toUInt16();
-
-    if (m_dataPoints.value("Pad").isValid())
-        m_pad = m_dataPoints.value("Pad").toUInt16();
-
-
-    qCDebug(dcSunSpecModelData()) << this;
-}
-
 void SunSpecPricingModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -319,49 +290,92 @@ void SunSpecPricingModel::initDataPoints()
 
 }
 
+void SunSpecPricingModel::processBlockData()
+{
+    // Scale factors
+    if (m_dataPoints.value("Sig_SF").isValid())
+        m_sigSf = m_dataPoints.value("Sig_SF").toInt16();
+
+
+    // Update properties according to the data point type
+    if (m_dataPoints.value("ModEna").isValid())
+        m_modEna = static_cast<ModenaFlags>(m_dataPoints.value("ModEna").toUInt16());
+
+    if (m_dataPoints.value("SigType").isValid())
+        m_sigType = static_cast<Sigtype>(m_dataPoints.value("SigType").toUInt16());
+
+    if (m_dataPoints.value("Sig").isValid())
+        m_sig = m_dataPoints.value("Sig").toFloatWithSSF(m_sigSf);
+
+    if (m_dataPoints.value("WinTms").isValid())
+        m_winTms = m_dataPoints.value("WinTms").toUInt16();
+
+    if (m_dataPoints.value("RvtTms").isValid())
+        m_rvtTms = m_dataPoints.value("RvtTms").toUInt16();
+
+    if (m_dataPoints.value("RmpTms").isValid())
+        m_rmpTms = m_dataPoints.value("RmpTms").toUInt16();
+
+    if (m_dataPoints.value("Sig_SF").isValid())
+        m_sigSf = m_dataPoints.value("Sig_SF").toInt16();
+
+    if (m_dataPoints.value("Pad").isValid())
+        m_pad = m_dataPoints.value("Pad").toUInt16();
+
+
+    qCDebug(dcSunSpecModelData()) << this;
+}
+
 QDebug operator<<(QDebug debug, SunSpecPricingModel *model)
 {
     debug.nospace().noquote() << "SunSpecPricingModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ModEna") << "-->";
     if (model->dataPoints().value("ModEna").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModEna") << "--> " << model->modEna() << endl;
+        debug.nospace().noquote() << model->modEna() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModEna") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("SigType") << "-->";
     if (model->dataPoints().value("SigType").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("SigType") << "--> " << model->sigType() << endl;
+        debug.nospace().noquote() << model->sigType() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("SigType") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Sig") << "-->";
     if (model->dataPoints().value("Sig").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Sig") << "--> " << model->sig() << endl;
+        debug.nospace().noquote() << model->sig() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Sig") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("WinTms") << "-->";
     if (model->dataPoints().value("WinTms").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WinTms") << "--> " << model->winTms() << endl;
+        debug.nospace().noquote() << model->winTms() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WinTms") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("RvtTms") << "-->";
     if (model->dataPoints().value("RvtTms").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("RvtTms") << "--> " << model->rvtTms() << endl;
+        debug.nospace().noquote() << model->rvtTms() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("RvtTms") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("RmpTms") << "-->";
     if (model->dataPoints().value("RmpTms").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("RmpTms") << "--> " << model->rmpTms() << endl;
+        debug.nospace().noquote() << model->rmpTms() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("RmpTms") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad") << "-->";
     if (model->dataPoints().value("Pad").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad") << "--> " << model->pad() << endl;
+        debug.nospace().noquote() << model->pad() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
 

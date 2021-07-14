@@ -42,7 +42,7 @@ class SunSpecLocationModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    explicit SunSpecLocationModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);
+    explicit SunSpecLocationModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
     ~SunSpecLocationModel() override; 
 
     QString name() const override;
@@ -57,6 +57,9 @@ public:
     qint32 altitude() const;
 
 protected:
+    quint16 m_fixedBlockLength = 36;
+
+    void initDataPoints() override;
     void processBlockData() override;
 
 private:
@@ -67,7 +70,6 @@ private:
     float m_longitude = 0;
     qint32 m_altitude = 0;
 
-    void initDataPoints();
 
 };
 

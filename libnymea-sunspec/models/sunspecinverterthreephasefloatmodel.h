@@ -75,7 +75,7 @@ public:
     Q_DECLARE_FLAGS(Evt1Flags, Evt1)
     Q_FLAG(Evt1)
 
-    explicit SunSpecInverterThreePhaseFloatModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);
+    explicit SunSpecInverterThreePhaseFloatModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
     ~SunSpecInverterThreePhaseFloatModel() override; 
 
     QString name() const override;
@@ -115,6 +115,9 @@ public:
     quint32 vendorEventBitfield4() const;
 
 protected:
+    quint16 m_fixedBlockLength = 60;
+
+    void initDataPoints() override;
     void processBlockData() override;
 
 private:
@@ -150,7 +153,6 @@ private:
     quint32 m_vendorEventBitfield3 = 0;
     quint32 m_vendorEventBitfield4 = 0;
 
-    void initDataPoints();
 
 };
 

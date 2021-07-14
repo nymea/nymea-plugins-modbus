@@ -34,15 +34,52 @@
 #include <QObject>
 
 #include "sunspecmodel.h"
+#include "sunspecmodelrepeatingblock.h"
 
 class SunSpecConnection;
+class SunSpecIrradianceModel;
+
+class SunSpecIrradianceModelRepeatingBlock : public SunSpecModelRepeatingBlock
+{
+    Q_OBJECT
+public:
+
+    explicit SunSpecIrradianceModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecIrradianceModel *parent = nullptr);
+    ~SunSpecIrradianceModelRepeatingBlock() override; 
+
+    SunSpecIrradianceModel *parentModel() const; 
+
+    QString name() const override;
+    quint16 ghi() const;
+    quint16 poai() const;
+    quint16 dfi() const;
+    quint16 dni() const;
+    quint16 oti() const;
+
+    void processBlockData(const QVector<quint16> blockData) override;
+
+protected:
+    void initDataPoints() override;
+
+private:
+    SunSpecIrradianceModel *m_parentModel = nullptr; 
+
+    quint16 m_ghi = 0;
+    quint16 m_poai = 0;
+    quint16 m_dfi = 0;
+    quint16 m_dni = 0;
+    quint16 m_oti = 0;
+
+};
+
+
 
 class SunSpecIrradianceModel : public SunSpecModel
 {
     Q_OBJECT
 public:
 
-    explicit SunSpecIrradianceModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);
+    explicit SunSpecIrradianceModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
     ~SunSpecIrradianceModel() override; 
 
     QString name() const override;
@@ -51,11 +88,14 @@ public:
 
 
 protected:
+    quint16 m_fixedBlockLength = 0;
+    quint16 m_repeatingBlockLength = 5;
+
+    void initDataPoints() override;
     void processBlockData() override;
 
 private:
 
-    void initDataPoints();
 
 };
 

@@ -31,11 +31,58 @@
 #include "sunspecflowbatterystackmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecFlowBatteryStackModel::SunSpecFlowBatteryStackModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 809, 1, parent)
+SunSpecFlowBatteryStackModelRepeatingBlock::SunSpecFlowBatteryStackModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecFlowBatteryStackModel *parent) :
+    SunSpecModelRepeatingBlock(blockIndex, blockSize, modbusStartRegister, parent)
 {
-    //Q_ASSERT_X(length == 1,  "SunSpecFlowBatteryStackModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
-    Q_UNUSED(length)
+    initDataPoints();
+}
+
+QString SunSpecFlowBatteryStackModelRepeatingBlock::name() const
+{
+    return "cell";
+}
+
+SunSpecFlowBatteryStackModel *SunSpecFlowBatteryStackModelRepeatingBlock::parentModel() const
+{
+    return m_parentModel;
+}
+
+quint16 SunSpecFlowBatteryStackModelRepeatingBlock::cellPointsToBeDetermined() const
+{
+    return m_cellPointsToBeDetermined;
+}
+
+void SunSpecFlowBatteryStackModelRepeatingBlock::initDataPoints()
+{
+    SunSpecDataPoint cellPointsToBeDeterminedDataPoint;
+    cellPointsToBeDeterminedDataPoint.setName("CellTBD");
+    cellPointsToBeDeterminedDataPoint.setLabel("Cell Points To Be Determined");
+    cellPointsToBeDeterminedDataPoint.setMandatory(true);
+    cellPointsToBeDeterminedDataPoint.setSize(1);
+    cellPointsToBeDeterminedDataPoint.setAddressOffset(0);
+    cellPointsToBeDeterminedDataPoint.setSunSpecDataType("uint16");
+    m_dataPoints.insert(cellPointsToBeDeterminedDataPoint.name(), cellPointsToBeDeterminedDataPoint);
+
+}
+
+void SunSpecFlowBatteryStackModelRepeatingBlock::processBlockData(const QVector<quint16> blockData)
+{
+    m_blockData = blockData;
+
+    // Update properties according to the data point type
+    if (m_dataPoints.value("CellTBD").isValid())
+        m_cellPointsToBeDetermined = m_dataPoints.value("CellTBD").toUInt16();
+
+
+    qCDebug(dcSunSpecModelData()) << this;
+}
+
+
+SunSpecFlowBatteryStackModel::SunSpecFlowBatteryStackModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 809, modelLength, parent)
+{
+    m_modelBlockType = SunSpecModel::ModelBlockTypeFixedAndRepeating;
+
     initDataPoints();
 }
 
@@ -63,16 +110,6 @@ quint16 SunSpecFlowBatteryStackModel::stackPointsToBeDetermined() const
 {
     return m_stackPointsToBeDetermined;
 }
-void SunSpecFlowBatteryStackModel::processBlockData()
-{
-    // Update properties according to the data point type
-    if (m_dataPoints.value("StackTBD").isValid())
-        m_stackPointsToBeDetermined = m_dataPoints.value("StackTBD").toUInt16();
-
-
-    qCDebug(dcSunSpecModelData()) << this;
-}
-
 void SunSpecFlowBatteryStackModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -107,13 +144,24 @@ void SunSpecFlowBatteryStackModel::initDataPoints()
 
 }
 
+void SunSpecFlowBatteryStackModel::processBlockData()
+{
+    // Update properties according to the data point type
+    if (m_dataPoints.value("StackTBD").isValid())
+        m_stackPointsToBeDetermined = m_dataPoints.value("StackTBD").toUInt16();
+
+
+    qCDebug(dcSunSpecModelData()) << this;
+}
+
 QDebug operator<<(QDebug debug, SunSpecFlowBatteryStackModel *model)
 {
     debug.nospace().noquote() << "SunSpecFlowBatteryStackModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("StackTBD") << "-->";
     if (model->dataPoints().value("StackTBD").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StackTBD") << "--> " << model->stackPointsToBeDetermined() << endl;
+        debug.nospace().noquote() << model->stackPointsToBeDetermined() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StackTBD") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
 

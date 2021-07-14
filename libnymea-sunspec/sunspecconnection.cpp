@@ -58,7 +58,6 @@ SunSpecConnection::SunSpecConnection(const QHostAddress &hostAddress, uint port,
         if (!m_modbusTcpClient->connectDevice()) {
             m_reconnectTimer.start();
         }
-
     });
 
     connect(m_modbusTcpClient, &QModbusTcpClient::stateChanged, this, [this](QModbusDevice::State state){
@@ -263,7 +262,6 @@ void SunSpecConnection::processDiscoveryResult()
 
         model->init();
     }
-
 }
 
 void SunSpecConnection::setDiscoveryRunning(bool discoveryRunning)

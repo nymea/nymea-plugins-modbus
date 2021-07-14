@@ -31,11 +31,11 @@
 #include "sunspeccontrolsmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecControlsModel::SunSpecControlsModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 123, 24, parent)
+SunSpecControlsModel::SunSpecControlsModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 123, modelLength, parent)
 {
-    //Q_ASSERT_X(length == 24,  "SunSpecControlsModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
-    Q_UNUSED(length)
+    m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
+
     initDataPoints();
 }
 
@@ -437,87 +437,18 @@ QModbusReply *SunSpecControlsModel::setVArPctEna(Varpct_ena vArPctEna)
 
     return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
-void SunSpecControlsModel::processBlockData()
+qint16 SunSpecControlsModel::wMaxLimPctSf() const
 {
-    // Scale factors
-    if (m_dataPoints.value("WMaxLimPct_SF").isValid())
-        m_wMaxLimPctSf = m_dataPoints.value("WMaxLimPct_SF").toInt16();
-
-    if (m_dataPoints.value("OutPFSet_SF").isValid())
-        m_outPfSetSf = m_dataPoints.value("OutPFSet_SF").toInt16();
-
-    if (m_dataPoints.value("VArPct_SF").isValid())
-        m_vArPctSf = m_dataPoints.value("VArPct_SF").toInt16();
-
-
-    // Update properties according to the data point type
-    if (m_dataPoints.value("Conn_WinTms").isValid())
-        m_connWinTms = m_dataPoints.value("Conn_WinTms").toUInt16();
-
-    if (m_dataPoints.value("Conn_RvrtTms").isValid())
-        m_connRvrtTms = m_dataPoints.value("Conn_RvrtTms").toUInt16();
-
-    if (m_dataPoints.value("Conn").isValid())
-        m_conn = static_cast<Conn>(m_dataPoints.value("Conn").toUInt16());
-
-    if (m_dataPoints.value("WMaxLimPct").isValid())
-        m_wMaxLimPct = m_dataPoints.value("WMaxLimPct").toFloatWithSSF(m_wMaxLimPctSf);
-
-    if (m_dataPoints.value("WMaxLimPct_WinTms").isValid())
-        m_wMaxLimPctWinTms = m_dataPoints.value("WMaxLimPct_WinTms").toUInt16();
-
-    if (m_dataPoints.value("WMaxLimPct_RvrtTms").isValid())
-        m_wMaxLimPctRvrtTms = m_dataPoints.value("WMaxLimPct_RvrtTms").toUInt16();
-
-    if (m_dataPoints.value("WMaxLimPct_RmpTms").isValid())
-        m_wMaxLimPctRmpTms = m_dataPoints.value("WMaxLimPct_RmpTms").toUInt16();
-
-    if (m_dataPoints.value("WMaxLim_Ena").isValid())
-        m_wMaxLimEna = static_cast<Wmaxlim_ena>(m_dataPoints.value("WMaxLim_Ena").toUInt16());
-
-    if (m_dataPoints.value("OutPFSet").isValid())
-        m_outPfSet = m_dataPoints.value("OutPFSet").toFloatWithSSF(m_outPfSetSf);
-
-    if (m_dataPoints.value("OutPFSet_WinTms").isValid())
-        m_outPfSetWinTms = m_dataPoints.value("OutPFSet_WinTms").toUInt16();
-
-    if (m_dataPoints.value("OutPFSet_RvrtTms").isValid())
-        m_outPfSetRvrtTms = m_dataPoints.value("OutPFSet_RvrtTms").toUInt16();
-
-    if (m_dataPoints.value("OutPFSet_RmpTms").isValid())
-        m_outPfSetRmpTms = m_dataPoints.value("OutPFSet_RmpTms").toUInt16();
-
-    if (m_dataPoints.value("OutPFSet_Ena").isValid())
-        m_outPfSetEna = static_cast<Outpfset_ena>(m_dataPoints.value("OutPFSet_Ena").toUInt16());
-
-    if (m_dataPoints.value("VArWMaxPct").isValid())
-        m_vArWMaxPct = m_dataPoints.value("VArWMaxPct").toFloatWithSSF(m_vArPctSf);
-
-    if (m_dataPoints.value("VArMaxPct").isValid())
-        m_vArMaxPct = m_dataPoints.value("VArMaxPct").toFloatWithSSF(m_vArPctSf);
-
-    if (m_dataPoints.value("VArAvalPct").isValid())
-        m_vArAvalPct = m_dataPoints.value("VArAvalPct").toFloatWithSSF(m_vArPctSf);
-
-    if (m_dataPoints.value("VArPct_WinTms").isValid())
-        m_vArPctWinTms = m_dataPoints.value("VArPct_WinTms").toUInt16();
-
-    if (m_dataPoints.value("VArPct_RvrtTms").isValid())
-        m_vArPctRvrtTms = m_dataPoints.value("VArPct_RvrtTms").toUInt16();
-
-    if (m_dataPoints.value("VArPct_RmpTms").isValid())
-        m_vArPctRmpTms = m_dataPoints.value("VArPct_RmpTms").toUInt16();
-
-    if (m_dataPoints.value("VArPct_Mod").isValid())
-        m_vArPctMod = static_cast<Varpct_mod>(m_dataPoints.value("VArPct_Mod").toUInt16());
-
-    if (m_dataPoints.value("VArPct_Ena").isValid())
-        m_vArPctEna = static_cast<Varpct_ena>(m_dataPoints.value("VArPct_Ena").toUInt16());
-
-
-    qCDebug(dcSunSpecModelData()) << this;
+    return m_wMaxLimPctSf;
 }
-
+qint16 SunSpecControlsModel::outPfSetSf() const
+{
+    return m_outPfSetSf;
+}
+qint16 SunSpecControlsModel::vArPctSf() const
+{
+    return m_vArPctSf;
+}
 void SunSpecControlsModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -832,133 +763,244 @@ void SunSpecControlsModel::initDataPoints()
 
 }
 
+void SunSpecControlsModel::processBlockData()
+{
+    // Scale factors
+    if (m_dataPoints.value("WMaxLimPct_SF").isValid())
+        m_wMaxLimPctSf = m_dataPoints.value("WMaxLimPct_SF").toInt16();
+
+    if (m_dataPoints.value("OutPFSet_SF").isValid())
+        m_outPfSetSf = m_dataPoints.value("OutPFSet_SF").toInt16();
+
+    if (m_dataPoints.value("VArPct_SF").isValid())
+        m_vArPctSf = m_dataPoints.value("VArPct_SF").toInt16();
+
+
+    // Update properties according to the data point type
+    if (m_dataPoints.value("Conn_WinTms").isValid())
+        m_connWinTms = m_dataPoints.value("Conn_WinTms").toUInt16();
+
+    if (m_dataPoints.value("Conn_RvrtTms").isValid())
+        m_connRvrtTms = m_dataPoints.value("Conn_RvrtTms").toUInt16();
+
+    if (m_dataPoints.value("Conn").isValid())
+        m_conn = static_cast<Conn>(m_dataPoints.value("Conn").toUInt16());
+
+    if (m_dataPoints.value("WMaxLimPct").isValid())
+        m_wMaxLimPct = m_dataPoints.value("WMaxLimPct").toFloatWithSSF(m_wMaxLimPctSf);
+
+    if (m_dataPoints.value("WMaxLimPct_WinTms").isValid())
+        m_wMaxLimPctWinTms = m_dataPoints.value("WMaxLimPct_WinTms").toUInt16();
+
+    if (m_dataPoints.value("WMaxLimPct_RvrtTms").isValid())
+        m_wMaxLimPctRvrtTms = m_dataPoints.value("WMaxLimPct_RvrtTms").toUInt16();
+
+    if (m_dataPoints.value("WMaxLimPct_RmpTms").isValid())
+        m_wMaxLimPctRmpTms = m_dataPoints.value("WMaxLimPct_RmpTms").toUInt16();
+
+    if (m_dataPoints.value("WMaxLim_Ena").isValid())
+        m_wMaxLimEna = static_cast<Wmaxlim_ena>(m_dataPoints.value("WMaxLim_Ena").toUInt16());
+
+    if (m_dataPoints.value("OutPFSet").isValid())
+        m_outPfSet = m_dataPoints.value("OutPFSet").toFloatWithSSF(m_outPfSetSf);
+
+    if (m_dataPoints.value("OutPFSet_WinTms").isValid())
+        m_outPfSetWinTms = m_dataPoints.value("OutPFSet_WinTms").toUInt16();
+
+    if (m_dataPoints.value("OutPFSet_RvrtTms").isValid())
+        m_outPfSetRvrtTms = m_dataPoints.value("OutPFSet_RvrtTms").toUInt16();
+
+    if (m_dataPoints.value("OutPFSet_RmpTms").isValid())
+        m_outPfSetRmpTms = m_dataPoints.value("OutPFSet_RmpTms").toUInt16();
+
+    if (m_dataPoints.value("OutPFSet_Ena").isValid())
+        m_outPfSetEna = static_cast<Outpfset_ena>(m_dataPoints.value("OutPFSet_Ena").toUInt16());
+
+    if (m_dataPoints.value("VArWMaxPct").isValid())
+        m_vArWMaxPct = m_dataPoints.value("VArWMaxPct").toFloatWithSSF(m_vArPctSf);
+
+    if (m_dataPoints.value("VArMaxPct").isValid())
+        m_vArMaxPct = m_dataPoints.value("VArMaxPct").toFloatWithSSF(m_vArPctSf);
+
+    if (m_dataPoints.value("VArAvalPct").isValid())
+        m_vArAvalPct = m_dataPoints.value("VArAvalPct").toFloatWithSSF(m_vArPctSf);
+
+    if (m_dataPoints.value("VArPct_WinTms").isValid())
+        m_vArPctWinTms = m_dataPoints.value("VArPct_WinTms").toUInt16();
+
+    if (m_dataPoints.value("VArPct_RvrtTms").isValid())
+        m_vArPctRvrtTms = m_dataPoints.value("VArPct_RvrtTms").toUInt16();
+
+    if (m_dataPoints.value("VArPct_RmpTms").isValid())
+        m_vArPctRmpTms = m_dataPoints.value("VArPct_RmpTms").toUInt16();
+
+    if (m_dataPoints.value("VArPct_Mod").isValid())
+        m_vArPctMod = static_cast<Varpct_mod>(m_dataPoints.value("VArPct_Mod").toUInt16());
+
+    if (m_dataPoints.value("VArPct_Ena").isValid())
+        m_vArPctEna = static_cast<Varpct_ena>(m_dataPoints.value("VArPct_Ena").toUInt16());
+
+    if (m_dataPoints.value("WMaxLimPct_SF").isValid())
+        m_wMaxLimPctSf = m_dataPoints.value("WMaxLimPct_SF").toInt16();
+
+    if (m_dataPoints.value("OutPFSet_SF").isValid())
+        m_outPfSetSf = m_dataPoints.value("OutPFSet_SF").toInt16();
+
+    if (m_dataPoints.value("VArPct_SF").isValid())
+        m_vArPctSf = m_dataPoints.value("VArPct_SF").toInt16();
+
+
+    qCDebug(dcSunSpecModelData()) << this;
+}
+
 QDebug operator<<(QDebug debug, SunSpecControlsModel *model)
 {
     debug.nospace().noquote() << "SunSpecControlsModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Conn_WinTms") << "-->";
     if (model->dataPoints().value("Conn_WinTms").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Conn_WinTms") << "--> " << model->connWinTms() << endl;
+        debug.nospace().noquote() << model->connWinTms() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Conn_WinTms") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Conn_RvrtTms") << "-->";
     if (model->dataPoints().value("Conn_RvrtTms").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Conn_RvrtTms") << "--> " << model->connRvrtTms() << endl;
+        debug.nospace().noquote() << model->connRvrtTms() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Conn_RvrtTms") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Conn") << "-->";
     if (model->dataPoints().value("Conn").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Conn") << "--> " << model->conn() << endl;
+        debug.nospace().noquote() << model->conn() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Conn") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLimPct") << "-->";
     if (model->dataPoints().value("WMaxLimPct").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLimPct") << "--> " << model->wMaxLimPct() << endl;
+        debug.nospace().noquote() << model->wMaxLimPct() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLimPct") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLimPct_WinTms") << "-->";
     if (model->dataPoints().value("WMaxLimPct_WinTms").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLimPct_WinTms") << "--> " << model->wMaxLimPctWinTms() << endl;
+        debug.nospace().noquote() << model->wMaxLimPctWinTms() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLimPct_WinTms") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLimPct_RvrtTms") << "-->";
     if (model->dataPoints().value("WMaxLimPct_RvrtTms").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLimPct_RvrtTms") << "--> " << model->wMaxLimPctRvrtTms() << endl;
+        debug.nospace().noquote() << model->wMaxLimPctRvrtTms() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLimPct_RvrtTms") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLimPct_RmpTms") << "-->";
     if (model->dataPoints().value("WMaxLimPct_RmpTms").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLimPct_RmpTms") << "--> " << model->wMaxLimPctRmpTms() << endl;
+        debug.nospace().noquote() << model->wMaxLimPctRmpTms() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLimPct_RmpTms") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLim_Ena") << "-->";
     if (model->dataPoints().value("WMaxLim_Ena").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLim_Ena") << "--> " << model->wMaxLimEna() << endl;
+        debug.nospace().noquote() << model->wMaxLimEna() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WMaxLim_Ena") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet") << "-->";
     if (model->dataPoints().value("OutPFSet").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet") << "--> " << model->outPfSet() << endl;
+        debug.nospace().noquote() << model->outPfSet() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet_WinTms") << "-->";
     if (model->dataPoints().value("OutPFSet_WinTms").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet_WinTms") << "--> " << model->outPfSetWinTms() << endl;
+        debug.nospace().noquote() << model->outPfSetWinTms() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet_WinTms") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet_RvrtTms") << "-->";
     if (model->dataPoints().value("OutPFSet_RvrtTms").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet_RvrtTms") << "--> " << model->outPfSetRvrtTms() << endl;
+        debug.nospace().noquote() << model->outPfSetRvrtTms() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet_RvrtTms") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet_RmpTms") << "-->";
     if (model->dataPoints().value("OutPFSet_RmpTms").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet_RmpTms") << "--> " << model->outPfSetRmpTms() << endl;
+        debug.nospace().noquote() << model->outPfSetRmpTms() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet_RmpTms") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet_Ena") << "-->";
     if (model->dataPoints().value("OutPFSet_Ena").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet_Ena") << "--> " << model->outPfSetEna() << endl;
+        debug.nospace().noquote() << model->outPfSetEna() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("OutPFSet_Ena") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VArWMaxPct") << "-->";
     if (model->dataPoints().value("VArWMaxPct").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArWMaxPct") << "--> " << model->vArWMaxPct() << endl;
+        debug.nospace().noquote() << model->vArWMaxPct() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArWMaxPct") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VArMaxPct") << "-->";
     if (model->dataPoints().value("VArMaxPct").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArMaxPct") << "--> " << model->vArMaxPct() << endl;
+        debug.nospace().noquote() << model->vArMaxPct() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArMaxPct") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VArAvalPct") << "-->";
     if (model->dataPoints().value("VArAvalPct").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArAvalPct") << "--> " << model->vArAvalPct() << endl;
+        debug.nospace().noquote() << model->vArAvalPct() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArAvalPct") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_WinTms") << "-->";
     if (model->dataPoints().value("VArPct_WinTms").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_WinTms") << "--> " << model->vArPctWinTms() << endl;
+        debug.nospace().noquote() << model->vArPctWinTms() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_WinTms") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_RvrtTms") << "-->";
     if (model->dataPoints().value("VArPct_RvrtTms").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_RvrtTms") << "--> " << model->vArPctRvrtTms() << endl;
+        debug.nospace().noquote() << model->vArPctRvrtTms() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_RvrtTms") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_RmpTms") << "-->";
     if (model->dataPoints().value("VArPct_RmpTms").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_RmpTms") << "--> " << model->vArPctRmpTms() << endl;
+        debug.nospace().noquote() << model->vArPctRmpTms() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_RmpTms") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_Mod") << "-->";
     if (model->dataPoints().value("VArPct_Mod").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_Mod") << "--> " << model->vArPctMod() << endl;
+        debug.nospace().noquote() << model->vArPctMod() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_Mod") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_Ena") << "-->";
     if (model->dataPoints().value("VArPct_Ena").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_Ena") << "--> " << model->vArPctEna() << endl;
+        debug.nospace().noquote() << model->vArPctEna() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArPct_Ena") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
 

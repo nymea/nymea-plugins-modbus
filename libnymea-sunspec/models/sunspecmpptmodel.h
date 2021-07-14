@@ -34,8 +34,97 @@
 #include <QObject>
 
 #include "sunspecmodel.h"
+#include "sunspecmodelrepeatingblock.h"
 
 class SunSpecConnection;
+class SunSpecMpptModel;
+
+class SunSpecMpptModelRepeatingBlock : public SunSpecModelRepeatingBlock
+{
+    Q_OBJECT
+public:
+
+    enum Dcst {
+        DcstOff = 1,
+        DcstSleeping = 2,
+        DcstStarting = 3,
+        DcstMppt = 4,
+        DcstThrottled = 5,
+        DcstShuttingDown = 6,
+        DcstFault = 7,
+        DcstStandby = 8,
+        DcstTest = 9,
+        DcstReserved10 = 10
+    };
+    Q_ENUM(Dcst)
+
+    enum Dcevt {
+        DcevtGroundFault = 0x1,
+        DcevtInputOverVoltage = 0x2,
+        DcevtReserved2 = 0x4,
+        DcevtDcDisconnect = 0x8,
+        DcevtReserved4 = 0x10,
+        DcevtCabinetOpen = 0x20,
+        DcevtManualShutdown = 0x40,
+        DcevtOverTemp = 0x80,
+        DcevtReserved8 = 0x100,
+        DcevtReserved9 = 0x200,
+        DcevtReserved10 = 0x400,
+        DcevtReserved11 = 0x800,
+        DcevtBlownFuse = 0x1000,
+        DcevtUnderTemp = 0x2000,
+        DcevtMemoryLoss = 0x4000,
+        DcevtArcDetection = 0x8000,
+        DcevtReserved16 = 0x10000,
+        DcevtReserved17 = 0x20000,
+        DcevtReserved18 = 0x40000,
+        DcevtReserved19 = 0x80000,
+        DcevtTestFailed = 0x100000,
+        DcevtInputUnderVoltage = 0x200000,
+        DcevtInputOverCurrent = 0x400000
+    };
+    Q_DECLARE_FLAGS(DcevtFlags, Dcevt)
+    Q_FLAG(Dcevt)
+
+    explicit SunSpecMpptModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecMpptModel *parent = nullptr);
+    ~SunSpecMpptModelRepeatingBlock() override; 
+
+    SunSpecMpptModel *parentModel() const; 
+
+    QString name() const override;
+    quint16 inputId() const;
+    QString inputIdSting() const;
+    float dcCurrent() const;
+    float dcVoltage() const;
+    float dcPower() const;
+    quint32 lifetimeEnergy() const;
+    quint32 timestamp() const;
+    qint16 temperature() const;
+    Dcst operatingState() const;
+    DcevtFlags moduleEvents() const;
+
+    void processBlockData(const QVector<quint16> blockData) override;
+
+protected:
+    void initDataPoints() override;
+
+private:
+    SunSpecMpptModel *m_parentModel = nullptr; 
+
+    quint16 m_inputId = 0;
+    QString m_inputIdSting;
+    float m_dcCurrent = 0;
+    float m_dcVoltage = 0;
+    float m_dcPower = 0;
+    quint32 m_lifetimeEnergy = 0;
+    quint32 m_timestamp = 0;
+    qint16 m_temperature = 0;
+    Dcst m_operatingState;
+    DcevtFlags m_moduleEvents;
+
+};
+
+
 
 class SunSpecMpptModel : public SunSpecModel
 {
@@ -70,18 +159,26 @@ public:
     Q_DECLARE_FLAGS(EvtFlags, Evt)
     Q_FLAG(Evt)
 
-    explicit SunSpecMpptModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);
+    explicit SunSpecMpptModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
     ~SunSpecMpptModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
+    qint16 currentScaleFactor() const;
+    qint16 voltageScaleFactor() const;
+    qint16 powerScaleFactor() const;
+    qint16 energyScaleFactor() const;
     EvtFlags globalEvents() const;
     int numberOfModules() const;
     quint16 timestampPeriod() const;
 
 protected:
+    quint16 m_fixedBlockLength = 8;
+    quint16 m_repeatingBlockLength = 20;
+
+    void initDataPoints() override;
     void processBlockData() override;
 
 private:
@@ -93,7 +190,6 @@ private:
     int m_numberOfModules = 0;
     quint16 m_timestampPeriod = 0;
 
-    void initDataPoints();
 
 };
 

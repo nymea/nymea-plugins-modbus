@@ -31,11 +31,11 @@
 #include "sunspecstatusmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecStatusModel::SunSpecStatusModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 122, 44, parent)
+SunSpecStatusModel::SunSpecStatusModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 122, modelLength, parent)
 {
-    //Q_ASSERT_X(length == 44,  "SunSpecStatusModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
-    Q_UNUSED(length)
+    m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
+
     initDataPoints();
 }
 
@@ -99,9 +99,17 @@ float SunSpecStatusModel::vArAval() const
 {
     return m_vArAval;
 }
+qint16 SunSpecStatusModel::vArAvalSf() const
+{
+    return m_vArAvalSf;
+}
 float SunSpecStatusModel::wAval() const
 {
     return m_wAval;
+}
+qint16 SunSpecStatusModel::wAvalSf() const
+{
+    return m_wAvalSf;
 }
 SunSpecStatusModel::StsetlimmskFlags SunSpecStatusModel::stSetLimMsk() const
 {
@@ -127,75 +135,10 @@ float SunSpecStatusModel::ris() const
 {
     return m_ris;
 }
-void SunSpecStatusModel::processBlockData()
+qint16 SunSpecStatusModel::risSf() const
 {
-    // Scale factors
-    if (m_dataPoints.value("VArAval_SF").isValid())
-        m_vArAvalSf = m_dataPoints.value("VArAval_SF").toInt16();
-
-    if (m_dataPoints.value("WAval_SF").isValid())
-        m_wAvalSf = m_dataPoints.value("WAval_SF").toInt16();
-
-    if (m_dataPoints.value("Ris_SF").isValid())
-        m_risSf = m_dataPoints.value("Ris_SF").toInt16();
-
-
-    // Update properties according to the data point type
-    if (m_dataPoints.value("PVConn").isValid())
-        m_pvConn = static_cast<PvconnFlags>(m_dataPoints.value("PVConn").toUInt16());
-
-    if (m_dataPoints.value("StorConn").isValid())
-        m_storConn = static_cast<StorconnFlags>(m_dataPoints.value("StorConn").toUInt16());
-
-    if (m_dataPoints.value("ECPConn").isValid())
-        m_ecpConn = static_cast<EcpconnFlags>(m_dataPoints.value("ECPConn").toUInt16());
-
-    if (m_dataPoints.value("ActWh").isValid())
-        m_actWh = m_dataPoints.value("ActWh").toInt64();
-
-    if (m_dataPoints.value("ActVAh").isValid())
-        m_actVAh = m_dataPoints.value("ActVAh").toInt64();
-
-    if (m_dataPoints.value("ActVArhQ1").isValid())
-        m_actVArhQ1 = m_dataPoints.value("ActVArhQ1").toInt64();
-
-    if (m_dataPoints.value("ActVArhQ2").isValid())
-        m_actVArhQ2 = m_dataPoints.value("ActVArhQ2").toInt64();
-
-    if (m_dataPoints.value("ActVArhQ3").isValid())
-        m_actVArhQ3 = m_dataPoints.value("ActVArhQ3").toInt64();
-
-    if (m_dataPoints.value("ActVArhQ4").isValid())
-        m_actVArhQ4 = m_dataPoints.value("ActVArhQ4").toInt64();
-
-    if (m_dataPoints.value("VArAval").isValid())
-        m_vArAval = m_dataPoints.value("VArAval").toFloatWithSSF(m_vArAvalSf);
-
-    if (m_dataPoints.value("WAval").isValid())
-        m_wAval = m_dataPoints.value("WAval").toFloatWithSSF(m_wAvalSf);
-
-    if (m_dataPoints.value("StSetLimMsk").isValid())
-        m_stSetLimMsk = static_cast<StsetlimmskFlags>(m_dataPoints.value("StSetLimMsk").toUInt32());
-
-    if (m_dataPoints.value("StActCtl").isValid())
-        m_stActCtl = static_cast<StactctlFlags>(m_dataPoints.value("StActCtl").toUInt32());
-
-    if (m_dataPoints.value("TmSrc").isValid())
-        m_tmSrc = m_dataPoints.value("TmSrc").toString();
-
-    if (m_dataPoints.value("Tms").isValid())
-        m_tms = m_dataPoints.value("Tms").toUInt32();
-
-    if (m_dataPoints.value("RtSt").isValid())
-        m_rtSt = static_cast<RtstFlags>(m_dataPoints.value("RtSt").toUInt16());
-
-    if (m_dataPoints.value("Ris").isValid())
-        m_ris = m_dataPoints.value("Ris").toFloatWithSSF(m_risSf);
-
-
-    qCDebug(dcSunSpecModelData()) << this;
+    return m_risSf;
 }
-
 void SunSpecStatusModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -436,109 +379,204 @@ void SunSpecStatusModel::initDataPoints()
 
 }
 
+void SunSpecStatusModel::processBlockData()
+{
+    // Scale factors
+    if (m_dataPoints.value("VArAval_SF").isValid())
+        m_vArAvalSf = m_dataPoints.value("VArAval_SF").toInt16();
+
+    if (m_dataPoints.value("WAval_SF").isValid())
+        m_wAvalSf = m_dataPoints.value("WAval_SF").toInt16();
+
+    if (m_dataPoints.value("Ris_SF").isValid())
+        m_risSf = m_dataPoints.value("Ris_SF").toInt16();
+
+
+    // Update properties according to the data point type
+    if (m_dataPoints.value("PVConn").isValid())
+        m_pvConn = static_cast<PvconnFlags>(m_dataPoints.value("PVConn").toUInt16());
+
+    if (m_dataPoints.value("StorConn").isValid())
+        m_storConn = static_cast<StorconnFlags>(m_dataPoints.value("StorConn").toUInt16());
+
+    if (m_dataPoints.value("ECPConn").isValid())
+        m_ecpConn = static_cast<EcpconnFlags>(m_dataPoints.value("ECPConn").toUInt16());
+
+    if (m_dataPoints.value("ActWh").isValid())
+        m_actWh = m_dataPoints.value("ActWh").toInt64();
+
+    if (m_dataPoints.value("ActVAh").isValid())
+        m_actVAh = m_dataPoints.value("ActVAh").toInt64();
+
+    if (m_dataPoints.value("ActVArhQ1").isValid())
+        m_actVArhQ1 = m_dataPoints.value("ActVArhQ1").toInt64();
+
+    if (m_dataPoints.value("ActVArhQ2").isValid())
+        m_actVArhQ2 = m_dataPoints.value("ActVArhQ2").toInt64();
+
+    if (m_dataPoints.value("ActVArhQ3").isValid())
+        m_actVArhQ3 = m_dataPoints.value("ActVArhQ3").toInt64();
+
+    if (m_dataPoints.value("ActVArhQ4").isValid())
+        m_actVArhQ4 = m_dataPoints.value("ActVArhQ4").toInt64();
+
+    if (m_dataPoints.value("VArAval").isValid())
+        m_vArAval = m_dataPoints.value("VArAval").toFloatWithSSF(m_vArAvalSf);
+
+    if (m_dataPoints.value("VArAval_SF").isValid())
+        m_vArAvalSf = m_dataPoints.value("VArAval_SF").toInt16();
+
+    if (m_dataPoints.value("WAval").isValid())
+        m_wAval = m_dataPoints.value("WAval").toFloatWithSSF(m_wAvalSf);
+
+    if (m_dataPoints.value("WAval_SF").isValid())
+        m_wAvalSf = m_dataPoints.value("WAval_SF").toInt16();
+
+    if (m_dataPoints.value("StSetLimMsk").isValid())
+        m_stSetLimMsk = static_cast<StsetlimmskFlags>(m_dataPoints.value("StSetLimMsk").toUInt32());
+
+    if (m_dataPoints.value("StActCtl").isValid())
+        m_stActCtl = static_cast<StactctlFlags>(m_dataPoints.value("StActCtl").toUInt32());
+
+    if (m_dataPoints.value("TmSrc").isValid())
+        m_tmSrc = m_dataPoints.value("TmSrc").toString();
+
+    if (m_dataPoints.value("Tms").isValid())
+        m_tms = m_dataPoints.value("Tms").toUInt32();
+
+    if (m_dataPoints.value("RtSt").isValid())
+        m_rtSt = static_cast<RtstFlags>(m_dataPoints.value("RtSt").toUInt16());
+
+    if (m_dataPoints.value("Ris").isValid())
+        m_ris = m_dataPoints.value("Ris").toFloatWithSSF(m_risSf);
+
+    if (m_dataPoints.value("Ris_SF").isValid())
+        m_risSf = m_dataPoints.value("Ris_SF").toInt16();
+
+
+    qCDebug(dcSunSpecModelData()) << this;
+}
+
 QDebug operator<<(QDebug debug, SunSpecStatusModel *model)
 {
     debug.nospace().noquote() << "SunSpecStatusModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("PVConn") << "-->";
     if (model->dataPoints().value("PVConn").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PVConn") << "--> " << model->pvConn() << endl;
+        debug.nospace().noquote() << model->pvConn() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("PVConn") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("StorConn") << "-->";
     if (model->dataPoints().value("StorConn").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StorConn") << "--> " << model->storConn() << endl;
+        debug.nospace().noquote() << model->storConn() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StorConn") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ECPConn") << "-->";
     if (model->dataPoints().value("ECPConn").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ECPConn") << "--> " << model->ecpConn() << endl;
+        debug.nospace().noquote() << model->ecpConn() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ECPConn") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ActWh") << "-->";
     if (model->dataPoints().value("ActWh").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActWh") << "--> " << model->actWh() << endl;
+        debug.nospace().noquote() << model->actWh() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActWh") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVAh") << "-->";
     if (model->dataPoints().value("ActVAh").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVAh") << "--> " << model->actVAh() << endl;
+        debug.nospace().noquote() << model->actVAh() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVAh") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVArhQ1") << "-->";
     if (model->dataPoints().value("ActVArhQ1").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVArhQ1") << "--> " << model->actVArhQ1() << endl;
+        debug.nospace().noquote() << model->actVArhQ1() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVArhQ1") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVArhQ2") << "-->";
     if (model->dataPoints().value("ActVArhQ2").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVArhQ2") << "--> " << model->actVArhQ2() << endl;
+        debug.nospace().noquote() << model->actVArhQ2() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVArhQ2") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVArhQ3") << "-->";
     if (model->dataPoints().value("ActVArhQ3").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVArhQ3") << "--> " << model->actVArhQ3() << endl;
+        debug.nospace().noquote() << model->actVArhQ3() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVArhQ3") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVArhQ4") << "-->";
     if (model->dataPoints().value("ActVArhQ4").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVArhQ4") << "--> " << model->actVArhQ4() << endl;
+        debug.nospace().noquote() << model->actVArhQ4() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ActVArhQ4") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("VArAval") << "-->";
     if (model->dataPoints().value("VArAval").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArAval") << "--> " << model->vArAval() << endl;
+        debug.nospace().noquote() << model->vArAval() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("VArAval") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("WAval") << "-->";
     if (model->dataPoints().value("WAval").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WAval") << "--> " << model->wAval() << endl;
+        debug.nospace().noquote() << model->wAval() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WAval") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("StSetLimMsk") << "-->";
     if (model->dataPoints().value("StSetLimMsk").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StSetLimMsk") << "--> " << model->stSetLimMsk() << endl;
+        debug.nospace().noquote() << model->stSetLimMsk() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StSetLimMsk") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("StActCtl") << "-->";
     if (model->dataPoints().value("StActCtl").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StActCtl") << "--> " << model->stActCtl() << endl;
+        debug.nospace().noquote() << model->stActCtl() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StActCtl") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TmSrc") << "-->";
     if (model->dataPoints().value("TmSrc").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmSrc") << "--> " << model->tmSrc() << endl;
+        debug.nospace().noquote() << model->tmSrc() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmSrc") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Tms") << "-->";
     if (model->dataPoints().value("Tms").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Tms") << "--> " << model->tms() << endl;
+        debug.nospace().noquote() << model->tms() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Tms") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("RtSt") << "-->";
     if (model->dataPoints().value("RtSt").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("RtSt") << "--> " << model->rtSt() << endl;
+        debug.nospace().noquote() << model->rtSt() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("RtSt") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Ris") << "-->";
     if (model->dataPoints().value("Ris").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Ris") << "--> " << model->ris() << endl;
+        debug.nospace().noquote() << model->ris() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Ris") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
 

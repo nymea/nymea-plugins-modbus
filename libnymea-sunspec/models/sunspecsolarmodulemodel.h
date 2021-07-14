@@ -82,13 +82,17 @@ public:
     Q_DECLARE_FLAGS(EvtFlags, Evt)
     Q_FLAG(Evt)
 
-    explicit SunSpecSolarModuleModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);
+    explicit SunSpecSolarModuleModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
     ~SunSpecSolarModuleModel() override; 
 
     QString name() const override;
     QString description() const override;
     QString label() const override;
 
+    qint16 a_SF() const;
+    qint16 v_SF() const;
+    qint16 w_SF() const;
+    qint16 wh_SF() const;
     Stat status() const;
     quint16 vendorStatus() const;
     EvtFlags events() const;
@@ -115,6 +119,9 @@ public:
     float inputPower() const;
 
 protected:
+    quint16 m_fixedBlockLength = 28;
+
+    void initDataPoints() override;
     void processBlockData() override;
 
 private:
@@ -140,7 +147,6 @@ private:
     quint32 m_inputEnergy = 0;
     float m_inputPower = 0;
 
-    void initDataPoints();
 
 };
 

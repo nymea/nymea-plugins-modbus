@@ -31,11 +31,58 @@
 #include "sunspecflowbatterymodel.h"
 #include "sunspecconnection.h"
 
-SunSpecFlowBatteryModel::SunSpecFlowBatteryModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 806, 1, parent)
+SunSpecFlowBatteryModelRepeatingBlock::SunSpecFlowBatteryModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecFlowBatteryModel *parent) :
+    SunSpecModelRepeatingBlock(blockIndex, blockSize, modbusStartRegister, parent)
 {
-    //Q_ASSERT_X(length == 1,  "SunSpecFlowBatteryModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
-    Q_UNUSED(length)
+    initDataPoints();
+}
+
+QString SunSpecFlowBatteryModelRepeatingBlock::name() const
+{
+    return "battery_string";
+}
+
+SunSpecFlowBatteryModel *SunSpecFlowBatteryModelRepeatingBlock::parentModel() const
+{
+    return m_parentModel;
+}
+
+quint16 SunSpecFlowBatteryModelRepeatingBlock::batteryStringPointsToBeDetermined() const
+{
+    return m_batteryStringPointsToBeDetermined;
+}
+
+void SunSpecFlowBatteryModelRepeatingBlock::initDataPoints()
+{
+    SunSpecDataPoint batteryStringPointsToBeDeterminedDataPoint;
+    batteryStringPointsToBeDeterminedDataPoint.setName("BatStTBD");
+    batteryStringPointsToBeDeterminedDataPoint.setLabel("Battery String Points To Be Determined");
+    batteryStringPointsToBeDeterminedDataPoint.setMandatory(true);
+    batteryStringPointsToBeDeterminedDataPoint.setSize(1);
+    batteryStringPointsToBeDeterminedDataPoint.setAddressOffset(0);
+    batteryStringPointsToBeDeterminedDataPoint.setSunSpecDataType("uint16");
+    m_dataPoints.insert(batteryStringPointsToBeDeterminedDataPoint.name(), batteryStringPointsToBeDeterminedDataPoint);
+
+}
+
+void SunSpecFlowBatteryModelRepeatingBlock::processBlockData(const QVector<quint16> blockData)
+{
+    m_blockData = blockData;
+
+    // Update properties according to the data point type
+    if (m_dataPoints.value("BatStTBD").isValid())
+        m_batteryStringPointsToBeDetermined = m_dataPoints.value("BatStTBD").toUInt16();
+
+
+    qCDebug(dcSunSpecModelData()) << this;
+}
+
+
+SunSpecFlowBatteryModel::SunSpecFlowBatteryModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 806, modelLength, parent)
+{
+    m_modelBlockType = SunSpecModel::ModelBlockTypeFixedAndRepeating;
+
     initDataPoints();
 }
 
@@ -63,16 +110,6 @@ quint16 SunSpecFlowBatteryModel::batteryPointsToBeDetermined() const
 {
     return m_batteryPointsToBeDetermined;
 }
-void SunSpecFlowBatteryModel::processBlockData()
-{
-    // Update properties according to the data point type
-    if (m_dataPoints.value("BatTBD").isValid())
-        m_batteryPointsToBeDetermined = m_dataPoints.value("BatTBD").toUInt16();
-
-
-    qCDebug(dcSunSpecModelData()) << this;
-}
-
 void SunSpecFlowBatteryModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -107,13 +144,24 @@ void SunSpecFlowBatteryModel::initDataPoints()
 
 }
 
+void SunSpecFlowBatteryModel::processBlockData()
+{
+    // Update properties according to the data point type
+    if (m_dataPoints.value("BatTBD").isValid())
+        m_batteryPointsToBeDetermined = m_dataPoints.value("BatTBD").toUInt16();
+
+
+    qCDebug(dcSunSpecModelData()) << this;
+}
+
 QDebug operator<<(QDebug debug, SunSpecFlowBatteryModel *model)
 {
     debug.nospace().noquote() << "SunSpecFlowBatteryModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("BatTBD") << "-->";
     if (model->dataPoints().value("BatTBD").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("BatTBD") << "--> " << model->batteryPointsToBeDetermined() << endl;
+        debug.nospace().noquote() << model->batteryPointsToBeDetermined() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("BatTBD") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
 

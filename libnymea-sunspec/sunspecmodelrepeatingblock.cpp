@@ -28,41 +28,31 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef SUNSPECENERGYSTORAGEBASEMODELDEPRECATEDMODEL_H
-#define SUNSPECENERGYSTORAGEBASEMODELDEPRECATEDMODEL_H
-
-#include <QObject>
-
+#include "sunspecmodelrepeatingblock.h"
 #include "sunspecmodel.h"
 
-class SunSpecConnection;
-
-class SunSpecEnergyStorageBaseModelDeprecatedModel : public SunSpecModel
+SunSpecModelRepeatingBlock::SunSpecModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecModel *parent) :
+    QObject(parent),
+    m_blockIndex(blockIndex),
+    m_blockSize(blockSize),
+    m_modbusStartRegister(modbusStartRegister)
 {
-    Q_OBJECT
-public:
 
-    explicit SunSpecEnergyStorageBaseModelDeprecatedModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
-    ~SunSpecEnergyStorageBaseModelDeprecatedModel() override; 
+}
 
-    QString name() const override;
-    QString description() const override;
-    QString label() const override;
+quint16 SunSpecModelRepeatingBlock::blockIndex() const
+{
+    return m_blockIndex;
+}
 
-    quint16 deprecatedModel() const;
+quint16 SunSpecModelRepeatingBlock::blockSize() const
+{
+    return m_blockSize;
+}
 
-protected:
-    quint16 m_fixedBlockLength = 1;
-
-    void initDataPoints() override;
-    void processBlockData() override;
-
-private:
-    quint16 m_deprecatedModel = 0;
-
-
-};
-
-QDebug operator<<(QDebug debug, SunSpecEnergyStorageBaseModelDeprecatedModel *model);
-
-#endif // SUNSPECENERGYSTORAGEBASEMODELDEPRECATEDMODEL_H
+QDebug operator<<(QDebug debug, SunSpecModelRepeatingBlock *repeatingBlock)
+{
+    debug.nospace().noquote() << "SunSpecModelRepeatingBlock(Name: " << repeatingBlock->name();
+    debug.nospace().noquote() << ", Index: " << repeatingBlock->blockIndex() << ", Length: " << repeatingBlock->blockSize() << ")";
+    return debug.space().quote();
+}

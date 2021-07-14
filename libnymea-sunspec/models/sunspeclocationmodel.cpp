@@ -31,11 +31,11 @@
 #include "sunspeclocationmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecLocationModel::SunSpecLocationModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 305, 36, parent)
+SunSpecLocationModel::SunSpecLocationModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 305, modelLength, parent)
 {
-    //Q_ASSERT_X(length == 36,  "SunSpecLocationModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
-    Q_UNUSED(length)
+    m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
+
     initDataPoints();
 }
 
@@ -83,31 +83,6 @@ qint32 SunSpecLocationModel::altitude() const
 {
     return m_altitude;
 }
-void SunSpecLocationModel::processBlockData()
-{
-    // Update properties according to the data point type
-    if (m_dataPoints.value("Tm").isValid())
-        m_tm = m_dataPoints.value("Tm").toString();
-
-    if (m_dataPoints.value("Date").isValid())
-        m_date = m_dataPoints.value("Date").toString();
-
-    if (m_dataPoints.value("Loc").isValid())
-        m_location = m_dataPoints.value("Loc").toString();
-
-    if (m_dataPoints.value("Lat").isValid())
-        m_lat = m_dataPoints.value("Lat").toFloatWithSSF(-7);
-
-    if (m_dataPoints.value("Long").isValid())
-        m_longitude = m_dataPoints.value("Long").toFloatWithSSF(-7);
-
-    if (m_dataPoints.value("Alt").isValid())
-        m_altitude = m_dataPoints.value("Alt").toInt32();
-
-
-    qCDebug(dcSunSpecModelData()) << this;
-}
-
 void SunSpecLocationModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -200,43 +175,74 @@ void SunSpecLocationModel::initDataPoints()
 
 }
 
+void SunSpecLocationModel::processBlockData()
+{
+    // Update properties according to the data point type
+    if (m_dataPoints.value("Tm").isValid())
+        m_tm = m_dataPoints.value("Tm").toString();
+
+    if (m_dataPoints.value("Date").isValid())
+        m_date = m_dataPoints.value("Date").toString();
+
+    if (m_dataPoints.value("Loc").isValid())
+        m_location = m_dataPoints.value("Loc").toString();
+
+    if (m_dataPoints.value("Lat").isValid())
+        m_lat = m_dataPoints.value("Lat").toFloatWithSSF(-7);
+
+    if (m_dataPoints.value("Long").isValid())
+        m_longitude = m_dataPoints.value("Long").toFloatWithSSF(-7);
+
+    if (m_dataPoints.value("Alt").isValid())
+        m_altitude = m_dataPoints.value("Alt").toInt32();
+
+
+    qCDebug(dcSunSpecModelData()) << this;
+}
+
 QDebug operator<<(QDebug debug, SunSpecLocationModel *model)
 {
     debug.nospace().noquote() << "SunSpecLocationModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Tm") << "-->";
     if (model->dataPoints().value("Tm").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Tm") << "--> " << model->tm() << endl;
+        debug.nospace().noquote() << model->tm() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Tm") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Date") << "-->";
     if (model->dataPoints().value("Date").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Date") << "--> " << model->date() << endl;
+        debug.nospace().noquote() << model->date() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Date") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Loc") << "-->";
     if (model->dataPoints().value("Loc").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Loc") << "--> " << model->location() << endl;
+        debug.nospace().noquote() << model->location() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Loc") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Lat") << "-->";
     if (model->dataPoints().value("Lat").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Lat") << "--> " << model->lat() << endl;
+        debug.nospace().noquote() << model->lat() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Lat") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Long") << "-->";
     if (model->dataPoints().value("Long").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Long") << "--> " << model->longitude() << endl;
+        debug.nospace().noquote() << model->longitude() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Long") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Alt") << "-->";
     if (model->dataPoints().value("Alt").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Alt") << "--> " << model->altitude() << endl;
+        debug.nospace().noquote() << model->altitude() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Alt") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
 

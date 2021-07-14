@@ -75,7 +75,7 @@ public:
     Q_DECLARE_FLAGS(Evt1Flags, Evt1)
     Q_FLAG(Evt1)
 
-    explicit SunSpecInverterSinglePhaseModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);
+    explicit SunSpecInverterSinglePhaseModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
     ~SunSpecInverterSinglePhaseModel() override; 
 
     QString name() const override;
@@ -86,25 +86,37 @@ public:
     float ampsPhaseA() const;
     float ampsPhaseB() const;
     float ampsPhaseC() const;
+    qint16 a_SF() const;
     float phaseVoltageAb() const;
     float phaseVoltageBc() const;
     float phaseVoltageCa() const;
     float phaseVoltageAn() const;
     float phaseVoltageBn() const;
     float phaseVoltageCn() const;
+    qint16 v_SF() const;
     float watts() const;
+    qint16 w_SF() const;
     float hz() const;
+    qint16 hz_SF() const;
     float va() const;
+    qint16 vA_SF() const;
     float vAr() const;
+    qint16 vAr_SF() const;
     float pf() const;
+    qint16 pF_SF() const;
     quint32 wattHours() const;
+    qint16 wH_SF() const;
     float dcAmps() const;
+    qint16 dCA_SF() const;
     float dcVoltage() const;
+    qint16 dCV_SF() const;
     float dcWatts() const;
+    qint16 dCW_SF() const;
     float cabinetTemperature() const;
     float heatSinkTemperature() const;
     float transformerTemperature() const;
     float otherTemperature() const;
+    qint16 tmp_SF() const;
     St operatingState() const;
     quint16 vendorOperatingState() const;
     Evt1Flags event1() const;
@@ -115,6 +127,9 @@ public:
     quint32 vendorEventBitfield4() const;
 
 protected:
+    quint16 m_fixedBlockLength = 50;
+
+    void initDataPoints() override;
     void processBlockData() override;
 
 private:
@@ -162,7 +177,6 @@ private:
     quint32 m_vendorEventBitfield3 = 0;
     quint32 m_vendorEventBitfield4 = 0;
 
-    void initDataPoints();
 
 };
 

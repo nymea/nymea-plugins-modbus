@@ -54,7 +54,7 @@ public:
     Q_DECLARE_FLAGS(ModenaFlags, Modena)
     Q_FLAG(Modena)
 
-    explicit SunSpecFreqWattParamModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);
+    explicit SunSpecFreqWattParamModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
     ~SunSpecFreqWattParamModel() override; 
 
     QString name() const override;
@@ -80,9 +80,15 @@ public:
     float hzStopWGra() const;
     QModbusReply *setHzStopWGra(float hzStopWGra);
 
+    qint16 wGraSf() const;
+    qint16 hzStrStopSf() const;
+    qint16 rmpIncDecSf() const;
     quint16 pad() const;
 
 protected:
+    quint16 m_fixedBlockLength = 10;
+
+    void initDataPoints() override;
     void processBlockData() override;
 
 private:
@@ -97,7 +103,6 @@ private:
     qint16 m_rmpIncDecSf = 0;
     quint16 m_pad = 0;
 
-    void initDataPoints();
 
 };
 

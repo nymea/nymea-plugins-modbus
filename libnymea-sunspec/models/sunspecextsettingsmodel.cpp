@@ -31,11 +31,11 @@
 #include "sunspecextsettingsmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecExtSettingsModel::SunSpecExtSettingsModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 145, 8, parent)
+SunSpecExtSettingsModel::SunSpecExtSettingsModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 145, modelLength, parent)
 {
-    //Q_ASSERT_X(length == 8,  "SunSpecExtSettingsModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
-    Q_UNUSED(length)
+    m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
+
     initDataPoints();
 }
 
@@ -185,39 +185,10 @@ QModbusReply *SunSpecExtSettingsModel::setDefaultRampRate(float defaultRampRate)
 
     return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
-void SunSpecExtSettingsModel::processBlockData()
+qint16 SunSpecExtSettingsModel::rampRateScaleFactor() const
 {
-    // Scale factors
-    if (m_dataPoints.value("Rmp_SF").isValid())
-        m_rampRateScaleFactor = m_dataPoints.value("Rmp_SF").toInt16();
-
-
-    // Update properties according to the data point type
-    if (m_dataPoints.value("NomRmpUpRte").isValid())
-        m_rampUpRate = m_dataPoints.value("NomRmpUpRte").toFloatWithSSF(m_rampRateScaleFactor);
-
-    if (m_dataPoints.value("NomRmpDnRte").isValid())
-        m_nomRmpDnRte = m_dataPoints.value("NomRmpDnRte").toFloatWithSSF(m_rampRateScaleFactor);
-
-    if (m_dataPoints.value("EmgRmpUpRte").isValid())
-        m_emergencyRampUpRate = m_dataPoints.value("EmgRmpUpRte").toFloatWithSSF(m_rampRateScaleFactor);
-
-    if (m_dataPoints.value("EmgRmpDnRte").isValid())
-        m_emergencyRampDownRate = m_dataPoints.value("EmgRmpDnRte").toFloatWithSSF(m_rampRateScaleFactor);
-
-    if (m_dataPoints.value("ConnRmpUpRte").isValid())
-        m_connectRampUpRate = m_dataPoints.value("ConnRmpUpRte").toFloatWithSSF(m_rampRateScaleFactor);
-
-    if (m_dataPoints.value("ConnRmpDnRte").isValid())
-        m_connectRampDownRate = m_dataPoints.value("ConnRmpDnRte").toFloatWithSSF(m_rampRateScaleFactor);
-
-    if (m_dataPoints.value("AGra").isValid())
-        m_defaultRampRate = m_dataPoints.value("AGra").toFloatWithSSF(m_rampRateScaleFactor);
-
-
-    qCDebug(dcSunSpecModelData()) << this;
+    return m_rampRateScaleFactor;
 }
-
 void SunSpecExtSettingsModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -343,49 +314,92 @@ void SunSpecExtSettingsModel::initDataPoints()
 
 }
 
+void SunSpecExtSettingsModel::processBlockData()
+{
+    // Scale factors
+    if (m_dataPoints.value("Rmp_SF").isValid())
+        m_rampRateScaleFactor = m_dataPoints.value("Rmp_SF").toInt16();
+
+
+    // Update properties according to the data point type
+    if (m_dataPoints.value("NomRmpUpRte").isValid())
+        m_rampUpRate = m_dataPoints.value("NomRmpUpRte").toFloatWithSSF(m_rampRateScaleFactor);
+
+    if (m_dataPoints.value("NomRmpDnRte").isValid())
+        m_nomRmpDnRte = m_dataPoints.value("NomRmpDnRte").toFloatWithSSF(m_rampRateScaleFactor);
+
+    if (m_dataPoints.value("EmgRmpUpRte").isValid())
+        m_emergencyRampUpRate = m_dataPoints.value("EmgRmpUpRte").toFloatWithSSF(m_rampRateScaleFactor);
+
+    if (m_dataPoints.value("EmgRmpDnRte").isValid())
+        m_emergencyRampDownRate = m_dataPoints.value("EmgRmpDnRte").toFloatWithSSF(m_rampRateScaleFactor);
+
+    if (m_dataPoints.value("ConnRmpUpRte").isValid())
+        m_connectRampUpRate = m_dataPoints.value("ConnRmpUpRte").toFloatWithSSF(m_rampRateScaleFactor);
+
+    if (m_dataPoints.value("ConnRmpDnRte").isValid())
+        m_connectRampDownRate = m_dataPoints.value("ConnRmpDnRte").toFloatWithSSF(m_rampRateScaleFactor);
+
+    if (m_dataPoints.value("AGra").isValid())
+        m_defaultRampRate = m_dataPoints.value("AGra").toFloatWithSSF(m_rampRateScaleFactor);
+
+    if (m_dataPoints.value("Rmp_SF").isValid())
+        m_rampRateScaleFactor = m_dataPoints.value("Rmp_SF").toInt16();
+
+
+    qCDebug(dcSunSpecModelData()) << this;
+}
+
 QDebug operator<<(QDebug debug, SunSpecExtSettingsModel *model)
 {
     debug.nospace().noquote() << "SunSpecExtSettingsModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("NomRmpUpRte") << "-->";
     if (model->dataPoints().value("NomRmpUpRte").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("NomRmpUpRte") << "--> " << model->rampUpRate() << endl;
+        debug.nospace().noquote() << model->rampUpRate() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("NomRmpUpRte") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("NomRmpDnRte") << "-->";
     if (model->dataPoints().value("NomRmpDnRte").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("NomRmpDnRte") << "--> " << model->nomRmpDnRte() << endl;
+        debug.nospace().noquote() << model->nomRmpDnRte() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("NomRmpDnRte") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("EmgRmpUpRte") << "-->";
     if (model->dataPoints().value("EmgRmpUpRte").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("EmgRmpUpRte") << "--> " << model->emergencyRampUpRate() << endl;
+        debug.nospace().noquote() << model->emergencyRampUpRate() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("EmgRmpUpRte") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("EmgRmpDnRte") << "-->";
     if (model->dataPoints().value("EmgRmpDnRte").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("EmgRmpDnRte") << "--> " << model->emergencyRampDownRate() << endl;
+        debug.nospace().noquote() << model->emergencyRampDownRate() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("EmgRmpDnRte") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ConnRmpUpRte") << "-->";
     if (model->dataPoints().value("ConnRmpUpRte").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ConnRmpUpRte") << "--> " << model->connectRampUpRate() << endl;
+        debug.nospace().noquote() << model->connectRampUpRate() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ConnRmpUpRte") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ConnRmpDnRte") << "-->";
     if (model->dataPoints().value("ConnRmpDnRte").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ConnRmpDnRte") << "--> " << model->connectRampDownRate() << endl;
+        debug.nospace().noquote() << model->connectRampDownRate() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ConnRmpDnRte") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("AGra") << "-->";
     if (model->dataPoints().value("AGra").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("AGra") << "--> " << model->defaultRampRate() << endl;
+        debug.nospace().noquote() << model->defaultRampRate() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("AGra") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
 

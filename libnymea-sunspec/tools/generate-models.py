@@ -173,13 +173,11 @@ def writeLicenseHeader(fileDescriptor):
     writeLine(fileDescriptor)
 
 
-def writeClassEnums(fileDescriptor, className, modelId):
+def writeClassEnums(fileDescriptor, className, points):
     print('--> Writing enums for', className)
-    # name, symbols[]
-    enumDefinitions = {}
+    enumDefinitions = {} # name, symbols[]
+
     # Get unique enums
-    modelData = models[modelId]
-    points = modelData['group']['points']
     for pointData in points:
         if 'type' in pointData and pointData['type'].startswith('enum') and 'symbols' in pointData:
             #print('Found enum in point data:', pointData['name'], pointData['symbols'])
@@ -208,14 +206,11 @@ def writeClassEnums(fileDescriptor, className, modelId):
         writeLine(fileDescriptor)
 
 
-def writeClassFlags(fileDescriptor, className, modelId):
+def writeClassFlags(fileDescriptor, className, points):
     print('--> Writing flags for', className)
-    # name, symbols[]
-    enumDefinitions = {}
+    enumDefinitions = {} # name, symbols[]
 
     # Get unique flags
-    modelData = models[modelId]
-    points = modelData['group']['points']
     for pointData in points:
         if 'type' in pointData and pointData['type'].startswith('bitfield') and 'symbols' in pointData:
             #print('Found enum in point data:', pointData['name'], pointData['symbols'])
@@ -313,6 +308,10 @@ def getPropertyName(dataPoint):
     if propertyName == 'long':
         propertyName = 'longitude'
 
+    if propertyName == 'pad':
+        propertyName = dataPoint['name']
+
+
     if propertyName == 'event':
         propertyName = 'eventFlags'
 
@@ -326,6 +325,14 @@ def getModelLength(modelData):
         modelLength += dataPoint['size']    
 
     return modelLength - modelHeaderSize
+
+
+def getGroupBlockLength(dataPoints):
+    modelLength = 0
+    for dataPoint in dataPoints:
+        modelLength += dataPoint['size']    
+
+    return modelLength
 
 
 def getCppType(dataPoint):
@@ -553,22 +560,26 @@ def getConvertionMethodToSunspecType(dataPoint, scaleFactorProperty):
     elif typeString == 'int32':
         line += ('convertFromInt32(%s);' % propertyName)
 
+    elif typeString == 'int64':
+        line += ('convertFromInt64(%s);' % propertyName)
+
+    elif typeString == 'float32':
+        line += ('convertFromFloat32(%s);' % propertyName)
+
+    elif typeString == 'float64':
+        line += ('convertFromFloat64(%s);' % propertyName)
+
+    elif typeString == 'string':
+        line += ('convertFromString(%s, dp.size());' % (propertyName, ))
+
     else:
         line = 'QVector<quint16> registers;'
     
     return line
 
 
-
-
-
-def addPropertiesMethodDeclaration(fileDescriptor, modelId):
+def addPropertiesMethodDeclaration(fileDescriptor, dataPoints):
     print('Write member get method declarations')
-
-    # Picking the first model for now, since they should work all the same within one group
-    modelData = models[modelId]
-    dataPoints = modelData['group']['points']
-
     previouseHadWriteMethod = False
     for dataPoint in dataPoints:
         defineWriteMethod = ('access' in dataPoint and dataPoint['access'] == 'RW')
@@ -583,10 +594,6 @@ def addPropertiesMethodDeclaration(fileDescriptor, modelId):
             continue
 
         typeName = dataPoint['type']
-        # Note: we don't want to provide public access to scale factors
-        if typeName == 'sunssf':
-            continue
-        
         writeLine(fileDescriptor, '    %s %s() const;' %(getCppType(dataPoint), propertyName))
 
         if defineWriteMethod:
@@ -598,11 +605,59 @@ def addPropertiesMethodDeclaration(fileDescriptor, modelId):
             writeLine(fileDescriptor)
 
 
-def addPropertiesMethodImplementation(fileDescriptor, className, modelId):
+def addPropertiesMethodImplementation(fileDescriptor, className, dataPoints):
     print('Write member get method implementations')
-    # Picking the first model for now, since they should work all the same within one group
-    modelData = models[modelId]
-    dataPoints = modelData['group']['points']
+    for dataPoint in dataPoints:
+        defineWriteMethod = ('access' in dataPoint and dataPoint['access'] == 'RW')
+        propertyName = getPropertyName(dataPoint)
+
+        # Those properties are static defined from this script
+        if propertyName == 'modelId' or propertyName == 'modelLength':
+            continue
+
+        typeName = dataPoint['type']
+
+        cppType = getCppType(dataPoint)
+        if cppType[0].isupper() and cppType[0] != 'Q':
+            writeLine(fileDescriptor, '%s::%s %s::%s() const' % (className, cppType, className, propertyName))
+        else:
+            writeLine(fileDescriptor, '%s %s::%s() const' % (cppType, className, propertyName))
+
+        writeLine(fileDescriptor, '{')
+        writeLine(fileDescriptor, '    return m_%s;' % propertyName)
+        writeLine(fileDescriptor, '}')
+        
+        if defineWriteMethod:
+            writeLine(fileDescriptor)
+            if dataPoint['type'] == 'string':
+                writeLine(fileDescriptor, 'QModbusReply *%s::set%s(const %s &%s)' % (className, convertToCamelCase(propertyName, True), getCppType(dataPoint), propertyName))
+            else:
+                writeLine(fileDescriptor, 'QModbusReply *%s::set%s(%s %s)' % (className,convertToCamelCase(propertyName, True), getCppType(dataPoint), propertyName))
+
+            writeLine(fileDescriptor, '{')
+            writeLine(fileDescriptor, '    if (!m_initialized)')
+            writeLine(fileDescriptor, '        return nullptr;')
+            writeLine(fileDescriptor)
+            writeLine(fileDescriptor, '    SunSpecDataPoint dp = m_dataPoints.value("%s");' % dataPoint['name'])
+            scaleFactorProperty = ''
+            if 'sf' in dataPoint:
+                # Get the scale factor propery
+                for dp in dataPoints:
+                    if dp['name'] == dataPoint['sf']:
+                        scaleFactorProperty = 'm_' + getPropertyName(dp)
+
+
+            writeLine(fileDescriptor, '    ' + getConvertionMethodToSunspecType(dataPoint, scaleFactorProperty))
+            writeLine(fileDescriptor)
+            writeLine(fileDescriptor, '    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());')
+            writeLine(fileDescriptor, '    request.setValues(registers);')
+            writeLine(fileDescriptor)
+            writeLine(fileDescriptor, '    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());')
+            writeLine(fileDescriptor, '}')
+
+
+def addPropertiesMethodImplementationRepeatingBlock(fileDescriptor, className, dataPoints, parentDataPoints):
+    print('Write property method implementation for repeating blocks')
     for dataPoint in dataPoints:
         defineWriteMethod = ('access' in dataPoint and dataPoint['access'] == 'RW')
         propertyName = getPropertyName(dataPoint)
@@ -634,32 +689,38 @@ def addPropertiesMethodImplementation(fileDescriptor, className, modelId):
                 writeLine(fileDescriptor, 'QModbusReply *%s::set%s(%s %s)' % (className,convertToCamelCase(propertyName, True), getCppType(dataPoint), propertyName))
 
             writeLine(fileDescriptor, '{')
-            writeLine(fileDescriptor, '    if (!m_initialized)')
-            writeLine(fileDescriptor, '        return nullptr;')
-            writeLine(fileDescriptor)
             writeLine(fileDescriptor, '    SunSpecDataPoint dp = m_dataPoints.value("%s");' % dataPoint['name'])
             scaleFactorProperty = ''
             if 'sf' in dataPoint:
+                # First check if we have the scale factor in the block
                 # Get the scale factor propery
                 for dp in dataPoints:
                     if dp['name'] == dataPoint['sf']:
                         scaleFactorProperty = 'm_' + getPropertyName(dp)
+
+                if scaleFactorProperty == '':
+                    # Lets pick the scale factor from the parent model class
+                    for dp in parentDataPoints:
+                        if dp['name'] == dataPoint['sf']:
+                            scaleFactorProperty = ('m_parentModel->%s()' % getPropertyName(dp))
 
             writeLine(fileDescriptor, '    ' + getConvertionMethodToSunspecType(dataPoint, scaleFactorProperty))
             writeLine(fileDescriptor)
             writeLine(fileDescriptor, '    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());')
             writeLine(fileDescriptor, '    request.setValues(registers);')
             writeLine(fileDescriptor)
-            writeLine(fileDescriptor, '    return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());')
+            writeLine(fileDescriptor, '    return m_parentModel->connection()->modbusTcpClient()->sendWriteRequest(request, m_parentModel->connection()->slaveId());')
             writeLine(fileDescriptor, '}')
+            writeLine(fileDescriptor)
 
 
 
-def addPropertiesDeclaration(fileDescriptor, modelId):
+
+
+
+
+def addPropertiesDeclaration(fileDescriptor, dataPoints):
     print('Write private members')
-    # Picking the first model for now, since they should work all the same within one group
-    modelData = models[modelId]
-    dataPoints = modelData['group']['points']
     for dataPoint in dataPoints:
         propertyName = getPropertyName(dataPoint)
 
@@ -675,10 +736,8 @@ def addPropertiesDeclaration(fileDescriptor, modelId):
         writeLine(fileDescriptor, '    %s m_%s%s;' %(cppType, propertyName, initValue))
 
 
-def writeProcessDataImplementation(fileDescriptor, className, modelId):
+def writeProcessDataImplementation(fileDescriptor, className, dataPoints, parentDataPoints = None):
     print('Write processData() implementation')
-    modelData = models[modelId]
-    dataPoints = modelData['group']['points']
 
     # Parse first the scale factors:
     hasScaleFactors = False
@@ -702,7 +761,7 @@ def writeProcessDataImplementation(fileDescriptor, className, modelId):
     for dataPoint in dataPoints:
         propertyName = getPropertyName(dataPoint)
         # Those properties are static defined from this script
-        if dataPoint['type'] == 'sunssf' or propertyName == 'modelId' or propertyName == 'modelLength':
+        if propertyName == 'modelId' or propertyName == 'modelLength':
             continue
 
         writeLine(fileDescriptor, '    if (m_dataPoints.value("%s").isValid())' % (dataPoint['name']))
@@ -713,6 +772,14 @@ def writeProcessDataImplementation(fileDescriptor, className, modelId):
             for dp in dataPoints:
                 if dp['name'] == dataPoint['sf']:
                     scaleFactorProperty = 'm_' + getPropertyName(dp)
+
+            if scaleFactorProperty == '' and parentDataPoints != None:
+                # Lets pick the scale factor from the parent model class
+                for dp in parentDataPoints:
+                    if dp['name'] == dataPoint['sf']:
+                        scaleFactorProperty = ('m_parentModel->%s()' % getPropertyName(dp))
+
+
 
             convertionMethod = getConvertionMethodFromSunspecType(dataPoint, scaleFactorProperty)
             writeLine(fileDescriptor, '        m_%s = %s;' % (getPropertyName(dataPoint), convertionMethod))
@@ -741,21 +808,168 @@ def writePropertyDebugLine(fileDescriptor, className, modelId):
 
         propertyName = getPropertyName(dataPoint)
         dataPointString = ('model->dataPoints().value("%s")' % dataPoint['name'])
-
+        writeLine(fileDescriptor, '    debug.nospace().noquote() << "    - " << %s << "-->";' % dataPointString)
         writeLine(fileDescriptor, '    if (%s.isValid()) {' % (dataPointString))
-        writeLine(fileDescriptor, '        debug.nospace().noquote() << "    - " << %s << "--> " << model->%s() << endl;' % (dataPointString, propertyName))
+        writeLine(fileDescriptor, '        debug.nospace().noquote() << model->%s() << endl;' % (propertyName))
         writeLine(fileDescriptor, '    } else {')
-        writeLine(fileDescriptor, '        debug.nospace().noquote() << "    - " << %s << "--> NaN" << endl;' % (dataPointString))
+        writeLine(fileDescriptor, '        debug.nospace().noquote() << "NaN" << endl;')
         writeLine(fileDescriptor, '    }')
         writeLine(fileDescriptor)
     
     writeLine(fileDescriptor)
 
 
+def writeRepeatingBlockClassDefinition(fileDescriptor, className, modelId):
+    print('Write repeating block class definition')
+    modelData = models[modelId]
+    blockData = {}
+    if 'group' in modelData and 'groups' in modelData['group']:
+        blockData = modelData['group']['groups'][0]
+    elif not 'group' in modelData and 'groups' in modelData:
+        blockData = modelData['groups']
+    else:
+        return
+
+    blockClassName = ("%sRepeatingBlock" % className)
+    dataPoints = blockData['points']
+
+    # Begin of class
+    writeLine(fileDescriptor, 'class %s;' % className)
+    writeLine(fileDescriptor)
+
+    writeLine(fileDescriptor, 'class %s : public SunSpecModelRepeatingBlock' % blockClassName)
+    writeLine(fileDescriptor, '{')
+    writeLine(fileDescriptor, '    Q_OBJECT')
+    
+    # Public members
+    writeLine(fileDescriptor, 'public:')
+
+    # Enum declarations
+    writeLine(fileDescriptor)
+    writeClassEnums(fileDescriptor, className, dataPoints)
+    writeClassFlags(fileDescriptor, className, dataPoints)
+
+   # Constructor
+    writeLine(fileDescriptor, '    explicit %s(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, %s *parent = nullptr);' % (blockClassName, className))
+    writeLine(fileDescriptor, '    ~%s() override; ' % blockClassName)
+    writeLine(fileDescriptor)
+
+    writeLine(fileDescriptor, '    %s *parentModel() const; ' % className)
+    writeLine(fileDescriptor)
+    writeLine(fileDescriptor, '    QString name() const override;')
+
+    # Properties
+    addPropertiesMethodDeclaration(fileDescriptor, dataPoints)
+
+    writeLine(fileDescriptor)
+    writeLine(fileDescriptor, '    void processBlockData(const QVector<quint16> blockData) override;')
+
+    # Protected members
+    writeLine(fileDescriptor)
+    writeLine(fileDescriptor, 'protected:')
+    writeLine(fileDescriptor, '    void initDataPoints() override;')
+    
+    # Private members
+    writeLine(fileDescriptor)
+    writeLine(fileDescriptor, 'private:')
+    writeLine(fileDescriptor, '    %s *m_parentModel = nullptr; ' % className)
+    writeLine(fileDescriptor)
+
+    addPropertiesDeclaration(fileDescriptor, dataPoints)
+    writeLine(fileDescriptor)
+
+    writeLine(fileDescriptor, '};')
+    writeLine(fileDescriptor)
+
+
+
+
+
+
+
+
+
+def writeRepeatingBlockClassImplementation(fileDescriptor, className, modelId):
+    print('Write repeating block class implementation')
+    modelData = models[modelId]
+    blockData = {}
+    if 'group' in modelData and 'groups' in modelData['group']:
+        blockData = modelData['group']['groups'][0]
+    elif not 'group' in modelData and 'groups' in modelData:
+        blockData = modelData['groups']
+    else:
+        return
+
+    blockClassName = ("%sRepeatingBlock" % className)
+    dataPoints = blockData['points']
+
+    # Constructor
+    writeLine(fileDescriptor, '%s::%s(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, %s *parent) :' % (blockClassName, blockClassName, className))
+    writeLine(fileDescriptor, '    SunSpecModelRepeatingBlock(blockIndex, blockSize, modbusStartRegister, parent)')
+    writeLine(fileDescriptor, '{')
+    writeLine(fileDescriptor, '    initDataPoints();')
+    writeLine(fileDescriptor, '}')
+    writeLine(fileDescriptor)
+
+   # Name
+    writeLine(fileDescriptor, 'QString %s::name() const' % blockClassName)
+    writeLine(fileDescriptor, '{')
+    if 'name' in modelData['group']:
+        writeLine(fileDescriptor, '    return "%s";' % blockData['name'])
+    else:
+        writeLine(fileDescriptor, '    return QString();')
+    writeLine(fileDescriptor, '}')
+    writeLine(fileDescriptor)
+
+    # Parent model
+    writeLine(fileDescriptor, '%s *%s::parentModel() const' % (className, blockClassName))
+    writeLine(fileDescriptor, '{')
+    writeLine(fileDescriptor, '    return m_parentModel;')
+    writeLine(fileDescriptor, '}')
+    writeLine(fileDescriptor)
+
+    # Properties
+    addPropertiesMethodImplementationRepeatingBlock(fileDescriptor, blockClassName, dataPoints, modelData['group']['points'])
+    writeLine(fileDescriptor)
+
+
+    # Init data points
+    writeLine(fileDescriptor, 'void %s::initDataPoints()' % blockClassName)
+    writeLine(fileDescriptor, '{')
+    addressOffset = 0
+    for dataPoint in dataPoints:
+        dataSize = addDataPointInitialization(fileDescriptor, dataPoint, addressOffset)
+        addressOffset += dataSize
+
+    writeLine(fileDescriptor, '}')
+    writeLine(fileDescriptor)
+
+    # Process data 
+    writeLine(fileDescriptor, 'void %s::processBlockData(const QVector<quint16> blockData)' % blockClassName)
+    writeLine(fileDescriptor, '{')
+    writeLine(fileDescriptor, '    m_blockData = blockData;')
+    writeLine(fileDescriptor)
+    writeProcessDataImplementation(fileDescriptor, blockClassName, dataPoints, modelData['group']['points'])
+    writeLine(fileDescriptor, '}')
+    writeLine(fileDescriptor)
+
+    writeLine(fileDescriptor)
+
+
+
+
+
+
+
+
+
 def writeHeaderFile(headerFileName, className, modelId):
     headerFileBaseName = os.path.basename(headerFileName)
     headerFiles.append(headerFileBaseName)
     print('Writing header file', headerFileBaseName)
+
+    modelData = models[modelId]
+    containingRepeatingBlock = ('group' in modelData and 'groups' in modelData['group']) or (not 'group' in modelData and 'groups' in modelData)
 
     fileDescriptor = open(headerFileName, 'w')
     writeLicenseHeader(fileDescriptor)
@@ -765,12 +979,21 @@ def writeHeaderFile(headerFileName, className, modelId):
     writeLine(fileDescriptor, '#include <QObject>')
     writeLine(fileDescriptor)
     writeLine(fileDescriptor, '#include "sunspecmodel.h"')
+    if containingRepeatingBlock:
+        writeLine(fileDescriptor, '#include "sunspecmodelrepeatingblock.h"')
+
     writeLine(fileDescriptor)
 
     writeLine(fileDescriptor, 'class SunSpecConnection;')
-    writeLine(fileDescriptor)
+
+    # Write the repeating block definition if required
+    if containingRepeatingBlock:
+        writeRepeatingBlockClassDefinition(fileDescriptor, className, modelId)
+        writeLine(fileDescriptor)
+
 
     # Begin of class
+    writeLine(fileDescriptor)
     writeLine(fileDescriptor, 'class %s : public SunSpecModel' % className)
     writeLine(fileDescriptor, '{')
     writeLine(fileDescriptor, '    Q_OBJECT')
@@ -779,12 +1002,13 @@ def writeHeaderFile(headerFileName, className, modelId):
     writeLine(fileDescriptor, 'public:')
 
     # Enum declarations
+    dataPoints = modelData['group']['points']
     writeLine(fileDescriptor)
-    writeClassEnums(fileDescriptor, className, modelId)
-    writeClassFlags(fileDescriptor, className, modelId)
+    writeClassEnums(fileDescriptor, className, dataPoints)
+    writeClassFlags(fileDescriptor, className, dataPoints)
 
     # Constructor
-    writeLine(fileDescriptor, '    explicit %s(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);' % className)
+    writeLine(fileDescriptor, '    explicit %s(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);' % className)
     writeLine(fileDescriptor, '    ~%s() override; ' % className)
     writeLine(fileDescriptor)
 
@@ -795,20 +1019,33 @@ def writeHeaderFile(headerFileName, className, modelId):
     writeLine(fileDescriptor)
 
     # Properties
-    addPropertiesMethodDeclaration(fileDescriptor, modelId)
+    addPropertiesMethodDeclaration(fileDescriptor, dataPoints)
 
     # Protected members
     writeLine(fileDescriptor)
     writeLine(fileDescriptor, 'protected:')
+    writeLine(fileDescriptor, '    quint16 m_fixedBlockLength = %s;' % getModelLength(models[modelId]))
+
+    # Check if there are repeating blocks within the module
+    modelData = models[modelId]
+    if 'group' in modelData and 'groups' in modelData['group']:
+        print('Repearing block detected')
+        writeLine(fileDescriptor, '    quint16 m_repeatingBlockLength = %s;' % getGroupBlockLength(modelData['group']['groups'][0]['points']))
+    elif 'groups' in modelData and not 'group' in modelData:
+        print('Repearing block detected')
+        writeLine(fileDescriptor, '    quint16 m_repeatingBlockLength = %s;' % getGroupBlockLength(modelData['groups'][0]['points']))
+        writeLine(fileDescriptor)
+
+    writeLine(fileDescriptor)
+
+    writeLine(fileDescriptor, '    void initDataPoints() override;')
     writeLine(fileDescriptor, '    void processBlockData() override;')
 
     # Private members
     writeLine(fileDescriptor)
     writeLine(fileDescriptor, 'private:')
-    addPropertiesDeclaration(fileDescriptor, modelId)
+    addPropertiesDeclaration(fileDescriptor, dataPoints)
     writeLine(fileDescriptor)
-
-    writeLine(fileDescriptor, '    void initDataPoints();')
 
     # End of class
     writeLine(fileDescriptor)
@@ -830,13 +1067,31 @@ def writeSourceFile(sourceFileName, className, modelId):
     writeLine(fileDescriptor, '#include "sunspecconnection.h"')
     writeLine(fileDescriptor)
     
+    modelData = models[modelId]
+    containingRepeatingBlock = ('group' in modelData and 'groups' in modelData['group']) or (not 'group' in modelData and 'groups' in modelData)
+    if containingRepeatingBlock:
+        writeRepeatingBlockClassImplementation(fileDescriptor, className, modelId)
+
     # Constructor
-    writeLine(fileDescriptor, '%s::%s(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :' % (className, className))
-    writeLine(fileDescriptor, '    SunSpecModel(connection, modbusStartRegister, %s, %s, parent)' % (modelId, getModelLength(models[modelId])))
+    writeLine(fileDescriptor, '%s::%s(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :' % (className, className))
+    writeLine(fileDescriptor, '    SunSpecModel(connection, modbusStartRegister, %s, modelLength, parent)' % modelId)
     writeLine(fileDescriptor, '{')
-    assertMessage = 'QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1()'
-    writeLine(fileDescriptor, '    //Q_ASSERT_X(length == %s,  "%s", %s);' % (getModelLength(models[modelId]), className, assertMessage))
-    writeLine(fileDescriptor, '    Q_UNUSED(length)')
+    #assertMessage = 'QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(modelLength).arg(m_modelLengthSunSpec).toLatin1()'
+    #writeLine(fileDescriptor, '    //Q_ASSERT_X(modelLength == m_modelLengthSunSpec,  "%s", %s);' % (className, assertMessage))
+
+    if 'group' in modelData and 'groups' in modelData['group']:
+        writeLine(fileDescriptor, '    m_modelBlockType = SunSpecModel::ModelBlockTypeFixedAndRepeating;')
+        writeLine(fileDescriptor)
+    elif not 'group' in modelData and 'groups' in modelData:
+        writeLine(fileDescriptor, '    m_modelBlockType = SunSpecModel::ModelBlockTypeRepeating;')
+        writeLine(fileDescriptor)
+    elif 'group' in modelData and not 'groups' in modelData['group']:
+        writeLine(fileDescriptor, '    m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;')
+        writeLine(fileDescriptor)
+
+
+    #writeLine(fileDescriptor, '    if (modelLength != m_modelLengthSunSpec)')
+    #writeLine(fileDescriptor, '        qCWarning(dcSunSpecModelData()) << qobject_cast<SunSpecModel *>(this) << "does not have the same length as specified from SunSpec" << m_modelLengthSunSpec;')
     writeLine(fileDescriptor, '    initDataPoints();')
     writeLine(fileDescriptor, '}')
     writeLine(fileDescriptor)
@@ -854,8 +1109,8 @@ def writeSourceFile(sourceFileName, className, modelId):
     # Name
     writeLine(fileDescriptor, 'QString %s::name() const' % className)
     writeLine(fileDescriptor, '{')
-    if 'name' in models[modelId]['group']:
-        writeLine(fileDescriptor, '    return "%s";' % models[modelId]['group']['name'])
+    if 'name' in modelData['group']:
+        writeLine(fileDescriptor, '    return "%s";' % modelData['group']['name'])
     else:
         writeLine(fileDescriptor, '    return QString();')
     writeLine(fileDescriptor, '}')
@@ -864,8 +1119,8 @@ def writeSourceFile(sourceFileName, className, modelId):
     # Description
     writeLine(fileDescriptor, 'QString %s::description() const' % className)
     writeLine(fileDescriptor, '{')
-    if 'desc' in models[modelId]['group']:
-        writeLine(fileDescriptor, '    return "%s";' % models[modelId]['group']['desc'])
+    if 'desc' in modelData['group']:
+        writeLine(fileDescriptor, '    return "%s";' % modelData['group']['desc'])
     else:
         writeLine(fileDescriptor, '    return QString();')
     writeLine(fileDescriptor, '}')
@@ -875,8 +1130,8 @@ def writeSourceFile(sourceFileName, className, modelId):
     # Label
     writeLine(fileDescriptor, 'QString %s::label() const' % className)
     writeLine(fileDescriptor, '{')
-    if 'label' in models[modelId]['group']:
-        writeLine(fileDescriptor, '    return "%s";' % models[modelId]['group']['label'])
+    if 'label' in modelData['group']:
+        writeLine(fileDescriptor, '    return "%s";' % modelData['group']['label'])
     else:
         writeLine(fileDescriptor, '    return QString();')
 
@@ -884,24 +1139,24 @@ def writeSourceFile(sourceFileName, className, modelId):
     writeLine(fileDescriptor)
 
     # Property get methods
-    addPropertiesMethodImplementation(fileDescriptor, className, modelId)
-
-    # Process data 
-    writeLine(fileDescriptor, 'void %s::processBlockData()' % className)
-    writeLine(fileDescriptor, '{')  
-    writeProcessDataImplementation(fileDescriptor, className, modelId)
-    writeLine(fileDescriptor, '}')
-    writeLine(fileDescriptor)
+    dataPoints = modelData['group']['points']
+    addPropertiesMethodImplementation(fileDescriptor, className, dataPoints)
 
     # Init data points
     writeLine(fileDescriptor, 'void %s::initDataPoints()' % className)
     writeLine(fileDescriptor, '{')
-    dataPoints = models[modelId]['group']['points']
     addressOffset = 0
     for dataPoint in dataPoints:
         dataSize = addDataPointInitialization(fileDescriptor, dataPoint, addressOffset)
         addressOffset += dataSize
 
+    writeLine(fileDescriptor, '}')
+    writeLine(fileDescriptor)
+
+    # Process data 
+    writeLine(fileDescriptor, 'void %s::processBlockData()' % className)
+    writeLine(fileDescriptor, '{')  
+    writeProcessDataImplementation(fileDescriptor, className, dataPoints)
     writeLine(fileDescriptor, '}')
     writeLine(fileDescriptor)
 

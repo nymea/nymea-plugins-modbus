@@ -34,15 +34,44 @@
 #include <QObject>
 
 #include "sunspecmodel.h"
+#include "sunspecmodelrepeatingblock.h"
 
 class SunSpecConnection;
+class SunSpecFlowBatteryModuleModel;
+
+class SunSpecFlowBatteryModuleModelRepeatingBlock : public SunSpecModelRepeatingBlock
+{
+    Q_OBJECT
+public:
+
+    explicit SunSpecFlowBatteryModuleModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecFlowBatteryModuleModel *parent = nullptr);
+    ~SunSpecFlowBatteryModuleModelRepeatingBlock() override; 
+
+    SunSpecFlowBatteryModuleModel *parentModel() const; 
+
+    QString name() const override;
+    quint16 stackPointsToBeDetermined() const;
+
+    void processBlockData(const QVector<quint16> blockData) override;
+
+protected:
+    void initDataPoints() override;
+
+private:
+    SunSpecFlowBatteryModuleModel *m_parentModel = nullptr; 
+
+    quint16 m_stackPointsToBeDetermined = 0;
+
+};
+
+
 
 class SunSpecFlowBatteryModuleModel : public SunSpecModel
 {
     Q_OBJECT
 public:
 
-    explicit SunSpecFlowBatteryModuleModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);
+    explicit SunSpecFlowBatteryModuleModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
     ~SunSpecFlowBatteryModuleModel() override; 
 
     QString name() const override;
@@ -52,12 +81,15 @@ public:
     quint16 modulePointsToBeDetermined() const;
 
 protected:
+    quint16 m_fixedBlockLength = 1;
+    quint16 m_repeatingBlockLength = 1;
+
+    void initDataPoints() override;
     void processBlockData() override;
 
 private:
     quint16 m_modulePointsToBeDetermined = 0;
 
-    void initDataPoints();
 
 };
 

@@ -31,11 +31,11 @@
 #include "sunspecminimetmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecMiniMetModel::SunSpecMiniMetModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 308, 4, parent)
+SunSpecMiniMetModel::SunSpecMiniMetModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 308, modelLength, parent)
 {
-    //Q_ASSERT_X(length == 4,  "SunSpecMiniMetModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
-    Q_UNUSED(length)
+    m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
+
     initDataPoints();
 }
 
@@ -75,25 +75,6 @@ quint16 SunSpecMiniMetModel::windSpeed() const
 {
     return m_windSpeed;
 }
-void SunSpecMiniMetModel::processBlockData()
-{
-    // Update properties according to the data point type
-    if (m_dataPoints.value("GHI").isValid())
-        m_ghi = m_dataPoints.value("GHI").toUInt16();
-
-    if (m_dataPoints.value("TmpBOM").isValid())
-        m_temp = m_dataPoints.value("TmpBOM").toFloatWithSSF(-1);
-
-    if (m_dataPoints.value("TmpAmb").isValid())
-        m_ambientTemperature = m_dataPoints.value("TmpAmb").toFloatWithSSF(-1);
-
-    if (m_dataPoints.value("WndSpd").isValid())
-        m_windSpeed = m_dataPoints.value("WndSpd").toUInt16();
-
-
-    qCDebug(dcSunSpecModelData()) << this;
-}
-
 void SunSpecMiniMetModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -162,31 +143,54 @@ void SunSpecMiniMetModel::initDataPoints()
 
 }
 
+void SunSpecMiniMetModel::processBlockData()
+{
+    // Update properties according to the data point type
+    if (m_dataPoints.value("GHI").isValid())
+        m_ghi = m_dataPoints.value("GHI").toUInt16();
+
+    if (m_dataPoints.value("TmpBOM").isValid())
+        m_temp = m_dataPoints.value("TmpBOM").toFloatWithSSF(-1);
+
+    if (m_dataPoints.value("TmpAmb").isValid())
+        m_ambientTemperature = m_dataPoints.value("TmpAmb").toFloatWithSSF(-1);
+
+    if (m_dataPoints.value("WndSpd").isValid())
+        m_windSpeed = m_dataPoints.value("WndSpd").toUInt16();
+
+
+    qCDebug(dcSunSpecModelData()) << this;
+}
+
 QDebug operator<<(QDebug debug, SunSpecMiniMetModel *model)
 {
     debug.nospace().noquote() << "SunSpecMiniMetModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("GHI") << "-->";
     if (model->dataPoints().value("GHI").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("GHI") << "--> " << model->ghi() << endl;
+        debug.nospace().noquote() << model->ghi() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("GHI") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpBOM") << "-->";
     if (model->dataPoints().value("TmpBOM").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpBOM") << "--> " << model->temp() << endl;
+        debug.nospace().noquote() << model->temp() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpBOM") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpAmb") << "-->";
     if (model->dataPoints().value("TmpAmb").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpAmb") << "--> " << model->ambientTemperature() << endl;
+        debug.nospace().noquote() << model->ambientTemperature() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpAmb") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("WndSpd") << "-->";
     if (model->dataPoints().value("WndSpd").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WndSpd") << "--> " << model->windSpeed() << endl;
+        debug.nospace().noquote() << model->windSpeed() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("WndSpd") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
 

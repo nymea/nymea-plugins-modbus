@@ -12,12 +12,14 @@ include(models/models.pri)
 SOURCES += \
     sunspecconnection.cpp \
     sunspecdatapoint.cpp \
-    sunspecmodel.cpp
+    sunspecmodel.cpp \
+    sunspecmodelrepeatingblock.cpp
 
 HEADERS += \
     sunspecconnection.h \
     sunspecdatapoint.h \
-    sunspecmodel.h
+    sunspecmodel.h \
+    sunspecmodelrepeatingblock.h
 
 # define install target
 target.path = $$[QT_INSTALL_LIBS]

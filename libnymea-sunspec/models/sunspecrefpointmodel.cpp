@@ -31,11 +31,11 @@
 #include "sunspecrefpointmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecRefPointModel::SunSpecRefPointModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 306, 4, parent)
+SunSpecRefPointModel::SunSpecRefPointModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 306, modelLength, parent)
 {
-    //Q_ASSERT_X(length == 4,  "SunSpecRefPointModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
-    Q_UNUSED(length)
+    m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
+
     initDataPoints();
 }
 
@@ -75,25 +75,6 @@ quint16 SunSpecRefPointModel::temperature() const
 {
     return m_temperature;
 }
-void SunSpecRefPointModel::processBlockData()
-{
-    // Update properties according to the data point type
-    if (m_dataPoints.value("GHI").isValid())
-        m_ghi = m_dataPoints.value("GHI").toUInt16();
-
-    if (m_dataPoints.value("A").isValid())
-        m_amps = m_dataPoints.value("A").toUInt16();
-
-    if (m_dataPoints.value("V").isValid())
-        m_voltage = m_dataPoints.value("V").toUInt16();
-
-    if (m_dataPoints.value("Tmp").isValid())
-        m_temperature = m_dataPoints.value("Tmp").toUInt16();
-
-
-    qCDebug(dcSunSpecModelData()) << this;
-}
-
 void SunSpecRefPointModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -162,31 +143,54 @@ void SunSpecRefPointModel::initDataPoints()
 
 }
 
+void SunSpecRefPointModel::processBlockData()
+{
+    // Update properties according to the data point type
+    if (m_dataPoints.value("GHI").isValid())
+        m_ghi = m_dataPoints.value("GHI").toUInt16();
+
+    if (m_dataPoints.value("A").isValid())
+        m_amps = m_dataPoints.value("A").toUInt16();
+
+    if (m_dataPoints.value("V").isValid())
+        m_voltage = m_dataPoints.value("V").toUInt16();
+
+    if (m_dataPoints.value("Tmp").isValid())
+        m_temperature = m_dataPoints.value("Tmp").toUInt16();
+
+
+    qCDebug(dcSunSpecModelData()) << this;
+}
+
 QDebug operator<<(QDebug debug, SunSpecRefPointModel *model)
 {
     debug.nospace().noquote() << "SunSpecRefPointModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("GHI") << "-->";
     if (model->dataPoints().value("GHI").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("GHI") << "--> " << model->ghi() << endl;
+        debug.nospace().noquote() << model->ghi() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("GHI") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("A") << "-->";
     if (model->dataPoints().value("A").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("A") << "--> " << model->amps() << endl;
+        debug.nospace().noquote() << model->amps() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("A") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("V") << "-->";
     if (model->dataPoints().value("V").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("V") << "--> " << model->voltage() << endl;
+        debug.nospace().noquote() << model->voltage() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("V") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Tmp") << "-->";
     if (model->dataPoints().value("Tmp").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Tmp") << "--> " << model->temperature() << endl;
+        debug.nospace().noquote() << model->temperature() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Tmp") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
 

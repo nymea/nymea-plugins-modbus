@@ -31,11 +31,11 @@
 #include "sunspecreactivecurrentmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecReactiveCurrentModel::SunSpecReactiveCurrentModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 128, 14, parent)
+SunSpecReactiveCurrentModel::SunSpecReactiveCurrentModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 128, modelLength, parent)
 {
-    //Q_ASSERT_X(length == 14,  "SunSpecReactiveCurrentModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
-    Q_UNUSED(length)
+    m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
+
     initDataPoints();
 }
 
@@ -257,61 +257,18 @@ QModbusReply *SunSpecReactiveCurrentModel::setHoldTmms(quint16 holdTmms)
 
     return m_connection->modbusTcpClient()->sendWriteRequest(request, m_connection->slaveId());
 }
+qint16 SunSpecReactiveCurrentModel::arGraSf() const
+{
+    return m_arGraSf;
+}
+qint16 SunSpecReactiveCurrentModel::vRefPctSf() const
+{
+    return m_vRefPctSf;
+}
 quint16 SunSpecReactiveCurrentModel::pad() const
 {
     return m_pad;
 }
-void SunSpecReactiveCurrentModel::processBlockData()
-{
-    // Scale factors
-    if (m_dataPoints.value("ArGra_SF").isValid())
-        m_arGraSf = m_dataPoints.value("ArGra_SF").toInt16();
-
-    if (m_dataPoints.value("VRefPct_SF").isValid())
-        m_vRefPctSf = m_dataPoints.value("VRefPct_SF").toInt16();
-
-
-    // Update properties according to the data point type
-    if (m_dataPoints.value("ArGraMod").isValid())
-        m_arGraMod = static_cast<Argramod>(m_dataPoints.value("ArGraMod").toUInt16());
-
-    if (m_dataPoints.value("ArGraSag").isValid())
-        m_arGraSag = m_dataPoints.value("ArGraSag").toFloatWithSSF(m_arGraSf);
-
-    if (m_dataPoints.value("ArGraSwell").isValid())
-        m_arGraSwell = m_dataPoints.value("ArGraSwell").toFloatWithSSF(m_arGraSf);
-
-    if (m_dataPoints.value("ModEna").isValid())
-        m_modEna = static_cast<ModenaFlags>(m_dataPoints.value("ModEna").toUInt16());
-
-    if (m_dataPoints.value("FilTms").isValid())
-        m_filTms = m_dataPoints.value("FilTms").toUInt16();
-
-    if (m_dataPoints.value("DbVMin").isValid())
-        m_dbVMin = m_dataPoints.value("DbVMin").toFloatWithSSF(m_vRefPctSf);
-
-    if (m_dataPoints.value("DbVMax").isValid())
-        m_dbVMax = m_dataPoints.value("DbVMax").toFloatWithSSF(m_vRefPctSf);
-
-    if (m_dataPoints.value("BlkZnV").isValid())
-        m_blkZnV = m_dataPoints.value("BlkZnV").toFloatWithSSF(m_vRefPctSf);
-
-    if (m_dataPoints.value("HysBlkZnV").isValid())
-        m_hysBlkZnV = m_dataPoints.value("HysBlkZnV").toFloatWithSSF(m_vRefPctSf);
-
-    if (m_dataPoints.value("BlkZnTmms").isValid())
-        m_blkZnTmms = m_dataPoints.value("BlkZnTmms").toUInt16();
-
-    if (m_dataPoints.value("HoldTmms").isValid())
-        m_holdTmms = m_dataPoints.value("HoldTmms").toUInt16();
-
-    if (m_dataPoints.value("Pad").isValid())
-        m_pad = m_dataPoints.value("Pad").toUInt16();
-
-
-    qCDebug(dcSunSpecModelData()) << this;
-}
-
 void SunSpecReactiveCurrentModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -505,79 +462,148 @@ void SunSpecReactiveCurrentModel::initDataPoints()
 
 }
 
+void SunSpecReactiveCurrentModel::processBlockData()
+{
+    // Scale factors
+    if (m_dataPoints.value("ArGra_SF").isValid())
+        m_arGraSf = m_dataPoints.value("ArGra_SF").toInt16();
+
+    if (m_dataPoints.value("VRefPct_SF").isValid())
+        m_vRefPctSf = m_dataPoints.value("VRefPct_SF").toInt16();
+
+
+    // Update properties according to the data point type
+    if (m_dataPoints.value("ArGraMod").isValid())
+        m_arGraMod = static_cast<Argramod>(m_dataPoints.value("ArGraMod").toUInt16());
+
+    if (m_dataPoints.value("ArGraSag").isValid())
+        m_arGraSag = m_dataPoints.value("ArGraSag").toFloatWithSSF(m_arGraSf);
+
+    if (m_dataPoints.value("ArGraSwell").isValid())
+        m_arGraSwell = m_dataPoints.value("ArGraSwell").toFloatWithSSF(m_arGraSf);
+
+    if (m_dataPoints.value("ModEna").isValid())
+        m_modEna = static_cast<ModenaFlags>(m_dataPoints.value("ModEna").toUInt16());
+
+    if (m_dataPoints.value("FilTms").isValid())
+        m_filTms = m_dataPoints.value("FilTms").toUInt16();
+
+    if (m_dataPoints.value("DbVMin").isValid())
+        m_dbVMin = m_dataPoints.value("DbVMin").toFloatWithSSF(m_vRefPctSf);
+
+    if (m_dataPoints.value("DbVMax").isValid())
+        m_dbVMax = m_dataPoints.value("DbVMax").toFloatWithSSF(m_vRefPctSf);
+
+    if (m_dataPoints.value("BlkZnV").isValid())
+        m_blkZnV = m_dataPoints.value("BlkZnV").toFloatWithSSF(m_vRefPctSf);
+
+    if (m_dataPoints.value("HysBlkZnV").isValid())
+        m_hysBlkZnV = m_dataPoints.value("HysBlkZnV").toFloatWithSSF(m_vRefPctSf);
+
+    if (m_dataPoints.value("BlkZnTmms").isValid())
+        m_blkZnTmms = m_dataPoints.value("BlkZnTmms").toUInt16();
+
+    if (m_dataPoints.value("HoldTmms").isValid())
+        m_holdTmms = m_dataPoints.value("HoldTmms").toUInt16();
+
+    if (m_dataPoints.value("ArGra_SF").isValid())
+        m_arGraSf = m_dataPoints.value("ArGra_SF").toInt16();
+
+    if (m_dataPoints.value("VRefPct_SF").isValid())
+        m_vRefPctSf = m_dataPoints.value("VRefPct_SF").toInt16();
+
+    if (m_dataPoints.value("Pad").isValid())
+        m_pad = m_dataPoints.value("Pad").toUInt16();
+
+
+    qCDebug(dcSunSpecModelData()) << this;
+}
+
 QDebug operator<<(QDebug debug, SunSpecReactiveCurrentModel *model)
 {
     debug.nospace().noquote() << "SunSpecReactiveCurrentModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ArGraMod") << "-->";
     if (model->dataPoints().value("ArGraMod").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ArGraMod") << "--> " << model->arGraMod() << endl;
+        debug.nospace().noquote() << model->arGraMod() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ArGraMod") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ArGraSag") << "-->";
     if (model->dataPoints().value("ArGraSag").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ArGraSag") << "--> " << model->arGraSag() << endl;
+        debug.nospace().noquote() << model->arGraSag() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ArGraSag") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ArGraSwell") << "-->";
     if (model->dataPoints().value("ArGraSwell").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ArGraSwell") << "--> " << model->arGraSwell() << endl;
+        debug.nospace().noquote() << model->arGraSwell() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ArGraSwell") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ModEna") << "-->";
     if (model->dataPoints().value("ModEna").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModEna") << "--> " << model->modEna() << endl;
+        debug.nospace().noquote() << model->modEna() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModEna") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("FilTms") << "-->";
     if (model->dataPoints().value("FilTms").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("FilTms") << "--> " << model->filTms() << endl;
+        debug.nospace().noquote() << model->filTms() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("FilTms") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("DbVMin") << "-->";
     if (model->dataPoints().value("DbVMin").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("DbVMin") << "--> " << model->dbVMin() << endl;
+        debug.nospace().noquote() << model->dbVMin() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("DbVMin") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("DbVMax") << "-->";
     if (model->dataPoints().value("DbVMax").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("DbVMax") << "--> " << model->dbVMax() << endl;
+        debug.nospace().noquote() << model->dbVMax() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("DbVMax") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("BlkZnV") << "-->";
     if (model->dataPoints().value("BlkZnV").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("BlkZnV") << "--> " << model->blkZnV() << endl;
+        debug.nospace().noquote() << model->blkZnV() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("BlkZnV") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("HysBlkZnV") << "-->";
     if (model->dataPoints().value("HysBlkZnV").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("HysBlkZnV") << "--> " << model->hysBlkZnV() << endl;
+        debug.nospace().noquote() << model->hysBlkZnV() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("HysBlkZnV") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("BlkZnTmms") << "-->";
     if (model->dataPoints().value("BlkZnTmms").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("BlkZnTmms") << "--> " << model->blkZnTmms() << endl;
+        debug.nospace().noquote() << model->blkZnTmms() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("BlkZnTmms") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("HoldTmms") << "-->";
     if (model->dataPoints().value("HoldTmms").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("HoldTmms") << "--> " << model->holdTmms() << endl;
+        debug.nospace().noquote() << model->holdTmms() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("HoldTmms") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad") << "-->";
     if (model->dataPoints().value("Pad").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad") << "--> " << model->pad() << endl;
+        debug.nospace().noquote() << model->pad() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
 

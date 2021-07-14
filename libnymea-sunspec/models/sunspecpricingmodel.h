@@ -57,7 +57,7 @@ public:
     Q_DECLARE_FLAGS(ModenaFlags, Modena)
     Q_FLAG(Modena)
 
-    explicit SunSpecPricingModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);
+    explicit SunSpecPricingModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
     ~SunSpecPricingModel() override; 
 
     QString name() const override;
@@ -83,9 +83,13 @@ public:
     quint16 rmpTms() const;
     QModbusReply *setRmpTms(quint16 rmpTms);
 
+    qint16 sigSf() const;
     quint16 pad() const;
 
 protected:
+    quint16 m_fixedBlockLength = 8;
+
+    void initDataPoints() override;
     void processBlockData() override;
 
 private:
@@ -98,7 +102,6 @@ private:
     qint16 m_sigSf = 0;
     quint16 m_pad = 0;
 
-    void initDataPoints();
 
 };
 

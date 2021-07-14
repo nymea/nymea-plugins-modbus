@@ -85,7 +85,7 @@ public:
     Q_DECLARE_FLAGS(EvtFlags, Evt)
     Q_FLAG(Evt)
 
-    explicit SunSpecAggregatorModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);
+    explicit SunSpecAggregatorModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
     ~SunSpecAggregatorModel() override; 
 
     QString name() const override;
@@ -104,6 +104,9 @@ public:
     quint32 controlValue() const;
 
 protected:
+    quint16 m_fixedBlockLength = 14;
+
+    void initDataPoints() override;
     void processBlockData() override;
 
 private:
@@ -118,7 +121,6 @@ private:
     quint32 m_vendorControl = 0;
     quint32 m_controlValue = 0;
 
-    void initDataPoints();
 
 };
 

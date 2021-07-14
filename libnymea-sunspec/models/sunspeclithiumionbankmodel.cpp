@@ -31,11 +31,538 @@
 #include "sunspeclithiumionbankmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecLithiumIonBankModel::SunSpecLithiumIonBankModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 803, 26, parent)
+SunSpecLithiumIonBankModelRepeatingBlock::SunSpecLithiumIonBankModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecLithiumIonBankModel *parent) :
+    SunSpecModelRepeatingBlock(blockIndex, blockSize, modbusStartRegister, parent)
 {
-    //Q_ASSERT_X(length == 26,  "SunSpecLithiumIonBankModel", QString("model length %1 given in the constructor does not match the model length from the specs %2.").arg(length).arg(modelLength()).toLatin1());
-    Q_UNUSED(length)
+    initDataPoints();
+}
+
+QString SunSpecLithiumIonBankModelRepeatingBlock::name() const
+{
+    return "string";
+}
+
+SunSpecLithiumIonBankModel *SunSpecLithiumIonBankModelRepeatingBlock::parentModel() const
+{
+    return m_parentModel;
+}
+
+quint16 SunSpecLithiumIonBankModelRepeatingBlock::moduleCount() const
+{
+    return m_moduleCount;
+}
+SunSpecLithiumIonBankModelRepeatingBlock::StrstFlags SunSpecLithiumIonBankModelRepeatingBlock::stringStatus() const
+{
+    return m_stringStatus;
+}
+SunSpecLithiumIonBankModelRepeatingBlock::Strconfail SunSpecLithiumIonBankModelRepeatingBlock::connectionFailureReason() const
+{
+    return m_connectionFailureReason;
+}
+float SunSpecLithiumIonBankModelRepeatingBlock::stringStateOfCharge() const
+{
+    return m_stringStateOfCharge;
+}
+float SunSpecLithiumIonBankModelRepeatingBlock::stringStateOfHealth() const
+{
+    return m_stringStateOfHealth;
+}
+float SunSpecLithiumIonBankModelRepeatingBlock::stringCurrent() const
+{
+    return m_stringCurrent;
+}
+float SunSpecLithiumIonBankModelRepeatingBlock::maxCellVoltage() const
+{
+    return m_maxCellVoltage;
+}
+quint16 SunSpecLithiumIonBankModelRepeatingBlock::maxCellVoltageModule() const
+{
+    return m_maxCellVoltageModule;
+}
+float SunSpecLithiumIonBankModelRepeatingBlock::minCellVoltage() const
+{
+    return m_minCellVoltage;
+}
+quint16 SunSpecLithiumIonBankModelRepeatingBlock::minCellVoltageModule() const
+{
+    return m_minCellVoltageModule;
+}
+float SunSpecLithiumIonBankModelRepeatingBlock::averageCellVoltage() const
+{
+    return m_averageCellVoltage;
+}
+float SunSpecLithiumIonBankModelRepeatingBlock::maxModuleTemperature() const
+{
+    return m_maxModuleTemperature;
+}
+quint16 SunSpecLithiumIonBankModelRepeatingBlock::maxModuleTemperatureModule() const
+{
+    return m_maxModuleTemperatureModule;
+}
+float SunSpecLithiumIonBankModelRepeatingBlock::minModuleTemperature() const
+{
+    return m_minModuleTemperature;
+}
+quint16 SunSpecLithiumIonBankModelRepeatingBlock::minModuleTemperatureModule() const
+{
+    return m_minModuleTemperatureModule;
+}
+float SunSpecLithiumIonBankModelRepeatingBlock::averageModuleTemperature() const
+{
+    return m_averageModuleTemperature;
+}
+SunSpecLithiumIonBankModelRepeatingBlock::Strdisrsn SunSpecLithiumIonBankModelRepeatingBlock::disabledReason() const
+{
+    return m_disabledReason;
+}
+SunSpecLithiumIonBankModelRepeatingBlock::StrconstFlags SunSpecLithiumIonBankModelRepeatingBlock::contactorStatus() const
+{
+    return m_contactorStatus;
+}
+SunSpecLithiumIonBankModelRepeatingBlock::Strevt1Flags SunSpecLithiumIonBankModelRepeatingBlock::stringEvent1() const
+{
+    return m_stringEvent1;
+}
+quint32 SunSpecLithiumIonBankModelRepeatingBlock::stringEvent2() const
+{
+    return m_stringEvent2;
+}
+quint32 SunSpecLithiumIonBankModelRepeatingBlock::vendorStringEventBitfield1() const
+{
+    return m_vendorStringEventBitfield1;
+}
+quint32 SunSpecLithiumIonBankModelRepeatingBlock::vendorStringEventBitfield2() const
+{
+    return m_vendorStringEventBitfield2;
+}
+SunSpecLithiumIonBankModelRepeatingBlock::Strsetena SunSpecLithiumIonBankModelRepeatingBlock::enableDisableString() const
+{
+    return m_enableDisableString;
+}
+
+QModbusReply *SunSpecLithiumIonBankModelRepeatingBlock::setEnableDisableString(Strsetena enableDisableString)
+{
+    SunSpecDataPoint dp = m_dataPoints.value("StrSetEna");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(static_cast<quint16>(enableDisableString));
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_parentModel->connection()->modbusTcpClient()->sendWriteRequest(request, m_parentModel->connection()->slaveId());
+}
+
+SunSpecLithiumIonBankModelRepeatingBlock::Strsetcon SunSpecLithiumIonBankModelRepeatingBlock::connectDisconnectString() const
+{
+    return m_connectDisconnectString;
+}
+
+QModbusReply *SunSpecLithiumIonBankModelRepeatingBlock::setConnectDisconnectString(Strsetcon connectDisconnectString)
+{
+    SunSpecDataPoint dp = m_dataPoints.value("StrSetCon");
+    QVector<quint16> registers = SunSpecDataPoint::convertFromUInt16(static_cast<quint16>(connectDisconnectString));
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + dp.addressOffset(), registers.length());
+    request.setValues(registers);
+
+    return m_parentModel->connection()->modbusTcpClient()->sendWriteRequest(request, m_parentModel->connection()->slaveId());
+}
+
+quint16 SunSpecLithiumIonBankModelRepeatingBlock::pad1() const
+{
+    return m_pad1;
+}
+quint16 SunSpecLithiumIonBankModelRepeatingBlock::pad2() const
+{
+    return m_pad2;
+}
+
+void SunSpecLithiumIonBankModelRepeatingBlock::initDataPoints()
+{
+    SunSpecDataPoint moduleCountDataPoint;
+    moduleCountDataPoint.setName("StrNMod");
+    moduleCountDataPoint.setLabel("Module Count");
+    moduleCountDataPoint.setDescription("Count of modules in the string.");
+    moduleCountDataPoint.setMandatory(true);
+    moduleCountDataPoint.setSize(1);
+    moduleCountDataPoint.setAddressOffset(0);
+    moduleCountDataPoint.setSunSpecDataType("uint16");
+    m_dataPoints.insert(moduleCountDataPoint.name(), moduleCountDataPoint);
+
+    SunSpecDataPoint stringStatusDataPoint;
+    stringStatusDataPoint.setName("StrSt");
+    stringStatusDataPoint.setLabel("String Status");
+    stringStatusDataPoint.setDescription("Current status of the string.");
+    stringStatusDataPoint.setMandatory(true);
+    stringStatusDataPoint.setSize(2);
+    stringStatusDataPoint.setAddressOffset(1);
+    stringStatusDataPoint.setSunSpecDataType("bitfield32");
+    m_dataPoints.insert(stringStatusDataPoint.name(), stringStatusDataPoint);
+
+    SunSpecDataPoint connectionFailureReasonDataPoint;
+    connectionFailureReasonDataPoint.setName("StrConFail");
+    connectionFailureReasonDataPoint.setLabel("Connection Failure Reason");
+    connectionFailureReasonDataPoint.setSize(1);
+    connectionFailureReasonDataPoint.setAddressOffset(3);
+    connectionFailureReasonDataPoint.setBlockOffset(1);
+    connectionFailureReasonDataPoint.setSunSpecDataType("enum16");
+    m_dataPoints.insert(connectionFailureReasonDataPoint.name(), connectionFailureReasonDataPoint);
+
+    SunSpecDataPoint stringStateOfChargeDataPoint;
+    stringStateOfChargeDataPoint.setName("StrSoC");
+    stringStateOfChargeDataPoint.setLabel("String State of Charge");
+    stringStateOfChargeDataPoint.setDescription("Battery string state of charge, expressed as a percentage.");
+    stringStateOfChargeDataPoint.setUnits("%");
+    stringStateOfChargeDataPoint.setMandatory(true);
+    stringStateOfChargeDataPoint.setSize(1);
+    stringStateOfChargeDataPoint.setAddressOffset(4);
+    stringStateOfChargeDataPoint.setBlockOffset(2);
+    stringStateOfChargeDataPoint.setScaleFactorName("SoC_SF");
+    stringStateOfChargeDataPoint.setSunSpecDataType("uint16");
+    m_dataPoints.insert(stringStateOfChargeDataPoint.name(), stringStateOfChargeDataPoint);
+
+    SunSpecDataPoint stringStateOfHealthDataPoint;
+    stringStateOfHealthDataPoint.setName("StrSoH");
+    stringStateOfHealthDataPoint.setLabel("String State of Health");
+    stringStateOfHealthDataPoint.setDescription("Battery string state of health, expressed as a percentage.");
+    stringStateOfHealthDataPoint.setUnits("%");
+    stringStateOfHealthDataPoint.setSize(1);
+    stringStateOfHealthDataPoint.setAddressOffset(5);
+    stringStateOfHealthDataPoint.setBlockOffset(3);
+    stringStateOfHealthDataPoint.setScaleFactorName("SoH_SF");
+    stringStateOfHealthDataPoint.setSunSpecDataType("uint16");
+    m_dataPoints.insert(stringStateOfHealthDataPoint.name(), stringStateOfHealthDataPoint);
+
+    SunSpecDataPoint stringCurrentDataPoint;
+    stringCurrentDataPoint.setName("StrA");
+    stringCurrentDataPoint.setLabel("String Current");
+    stringCurrentDataPoint.setDescription("String current measurement.");
+    stringCurrentDataPoint.setUnits("A");
+    stringCurrentDataPoint.setMandatory(true);
+    stringCurrentDataPoint.setSize(1);
+    stringCurrentDataPoint.setAddressOffset(6);
+    stringCurrentDataPoint.setBlockOffset(4);
+    stringCurrentDataPoint.setScaleFactorName("A_SF");
+    stringCurrentDataPoint.setSunSpecDataType("int16");
+    m_dataPoints.insert(stringCurrentDataPoint.name(), stringCurrentDataPoint);
+
+    SunSpecDataPoint maxCellVoltageDataPoint;
+    maxCellVoltageDataPoint.setName("StrCellVMax");
+    maxCellVoltageDataPoint.setLabel("Max Cell Voltage");
+    maxCellVoltageDataPoint.setDescription("Maximum voltage for all cells in the string.");
+    maxCellVoltageDataPoint.setUnits("V");
+    maxCellVoltageDataPoint.setMandatory(true);
+    maxCellVoltageDataPoint.setSize(1);
+    maxCellVoltageDataPoint.setAddressOffset(7);
+    maxCellVoltageDataPoint.setBlockOffset(5);
+    maxCellVoltageDataPoint.setScaleFactorName("CellV_SF");
+    maxCellVoltageDataPoint.setSunSpecDataType("uint16");
+    m_dataPoints.insert(maxCellVoltageDataPoint.name(), maxCellVoltageDataPoint);
+
+    SunSpecDataPoint maxCellVoltageModuleDataPoint;
+    maxCellVoltageModuleDataPoint.setName("StrCellVMaxMod");
+    maxCellVoltageModuleDataPoint.setLabel("Max Cell Voltage Module");
+    maxCellVoltageModuleDataPoint.setDescription("Module containing the maximum cell voltage.");
+    maxCellVoltageModuleDataPoint.setSize(1);
+    maxCellVoltageModuleDataPoint.setAddressOffset(8);
+    maxCellVoltageModuleDataPoint.setBlockOffset(6);
+    maxCellVoltageModuleDataPoint.setSunSpecDataType("uint16");
+    m_dataPoints.insert(maxCellVoltageModuleDataPoint.name(), maxCellVoltageModuleDataPoint);
+
+    SunSpecDataPoint minCellVoltageDataPoint;
+    minCellVoltageDataPoint.setName("StrCellVMin");
+    minCellVoltageDataPoint.setLabel("Min Cell Voltage");
+    minCellVoltageDataPoint.setDescription("Minimum voltage for all cells in the string.");
+    minCellVoltageDataPoint.setUnits("V");
+    minCellVoltageDataPoint.setMandatory(true);
+    minCellVoltageDataPoint.setSize(1);
+    minCellVoltageDataPoint.setAddressOffset(9);
+    minCellVoltageDataPoint.setBlockOffset(7);
+    minCellVoltageDataPoint.setScaleFactorName("CellV_SF");
+    minCellVoltageDataPoint.setSunSpecDataType("uint16");
+    m_dataPoints.insert(minCellVoltageDataPoint.name(), minCellVoltageDataPoint);
+
+    SunSpecDataPoint minCellVoltageModuleDataPoint;
+    minCellVoltageModuleDataPoint.setName("StrCellVMinMod");
+    minCellVoltageModuleDataPoint.setLabel("Min Cell Voltage Module");
+    minCellVoltageModuleDataPoint.setDescription("Module containing the minimum cell voltage.");
+    minCellVoltageModuleDataPoint.setSize(1);
+    minCellVoltageModuleDataPoint.setAddressOffset(10);
+    minCellVoltageModuleDataPoint.setBlockOffset(8);
+    minCellVoltageModuleDataPoint.setSunSpecDataType("uint16");
+    m_dataPoints.insert(minCellVoltageModuleDataPoint.name(), minCellVoltageModuleDataPoint);
+
+    SunSpecDataPoint averageCellVoltageDataPoint;
+    averageCellVoltageDataPoint.setName("StrCellVAvg");
+    averageCellVoltageDataPoint.setLabel("Average Cell Voltage");
+    averageCellVoltageDataPoint.setDescription("Average voltage for all cells in the string.");
+    averageCellVoltageDataPoint.setUnits("V");
+    averageCellVoltageDataPoint.setMandatory(true);
+    averageCellVoltageDataPoint.setSize(1);
+    averageCellVoltageDataPoint.setAddressOffset(11);
+    averageCellVoltageDataPoint.setBlockOffset(9);
+    averageCellVoltageDataPoint.setScaleFactorName("CellV_SF");
+    averageCellVoltageDataPoint.setSunSpecDataType("uint16");
+    m_dataPoints.insert(averageCellVoltageDataPoint.name(), averageCellVoltageDataPoint);
+
+    SunSpecDataPoint maxModuleTemperatureDataPoint;
+    maxModuleTemperatureDataPoint.setName("StrModTmpMax");
+    maxModuleTemperatureDataPoint.setLabel("Max Module Temperature");
+    maxModuleTemperatureDataPoint.setDescription("Maximum temperature for all modules in the bank.");
+    maxModuleTemperatureDataPoint.setUnits("C");
+    maxModuleTemperatureDataPoint.setMandatory(true);
+    maxModuleTemperatureDataPoint.setSize(1);
+    maxModuleTemperatureDataPoint.setAddressOffset(12);
+    maxModuleTemperatureDataPoint.setBlockOffset(10);
+    maxModuleTemperatureDataPoint.setScaleFactorName("ModTmp_SF");
+    maxModuleTemperatureDataPoint.setSunSpecDataType("int16");
+    m_dataPoints.insert(maxModuleTemperatureDataPoint.name(), maxModuleTemperatureDataPoint);
+
+    SunSpecDataPoint maxModuleTemperatureModuleDataPoint;
+    maxModuleTemperatureModuleDataPoint.setName("StrModTmpMaxMod");
+    maxModuleTemperatureModuleDataPoint.setLabel("Max Module Temperature Module");
+    maxModuleTemperatureModuleDataPoint.setDescription("Module with the maximum temperature.");
+    maxModuleTemperatureModuleDataPoint.setSize(1);
+    maxModuleTemperatureModuleDataPoint.setAddressOffset(13);
+    maxModuleTemperatureModuleDataPoint.setBlockOffset(11);
+    maxModuleTemperatureModuleDataPoint.setSunSpecDataType("uint16");
+    m_dataPoints.insert(maxModuleTemperatureModuleDataPoint.name(), maxModuleTemperatureModuleDataPoint);
+
+    SunSpecDataPoint minModuleTemperatureDataPoint;
+    minModuleTemperatureDataPoint.setName("StrModTmpMin");
+    minModuleTemperatureDataPoint.setLabel("Min Module Temperature");
+    minModuleTemperatureDataPoint.setDescription("Minimum temperature for all modules in the bank.");
+    minModuleTemperatureDataPoint.setUnits("C");
+    minModuleTemperatureDataPoint.setMandatory(true);
+    minModuleTemperatureDataPoint.setSize(1);
+    minModuleTemperatureDataPoint.setAddressOffset(14);
+    minModuleTemperatureDataPoint.setBlockOffset(12);
+    minModuleTemperatureDataPoint.setScaleFactorName("ModTmp_SF");
+    minModuleTemperatureDataPoint.setSunSpecDataType("int16");
+    m_dataPoints.insert(minModuleTemperatureDataPoint.name(), minModuleTemperatureDataPoint);
+
+    SunSpecDataPoint minModuleTemperatureModuleDataPoint;
+    minModuleTemperatureModuleDataPoint.setName("StrModTmpMinMod");
+    minModuleTemperatureModuleDataPoint.setLabel("Min Module Temperature Module");
+    minModuleTemperatureModuleDataPoint.setDescription("Module with the minimum temperature.");
+    minModuleTemperatureModuleDataPoint.setSize(1);
+    minModuleTemperatureModuleDataPoint.setAddressOffset(15);
+    minModuleTemperatureModuleDataPoint.setBlockOffset(13);
+    minModuleTemperatureModuleDataPoint.setSunSpecDataType("uint16");
+    m_dataPoints.insert(minModuleTemperatureModuleDataPoint.name(), minModuleTemperatureModuleDataPoint);
+
+    SunSpecDataPoint averageModuleTemperatureDataPoint;
+    averageModuleTemperatureDataPoint.setName("StrModTmpAvg");
+    averageModuleTemperatureDataPoint.setLabel("Average Module Temperature");
+    averageModuleTemperatureDataPoint.setDescription("Average temperature for all modules in the bank.");
+    averageModuleTemperatureDataPoint.setUnits("C");
+    averageModuleTemperatureDataPoint.setMandatory(true);
+    averageModuleTemperatureDataPoint.setSize(1);
+    averageModuleTemperatureDataPoint.setAddressOffset(16);
+    averageModuleTemperatureDataPoint.setBlockOffset(14);
+    averageModuleTemperatureDataPoint.setScaleFactorName("ModTmp_SF");
+    averageModuleTemperatureDataPoint.setSunSpecDataType("int16");
+    m_dataPoints.insert(averageModuleTemperatureDataPoint.name(), averageModuleTemperatureDataPoint);
+
+    SunSpecDataPoint disabledReasonDataPoint;
+    disabledReasonDataPoint.setName("StrDisRsn");
+    disabledReasonDataPoint.setLabel("Disabled Reason");
+    disabledReasonDataPoint.setDescription("Reason why the string is currently disabled.");
+    disabledReasonDataPoint.setSize(1);
+    disabledReasonDataPoint.setAddressOffset(17);
+    disabledReasonDataPoint.setBlockOffset(15);
+    disabledReasonDataPoint.setSunSpecDataType("enum16");
+    m_dataPoints.insert(disabledReasonDataPoint.name(), disabledReasonDataPoint);
+
+    SunSpecDataPoint contactorStatusDataPoint;
+    contactorStatusDataPoint.setName("StrConSt");
+    contactorStatusDataPoint.setLabel("Contactor Status");
+    contactorStatusDataPoint.setDescription("Status of the contactor(s) for the string.");
+    contactorStatusDataPoint.setSize(2);
+    contactorStatusDataPoint.setAddressOffset(18);
+    contactorStatusDataPoint.setBlockOffset(16);
+    contactorStatusDataPoint.setSunSpecDataType("bitfield32");
+    m_dataPoints.insert(contactorStatusDataPoint.name(), contactorStatusDataPoint);
+
+    SunSpecDataPoint stringEvent1DataPoint;
+    stringEvent1DataPoint.setName("StrEvt1");
+    stringEvent1DataPoint.setLabel("String Event 1");
+    stringEvent1DataPoint.setDescription("Alarms, warnings and status values.  Bit flags.");
+    stringEvent1DataPoint.setMandatory(true);
+    stringEvent1DataPoint.setSize(2);
+    stringEvent1DataPoint.setAddressOffset(20);
+    stringEvent1DataPoint.setBlockOffset(18);
+    stringEvent1DataPoint.setSunSpecDataType("bitfield32");
+    m_dataPoints.insert(stringEvent1DataPoint.name(), stringEvent1DataPoint);
+
+    SunSpecDataPoint stringEvent2DataPoint;
+    stringEvent2DataPoint.setName("StrEvt2");
+    stringEvent2DataPoint.setLabel("String Event 2");
+    stringEvent2DataPoint.setDescription("Alarms, warnings and status values.  Bit flags.");
+    stringEvent2DataPoint.setSize(2);
+    stringEvent2DataPoint.setAddressOffset(22);
+    stringEvent2DataPoint.setBlockOffset(20);
+    stringEvent2DataPoint.setSunSpecDataType("bitfield32");
+    m_dataPoints.insert(stringEvent2DataPoint.name(), stringEvent2DataPoint);
+
+    SunSpecDataPoint vendorStringEventBitfield1DataPoint;
+    vendorStringEventBitfield1DataPoint.setName("StrEvtVnd1");
+    vendorStringEventBitfield1DataPoint.setLabel("Vendor String Event Bitfield 1");
+    vendorStringEventBitfield1DataPoint.setDescription("Vendor defined events.");
+    vendorStringEventBitfield1DataPoint.setSize(2);
+    vendorStringEventBitfield1DataPoint.setAddressOffset(24);
+    vendorStringEventBitfield1DataPoint.setBlockOffset(22);
+    vendorStringEventBitfield1DataPoint.setSunSpecDataType("bitfield32");
+    m_dataPoints.insert(vendorStringEventBitfield1DataPoint.name(), vendorStringEventBitfield1DataPoint);
+
+    SunSpecDataPoint vendorStringEventBitfield2DataPoint;
+    vendorStringEventBitfield2DataPoint.setName("StrEvtVnd2");
+    vendorStringEventBitfield2DataPoint.setLabel("Vendor String Event Bitfield 2");
+    vendorStringEventBitfield2DataPoint.setDescription("Vendor defined events.");
+    vendorStringEventBitfield2DataPoint.setSize(2);
+    vendorStringEventBitfield2DataPoint.setAddressOffset(26);
+    vendorStringEventBitfield2DataPoint.setBlockOffset(24);
+    vendorStringEventBitfield2DataPoint.setSunSpecDataType("bitfield32");
+    m_dataPoints.insert(vendorStringEventBitfield2DataPoint.name(), vendorStringEventBitfield2DataPoint);
+
+    SunSpecDataPoint enableDisableStringDataPoint;
+    enableDisableStringDataPoint.setName("StrSetEna");
+    enableDisableStringDataPoint.setLabel("Enable/Disable String");
+    enableDisableStringDataPoint.setDescription("Enables and disables the string.");
+    enableDisableStringDataPoint.setSize(1);
+    enableDisableStringDataPoint.setAddressOffset(28);
+    enableDisableStringDataPoint.setBlockOffset(26);
+    enableDisableStringDataPoint.setSunSpecDataType("enum16");
+    enableDisableStringDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    m_dataPoints.insert(enableDisableStringDataPoint.name(), enableDisableStringDataPoint);
+
+    SunSpecDataPoint connectDisconnectStringDataPoint;
+    connectDisconnectStringDataPoint.setName("StrSetCon");
+    connectDisconnectStringDataPoint.setLabel("Connect/Disconnect String");
+    connectDisconnectStringDataPoint.setDescription("Connects and disconnects the string.");
+    connectDisconnectStringDataPoint.setSize(1);
+    connectDisconnectStringDataPoint.setAddressOffset(29);
+    connectDisconnectStringDataPoint.setBlockOffset(27);
+    connectDisconnectStringDataPoint.setSunSpecDataType("enum16");
+    connectDisconnectStringDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    m_dataPoints.insert(connectDisconnectStringDataPoint.name(), connectDisconnectStringDataPoint);
+
+    SunSpecDataPoint pad1DataPoint;
+    pad1DataPoint.setName("Pad1");
+    pad1DataPoint.setLabel("Pad");
+    pad1DataPoint.setDescription("Pad register.");
+    pad1DataPoint.setMandatory(true);
+    pad1DataPoint.setSize(1);
+    pad1DataPoint.setAddressOffset(30);
+    pad1DataPoint.setBlockOffset(28);
+    pad1DataPoint.setSunSpecDataType("pad");
+    m_dataPoints.insert(pad1DataPoint.name(), pad1DataPoint);
+
+    SunSpecDataPoint pad2DataPoint;
+    pad2DataPoint.setName("Pad2");
+    pad2DataPoint.setLabel("Pad");
+    pad2DataPoint.setDescription("Pad register.");
+    pad2DataPoint.setMandatory(true);
+    pad2DataPoint.setSize(1);
+    pad2DataPoint.setAddressOffset(31);
+    pad2DataPoint.setBlockOffset(29);
+    pad2DataPoint.setSunSpecDataType("pad");
+    m_dataPoints.insert(pad2DataPoint.name(), pad2DataPoint);
+
+}
+
+void SunSpecLithiumIonBankModelRepeatingBlock::processBlockData(const QVector<quint16> blockData)
+{
+    m_blockData = blockData;
+
+    // Update properties according to the data point type
+    if (m_dataPoints.value("StrNMod").isValid())
+        m_moduleCount = m_dataPoints.value("StrNMod").toUInt16();
+
+    if (m_dataPoints.value("StrSt").isValid())
+        m_stringStatus = static_cast<StrstFlags>(m_dataPoints.value("StrSt").toUInt32());
+
+    if (m_dataPoints.value("StrConFail").isValid())
+        m_connectionFailureReason = static_cast<Strconfail>(m_dataPoints.value("StrConFail").toUInt16());
+
+    if (m_dataPoints.value("StrSoC").isValid())
+        m_stringStateOfCharge = m_dataPoints.value("StrSoC").toFloatWithSSF(m_parentModel->soC_SF());
+
+    if (m_dataPoints.value("StrSoH").isValid())
+        m_stringStateOfHealth = m_dataPoints.value("StrSoH").toFloatWithSSF(m_parentModel->soH_SF());
+
+    if (m_dataPoints.value("StrA").isValid())
+        m_stringCurrent = m_dataPoints.value("StrA").toFloatWithSSF(m_parentModel->a_SF());
+
+    if (m_dataPoints.value("StrCellVMax").isValid())
+        m_maxCellVoltage = m_dataPoints.value("StrCellVMax").toFloatWithSSF(m_parentModel->cellV_SF());
+
+    if (m_dataPoints.value("StrCellVMaxMod").isValid())
+        m_maxCellVoltageModule = m_dataPoints.value("StrCellVMaxMod").toUInt16();
+
+    if (m_dataPoints.value("StrCellVMin").isValid())
+        m_minCellVoltage = m_dataPoints.value("StrCellVMin").toFloatWithSSF(m_parentModel->cellV_SF());
+
+    if (m_dataPoints.value("StrCellVMinMod").isValid())
+        m_minCellVoltageModule = m_dataPoints.value("StrCellVMinMod").toUInt16();
+
+    if (m_dataPoints.value("StrCellVAvg").isValid())
+        m_averageCellVoltage = m_dataPoints.value("StrCellVAvg").toFloatWithSSF(m_parentModel->cellV_SF());
+
+    if (m_dataPoints.value("StrModTmpMax").isValid())
+        m_maxModuleTemperature = m_dataPoints.value("StrModTmpMax").toFloatWithSSF(m_parentModel->modTmp_SF());
+
+    if (m_dataPoints.value("StrModTmpMaxMod").isValid())
+        m_maxModuleTemperatureModule = m_dataPoints.value("StrModTmpMaxMod").toUInt16();
+
+    if (m_dataPoints.value("StrModTmpMin").isValid())
+        m_minModuleTemperature = m_dataPoints.value("StrModTmpMin").toFloatWithSSF(m_parentModel->modTmp_SF());
+
+    if (m_dataPoints.value("StrModTmpMinMod").isValid())
+        m_minModuleTemperatureModule = m_dataPoints.value("StrModTmpMinMod").toUInt16();
+
+    if (m_dataPoints.value("StrModTmpAvg").isValid())
+        m_averageModuleTemperature = m_dataPoints.value("StrModTmpAvg").toFloatWithSSF(m_parentModel->modTmp_SF());
+
+    if (m_dataPoints.value("StrDisRsn").isValid())
+        m_disabledReason = static_cast<Strdisrsn>(m_dataPoints.value("StrDisRsn").toUInt16());
+
+    if (m_dataPoints.value("StrConSt").isValid())
+        m_contactorStatus = static_cast<StrconstFlags>(m_dataPoints.value("StrConSt").toUInt32());
+
+    if (m_dataPoints.value("StrEvt1").isValid())
+        m_stringEvent1 = static_cast<Strevt1Flags>(m_dataPoints.value("StrEvt1").toUInt32());
+
+    if (m_dataPoints.value("StrEvt2").isValid())
+        m_stringEvent2 = m_dataPoints.value("StrEvt2").toUInt32();
+
+    if (m_dataPoints.value("StrEvtVnd1").isValid())
+        m_vendorStringEventBitfield1 = m_dataPoints.value("StrEvtVnd1").toUInt32();
+
+    if (m_dataPoints.value("StrEvtVnd2").isValid())
+        m_vendorStringEventBitfield2 = m_dataPoints.value("StrEvtVnd2").toUInt32();
+
+    if (m_dataPoints.value("StrSetEna").isValid())
+        m_enableDisableString = static_cast<Strsetena>(m_dataPoints.value("StrSetEna").toUInt16());
+
+    if (m_dataPoints.value("StrSetCon").isValid())
+        m_connectDisconnectString = static_cast<Strsetcon>(m_dataPoints.value("StrSetCon").toUInt16());
+
+    if (m_dataPoints.value("Pad1").isValid())
+        m_pad1 = m_dataPoints.value("Pad1").toUInt16();
+
+    if (m_dataPoints.value("Pad2").isValid())
+        m_pad2 = m_dataPoints.value("Pad2").toUInt16();
+
+
+    qCDebug(dcSunSpecModelData()) << this;
+}
+
+
+SunSpecLithiumIonBankModel::SunSpecLithiumIonBankModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 803, modelLength, parent)
+{
+    m_modelBlockType = SunSpecModel::ModelBlockTypeFixedAndRepeating;
+
     initDataPoints();
 }
 
@@ -139,93 +666,30 @@ quint16 SunSpecLithiumIonBankModel::batteryCellBalancingCount() const
 {
     return m_batteryCellBalancingCount;
 }
-void SunSpecLithiumIonBankModel::processBlockData()
+qint16 SunSpecLithiumIonBankModel::cellV_SF() const
 {
-    // Scale factors
-    if (m_dataPoints.value("CellV_SF").isValid())
-        m_cellV_SF = m_dataPoints.value("CellV_SF").toInt16();
-
-    if (m_dataPoints.value("ModTmp_SF").isValid())
-        m_modTmp_SF = m_dataPoints.value("ModTmp_SF").toInt16();
-
-    if (m_dataPoints.value("A_SF").isValid())
-        m_a_SF = m_dataPoints.value("A_SF").toInt16();
-
-    if (m_dataPoints.value("SoH_SF").isValid())
-        m_soH_SF = m_dataPoints.value("SoH_SF").toInt16();
-
-    if (m_dataPoints.value("SoC_SF").isValid())
-        m_soC_SF = m_dataPoints.value("SoC_SF").toInt16();
-
-    if (m_dataPoints.value("V_SF").isValid())
-        m_v_SF = m_dataPoints.value("V_SF").toInt16();
-
-
-    // Update properties according to the data point type
-    if (m_dataPoints.value("NStr").isValid())
-        m_stringCount = m_dataPoints.value("NStr").toUInt16();
-
-    if (m_dataPoints.value("NStrCon").isValid())
-        m_connectedStringCount = m_dataPoints.value("NStrCon").toUInt16();
-
-    if (m_dataPoints.value("ModTmpMax").isValid())
-        m_maxModuleTemperature = m_dataPoints.value("ModTmpMax").toFloatWithSSF(m_modTmp_SF);
-
-    if (m_dataPoints.value("ModTmpMaxStr").isValid())
-        m_maxModuleTemperatureString = m_dataPoints.value("ModTmpMaxStr").toUInt16();
-
-    if (m_dataPoints.value("ModTmpMaxMod").isValid())
-        m_maxModuleTemperatureModule = m_dataPoints.value("ModTmpMaxMod").toUInt16();
-
-    if (m_dataPoints.value("ModTmpMin").isValid())
-        m_minModuleTemperature = m_dataPoints.value("ModTmpMin").toFloatWithSSF(m_modTmp_SF);
-
-    if (m_dataPoints.value("ModTmpMinStr").isValid())
-        m_minModuleTemperatureString = m_dataPoints.value("ModTmpMinStr").toUInt16();
-
-    if (m_dataPoints.value("ModTmpMinMod").isValid())
-        m_minModuleTemperatureModule = m_dataPoints.value("ModTmpMinMod").toUInt16();
-
-    if (m_dataPoints.value("ModTmpAvg").isValid())
-        m_averageModuleTemperature = m_dataPoints.value("ModTmpAvg").toInt16();
-
-    if (m_dataPoints.value("StrVMax").isValid())
-        m_maxStringVoltage = m_dataPoints.value("StrVMax").toFloatWithSSF(m_v_SF);
-
-    if (m_dataPoints.value("StrVMaxStr").isValid())
-        m_maxStringVoltageString = m_dataPoints.value("StrVMaxStr").toUInt16();
-
-    if (m_dataPoints.value("StrVMin").isValid())
-        m_minStringVoltage = m_dataPoints.value("StrVMin").toFloatWithSSF(m_v_SF);
-
-    if (m_dataPoints.value("StrVMinStr").isValid())
-        m_minStringVoltageString = m_dataPoints.value("StrVMinStr").toUInt16();
-
-    if (m_dataPoints.value("StrVAvg").isValid())
-        m_averageStringVoltage = m_dataPoints.value("StrVAvg").toFloatWithSSF(m_v_SF);
-
-    if (m_dataPoints.value("StrAMax").isValid())
-        m_maxStringCurrent = m_dataPoints.value("StrAMax").toFloatWithSSF(m_a_SF);
-
-    if (m_dataPoints.value("StrAMaxStr").isValid())
-        m_maxStringCurrentString = m_dataPoints.value("StrAMaxStr").toUInt16();
-
-    if (m_dataPoints.value("StrAMin").isValid())
-        m_minStringCurrent = m_dataPoints.value("StrAMin").toFloatWithSSF(m_a_SF);
-
-    if (m_dataPoints.value("StrAMinStr").isValid())
-        m_minStringCurrentString = m_dataPoints.value("StrAMinStr").toUInt16();
-
-    if (m_dataPoints.value("StrAAvg").isValid())
-        m_averageStringCurrent = m_dataPoints.value("StrAAvg").toFloatWithSSF(m_a_SF);
-
-    if (m_dataPoints.value("NCellBal").isValid())
-        m_batteryCellBalancingCount = m_dataPoints.value("NCellBal").toUInt16();
-
-
-    qCDebug(dcSunSpecModelData()) << this;
+    return m_cellV_SF;
 }
-
+qint16 SunSpecLithiumIonBankModel::modTmp_SF() const
+{
+    return m_modTmp_SF;
+}
+qint16 SunSpecLithiumIonBankModel::a_SF() const
+{
+    return m_a_SF;
+}
+qint16 SunSpecLithiumIonBankModel::soH_SF() const
+{
+    return m_soH_SF;
+}
+qint16 SunSpecLithiumIonBankModel::soC_SF() const
+{
+    return m_soC_SF;
+}
+qint16 SunSpecLithiumIonBankModel::v_SF() const
+{
+    return m_v_SF;
+}
 void SunSpecLithiumIonBankModel::initDataPoints()
 {
     SunSpecDataPoint modelIdDataPoint;
@@ -527,127 +991,252 @@ void SunSpecLithiumIonBankModel::initDataPoints()
 
 }
 
+void SunSpecLithiumIonBankModel::processBlockData()
+{
+    // Scale factors
+    if (m_dataPoints.value("CellV_SF").isValid())
+        m_cellV_SF = m_dataPoints.value("CellV_SF").toInt16();
+
+    if (m_dataPoints.value("ModTmp_SF").isValid())
+        m_modTmp_SF = m_dataPoints.value("ModTmp_SF").toInt16();
+
+    if (m_dataPoints.value("A_SF").isValid())
+        m_a_SF = m_dataPoints.value("A_SF").toInt16();
+
+    if (m_dataPoints.value("SoH_SF").isValid())
+        m_soH_SF = m_dataPoints.value("SoH_SF").toInt16();
+
+    if (m_dataPoints.value("SoC_SF").isValid())
+        m_soC_SF = m_dataPoints.value("SoC_SF").toInt16();
+
+    if (m_dataPoints.value("V_SF").isValid())
+        m_v_SF = m_dataPoints.value("V_SF").toInt16();
+
+
+    // Update properties according to the data point type
+    if (m_dataPoints.value("NStr").isValid())
+        m_stringCount = m_dataPoints.value("NStr").toUInt16();
+
+    if (m_dataPoints.value("NStrCon").isValid())
+        m_connectedStringCount = m_dataPoints.value("NStrCon").toUInt16();
+
+    if (m_dataPoints.value("ModTmpMax").isValid())
+        m_maxModuleTemperature = m_dataPoints.value("ModTmpMax").toFloatWithSSF(m_modTmp_SF);
+
+    if (m_dataPoints.value("ModTmpMaxStr").isValid())
+        m_maxModuleTemperatureString = m_dataPoints.value("ModTmpMaxStr").toUInt16();
+
+    if (m_dataPoints.value("ModTmpMaxMod").isValid())
+        m_maxModuleTemperatureModule = m_dataPoints.value("ModTmpMaxMod").toUInt16();
+
+    if (m_dataPoints.value("ModTmpMin").isValid())
+        m_minModuleTemperature = m_dataPoints.value("ModTmpMin").toFloatWithSSF(m_modTmp_SF);
+
+    if (m_dataPoints.value("ModTmpMinStr").isValid())
+        m_minModuleTemperatureString = m_dataPoints.value("ModTmpMinStr").toUInt16();
+
+    if (m_dataPoints.value("ModTmpMinMod").isValid())
+        m_minModuleTemperatureModule = m_dataPoints.value("ModTmpMinMod").toUInt16();
+
+    if (m_dataPoints.value("ModTmpAvg").isValid())
+        m_averageModuleTemperature = m_dataPoints.value("ModTmpAvg").toInt16();
+
+    if (m_dataPoints.value("StrVMax").isValid())
+        m_maxStringVoltage = m_dataPoints.value("StrVMax").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("StrVMaxStr").isValid())
+        m_maxStringVoltageString = m_dataPoints.value("StrVMaxStr").toUInt16();
+
+    if (m_dataPoints.value("StrVMin").isValid())
+        m_minStringVoltage = m_dataPoints.value("StrVMin").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("StrVMinStr").isValid())
+        m_minStringVoltageString = m_dataPoints.value("StrVMinStr").toUInt16();
+
+    if (m_dataPoints.value("StrVAvg").isValid())
+        m_averageStringVoltage = m_dataPoints.value("StrVAvg").toFloatWithSSF(m_v_SF);
+
+    if (m_dataPoints.value("StrAMax").isValid())
+        m_maxStringCurrent = m_dataPoints.value("StrAMax").toFloatWithSSF(m_a_SF);
+
+    if (m_dataPoints.value("StrAMaxStr").isValid())
+        m_maxStringCurrentString = m_dataPoints.value("StrAMaxStr").toUInt16();
+
+    if (m_dataPoints.value("StrAMin").isValid())
+        m_minStringCurrent = m_dataPoints.value("StrAMin").toFloatWithSSF(m_a_SF);
+
+    if (m_dataPoints.value("StrAMinStr").isValid())
+        m_minStringCurrentString = m_dataPoints.value("StrAMinStr").toUInt16();
+
+    if (m_dataPoints.value("StrAAvg").isValid())
+        m_averageStringCurrent = m_dataPoints.value("StrAAvg").toFloatWithSSF(m_a_SF);
+
+    if (m_dataPoints.value("NCellBal").isValid())
+        m_batteryCellBalancingCount = m_dataPoints.value("NCellBal").toUInt16();
+
+    if (m_dataPoints.value("CellV_SF").isValid())
+        m_cellV_SF = m_dataPoints.value("CellV_SF").toInt16();
+
+    if (m_dataPoints.value("ModTmp_SF").isValid())
+        m_modTmp_SF = m_dataPoints.value("ModTmp_SF").toInt16();
+
+    if (m_dataPoints.value("A_SF").isValid())
+        m_a_SF = m_dataPoints.value("A_SF").toInt16();
+
+    if (m_dataPoints.value("SoH_SF").isValid())
+        m_soH_SF = m_dataPoints.value("SoH_SF").toInt16();
+
+    if (m_dataPoints.value("SoC_SF").isValid())
+        m_soC_SF = m_dataPoints.value("SoC_SF").toInt16();
+
+    if (m_dataPoints.value("V_SF").isValid())
+        m_v_SF = m_dataPoints.value("V_SF").toInt16();
+
+
+    qCDebug(dcSunSpecModelData()) << this;
+}
+
 QDebug operator<<(QDebug debug, SunSpecLithiumIonBankModel *model)
 {
     debug.nospace().noquote() << "SunSpecLithiumIonBankModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("NStr") << "-->";
     if (model->dataPoints().value("NStr").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("NStr") << "--> " << model->stringCount() << endl;
+        debug.nospace().noquote() << model->stringCount() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("NStr") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("NStrCon") << "-->";
     if (model->dataPoints().value("NStrCon").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("NStrCon") << "--> " << model->connectedStringCount() << endl;
+        debug.nospace().noquote() << model->connectedStringCount() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("NStrCon") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMax") << "-->";
     if (model->dataPoints().value("ModTmpMax").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMax") << "--> " << model->maxModuleTemperature() << endl;
+        debug.nospace().noquote() << model->maxModuleTemperature() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMax") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMaxStr") << "-->";
     if (model->dataPoints().value("ModTmpMaxStr").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMaxStr") << "--> " << model->maxModuleTemperatureString() << endl;
+        debug.nospace().noquote() << model->maxModuleTemperatureString() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMaxStr") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMaxMod") << "-->";
     if (model->dataPoints().value("ModTmpMaxMod").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMaxMod") << "--> " << model->maxModuleTemperatureModule() << endl;
+        debug.nospace().noquote() << model->maxModuleTemperatureModule() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMaxMod") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMin") << "-->";
     if (model->dataPoints().value("ModTmpMin").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMin") << "--> " << model->minModuleTemperature() << endl;
+        debug.nospace().noquote() << model->minModuleTemperature() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMin") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMinStr") << "-->";
     if (model->dataPoints().value("ModTmpMinStr").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMinStr") << "--> " << model->minModuleTemperatureString() << endl;
+        debug.nospace().noquote() << model->minModuleTemperatureString() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMinStr") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMinMod") << "-->";
     if (model->dataPoints().value("ModTmpMinMod").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMinMod") << "--> " << model->minModuleTemperatureModule() << endl;
+        debug.nospace().noquote() << model->minModuleTemperatureModule() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpMinMod") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpAvg") << "-->";
     if (model->dataPoints().value("ModTmpAvg").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpAvg") << "--> " << model->averageModuleTemperature() << endl;
+        debug.nospace().noquote() << model->averageModuleTemperature() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("ModTmpAvg") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVMax") << "-->";
     if (model->dataPoints().value("StrVMax").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVMax") << "--> " << model->maxStringVoltage() << endl;
+        debug.nospace().noquote() << model->maxStringVoltage() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVMax") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVMaxStr") << "-->";
     if (model->dataPoints().value("StrVMaxStr").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVMaxStr") << "--> " << model->maxStringVoltageString() << endl;
+        debug.nospace().noquote() << model->maxStringVoltageString() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVMaxStr") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVMin") << "-->";
     if (model->dataPoints().value("StrVMin").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVMin") << "--> " << model->minStringVoltage() << endl;
+        debug.nospace().noquote() << model->minStringVoltage() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVMin") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVMinStr") << "-->";
     if (model->dataPoints().value("StrVMinStr").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVMinStr") << "--> " << model->minStringVoltageString() << endl;
+        debug.nospace().noquote() << model->minStringVoltageString() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVMinStr") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVAvg") << "-->";
     if (model->dataPoints().value("StrVAvg").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVAvg") << "--> " << model->averageStringVoltage() << endl;
+        debug.nospace().noquote() << model->averageStringVoltage() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrVAvg") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAMax") << "-->";
     if (model->dataPoints().value("StrAMax").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAMax") << "--> " << model->maxStringCurrent() << endl;
+        debug.nospace().noquote() << model->maxStringCurrent() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAMax") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAMaxStr") << "-->";
     if (model->dataPoints().value("StrAMaxStr").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAMaxStr") << "--> " << model->maxStringCurrentString() << endl;
+        debug.nospace().noquote() << model->maxStringCurrentString() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAMaxStr") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAMin") << "-->";
     if (model->dataPoints().value("StrAMin").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAMin") << "--> " << model->minStringCurrent() << endl;
+        debug.nospace().noquote() << model->minStringCurrent() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAMin") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAMinStr") << "-->";
     if (model->dataPoints().value("StrAMinStr").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAMinStr") << "--> " << model->minStringCurrentString() << endl;
+        debug.nospace().noquote() << model->minStringCurrentString() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAMinStr") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAAvg") << "-->";
     if (model->dataPoints().value("StrAAvg").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAAvg") << "--> " << model->averageStringCurrent() << endl;
+        debug.nospace().noquote() << model->averageStringCurrent() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("StrAAvg") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
+    debug.nospace().noquote() << "    - " << model->dataPoints().value("NCellBal") << "-->";
     if (model->dataPoints().value("NCellBal").isValid()) {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("NCellBal") << "--> " << model->batteryCellBalancingCount() << endl;
+        debug.nospace().noquote() << model->batteryCellBalancingCount() << endl;
     } else {
-        debug.nospace().noquote() << "    - " << model->dataPoints().value("NCellBal") << "--> NaN" << endl;
+        debug.nospace().noquote() << "NaN" << endl;
     }
 
 

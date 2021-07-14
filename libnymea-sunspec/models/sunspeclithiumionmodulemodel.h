@@ -34,15 +34,54 @@
 #include <QObject>
 
 #include "sunspecmodel.h"
+#include "sunspecmodelrepeatingblock.h"
 
 class SunSpecConnection;
+class SunSpecLithiumIonModuleModel;
+
+class SunSpecLithiumIonModuleModelRepeatingBlock : public SunSpecModelRepeatingBlock
+{
+    Q_OBJECT
+public:
+
+    enum Cellst {
+        CellstCellIsBalancing = 0x1
+    };
+    Q_DECLARE_FLAGS(CellstFlags, Cellst)
+    Q_FLAG(Cellst)
+
+    explicit SunSpecLithiumIonModuleModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecLithiumIonModuleModel *parent = nullptr);
+    ~SunSpecLithiumIonModuleModelRepeatingBlock() override; 
+
+    SunSpecLithiumIonModuleModel *parentModel() const; 
+
+    QString name() const override;
+    float cellVoltage() const;
+    float cellTemperature() const;
+    CellstFlags cellStatus() const;
+
+    void processBlockData(const QVector<quint16> blockData) override;
+
+protected:
+    void initDataPoints() override;
+
+private:
+    SunSpecLithiumIonModuleModel *m_parentModel = nullptr; 
+
+    float m_cellVoltage = 0;
+    float m_cellTemperature = 0;
+    CellstFlags m_cellStatus;
+
+};
+
+
 
 class SunSpecLithiumIonModuleModel : public SunSpecModel
 {
     Q_OBJECT
 public:
 
-    explicit SunSpecLithiumIonModuleModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);
+    explicit SunSpecLithiumIonModuleModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
     ~SunSpecLithiumIonModuleModel() override; 
 
     QString name() const override;
@@ -69,8 +108,18 @@ public:
     float averageCellTemperature() const;
     quint16 balancedCellCount() const;
     QString serialNumber() const;
+    qint16 soC_SF() const;
+    qint16 soH_SF() const;
+    qint16 doD_SF() const;
+    qint16 v_SF() const;
+    qint16 cellV_SF() const;
+    qint16 tmp_SF() const;
 
 protected:
+    quint16 m_fixedBlockLength = 42;
+    quint16 m_repeatingBlockLength = 4;
+
+    void initDataPoints() override;
     void processBlockData() override;
 
 private:
@@ -101,7 +150,6 @@ private:
     qint16 m_cellV_SF = 0;
     qint16 m_tmp_SF = 0;
 
-    void initDataPoints();
 
 };
 

@@ -74,7 +74,7 @@ public:
     };
     Q_ENUM(Varpct_ena)
 
-    explicit SunSpecControlsModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 length, QObject *parent = nullptr);
+    explicit SunSpecControlsModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
     ~SunSpecControlsModel() override; 
 
     QString name() const override;
@@ -145,8 +145,14 @@ public:
     Varpct_ena vArPctEna() const;
     QModbusReply *setVArPctEna(Varpct_ena vArPctEna);
 
+    qint16 wMaxLimPctSf() const;
+    qint16 outPfSetSf() const;
+    qint16 vArPctSf() const;
 
 protected:
+    quint16 m_fixedBlockLength = 24;
+
+    void initDataPoints() override;
     void processBlockData() override;
 
 private:
@@ -175,7 +181,6 @@ private:
     qint16 m_outPfSetSf = 0;
     qint16 m_vArPctSf = 0;
 
-    void initDataPoints();
 
 };
 
