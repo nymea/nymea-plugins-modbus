@@ -87,9 +87,9 @@ public:
     Q_FLAG(Dcevt)
 
     explicit SunSpecMpptModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecMpptModel *parent = nullptr);
-    ~SunSpecMpptModelRepeatingBlock() override; 
+    ~SunSpecMpptModelRepeatingBlock() override = default;
 
-    SunSpecMpptModel *parentModel() const; 
+    SunSpecMpptModel *parentModel() const;
 
     QString name() const override;
     quint16 inputId() const;
@@ -109,7 +109,7 @@ protected:
     void initDataPoints() override;
 
 private:
-    SunSpecMpptModel *m_parentModel = nullptr; 
+    SunSpecMpptModel *m_parentModel = nullptr;
 
     quint16 m_inputId = 0;
     QString m_inputIdSting;

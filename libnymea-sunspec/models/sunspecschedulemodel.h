@@ -84,9 +84,9 @@ public:
     Q_ENUM(Ytyp)
 
     explicit SunSpecScheduleModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecScheduleModel *parent = nullptr);
-    ~SunSpecScheduleModelRepeatingBlock() override; 
+    ~SunSpecScheduleModelRepeatingBlock() override = default;
 
-    SunSpecScheduleModel *parentModel() const; 
+    SunSpecScheduleModel *parentModel() const;
 
     QString name() const override;
 
@@ -191,7 +191,7 @@ protected:
     void initDataPoints() override;
 
 private:
-    SunSpecScheduleModel *m_parentModel = nullptr; 
+    SunSpecScheduleModel *m_parentModel = nullptr;
 
     quint16 m_actPts = 0;
     quint32 m_strTms = 0;

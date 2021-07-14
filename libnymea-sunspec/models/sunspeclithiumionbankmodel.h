@@ -157,9 +157,9 @@ public:
     Q_FLAG(Strevt1)
 
     explicit SunSpecLithiumIonBankModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecLithiumIonBankModel *parent = nullptr);
-    ~SunSpecLithiumIonBankModelRepeatingBlock() override; 
+    ~SunSpecLithiumIonBankModelRepeatingBlock() override = default;
 
-    SunSpecLithiumIonBankModel *parentModel() const; 
+    SunSpecLithiumIonBankModel *parentModel() const;
 
     QString name() const override;
     quint16 moduleCount() const;
@@ -200,7 +200,7 @@ protected:
     void initDataPoints() override;
 
 private:
-    SunSpecLithiumIonBankModel *m_parentModel = nullptr; 
+    SunSpecLithiumIonBankModel *m_parentModel = nullptr;
 
     quint16 m_moduleCount = 0;
     StrstFlags m_stringStatus;

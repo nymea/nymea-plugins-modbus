@@ -45,9 +45,9 @@ class SunSpecSecureAcMeterSelectedReadingsModelRepeatingBlock : public SunSpecMo
 public:
 
     explicit SunSpecSecureAcMeterSelectedReadingsModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecSecureAcMeterSelectedReadingsModel *parent = nullptr);
-    ~SunSpecSecureAcMeterSelectedReadingsModelRepeatingBlock() override; 
+    ~SunSpecSecureAcMeterSelectedReadingsModelRepeatingBlock() override = default;
 
-    SunSpecSecureAcMeterSelectedReadingsModel *parentModel() const; 
+    SunSpecSecureAcMeterSelectedReadingsModel *parentModel() const;
 
     QString name() const override;
     quint16 dS() const;
@@ -58,7 +58,7 @@ protected:
     void initDataPoints() override;
 
 private:
-    SunSpecSecureAcMeterSelectedReadingsModel *m_parentModel = nullptr; 
+    SunSpecSecureAcMeterSelectedReadingsModel *m_parentModel = nullptr;
 
     quint16 m_dS = 0;
 

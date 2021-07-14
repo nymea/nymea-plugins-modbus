@@ -851,10 +851,10 @@ def writeRepeatingBlockClassDefinition(fileDescriptor, className, modelId):
 
    # Constructor
     writeLine(fileDescriptor, '    explicit %s(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, %s *parent = nullptr);' % (blockClassName, className))
-    writeLine(fileDescriptor, '    ~%s() override; ' % blockClassName)
+    writeLine(fileDescriptor, '    ~%s() override = default;' % blockClassName)
     writeLine(fileDescriptor)
 
-    writeLine(fileDescriptor, '    %s *parentModel() const; ' % className)
+    writeLine(fileDescriptor, '    %s *parentModel() const;' % className)
     writeLine(fileDescriptor)
     writeLine(fileDescriptor, '    QString name() const override;')
 
@@ -872,7 +872,7 @@ def writeRepeatingBlockClassDefinition(fileDescriptor, className, modelId):
     # Private members
     writeLine(fileDescriptor)
     writeLine(fileDescriptor, 'private:')
-    writeLine(fileDescriptor, '    %s *m_parentModel = nullptr; ' % className)
+    writeLine(fileDescriptor, '    %s *m_parentModel = nullptr;' % className)
     writeLine(fileDescriptor)
 
     addPropertiesDeclaration(fileDescriptor, dataPoints)

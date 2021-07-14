@@ -51,9 +51,9 @@ public:
     Q_ENUM(Readonly)
 
     explicit SunSpecHfrtcModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecHfrtcModel *parent = nullptr);
-    ~SunSpecHfrtcModelRepeatingBlock() override; 
+    ~SunSpecHfrtcModelRepeatingBlock() override = default;
 
-    SunSpecHfrtcModel *parentModel() const; 
+    SunSpecHfrtcModel *parentModel() const;
 
     QString name() const override;
 
@@ -191,7 +191,7 @@ protected:
     void initDataPoints() override;
 
 private:
-    SunSpecHfrtcModel *m_parentModel = nullptr; 
+    SunSpecHfrtcModel *m_parentModel = nullptr;
 
     quint16 m_actPt = 0;
     float m_tms1 = 0;

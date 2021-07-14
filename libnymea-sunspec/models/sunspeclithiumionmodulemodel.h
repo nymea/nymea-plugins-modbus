@@ -51,9 +51,9 @@ public:
     Q_FLAG(Cellst)
 
     explicit SunSpecLithiumIonModuleModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecLithiumIonModuleModel *parent = nullptr);
-    ~SunSpecLithiumIonModuleModelRepeatingBlock() override; 
+    ~SunSpecLithiumIonModuleModelRepeatingBlock() override = default;
 
-    SunSpecLithiumIonModuleModel *parentModel() const; 
+    SunSpecLithiumIonModuleModel *parentModel() const;
 
     QString name() const override;
     float cellVoltage() const;
@@ -66,7 +66,7 @@ protected:
     void initDataPoints() override;
 
 private:
-    SunSpecLithiumIonModuleModel *m_parentModel = nullptr; 
+    SunSpecLithiumIonModuleModel *m_parentModel = nullptr;
 
     float m_cellVoltage = 0;
     float m_cellTemperature = 0;

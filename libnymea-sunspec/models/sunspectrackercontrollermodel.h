@@ -60,9 +60,9 @@ public:
     Q_FLAG(Alm)
 
     explicit SunSpecTrackerControllerModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecTrackerControllerModel *parent = nullptr);
-    ~SunSpecTrackerControllerModelRepeatingBlock() override; 
+    ~SunSpecTrackerControllerModelRepeatingBlock() override = default;
 
-    SunSpecTrackerControllerModel *parentModel() const; 
+    SunSpecTrackerControllerModel *parentModel() const;
 
     QString name() const override;
     QString tracker() const;
@@ -88,7 +88,7 @@ protected:
     void initDataPoints() override;
 
 private:
-    SunSpecTrackerControllerModel *m_parentModel = nullptr; 
+    SunSpecTrackerControllerModel *m_parentModel = nullptr;
 
     QString m_tracker;
     float m_targetElevation = 0;

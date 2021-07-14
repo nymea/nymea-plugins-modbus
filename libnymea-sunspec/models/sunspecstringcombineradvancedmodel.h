@@ -69,9 +69,9 @@ public:
     Q_FLAG(Inevt)
 
     explicit SunSpecStringCombinerAdvancedModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecStringCombinerAdvancedModel *parent = nullptr);
-    ~SunSpecStringCombinerAdvancedModelRepeatingBlock() override; 
+    ~SunSpecStringCombinerAdvancedModelRepeatingBlock() override = default;
 
-    SunSpecStringCombinerAdvancedModel *parentModel() const; 
+    SunSpecStringCombinerAdvancedModel *parentModel() const;
 
     QString name() const override;
     quint16 id() const;
@@ -91,7 +91,7 @@ protected:
     void initDataPoints() override;
 
 private:
-    SunSpecStringCombinerAdvancedModel *m_parentModel = nullptr; 
+    SunSpecStringCombinerAdvancedModel *m_parentModel = nullptr;
 
     quint16 m_id = 0;
     InevtFlags m_inputEvent;

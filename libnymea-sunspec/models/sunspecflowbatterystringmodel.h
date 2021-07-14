@@ -168,9 +168,9 @@ public:
     Q_FLAG(Modevt2)
 
     explicit SunSpecFlowBatteryStringModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecFlowBatteryStringModel *parent = nullptr);
-    ~SunSpecFlowBatteryStringModelRepeatingBlock() override; 
+    ~SunSpecFlowBatteryStringModelRepeatingBlock() override = default;
 
-    SunSpecFlowBatteryStringModel *parentModel() const; 
+    SunSpecFlowBatteryStringModel *parentModel() const;
 
     QString name() const override;
     quint16 moduleIndex() const;
@@ -205,7 +205,7 @@ protected:
     void initDataPoints() override;
 
 private:
-    SunSpecFlowBatteryStringModel *m_parentModel = nullptr; 
+    SunSpecFlowBatteryStringModel *m_parentModel = nullptr;
 
     quint16 m_moduleIndex = 0;
     quint16 m_stackCount = 0;

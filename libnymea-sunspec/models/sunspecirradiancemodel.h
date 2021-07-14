@@ -45,9 +45,9 @@ class SunSpecIrradianceModelRepeatingBlock : public SunSpecModelRepeatingBlock
 public:
 
     explicit SunSpecIrradianceModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecIrradianceModel *parent = nullptr);
-    ~SunSpecIrradianceModelRepeatingBlock() override; 
+    ~SunSpecIrradianceModelRepeatingBlock() override = default;
 
-    SunSpecIrradianceModel *parentModel() const; 
+    SunSpecIrradianceModel *parentModel() const;
 
     QString name() const override;
     quint16 ghi() const;
@@ -62,7 +62,7 @@ protected:
     void initDataPoints() override;
 
 private:
-    SunSpecIrradianceModel *m_parentModel = nullptr; 
+    SunSpecIrradianceModel *m_parentModel = nullptr;
 
     quint16 m_ghi = 0;
     quint16 m_poai = 0;

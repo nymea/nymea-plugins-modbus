@@ -51,9 +51,9 @@ public:
     Q_ENUM(Readonly)
 
     explicit SunSpecFreqWattModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecFreqWattModel *parent = nullptr);
-    ~SunSpecFreqWattModelRepeatingBlock() override; 
+    ~SunSpecFreqWattModelRepeatingBlock() override = default;
 
-    SunSpecFreqWattModel *parentModel() const; 
+    SunSpecFreqWattModel *parentModel() const;
 
     QString name() const override;
 
@@ -215,7 +215,7 @@ protected:
     void initDataPoints() override;
 
 private:
-    SunSpecFreqWattModel *m_parentModel = nullptr; 
+    SunSpecFreqWattModel *m_parentModel = nullptr;
 
     quint16 m_actPt = 0;
     float m_hz1 = 0;

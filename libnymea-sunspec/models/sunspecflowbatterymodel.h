@@ -45,9 +45,9 @@ class SunSpecFlowBatteryModelRepeatingBlock : public SunSpecModelRepeatingBlock
 public:
 
     explicit SunSpecFlowBatteryModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecFlowBatteryModel *parent = nullptr);
-    ~SunSpecFlowBatteryModelRepeatingBlock() override; 
+    ~SunSpecFlowBatteryModelRepeatingBlock() override = default;
 
-    SunSpecFlowBatteryModel *parentModel() const; 
+    SunSpecFlowBatteryModel *parentModel() const;
 
     QString name() const override;
     quint16 batteryStringPointsToBeDetermined() const;
@@ -58,7 +58,7 @@ protected:
     void initDataPoints() override;
 
 private:
-    SunSpecFlowBatteryModel *m_parentModel = nullptr; 
+    SunSpecFlowBatteryModel *m_parentModel = nullptr;
 
     quint16 m_batteryStringPointsToBeDetermined = 0;
 

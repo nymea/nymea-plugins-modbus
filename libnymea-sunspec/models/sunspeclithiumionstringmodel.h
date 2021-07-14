@@ -45,9 +45,9 @@ class SunSpecLithiumIonStringModelRepeatingBlock : public SunSpecModelRepeatingB
 public:
 
     explicit SunSpecLithiumIonStringModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecLithiumIonStringModel *parent = nullptr);
-    ~SunSpecLithiumIonStringModelRepeatingBlock() override; 
+    ~SunSpecLithiumIonStringModelRepeatingBlock() override = default;
 
-    SunSpecLithiumIonStringModel *parentModel() const; 
+    SunSpecLithiumIonStringModel *parentModel() const;
 
     QString name() const override;
     quint16 moduleCellCount() const;
@@ -73,7 +73,7 @@ protected:
     void initDataPoints() override;
 
 private:
-    SunSpecLithiumIonStringModel *m_parentModel = nullptr; 
+    SunSpecLithiumIonStringModel *m_parentModel = nullptr;
 
     quint16 m_moduleCellCount = 0;
     float m_moduleSoC = 0;
