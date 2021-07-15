@@ -58,6 +58,11 @@ quint16 SolarEdgeBattery::modbusStartRegister() const
     return m_modbusStartRegister;
 }
 
+SolarEdgeBattery::BatteryData SolarEdgeBattery::batteryData() const
+{
+    return m_batteryData;
+}
+
 void SolarEdgeBattery::init()
 {
     qCDebug(dcSunSpec()) << "Initializing battery on" << m_modbusStartRegister;
