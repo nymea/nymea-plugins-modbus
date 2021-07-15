@@ -138,14 +138,13 @@ void SolarEdgeBattery::readBlockData()
                             m_batteryData.stateOfEnergy = SunSpecDataPoint::convertToFloat32(values.mid(StateOfEnergy - offset, 2));
                             m_batteryData.batteryStatus = static_cast<BatteryStatus>(SunSpecDataPoint::convertToUInt32(values.mid(Status - offset, 2)));
 
-                            emit batteryDataReceived(m_batteryData);
-
                             if (!m_initFinishedSuccess) {
                                 m_timer.stop();
                                 m_initFinishedSuccess = true;
                                 emit initFinished(true);
                             }
                             onBlockDataUpdated();
+                            emit batteryDataReceived(m_batteryData);
                         });
 
                         connect(reply, &QModbusReply::errorOccurred, this, [reply] (QModbusDevice::Error error) {
@@ -180,10 +179,10 @@ void SolarEdgeBattery::readBlockData()
 
 void SolarEdgeBattery::onBlockDataUpdated()
 {
+    qCDebug(dcSunSpec()) << "SolarEdgeBattery: block updated:" << m_batteryData;
+
     if (!m_thing)
         return;
-
-    qCDebug(dcSunSpec()) << "SolarEdgeBattery: block updated:" << m_batteryData;
 
     bool charging = false;
     bool discharging = false;
@@ -245,7 +244,6 @@ void SolarEdgeBattery::onBlockDataUpdated()
     m_thing->setStateValue(solarEdgeBatteryStateOfHealthStateTypeId, m_batteryData.stateOfHealth);
     m_thing->setStateValue(solarEdgeBatteryFirmwareVersionStateTypeId, m_batteryData.firmwareVersion);
 }
-
 
 QDebug operator<<(QDebug debug, const SolarEdgeBattery::BatteryData &batteryData)
 {

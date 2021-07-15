@@ -564,6 +564,7 @@ void IntegrationPluginSunSpec::setupSolarEdgeBattery(ThingSetupInfo *info)
         return info->finish(Thing::ThingErrorHardwareNotAvailable);
     }
 
+    qCDebug(dcSunSpec()) << "Setting up SolarEdge battery...";
     SolarEdgeBattery *battery = new SolarEdgeBattery(thing, connection, modbusStartRegister, connection);
     connect(battery, &SolarEdgeBattery::initFinished, connection, [=](bool success) {
         if (!success) {
@@ -574,6 +575,9 @@ void IntegrationPluginSunSpec::setupSolarEdgeBattery(ThingSetupInfo *info)
         m_sunspecThings.insert(thing, battery);
         info->finish(Thing::ThingErrorNoError);
     });
+
+    // Start initializing battery data
+    battery->init();
 }
 
 void IntegrationPluginSunSpec::searchSolarEdgeBatteries(SunSpecConnection *connection)
