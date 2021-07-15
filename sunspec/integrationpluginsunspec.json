@@ -57,6 +57,13 @@
                             "defaultValue": 502
                         },
                         {
+                            "id": "f65d6c36-1672-44cb-b52a-62d71837ae67",
+                            "name":"macAddress",
+                            "displayName": "MAC address",
+                            "type": "QString",
+                            "defaultValue": "00:00:00:00:00:00"
+                        },
+                        {
                             "id": "953064e0-4675-4538-a9a2-fa22ce2f347c",
                             "name":"slaveId",
                             "displayName": "Slave ID",
@@ -89,6 +96,14 @@
                             "displayNameEvent": "Device model changed",
                             "type": "QString",
                             "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "d95757de-b52d-418b-9404-ac3d7202d897",
+                            "name":"version",
+                            "displayName": "Version",
+                            "displayNameEvent": "Version changed",
+                            "type": "QString",
+                            "defaultValue": ""
                         },
                         {
                             "id": "6ed498e1-37ca-4bb7-bac7-463509c7784e",
@@ -211,26 +226,7 @@
                             "displayName": "Error",
                             "displayNameEvent": "Error changed",
                             "type": "QString",
-                            "possibleValues": [
-                                "None",
-                                "Ground fault",
-                                "DC over voltage",
-                                "AC disconnect open",
-                                "DC disconnect open",
-                                "Grid disconnect",
-                                "Cabinet open",
-                                "Manual shutdown",
-                                "Over temperature",
-                                "Frequency above limit",
-                                "Frequency under limit",
-                                "AC voltage above limit",
-                                "AC voltage under limit",
-                                "Blown string fuse on input",
-                                "Under temperature",
-                                "Communication error",
-                                "Hardware test failure"
-                            ],
-                            "defaultValue": "None"
+                            "defaultValue": ""
                         }
                     ]
                 },
@@ -372,26 +368,7 @@
                             "displayName": "Error",
                             "displayNameEvent": "Error changed",
                             "type": "QString",
-                            "possibleValues": [
-                                "None",
-                                "Ground fault",
-                                "DC over voltage",
-                                "AC disconnect open",
-                                "DC disconnect open",
-                                "Grid disconnect",
-                                "Cabinet open",
-                                "Manual shutdown",
-                                "Over temperature",
-                                "Frequency above limit",
-                                "Frequency under limit",
-                                "AC voltage above limit",
-                                "AC voltage under limit",
-                                "Blown string fuse on input",
-                                "Under temperature",
-                                "Communication error",
-                                "Hardware test failure"
-                            ],
-                            "defaultValue": "None"
+                            "defaultValue": ""
                         }
                     ]
                 },
@@ -551,26 +528,7 @@
                             "displayName": "Error",
                             "displayNameEvent": "Error changed",
                             "type": "QString",
-                            "possibleValues": [
-                                "None",
-                                "Ground fault",
-                                "DC over voltage",
-                                "AC disconnect open",
-                                "DC disconnect open",
-                                "Grid disconnect",
-                                "Cabinet open",
-                                "Manual shutdown",
-                                "Over temperature",
-                                "Frequency above limit",
-                                "Frequency under limit",
-                                "AC voltage above limit",
-                                "AC voltage under limit",
-                                "Blown string fuse on input",
-                                "Under temperature",
-                                "Communication error",
-                                "Hardware test failure"
-                            ],
-                            "defaultValue": "None"
+                            "defaultValue": ""
                         }
                     ]
                 },
@@ -607,6 +565,15 @@
                             "type": "bool",
                             "defaultValue": false,
                             "cached": false
+                        },
+                        {
+                            "id": "1abf61d4-6529-483f-832a-8ace4373cd02",
+                            "name": "totalCurrent",
+                            "displayName": "Total AC current",
+                            "displayNameEvent": "Total AC current changed",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0.00
                         },
                         {
                             "id": "4a058e36-0b45-4388-9a26-0615f7aafa0d",
@@ -948,7 +915,7 @@
                     "displayName": "SunSpec Storage",
                     "id": "9a643ba8-346c-4127-a2f8-956a7133d75e",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["connectable"],
+                    "interfaces": ["battery", "connectable"],
                     "paramTypes": [
                         {
                             "id": "219beb96-b9fe-4dd2-a386-ecfbbab8786d",
@@ -990,7 +957,7 @@
                             "name": "batteryLevel",
                             "displayName": "Battery level",
                             "displayNameEvent": "Battery level changed",
-                            "type": "double",
+                            "type": "int",
                             "unit": "Percentage",
                             "minValue": 0,
                             "maxValue": 100,
@@ -1012,6 +979,22 @@
                                 "Testing"
                             ],
                             "defaultValue": "Off"
+                        },
+                        {
+                            "id": "9d191d9f-154e-4de5-81ee-5d7928d24fe2",
+                            "name": "charging",
+                            "displayName": "Charging",
+                            "displayNameEvent": "Charging changed",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "466c2e36-f305-4e3f-9c05-496de7d1cf6d",
+                            "name": "discharging",
+                            "displayName": "Discharging",
+                            "displayNameEvent": "Discharging changed",
+                            "type": "bool",
+                            "defaultValue": false
                         },
                         {
                             "id": "221a2ef6-0a92-4ff0-87fe-7bd920dbec0b",
@@ -1068,6 +1051,262 @@
                             "defaultValue": false,
                             "writable": true,
                             "displayNameAction": "Set discharging rate"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "solarEdge",
+            "displayName": "SolarEdge",
+            "id": "addd7dd8-13e1-405b-ba61-b2d82eaf0426",
+            "thingClasses": [
+                {
+                    "name": "solarEdgeConnection",
+                    "displayName": "SolarEdge connection",
+                    "id": "7a92bf65-b443-4491-a012-2bec35eb5bf0",
+                    "createMethods": [ "User", "Discovery" ],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                        {
+                            "id": "94f6ba3c-6b8b-47a9-a5cb-73a091ae4cf7",
+                            "name":"ipAddress",
+                            "displayName": "IP address",
+                            "type": "QString",
+                            "defaultValue": "127.0.0.1"
+                        },
+                        {
+                            "id": "bb395c12-54d6-4139-b0a6-e31b28bc4d2e",
+                            "name":"macAddress",
+                            "displayName": "MAC address",
+                            "type": "QString",
+                            "defaultValue": "00:00:00:00:00:00"
+                        },
+                        {
+                            "id": "1bcede48-d167-4ced-8f1b-bea6302dd43f",
+                            "name":"port",
+                            "displayName": "Port",
+                            "type": "int",
+                            "defaultValue": 502
+                        },
+                        {
+                            "id": "b9cc58cf-ad15-447a-a94d-17b9204313bc",
+                            "name":"slaveId",
+                            "displayName": "Slave ID",
+                            "type": "int",
+                            "defaultValue": 1
+                        }
+                    ],
+                    "stateTypes":[
+                        {
+                            "id": "f51d4e5a-24ea-41f9-a453-d2bdd68d804c",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "3f783971-ba6f-498d-8e31-1ecfc6efa0a3",
+                            "name":"manufacturer",
+                            "displayName": "Manufacturer",
+                            "displayNameEvent": "Manufacturer changed",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "ce075b2c-12c8-4279-99ef-7ba39aba4d53",
+                            "name":"deviceModel",
+                            "displayName": "Device model",
+                            "displayNameEvent": "Device model changed",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "bf2c53dc-be30-4177-b3ab-119c49e8a994",
+                            "name":"version",
+                            "displayName": "Version",
+                            "displayNameEvent": "Version changed",
+                            "type": "QString",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "a71286ed-1851-4324-bd72-567696c2aebb",
+                            "name":"serialNumber",
+                            "displayName": "Serial number",
+                            "displayNameEvent": "Serial number changed",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        }
+                    ]
+                },
+                {
+                    "name": "solarEdgeBattery",
+                    "displayName": "SolarEdge battery",
+                    "id": "7900471a-da3f-4f03-98be-3e3d9c841546",
+                    "createMethods": [ "Auto" ],
+                    "interfaces": ["battery", "connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "7413cce6-48c1-4924-89bc-915beed67b57",
+                            "name":"modbusAddress",
+                            "displayName": "Modbus address",
+                            "type": "uint",
+                            "readOnly": true,
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "efd99fe4-3a48-4208-829d-14e062015ee7",
+                            "name":"serialNumber",
+                            "displayName": "Serial number",
+                            "type": "QString",
+                            "readOnly": true,
+                            "defaultValue": ""
+                        }
+                    ],
+                    "stateTypes":[
+                        {
+                            "id": "8addf8aa-f879-4afa-935d-4d2ffa38d05e",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "897616db-e815-4cda-b890-13b37a94ad17",
+                            "name": "batteryCritical",
+                            "displayName": "Battery critical",
+                            "displayNameEvent": "Battery critical changed",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "a4b0c8c9-44f0-43e2-ab25-63fdc9772fb8",
+                            "name": "batteryLevel",
+                            "displayName": "Battery level",
+                            "displayNameEvent": "Battery level changed",
+                            "type": "int",
+                            "unit": "Percentage",
+                            "minValue": 0,
+                            "maxValue": 100,
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "815b0826-c392-4249-a271-19e92ebe46e0",
+                            "name": "charging",
+                            "displayName": "Charging",
+                            "displayNameEvent": "Charging changed",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "3a0ee6f1-8a49-431d-9e6f-774cdfa8ae1a",
+                            "name": "discharging",
+                            "displayName": "Discharging",
+                            "displayNameEvent": "Discharging changed",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "f6c6f548-8a12-4a62-a641-08bb003c55fa",
+                            "name": "ratedEnergy",
+                            "displayName": "Rated energy",
+                            "displayNameEvent": "Rated energy changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "f46298e5-d06c-4ebe-869a-d9feff1a4689",
+                            "name": "averageTemperature",
+                            "displayName": "Average temperature",
+                            "displayNameEvent": "Average temperature changed",
+                            "type": "double",
+                            "unit": "DegreeCelsius",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "9d17defb-fc6e-4c10-af53-14b796222a14",
+                            "name": "instantaneousVoltage",
+                            "displayName": "Instantaneous voltage",
+                            "displayNameEvent": "Instantaneous voltage changed",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "89f58155-ca0c-48a8-aa7f-6e4d1b1bad36",
+                            "name": "instantaneousCurrent",
+                            "displayName": "Instantaneous current",
+                            "displayNameEvent": "Instantaneous current changed",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "caccf9fd-0f83-4dd5-ae48-a497f13d2a2e",
+                            "name": "instantaneousPower",
+                            "displayName": "Instantaneous power",
+                            "displayNameEvent": "Instantaneous power changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "d8cc799d-9709-4342-8766-52ff5f12aecc",
+                            "name": "maxEnergy",
+                            "displayName": "Maximum energy",
+                            "displayNameEvent": "Maximum energy changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "7ac7ccd1-b5d1-488b-a99b-98ef000b7d03",
+                            "name": "availableEnergy",
+                            "displayName": "Available energy",
+                            "displayNameEvent": "Available energy changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "24b501db-f301-422d-ad58-f16ca025f6ee",
+                            "name": "stateOfHealth",
+                            "displayName": "State of health (SOH)",
+                            "displayNameEvent": "State of health (SOH) changed",
+                            "type": "double",
+                            "unit": "Percentage",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "9c24b27a-3ea1-4db1-8868-6c999aad0a18",
+                            "name": "batteryStatus",
+                            "displayName": "Battery status",
+                            "displayNameEvent": "Battery status changed",
+                            "type": "QString",
+                            "possibleValues": [
+                                "Off",
+                                "Standby",
+                                "Init",
+                                "Charging",
+                                "Discharging",
+                                "Fault",
+                                "Holding",
+                                "Idle"
+                            ],
+                            "defaultValue": "Idle"
+                        },
+                        {
+                            "id": "db2e0304-4f0e-461f-8bab-c63fcb5deb1b",
+                            "name": "firmwareVersion",
+                            "displayName": "Firmware version",
+                            "displayNameEvent": "Firmware version changed",
+                            "type": "QString",
+                            "defaultValue": ""
                         }
                     ]
                 }

@@ -1,5 +1,9 @@
 TEMPLATE = subdirs
 
+# Note keep it ordered so the lib will be built first
+CONFIG += ordered
+SUBDIRS += libnymea-sunspec
+
 PLUGIN_DIRS = \
     drexelundweiss          \
     energymeters            \ 
@@ -11,6 +15,7 @@ PLUGIN_DIRS = \
     idm                     \
     wallbe                  \
     webasto                 \
+
 
 message(============================================)
 message("Qt version:" $$[QT_VERSION])
