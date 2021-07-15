@@ -255,7 +255,7 @@ void SunSpecConnection::processDiscoveryResult()
 
             if (m_uninitializedModels.isEmpty()) {
                 // Sort the models according to their modbus start address to get the common model for each model
-                qSort(m_models.begin(), m_models.end(), [](const SunSpecModel* a, const SunSpecModel* b) -> bool {
+                std::sort(m_models.begin(), m_models.end(), [](const SunSpecModel* a, const SunSpecModel* b) -> bool {
                     return a->modbusStartRegister() < b->modbusStartRegister();
                 });
 
