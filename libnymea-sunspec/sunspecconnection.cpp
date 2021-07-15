@@ -253,10 +253,18 @@ void SunSpecConnection::processDiscoveryResult()
                 model->deleteLater();
             }
 
-            // Set common model information to each model
-
-
             if (m_uninitializedModels.isEmpty()) {
+                // Sort the models according to their modbus start address to get the common model for each model
+                qSort(m_models.begin(), m_models.end(), [](const SunSpecModel* a, const SunSpecModel* b) -> bool {
+                    return a->modbusStartRegister() < b->modbusStartRegister();
+                });
+
+                qCDebug(dcSunSpec()) << "Sorted model list:";
+                for (int i = 0; i < m_models.count(); i++) {
+                    qCDebug(dcSunSpec()) << "-->" << m_models.at(i);
+                }
+
+                // Set common model information to each model
                 qCDebug(dcSunSpec()) << "All models initialized. Discovery finished successfully.";
                 setDiscoveryRunning(false);
                 emit discoveryFinished(true);

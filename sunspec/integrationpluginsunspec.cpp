@@ -174,7 +174,7 @@ void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
     Thing *thing = info->thing();
     qCDebug(dcSunSpec()) << "Setup thing" << thing->name();
 
-    if (thing->thingClassId() == sunspecConnectionThingClassId) {
+    if (thing->thingClassId() == sunspecConnectionThingClassId || thing->thingClassId() == solarEdgeConnectionThingClassId) {
         setupConnection(info);
     } else if (thing->thingClassId() == sunspecThreePhaseInverterThingClassId || thing->thingClassId() == sunspecSplitPhaseInverterThingClassId || thing->thingClassId() == sunspecSinglePhaseInverterThingClassId ) {
         Thing *parentThing = myThings().findById(thing->parentId());
@@ -417,9 +417,9 @@ void IntegrationPluginSunSpec::processDiscoveryResult(Thing *thing, SunSpecConne
 void IntegrationPluginSunSpec::setupConnection(ThingSetupInfo *info)
 {
     Thing *thing = info->thing();
-    QHostAddress address = QHostAddress(info->thing()->paramValue(sunspecConnectionThingIpAddressParamTypeId).toString());
-    int port = info->thing()->paramValue(sunspecConnectionThingPortParamTypeId).toInt();
-    int slaveId = info->thing()->paramValue(sunspecConnectionThingSlaveIdParamTypeId).toInt();
+    QHostAddress address = QHostAddress(info->thing()->paramValue(m_connectionIpParamTypeIds.value(thing->thingClassId())).toString());
+    int port = info->thing()->paramValue(m_connectionPortParamTypeIds.value(thing->thingClassId())).toInt();
+    int slaveId = info->thing()->paramValue(m_connectionSlaveIdParamTypeIds.value(thing->thingClassId())).toInt();
 
     if (m_sunSpecConnections.contains(thing->id())) {
         qCDebug(dcSunSpec()) << "Reconfigure SunSpec connection with new address" << address;
@@ -435,8 +435,14 @@ void IntegrationPluginSunSpec::setupConnection(ThingSetupInfo *info)
         qCDebug(dcSunSpec()) << connection << (connected ? "connected" : "disconnected");
         thing->setStateValue(m_connectedStateTypeIds.value(thing->thingClassId()), connected);
 
+        // Update connected state of child things
         foreach (Thing *child, myThings().filterByParentId(thing->id())) {
-            child->setStateValue(m_connectedStateTypeIds.value(thing->thingClassId()), connected);
+            child->setStateValue(m_connectedStateTypeIds.value(child->thingClassId()), connected);
+
+            // Refresh childs if connected successfully
+            if (connected && m_sunspecThings.contains(child)) {
+                m_sunspecThings.value(child)->readBlockData();
+            }
         }
     });
 
@@ -450,7 +456,6 @@ void IntegrationPluginSunSpec::setupConnection(ThingSetupInfo *info)
                     m_sunSpecConnections.insert(info->thing()->id(), connection);
                     info->finish(Thing::ThingErrorNoError);
                     processDiscoveryResult(info->thing(), connection);
-
                 } else {
                     qCWarning(dcSunSpec()) << "Discovery finished with errors during setup of" << connection;
                     info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("The SunSpec discovery finished with errors. Please make sure this is a SunSpec device."));
@@ -649,7 +654,9 @@ void IntegrationPluginSunSpec::onRefreshTimer()
 {
     // Update all blocks
     foreach (SunSpecThing *sunSpecThing, m_sunspecThings) {
-        sunSpecThing->readBlockData();
+        if (sunSpecThing->model()->connection()->connected()) {
+            sunSpecThing->readBlockData();
+        }
     }
 }
 
