@@ -114,6 +114,8 @@ public:
 
     quint16 modbusStartRegister() const override;
 
+    BatteryData batteryData() const;
+
     void init();
     void readBlockData() override;
 
