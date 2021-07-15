@@ -203,6 +203,15 @@ void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
                 setupStorage(info);
             });
         }
+    } else if (thing->thingClassId() == solarEdgeBatteryThingClassId) {
+        Thing *parentThing = myThings().findById(thing->parentId());
+        if (parentThing->setupStatus() == Thing::ThingSetupStatusComplete) {
+            setupSolarEdgeBattery(info);
+        } else {
+            connect(parentThing, &Thing::setupStatusChanged, info, [this, info] {
+                setupSolarEdgeBattery(info);
+            });
+        }
     } else {
         Q_ASSERT_X(false, "setupThing", QString("Unhandled thingClassId: %1").arg(info->thing()->thingClassId().toString()).toUtf8());
     }
