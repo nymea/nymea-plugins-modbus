@@ -1,4 +1,4 @@
 usr/lib/@DEB_HOST_MULTIARCH@/libnymea-sunspec1.so
-usr/include/nymea-sunspec/*.h
+usr/include/nymea-sunspec/
 usr/lib/@DEB_HOST_MULTIARCH@/pkgconfig/nymea-sunspec.pc
 
