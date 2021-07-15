@@ -46,8 +46,11 @@ public:
     explicit SunSpecThing(Thing *thing, SunSpecModel *model, QObject *parent = nullptr);
     virtual ~SunSpecThing() = default;
 
+    virtual SunSpecConnection *connection() const;
     SunSpecModel *model() const;
     Thing *thing() const;
+
+    virtual quint16 modbusStartRegister() const;
 
     virtual void readBlockData() = 0;
 

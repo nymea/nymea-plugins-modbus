@@ -665,9 +665,9 @@ void IntegrationPluginSunSpec::searchSolarEdgeBattery(SunSpecConnection *connect
 
 void IntegrationPluginSunSpec::onRefreshTimer()
 {
-    // Update all blocks
+    // Update all sunspec thing blocks
     foreach (SunSpecThing *sunSpecThing, m_sunspecThings) {
-        if (sunSpecThing->model()->connection()->connected()) {
+        if (sunSpecThing->connection()->connected()) {
             sunSpecThing->readBlockData();
         }
     }

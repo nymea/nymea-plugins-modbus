@@ -110,18 +110,15 @@ public:
 
     explicit SolarEdgeBattery(Thing *thing, SunSpecConnection *connection, int modbusStartRegister, QObject *parent = nullptr);
 
-    SunSpecConnection *connection() const;
+    SunSpecConnection *connection() const override;
 
-    int modbusStartRegister() const;
-
-    BatteryData batteryData() const;
+    quint16 modbusStartRegister() const override;
 
     void init();
     void readBlockData() override;
 
 signals:
     void initFinished(bool success);
-    void batteryDataReceived(const BatteryData &batteryData);
 
 private:
     QTimer m_timer;

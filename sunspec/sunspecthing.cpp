@@ -38,6 +38,14 @@ SunSpecThing::SunSpecThing(Thing *thing, SunSpecModel *model, QObject *parent) :
 
 }
 
+SunSpecConnection *SunSpecThing::connection() const
+{
+    if (!m_model)
+        return nullptr;
+
+    return m_model->connection();
+}
+
 SunSpecModel *SunSpecThing::model() const
 {
     return m_model;
@@ -46,6 +54,14 @@ SunSpecModel *SunSpecThing::model() const
 Thing *SunSpecThing::thing() const
 {
     return m_thing;
+}
+
+quint16 SunSpecThing::modbusStartRegister() const
+{
+    if (!m_model)
+        return 0xFFFF;
+
+    return m_model->modbusStartRegister();
 }
 
 void SunSpecThing::executeAction(ThingActionInfo *info)
