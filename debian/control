@@ -128,22 +128,6 @@ Description: nymea.io plugin for my-pv heating rods
  This package will install the nymea.io plugin for my-pv
 
 
-Package: nymea-plugin-solaredge
-Architecture: any
-Depends: ${shlibs:Depends},
-         ${misc:Depends},
-         libnymea-sunspec1 (= ${binary:Version}),
-         nymea-plugins-modbus-translations
-Description: nymea.io plugin for SolarEdge devices.
- The nymea daemon is a plugin based IoT (Internet of Things) server. The
- server works like a translator for devices, things and services and
- allows them to interact.
- With the powerful rule engine you are able to connect any device available
- in the system and create individual scenes and behaviors for your environment.
- .
- This package will install the nymea.io plugin for SolarEdge.
-
-
 Package: nymea-plugin-sunspec
 Architecture: any
 Depends: ${shlibs:Depends},
@@ -157,6 +141,7 @@ Description: nymea.io plugin for SunSpec Modbus devices.
  in the system and create individual scenes and behaviors for your environment.
  .
  This package will install the nymea.io plugin for SunSpec.
+
 
 Package: nymea-plugin-unipi2
 Architecture: any
