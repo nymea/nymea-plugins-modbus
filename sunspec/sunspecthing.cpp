@@ -51,4 +51,5 @@ Thing *SunSpecThing::thing() const
 void SunSpecThing::executeAction(ThingActionInfo *info)
 {
     Q_ASSERT_X(false, "executeAction", QString("Unhandled action: %1").arg(info->action().actionTypeId().toString()).toUtf8());
+    info->finish(Thing::ThingErrorActionTypeNotFound);
 }
