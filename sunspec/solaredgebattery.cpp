@@ -91,8 +91,9 @@ void SolarEdgeBattery::readBlockData()
                 }
 
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcSunSpec()) << "SolarEdgeBattery: Received first block data" << m_modbusStartRegister << unit.values().count();
                 QVector<quint16> values = unit.values();
+                qCDebug(dcSunSpec()) << "SolarEdgeBattery: Received first block data" << m_modbusStartRegister << values.count();
+                qCDebug(dcSunSpec()) << SunSpecDataPoint::registersToString(values);
 
                 m_batteryData.manufacturerName = SunSpecDataPoint::convertToString(values.mid(ManufacturerName, 16));
                 m_batteryData.model = SunSpecDataPoint::convertToString(values.mid(Model, 16));
@@ -110,7 +111,6 @@ void SolarEdgeBattery::readBlockData()
                 m_batteryData.maxChargePeakPower = SunSpecDataPoint::convertToFloat32(values.mid(MaxChargePeakPower, 2));
                 m_batteryData.maxDischargePeakPower = SunSpecDataPoint::convertToFloat32(values.mid(MaxDischargePeakPower, 2));
 
-
                 // Read from 0x6c to 0x86
                 int offset = 0x6c;
                 QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister + offset, 28);
@@ -126,7 +126,9 @@ void SolarEdgeBattery::readBlockData()
                             const QModbusDataUnit unit = reply->result();
                             QVector<quint16> values = unit.values();
 
-                            qCDebug(dcSunSpec()) << "SolarEdgeBattery: Received second block data" << offset << values.count();
+                            qCDebug(dcSunSpec()) << "SolarEdgeBattery: Received second block data" << m_modbusStartRegister + offset << values.count();
+                            qCDebug(dcSunSpec()) << SunSpecDataPoint::registersToString(values);
+
                             m_batteryData.averageTemperature = SunSpecDataPoint::convertToFloat32(values.mid(BatteryAverageTemperature - offset, 2));
                             m_batteryData.maxTemperature = SunSpecDataPoint::convertToFloat32(values.mid(BatteryMaxTemperature - offset, 2));
                             m_batteryData.instantaneousVoltage = SunSpecDataPoint::convertToFloat32(values.mid(InstantaneousVoltage - offset, 2));
