@@ -46,7 +46,12 @@ public:
     explicit SunSpecThing(Thing *thing, SunSpecModel *model, QObject *parent = nullptr);
     virtual ~SunSpecThing() = default;
 
+    SunSpecModel *model() const;
+    Thing *thing() const;
+
     virtual void readBlockData() = 0;
+
+    virtual void executeAction(ThingActionInfo *info);
 
 protected:
     Thing *m_thing = nullptr;

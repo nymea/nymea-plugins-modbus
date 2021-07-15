@@ -209,7 +209,7 @@ void SunSpecConnection::processDiscoveryResult()
     qCDebug(dcSunSpec()) << "Creating models from the discovery results...";
 
     if (!m_uninitializedModels.isEmpty()) {
-        qCWarning(dcSunSpec()) << "Having still uninitialized modules in the pipeline. This should never happen (please report a bug). Removing unintialized modules.";
+        qCWarning(dcSunSpec()) << "Having still uninitialized models in the pipeline. This should never happen (please report a bug). Removing unintialized models.";
         qDeleteAll(m_uninitializedModels);
         m_uninitializedModels.clear();
     }
@@ -236,7 +236,7 @@ void SunSpecConnection::processDiscoveryResult()
 
     // If no models found to initialize, we are done
     if (m_uninitializedModels.isEmpty()) {
-        qCDebug(dcSunSpec()) << "No modules to initialize. Discovery finished successfully.";
+        qCDebug(dcSunSpec()) << "No models to initialize. Discovery finished successfully.";
         setDiscoveryRunning(false);
         emit discoveryFinished(true);
         return;
@@ -253,8 +253,11 @@ void SunSpecConnection::processDiscoveryResult()
                 model->deleteLater();
             }
 
+            // Set common model information to each model
+
+
             if (m_uninitializedModels.isEmpty()) {
-                qCDebug(dcSunSpec()) << "All modules initialized. Discovery finished successfully.";
+                qCDebug(dcSunSpec()) << "All models initialized. Discovery finished successfully.";
                 setDiscoveryRunning(false);
                 emit discoveryFinished(true);
             }

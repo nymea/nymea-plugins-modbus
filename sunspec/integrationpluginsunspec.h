@@ -79,19 +79,27 @@ private:
     QHash<ThingClassId, ParamTypeId> m_modelIdParamTypeIds;
     QHash<ThingClassId, ParamTypeId> m_modbusAddressParamTypeIds;
 
-
     PluginTimer *m_refreshTimer = nullptr;
-    QHash<QUuid, ThingActionInfo *> m_asyncActions;
+
     QHash<ThingId, SunSpecConnection *> m_sunSpecConnections;
     QHash<Thing *, SunSpecThing *> m_sunspecThings;
 
     bool sunspecThingAlreadyAdded(uint modelId, uint modbusAddress, const ThingId &parentId);
     void processDiscoveryResult(Thing *thing, SunSpecConnection *connection);
 
+    // SunSpec things
     void setupConnection(ThingSetupInfo *info);
     void setupInverter(ThingSetupInfo *info);
     void setupMeter(ThingSetupInfo *info);
     void setupStorage(ThingSetupInfo *info);
+
+    // Custom types
+    void setupSolarEdgeBattery(ThingSetupInfo *info);
+
+    // Discover SolarEdge batteries
+    void searchSolarEdgeBatteries(SunSpecConnection *connection);
+    void searchSolarEdgeBattery(SunSpecConnection *connection, const ThingId &parentThingId, quint16 startRegister);
+
 
 private slots:
     void onRefreshTimer();

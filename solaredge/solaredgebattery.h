@@ -34,7 +34,7 @@
 #include <QObject>
 #include <QDebug>
 
-#include <sunspec.h>
+
 
 class SolarEdgeBattery : public QObject
 {
@@ -104,7 +104,7 @@ public:
         BatteryStatus batteryStatus;
     };
 
-    explicit SolarEdgeBattery(SunSpec *connection, int modbusStartRegister, QObject *parent = nullptr);
+    explicit SolarEdgeBattery(SunSpecConnection *connection, int modbusStartRegister, QObject *parent = nullptr);
 
     SunSpec *connection() const;
     int modbusStartRegister() const;

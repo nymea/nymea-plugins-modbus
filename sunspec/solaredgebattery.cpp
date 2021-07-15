@@ -34,8 +34,8 @@
 #include <sunspecdatapoint.h>
 #include <sunspecconnection.h>
 
-SolarEdgeBattery::SolarEdgeBattery(SunSpecConnection *connection, int modbusStartRegister, QObject *parent) :
-    QObject(parent),
+SolarEdgeBattery::SolarEdgeBattery(Thing *thing, SunSpecConnection *connection, int modbusStartRegister, QObject *parent) :
+    SunSpecThing(thing, nullptr, parent),
     m_connection(connection),
     m_modbusStartRegister(modbusStartRegister)
 {
@@ -74,7 +74,7 @@ void SolarEdgeBattery::init()
 void SolarEdgeBattery::readBlockData()
 {
     // Read the data in 2 block requests
-    qCDebug(dcSunSpec()) << "Battery: Read block 1 from modbus address" << m_modbusStartRegister << "length" << 107<< ", Slave ID" << m_connection->slaveId();
+    qCDebug(dcSunSpec()) << "SolarEdgeBattery: Read block 1 from modbus address" << m_modbusStartRegister << "length" << 107<< ", Slave ID" << m_connection->slaveId();
 
     // Total possible block size is 0xE19A - 0xE100 = 0x9A = 153 registers
 
@@ -86,29 +86,29 @@ void SolarEdgeBattery::readBlockData()
             connect(reply, &QModbusReply::finished, this, [=]() {
 
                 if (reply->error() != QModbusDevice::NoError) {
-                    qCWarning(dcSunSpec()) << "Battery: Read response error:" << reply->error();
+                    qCWarning(dcSunSpec()) << "SolarEdgeBattery: Read response error:" << reply->error();
                     return;
                 }
 
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcSunSpec()) << "Battery: Received first block data" << m_modbusStartRegister << unit.values().count();
+                qCDebug(dcSunSpec()) << "SolarEdgeBattery: Received first block data" << m_modbusStartRegister << unit.values().count();
                 QVector<quint16> values = unit.values();
 
-                m_batteryData.manufacturerName = QString::fromUtf8(SunSpec::convertModbusRegisters(values, ManufacturerName, 16)).trimmed();
-                m_batteryData.model = QString::fromUtf8(SunSpec::convertModbusRegisters(values, Model, 16)).trimmed();
-                m_batteryData.firmwareVersion = QString::fromUtf8(SunSpec::convertModbusRegisters(values, FirmwareVersion, 16)).trimmed();
-                m_batteryData.serialNumber = QString::fromUtf8(SunSpec::convertModbusRegisters(values, SerialNumber, 16)).trimmed();
+                m_batteryData.manufacturerName = SunSpecDataPoint::convertToString(values.mid(ManufacturerName, 16));
+                m_batteryData.model = SunSpecDataPoint::convertToString(values.mid(Model, 16));
+                m_batteryData.firmwareVersion = SunSpecDataPoint::convertToString(values.mid(FirmwareVersion, 16));
+                m_batteryData.serialNumber = SunSpecDataPoint::convertToString(values.mid(SerialNumber, 16));
                 m_batteryData.batteryDeviceId = values[BatteryDeviceId];
 
                 // 8192 17945 536888857 536888857 1.08652e-19
                 // 0x2000 0x4619
 
-                qCDebug(dcSunSpec()) << "Battery: " << m_batteryData.batteryDeviceId << m_batteryData.manufacturerName << m_batteryData.model << m_batteryData.firmwareVersion << m_batteryData.serialNumber;
-                m_batteryData.ratedEnergy = SunSpec::convertToFloat32(values[RatedEnergy], values[RatedEnergy + 1]);
-                m_batteryData.maxChargeContinuesPower = SunSpec::convertToFloat32(values[MaxChargeContinuesPower], values[MaxChargeContinuesPower + 1]);
-                m_batteryData.maxDischargeContinuesPower = SunSpec::convertToFloat32(values[MaxDischargeContinuesPower], values[MaxDischargeContinuesPower + 1]);
-                m_batteryData.maxChargePeakPower = SunSpec::convertToFloat32(values[MaxChargePeakPower], values[MaxChargePeakPower + 1]);
-                m_batteryData.maxDischargePeakPower = SunSpec::convertToFloat32(values[MaxDischargePeakPower], values[MaxDischargePeakPower + 1]);
+                qCDebug(dcSunSpec()) << "SolarEdgeBattery: " << m_batteryData.batteryDeviceId << m_batteryData.manufacturerName << m_batteryData.model << m_batteryData.firmwareVersion << m_batteryData.serialNumber;
+                m_batteryData.ratedEnergy = SunSpecDataPoint::convertToFloat32(values.mid(RatedEnergy, 2));
+                m_batteryData.maxChargeContinuesPower = SunSpecDataPoint::convertToFloat32(values.mid(MaxChargeContinuesPower, 2));
+                m_batteryData.maxDischargeContinuesPower = SunSpecDataPoint::convertToFloat32(values.mid(MaxDischargeContinuesPower, 2));
+                m_batteryData.maxChargePeakPower = SunSpecDataPoint::convertToFloat32(values.mid(MaxChargePeakPower, 2));
+                m_batteryData.maxDischargePeakPower = SunSpecDataPoint::convertToFloat32(values.mid(MaxDischargePeakPower, 2));
 
 
                 // Read from 0x6c to 0x86
@@ -119,26 +119,25 @@ void SolarEdgeBattery::readBlockData()
                         connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
                         connect(reply, &QModbusReply::finished, this, [=]() {
                             if (reply->error() != QModbusDevice::NoError) {
-                                qCWarning(dcSunSpec()) << "Battery: Read response error:" << reply->error();
+                                qCWarning(dcSunSpec()) << "SolarEdgeBattery: Read response error:" << reply->error();
                                 return;
                             }
 
                             const QModbusDataUnit unit = reply->result();
                             QVector<quint16> values = unit.values();
 
-                            qCDebug(dcSunSpec()) << "Battery: Received second block data" << offset << values.count();
-                            m_batteryData.averageTemperature = SunSpec::convertToFloat32(values[BatteryAverageTemperature - offset], values[BatteryAverageTemperature - offset + 1]);
-                            m_batteryData.maxTemperature = SunSpec::convertToFloat32(values[BatteryMaxTemperature - offset], values[BatteryMaxTemperature - offset + 1]);
-                            m_batteryData.instantaneousVoltage = SunSpec::convertToFloat32(values[InstantaneousVoltage - offset], values[InstantaneousVoltage - offset + 1]);
-                            m_batteryData.instantaneousCurrent = SunSpec::convertToFloat32(values[InstantaneousCurrent - offset], values[InstantaneousCurrent - offset + 1]);
-                            m_batteryData.instantaneousPower = SunSpec::convertToFloat32(values[InstantaneousPower - offset], values[InstantaneousPower - offset + 1]);
-                            m_batteryData.maxEnergy = SunSpec::convertToFloat32(values[MaxEnergy - offset], values[MaxEnergy - offset + 1]);
-                            m_batteryData.availableEnergy = SunSpec::convertToFloat32(values[AvailableEnergy - offset], values[AvailableEnergy - offset + 1]);
-                            m_batteryData.stateOfHealth = SunSpec::convertToFloat32(values[StateOfHealth - offset], values[StateOfHealth - offset + 1]);
-                            m_batteryData.stateOfEnergy = SunSpec::convertToFloat32(values[StateOfEnergy - offset], values[StateOfEnergy - offset + 1]);
-                            m_batteryData.batteryStatus = static_cast<BatteryStatus>(static_cast<quint32>(values[Status - offset + 1]) << 16 | values[Status - offset]);
+                            qCDebug(dcSunSpec()) << "SolarEdgeBattery: Received second block data" << offset << values.count();
+                            m_batteryData.averageTemperature = SunSpecDataPoint::convertToFloat32(values.mid(BatteryAverageTemperature - offset, 2));
+                            m_batteryData.maxTemperature = SunSpecDataPoint::convertToFloat32(values.mid(BatteryMaxTemperature - offset, 2));
+                            m_batteryData.instantaneousVoltage = SunSpecDataPoint::convertToFloat32(values.mid(InstantaneousVoltage - offset, 2));
+                            m_batteryData.instantaneousCurrent = SunSpecDataPoint::convertToFloat32(values.mid(InstantaneousCurrent - offset, 2));
+                            m_batteryData.instantaneousPower = SunSpecDataPoint::convertToFloat32(values.mid(InstantaneousPower - offset, 2));
+                            m_batteryData.maxEnergy = SunSpecDataPoint::convertToFloat32(values.mid(MaxEnergy - offset, 2));
+                            m_batteryData.availableEnergy = SunSpecDataPoint::convertToFloat32(values.mid(AvailableEnergy - offset, 2));
+                            m_batteryData.stateOfHealth = SunSpecDataPoint::convertToFloat32(values.mid(StateOfHealth - offset, 2));
+                            m_batteryData.stateOfEnergy = SunSpecDataPoint::convertToFloat32(values.mid(StateOfEnergy - offset, 2));
+                            m_batteryData.batteryStatus = static_cast<BatteryStatus>(SunSpecDataPoint::convertToUInt32(values.mid(Status - offset, 2)));
 
-                            qCDebug(dcSunSpec()) << m_batteryData;
                             emit batteryDataReceived(m_batteryData);
 
                             if (!m_initFinishedSuccess) {
@@ -146,42 +145,111 @@ void SolarEdgeBattery::readBlockData()
                                 m_initFinishedSuccess = true;
                                 emit initFinished(true);
                             }
+                            onBlockDataUpdated();
                         });
 
                         connect(reply, &QModbusReply::errorOccurred, this, [reply] (QModbusDevice::Error error) {
-                            qCWarning(dcSunSpec()) << "Battery: Modbus reply error:" << error;
+                            qCWarning(dcSunSpec()) << "SolarEdgeBattery: Modbus reply error:" << error;
                             emit reply->finished(); // To make sure it will be deleted
                         });
                     } else {
-                        qCWarning(dcSunSpec()) << "Battery: Read error: " << m_connection->modbusTcpClient()->errorString();
+                        qCWarning(dcSunSpec()) << "SolarEdgeBattery: Read error: " << m_connection->modbusTcpClient()->errorString();
                         delete reply; // broadcast replies return immediately
                         return;
                     }
                 } else {
-                    qCWarning(dcSunSpec()) << "Battery: Read error: " << m_connection->modbusTcpClient()->errorString();
+                    qCWarning(dcSunSpec()) << "SolarEdgeBattery: Read error: " << m_connection->modbusTcpClient()->errorString();
                     return;
                 }
             });
 
             connect(reply, &QModbusReply::errorOccurred, this, [reply] (QModbusDevice::Error error) {
-                qCWarning(dcSunSpec()) << "Battery: Modbus reply error:" << error;
+                qCWarning(dcSunSpec()) << "SolarEdgeBattery: Modbus reply error:" << error;
                 emit reply->finished(); // To make sure it will be deleted
             });
         } else {
-            qCWarning(dcSunSpec()) << "Battery: Read error: " << m_connection->modbusTcpClient()->errorString();
+            qCWarning(dcSunSpec()) << "SolarEdgeBattery: Read error: " << m_connection->modbusTcpClient()->errorString();
             delete reply; // broadcast replies return immediately
             return;
         }
     } else {
-        qCWarning(dcSunSpec()) << "Battery: Read error: " << m_connection->modbusTcpClient()->errorString();
+        qCWarning(dcSunSpec()) << "SolarEdgeBattery: Read error: " << m_connection->modbusTcpClient()->errorString();
         return;
     }
+}
+
+void SolarEdgeBattery::onBlockDataUpdated()
+{
+    if (!m_thing)
+        return;
+
+    qCDebug(dcSunSpec()) << "SolarEdgeBattery: block updated:" << m_batteryData;
+
+    bool charging = false;
+    bool discharging = false;
+
+    switch (m_batteryData.batteryStatus) {
+    case SolarEdgeBattery::Off:
+        charging = false;
+        discharging = false;
+        m_thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Off");
+        break;
+    case SolarEdgeBattery::Standby:
+        charging = false;
+        discharging = false;
+        m_thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Standby");
+        break;
+    case SolarEdgeBattery::Init:
+        charging = false;
+        discharging = false;
+        m_thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Init");
+        break;
+    case SolarEdgeBattery::Charge:
+        charging = true;
+        discharging = false;
+        m_thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Charging");
+        break;
+    case SolarEdgeBattery::Discharge:
+        charging = false;
+        discharging = true;
+        m_thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Discharging");
+        break;
+    case SolarEdgeBattery::Fault:
+        charging = false;
+        discharging = false;
+        m_thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Fault");
+        break;
+    case SolarEdgeBattery::Holding:
+        charging = false;
+        discharging = false;
+        m_thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Holding");
+        break;
+    case SolarEdgeBattery::Idle:
+        charging = false;
+        discharging = false;
+        m_thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Idle");
+        break;
+    }
+
+    m_thing->setStateValue(solarEdgeBatteryBatteryCriticalStateTypeId, (m_batteryData.stateOfEnergy < 5) && !charging);
+    m_thing->setStateValue(solarEdgeBatteryBatteryLevelStateTypeId, m_batteryData.stateOfEnergy);
+    m_thing->setStateValue(solarEdgeBatteryDischargingStateTypeId, discharging);
+    m_thing->setStateValue(solarEdgeBatteryChargingStateTypeId, charging);
+    m_thing->setStateValue(solarEdgeBatteryRatedEnergyStateTypeId, m_batteryData.ratedEnergy);
+    m_thing->setStateValue(solarEdgeBatteryAverageTemperatureStateTypeId, m_batteryData.averageTemperature);
+    m_thing->setStateValue(solarEdgeBatteryInstantaneousVoltageStateTypeId, m_batteryData.instantaneousVoltage);
+    m_thing->setStateValue(solarEdgeBatteryInstantaneousCurrentStateTypeId, m_batteryData.instantaneousCurrent);
+    m_thing->setStateValue(solarEdgeBatteryInstantaneousPowerStateTypeId, m_batteryData.instantaneousPower);
+    m_thing->setStateValue(solarEdgeBatteryMaxEnergyStateTypeId, m_batteryData.maxEnergy);
+    m_thing->setStateValue(solarEdgeBatteryAvailableEnergyStateTypeId, m_batteryData.availableEnergy);
+    m_thing->setStateValue(solarEdgeBatteryStateOfHealthStateTypeId, m_batteryData.stateOfHealth);
+    m_thing->setStateValue(solarEdgeBatteryFirmwareVersionStateTypeId, m_batteryData.firmwareVersion);
 }
 
 
 QDebug operator<<(QDebug debug, const SolarEdgeBattery::BatteryData &batteryData)
 {
-    debug << "BatteryData(" << batteryData.manufacturerName << "-" << batteryData.model << ")" << endl;
+    debug << "SolarEdgeBatteryData(" << batteryData.manufacturerName << "-" << batteryData.model << ")" << endl;
     debug << "    - Battery Device ID" << batteryData.batteryDeviceId << endl;
     debug << "    - Firmware version" << batteryData.firmwareVersion << endl;
     debug << "    - Serial number" << batteryData.serialNumber << endl;

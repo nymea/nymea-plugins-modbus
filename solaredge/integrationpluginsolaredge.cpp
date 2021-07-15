@@ -982,5 +982,4 @@ void IntegrationPluginSolarEdge::onBatteryDataReceived(const SolarEdgeBattery::B
     thing->setStateValue(solarEdgeBatteryAvailableEnergyStateTypeId, batteryData.availableEnergy);
     thing->setStateValue(solarEdgeBatteryStateOfHealthStateTypeId, batteryData.stateOfHealth);
     thing->setStateValue(solarEdgeBatteryFirmwareVersionStateTypeId, batteryData.firmwareVersion);
-
 }

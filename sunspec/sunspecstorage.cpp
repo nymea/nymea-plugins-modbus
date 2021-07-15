@@ -29,6 +29,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "sunspecstorage.h"
+#include "extern-plugininfo.h"
 
 #include <models/sunspecstoragemodel.h>
 
@@ -38,15 +39,86 @@ SunSpecStorage::SunSpecStorage(Thing *thing, SunSpecModel *model, QObject *paren
 
 }
 
-QModbusReply *SunSpecStorage::setGridCharging(bool gridCharging)
-{
-    SunSpecStorageModel *storage = qobject_cast<SunSpecStorageModel *>(m_model);
-    return storage->setChaGriSet(gridCharging ? SunSpecStorageModel::ChagrisetGrid : SunSpecStorageModel::ChagrisetPv);
-}
-
 void SunSpecStorage::readBlockData()
 {
     m_model->readBlockData();
+}
+
+void SunSpecStorage::executeAction(ThingActionInfo *info)
+{
+    Thing *thing = info->thing();
+    Action action = info->action();
+    SunSpecStorageModel *storage = qobject_cast<SunSpecStorageModel *>(m_model);
+
+    if (action.actionTypeId() == sunspecStorageGridChargingActionTypeId) {
+        bool gridCharging = action.param(sunspecStorageGridChargingActionGridChargingParamTypeId).value().toBool();
+        QModbusReply *reply = storage->setChaGriSet(gridCharging ? SunSpecStorageModel::ChagrisetGrid : SunSpecStorageModel::ChagrisetPv);
+        if (!reply) {
+            info->finish(Thing::ThingErrorHardwareFailure);
+            return;
+        }
+
+        connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+        connect(reply, &QModbusReply::finished, info, [info, reply]{
+            if (reply->error() != QModbusDevice::NoError) {
+                info->finish(Thing::ThingErrorHardwareFailure);
+                return;
+            }
+            info->finish(Thing::ThingErrorNoError);
+        });
+    } else if (action.actionTypeId() == sunspecStorageEnableChargingActionTypeId || action.actionTypeId() == sunspecStorageEnableDischargingActionTypeId) {
+        SunSpecStorageModel::Storctl_modFlags controlModeFlags;
+        if (action.param(sunspecStorageEnableChargingActionEnableChargingParamTypeId).value().toBool())
+            controlModeFlags.setFlag(SunSpecStorageModel::Storctl_modCharge);
+
+        if (thing->stateValue(sunspecStorageEnableDischargingStateTypeId).toBool())
+            controlModeFlags.setFlag(SunSpecStorageModel::Storctl_modDiScharge);
+
+        QModbusReply *reply = storage->setStorCtlMod(controlModeFlags);
+        if (!reply) {
+            info->finish(Thing::ThingErrorHardwareFailure);
+            return;
+        }
+        connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+        connect(reply, &QModbusReply::finished, info, [info, reply]{
+            if (reply->error() != QModbusDevice::NoError) {
+                info->finish(Thing::ThingErrorHardwareFailure);
+                return;
+            }
+            info->finish(Thing::ThingErrorNoError);
+        });
+    }
+    else if (action.actionTypeId() == sunspecStorageChargingRateActionTypeId) {
+        QModbusReply *reply = storage->setInWRte(action.param(sunspecStorageChargingRateActionChargingRateParamTypeId).value().toInt());
+        if (!reply) {
+            info->finish(Thing::ThingErrorHardwareFailure);
+            return;
+        }
+        connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+        connect(reply, &QModbusReply::finished, info, [info, reply]{
+            if (reply->error() != QModbusDevice::NoError) {
+                info->finish(Thing::ThingErrorHardwareFailure);
+                return;
+            }
+            info->finish(Thing::ThingErrorNoError);
+        });
+    } else if (action.actionTypeId() == sunspecStorageDischargingRateActionTypeId) {
+        QModbusReply *reply = storage->setOutWRte(action.param(sunspecStorageDischargingRateActionDischargingRateParamTypeId).value().toInt());
+        if (!reply) {
+            info->finish(Thing::ThingErrorHardwareFailure);
+            return;
+        }
+        connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+        connect(reply, &QModbusReply::finished, info, [info, reply]{
+            if (reply->error() != QModbusDevice::NoError) {
+                info->finish(Thing::ThingErrorHardwareFailure);
+                return;
+            }
+            info->finish(Thing::ThingErrorNoError);
+        });
+    } else {
+        Q_ASSERT_X(false, "executeAction", QString("Unhandled action: %1").arg(action.actionTypeId().toString()).toUtf8());
+    }
 }
 
 void SunSpecStorage::onBlockDataUpdated()

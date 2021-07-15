@@ -35,6 +35,8 @@
 
 #include "sunspecthing.h"
 
+#include <models/sunspecstoragemodel.h>
+
 class SunSpecStorage : public SunSpecThing
 {
     Q_OBJECT
@@ -42,9 +44,9 @@ public:
     explicit SunSpecStorage(Thing *thing, SunSpecModel *model, QObject *parent = nullptr);
     ~SunSpecStorage() override = default;
 
-    QModbusReply *setGridCharging(bool gridCharging);
-
     void readBlockData() override;
+
+    void executeAction(ThingActionInfo *info) override;
 
 private slots:
     void onBlockDataUpdated() override;

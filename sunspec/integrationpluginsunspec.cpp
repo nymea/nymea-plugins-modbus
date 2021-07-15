@@ -31,6 +31,7 @@
 #include "plugininfo.h"
 #include "integrationpluginsunspec.h"
 #include "network/networkdevicediscovery.h"
+#include "solaredgebattery.h"
 
 #include <sunspecmodel.h>
 #include <models/sunspeccommonmodel.h>
@@ -39,11 +40,6 @@
 
 IntegrationPluginSunSpec::IntegrationPluginSunSpec()
 {
-
-    // Test data convertion of well known data and types
-//    QVector<quint16> testvector = {0x001f}; // Line Frequency 60.02
-//    qint16 sf = static_cast<qint16>(0x)
-
 
 }
 
@@ -79,6 +75,7 @@ void IntegrationPluginSunSpec::init()
     // Connected state for all things
     m_connectedStateTypeIds.insert(sunspecConnectionThingClassId, sunspecConnectionConnectedStateTypeId);
     m_connectedStateTypeIds.insert(solarEdgeConnectionThingClassId, solarEdgeConnectionConnectedStateTypeId);
+    m_connectedStateTypeIds.insert(solarEdgeBatteryThingClassId, solarEdgeBatteryConnectedStateTypeId);
 
     m_connectedStateTypeIds.insert(sunspecStorageThingClassId, sunspecStorageConnectedStateTypeId);
     m_connectedStateTypeIds.insert(sunspecSinglePhaseInverterThingClassId, sunspecSinglePhaseInverterConnectedStateTypeId);
@@ -215,6 +212,7 @@ void IntegrationPluginSunSpec::postSetupThing(Thing *thing)
 {
     qCDebug(dcSunSpec()) << "Post setup thing" << thing->name();
 
+    // Create the refresh timer if not already set up
     if (!m_refreshTimer) {
         qCDebug(dcSunSpec()) << "Starting refresh timer";
         int refreshTime = configValue(sunSpecPluginUpdateIntervalParamTypeId).toInt();
@@ -222,14 +220,20 @@ void IntegrationPluginSunSpec::postSetupThing(Thing *thing)
         connect(m_refreshTimer, &PluginTimer::timeout, this, &IntegrationPluginSunSpec::onRefreshTimer);
     }
 
-    if (thing->thingClassId() == sunspecConnectionThingClassId) {
+    // Run the autodiscovery on any sunspec connection type
+    if (m_sunSpecConnections.contains(thing->id())) {
         SunSpecConnection *connection = m_sunSpecConnections.value(thing->id());
         if (!connection) {
-            qCDebug(dcSunSpec()) << "SunSpecConnection not found for" << thing;
+            qCWarning(dcSunSpec()) << "SunSpecConnection not found for" << thing;
             return;
         }
 
         connection->startDiscovery();
+
+        // Discovery modbus based batteries for solar edge connections
+        if (thing->thingClassId() == solarEdgeConnectionThingClassId) {
+            searchSolarEdgeBatteries(connection);
+        }
     } else if (m_sunspecThings.contains(thing)) {
         SunSpecThing *sunSpecThing = m_sunspecThings.value(thing);
         sunSpecThing->readBlockData();
@@ -276,55 +280,13 @@ void IntegrationPluginSunSpec::executeAction(ThingActionInfo *info)
             return;
         }
 
-        if (action.actionTypeId() == sunspecStorageGridChargingActionTypeId) {
-            QModbusReply *reply = sunSpecStorage->setGridCharging(action.param(sunspecStorageGridChargingActionGridChargingParamTypeId).value().toBool());
-            connect(reply, &QModbusReply::finished, info, [info, reply]{
-                if (reply->error() != QModbusDevice::NoError) {
-                    info->finish(Thing::ThingErrorHardwareFailure);
-                    return;
-                }
-                info->finish(Thing::ThingErrorNoError);
-            });
-        } /*else if (action.actionTypeId() == sunspecStorageEnableChargingActionTypeId) {
-            bool charging = action.param(sunspecStorageEnableChargingActionEnableChargingParamTypeId).value().toBool();
-            bool discharging = thing->stateValue(sunspecStorageEnableDischargingStateTypeId).toBool();
-            QUuid requestId = sunSpecStorage->setStorageControlMode(charging, discharging);
-            if (requestId.isNull()) {
-                info->finish(Thing::ThingErrorHardwareFailure);
-            } else {
-                m_asyncActions.insert(requestId, info);
-                connect(info, &ThingActionInfo::aborted, this, [requestId, this] {m_asyncActions.remove(requestId);});
-            }
-        }*/
-        //else if (action.actionTypeId() == sunspecStorageChargingRateActionTypeId) {
-        //            QUuid requestId = sunSpecStorage->setChargingRate(action.param(sunspecStorageChargingRateActionChargingRateParamTypeId).value().toInt());
-        //            if (requestId.isNull()) {
-        //                info->finish(Thing::ThingErrorHardwareFailure);
-        //            } else {
-        //                m_asyncActions.insert(requestId, info);
-        //                connect(info, &ThingActionInfo::aborted, this, [requestId, this] {m_asyncActions.remove(requestId);});
-        //            }
-        //        } else if (action.actionTypeId() == sunspecStorageEnableDischargingActionTypeId) {
-        //            bool discharging = action.param(sunspecStorageEnableDischargingActionEnableDischargingParamTypeId).value().toBool();
-        //            bool charging = thing->stateValue(sunspecStorageEnableChargingStateTypeId).toBool();
-        //            QUuid requestId = sunSpecStorage->setStorageControlMode(charging, discharging);
-        //            if (requestId.isNull()) {
-        //                info->finish(Thing::ThingErrorHardwareFailure);
-        //            } else {
-        //                m_asyncActions.insert(requestId, info);
-        //                connect(info, &ThingActionInfo::aborted, this, [requestId, this] {m_asyncActions.remove(requestId);});
-        //            }
-        //        } else if (action.actionTypeId() == sunspecStorageDischargingRateActionTypeId) {
-        //            QUuid requestId = sunSpecStorage->setDischargingRate(action.param(sunspecStorageDischargingRateActionDischargingRateParamTypeId).value().toInt());
-        //            if (requestId.isNull()) {
-        //                info->finish(Thing::ThingErrorHardwareFailure);
-        //            } else {
-        //                m_asyncActions.insert(requestId, info);
-        //                connect(info, &ThingActionInfo::aborted, this, [requestId, this] {m_asyncActions.remove(requestId);});
-        //            }
-        //        } else {
-        //            Q_ASSERT_X(false, "executeAction", QString("Unhandled action: %1").arg(action.actionTypeId().toString()).toUtf8());
-        //        }
+        if (!sunSpecStorage->model()->connection()->connected()) {
+            qWarning(dcSunSpec()) << "Could not execute action for" << thing << "because the SunSpec connection is not connected.";
+            info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("The SunSpec connection is not connected."));
+            return;
+        }
+
+        sunSpecStorage->executeAction(info);
     } else {
         Q_ASSERT_X(false, "executeAction", QString("Unhandled thingClassId: %1").arg(info->thing()->thingClassId().toString()).toUtf8());
     }
@@ -333,7 +295,7 @@ void IntegrationPluginSunSpec::executeAction(ThingActionInfo *info)
 bool IntegrationPluginSunSpec::sunspecThingAlreadyAdded(uint modelId, uint modbusAddress, const ThingId &parentId)
 {
     foreach (Thing *thing, myThings()) {
-        if (!m_modbusAddressParamTypeIds.keys().contains(thing->thingClassId()))
+        if (!m_modbusAddressParamTypeIds.contains(thing->thingClassId()))
             continue;
 
         uint thingModelId = thing->paramValue(m_modelIdParamTypeIds.value(thing->thingClassId())).toUInt();
@@ -372,7 +334,7 @@ void IntegrationPluginSunSpec::processDiscoveryResult(Thing *thing, SunSpecConne
 
         switch (model->modelId()) {
         case SunSpecModelFactory::ModelIdCommon:
-            // Skip the common model, we already handled this one
+            // Skip the common model, we already handled this one for each thing model
             break;
         case SunSpecModelFactory::ModelIdInverterSinglePhase:
         case SunSpecModelFactory::ModelIdInverterSinglePhaseFloat: {
@@ -446,7 +408,7 @@ void IntegrationPluginSunSpec::processDiscoveryResult(Thing *thing, SunSpecConne
             break;
         }
         default:
-            qCWarning(dcSunSpec()) << "Plugin has no thing implemented for detected" << model;
+            qCWarning(dcSunSpec()) << "Plugin has no implementation for detected" << model;
             break;
         }
     }
@@ -488,6 +450,7 @@ void IntegrationPluginSunSpec::setupConnection(ThingSetupInfo *info)
                     m_sunSpecConnections.insert(info->thing()->id(), connection);
                     info->finish(Thing::ThingErrorNoError);
                     processDiscoveryResult(info->thing(), connection);
+
                 } else {
                     qCWarning(dcSunSpec()) << "Discovery finished with errors during setup of" << connection;
                     info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("The SunSpec discovery finished with errors. Please make sure this is a SunSpec device."));
@@ -572,6 +535,111 @@ void IntegrationPluginSunSpec::setupStorage(ThingSetupInfo *info)
             SunSpecStorage *storage = new SunSpecStorage(thing, model, this);
             m_sunspecThings.insert(thing, storage);
             info->finish(Thing::ThingErrorNoError);
+            return;
+        }
+    }
+}
+
+void IntegrationPluginSunSpec::setupSolarEdgeBattery(ThingSetupInfo *info)
+{
+    Thing *thing = info->thing();
+    int modbusStartRegister = thing->paramValue(solarEdgeBatteryThingModbusAddressParamTypeId).toUInt();
+    SunSpecConnection *connection = m_sunSpecConnections.value(thing->parentId());
+    if (!connection) {
+        qCWarning(dcSunSpec()) << "Could not find SunSpec connection for setting up SolarEdge battery";
+        return info->finish(Thing::ThingErrorHardwareNotAvailable);
+    }
+
+    SolarEdgeBattery *battery = new SolarEdgeBattery(thing, connection, modbusStartRegister, connection);
+    connect(battery, &SolarEdgeBattery::initFinished, connection, [=](bool success) {
+        if (!success) {
+            qCWarning(dcSunSpec()) << "Failed to initialize SolarEdge battery data during setup";
+            return info->finish(Thing::ThingErrorHardwareFailure);
+        }
+
+        m_sunspecThings.insert(thing, battery);
+        info->finish(Thing::ThingErrorNoError);
+    });
+}
+
+void IntegrationPluginSunSpec::searchSolarEdgeBatteries(SunSpecConnection *connection)
+{
+    qCDebug(dcSunSpec()) << "Searching for connected SolarEdge batteries...";
+    ThingId parentThingId = m_sunSpecConnections.key(connection);
+    if (parentThingId.isNull()) {
+        qCWarning(dcSunSpec()) << "Could not search for SolarEdge batteries because of find parent ThingId connection for" << connection->hostAddress().toString();
+        return;
+    }
+
+    // Batteries are not mapped to the sunspec layer, so we have to treat them as normal modbus registers.
+    // Read the battery id to verify if the battery is connected.
+    // Battery 1: start register 0xE100, device id register 0xE140
+    // Battery 2: start register 0xE200, device id register 0xE240
+    searchSolarEdgeBattery(connection, parentThingId, 0xE100);
+    searchSolarEdgeBattery(connection, parentThingId, 0xE200);
+}
+
+void IntegrationPluginSunSpec::searchSolarEdgeBattery(SunSpecConnection *connection, const ThingId &parentThingId, quint16 startRegister)
+{
+    // Read the battery device id to verify if the battery is connected.
+    // Example: start register 0xE100, device id register 0xE140
+
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, startRegister + 0x40, 1);
+    if (QModbusReply *reply = connection->modbusTcpClient()->sendReadRequest(request, connection->slaveId())) {
+        if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [=]() {
+
+                if (reply->error() != QModbusDevice::NoError) {
+                    qCDebug(dcSunSpec()) << "SolarEdge battery seems not to be connected on" << startRegister;
+                    return;
+                }
+
+                const QModbusDataUnit unit = reply->result();
+                if (unit.values().isEmpty()) {
+                    return;
+                }
+
+                quint16 batteryDeviceId = unit.value(0);
+                if (batteryDeviceId == 255) {
+                    qCDebug(dcSunSpec()) << "No SolarEdge battery connected on" << startRegister;
+                    return;
+                }
+
+                // Create a temporary battery object without thing
+                qCDebug(dcSunSpec()) << "Found SolarEdge battery on modbus register" << startRegister;
+                SolarEdgeBattery *battery = new SolarEdgeBattery(nullptr, connection, startRegister, connection);
+                connect(battery, &SolarEdgeBattery::initFinished, connection, [=](bool success) {
+
+                    // Delete this object since we used it only for set up
+                    battery->deleteLater();
+
+                    if (!success) {
+                        qCWarning(dcSunSpec()) << "Failed to initialize SolarEdge battery on register" << battery->modbusStartRegister();
+                        return;
+                    }
+
+                    qCDebug(dcSunSpec()) << "Battery initialized successfully." << battery->batteryData().manufacturerName << battery->batteryData().model;
+                    // Check if we already created this battery
+                    if (!myThings().filterByParam(solarEdgeBatteryThingSerialNumberParamTypeId, battery->batteryData().serialNumber).isEmpty()) {
+                        qCDebug(dcSunSpec()) << "Battery already set up" << battery->batteryData().serialNumber;
+                    } else {
+                        // Create new battery device in the system
+                        ThingDescriptor descriptor(solarEdgeBatteryThingClassId, battery->batteryData().manufacturerName + " - " + battery->batteryData().model, QString(), parentThingId);
+                        ParamList params;
+                        params.append(Param(solarEdgeBatteryThingModbusAddressParamTypeId, startRegister));
+                        params.append(Param(solarEdgeBatteryThingSerialNumberParamTypeId, battery->batteryData().serialNumber));
+                        descriptor.setParams(params);
+                        emit autoThingsAppeared({descriptor});
+                    }
+
+                });
+
+                // Start initializing battery data
+                battery->init();
+            });
+        } else {
+            delete reply; // broadcast replies return immediately
             return;
         }
     }

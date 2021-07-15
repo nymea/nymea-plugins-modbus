@@ -35,9 +35,12 @@
 #include <QDebug>
 #include <QTimer>
 
-class SunSpecConnection;
+#include "sunspecthing.h"
 
-class SolarEdgeBattery : public QObject
+/* Note: this is actually not a sunspec thing, since SolarEdge provide battery information using a non SunSpec modbus register section.
+ * For keeping the code as simple as possible we make it a SunSpec thing */
+
+class SolarEdgeBattery : public SunSpecThing
 {
     Q_OBJECT
 public:
@@ -105,15 +108,20 @@ public:
         BatteryStatus batteryStatus;
     };
 
-    explicit SolarEdgeBattery(SunSpecConnection *connection, int modbusStartRegister, QObject *parent = nullptr);
+    explicit SolarEdgeBattery(Thing *thing, SunSpecConnection *connection, int modbusStartRegister, QObject *parent = nullptr);
 
     SunSpecConnection *connection() const;
+
     int modbusStartRegister() const;
 
     BatteryData batteryData() const;
 
     void init();
-    void readBlockData();
+    void readBlockData() override;
+
+signals:
+    void initFinished(bool success);
+    void batteryDataReceived(const BatteryData &batteryData);
 
 private:
     QTimer m_timer;
@@ -122,9 +130,8 @@ private:
     bool m_initFinishedSuccess = false;
     BatteryData m_batteryData;
 
-signals:
-    void initFinished(bool success);
-    void batteryDataReceived(const BatteryData &batteryData);
+private slots:
+    void onBlockDataUpdated() override;
 
 };
 
