@@ -164,33 +164,33 @@ void SunSpecRefPointModel::processBlockData()
 
 QDebug operator<<(QDebug debug, SunSpecRefPointModel *model)
 {
-    debug.nospace().noquote() << "SunSpecRefPointModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "SunSpecRefPointModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")\n";
     debug.nospace().noquote() << "    - " << model->dataPoints().value("GHI") << "-->";
     if (model->dataPoints().value("GHI").isValid()) {
-        debug.nospace().noquote() << model->ghi() << endl;
+        debug.nospace().noquote() << model->ghi() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("A") << "-->";
     if (model->dataPoints().value("A").isValid()) {
-        debug.nospace().noquote() << model->amps() << endl;
+        debug.nospace().noquote() << model->amps() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("V") << "-->";
     if (model->dataPoints().value("V").isValid()) {
-        debug.nospace().noquote() << model->voltage() << endl;
+        debug.nospace().noquote() << model->voltage() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("Tmp") << "-->";
     if (model->dataPoints().value("Tmp").isValid()) {
-        debug.nospace().noquote() << model->temperature() << endl;
+        debug.nospace().noquote() << model->temperature() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
 

@@ -156,12 +156,12 @@ void SunSpecFlowBatteryStackModel::processBlockData()
 
 QDebug operator<<(QDebug debug, SunSpecFlowBatteryStackModel *model)
 {
-    debug.nospace().noquote() << "SunSpecFlowBatteryStackModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "SunSpecFlowBatteryStackModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")\n";
     debug.nospace().noquote() << "    - " << model->dataPoints().value("StackTBD") << "-->";
     if (model->dataPoints().value("StackTBD").isValid()) {
-        debug.nospace().noquote() << model->stackPointsToBeDetermined() << endl;
+        debug.nospace().noquote() << model->stackPointsToBeDetermined() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
 

@@ -374,54 +374,54 @@ void SunSpecFreqWattParamModel::processBlockData()
 
 QDebug operator<<(QDebug debug, SunSpecFreqWattParamModel *model)
 {
-    debug.nospace().noquote() << "SunSpecFreqWattParamModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "SunSpecFreqWattParamModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")\n";
     debug.nospace().noquote() << "    - " << model->dataPoints().value("WGra") << "-->";
     if (model->dataPoints().value("WGra").isValid()) {
-        debug.nospace().noquote() << model->wGra() << endl;
+        debug.nospace().noquote() << model->wGra() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("HzStr") << "-->";
     if (model->dataPoints().value("HzStr").isValid()) {
-        debug.nospace().noquote() << model->hzStr() << endl;
+        debug.nospace().noquote() << model->hzStr() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("HzStop") << "-->";
     if (model->dataPoints().value("HzStop").isValid()) {
-        debug.nospace().noquote() << model->hzStop() << endl;
+        debug.nospace().noquote() << model->hzStop() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("HysEna") << "-->";
     if (model->dataPoints().value("HysEna").isValid()) {
-        debug.nospace().noquote() << model->hysEna() << endl;
+        debug.nospace().noquote() << model->hysEna() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("ModEna") << "-->";
     if (model->dataPoints().value("ModEna").isValid()) {
-        debug.nospace().noquote() << model->modEna() << endl;
+        debug.nospace().noquote() << model->modEna() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("HzStopWGra") << "-->";
     if (model->dataPoints().value("HzStopWGra").isValid()) {
-        debug.nospace().noquote() << model->hzStopWGra() << endl;
+        debug.nospace().noquote() << model->hzStopWGra() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad") << "-->";
     if (model->dataPoints().value("Pad").isValid()) {
-        debug.nospace().noquote() << model->pad() << endl;
+        debug.nospace().noquote() << model->pad() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
 

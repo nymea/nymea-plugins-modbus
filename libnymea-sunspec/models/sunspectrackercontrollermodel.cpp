@@ -572,75 +572,75 @@ void SunSpecTrackerControllerModel::processBlockData()
 
 QDebug operator<<(QDebug debug, SunSpecTrackerControllerModel *model)
 {
-    debug.nospace().noquote() << "SunSpecTrackerControllerModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "SunSpecTrackerControllerModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")\n";
     debug.nospace().noquote() << "    - " << model->dataPoints().value("Nam") << "-->";
     if (model->dataPoints().value("Nam").isValid()) {
-        debug.nospace().noquote() << model->controller() << endl;
+        debug.nospace().noquote() << model->controller() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("Typ") << "-->";
     if (model->dataPoints().value("Typ").isValid()) {
-        debug.nospace().noquote() << model->type() << endl;
+        debug.nospace().noquote() << model->type() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("DtLoc") << "-->";
     if (model->dataPoints().value("DtLoc").isValid()) {
-        debug.nospace().noquote() << model->date() << endl;
+        debug.nospace().noquote() << model->date() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("TmLoc") << "-->";
     if (model->dataPoints().value("TmLoc").isValid()) {
-        debug.nospace().noquote() << model->time() << endl;
+        debug.nospace().noquote() << model->time() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("Day") << "-->";
     if (model->dataPoints().value("Day").isValid()) {
-        debug.nospace().noquote() << model->day() << endl;
+        debug.nospace().noquote() << model->day() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("GlblElCtl") << "-->";
     if (model->dataPoints().value("GlblElCtl").isValid()) {
-        debug.nospace().noquote() << model->manualElevation() << endl;
+        debug.nospace().noquote() << model->manualElevation() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("GlblAzCtl") << "-->";
     if (model->dataPoints().value("GlblAzCtl").isValid()) {
-        debug.nospace().noquote() << model->manualAzimuth() << endl;
+        debug.nospace().noquote() << model->manualAzimuth() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("GlblCtl") << "-->";
     if (model->dataPoints().value("GlblCtl").isValid()) {
-        debug.nospace().noquote() << model->globalMode() << endl;
+        debug.nospace().noquote() << model->globalMode() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("GlblAlm") << "-->";
     if (model->dataPoints().value("GlblAlm").isValid()) {
-        debug.nospace().noquote() << model->globalAlarm() << endl;
+        debug.nospace().noquote() << model->globalAlarm() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("N") << "-->";
     if (model->dataPoints().value("N").isValid()) {
-        debug.nospace().noquote() << model->trackers() << endl;
+        debug.nospace().noquote() << model->trackers() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
 

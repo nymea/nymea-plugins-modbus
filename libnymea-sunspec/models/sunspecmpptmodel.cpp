@@ -417,26 +417,26 @@ void SunSpecMpptModel::processBlockData()
 
 QDebug operator<<(QDebug debug, SunSpecMpptModel *model)
 {
-    debug.nospace().noquote() << "SunSpecMpptModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "SunSpecMpptModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")\n";
     debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt") << "-->";
     if (model->dataPoints().value("Evt").isValid()) {
-        debug.nospace().noquote() << model->globalEvents() << endl;
+        debug.nospace().noquote() << model->globalEvents() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("N") << "-->";
     if (model->dataPoints().value("N").isValid()) {
-        debug.nospace().noquote() << model->numberOfModules() << endl;
+        debug.nospace().noquote() << model->numberOfModules() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("TmsPer") << "-->";
     if (model->dataPoints().value("TmsPer").isValid()) {
-        debug.nospace().noquote() << model->timestampPeriod() << endl;
+        debug.nospace().noquote() << model->timestampPeriod() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
 

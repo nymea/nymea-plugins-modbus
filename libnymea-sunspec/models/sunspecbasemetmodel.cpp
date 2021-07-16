@@ -280,82 +280,82 @@ void SunSpecBaseMetModel::processBlockData()
 
 QDebug operator<<(QDebug debug, SunSpecBaseMetModel *model)
 {
-    debug.nospace().noquote() << "SunSpecBaseMetModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "SunSpecBaseMetModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")\n";
     debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpAmb") << "-->";
     if (model->dataPoints().value("TmpAmb").isValid()) {
-        debug.nospace().noquote() << model->ambientTemperature() << endl;
+        debug.nospace().noquote() << model->ambientTemperature() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("RH") << "-->";
     if (model->dataPoints().value("RH").isValid()) {
-        debug.nospace().noquote() << model->relativeHumidity() << endl;
+        debug.nospace().noquote() << model->relativeHumidity() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("Pres") << "-->";
     if (model->dataPoints().value("Pres").isValid()) {
-        debug.nospace().noquote() << model->barometricPressure() << endl;
+        debug.nospace().noquote() << model->barometricPressure() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("WndSpd") << "-->";
     if (model->dataPoints().value("WndSpd").isValid()) {
-        debug.nospace().noquote() << model->windSpeed() << endl;
+        debug.nospace().noquote() << model->windSpeed() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("WndDir") << "-->";
     if (model->dataPoints().value("WndDir").isValid()) {
-        debug.nospace().noquote() << model->windDirection() << endl;
+        debug.nospace().noquote() << model->windDirection() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("Rain") << "-->";
     if (model->dataPoints().value("Rain").isValid()) {
-        debug.nospace().noquote() << model->rainfall() << endl;
+        debug.nospace().noquote() << model->rainfall() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("Snw") << "-->";
     if (model->dataPoints().value("Snw").isValid()) {
-        debug.nospace().noquote() << model->snowDepth() << endl;
+        debug.nospace().noquote() << model->snowDepth() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("PPT") << "-->";
     if (model->dataPoints().value("PPT").isValid()) {
-        debug.nospace().noquote() << model->precipitationType() << endl;
+        debug.nospace().noquote() << model->precipitationType() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("ElecFld") << "-->";
     if (model->dataPoints().value("ElecFld").isValid()) {
-        debug.nospace().noquote() << model->electricField() << endl;
+        debug.nospace().noquote() << model->electricField() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("SurWet") << "-->";
     if (model->dataPoints().value("SurWet").isValid()) {
-        debug.nospace().noquote() << model->surfaceWetness() << endl;
+        debug.nospace().noquote() << model->surfaceWetness() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("SoilWet") << "-->";
     if (model->dataPoints().value("SoilWet").isValid()) {
-        debug.nospace().noquote() << model->soilWetness() << endl;
+        debug.nospace().noquote() << model->soilWetness() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
 

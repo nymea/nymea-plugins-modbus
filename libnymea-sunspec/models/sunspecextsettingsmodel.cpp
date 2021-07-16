@@ -352,54 +352,54 @@ void SunSpecExtSettingsModel::processBlockData()
 
 QDebug operator<<(QDebug debug, SunSpecExtSettingsModel *model)
 {
-    debug.nospace().noquote() << "SunSpecExtSettingsModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "SunSpecExtSettingsModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")\n";
     debug.nospace().noquote() << "    - " << model->dataPoints().value("NomRmpUpRte") << "-->";
     if (model->dataPoints().value("NomRmpUpRte").isValid()) {
-        debug.nospace().noquote() << model->rampUpRate() << endl;
+        debug.nospace().noquote() << model->rampUpRate() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("NomRmpDnRte") << "-->";
     if (model->dataPoints().value("NomRmpDnRte").isValid()) {
-        debug.nospace().noquote() << model->nomRmpDnRte() << endl;
+        debug.nospace().noquote() << model->nomRmpDnRte() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("EmgRmpUpRte") << "-->";
     if (model->dataPoints().value("EmgRmpUpRte").isValid()) {
-        debug.nospace().noquote() << model->emergencyRampUpRate() << endl;
+        debug.nospace().noquote() << model->emergencyRampUpRate() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("EmgRmpDnRte") << "-->";
     if (model->dataPoints().value("EmgRmpDnRte").isValid()) {
-        debug.nospace().noquote() << model->emergencyRampDownRate() << endl;
+        debug.nospace().noquote() << model->emergencyRampDownRate() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("ConnRmpUpRte") << "-->";
     if (model->dataPoints().value("ConnRmpUpRte").isValid()) {
-        debug.nospace().noquote() << model->connectRampUpRate() << endl;
+        debug.nospace().noquote() << model->connectRampUpRate() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("ConnRmpDnRte") << "-->";
     if (model->dataPoints().value("ConnRmpDnRte").isValid()) {
-        debug.nospace().noquote() << model->connectRampDownRate() << endl;
+        debug.nospace().noquote() << model->connectRampDownRate() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("AGra") << "-->";
     if (model->dataPoints().value("AGra").isValid()) {
-        debug.nospace().noquote() << model->defaultRampRate() << endl;
+        debug.nospace().noquote() << model->defaultRampRate() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
 

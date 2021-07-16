@@ -164,33 +164,33 @@ void SunSpecMiniMetModel::processBlockData()
 
 QDebug operator<<(QDebug debug, SunSpecMiniMetModel *model)
 {
-    debug.nospace().noquote() << "SunSpecMiniMetModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "SunSpecMiniMetModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")\n";
     debug.nospace().noquote() << "    - " << model->dataPoints().value("GHI") << "-->";
     if (model->dataPoints().value("GHI").isValid()) {
-        debug.nospace().noquote() << model->ghi() << endl;
+        debug.nospace().noquote() << model->ghi() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpBOM") << "-->";
     if (model->dataPoints().value("TmpBOM").isValid()) {
-        debug.nospace().noquote() << model->temp() << endl;
+        debug.nospace().noquote() << model->temp() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpAmb") << "-->";
     if (model->dataPoints().value("TmpAmb").isValid()) {
-        debug.nospace().noquote() << model->ambientTemperature() << endl;
+        debug.nospace().noquote() << model->ambientTemperature() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("WndSpd") << "-->";
     if (model->dataPoints().value("WndSpd").isValid()) {
-        debug.nospace().noquote() << model->windSpeed() << endl;
+        debug.nospace().noquote() << model->windSpeed() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
 

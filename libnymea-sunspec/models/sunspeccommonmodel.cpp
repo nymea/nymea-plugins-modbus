@@ -228,54 +228,54 @@ void SunSpecCommonModel::processBlockData()
 
 QDebug operator<<(QDebug debug, SunSpecCommonModel *model)
 {
-    debug.nospace().noquote() << "SunSpecCommonModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "SunSpecCommonModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")\n";
     debug.nospace().noquote() << "    - " << model->dataPoints().value("Mn") << "-->";
     if (model->dataPoints().value("Mn").isValid()) {
-        debug.nospace().noquote() << model->manufacturer() << endl;
+        debug.nospace().noquote() << model->manufacturer() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("Md") << "-->";
     if (model->dataPoints().value("Md").isValid()) {
-        debug.nospace().noquote() << model->model() << endl;
+        debug.nospace().noquote() << model->model() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("Opt") << "-->";
     if (model->dataPoints().value("Opt").isValid()) {
-        debug.nospace().noquote() << model->options() << endl;
+        debug.nospace().noquote() << model->options() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("Vr") << "-->";
     if (model->dataPoints().value("Vr").isValid()) {
-        debug.nospace().noquote() << model->version() << endl;
+        debug.nospace().noquote() << model->version() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("SN") << "-->";
     if (model->dataPoints().value("SN").isValid()) {
-        debug.nospace().noquote() << model->serialNumber() << endl;
+        debug.nospace().noquote() << model->serialNumber() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("DA") << "-->";
     if (model->dataPoints().value("DA").isValid()) {
-        debug.nospace().noquote() << model->deviceAddress() << endl;
+        debug.nospace().noquote() << model->deviceAddress() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad") << "-->";
     if (model->dataPoints().value("Pad").isValid()) {
-        debug.nospace().noquote() << model->pad() << endl;
+        debug.nospace().noquote() << model->pad() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
 
