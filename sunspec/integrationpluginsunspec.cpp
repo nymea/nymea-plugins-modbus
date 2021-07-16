@@ -89,15 +89,6 @@ void IntegrationPluginSunSpec::init()
     m_connectedStateTypeIds.insert(sunspecSplitPhaseMeterThingClassId, sunspecSplitPhaseMeterConnectedStateTypeId);
     m_connectedStateTypeIds.insert(sunspecThreePhaseMeterThingClassId, sunspecThreePhaseMeterConnectedStateTypeId);
 
-    // Version states for all sunspec things
-    m_versionStateTypeIds.insert(solarEdgeBatteryThingClassId, solarEdgeBatteryVersionStateTypeId);
-    m_versionStateTypeIds.insert(sunspecSinglePhaseInverterThingClassId, sunspecSinglePhaseInverterVersionStateTypeId);
-    m_versionStateTypeIds.insert(sunspecThreePhaseInverterThingClassId, sunspecThreePhaseInverterVersionStateTypeId);
-    m_versionStateTypeIds.insert(sunspecStorageThingClassId, sunspecStorageVersionStateTypeId);
-    m_versionStateTypeIds.insert(sunspecSinglePhaseMeterThingClassId, sunspecSinglePhaseMeterVersionStateTypeId);
-    m_versionStateTypeIds.insert(sunspecSplitPhaseMeterThingClassId, sunspecSplitPhaseMeterVersionStateTypeId);
-    m_versionStateTypeIds.insert(sunspecThreePhaseMeterThingClassId, sunspecThreePhaseMeterVersionStateTypeId);
-
     // Params for sunspec things
     m_modelIdParamTypeIds.insert(sunspecSinglePhaseInverterThingClassId, sunspecSinglePhaseInverterThingModelIdParamTypeId);
     m_modelIdParamTypeIds.insert(sunspecSplitPhaseInverterThingClassId, sunspecSplitPhaseInverterThingModelIdParamTypeId);
@@ -287,9 +278,6 @@ void IntegrationPluginSunSpec::postSetupThing(Thing *thing)
     } else if (m_sunspecThings.contains(thing)) {
         SunSpecThing *sunSpecThing = m_sunspecThings.value(thing);
         sunSpecThing->readBlockData();
-
-        // Update the version state
-        thing->setStateValue(m_versionStateTypeIds.value(thing->thingClassId()), sunSpecThing->model()->commonModelInfo().versionString);
     } else {
         Q_ASSERT_X(false, "postSetupThing", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
     }

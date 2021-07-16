@@ -69,9 +69,6 @@ private:
     QHash<ThingClassId, ParamTypeId> m_connectionMacAddressParamTypeIds;
     QHash<ThingClassId, ParamTypeId> m_connectionSlaveIdParamTypeIds;
 
-    // SunSpec thing common state map
-    QHash<ThingClassId, StateTypeId> m_versionStateTypeIds;
-
     // SunSpec thing params map
     QHash<ThingClassId, ParamTypeId> m_modelIdParamTypeIds;
     QHash<ThingClassId, ParamTypeId> m_modbusAddressParamTypeIds;
