@@ -188,7 +188,7 @@ public:
     void processBlockData(const QVector<quint16> blockData) override;
 
 protected:
-    void initDataPoints() override;
+    void initDataPoints();
 
 private:
     SunSpecLfrtcModel *m_parentModel = nullptr;
@@ -285,7 +285,7 @@ protected:
     quint16 m_fixedBlockLength = 10;
     quint16 m_repeatingBlockLength = 50;
 
-    void initDataPoints() override;
+    void initDataPoints();
     void processBlockData() override;
 
 private:

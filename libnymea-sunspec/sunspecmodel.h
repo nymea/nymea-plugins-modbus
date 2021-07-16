@@ -94,7 +94,6 @@ protected:
 
     void setInitializedFinished();
 
-    virtual void initDataPoints() = 0;
     virtual void processBlockData() = 0;
 
 signals:

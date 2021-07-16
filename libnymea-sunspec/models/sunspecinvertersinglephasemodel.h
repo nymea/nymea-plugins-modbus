@@ -129,7 +129,7 @@ public:
 protected:
     quint16 m_fixedBlockLength = 50;
 
-    void initDataPoints() override;
+    void initDataPoints();
     void processBlockData() override;
 
 private:

@@ -1065,180 +1065,180 @@ void SunSpecFlowBatteryStringModel::processBlockData()
 
 QDebug operator<<(QDebug debug, SunSpecFlowBatteryStringModel *model)
 {
-    debug.nospace().noquote() << "SunSpecFlowBatteryStringModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "SunSpecFlowBatteryStringModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")\n";
     debug.nospace().noquote() << "    - " << model->dataPoints().value("Idx") << "-->";
     if (model->dataPoints().value("Idx").isValid()) {
-        debug.nospace().noquote() << model->stringIndex() << endl;
+        debug.nospace().noquote() << model->stringIndex() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("NMod") << "-->";
     if (model->dataPoints().value("NMod").isValid()) {
-        debug.nospace().noquote() << model->moduleCount() << endl;
+        debug.nospace().noquote() << model->moduleCount() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("NModCon") << "-->";
     if (model->dataPoints().value("NModCon").isValid()) {
-        debug.nospace().noquote() << model->connectedModuleCount() << endl;
+        debug.nospace().noquote() << model->connectedModuleCount() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("ModVMax") << "-->";
     if (model->dataPoints().value("ModVMax").isValid()) {
-        debug.nospace().noquote() << model->maxModuleVoltage() << endl;
+        debug.nospace().noquote() << model->maxModuleVoltage() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("ModVMaxMod") << "-->";
     if (model->dataPoints().value("ModVMaxMod").isValid()) {
-        debug.nospace().noquote() << model->maxModuleVoltageModule() << endl;
+        debug.nospace().noquote() << model->maxModuleVoltageModule() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("ModVMin") << "-->";
     if (model->dataPoints().value("ModVMin").isValid()) {
-        debug.nospace().noquote() << model->minModuleVoltage() << endl;
+        debug.nospace().noquote() << model->minModuleVoltage() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("ModVMinMod") << "-->";
     if (model->dataPoints().value("ModVMinMod").isValid()) {
-        debug.nospace().noquote() << model->minModuleVoltageModule() << endl;
+        debug.nospace().noquote() << model->minModuleVoltageModule() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("ModVAvg") << "-->";
     if (model->dataPoints().value("ModVAvg").isValid()) {
-        debug.nospace().noquote() << model->averageModuleVoltage() << endl;
+        debug.nospace().noquote() << model->averageModuleVoltage() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("CellVMax") << "-->";
     if (model->dataPoints().value("CellVMax").isValid()) {
-        debug.nospace().noquote() << model->maxCellVoltage() << endl;
+        debug.nospace().noquote() << model->maxCellVoltage() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("CellVMaxMod") << "-->";
     if (model->dataPoints().value("CellVMaxMod").isValid()) {
-        debug.nospace().noquote() << model->maxCellVoltageModule() << endl;
+        debug.nospace().noquote() << model->maxCellVoltageModule() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("CellVMaxStk") << "-->";
     if (model->dataPoints().value("CellVMaxStk").isValid()) {
-        debug.nospace().noquote() << model->maxCellVoltageStack() << endl;
+        debug.nospace().noquote() << model->maxCellVoltageStack() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("CellVMin") << "-->";
     if (model->dataPoints().value("CellVMin").isValid()) {
-        debug.nospace().noquote() << model->minCellVoltage() << endl;
+        debug.nospace().noquote() << model->minCellVoltage() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("CellVMinMod") << "-->";
     if (model->dataPoints().value("CellVMinMod").isValid()) {
-        debug.nospace().noquote() << model->minCellVoltageModule() << endl;
+        debug.nospace().noquote() << model->minCellVoltageModule() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("CellVMinStk") << "-->";
     if (model->dataPoints().value("CellVMinStk").isValid()) {
-        debug.nospace().noquote() << model->minCellVoltageStack() << endl;
+        debug.nospace().noquote() << model->minCellVoltageStack() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("CellVAvg") << "-->";
     if (model->dataPoints().value("CellVAvg").isValid()) {
-        debug.nospace().noquote() << model->averageCellVoltage() << endl;
+        debug.nospace().noquote() << model->averageCellVoltage() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpMax") << "-->";
     if (model->dataPoints().value("TmpMax").isValid()) {
-        debug.nospace().noquote() << model->maxTemperature() << endl;
+        debug.nospace().noquote() << model->maxTemperature() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpMaxMod") << "-->";
     if (model->dataPoints().value("TmpMaxMod").isValid()) {
-        debug.nospace().noquote() << model->maxTemperatureModule() << endl;
+        debug.nospace().noquote() << model->maxTemperatureModule() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpMin") << "-->";
     if (model->dataPoints().value("TmpMin").isValid()) {
-        debug.nospace().noquote() << model->minTemperature() << endl;
+        debug.nospace().noquote() << model->minTemperature() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpMinMod") << "-->";
     if (model->dataPoints().value("TmpMinMod").isValid()) {
-        debug.nospace().noquote() << model->minTemperatureModule() << endl;
+        debug.nospace().noquote() << model->minTemperatureModule() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("TmpAvg") << "-->";
     if (model->dataPoints().value("TmpAvg").isValid()) {
-        debug.nospace().noquote() << model->averageTemperature() << endl;
+        debug.nospace().noquote() << model->averageTemperature() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt1") << "-->";
     if (model->dataPoints().value("Evt1").isValid()) {
-        debug.nospace().noquote() << model->stringEvent1() << endl;
+        debug.nospace().noquote() << model->stringEvent1() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt2") << "-->";
     if (model->dataPoints().value("Evt2").isValid()) {
-        debug.nospace().noquote() << model->stringEvent2() << endl;
+        debug.nospace().noquote() << model->stringEvent2() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd1") << "-->";
     if (model->dataPoints().value("EvtVnd1").isValid()) {
-        debug.nospace().noquote() << model->vendorEventBitfield1() << endl;
+        debug.nospace().noquote() << model->vendorEventBitfield1() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd2") << "-->";
     if (model->dataPoints().value("EvtVnd2").isValid()) {
-        debug.nospace().noquote() << model->vendorEventBitfield2() << endl;
+        debug.nospace().noquote() << model->vendorEventBitfield2() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad1") << "-->";
     if (model->dataPoints().value("Pad1").isValid()) {
-        debug.nospace().noquote() << model->pad1() << endl;
+        debug.nospace().noquote() << model->pad1() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
 

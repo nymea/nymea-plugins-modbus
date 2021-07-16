@@ -211,7 +211,7 @@ void SunSpecIrradianceModel::processBlockData()
 
 QDebug operator<<(QDebug debug, SunSpecIrradianceModel *model)
 {
-    debug.nospace().noquote() << "SunSpecIrradianceModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "SunSpecIrradianceModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")\n";
 
     return debug.space().quote();
 }

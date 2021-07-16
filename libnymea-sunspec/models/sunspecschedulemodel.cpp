@@ -1197,40 +1197,40 @@ void SunSpecScheduleModel::processBlockData()
 
 QDebug operator<<(QDebug debug, SunSpecScheduleModel *model)
 {
-    debug.nospace().noquote() << "SunSpecScheduleModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "SunSpecScheduleModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")\n";
     debug.nospace().noquote() << "    - " << model->dataPoints().value("ActSchd") << "-->";
     if (model->dataPoints().value("ActSchd").isValid()) {
-        debug.nospace().noquote() << model->actSchd() << endl;
+        debug.nospace().noquote() << model->actSchd() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("ModEna") << "-->";
     if (model->dataPoints().value("ModEna").isValid()) {
-        debug.nospace().noquote() << model->modEna() << endl;
+        debug.nospace().noquote() << model->modEna() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("NSchd") << "-->";
     if (model->dataPoints().value("NSchd").isValid()) {
-        debug.nospace().noquote() << model->nSchd() << endl;
+        debug.nospace().noquote() << model->nSchd() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("NPts") << "-->";
     if (model->dataPoints().value("NPts").isValid()) {
-        debug.nospace().noquote() << model->nPts() << endl;
+        debug.nospace().noquote() << model->nPts() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("Pad") << "-->";
     if (model->dataPoints().value("Pad").isValid()) {
-        debug.nospace().noquote() << model->pad() << endl;
+        debug.nospace().noquote() << model->pad() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
 

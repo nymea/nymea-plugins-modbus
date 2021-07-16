@@ -59,7 +59,7 @@ public:
     void processBlockData(const QVector<quint16> blockData) override;
 
 protected:
-    void initDataPoints() override;
+    void initDataPoints();
 
 private:
     SunSpecIrradianceModel *m_parentModel = nullptr;
@@ -91,7 +91,7 @@ protected:
     quint16 m_fixedBlockLength = 0;
     quint16 m_repeatingBlockLength = 5;
 
-    void initDataPoints() override;
+    void initDataPoints();
     void processBlockData() override;
 
 private:

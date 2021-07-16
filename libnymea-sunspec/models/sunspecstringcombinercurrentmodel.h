@@ -83,7 +83,7 @@ public:
     void processBlockData(const QVector<quint16> blockData) override;
 
 protected:
-    void initDataPoints() override;
+    void initDataPoints();
 
 private:
     SunSpecStringCombinerCurrentModel *m_parentModel = nullptr;
@@ -152,7 +152,7 @@ protected:
     quint16 m_fixedBlockLength = 16;
     quint16 m_repeatingBlockLength = 8;
 
-    void initDataPoints() override;
+    void initDataPoints();
     void processBlockData() override;
 
 private:

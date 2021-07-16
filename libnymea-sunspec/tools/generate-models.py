@@ -810,9 +810,9 @@ def writePropertyDebugLine(fileDescriptor, className, modelId):
         dataPointString = ('model->dataPoints().value("%s")' % dataPoint['name'])
         writeLine(fileDescriptor, '    debug.nospace().noquote() << "    - " << %s << "-->";' % dataPointString)
         writeLine(fileDescriptor, '    if (%s.isValid()) {' % (dataPointString))
-        writeLine(fileDescriptor, '        debug.nospace().noquote() << model->%s() << endl;' % (propertyName))
+        writeLine(fileDescriptor, '        debug.nospace().noquote() << model->%s() << "\\n";' % (propertyName))
         writeLine(fileDescriptor, '    } else {')
-        writeLine(fileDescriptor, '        debug.nospace().noquote() << "NaN" << endl;')
+        writeLine(fileDescriptor, '        debug.nospace().noquote() << "NaN\\n";')
         writeLine(fileDescriptor, '    }')
         writeLine(fileDescriptor)
     
@@ -867,7 +867,7 @@ def writeRepeatingBlockClassDefinition(fileDescriptor, className, modelId):
     # Protected members
     writeLine(fileDescriptor)
     writeLine(fileDescriptor, 'protected:')
-    writeLine(fileDescriptor, '    void initDataPoints() override;')
+    writeLine(fileDescriptor, '    void initDataPoints();')
     
     # Private members
     writeLine(fileDescriptor)
@@ -1038,7 +1038,7 @@ def writeHeaderFile(headerFileName, className, modelId):
 
     writeLine(fileDescriptor)
 
-    writeLine(fileDescriptor, '    void initDataPoints() override;')
+    writeLine(fileDescriptor, '    void initDataPoints();')
     writeLine(fileDescriptor, '    void processBlockData() override;')
 
     # Private members
@@ -1163,7 +1163,7 @@ def writeSourceFile(sourceFileName, className, modelId):
     # Debug operator
     writeLine(fileDescriptor, 'QDebug operator<<(QDebug debug, %s *model)' % className)
     writeLine(fileDescriptor, '{')
-    writeLine(fileDescriptor, '    debug.nospace().noquote() << "%s(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;' % className)
+    writeLine(fileDescriptor, '    debug.nospace().noquote() << "%s(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")\\n";' % className)
     writePropertyDebugLine(fileDescriptor, className, modelId)
     writeLine(fileDescriptor, '    return debug.space().quote();')
     writeLine(fileDescriptor, '}')

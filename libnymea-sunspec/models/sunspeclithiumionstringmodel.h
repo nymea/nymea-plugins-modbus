@@ -70,7 +70,7 @@ public:
     void processBlockData(const QVector<quint16> blockData) override;
 
 protected:
-    void initDataPoints() override;
+    void initDataPoints();
 
 private:
     SunSpecLithiumIonStringModel *m_parentModel = nullptr;
@@ -254,7 +254,7 @@ protected:
     quint16 m_fixedBlockLength = 46;
     quint16 m_repeatingBlockLength = 16;
 
-    void initDataPoints() override;
+    void initDataPoints();
     void processBlockData() override;
 
 private:

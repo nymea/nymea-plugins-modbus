@@ -267,75 +267,75 @@ void SunSpecAggregatorModel::processBlockData()
 
 QDebug operator<<(QDebug debug, SunSpecAggregatorModel *model)
 {
-    debug.nospace().noquote() << "SunSpecAggregatorModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "SunSpecAggregatorModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")\n";
     debug.nospace().noquote() << "    - " << model->dataPoints().value("AID") << "-->";
     if (model->dataPoints().value("AID").isValid()) {
-        debug.nospace().noquote() << model->aid() << endl;
+        debug.nospace().noquote() << model->aid() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("N") << "-->";
     if (model->dataPoints().value("N").isValid()) {
-        debug.nospace().noquote() << model->n() << endl;
+        debug.nospace().noquote() << model->n() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("UN") << "-->";
     if (model->dataPoints().value("UN").isValid()) {
-        debug.nospace().noquote() << model->un() << endl;
+        debug.nospace().noquote() << model->un() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("St") << "-->";
     if (model->dataPoints().value("St").isValid()) {
-        debug.nospace().noquote() << model->status() << endl;
+        debug.nospace().noquote() << model->status() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("StVnd") << "-->";
     if (model->dataPoints().value("StVnd").isValid()) {
-        debug.nospace().noquote() << model->vendorStatus() << endl;
+        debug.nospace().noquote() << model->vendorStatus() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("Evt") << "-->";
     if (model->dataPoints().value("Evt").isValid()) {
-        debug.nospace().noquote() << model->eventCode() << endl;
+        debug.nospace().noquote() << model->eventCode() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("EvtVnd") << "-->";
     if (model->dataPoints().value("EvtVnd").isValid()) {
-        debug.nospace().noquote() << model->vendorEventCode() << endl;
+        debug.nospace().noquote() << model->vendorEventCode() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("Ctl") << "-->";
     if (model->dataPoints().value("Ctl").isValid()) {
-        debug.nospace().noquote() << model->control() << endl;
+        debug.nospace().noquote() << model->control() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("CtlVnd") << "-->";
     if (model->dataPoints().value("CtlVnd").isValid()) {
-        debug.nospace().noquote() << model->vendorControl() << endl;
+        debug.nospace().noquote() << model->vendorControl() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
     debug.nospace().noquote() << "    - " << model->dataPoints().value("CtlVl") << "-->";
     if (model->dataPoints().value("CtlVl").isValid()) {
-        debug.nospace().noquote() << model->controlValue() << endl;
+        debug.nospace().noquote() << model->controlValue() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
 

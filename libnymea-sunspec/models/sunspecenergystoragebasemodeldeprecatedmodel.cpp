@@ -110,12 +110,12 @@ void SunSpecEnergyStorageBaseModelDeprecatedModel::processBlockData()
 
 QDebug operator<<(QDebug debug, SunSpecEnergyStorageBaseModelDeprecatedModel *model)
 {
-    debug.nospace().noquote() << "SunSpecEnergyStorageBaseModelDeprecatedModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")" << endl;
+    debug.nospace().noquote() << "SunSpecEnergyStorageBaseModelDeprecatedModel(Model: " << model->modelId() << ", Register: " << model->modbusStartRegister() << ", Length: " << model->modelLength() << ")\n";
     debug.nospace().noquote() << "    - " << model->dataPoints().value("DEPRECATED") << "-->";
     if (model->dataPoints().value("DEPRECATED").isValid()) {
-        debug.nospace().noquote() << model->deprecatedModel() << endl;
+        debug.nospace().noquote() << model->deprecatedModel() << "\n";
     } else {
-        debug.nospace().noquote() << "NaN" << endl;
+        debug.nospace().noquote() << "NaN\n";
     }
 
 
