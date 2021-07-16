@@ -84,6 +84,11 @@ QVector<quint16> SunSpecModel::blockData() const
     return m_blockData;
 }
 
+SunSpecModel::CommonModelInfo SunSpecModel::commonModelInfo() const
+{
+    return m_commonModelInfo;
+}
+
 void SunSpecModel::init()
 {
     m_initialized = false;

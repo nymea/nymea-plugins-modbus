@@ -69,15 +69,15 @@ private:
     QHash<ThingClassId, ParamTypeId> m_connectionMacAddressParamTypeIds;
     QHash<ThingClassId, ParamTypeId> m_connectionSlaveIdParamTypeIds;
 
-    // SunSpec Connection states map
-    QHash<ThingClassId, StateTypeId> m_connectionManufacturerStateTypeIds;
-    QHash<ThingClassId, StateTypeId> m_connectionDeviceModelStateTypeIds;
-    QHash<ThingClassId, StateTypeId> m_connectionVersionStateTypeIds;
-    QHash<ThingClassId, StateTypeId> m_connectionSerialNumberStateTypeIds;
+    // SunSpec thing common state map
+    QHash<ThingClassId, StateTypeId> m_versionStateTypeIds;
 
     // SunSpec thing params map
     QHash<ThingClassId, ParamTypeId> m_modelIdParamTypeIds;
     QHash<ThingClassId, ParamTypeId> m_modbusAddressParamTypeIds;
+    QHash<ThingClassId, ParamTypeId> m_manufacturerParamTypeIds;
+    QHash<ThingClassId, ParamTypeId> m_deviceModelParamTypeIds;
+    QHash<ThingClassId, ParamTypeId> m_serialNumberParamTypeIds;
 
     PluginTimer *m_refreshTimer = nullptr;
 
@@ -100,6 +100,7 @@ private:
     void searchSolarEdgeBatteries(SunSpecConnection *connection);
     void searchSolarEdgeBattery(SunSpecConnection *connection, const ThingId &parentThingId, quint16 startRegister);
 
+    void autocreateSunSpecModelThing(const ThingClassId &thingClassId, const QString &thingName, const ThingId &parentId, SunSpecModel *model);
 
 private slots:
     void onRefreshTimer();
