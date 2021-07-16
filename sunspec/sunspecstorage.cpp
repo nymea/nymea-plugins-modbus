@@ -126,6 +126,8 @@ void SunSpecStorage::onBlockDataUpdated()
     qCDebug(dcSunSpec()) << m_thing->name() << "block data updated" << storage;
 
     m_thing->setStateValue(sunspecStorageConnectedStateTypeId, true);
+    m_thing->setStateValue(sunspecStorageVersionStateTypeId, m_model->commonModelInfo().versionString);
+
     m_thing->setStateValue(sunspecStorageBatteryCriticalStateTypeId, storage->chaState() < 5);
     m_thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, qRound(storage->chaState()));
     m_thing->setStateValue(sunspecStorageGridChargingStateTypeId, storage->chaGriSet() == SunSpecStorageModel::ChagrisetGrid);

@@ -73,6 +73,8 @@ void SunSpecMeter::onBlockDataUpdated()
         SunSpecMeterSinglePhaseFloatModel *meter = qobject_cast<SunSpecMeterSinglePhaseFloatModel *>(m_model);
         qCDebug(dcSunSpec()) << m_thing->name() << "block data updated" << meter;
         m_thing->setStateValue(sunspecSinglePhaseMeterConnectedStateTypeId, true);
+        m_thing->setStateValue(sunspecSinglePhaseMeterVersionStateTypeId, m_model->commonModelInfo().versionString);
+
         m_thing->setStateValue(sunspecSinglePhaseMeterPhaseACurrentStateTypeId, meter->ampsPhaseA());
         m_thing->setStateValue(sunspecSinglePhaseMeterLnACVoltageStateTypeId, meter->voltageLn());
         m_thing->setStateValue(sunspecSinglePhaseMeterPhaseANVoltageStateTypeId, meter->phaseVoltageAn());
@@ -86,6 +88,8 @@ void SunSpecMeter::onBlockDataUpdated()
         SunSpecMeterSplitSinglePhaseAbnModel *meter = qobject_cast<SunSpecMeterSplitSinglePhaseAbnModel *>(m_model);
         qCDebug(dcSunSpec()) << m_thing->name() << "block data updated" << meter;
         m_thing->setStateValue(sunspecSplitPhaseMeterConnectedStateTypeId, true);
+        m_thing->setStateValue(sunspecSplitPhaseMeterVersionStateTypeId, m_model->commonModelInfo().versionString);
+
         m_thing->setStateValue(sunspecSplitPhaseMeterTotalCurrentStateTypeId, meter->amps());
         m_thing->setStateValue(sunspecSplitPhaseMeterPhaseACurrentStateTypeId, meter->ampsPhaseA());
         m_thing->setStateValue(sunspecSplitPhaseMeterPhaseBCurrentStateTypeId, meter->ampsPhaseB());
@@ -102,6 +106,8 @@ void SunSpecMeter::onBlockDataUpdated()
         SunSpecMeterSplitSinglePhaseFloatModel *meter = qobject_cast<SunSpecMeterSplitSinglePhaseFloatModel *>(m_model);
         qCDebug(dcSunSpec()) << m_thing->name() << "block data updated" << meter;
         m_thing->setStateValue(sunspecSplitPhaseMeterConnectedStateTypeId, true);
+        m_thing->setStateValue(sunspecSplitPhaseMeterVersionStateTypeId, m_model->commonModelInfo().versionString);
+
         m_thing->setStateValue(sunspecSplitPhaseMeterTotalCurrentStateTypeId, meter->amps());
         m_thing->setStateValue(sunspecSplitPhaseMeterPhaseACurrentStateTypeId, meter->ampsPhaseA());
         m_thing->setStateValue(sunspecSplitPhaseMeterPhaseBCurrentStateTypeId, meter->ampsPhaseB());
@@ -118,6 +124,8 @@ void SunSpecMeter::onBlockDataUpdated()
         SunSpecMeterThreePhaseModel *meter = qobject_cast<SunSpecMeterThreePhaseModel *>(m_model);
         qCDebug(dcSunSpec()) << m_thing->name() << "block data updated" << meter;
         m_thing->setStateValue(sunspecThreePhaseMeterConnectedStateTypeId, true);
+        m_thing->setStateValue(sunspecThreePhaseMeterVersionStateTypeId, m_model->commonModelInfo().versionString);
+
         m_thing->setStateValue(sunspecThreePhaseMeterTotalCurrentStateTypeId, meter->amps());
         m_thing->setStateValue(sunspecThreePhaseMeterPhaseACurrentStateTypeId, meter->ampsPhaseA());
         m_thing->setStateValue(sunspecThreePhaseMeterPhaseBCurrentStateTypeId, meter->ampsPhaseB());
@@ -136,6 +144,8 @@ void SunSpecMeter::onBlockDataUpdated()
         SunSpecDeltaConnectThreePhaseAbcMeterModel *meter = qobject_cast<SunSpecDeltaConnectThreePhaseAbcMeterModel *>(m_model);
         qCDebug(dcSunSpec()) << m_thing->name() << "block data updated" << meter;
         m_thing->setStateValue(sunspecThreePhaseMeterConnectedStateTypeId, true);
+        m_thing->setStateValue(sunspecThreePhaseMeterVersionStateTypeId, m_model->commonModelInfo().versionString);
+
         m_thing->setStateValue(sunspecThreePhaseMeterTotalCurrentStateTypeId, meter->amps());
         m_thing->setStateValue(sunspecThreePhaseMeterPhaseACurrentStateTypeId, meter->ampsPhaseA());
         m_thing->setStateValue(sunspecThreePhaseMeterPhaseBCurrentStateTypeId, meter->ampsPhaseB());
@@ -154,6 +164,8 @@ void SunSpecMeter::onBlockDataUpdated()
         SunSpecMeterThreePhaseWyeConnectModel *meter = qobject_cast<SunSpecMeterThreePhaseWyeConnectModel *>(m_model);
         qCDebug(dcSunSpec()) << m_thing->name() << "block data updated" << meter;
         m_thing->setStateValue(sunspecThreePhaseMeterConnectedStateTypeId, true);
+        m_thing->setStateValue(sunspecThreePhaseMeterVersionStateTypeId, m_model->commonModelInfo().versionString);
+
         m_thing->setStateValue(sunspecThreePhaseMeterTotalCurrentStateTypeId, meter->amps());
         m_thing->setStateValue(sunspecThreePhaseMeterPhaseACurrentStateTypeId, meter->ampsPhaseA());
         m_thing->setStateValue(sunspecThreePhaseMeterPhaseBCurrentStateTypeId, meter->ampsPhaseB());
@@ -172,6 +184,8 @@ void SunSpecMeter::onBlockDataUpdated()
         SunSpecMeterThreePhaseDeltaConnectModel *meter = qobject_cast<SunSpecMeterThreePhaseDeltaConnectModel *>(m_model);
         qCDebug(dcSunSpec()) << m_thing->name() << "block data updated" << meter;
         m_thing->setStateValue(sunspecThreePhaseMeterConnectedStateTypeId, true);
+        m_thing->setStateValue(sunspecThreePhaseMeterVersionStateTypeId, m_model->commonModelInfo().versionString);
+
         m_thing->setStateValue(sunspecThreePhaseMeterTotalCurrentStateTypeId, meter->amps());
         m_thing->setStateValue(sunspecThreePhaseMeterPhaseACurrentStateTypeId, meter->ampsPhaseA());
         m_thing->setStateValue(sunspecThreePhaseMeterPhaseBCurrentStateTypeId, meter->ampsPhaseB());
