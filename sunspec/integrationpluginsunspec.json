@@ -80,38 +80,6 @@
                             "type": "bool",
                             "defaultValue": false,
                             "cached": false
-                        },
-                        {
-                            "id": "04970315-ed3a-45ce-98fc-35ae3c4eb27b",
-                            "name":"manufacturer",
-                            "displayName": "Manufacturer",
-                            "displayNameEvent": "Manufacturer changed",
-                            "type": "QString",
-                            "defaultValue": "Unkown"
-                        },
-                        {
-                            "id": "58146c26-17d3-458e-a13f-d7f306c20c44",
-                            "name":"deviceModel",
-                            "displayName": "Device model",
-                            "displayNameEvent": "Device model changed",
-                            "type": "QString",
-                            "defaultValue": "Unkown"
-                        },
-                        {
-                            "id": "d95757de-b52d-418b-9404-ac3d7202d897",
-                            "name":"version",
-                            "displayName": "Version",
-                            "displayNameEvent": "Version changed",
-                            "type": "QString",
-                            "defaultValue": ""
-                        },
-                        {
-                            "id": "6ed498e1-37ca-4bb7-bac7-463509c7784e",
-                            "name":"serialNumber",
-                            "displayName": "Serial number",
-                            "displayNameEvent": "Serial number changed",
-                            "type": "QString",
-                            "defaultValue": "Unkown"
                         }
                     ]
                 },
@@ -136,6 +104,27 @@
                             "type": "uint",
                             "readOnly": true,
                             "defaultValue": 0
+                        },
+                        {
+                            "id": "5fbb0b62-e0f9-4aee-aba7-fd00ae8b0a5d",
+                            "name":"manufacturer",
+                            "displayName": "Manufacturer",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "12f1b02c-033d-423f-a217-955ddb995dd5",
+                            "name":"deviceModel",
+                            "displayName": "Device model",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "59b85218-f144-4ce8-95f7-19a1dc2e2a8d",
+                            "name":"serialNumber",
+                            "displayName": "Serial number",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
                         }
                     ],
                     "stateTypes":[
@@ -227,6 +216,14 @@
                             "displayNameEvent": "Error changed",
                             "type": "QString",
                             "defaultValue": ""
+                        },
+                        {
+                            "id": "f4439de3-a461-42d6-b4c9-aa35f696a420",
+                            "name": "version",
+                            "displayName": "Version",
+                            "displayNameEvent": "Version changed",
+                            "type": "QString",
+                            "defaultValue": ""
                         }
                     ]
                 },
@@ -251,6 +248,27 @@
                             "type": "uint",
                             "readOnly": true,
                             "defaultValue": 0
+                        },
+                        {
+                            "id": "c2c35b68-1c0f-47cc-b09f-49d9cf67c0ff",
+                            "name":"manufacturer",
+                            "displayName": "Manufacturer",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "d40b1b9d-994d-422c-8a41-b98cf03c1678",
+                            "name":"deviceModel",
+                            "displayName": "Device model",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "8afdd256-0393-4610-9477-7c4541c92ffe",
+                            "name":"serialNumber",
+                            "displayName": "Serial number",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
                         }
                     ],
                     "stateTypes":[
@@ -369,6 +387,14 @@
                             "displayNameEvent": "Error changed",
                             "type": "QString",
                             "defaultValue": ""
+                        },
+                        {
+                            "id": "2986cac4-f4ac-4299-ac9e-48339e2a54ef",
+                            "name": "version",
+                            "displayName": "Version",
+                            "displayNameEvent": "Version changed",
+                            "type": "QString",
+                            "defaultValue": ""
                         }
                     ]
                 },
@@ -393,6 +419,27 @@
                             "type": "uint",
                             "readOnly": true,
                             "defaultValue": 0
+                        },
+                        {
+                            "id": "640b71ba-2ccd-40d6-bf45-8271a9046f81",
+                            "name":"manufacturer",
+                            "displayName": "Manufacturer",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "938b6555-e0af-4222-b85b-90bc1bc78c8f",
+                            "name":"deviceModel",
+                            "displayName": "Device model",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "ee169df5-475c-4dfb-870a-0785899b7dc1",
+                            "name":"serialNumber",
+                            "displayName": "Serial number",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
                         }
                     ],
                     "stateTypes":[
@@ -529,6 +576,14 @@
                             "displayNameEvent": "Error changed",
                             "type": "QString",
                             "defaultValue": ""
+                        },
+                        {
+                            "id": "3b543b60-d8f6-4bc0-a79f-cb9cb20e4bb8",
+                            "name": "version",
+                            "displayName": "Version",
+                            "displayNameEvent": "Version changed",
+                            "type": "QString",
+                            "defaultValue": ""
                         }
                     ]
                 },
@@ -554,6 +609,27 @@
                             "type": "uint",
                             "readOnly": true,
                             "defaultValue": 0
+                        },
+                        {
+                            "id": "811de380-848a-448c-8446-daa0e0fd8e50",
+                            "name":"manufacturer",
+                            "displayName": "Manufacturer",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "e31333c8-746d-4955-af0a-ae18d7100de7",
+                            "name":"deviceModel",
+                            "displayName": "Device model",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "581fa623-0005-448f-a5b1-8db1043795a3",
+                            "name":"serialNumber",
+                            "displayName": "Serial number",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
                         }
                     ],
                     "stateTypes":[
@@ -637,6 +713,14 @@
                             "type": "double",
                             "unit": "KiloWattHour",
                             "defaultValue": 0.00
+                        },
+                        {
+                            "id": "94adff6f-f672-4e4e-a72c-cd6cd7e8721a",
+                            "name": "version",
+                            "displayName": "Version",
+                            "displayNameEvent": "Version changed",
+                            "type": "QString",
+                            "defaultValue": ""
                         }
                     ]
                 },
@@ -662,6 +746,27 @@
                             "type": "uint",
                             "readOnly": true,
                             "defaultValue": 0
+                        },
+                        {
+                            "id": "ecbdee01-8be7-42bf-9e1a-a0f700669b09",
+                            "name":"manufacturer",
+                            "displayName": "Manufacturer",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "6bc978cb-a779-4f5f-87a4-3cbbe2a55ca8",
+                            "name":"deviceModel",
+                            "displayName": "Device model",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "fb7cc04b-91cb-4f3d-a444-201cca57934a",
+                            "name":"serialNumber",
+                            "displayName": "Serial number",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
                         }
                     ],
                     "stateTypes":[
@@ -763,6 +868,14 @@
                             "type": "double",
                             "unit": "KiloWattHour",
                             "defaultValue": 0.00
+                        },
+                        {
+                            "id": "85c5087c-77b4-4ac8-bdff-020f6242bd57",
+                            "name": "version",
+                            "displayName": "Version",
+                            "displayNameEvent": "Version changed",
+                            "type": "QString",
+                            "defaultValue": ""
                         }
                     ]
                 },
@@ -788,6 +901,27 @@
                             "type": "uint",
                             "readOnly": true,
                             "defaultValue": 0
+                        },
+                        {
+                            "id": "462552de-af84-4893-9132-81c1adce67ad",
+                            "name":"manufacturer",
+                            "displayName": "Manufacturer",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "00d308dc-e9a3-40e4-acad-3cad2ca3590f",
+                            "name":"deviceModel",
+                            "displayName": "Device model",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "97bbcc98-f4ec-4060-bac2-31b40720862c",
+                            "name":"serialNumber",
+                            "displayName": "Serial number",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
                         }
                     ],
                     "stateTypes":[
@@ -907,6 +1041,14 @@
                             "type": "double",
                             "unit": "KiloWattHour",
                             "defaultValue": 0.00
+                        },
+                        {
+                            "id": "3b8f53d2-4c80-48a6-8c0b-381e93872811",
+                            "name": "version",
+                            "displayName": "Version",
+                            "displayNameEvent": "Version changed",
+                            "type": "QString",
+                            "defaultValue": ""
                         }
                     ]
                 },
@@ -932,6 +1074,27 @@
                             "type": "uint",
                             "readOnly": true,
                             "defaultValue": 0
+                        },
+                        {
+                            "id": "7ee31b97-caec-4cdb-80c9-71e232c5fb22",
+                            "name":"manufacturer",
+                            "displayName": "Manufacturer",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "2abf786d-18be-46cb-b4a3-7e0934a4c3fd",
+                            "name":"deviceModel",
+                            "displayName": "Device model",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "5cf43b80-3e65-4f69-8bf5-91810da0ead4",
+                            "name":"serialNumber",
+                            "displayName": "Serial number",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
                         }
                     ],
                     "stateTypes":[
@@ -1051,6 +1214,14 @@
                             "defaultValue": false,
                             "writable": true,
                             "displayNameAction": "Set discharging rate"
+                        },
+                        {
+                            "id": "fca0c151-d8fa-4d6e-a5d7-b3bc965abc09",
+                            "name": "version",
+                            "displayName": "Version",
+                            "displayNameEvent": "Version changed",
+                            "type": "QString",
+                            "defaultValue": ""
                         }
                     ]
                 }
@@ -1106,38 +1277,6 @@
                             "type": "bool",
                             "defaultValue": false,
                             "cached": false
-                        },
-                        {
-                            "id": "3f783971-ba6f-498d-8e31-1ecfc6efa0a3",
-                            "name":"manufacturer",
-                            "displayName": "Manufacturer",
-                            "displayNameEvent": "Manufacturer changed",
-                            "type": "QString",
-                            "defaultValue": "Unkown"
-                        },
-                        {
-                            "id": "ce075b2c-12c8-4279-99ef-7ba39aba4d53",
-                            "name":"deviceModel",
-                            "displayName": "Device model",
-                            "displayNameEvent": "Device model changed",
-                            "type": "QString",
-                            "defaultValue": "Unkown"
-                        },
-                        {
-                            "id": "bf2c53dc-be30-4177-b3ab-119c49e8a994",
-                            "name":"version",
-                            "displayName": "Version",
-                            "displayNameEvent": "Version changed",
-                            "type": "QString",
-                            "defaultValue": ""
-                        },
-                        {
-                            "id": "a71286ed-1851-4324-bd72-567696c2aebb",
-                            "name":"serialNumber",
-                            "displayName": "Serial number",
-                            "displayNameEvent": "Serial number changed",
-                            "type": "QString",
-                            "defaultValue": "Unkown"
                         }
                     ]
                 },
@@ -1157,11 +1296,24 @@
                             "defaultValue": 0
                         },
                         {
+                            "id": "8a4b19a9-ee14-42aa-9146-fa84e15970ee",
+                            "name":"manufacturer",
+                            "displayName": "Manufacturer",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        },
+                        {
+                            "id": "e90a3833-1eb6-43ed-a72a-0cf7cb8015ca",
+                            "name":"deviceModel",
+                            "displayName": "Device model",
+                            "type": "QString",
+                            "defaultValue": "Unkown"
+                        },
+                        {
                             "id": "efd99fe4-3a48-4208-829d-14e062015ee7",
                             "name":"serialNumber",
                             "displayName": "Serial number",
                             "type": "QString",
-                            "readOnly": true,
                             "defaultValue": ""
                         }
                     ],
@@ -1302,9 +1454,9 @@
                         },
                         {
                             "id": "db2e0304-4f0e-461f-8bab-c63fcb5deb1b",
-                            "name": "firmwareVersion",
-                            "displayName": "Firmware version",
-                            "displayNameEvent": "Firmware version changed",
+                            "name": "version",
+                            "displayName": "Version",
+                            "displayNameEvent": "Version changed",
                             "type": "QString",
                             "defaultValue": ""
                         }

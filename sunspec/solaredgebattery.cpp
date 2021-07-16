@@ -252,7 +252,7 @@ void SolarEdgeBattery::onBlockDataUpdated()
     m_thing->setStateValue(solarEdgeBatteryMaxEnergyStateTypeId, m_batteryData.maxEnergy);
     m_thing->setStateValue(solarEdgeBatteryAvailableEnergyStateTypeId, m_batteryData.availableEnergy);
     m_thing->setStateValue(solarEdgeBatteryStateOfHealthStateTypeId, m_batteryData.stateOfHealth);
-    m_thing->setStateValue(solarEdgeBatteryFirmwareVersionStateTypeId, m_batteryData.firmwareVersion);
+    m_thing->setStateValue(solarEdgeBatteryVersionStateTypeId, m_batteryData.firmwareVersion);
 }
 
 QDebug operator<<(QDebug debug, const SolarEdgeBattery::BatteryData &batteryData)

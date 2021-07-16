@@ -45,6 +45,9 @@ class SunSpecConnection;
 class SunSpecModel : public QObject
 {
     Q_OBJECT
+
+    friend class SunSpecConnection;
+
 public:
     enum ModelBlockType {
         ModelBlockTypeFixed,
@@ -53,6 +56,13 @@ public:
     };
     Q_ENUM(ModelBlockType)
 
+    typedef struct CommonModelInfo {
+        QString manufacturerName;
+        QString modelName;
+        QString serialNumber;
+        QString versionString;
+    } CommonModelInfo;
+
     explicit SunSpecModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelId, quint16 modelLength, QObject *parent = nullptr);
     virtual ~SunSpecModel() = default;
 
@@ -60,6 +70,7 @@ public:
 
     bool initialized() const;
 
+    // Model information
     virtual QString name() const = 0;
     virtual QString description() const = 0;
     virtual QString label() const = 0;
@@ -71,6 +82,8 @@ public:
     QHash<QString, SunSpecDataPoint> dataPoints() const;
 
     QVector<quint16> blockData() const;
+
+    CommonModelInfo commonModelInfo() const;
 
     virtual void init();
     virtual void readBlockData();
@@ -91,6 +104,8 @@ protected:
 
     QVector<quint16> m_blockData;
     QHash<QString, SunSpecDataPoint> m_dataPoints;
+
+    CommonModelInfo m_commonModelInfo;
 
     void setInitializedFinished();
 

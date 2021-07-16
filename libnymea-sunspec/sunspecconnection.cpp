@@ -30,6 +30,7 @@
 
 #include "sunspecconnection.h"
 #include "sunspecmodel.h"
+#include "models/sunspeccommonmodel.h"
 #include "models/sunspecmodelfactory.h"
 
 Q_LOGGING_CATEGORY(dcSunSpec, "SunSpec")
@@ -254,17 +255,35 @@ void SunSpecConnection::processDiscoveryResult()
             }
 
             if (m_uninitializedModels.isEmpty()) {
-                // Sort the models according to their modbus start address to get the common model for each model
+                // Sort the models according to their modbus start address in order to set the common model for each model
                 std::sort(m_models.begin(), m_models.end(), [](const SunSpecModel* a, const SunSpecModel* b) -> bool {
                     return a->modbusStartRegister() < b->modbusStartRegister();
                 });
 
+                // Set common model information to each model (until the next common model shows up)
                 qCDebug(dcSunSpec()) << "Sorted model list:";
+                SunSpecCommonModel *currentCommonModel = nullptr;
+                SunSpecModel::CommonModelInfo commonModelInfo;
                 for (int i = 0; i < m_models.count(); i++) {
-                    qCDebug(dcSunSpec()) << "-->" << m_models.at(i);
+                    SunSpecModel *model = m_models.at(i);
+                    qCDebug(dcSunSpec()) << "-->" << model;
+                    if (model->modelId() == SunSpecModelFactory::ModelIdCommon) {
+                        SunSpecCommonModel *commonModel = qobject_cast<SunSpecCommonModel *>(model);
+                        if (commonModel != currentCommonModel) {
+                            currentCommonModel = commonModel;
+                            commonModelInfo.manufacturerName = currentCommonModel->manufacturer();
+                            commonModelInfo.modelName = currentCommonModel->model();
+                            commonModelInfo.serialNumber = currentCommonModel->serialNumber();
+                            commonModelInfo.versionString = currentCommonModel->version();
+                        }
+                        continue;
+                    }
+
+                    if (currentCommonModel && model->modelId() != SunSpecModelFactory::ModelIdCommon) {
+                        model->m_commonModelInfo = commonModelInfo;
+                    }
                 }
 
-                // Set common model information to each model
                 qCDebug(dcSunSpec()) << "All models initialized. Discovery finished successfully.";
                 setDiscoveryRunning(false);
                 emit discoveryFinished(true);
