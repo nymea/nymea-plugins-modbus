@@ -15,6 +15,12 @@ Connect nymea to SunSpec devices over Modbus TCP
 * SunSpec Storage 
 	* Model ID 124
 
+
+## Tested connections
+
+* SolarEdge (with custom battery)
+* Kostal [Documentation](
+
 ## Requirements
 
 * The package 'nymea-plugin-sunspec' must be installed.

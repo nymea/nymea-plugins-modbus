@@ -83,6 +83,7 @@ private:
 
     bool sunspecThingAlreadyAdded(uint modelId, uint modbusAddress, const ThingId &parentId);
     void processDiscoveryResult(Thing *thing, SunSpecConnection *connection);
+    void checkAutoSetupModels(Thing *connectionThing, QList<SunSpecModel *> models);
 
     // SunSpec things
     void setupConnection(ThingSetupInfo *info);

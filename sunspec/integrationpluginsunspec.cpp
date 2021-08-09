@@ -167,9 +167,8 @@ void IntegrationPluginSunSpec::discoverThings(ThingDiscoveryInfo *info)
                     title += networkDeviceInfo.address().toString() + " (" + networkDeviceInfo.hostName() + ")";
                 }
             } else {
-                // Kostal does not provide usefull information for filterin in the discovery
-
                 // Generic or not discoverable sunspec connection, show all network results
+                // - Kostal does not provide usefull information for filterin in the discovery
                 if (networkDeviceInfo.hostName().isEmpty()) {
                     title += networkDeviceInfo.address().toString();
                 } else {
@@ -210,7 +209,8 @@ void IntegrationPluginSunSpec::discoverThings(ThingDiscoveryInfo *info)
 void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
 {
     Thing *thing = info->thing();
-    qCDebug(dcSunSpec()) << "Setup thing" << thing->name();
+    qCDebug(dcSunSpec()) << "Setup thing" << thing;
+    qCDebug(dcSunSpec()) << thing->params();
 
     if (thing->thingClassId() == sunspecConnectionThingClassId || thing->thingClassId() == solarEdgeConnectionThingClassId  || thing->thingClassId() == kostalConnectionThingClassId) {
         setupConnection(info);
@@ -359,15 +359,57 @@ void IntegrationPluginSunSpec::processDiscoveryResult(Thing *thing, SunSpecConne
 {
     qCDebug(dcSunSpec()) << "Processing discovery result from" << thing->name() << connection;
 
-    // Now process the other models and check if we can create any auto device if not already added
-    foreach (SunSpecModel *model, connection->models()) {
+    // Note: from kostal devices is known, that they add inverter
+    // as normal and float version, but we need only one.
+    // Lets filter the duplicated information for kostal connections
+    if (thing->thingClassId() == kostalConnectionThingClassId) {
+        QHash<quint16, SunSpecModel *> filteredModels;
+        foreach (SunSpecModel *model, connection->models()) {
+            switch (model->modelId()) {
+            case SunSpecModelFactory::ModelIdInverterSinglePhaseFloat:
+                if (filteredModels.contains(SunSpecModelFactory::ModelIdInverterSinglePhase)) {
+                    qCDebug(dcSunSpec()) << "Kostal: Filter out" << model;
+                } else {
+                    filteredModels.insert(model->modelId(), model);
+                }
+                break;
+            case SunSpecModelFactory::ModelIdInverterSplitPhaseFloat:
+                if (filteredModels.contains(SunSpecModelFactory::ModelIdInverterSplitPhase)) {
+                    qCDebug(dcSunSpec()) << "Kostal: Filter out" << model;
+                } else {
+                    filteredModels.insert(model->modelId(), model);
+                }
+                break;
+            case SunSpecModelFactory::ModelIdInverterThreePhaseFloat:
+                if (filteredModels.contains(SunSpecModelFactory::ModelIdInverterThreePhase)) {
+                    qCDebug(dcSunSpec()) << "Kostal: Filter out" << model;
+                } else {
+                    filteredModels.insert(model->modelId(), model);
+                }
+                break;
+            default:
+                filteredModels.insert(model->modelId(), model);
+                break;
+            }
+        }
+
+        // Process the filtered list
+        checkAutoSetupModels(thing, filteredModels.values());
+    } else {
+        // Process all models
+        checkAutoSetupModels(thing, connection->models());
+    }
+}
+
+void IntegrationPluginSunSpec::checkAutoSetupModels(Thing *connectionThing, QList<SunSpecModel *> models)
+{
+    // Process the models and check if we can create any auto device if not already added
+    foreach (SunSpecModel *model, models) {
         // Make sure we have not added this model yet
-        if (sunspecThingAlreadyAdded(model->modelId(), model->modbusStartRegister(), thing->id())) {
+        if (sunspecThingAlreadyAdded(model->modelId(), model->modbusStartRegister(), connectionThing->id())) {
             qCDebug(dcSunSpec()) << "Thing already set up for" << model;
             continue;
         }
-
-        // TODO: Make sure to not add duplicated models like inverter + inverter float..
 
         switch (model->modelId()) {
         case SunSpecModelFactory::ModelIdCommon:
@@ -375,32 +417,32 @@ void IntegrationPluginSunSpec::processDiscoveryResult(Thing *thing, SunSpecConne
             break;
         case SunSpecModelFactory::ModelIdInverterSinglePhase:
         case SunSpecModelFactory::ModelIdInverterSinglePhaseFloat:
-            autocreateSunSpecModelThing(sunspecSinglePhaseInverterThingClassId, QT_TR_NOOP("Single Phase Inverter"), thing->id(), model);
+            autocreateSunSpecModelThing(sunspecSinglePhaseInverterThingClassId, QT_TR_NOOP("Single Phase Inverter"), connectionThing->id(), model);
             break;
         case SunSpecModelFactory::ModelIdInverterSplitPhase:
         case SunSpecModelFactory::ModelIdInverterSplitPhaseFloat:
-            autocreateSunSpecModelThing(sunspecSplitPhaseInverterThingClassId, QT_TR_NOOP("Split Phase Inverter"), thing->id(), model);
+            autocreateSunSpecModelThing(sunspecSplitPhaseInverterThingClassId, QT_TR_NOOP("Split Phase Inverter"), connectionThing->id(), model);
             break;
         case SunSpecModelFactory::ModelIdInverterThreePhase:
         case SunSpecModelFactory::ModelIdInverterThreePhaseFloat:
-            autocreateSunSpecModelThing(sunspecThreePhaseInverterThingClassId, QT_TR_NOOP("Three Phase Inverter"), thing->id(), model);
+            autocreateSunSpecModelThing(sunspecThreePhaseInverterThingClassId, QT_TR_NOOP("Three Phase Inverter"), connectionThing->id(), model);
             break;
         case SunSpecModelFactory::ModelIdMeterSinglePhase:
         case SunSpecModelFactory::ModelIdMeterSinglePhaseFloat:
-            autocreateSunSpecModelThing(sunspecSinglePhaseMeterThingClassId, QT_TR_NOOP("Single Phase Meter"), thing->id(), model);
+            autocreateSunSpecModelThing(sunspecSinglePhaseMeterThingClassId, QT_TR_NOOP("Single Phase Meter"), connectionThing->id(), model);
             break;
         case SunSpecModelFactory::ModelIdMeterSplitSinglePhaseAbn:
         case SunSpecModelFactory::ModelIdMeterSplitSinglePhaseFloat:
-            autocreateSunSpecModelThing(sunspecSplitPhaseMeterThingClassId, QT_TR_NOOP("Split Phase Meter"), thing->id(), model);
+            autocreateSunSpecModelThing(sunspecSplitPhaseMeterThingClassId, QT_TR_NOOP("Split Phase Meter"), connectionThing->id(), model);
             break;
         case SunSpecModelFactory::ModelIdMeterThreePhase:
         case SunSpecModelFactory::ModelIdDeltaConnectThreePhaseAbcMeter:
         case SunSpecModelFactory::ModelIdMeterThreePhaseWyeConnect:
         case SunSpecModelFactory::ModelIdMeterThreePhaseDeltaConnect:
-            autocreateSunSpecModelThing(sunspecThreePhaseMeterThingClassId, QT_TR_NOOP("Three Phase Meter"), thing->id(), model);
+            autocreateSunSpecModelThing(sunspecThreePhaseMeterThingClassId, QT_TR_NOOP("Three Phase Meter"), connectionThing->id(), model);
             break;
         case SunSpecModelFactory::ModelIdStorage:
-            autocreateSunSpecModelThing(sunspecStorageThingClassId, QT_TR_NOOP("Storage"), thing->id(), model);
+            autocreateSunSpecModelThing(sunspecStorageThingClassId, QT_TR_NOOP("Storage"), connectionThing->id(), model);
             break;
         default:
             qCWarning(dcSunSpec()) << "Plugin has no implementation for detected" << model;

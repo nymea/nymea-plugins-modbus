@@ -374,8 +374,8 @@ void SunSpecConnection::scanNextSunspecBaseRegister()
 
 void SunSpecConnection::scanModelsOnBaseRegister(quint16 offset)
 {
-    qCDebug(dcSunSpec()) << "Reading SunSpec models header" << this << "using SunSpec base register" << m_baseRegister << "offset:" << offset;
     quint16 startRegisterAddress = m_baseRegister + offset;
+    qCDebug(dcSunSpec()) << "Reading SunSpec model header" << this << "using SunSpec base register" << m_baseRegister << "offset:" << offset << "=" << startRegisterAddress;
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, startRegisterAddress, 2);
     QModbusReply *reply = m_modbusTcpClient->sendReadRequest(request, m_slaveId);
 
@@ -391,7 +391,7 @@ void SunSpecConnection::scanModelsOnBaseRegister(quint16 offset)
     }
 
     connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
-    connect(reply, &QModbusReply::finished, this, [this, reply, offset] {
+    connect(reply, &QModbusReply::finished, this, [this, reply, offset, startRegisterAddress] {
         if (reply->error() == QModbusDevice::NoError) {
 
             const QModbusDataUnit unit = reply->result();
@@ -406,7 +406,7 @@ void SunSpecConnection::scanModelsOnBaseRegister(quint16 offset)
                 return;
             }
 
-            qCDebug(dcSunSpec()) << "Discovered SunSpec model on" << this << modelId << "with length" << modelLength;
+            qCDebug(dcSunSpec()) << "Discovered SunSpec model on" << this << "[" << startRegisterAddress + 2 << "-" << startRegisterAddress + 2 + modelLength << "]" << "(base: " << m_baseRegister << "offset:" << offset << "length:" << modelLength << ") | Model ID:" << modelId << static_cast<SunSpecModelFactory::ModelId>(modelId);
             ModuleDiscoveryResult result;
             result.modbusStartRegister = modbusStartRegister;
             result.modelId = modelId;
@@ -417,9 +417,14 @@ void SunSpecConnection::scanModelsOnBaseRegister(quint16 offset)
             scanModelsOnBaseRegister(offset + 2 + modelLength);
         } else {
             qCWarning(dcSunSpec()) << "Error occured while reading model header from" << this << "using offset" << offset << m_modbusTcpClient->errorString();
-            // FIXME: check if models have already been found, finish with success in that case so we show at least the models found so far...
-            setDiscoveryRunning(false);
-            emit discoveryFinished(false);
+            if (!m_modelDiscoveryResult.isEmpty()) {
+                qCWarning(dcSunSpec()) << "Error occured but already discovered" << m_modelDiscoveryResult.count() << "models. Continue with the discovered models, but the discovery may be incomplete due to header reading errors.";
+                qCDebug(dcSunSpec()) << "Scan for SunSpec models on" << this << m_baseRegister << "finished successfully";
+                processDiscoveryResult();
+            } else {
+                setDiscoveryRunning(false);
+                emit discoveryFinished(false);
+            }
         }
     });
 }

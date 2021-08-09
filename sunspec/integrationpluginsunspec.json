@@ -1495,14 +1495,14 @@
                             "name":"port",
                             "displayName": "Port",
                             "type": "int",
-                            "defaultValue": 502
+                            "defaultValue": 1502
                         },
                         {
                             "id": "48b133da-cce3-47f3-9c7c-470026af7829",
                             "name":"slaveId",
                             "displayName": "Slave ID",
                             "type": "int",
-                            "defaultValue": 1
+                            "defaultValue": 71
                         }
                     ],
                     "stateTypes":[
