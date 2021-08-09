@@ -417,6 +417,7 @@ void SunSpecConnection::scanModelsOnBaseRegister(quint16 offset)
             scanModelsOnBaseRegister(offset + 2 + modelLength);
         } else {
             qCWarning(dcSunSpec()) << "Error occured while reading model header from" << this << "using offset" << offset << m_modbusTcpClient->errorString();
+            // FIXME: check if models have already been found, finish with success in that case so we show at least the models found so far...
             setDiscoveryRunning(false);
             emit discoveryFinished(false);
         }

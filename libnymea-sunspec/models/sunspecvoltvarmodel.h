@@ -207,7 +207,7 @@ public:
     void processBlockData(const QVector<quint16> blockData) override;
 
 protected:
-    void initDataPoints();
+    void initDataPoints() override;
 
 private:
     SunSpecVoltVarModel *m_parentModel = nullptr;

@@ -55,7 +55,7 @@ public:
     void processBlockData(const QVector<quint16> blockData) override;
 
 protected:
-    void initDataPoints();
+    void initDataPoints() override;
 
 private:
     SunSpecFlowBatteryModel *m_parentModel = nullptr;
