@@ -1463,6 +1463,61 @@
                     ]
                 }
             ]
+        },
+        {
+            "name": "kostal",
+            "displayName": "KOSTAL Solar Electric",
+            "id": "862d1ebf-cb78-4c55-89b2-819fddfd9acd",
+            "thingClasses": [
+                {
+                    "name": "kostalConnection",
+                    "displayName": "Kostal SunSpec connection",
+                    "id": "0cad2dca-66ac-489c-8443-074e32aa27a0",
+                    "createMethods": [ "User", "Discovery" ],
+                    "interfaces": ["gateway"],
+                    "paramTypes": [
+                        {
+                            "id": "9fe10047-b2fd-460b-88ad-7f00977efc57",
+                            "name":"ipAddress",
+                            "displayName": "IP address",
+                            "type": "QString",
+                            "defaultValue": "127.0.0.1"
+                        },
+                        {
+                            "id": "047b048d-2e93-4129-80df-231688436da4",
+                            "name":"macAddress",
+                            "displayName": "MAC address",
+                            "type": "QString",
+                            "defaultValue": "00:00:00:00:00:00"
+                        },
+                        {
+                            "id": "bf87f540-ce2e-4c35-af62-942da7be2f80",
+                            "name":"port",
+                            "displayName": "Port",
+                            "type": "int",
+                            "defaultValue": 502
+                        },
+                        {
+                            "id": "48b133da-cce3-47f3-9c7c-470026af7829",
+                            "name":"slaveId",
+                            "displayName": "Slave ID",
+                            "type": "int",
+                            "defaultValue": 1
+                        }
+                    ],
+                    "stateTypes":[
+                        {
+                            "id": "b9c52ae8-cb9b-4742-8e9a-450dce3a009f",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }

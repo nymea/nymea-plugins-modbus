@@ -63,7 +63,7 @@ public:
     void processBlockData(const QVector<quint16> blockData) override;
 
 protected:
-    void initDataPoints();
+    void initDataPoints() override;
 
 private:
     SunSpecLithiumIonModuleModel *m_parentModel = nullptr;

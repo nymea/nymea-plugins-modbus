@@ -867,7 +867,7 @@ def writeRepeatingBlockClassDefinition(fileDescriptor, className, modelId):
     # Protected members
     writeLine(fileDescriptor)
     writeLine(fileDescriptor, 'protected:')
-    writeLine(fileDescriptor, '    void initDataPoints();')
+    writeLine(fileDescriptor, '    void initDataPoints() override;')
     
     # Private members
     writeLine(fileDescriptor)

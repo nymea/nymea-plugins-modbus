@@ -66,20 +66,25 @@ void IntegrationPluginSunSpec::init()
     // SunSpec connection params
     m_connectionIpParamTypeIds.insert(sunspecConnectionThingClassId, sunspecConnectionThingIpAddressParamTypeId);
     m_connectionIpParamTypeIds.insert(solarEdgeConnectionThingClassId, solarEdgeConnectionThingIpAddressParamTypeId);
+    m_connectionIpParamTypeIds.insert(kostalConnectionThingClassId, kostalConnectionThingIpAddressParamTypeId);
 
     m_connectionPortParamTypeIds.insert(sunspecConnectionThingClassId, sunspecConnectionThingPortParamTypeId);
     m_connectionPortParamTypeIds.insert(solarEdgeConnectionThingClassId, solarEdgeConnectionThingPortParamTypeId);
+    m_connectionPortParamTypeIds.insert(kostalConnectionThingClassId, kostalConnectionThingPortParamTypeId);
 
     m_connectionMacAddressParamTypeIds.insert(sunspecConnectionThingClassId, sunspecConnectionThingMacAddressParamTypeId);
     m_connectionMacAddressParamTypeIds.insert(solarEdgeConnectionThingClassId, solarEdgeConnectionThingMacAddressParamTypeId);
+    m_connectionMacAddressParamTypeIds.insert(kostalConnectionThingClassId, kostalConnectionThingMacAddressParamTypeId);
 
     m_connectionSlaveIdParamTypeIds.insert(sunspecConnectionThingClassId, sunspecConnectionThingSlaveIdParamTypeId);
     m_connectionSlaveIdParamTypeIds.insert(solarEdgeConnectionThingClassId, solarEdgeConnectionThingSlaveIdParamTypeId);
+    m_connectionSlaveIdParamTypeIds.insert(kostalConnectionThingClassId, kostalConnectionThingSlaveIdParamTypeId);
 
     // Connected state for all things
     m_connectedStateTypeIds.insert(sunspecConnectionThingClassId, sunspecConnectionConnectedStateTypeId);
     m_connectedStateTypeIds.insert(solarEdgeConnectionThingClassId, solarEdgeConnectionConnectedStateTypeId);
     m_connectedStateTypeIds.insert(solarEdgeBatteryThingClassId, solarEdgeBatteryConnectedStateTypeId);
+    m_connectedStateTypeIds.insert(kostalConnectionThingClassId, kostalConnectionConnectedStateTypeId);
 
     m_connectedStateTypeIds.insert(sunspecStorageThingClassId, sunspecStorageConnectedStateTypeId);
     m_connectedStateTypeIds.insert(sunspecSinglePhaseInverterThingClassId, sunspecSinglePhaseInverterConnectedStateTypeId);
@@ -162,6 +167,8 @@ void IntegrationPluginSunSpec::discoverThings(ThingDiscoveryInfo *info)
                     title += networkDeviceInfo.address().toString() + " (" + networkDeviceInfo.hostName() + ")";
                 }
             } else {
+                // Kostal does not provide usefull information for filterin in the discovery
+
                 // Generic or not discoverable sunspec connection, show all network results
                 if (networkDeviceInfo.hostName().isEmpty()) {
                     title += networkDeviceInfo.address().toString();
@@ -205,7 +212,7 @@ void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
     Thing *thing = info->thing();
     qCDebug(dcSunSpec()) << "Setup thing" << thing->name();
 
-    if (thing->thingClassId() == sunspecConnectionThingClassId || thing->thingClassId() == solarEdgeConnectionThingClassId) {
+    if (thing->thingClassId() == sunspecConnectionThingClassId || thing->thingClassId() == solarEdgeConnectionThingClassId  || thing->thingClassId() == kostalConnectionThingClassId) {
         setupConnection(info);
     } else if (thing->thingClassId() == sunspecThreePhaseInverterThingClassId || thing->thingClassId() == sunspecSplitPhaseInverterThingClassId || thing->thingClassId() == sunspecSinglePhaseInverterThingClassId ) {
         Thing *parentThing = myThings().findById(thing->parentId());
@@ -287,7 +294,7 @@ void IntegrationPluginSunSpec::thingRemoved(Thing *thing)
 {
     qCDebug(dcSunSpec()) << "Thing removed" << thing->name();
 
-    if (thing->thingClassId() == sunspecConnectionThingClassId) {
+    if (m_sunSpecConnections.contains(thing->id())) {
         SunSpecConnection *connection = m_sunSpecConnections.take(thing->id());
         if (connection)
             connection->deleteLater();
@@ -359,6 +366,8 @@ void IntegrationPluginSunSpec::processDiscoveryResult(Thing *thing, SunSpecConne
             qCDebug(dcSunSpec()) << "Thing already set up for" << model;
             continue;
         }
+
+        // TODO: Make sure to not add duplicated models like inverter + inverter float..
 
         switch (model->modelId()) {
         case SunSpecModelFactory::ModelIdCommon:
