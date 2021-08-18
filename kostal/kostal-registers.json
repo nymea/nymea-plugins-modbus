@@ -1,0 +1,580 @@
+{
+    "enums": [
+        {
+            "name": "ByteOrder",
+            "values": [
+                {
+                    "key": "LittleEndian",
+                    "value": 0
+                },
+                {
+                    "key": "BigEndian",
+                    "value": 1
+                }
+            ]
+        },
+        {
+            "name": "InverterState",
+            "values": [
+                {
+                    "key": "Off",
+                    "value": 0
+                },
+                {
+                    "key": "Init",
+                    "value": 1
+                },
+                {
+                    "key": "IsoMeas",
+                    "value": 2
+                },
+                {
+                    "key": "GridCheck",
+                    "value": 3
+                },
+                {
+                    "key": "StartUp",
+                    "value": 4
+                },
+                {
+                    "key": "FeedIn",
+                    "value": 6
+                },
+                {
+                    "key": "Throttled",
+                    "value": 7
+                },
+                {
+                    "key": "ExtSwitchOff",
+                    "value": 8
+                },
+                {
+                    "key": "Update",
+                    "value": 9
+                },
+                {
+                    "key": "Standby",
+                    "value": 10
+                },
+                {
+                    "key": "GridSync",
+                    "value": 11
+                },
+                {
+                    "key": "GridPreCheck",
+                    "value": 12
+                },
+                {
+                    "key": "GridSwitchOff",
+                    "value": 13
+                },
+                {
+                    "key": "Overheating",
+                    "value": 14
+                },
+                {
+                    "key": "Shutdown",
+                    "value": 15
+                },
+                {
+                    "key": "ImproperDcVoltage",
+                    "value": 16
+                },
+                {
+                    "key": "Esb",
+                    "value": 17
+                },
+                {
+                    "key": "Unknown",
+                    "value": 18
+                }
+            ]
+        },
+        {
+            "name": "EnergyManagementState",
+            "values": [
+                {
+                    "key": "Idle",
+                    "value": 0
+                },
+                {
+                    "key": "EmergencyBatteryCharge",
+                    "value": 2
+                },
+                {
+                    "key": "WinterModeStep1",
+                    "value": 8
+                },
+                {
+                    "key": "WinterModeStep2",
+                    "value": 16
+                }
+            ]
+        }
+    ],
+    "registers": [
+        {
+            "id": "modbusUnitId",
+            "address": 4,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "init",
+            "description": "MODBUS Unit-ID",
+            "unit": "",
+            "access": "RO"
+        },
+        {
+            "id": "modbusByteOrder",
+            "address": 5,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "init",
+            "enum": "ByteOrder",
+            "description": "MODBUS Byte Order Note",
+            "unit": "",
+            "access": "RO"
+        },
+        {
+            "id": "inverterArticleNumber",
+            "address": 6,
+            "size": 8,
+            "type": "string",
+            "readSchedule": "init",
+            "description": "Inverter article number",
+            "unit": "",
+            "access": "RO"
+        },
+        {
+            "id": "bidirectionalConverterNumber",
+            "address": 30,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "init",
+            "description": "Number of bidirectional converter",
+            "unit": "",
+            "access": "RO"
+        },
+        {
+            "id": "numberPvStrings",
+            "address": 34,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "init",
+            "description": "Number of PV strings",
+            "unit": "",
+            "access": "RO"
+        },
+        {
+            "id": "hardwareVersion",
+            "address": 36,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "init",
+            "description": "Hardware-Version",
+            "unit": "",
+            "access": "RO"
+        },
+        {
+            "id": "softwareVersionMainController",
+            "address": 38,
+            "size": 8,
+            "type": "string",
+            "readSchedule": "init",
+            "description": "Software-Version Maincontroller (MC)",
+            "unit": "",
+            "access": "RO"
+        },
+        {
+            "id": "softwareVersionIoController",
+            "address": 46,
+            "size": 8,
+            "type": "string",
+            "readSchedule": "init",
+            "description": "Software-Version IO-Controller (IOC)",
+            "unit": "",
+            "access": "RO"
+        },
+        {
+            "id": "powerId",
+            "address": 54,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "init",
+            "description": "Power-ID",
+            "unit": "",
+            "access": "RO"
+        },
+        {
+            "id": "inverterState",
+            "address": 56,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "description": "Inverter state",
+            "unit": "",
+            "enum": "InverterState",
+            "access": "RO"
+        },
+        {
+            "id": "totalDcPower",
+            "address": 100,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Total DC power",
+            "unit": "W",
+            "access": "RO"
+        },
+        {
+            "id": "energyManagementState",
+            "address": 104,
+            "size": 2,
+            "type": "uint32",
+            "enum": "EnergyManagementState",
+            "readSchedule": "update",
+            "description": "State of energy manager",
+            "unit": "",
+            "access": "RO"
+        },
+        {
+            "id": "homeOwnConsumptionFromBattery",
+            "address": 106,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Home own consumption from battery",
+            "unit": "W",
+            "access": "RO"
+        },
+        {
+            "id": "homeOwnConsumptionFromGrid",
+            "address": 108,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Home own consumption from grid",
+            "unit": "W",
+            "access": "RO"
+        },
+        {
+            "id": "totalHomeConsumptionFromBattery",
+            "address": 110,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Total home consumption Battery",
+            "unit": "Wh",
+            "access": "RO"
+        },
+        {
+            "id": "totalHomeConsumptionFromGrid",
+            "address": 112,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Total home consumption grid",
+            "unit": "Wh",
+            "access": "RO"
+        },
+        {
+            "id": "totalHomeConsumptionFromPv",
+            "address": 114,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Total home consumption from PV",
+            "unit": "Wh",
+            "access": "RO"
+        },
+        {
+            "id": "homeOwnConsumptionPv",
+            "address": 116,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Home own consumption from PV",
+            "unit": "W",
+            "access": "RO"
+        },
+        {
+            "id": "totalHomeConsumption",
+            "address": 118,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Total home consumption",
+            "unit": "Wh",
+            "access": "RO"
+        },
+        {
+            "id": "gridFrequency",
+            "address": 152,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Grid frequency",
+            "unit": "Hz",
+            "access": "RO"
+        },
+        {
+            "id": "currentPhase1",
+            "address": 154,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Current phase 1",
+            "unit": "A",
+            "access": "RO"
+        },
+        {
+            "id": "activePowerPhase1",
+            "address": 156,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Active power phase 1",
+            "unit": "W",
+            "access": "RO"
+        },
+        {
+            "id": "voltagePhase1",
+            "address": 158,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Voltage phase 1",
+            "unit": "V",
+            "access": "RO"
+        },
+        {
+            "id": "currentPhase2",
+            "address": 160,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Current phase 2",
+            "unit": "A",
+            "access": "RO"
+        },
+        {
+            "id": "activePowerPhase2",
+            "address": 162,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Active power phase 2",
+            "unit": "W",
+            "access": "RO"
+        },
+        {
+            "id": "voltagePhase2",
+            "address": 164,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Voltage phase 2",
+            "unit": "V",
+            "access": "RO"
+        },
+        {
+            "id": "currentPhase3",
+            "address": 166,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Current phase 3",
+            "unit": "A",
+            "access": "RO"
+        },
+        {
+            "id": "activePowerPhase3",
+            "address": 168,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Active power phase 3",
+            "unit": "W",
+            "access": "RO"
+        },
+        {
+            "id": "voltagePhase3",
+            "address": 170,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Voltage phase 3",
+            "unit": "V",
+            "access": "RO"
+        },
+        {
+            "id": "totalAcPower",
+            "address": 172,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Total AC power",
+            "unit": "W",
+            "access": "RO"
+        },
+        {
+            "id": "batteryChargeCurrent",
+            "address": 190,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Battery charge current",
+            "unit": "A",
+            "access": "RO"
+        },
+        {
+            "id": "numberOfBytteryCycles",
+            "address": 194,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Number of battery cycles",
+            "unit": "",
+            "access": "RO"
+        },
+        {
+            "id": "actualBatteryChargeCurrent",
+            "address": 200,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Actual battery charge (-) / discharge (+) current",
+            "unit": "A",
+            "access": "RO"
+        },
+        {
+            "id": "batteryStateOfCharge",
+            "address": 210,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Actual state of charge",
+            "unit": "%",
+            "access": "RO"
+        },
+        {
+            "id": "batteryTemperature",
+            "address": 214,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Battery temperature",
+            "unit": "°C",
+            "access": "RO"
+        },
+        {
+            "id": "batteryVoltage",
+            "address": 216,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Battery voltage",
+            "unit": "V",
+            "access": "RO"
+        },
+        {
+            "id": "powerMeterCurrentPhase1",
+            "address": 222,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Current phase 1 (powermeter)",
+            "unit": "A",
+            "access": "RO"
+        },
+        {
+            "id": "powerMeterActivePowerPhase1",
+            "address": 224,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Active power phase 1 (powermeter)",
+            "unit": "W",
+            "access": "RO"
+        },
+        {
+            "id": "powerMeterVoltagePhase1",
+            "address": 230,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Voltage phase 1 (powermeter)",
+            "unit": "V",
+            "access": "RO"
+        },
+        {
+            "id": "powerMeterCurrentPhase2",
+            "address": 232,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Current phase 2 (powermeter)",
+            "unit": "A",
+            "access": "RO"
+        },
+        {
+            "id": "powerMeterActivePowerPhase2",
+            "address": 234,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Active power phase 2 (powermeter)",
+            "unit": "W",
+            "access": "RO"
+        },
+        {
+            "id": "powerMeterVoltagePhase2",
+            "address": 240,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Voltage phase 2 (powermeter)",
+            "unit": "V",
+            "access": "RO"
+        },
+        {
+            "id": "powerMeterCurrentPhase3",
+            "address": 242,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Current phase 3 (powermeter)",
+            "unit": "A",
+            "access": "RO"
+        },
+        {
+            "id": "powerMeterActivePowerPhase3",
+            "address": 244,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Active power phase 3 (powermeter)",
+            "unit": "W",
+            "access": "RO"
+        },
+        {
+            "id": "powerMeterVoltagePhase3",
+            "address": 250,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Voltage phase 3 (powermeter)",
+            "unit": "V",
+            "access": "RO"
+        },
+        {
+            "id": "powerMeterTotalActivePower",
+            "address": 252,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "description": "Total active power (powermeter)",
+            "unit": "W",
+            "access": "RO"
+        }
+    ]
+}

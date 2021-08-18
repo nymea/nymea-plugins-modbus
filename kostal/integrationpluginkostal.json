@@ -1,0 +1,164 @@
+{
+    "name": "Kostal",
+        "displayName": "Kostal",
+        "id": "51a2c7d5-084d-4474-a65a-e0447ab9ac45",
+        "vendors": [
+        {
+            "name": "kostal",
+            "displayName": "KOSTAL Solar Electric",
+            "id": "862d1ebf-cb78-4c55-89b2-819fddfd9acd",
+            "thingClasses": [
+                {
+                    "name": "kostalInverter",
+                    "displayName": "KOSTAL Inverter",
+                    "id": "7dc6db14-6f5a-4ac8-9684-4c6a526bd0de",
+                    "createMethods": ["discovery", "user"],
+                    "interfaces": ["smartmeterproducer", "connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "f1c43b1e-cffe-4d30-bda0-c23ed648dd71",
+                            "name": "ipAddress",
+                            "displayName": "IP address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": "127.0.0.1"
+                        },
+                        {
+                            "id": "906f6099-d0e1-4297-a2b3-f8ec4482c578",
+                            "name":"macAddress",
+                            "displayName": "MAC address",
+                            "type": "QString",
+                            "inputType": "MacAddress",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "9d2175af-afb9-4b31-b3dc-e53a369bad9e",
+                            "name":"port",
+                            "displayName": "Port",
+                            "type": "int",
+                            "defaultValue": 1502
+                        },
+                        {
+                            "id": "b3e04cb0-8f9a-4c9f-9c67-5c08da0273e3",
+                            "name":"slaveId",
+                            "displayName": "Slave ID",
+                            "type": "int",
+                            "defaultValue": 71
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "8d64954a-855d-44ea-8bc9-88a71ab47b6b",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "d11b8e29-44e9-4b5c-bb4e-aa2ca87db5d3",
+                            "name": "totalCurrent",
+                            "displayName": "Total AC current",
+                            "displayNameEvent": "Total AC current changed",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "5c1546d2-92be-4809-bc56-8bbdaab436d2",
+                            "name": "totalEnergyProduced",
+                            "displayName": "AC energy",
+                            "displayNameEvent": "AC energy changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "567bb3c2-4a0c-4194-a86e-b8dc29815092",
+                            "name": "phaseACurrent",
+                            "displayName": "Phase A current",
+                            "displayNameEvent": "Phase A current changed",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "84e9282a-b72b-4dbf-9e4b-99083e5539a5",
+                            "name": "phaseBCurrent",
+                            "displayName": "Phase B current",
+                            "displayNameEvent": "Phase B current changed",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "4f7c308f-2cb2-4327-8a68-77222f920e61",
+                            "name": "phaseCCurrent",
+                            "displayName": "Phase C current",
+                            "displayNameEvent": "Phase C current changed",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "9493939e-601b-460a-ab48-91772b4db823",
+                            "name": "frequency",
+                            "displayName": "Frequency",
+                            "displayNameEvent": "Frequency changed",
+                            "type": "double",
+                            "unit": "Hertz",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "3b543b60-d8f6-4bc0-a79f-cb9cb20e4bb8",
+                            "name": "version",
+                            "displayName": "Version",
+                            "displayNameEvent": "Version changed",
+                            "type": "QString",
+                            "defaultValue": ""
+                        }
+                    ],
+                    "actionTypes": [ ]
+                },
+                {
+                    "name": "kostalMeter",
+                    "displayName": "KOSTAL Meter",
+                    "id": "61af1e07-6a59-4465-a563-3cbf4a9fcbc3",
+                    "createMethods": ["auto"],
+                    "interfaces": [ "connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "61c6a9fe-93c8-41fa-a7bf-113d3425c1cc",
+                            "name": "ipAddress",
+                            "displayName": "IP address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": "127.0.0.1"
+                        },
+                        {
+                            "id": "e69acdd3-ba4f-41a9-b89e-89ed108aa850",
+                            "name":"macAddress",
+                            "displayName": "MAC address",
+                            "type": "QString",
+                            "inputType": "MacAddress",
+                            "defaultValue": ""
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "5c510989-d6e1-4b06-b10f-f8b9e52a254c",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        }
+                    ],
+                    "actionTypes": [ ]
+                }
+            ]
+        }
+    ]
+}
