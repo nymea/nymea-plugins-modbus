@@ -47,6 +47,7 @@ public:
     explicit IntegrationPluginKostal();
 
     void discoverThings(ThingDiscoveryInfo *info) override;
+    void startMonitoringAutoThings() override;
     void setupThing(ThingSetupInfo *info) override;
     void postSetupThing(Thing *thing) override;
     void thingRemoved(Thing *thing) override;
@@ -55,9 +56,6 @@ public:
 private:
     PluginTimer *m_pluginTimer = nullptr;
     QHash<Thing *, KostalConnection *> m_kostalConnections;
-
-private slots:
-    void update(Thing *thing);
 
 };
 

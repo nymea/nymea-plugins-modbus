@@ -221,6 +221,96 @@ float KostalConnection::batteryVoltage() const
     return m_batteryVoltage;
 }
 
+float KostalConnection::powerMeterCurrentPhase1() const
+{
+    return m_powerMeterCurrentPhase1;
+}
+
+float KostalConnection::powerMeterActivePowerPhase1() const
+{
+    return m_powerMeterActivePowerPhase1;
+}
+
+float KostalConnection::powerMeterVoltagePhase1() const
+{
+    return m_powerMeterVoltagePhase1;
+}
+
+float KostalConnection::powerMeterCurrentPhase2() const
+{
+    return m_powerMeterCurrentPhase2;
+}
+
+float KostalConnection::powerMeterActivePowerPhase2() const
+{
+    return m_powerMeterActivePowerPhase2;
+}
+
+float KostalConnection::powerMeterVoltagePhase2() const
+{
+    return m_powerMeterVoltagePhase2;
+}
+
+float KostalConnection::powerMeterCurrentPhase3() const
+{
+    return m_powerMeterCurrentPhase3;
+}
+
+float KostalConnection::powerMeterActivePowerPhase3() const
+{
+    return m_powerMeterActivePowerPhase3;
+}
+
+float KostalConnection::powerMeterVoltagePhase3() const
+{
+    return m_powerMeterVoltagePhase3;
+}
+
+float KostalConnection::powerMeterTotalActivePower() const
+{
+    return m_powerMeterTotalActivePower;
+}
+
+QString KostalConnection::batteryManufacturer() const
+{
+    return m_batteryManufacturer;
+}
+
+quint32 KostalConnection::batteryModelId() const
+{
+    return m_batteryModelId;
+}
+
+quint32 KostalConnection::batterySerialNumber() const
+{
+    return m_batterySerialNumber;
+}
+
+QString KostalConnection::inverterManufacturer() const
+{
+    return m_inverterManufacturer;
+}
+
+QString KostalConnection::inverterSerialNumber() const
+{
+    return m_inverterSerialNumber;
+}
+
+qint16 KostalConnection::energyScaleFactor() const
+{
+    return m_energyScaleFactor;
+}
+
+KostalConnection::BatteryType KostalConnection::batteryType() const
+{
+    return m_batteryType;
+}
+
+float KostalConnection::totalEnergyAcToGrid() const
+{
+    return m_totalEnergyAcToGrid;
+}
+
 void KostalConnection::initialize()
 {
     QModbusReply *reply = nullptr;
@@ -239,8 +329,7 @@ void KostalConnection::initialize()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    quint16 receivedModbusUnitId = ModbusDataUtils::convertToUInt16(registers);
+                    quint16 receivedModbusUnitId = ModbusDataUtils::convertToUInt16(unit.values());
                     if (m_modbusUnitId != receivedModbusUnitId) {
                         m_modbusUnitId = receivedModbusUnitId;
                         emit modbusUnitIdChanged(m_modbusUnitId);
@@ -271,8 +360,7 @@ void KostalConnection::initialize()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    ByteOrder receivedModbusByteOrder = static_cast<ByteOrder>(ModbusDataUtils::convertToUInt16(registers));
+                    ByteOrder receivedModbusByteOrder = static_cast<ByteOrder>(ModbusDataUtils::convertToUInt16(unit.values()));
                     if (m_modbusByteOrder != receivedModbusByteOrder) {
                         m_modbusByteOrder = receivedModbusByteOrder;
                         emit modbusByteOrderChanged(m_modbusByteOrder);
@@ -303,8 +391,7 @@ void KostalConnection::initialize()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    QString receivedInverterArticleNumber = ModbusDataUtils::convertToString(registers);
+                    QString receivedInverterArticleNumber = ModbusDataUtils::convertToString(unit.values());
                     if (m_inverterArticleNumber != receivedInverterArticleNumber) {
                         m_inverterArticleNumber = receivedInverterArticleNumber;
                         emit inverterArticleNumberChanged(m_inverterArticleNumber);
@@ -335,8 +422,7 @@ void KostalConnection::initialize()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    quint16 receivedBidirectionalConverterNumber = ModbusDataUtils::convertToUInt16(registers);
+                    quint16 receivedBidirectionalConverterNumber = ModbusDataUtils::convertToUInt16(unit.values());
                     if (m_bidirectionalConverterNumber != receivedBidirectionalConverterNumber) {
                         m_bidirectionalConverterNumber = receivedBidirectionalConverterNumber;
                         emit bidirectionalConverterNumberChanged(m_bidirectionalConverterNumber);
@@ -367,8 +453,7 @@ void KostalConnection::initialize()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    quint16 receivedNumberPvStrings = ModbusDataUtils::convertToUInt16(registers);
+                    quint16 receivedNumberPvStrings = ModbusDataUtils::convertToUInt16(unit.values());
                     if (m_numberPvStrings != receivedNumberPvStrings) {
                         m_numberPvStrings = receivedNumberPvStrings;
                         emit numberPvStringsChanged(m_numberPvStrings);
@@ -399,8 +484,7 @@ void KostalConnection::initialize()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    quint32 receivedHardwareVersion = ModbusDataUtils::convertToUInt32(registers);
+                    quint32 receivedHardwareVersion = ModbusDataUtils::convertToUInt32(unit.values());
                     if (m_hardwareVersion != receivedHardwareVersion) {
                         m_hardwareVersion = receivedHardwareVersion;
                         emit hardwareVersionChanged(m_hardwareVersion);
@@ -431,8 +515,7 @@ void KostalConnection::initialize()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    QString receivedSoftwareVersionMainController = ModbusDataUtils::convertToString(registers);
+                    QString receivedSoftwareVersionMainController = ModbusDataUtils::convertToString(unit.values());
                     if (m_softwareVersionMainController != receivedSoftwareVersionMainController) {
                         m_softwareVersionMainController = receivedSoftwareVersionMainController;
                         emit softwareVersionMainControllerChanged(m_softwareVersionMainController);
@@ -463,8 +546,7 @@ void KostalConnection::initialize()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    QString receivedSoftwareVersionIoController = ModbusDataUtils::convertToString(registers);
+                    QString receivedSoftwareVersionIoController = ModbusDataUtils::convertToString(unit.values());
                     if (m_softwareVersionIoController != receivedSoftwareVersionIoController) {
                         m_softwareVersionIoController = receivedSoftwareVersionIoController;
                         emit softwareVersionIoControllerChanged(m_softwareVersionIoController);
@@ -495,8 +577,7 @@ void KostalConnection::initialize()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    quint16 receivedPowerId = ModbusDataUtils::convertToUInt16(registers);
+                    quint16 receivedPowerId = ModbusDataUtils::convertToUInt16(unit.values());
                     if (m_powerId != receivedPowerId) {
                         m_powerId = receivedPowerId;
                         emit powerIdChanged(m_powerId);
@@ -516,6 +597,223 @@ void KostalConnection::initialize()
         }
     } else {
         qCWarning(dcKostalConnection()) << "Error occurred while reading \"Power-ID\" registers from" << hostAddress().toString() << errorString();
+    }
+
+    // Read Battery Manufacturer
+    reply = readBatteryManufacturer();
+    if (reply) {
+        if (!reply->isFinished()) {
+            m_pendingInitReplies.append(reply);
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    QString receivedBatteryManufacturer = ModbusDataUtils::convertToString(unit.values());
+                    if (m_batteryManufacturer != receivedBatteryManufacturer) {
+                        m_batteryManufacturer = receivedBatteryManufacturer;
+                        emit batteryManufacturerChanged(m_batteryManufacturer);
+                    }
+                }
+
+                m_pendingInitReplies.removeAll(reply);
+                verifyInitFinished();
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcKostalConnection()) << "Modbus reply error occurred while reading \"Battery Manufacturer\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcKostalConnection()) << "Error occurred while reading \"Battery Manufacturer\" registers from" << hostAddress().toString() << errorString();
+    }
+
+    // Read Battery model ID
+    reply = readBatteryModelId();
+    if (reply) {
+        if (!reply->isFinished()) {
+            m_pendingInitReplies.append(reply);
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    quint32 receivedBatteryModelId = ModbusDataUtils::convertToUInt32(unit.values());
+                    if (m_batteryModelId != receivedBatteryModelId) {
+                        m_batteryModelId = receivedBatteryModelId;
+                        emit batteryModelIdChanged(m_batteryModelId);
+                    }
+                }
+
+                m_pendingInitReplies.removeAll(reply);
+                verifyInitFinished();
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcKostalConnection()) << "Modbus reply error occurred while reading \"Battery model ID\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcKostalConnection()) << "Error occurred while reading \"Battery model ID\" registers from" << hostAddress().toString() << errorString();
+    }
+
+    // Read Battery serial number
+    reply = readBatterySerialNumber();
+    if (reply) {
+        if (!reply->isFinished()) {
+            m_pendingInitReplies.append(reply);
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    quint32 receivedBatterySerialNumber = ModbusDataUtils::convertToUInt32(unit.values());
+                    if (m_batterySerialNumber != receivedBatterySerialNumber) {
+                        m_batterySerialNumber = receivedBatterySerialNumber;
+                        emit batterySerialNumberChanged(m_batterySerialNumber);
+                    }
+                }
+
+                m_pendingInitReplies.removeAll(reply);
+                verifyInitFinished();
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcKostalConnection()) << "Modbus reply error occurred while reading \"Battery serial number\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcKostalConnection()) << "Error occurred while reading \"Battery serial number\" registers from" << hostAddress().toString() << errorString();
+    }
+
+    // Read Inverter manufacturer
+    reply = readInverterManufacturer();
+    if (reply) {
+        if (!reply->isFinished()) {
+            m_pendingInitReplies.append(reply);
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    QString receivedInverterManufacturer = ModbusDataUtils::convertToString(unit.values());
+                    if (m_inverterManufacturer != receivedInverterManufacturer) {
+                        m_inverterManufacturer = receivedInverterManufacturer;
+                        emit inverterManufacturerChanged(m_inverterManufacturer);
+                    }
+                }
+
+                m_pendingInitReplies.removeAll(reply);
+                verifyInitFinished();
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcKostalConnection()) << "Modbus reply error occurred while reading \"Inverter manufacturer\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcKostalConnection()) << "Error occurred while reading \"Inverter manufacturer\" registers from" << hostAddress().toString() << errorString();
+    }
+
+    // Read Inverter serial number
+    reply = readInverterSerialNumber();
+    if (reply) {
+        if (!reply->isFinished()) {
+            m_pendingInitReplies.append(reply);
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    QString receivedInverterSerialNumber = ModbusDataUtils::convertToString(unit.values());
+                    if (m_inverterSerialNumber != receivedInverterSerialNumber) {
+                        m_inverterSerialNumber = receivedInverterSerialNumber;
+                        emit inverterSerialNumberChanged(m_inverterSerialNumber);
+                    }
+                }
+
+                m_pendingInitReplies.removeAll(reply);
+                verifyInitFinished();
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcKostalConnection()) << "Modbus reply error occurred while reading \"Inverter serial number\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcKostalConnection()) << "Error occurred while reading \"Inverter serial number\" registers from" << hostAddress().toString() << errorString();
+    }
+
+    // Read Energy scale factor
+    reply = readEnergyScaleFactor();
+    if (reply) {
+        if (!reply->isFinished()) {
+            m_pendingInitReplies.append(reply);
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    qint16 receivedEnergyScaleFactor = ModbusDataUtils::convertToInt16(unit.values());
+                    if (m_energyScaleFactor != receivedEnergyScaleFactor) {
+                        m_energyScaleFactor = receivedEnergyScaleFactor;
+                        emit energyScaleFactorChanged(m_energyScaleFactor);
+                    }
+                }
+
+                m_pendingInitReplies.removeAll(reply);
+                verifyInitFinished();
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcKostalConnection()) << "Modbus reply error occurred while reading \"Energy scale factor\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcKostalConnection()) << "Error occurred while reading \"Energy scale factor\" registers from" << hostAddress().toString() << errorString();
+    }
+
+    // Read Battery type
+    reply = readBatteryType();
+    if (reply) {
+        if (!reply->isFinished()) {
+            m_pendingInitReplies.append(reply);
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    BatteryType receivedBatteryType = static_cast<BatteryType>(ModbusDataUtils::convertToUInt16(unit.values()));
+                    if (m_batteryType != receivedBatteryType) {
+                        m_batteryType = receivedBatteryType;
+                        emit batteryTypeChanged(m_batteryType);
+                    }
+                }
+
+                m_pendingInitReplies.removeAll(reply);
+                verifyInitFinished();
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcKostalConnection()) << "Modbus reply error occurred while reading \"Battery type\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcKostalConnection()) << "Error occurred while reading \"Battery type\" registers from" << hostAddress().toString() << errorString();
     }
 
     
@@ -550,6 +848,17 @@ void KostalConnection::update()
     updateBatteryStateOfCharge();
     updateBatteryTemperature();
     updateBatteryVoltage();
+    updatePowerMeterCurrentPhase1();
+    updatePowerMeterActivePowerPhase1();
+    updatePowerMeterVoltagePhase1();
+    updatePowerMeterCurrentPhase2();
+    updatePowerMeterActivePowerPhase2();
+    updatePowerMeterVoltagePhase2();
+    updatePowerMeterCurrentPhase3();
+    updatePowerMeterActivePowerPhase3();
+    updatePowerMeterVoltagePhase3();
+    updatePowerMeterTotalActivePower();
+    updateTotalEnergyAcToGrid();
 }
 
 void KostalConnection::updateInverterState()
@@ -562,8 +871,7 @@ void KostalConnection::updateInverterState()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    InverterState receivedInverterState = static_cast<InverterState>(ModbusDataUtils::convertToUInt16(registers));
+                    InverterState receivedInverterState = static_cast<InverterState>(ModbusDataUtils::convertToUInt16(unit.values()));
                     if (m_inverterState != receivedInverterState) {
                         m_inverterState = receivedInverterState;
                         emit inverterStateChanged(m_inverterState);
@@ -593,8 +901,7 @@ void KostalConnection::updateTotalDcPower()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedTotalDcPower = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedTotalDcPower = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_totalDcPower != receivedTotalDcPower) {
                         m_totalDcPower = receivedTotalDcPower;
                         emit totalDcPowerChanged(m_totalDcPower);
@@ -624,8 +931,7 @@ void KostalConnection::updateEnergyManagementState()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    EnergyManagementState receivedEnergyManagementState = static_cast<EnergyManagementState>(ModbusDataUtils::convertToUInt32(registers));
+                    EnergyManagementState receivedEnergyManagementState = static_cast<EnergyManagementState>(ModbusDataUtils::convertToUInt32(unit.values()));
                     if (m_energyManagementState != receivedEnergyManagementState) {
                         m_energyManagementState = receivedEnergyManagementState;
                         emit energyManagementStateChanged(m_energyManagementState);
@@ -655,8 +961,7 @@ void KostalConnection::updateHomeOwnConsumptionFromBattery()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedHomeOwnConsumptionFromBattery = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedHomeOwnConsumptionFromBattery = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_homeOwnConsumptionFromBattery != receivedHomeOwnConsumptionFromBattery) {
                         m_homeOwnConsumptionFromBattery = receivedHomeOwnConsumptionFromBattery;
                         emit homeOwnConsumptionFromBatteryChanged(m_homeOwnConsumptionFromBattery);
@@ -686,8 +991,7 @@ void KostalConnection::updateHomeOwnConsumptionFromGrid()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedHomeOwnConsumptionFromGrid = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedHomeOwnConsumptionFromGrid = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_homeOwnConsumptionFromGrid != receivedHomeOwnConsumptionFromGrid) {
                         m_homeOwnConsumptionFromGrid = receivedHomeOwnConsumptionFromGrid;
                         emit homeOwnConsumptionFromGridChanged(m_homeOwnConsumptionFromGrid);
@@ -717,8 +1021,7 @@ void KostalConnection::updateTotalHomeConsumptionFromBattery()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedTotalHomeConsumptionFromBattery = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedTotalHomeConsumptionFromBattery = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_totalHomeConsumptionFromBattery != receivedTotalHomeConsumptionFromBattery) {
                         m_totalHomeConsumptionFromBattery = receivedTotalHomeConsumptionFromBattery;
                         emit totalHomeConsumptionFromBatteryChanged(m_totalHomeConsumptionFromBattery);
@@ -748,8 +1051,7 @@ void KostalConnection::updateTotalHomeConsumptionFromGrid()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedTotalHomeConsumptionFromGrid = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedTotalHomeConsumptionFromGrid = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_totalHomeConsumptionFromGrid != receivedTotalHomeConsumptionFromGrid) {
                         m_totalHomeConsumptionFromGrid = receivedTotalHomeConsumptionFromGrid;
                         emit totalHomeConsumptionFromGridChanged(m_totalHomeConsumptionFromGrid);
@@ -779,8 +1081,7 @@ void KostalConnection::updateTotalHomeConsumptionFromPv()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedTotalHomeConsumptionFromPv = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedTotalHomeConsumptionFromPv = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_totalHomeConsumptionFromPv != receivedTotalHomeConsumptionFromPv) {
                         m_totalHomeConsumptionFromPv = receivedTotalHomeConsumptionFromPv;
                         emit totalHomeConsumptionFromPvChanged(m_totalHomeConsumptionFromPv);
@@ -810,8 +1111,7 @@ void KostalConnection::updateHomeOwnConsumptionPv()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedHomeOwnConsumptionPv = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedHomeOwnConsumptionPv = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_homeOwnConsumptionPv != receivedHomeOwnConsumptionPv) {
                         m_homeOwnConsumptionPv = receivedHomeOwnConsumptionPv;
                         emit homeOwnConsumptionPvChanged(m_homeOwnConsumptionPv);
@@ -841,8 +1141,7 @@ void KostalConnection::updateTotalHomeConsumption()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedTotalHomeConsumption = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedTotalHomeConsumption = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_totalHomeConsumption != receivedTotalHomeConsumption) {
                         m_totalHomeConsumption = receivedTotalHomeConsumption;
                         emit totalHomeConsumptionChanged(m_totalHomeConsumption);
@@ -872,8 +1171,7 @@ void KostalConnection::updateGridFrequency()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedGridFrequency = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedGridFrequency = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_gridFrequency != receivedGridFrequency) {
                         m_gridFrequency = receivedGridFrequency;
                         emit gridFrequencyChanged(m_gridFrequency);
@@ -903,8 +1201,7 @@ void KostalConnection::updateCurrentPhase1()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedCurrentPhase1 = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedCurrentPhase1 = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_currentPhase1 != receivedCurrentPhase1) {
                         m_currentPhase1 = receivedCurrentPhase1;
                         emit currentPhase1Changed(m_currentPhase1);
@@ -934,8 +1231,7 @@ void KostalConnection::updateActivePowerPhase1()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedActivePowerPhase1 = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedActivePowerPhase1 = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_activePowerPhase1 != receivedActivePowerPhase1) {
                         m_activePowerPhase1 = receivedActivePowerPhase1;
                         emit activePowerPhase1Changed(m_activePowerPhase1);
@@ -965,8 +1261,7 @@ void KostalConnection::updateVoltagePhase1()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedVoltagePhase1 = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedVoltagePhase1 = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_voltagePhase1 != receivedVoltagePhase1) {
                         m_voltagePhase1 = receivedVoltagePhase1;
                         emit voltagePhase1Changed(m_voltagePhase1);
@@ -996,8 +1291,7 @@ void KostalConnection::updateCurrentPhase2()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedCurrentPhase2 = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedCurrentPhase2 = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_currentPhase2 != receivedCurrentPhase2) {
                         m_currentPhase2 = receivedCurrentPhase2;
                         emit currentPhase2Changed(m_currentPhase2);
@@ -1027,8 +1321,7 @@ void KostalConnection::updateActivePowerPhase2()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedActivePowerPhase2 = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedActivePowerPhase2 = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_activePowerPhase2 != receivedActivePowerPhase2) {
                         m_activePowerPhase2 = receivedActivePowerPhase2;
                         emit activePowerPhase2Changed(m_activePowerPhase2);
@@ -1058,8 +1351,7 @@ void KostalConnection::updateVoltagePhase2()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedVoltagePhase2 = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedVoltagePhase2 = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_voltagePhase2 != receivedVoltagePhase2) {
                         m_voltagePhase2 = receivedVoltagePhase2;
                         emit voltagePhase2Changed(m_voltagePhase2);
@@ -1089,8 +1381,7 @@ void KostalConnection::updateCurrentPhase3()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedCurrentPhase3 = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedCurrentPhase3 = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_currentPhase3 != receivedCurrentPhase3) {
                         m_currentPhase3 = receivedCurrentPhase3;
                         emit currentPhase3Changed(m_currentPhase3);
@@ -1120,8 +1411,7 @@ void KostalConnection::updateActivePowerPhase3()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedActivePowerPhase3 = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedActivePowerPhase3 = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_activePowerPhase3 != receivedActivePowerPhase3) {
                         m_activePowerPhase3 = receivedActivePowerPhase3;
                         emit activePowerPhase3Changed(m_activePowerPhase3);
@@ -1151,8 +1441,7 @@ void KostalConnection::updateVoltagePhase3()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedVoltagePhase3 = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedVoltagePhase3 = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_voltagePhase3 != receivedVoltagePhase3) {
                         m_voltagePhase3 = receivedVoltagePhase3;
                         emit voltagePhase3Changed(m_voltagePhase3);
@@ -1182,8 +1471,7 @@ void KostalConnection::updateTotalAcPower()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedTotalAcPower = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedTotalAcPower = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_totalAcPower != receivedTotalAcPower) {
                         m_totalAcPower = receivedTotalAcPower;
                         emit totalAcPowerChanged(m_totalAcPower);
@@ -1213,8 +1501,7 @@ void KostalConnection::updateBatteryChargeCurrent()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedBatteryChargeCurrent = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedBatteryChargeCurrent = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_batteryChargeCurrent != receivedBatteryChargeCurrent) {
                         m_batteryChargeCurrent = receivedBatteryChargeCurrent;
                         emit batteryChargeCurrentChanged(m_batteryChargeCurrent);
@@ -1244,8 +1531,7 @@ void KostalConnection::updateNumberOfBytteryCycles()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedNumberOfBytteryCycles = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedNumberOfBytteryCycles = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_numberOfBytteryCycles != receivedNumberOfBytteryCycles) {
                         m_numberOfBytteryCycles = receivedNumberOfBytteryCycles;
                         emit numberOfBytteryCyclesChanged(m_numberOfBytteryCycles);
@@ -1275,8 +1561,7 @@ void KostalConnection::updateActualBatteryChargeCurrent()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedActualBatteryChargeCurrent = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedActualBatteryChargeCurrent = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_actualBatteryChargeCurrent != receivedActualBatteryChargeCurrent) {
                         m_actualBatteryChargeCurrent = receivedActualBatteryChargeCurrent;
                         emit actualBatteryChargeCurrentChanged(m_actualBatteryChargeCurrent);
@@ -1306,8 +1591,7 @@ void KostalConnection::updateBatteryStateOfCharge()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedBatteryStateOfCharge = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedBatteryStateOfCharge = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_batteryStateOfCharge != receivedBatteryStateOfCharge) {
                         m_batteryStateOfCharge = receivedBatteryStateOfCharge;
                         emit batteryStateOfChargeChanged(m_batteryStateOfCharge);
@@ -1337,8 +1621,7 @@ void KostalConnection::updateBatteryTemperature()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedBatteryTemperature = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedBatteryTemperature = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_batteryTemperature != receivedBatteryTemperature) {
                         m_batteryTemperature = receivedBatteryTemperature;
                         emit batteryTemperatureChanged(m_batteryTemperature);
@@ -1368,8 +1651,7 @@ void KostalConnection::updateBatteryVoltage()
             connect(reply, &QModbusReply::finished, this, [this, reply](){
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> registers = unit.values();
-                    float receivedBatteryVoltage = ModbusDataUtils::convertToFloat32(registers);
+                    float receivedBatteryVoltage = ModbusDataUtils::convertToFloat32(unit.values());
                     if (m_batteryVoltage != receivedBatteryVoltage) {
                         m_batteryVoltage = receivedBatteryVoltage;
                         emit batteryVoltageChanged(m_batteryVoltage);
@@ -1386,6 +1668,336 @@ void KostalConnection::updateBatteryVoltage()
         }
     } else {
         qCWarning(dcKostalConnection()) << "Error occurred while reading \"Battery voltage\" registers from" << hostAddress().toString() << errorString();
+    }
+}
+
+void KostalConnection::updatePowerMeterCurrentPhase1()
+{
+    // Update registers from Current phase 1 (powermeter)
+    QModbusReply *reply = readPowerMeterCurrentPhase1();
+    if (reply) {
+        if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    float receivedPowerMeterCurrentPhase1 = ModbusDataUtils::convertToFloat32(unit.values());
+                    if (m_powerMeterCurrentPhase1 != receivedPowerMeterCurrentPhase1) {
+                        m_powerMeterCurrentPhase1 = receivedPowerMeterCurrentPhase1;
+                        emit powerMeterCurrentPhase1Changed(m_powerMeterCurrentPhase1);
+                    }
+                }
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcKostalConnection()) << "Modbus reply error occurred while updating \"Current phase 1 (powermeter)\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcKostalConnection()) << "Error occurred while reading \"Current phase 1 (powermeter)\" registers from" << hostAddress().toString() << errorString();
+    }
+}
+
+void KostalConnection::updatePowerMeterActivePowerPhase1()
+{
+    // Update registers from Active power phase 1 (powermeter)
+    QModbusReply *reply = readPowerMeterActivePowerPhase1();
+    if (reply) {
+        if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    float receivedPowerMeterActivePowerPhase1 = ModbusDataUtils::convertToFloat32(unit.values());
+                    if (m_powerMeterActivePowerPhase1 != receivedPowerMeterActivePowerPhase1) {
+                        m_powerMeterActivePowerPhase1 = receivedPowerMeterActivePowerPhase1;
+                        emit powerMeterActivePowerPhase1Changed(m_powerMeterActivePowerPhase1);
+                    }
+                }
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcKostalConnection()) << "Modbus reply error occurred while updating \"Active power phase 1 (powermeter)\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcKostalConnection()) << "Error occurred while reading \"Active power phase 1 (powermeter)\" registers from" << hostAddress().toString() << errorString();
+    }
+}
+
+void KostalConnection::updatePowerMeterVoltagePhase1()
+{
+    // Update registers from Voltage phase 1 (powermeter)
+    QModbusReply *reply = readPowerMeterVoltagePhase1();
+    if (reply) {
+        if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    float receivedPowerMeterVoltagePhase1 = ModbusDataUtils::convertToFloat32(unit.values());
+                    if (m_powerMeterVoltagePhase1 != receivedPowerMeterVoltagePhase1) {
+                        m_powerMeterVoltagePhase1 = receivedPowerMeterVoltagePhase1;
+                        emit powerMeterVoltagePhase1Changed(m_powerMeterVoltagePhase1);
+                    }
+                }
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcKostalConnection()) << "Modbus reply error occurred while updating \"Voltage phase 1 (powermeter)\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcKostalConnection()) << "Error occurred while reading \"Voltage phase 1 (powermeter)\" registers from" << hostAddress().toString() << errorString();
+    }
+}
+
+void KostalConnection::updatePowerMeterCurrentPhase2()
+{
+    // Update registers from Current phase 2 (powermeter)
+    QModbusReply *reply = readPowerMeterCurrentPhase2();
+    if (reply) {
+        if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    float receivedPowerMeterCurrentPhase2 = ModbusDataUtils::convertToFloat32(unit.values());
+                    if (m_powerMeterCurrentPhase2 != receivedPowerMeterCurrentPhase2) {
+                        m_powerMeterCurrentPhase2 = receivedPowerMeterCurrentPhase2;
+                        emit powerMeterCurrentPhase2Changed(m_powerMeterCurrentPhase2);
+                    }
+                }
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcKostalConnection()) << "Modbus reply error occurred while updating \"Current phase 2 (powermeter)\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcKostalConnection()) << "Error occurred while reading \"Current phase 2 (powermeter)\" registers from" << hostAddress().toString() << errorString();
+    }
+}
+
+void KostalConnection::updatePowerMeterActivePowerPhase2()
+{
+    // Update registers from Active power phase 2 (powermeter)
+    QModbusReply *reply = readPowerMeterActivePowerPhase2();
+    if (reply) {
+        if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    float receivedPowerMeterActivePowerPhase2 = ModbusDataUtils::convertToFloat32(unit.values());
+                    if (m_powerMeterActivePowerPhase2 != receivedPowerMeterActivePowerPhase2) {
+                        m_powerMeterActivePowerPhase2 = receivedPowerMeterActivePowerPhase2;
+                        emit powerMeterActivePowerPhase2Changed(m_powerMeterActivePowerPhase2);
+                    }
+                }
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcKostalConnection()) << "Modbus reply error occurred while updating \"Active power phase 2 (powermeter)\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcKostalConnection()) << "Error occurred while reading \"Active power phase 2 (powermeter)\" registers from" << hostAddress().toString() << errorString();
+    }
+}
+
+void KostalConnection::updatePowerMeterVoltagePhase2()
+{
+    // Update registers from Voltage phase 2 (powermeter)
+    QModbusReply *reply = readPowerMeterVoltagePhase2();
+    if (reply) {
+        if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    float receivedPowerMeterVoltagePhase2 = ModbusDataUtils::convertToFloat32(unit.values());
+                    if (m_powerMeterVoltagePhase2 != receivedPowerMeterVoltagePhase2) {
+                        m_powerMeterVoltagePhase2 = receivedPowerMeterVoltagePhase2;
+                        emit powerMeterVoltagePhase2Changed(m_powerMeterVoltagePhase2);
+                    }
+                }
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcKostalConnection()) << "Modbus reply error occurred while updating \"Voltage phase 2 (powermeter)\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcKostalConnection()) << "Error occurred while reading \"Voltage phase 2 (powermeter)\" registers from" << hostAddress().toString() << errorString();
+    }
+}
+
+void KostalConnection::updatePowerMeterCurrentPhase3()
+{
+    // Update registers from Current phase 3 (powermeter)
+    QModbusReply *reply = readPowerMeterCurrentPhase3();
+    if (reply) {
+        if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    float receivedPowerMeterCurrentPhase3 = ModbusDataUtils::convertToFloat32(unit.values());
+                    if (m_powerMeterCurrentPhase3 != receivedPowerMeterCurrentPhase3) {
+                        m_powerMeterCurrentPhase3 = receivedPowerMeterCurrentPhase3;
+                        emit powerMeterCurrentPhase3Changed(m_powerMeterCurrentPhase3);
+                    }
+                }
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcKostalConnection()) << "Modbus reply error occurred while updating \"Current phase 3 (powermeter)\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcKostalConnection()) << "Error occurred while reading \"Current phase 3 (powermeter)\" registers from" << hostAddress().toString() << errorString();
+    }
+}
+
+void KostalConnection::updatePowerMeterActivePowerPhase3()
+{
+    // Update registers from Active power phase 3 (powermeter)
+    QModbusReply *reply = readPowerMeterActivePowerPhase3();
+    if (reply) {
+        if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    float receivedPowerMeterActivePowerPhase3 = ModbusDataUtils::convertToFloat32(unit.values());
+                    if (m_powerMeterActivePowerPhase3 != receivedPowerMeterActivePowerPhase3) {
+                        m_powerMeterActivePowerPhase3 = receivedPowerMeterActivePowerPhase3;
+                        emit powerMeterActivePowerPhase3Changed(m_powerMeterActivePowerPhase3);
+                    }
+                }
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcKostalConnection()) << "Modbus reply error occurred while updating \"Active power phase 3 (powermeter)\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcKostalConnection()) << "Error occurred while reading \"Active power phase 3 (powermeter)\" registers from" << hostAddress().toString() << errorString();
+    }
+}
+
+void KostalConnection::updatePowerMeterVoltagePhase3()
+{
+    // Update registers from Voltage phase 3 (powermeter)
+    QModbusReply *reply = readPowerMeterVoltagePhase3();
+    if (reply) {
+        if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    float receivedPowerMeterVoltagePhase3 = ModbusDataUtils::convertToFloat32(unit.values());
+                    if (m_powerMeterVoltagePhase3 != receivedPowerMeterVoltagePhase3) {
+                        m_powerMeterVoltagePhase3 = receivedPowerMeterVoltagePhase3;
+                        emit powerMeterVoltagePhase3Changed(m_powerMeterVoltagePhase3);
+                    }
+                }
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcKostalConnection()) << "Modbus reply error occurred while updating \"Voltage phase 3 (powermeter)\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcKostalConnection()) << "Error occurred while reading \"Voltage phase 3 (powermeter)\" registers from" << hostAddress().toString() << errorString();
+    }
+}
+
+void KostalConnection::updatePowerMeterTotalActivePower()
+{
+    // Update registers from Total active power (powermeter)
+    QModbusReply *reply = readPowerMeterTotalActivePower();
+    if (reply) {
+        if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    float receivedPowerMeterTotalActivePower = ModbusDataUtils::convertToFloat32(unit.values());
+                    if (m_powerMeterTotalActivePower != receivedPowerMeterTotalActivePower) {
+                        m_powerMeterTotalActivePower = receivedPowerMeterTotalActivePower;
+                        emit powerMeterTotalActivePowerChanged(m_powerMeterTotalActivePower);
+                    }
+                }
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcKostalConnection()) << "Modbus reply error occurred while updating \"Total active power (powermeter)\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcKostalConnection()) << "Error occurred while reading \"Total active power (powermeter)\" registers from" << hostAddress().toString() << errorString();
+    }
+}
+
+void KostalConnection::updateTotalEnergyAcToGrid()
+{
+    // Update registers from Total energy AC-side to grid
+    QModbusReply *reply = readTotalEnergyAcToGrid();
+    if (reply) {
+        if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    float receivedTotalEnergyAcToGrid = ModbusDataUtils::convertToInt32(unit.values()) * 1.0 * pow(10, m_energyScaleFactor);
+                    if (m_totalEnergyAcToGrid != receivedTotalEnergyAcToGrid) {
+                        m_totalEnergyAcToGrid = receivedTotalEnergyAcToGrid;
+                        emit totalEnergyAcToGridChanged(m_totalEnergyAcToGrid);
+                    }
+                }
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcKostalConnection()) << "Modbus reply error occurred while updating \"Total energy AC-side to grid\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcKostalConnection()) << "Error occurred while reading \"Total energy AC-side to grid\" registers from" << hostAddress().toString() << errorString();
     }
 }
 
@@ -1605,11 +2217,179 @@ QModbusReply *KostalConnection::readBatteryVoltage()
     return sendReadRequest(request, m_slaveId);
 }
 
+QModbusReply *KostalConnection::readPowerMeterCurrentPhase1()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 222, 2);
+    return sendReadRequest(request, m_slaveId);
+}
+
+QModbusReply *KostalConnection::readPowerMeterActivePowerPhase1()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 224, 2);
+    return sendReadRequest(request, m_slaveId);
+}
+
+QModbusReply *KostalConnection::readPowerMeterVoltagePhase1()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 230, 2);
+    return sendReadRequest(request, m_slaveId);
+}
+
+QModbusReply *KostalConnection::readPowerMeterCurrentPhase2()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 232, 2);
+    return sendReadRequest(request, m_slaveId);
+}
+
+QModbusReply *KostalConnection::readPowerMeterActivePowerPhase2()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 234, 2);
+    return sendReadRequest(request, m_slaveId);
+}
+
+QModbusReply *KostalConnection::readPowerMeterVoltagePhase2()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 240, 2);
+    return sendReadRequest(request, m_slaveId);
+}
+
+QModbusReply *KostalConnection::readPowerMeterCurrentPhase3()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 242, 2);
+    return sendReadRequest(request, m_slaveId);
+}
+
+QModbusReply *KostalConnection::readPowerMeterActivePowerPhase3()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 244, 2);
+    return sendReadRequest(request, m_slaveId);
+}
+
+QModbusReply *KostalConnection::readPowerMeterVoltagePhase3()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 250, 2);
+    return sendReadRequest(request, m_slaveId);
+}
+
+QModbusReply *KostalConnection::readPowerMeterTotalActivePower()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 252, 2);
+    return sendReadRequest(request, m_slaveId);
+}
+
+QModbusReply *KostalConnection::readBatteryManufacturer()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 517, 8);
+    return sendReadRequest(request, m_slaveId);
+}
+
+QModbusReply *KostalConnection::readBatteryModelId()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 525, 2);
+    return sendReadRequest(request, m_slaveId);
+}
+
+QModbusReply *KostalConnection::readBatterySerialNumber()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 527, 2);
+    return sendReadRequest(request, m_slaveId);
+}
+
+QModbusReply *KostalConnection::readInverterManufacturer()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 535, 16);
+    return sendReadRequest(request, m_slaveId);
+}
+
+QModbusReply *KostalConnection::readInverterSerialNumber()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 559, 16);
+    return sendReadRequest(request, m_slaveId);
+}
+
+QModbusReply *KostalConnection::readEnergyScaleFactor()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 579, 1);
+    return sendReadRequest(request, m_slaveId);
+}
+
+QModbusReply *KostalConnection::readBatteryType()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 588, 1);
+    return sendReadRequest(request, m_slaveId);
+}
+
+QModbusReply *KostalConnection::readTotalEnergyAcToGrid()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 1064, 1);
+    return sendReadRequest(request, m_slaveId);
+}
+
 void KostalConnection::verifyInitFinished()
 {
     if (m_pendingInitReplies.isEmpty()) {
         qCDebug(dcKostalConnection()) << "Initialization finished of KostalConnection" << hostAddress().toString();
         emit initializationFinished();
     }
+}
+
+QDebug operator<<(QDebug debug, KostalConnection *kostalConnection)
+{
+    debug.nospace().noquote() << "KostalConnection(" << kostalConnection->hostAddress().toString() << ":" << kostalConnection->port() << ")" << "\n";
+    debug.nospace().noquote() << "    - MODBUS Unit-ID:" << kostalConnection->modbusUnitId() << "\n";
+    debug.nospace().noquote() << "    - MODBUS Byte Order Note:" << kostalConnection->modbusByteOrder() << "\n";
+    debug.nospace().noquote() << "    - Inverter article number:" << kostalConnection->inverterArticleNumber() << "\n";
+    debug.nospace().noquote() << "    - Number of bidirectional converter:" << kostalConnection->bidirectionalConverterNumber() << "\n";
+    debug.nospace().noquote() << "    - Number of PV strings:" << kostalConnection->numberPvStrings() << "\n";
+    debug.nospace().noquote() << "    - Hardware-Version:" << kostalConnection->hardwareVersion() << "\n";
+    debug.nospace().noquote() << "    - Software-Version Maincontroller (MC):" << kostalConnection->softwareVersionMainController() << "\n";
+    debug.nospace().noquote() << "    - Software-Version IO-Controller (IOC):" << kostalConnection->softwareVersionIoController() << "\n";
+    debug.nospace().noquote() << "    - Power-ID:" << kostalConnection->powerId() << "\n";
+    debug.nospace().noquote() << "    - Inverter state:" << kostalConnection->inverterState() << "\n";
+    debug.nospace().noquote() << "    - Total DC power:" << kostalConnection->totalDcPower() << " [W]" << "\n";
+    debug.nospace().noquote() << "    - State of energy manager:" << kostalConnection->energyManagementState() << "\n";
+    debug.nospace().noquote() << "    - Home own consumption from battery:" << kostalConnection->homeOwnConsumptionFromBattery() << " [W]" << "\n";
+    debug.nospace().noquote() << "    - Home own consumption from grid:" << kostalConnection->homeOwnConsumptionFromGrid() << " [W]" << "\n";
+    debug.nospace().noquote() << "    - Total home consumption Battery:" << kostalConnection->totalHomeConsumptionFromBattery() << " [Wh]" << "\n";
+    debug.nospace().noquote() << "    - Total home consumption grid:" << kostalConnection->totalHomeConsumptionFromGrid() << " [Wh]" << "\n";
+    debug.nospace().noquote() << "    - Total home consumption from PV:" << kostalConnection->totalHomeConsumptionFromPv() << " [Wh]" << "\n";
+    debug.nospace().noquote() << "    - Home own consumption from PV:" << kostalConnection->homeOwnConsumptionPv() << " [W]" << "\n";
+    debug.nospace().noquote() << "    - Total home consumption:" << kostalConnection->totalHomeConsumption() << " [Wh]" << "\n";
+    debug.nospace().noquote() << "    - Grid frequency:" << kostalConnection->gridFrequency() << " [Hz]" << "\n";
+    debug.nospace().noquote() << "    - Current phase 1:" << kostalConnection->currentPhase1() << " [A]" << "\n";
+    debug.nospace().noquote() << "    - Active power phase 1:" << kostalConnection->activePowerPhase1() << " [W]" << "\n";
+    debug.nospace().noquote() << "    - Voltage phase 1:" << kostalConnection->voltagePhase1() << " [V]" << "\n";
+    debug.nospace().noquote() << "    - Current phase 2:" << kostalConnection->currentPhase2() << " [A]" << "\n";
+    debug.nospace().noquote() << "    - Active power phase 2:" << kostalConnection->activePowerPhase2() << " [W]" << "\n";
+    debug.nospace().noquote() << "    - Voltage phase 2:" << kostalConnection->voltagePhase2() << " [V]" << "\n";
+    debug.nospace().noquote() << "    - Current phase 3:" << kostalConnection->currentPhase3() << " [A]" << "\n";
+    debug.nospace().noquote() << "    - Active power phase 3:" << kostalConnection->activePowerPhase3() << " [W]" << "\n";
+    debug.nospace().noquote() << "    - Voltage phase 3:" << kostalConnection->voltagePhase3() << " [V]" << "\n";
+    debug.nospace().noquote() << "    - Total AC power:" << kostalConnection->totalAcPower() << " [W]" << "\n";
+    debug.nospace().noquote() << "    - Battery charge current:" << kostalConnection->batteryChargeCurrent() << " [A]" << "\n";
+    debug.nospace().noquote() << "    - Number of battery cycles:" << kostalConnection->numberOfBytteryCycles() << "\n";
+    debug.nospace().noquote() << "    - Actual battery charge (-) / discharge (+) current:" << kostalConnection->actualBatteryChargeCurrent() << " [A]" << "\n";
+    debug.nospace().noquote() << "    - Actual state of charge:" << kostalConnection->batteryStateOfCharge() << " [%]" << "\n";
+    debug.nospace().noquote() << "    - Battery temperature:" << kostalConnection->batteryTemperature() << " [°C]" << "\n";
+    debug.nospace().noquote() << "    - Battery voltage:" << kostalConnection->batteryVoltage() << " [V]" << "\n";
+    debug.nospace().noquote() << "    - Current phase 1 (powermeter):" << kostalConnection->powerMeterCurrentPhase1() << " [A]" << "\n";
+    debug.nospace().noquote() << "    - Active power phase 1 (powermeter):" << kostalConnection->powerMeterActivePowerPhase1() << " [W]" << "\n";
+    debug.nospace().noquote() << "    - Voltage phase 1 (powermeter):" << kostalConnection->powerMeterVoltagePhase1() << " [V]" << "\n";
+    debug.nospace().noquote() << "    - Current phase 2 (powermeter):" << kostalConnection->powerMeterCurrentPhase2() << " [A]" << "\n";
+    debug.nospace().noquote() << "    - Active power phase 2 (powermeter):" << kostalConnection->powerMeterActivePowerPhase2() << " [W]" << "\n";
+    debug.nospace().noquote() << "    - Voltage phase 2 (powermeter):" << kostalConnection->powerMeterVoltagePhase2() << " [V]" << "\n";
+    debug.nospace().noquote() << "    - Current phase 3 (powermeter):" << kostalConnection->powerMeterCurrentPhase3() << " [A]" << "\n";
+    debug.nospace().noquote() << "    - Active power phase 3 (powermeter):" << kostalConnection->powerMeterActivePowerPhase3() << " [W]" << "\n";
+    debug.nospace().noquote() << "    - Voltage phase 3 (powermeter):" << kostalConnection->powerMeterVoltagePhase3() << " [V]" << "\n";
+    debug.nospace().noquote() << "    - Total active power (powermeter):" << kostalConnection->powerMeterTotalActivePower() << " [W]" << "\n";
+    debug.nospace().noquote() << "    - Battery Manufacturer:" << kostalConnection->batteryManufacturer() << "\n";
+    debug.nospace().noquote() << "    - Battery model ID:" << kostalConnection->batteryModelId() << "\n";
+    debug.nospace().noquote() << "    - Battery serial number:" << kostalConnection->batterySerialNumber() << "\n";
+    debug.nospace().noquote() << "    - Inverter manufacturer:" << kostalConnection->inverterManufacturer() << "\n";
+    debug.nospace().noquote() << "    - Inverter serial number:" << kostalConnection->inverterSerialNumber() << "\n";
+    debug.nospace().noquote() << "    - Energy scale factor:" << kostalConnection->energyScaleFactor() << "\n";
+    debug.nospace().noquote() << "    - Battery type:" << kostalConnection->batteryType() << "\n";
+    debug.nospace().noquote() << "    - Total energy AC-side to grid:" << kostalConnection->totalEnergyAcToGrid() << " [Wh]" << "\n";
+    return debug.quote().space();
 }
 

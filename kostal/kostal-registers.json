@@ -110,6 +110,23 @@
                     "value": 16
                 }
             ]
+        },
+        {
+            "name": "BatteryType",
+            "values": [
+                {
+                    "key": "NoBattery",
+                    "value": 0
+                },
+                {
+                    "key": "SonyMurata",
+                    "value": 2
+                },
+                {
+                    "key": "BydBbox",
+                    "value": 4
+                }
+            ]
         }
     ],
     "registers": [
@@ -120,7 +137,7 @@
             "type": "uint16",
             "readSchedule": "init",
             "description": "MODBUS Unit-ID",
-            "unit": "",
+            "defaultValue": "1",
             "access": "RO"
         },
         {
@@ -131,7 +148,7 @@
             "readSchedule": "init",
             "enum": "ByteOrder",
             "description": "MODBUS Byte Order Note",
-            "unit": "",
+            "defaultValue": "ByteOrderBigEndian",
             "access": "RO"
         },
         {
@@ -141,7 +158,6 @@
             "type": "string",
             "readSchedule": "init",
             "description": "Inverter article number",
-            "unit": "",
             "access": "RO"
         },
         {
@@ -151,7 +167,7 @@
             "type": "uint16",
             "readSchedule": "init",
             "description": "Number of bidirectional converter",
-            "unit": "",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -162,6 +178,7 @@
             "readSchedule": "init",
             "description": "Number of PV strings",
             "unit": "",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -171,7 +188,7 @@
             "type": "uint32",
             "readSchedule": "init",
             "description": "Hardware-Version",
-            "unit": "",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -181,7 +198,6 @@
             "type": "string",
             "readSchedule": "init",
             "description": "Software-Version Maincontroller (MC)",
-            "unit": "",
             "access": "RO"
         },
         {
@@ -191,7 +207,6 @@
             "type": "string",
             "readSchedule": "init",
             "description": "Software-Version IO-Controller (IOC)",
-            "unit": "",
             "access": "RO"
         },
         {
@@ -201,7 +216,7 @@
             "type": "uint16",
             "readSchedule": "init",
             "description": "Power-ID",
-            "unit": "",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -211,7 +226,7 @@
             "type": "uint16",
             "readSchedule": "update",
             "description": "Inverter state",
-            "unit": "",
+            "defaultValue": "InverterStateUnknown",
             "enum": "InverterState",
             "access": "RO"
         },
@@ -223,6 +238,7 @@
             "readSchedule": "update",
             "description": "Total DC power",
             "unit": "W",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -233,7 +249,7 @@
             "enum": "EnergyManagementState",
             "readSchedule": "update",
             "description": "State of energy manager",
-            "unit": "",
+            "defaultValue": "EnergyManagementStateIdle",
             "access": "RO"
         },
         {
@@ -244,6 +260,7 @@
             "readSchedule": "update",
             "description": "Home own consumption from battery",
             "unit": "W",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -254,6 +271,7 @@
             "readSchedule": "update",
             "description": "Home own consumption from grid",
             "unit": "W",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -264,6 +282,7 @@
             "readSchedule": "update",
             "description": "Total home consumption Battery",
             "unit": "Wh",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -274,6 +293,7 @@
             "readSchedule": "update",
             "description": "Total home consumption grid",
             "unit": "Wh",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -284,6 +304,7 @@
             "readSchedule": "update",
             "description": "Total home consumption from PV",
             "unit": "Wh",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -294,6 +315,7 @@
             "readSchedule": "update",
             "description": "Home own consumption from PV",
             "unit": "W",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -304,6 +326,7 @@
             "readSchedule": "update",
             "description": "Total home consumption",
             "unit": "Wh",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -314,6 +337,7 @@
             "readSchedule": "update",
             "description": "Grid frequency",
             "unit": "Hz",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -324,6 +348,7 @@
             "readSchedule": "update",
             "description": "Current phase 1",
             "unit": "A",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -334,6 +359,7 @@
             "readSchedule": "update",
             "description": "Active power phase 1",
             "unit": "W",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -344,6 +370,7 @@
             "readSchedule": "update",
             "description": "Voltage phase 1",
             "unit": "V",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -354,6 +381,7 @@
             "readSchedule": "update",
             "description": "Current phase 2",
             "unit": "A",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -364,6 +392,7 @@
             "readSchedule": "update",
             "description": "Active power phase 2",
             "unit": "W",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -374,6 +403,7 @@
             "readSchedule": "update",
             "description": "Voltage phase 2",
             "unit": "V",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -384,6 +414,7 @@
             "readSchedule": "update",
             "description": "Current phase 3",
             "unit": "A",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -394,6 +425,7 @@
             "readSchedule": "update",
             "description": "Active power phase 3",
             "unit": "W",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -404,6 +436,7 @@
             "readSchedule": "update",
             "description": "Voltage phase 3",
             "unit": "V",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -414,6 +447,7 @@
             "readSchedule": "update",
             "description": "Total AC power",
             "unit": "W",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -424,6 +458,7 @@
             "readSchedule": "update",
             "description": "Battery charge current",
             "unit": "A",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -434,6 +469,7 @@
             "readSchedule": "update",
             "description": "Number of battery cycles",
             "unit": "",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -444,6 +480,7 @@
             "readSchedule": "update",
             "description": "Actual battery charge (-) / discharge (+) current",
             "unit": "A",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -454,6 +491,7 @@
             "readSchedule": "update",
             "description": "Actual state of charge",
             "unit": "%",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -464,6 +502,7 @@
             "readSchedule": "update",
             "description": "Battery temperature",
             "unit": "°C",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -474,6 +513,7 @@
             "readSchedule": "update",
             "description": "Battery voltage",
             "unit": "V",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -484,6 +524,7 @@
             "readSchedule": "update",
             "description": "Current phase 1 (powermeter)",
             "unit": "A",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -494,6 +535,7 @@
             "readSchedule": "update",
             "description": "Active power phase 1 (powermeter)",
             "unit": "W",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -504,6 +546,7 @@
             "readSchedule": "update",
             "description": "Voltage phase 1 (powermeter)",
             "unit": "V",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -514,6 +557,7 @@
             "readSchedule": "update",
             "description": "Current phase 2 (powermeter)",
             "unit": "A",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -524,6 +568,7 @@
             "readSchedule": "update",
             "description": "Active power phase 2 (powermeter)",
             "unit": "W",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -534,6 +579,7 @@
             "readSchedule": "update",
             "description": "Voltage phase 2 (powermeter)",
             "unit": "V",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -544,6 +590,7 @@
             "readSchedule": "update",
             "description": "Current phase 3 (powermeter)",
             "unit": "A",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -554,6 +601,7 @@
             "readSchedule": "update",
             "description": "Active power phase 3 (powermeter)",
             "unit": "W",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -564,6 +612,7 @@
             "readSchedule": "update",
             "description": "Voltage phase 3 (powermeter)",
             "unit": "V",
+            "defaultValue": "0",
             "access": "RO"
         },
         {
@@ -574,6 +623,87 @@
             "readSchedule": "update",
             "description": "Total active power (powermeter)",
             "unit": "W",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "batteryManufacturer",
+            "address": 517,
+            "size": 8,
+            "type": "string",
+            "readSchedule": "init",
+            "description": "Battery Manufacturer",
+            "access": "RO"
+        },
+        {
+            "id": "batteryModelId",
+            "address": 525,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "init",
+            "description": "Battery model ID",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "batterySerialNumber",
+            "address": 527,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "init",
+            "description": "Battery serial number",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "inverterManufacturer",
+            "address": 535,
+            "size": 16,
+            "type": "string",
+            "readSchedule": "init",
+            "description": "Inverter manufacturer",
+            "access": "RO"
+        },
+        {
+            "id": "inverterSerialNumber",
+            "address": 559,
+            "size": 16,
+            "type": "string",
+            "readSchedule": "init",
+            "description": "Inverter serial number",
+            "access": "RO"
+        },
+        {
+            "id": "energyScaleFactor",
+            "address": 579,
+            "size": 1,
+            "type": "int16",
+            "readSchedule": "init",
+            "description": "Energy scale factor",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "batteryType",
+            "address": 588,
+            "size": 1,
+            "type": "uint16",
+            "enum": "BatteryType",
+            "readSchedule": "init",
+            "description": "Battery type",
+            "defaultValue": "BatteryTypeNoBattery",
+            "access": "RO"
+        },
+        {
+            "id": "totalEnergyAcToGrid",
+            "address": 1064,
+            "size": 1,
+            "type": "int32",
+            "scaleFactor": "energyScaleFactor",
+            "readSchedule": "update",
+            "description": "Total energy AC-side to grid",
+            "unit": "Wh",
+            "defaultValue": "0",
             "access": "RO"
         }
     ]

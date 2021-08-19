@@ -87,6 +87,11 @@ void IntegrationPluginKostal::discoverThings(ThingDiscoveryInfo *info)
     });
 }
 
+void IntegrationPluginKostal::startMonitoringAutoThings()
+{
+
+}
+
 void IntegrationPluginKostal::setupThing(ThingSetupInfo *info)
 {
     Thing *thing = info->thing();
@@ -104,43 +109,97 @@ void IntegrationPluginKostal::setupThing(ThingSetupInfo *info)
 
         KostalConnection *kostalConnection = new KostalConnection(hostAddress, port, slaveId, this);
         connect(kostalConnection, &KostalConnection::initializationFinished, this, [this, thing, kostalConnection, info]{
-            qCDebug(dcKostal()) << "Connection init finished" << kostalConnection->inverterArticleNumber();
+            qCDebug(dcKostal()) << "Connection init" << kostalConnection;
+
             // FIXME: check if success
+
             m_kostalConnections.insert(thing, kostalConnection);
             info->finish(Thing::ThingErrorNoError);
 
+            // Set connected true
+            thing->setStateValue(kostalInverterConnectedStateTypeId, true);
+            foreach (Thing *childThing, myThings().filterByParentId(thing->id())) {
+                if (childThing->thingClassId() == kostalBatteryThingClassId) {
+                    childThing->setSettingValue(kostalBatteryConnectedStateTypeId, true);
+                } else if (childThing->thingClassId() == kostalMeterThingClassId) {
+                    childThing->setSettingValue(kostalMeterConnectedStateTypeId, true);
+                }
+            }
+
             connect(kostalConnection, &KostalConnection::totalHomeConsumptionChanged, this, [thing](float totalHomeConsumption){
                 qCDebug(dcKostal()) << thing << "total home consumption changed" << totalHomeConsumption << "Wh";
-                thing->setStateValue(kostalInverterTotalEnergyProducedStateTypeId, totalHomeConsumption / 1000); // kWh
+                thing->setStateValue(kostalInverterTotalEnergyProducedStateTypeId, totalHomeConsumption / 1000.0); // kWh
             });
 
+            // Total current
+            connect(kostalConnection, &KostalConnection::currentPhase1Changed, this, [thing, kostalConnection](float currentPhase1){
+                qCDebug(dcKostal()) << thing << "current phase 1 changed" << currentPhase1 << "A";
+                thing->setStateValue(kostalInverterPhaseACurrentStateTypeId, currentPhase1); // A
+                thing->setStateValue(kostalInverterTotalCurrentStateTypeId, kostalConnection->currentPhase1() + kostalConnection->currentPhase2() + kostalConnection->currentPhase3()); // A
+            });
+
+            connect(kostalConnection, &KostalConnection::currentPhase2Changed, this, [thing, kostalConnection](float currentPhase2){
+                qCDebug(dcKostal()) << thing << "current phase 2 changed" << currentPhase2 << "A";
+                thing->setStateValue(kostalInverterPhaseBCurrentStateTypeId, currentPhase2); // A
+                thing->setStateValue(kostalInverterTotalCurrentStateTypeId, kostalConnection->currentPhase1() + kostalConnection->currentPhase2() + kostalConnection->currentPhase3()); // A
+            });
+
+            connect(kostalConnection, &KostalConnection::currentPhase3Changed, this, [thing, kostalConnection](float currentPhase3){
+                qCDebug(dcKostal()) << thing << "current phase 3 changed" << currentPhase3 << "A";
+                thing->setStateValue(kostalInverterPhaseCCurrentStateTypeId, currentPhase3); // A
+                thing->setStateValue(kostalInverterTotalCurrentStateTypeId, kostalConnection->currentPhase1() + kostalConnection->currentPhase2() + kostalConnection->currentPhase3()); // A
+            });
+
+            connect(kostalConnection, &KostalConnection::gridFrequencyChanged, this, [thing](float gridFrequency){
+                qCDebug(dcKostal()) << thing << "grid frequency changed" << gridFrequency << "Hz";
+                thing->setStateValue(kostalInverterFrequencyStateTypeId, gridFrequency);
+            });
+
+            // Update registers
+            kostalConnection->update();
         });
 
-
-
+        connect(kostalConnection, &KostalConnection::connectionStateChanged, this, [this, thing, kostalConnection](bool status){
+            qCDebug(dcKostal()) << "Connected changed to" << status << "for" << thing;
+            if (status) {
+                kostalConnection->initialize();
+            } else {
+                thing->setStateValue(kostalInverterConnectedStateTypeId, false);
+                foreach (Thing *childThing, myThings().filterByParentId(thing->id())) {
+                    if (childThing->thingClassId() == kostalBatteryThingClassId) {
+                        childThing->setSettingValue(kostalBatteryConnectedStateTypeId, false);
+                    } else if (childThing->thingClassId() == kostalMeterThingClassId) {
+                        childThing->setSettingValue(kostalMeterConnectedStateTypeId, false);
+                    }
+                }
+            }
+        });
     }
 }
 
 void IntegrationPluginKostal::postSetupThing(Thing *thing)
 {
-    Q_UNUSED(thing)
-//    if (thing->thingClassId() == mtecThingClassId) {
-
-//        if (!m_pluginTimer) {
-//            qCDebug(dcKostal()) << "Starting plugin timer...";
-//            m_pluginTimer = hardwareManager()->pluginTimerManager()->registerTimer(10);
-//            connect(m_pluginTimer, &PluginTimer::timeout, this, [this] {
-//                foreach (Thing *thing, myThings().filterByThingClassId(mtecThingClassId)) {
-//                    update(thing);
-//                }
-//            });
-//        }
-//    }
+    if (thing->thingClassId() == kostalInverterThingClassId) {
+        if (!m_pluginTimer) {
+            qCDebug(dcKostal()) << "Starting plugin timer...";
+            m_pluginTimer = hardwareManager()->pluginTimerManager()->registerTimer(10);
+            connect(m_pluginTimer, &PluginTimer::timeout, this, [this] {
+                foreach(KostalConnection *connection, m_kostalConnections) {
+                    if (connection->connected()) {
+                        connection->update();
+                    }
+                }
+            });
+        }
+    }
 }
 
 void IntegrationPluginKostal::thingRemoved(Thing *thing)
 {
-    Q_UNUSED(thing)
+    if (thing->thingClassId() == kostalInverterThingClassId && m_kostalConnections.contains(thing)) {
+        KostalConnection *connection = m_kostalConnections.take(thing);
+        delete connection;
+    }
 
     if (myThings().isEmpty() && m_pluginTimer) {
         hardwareManager()->pluginTimerManager()->unregisterTimer(m_pluginTimer);
@@ -150,13 +209,7 @@ void IntegrationPluginKostal::thingRemoved(Thing *thing)
 
 void IntegrationPluginKostal::executeAction(ThingActionInfo *info)
 {
-
     info->finish(Thing::ThingErrorNoError);
-}
-
-void IntegrationPluginKostal::update(Thing *thing)
-{
-    Q_UNUSED(thing)
 }
 
 

@@ -76,6 +76,13 @@ public:
     };
     Q_ENUM(EnergyManagementState)
 
+    enum BatteryType {
+        BatteryTypeNoBattery = 0,
+        BatteryTypeSonyMurata = 2,
+        BatteryTypeBydBbox = 4
+    };
+    Q_ENUM(BatteryType)
+
     explicit KostalConnection(const QHostAddress &hostAddress, uint port, quint16 slaveId, QObject *parent = nullptr);
     ~KostalConnection() = default;
 
@@ -187,8 +194,62 @@ public:
     /* Battery voltage [V] - Address: 216, Size: 2 */
     float batteryVoltage() const;
 
-    void initialize();
-    void update();
+    /* Current phase 1 (powermeter) [A] - Address: 222, Size: 2 */
+    float powerMeterCurrentPhase1() const;
+
+    /* Active power phase 1 (powermeter) [W] - Address: 224, Size: 2 */
+    float powerMeterActivePowerPhase1() const;
+
+    /* Voltage phase 1 (powermeter) [V] - Address: 230, Size: 2 */
+    float powerMeterVoltagePhase1() const;
+
+    /* Current phase 2 (powermeter) [A] - Address: 232, Size: 2 */
+    float powerMeterCurrentPhase2() const;
+
+    /* Active power phase 2 (powermeter) [W] - Address: 234, Size: 2 */
+    float powerMeterActivePowerPhase2() const;
+
+    /* Voltage phase 2 (powermeter) [V] - Address: 240, Size: 2 */
+    float powerMeterVoltagePhase2() const;
+
+    /* Current phase 3 (powermeter) [A] - Address: 242, Size: 2 */
+    float powerMeterCurrentPhase3() const;
+
+    /* Active power phase 3 (powermeter) [W] - Address: 244, Size: 2 */
+    float powerMeterActivePowerPhase3() const;
+
+    /* Voltage phase 3 (powermeter) [V] - Address: 250, Size: 2 */
+    float powerMeterVoltagePhase3() const;
+
+    /* Total active power (powermeter) [W] - Address: 252, Size: 2 */
+    float powerMeterTotalActivePower() const;
+
+    /* Battery Manufacturer - Address: 517, Size: 8 */
+    QString batteryManufacturer() const;
+
+    /* Battery model ID - Address: 525, Size: 2 */
+    quint32 batteryModelId() const;
+
+    /* Battery serial number - Address: 527, Size: 2 */
+    quint32 batterySerialNumber() const;
+
+    /* Inverter manufacturer - Address: 535, Size: 16 */
+    QString inverterManufacturer() const;
+
+    /* Inverter serial number - Address: 559, Size: 16 */
+    QString inverterSerialNumber() const;
+
+    /* Energy scale factor - Address: 579, Size: 1 */
+    qint16 energyScaleFactor() const;
+
+    /* Battery type - Address: 588, Size: 1 */
+    BatteryType batteryType() const;
+
+    /* Total energy AC-side to grid [Wh] - Address: 1064, Size: 1 */
+    float totalEnergyAcToGrid() const;
+
+    virtual void initialize();
+    virtual void update();
 
     void updateInverterState();
     void updateTotalDcPower();
@@ -217,6 +278,17 @@ public:
     void updateBatteryStateOfCharge();
     void updateBatteryTemperature();
     void updateBatteryVoltage();
+    void updatePowerMeterCurrentPhase1();
+    void updatePowerMeterActivePowerPhase1();
+    void updatePowerMeterVoltagePhase1();
+    void updatePowerMeterCurrentPhase2();
+    void updatePowerMeterActivePowerPhase2();
+    void updatePowerMeterVoltagePhase2();
+    void updatePowerMeterCurrentPhase3();
+    void updatePowerMeterActivePowerPhase3();
+    void updatePowerMeterVoltagePhase3();
+    void updatePowerMeterTotalActivePower();
+    void updateTotalEnergyAcToGrid();
 
 signals:
     void initializationFinished();
@@ -257,47 +329,83 @@ signals:
     void batteryStateOfChargeChanged(float batteryStateOfCharge);
     void batteryTemperatureChanged(float batteryTemperature);
     void batteryVoltageChanged(float batteryVoltage);
+    void powerMeterCurrentPhase1Changed(float powerMeterCurrentPhase1);
+    void powerMeterActivePowerPhase1Changed(float powerMeterActivePowerPhase1);
+    void powerMeterVoltagePhase1Changed(float powerMeterVoltagePhase1);
+    void powerMeterCurrentPhase2Changed(float powerMeterCurrentPhase2);
+    void powerMeterActivePowerPhase2Changed(float powerMeterActivePowerPhase2);
+    void powerMeterVoltagePhase2Changed(float powerMeterVoltagePhase2);
+    void powerMeterCurrentPhase3Changed(float powerMeterCurrentPhase3);
+    void powerMeterActivePowerPhase3Changed(float powerMeterActivePowerPhase3);
+    void powerMeterVoltagePhase3Changed(float powerMeterVoltagePhase3);
+    void powerMeterTotalActivePowerChanged(float powerMeterTotalActivePower);
+    void batteryManufacturerChanged(const QString &batteryManufacturer);
+    void batteryModelIdChanged(quint32 batteryModelId);
+    void batterySerialNumberChanged(quint32 batterySerialNumber);
+    void inverterManufacturerChanged(const QString &inverterManufacturer);
+    void inverterSerialNumberChanged(const QString &inverterSerialNumber);
+    void energyScaleFactorChanged(qint16 energyScaleFactor);
+    void batteryTypeChanged(BatteryType batteryType);
+    void totalEnergyAcToGridChanged(float totalEnergyAcToGrid);
 
 private:
     quint16 m_slaveId = 1;
     QVector<QModbusReply *> m_pendingInitReplies;
 
-    quint16 m_modbusUnitId;
-    ByteOrder m_modbusByteOrder;
+    quint16 m_modbusUnitId = 1;
+    ByteOrder m_modbusByteOrder = ByteOrderBigEndian;
     QString m_inverterArticleNumber;
-    quint16 m_bidirectionalConverterNumber;
-    quint16 m_numberPvStrings;
-    quint32 m_hardwareVersion;
+    quint16 m_bidirectionalConverterNumber = 0;
+    quint16 m_numberPvStrings = 0;
+    quint32 m_hardwareVersion = 0;
     QString m_softwareVersionMainController;
     QString m_softwareVersionIoController;
-    quint16 m_powerId;
-    InverterState m_inverterState;
-    float m_totalDcPower;
-    EnergyManagementState m_energyManagementState;
-    float m_homeOwnConsumptionFromBattery;
-    float m_homeOwnConsumptionFromGrid;
-    float m_totalHomeConsumptionFromBattery;
-    float m_totalHomeConsumptionFromGrid;
-    float m_totalHomeConsumptionFromPv;
-    float m_homeOwnConsumptionPv;
-    float m_totalHomeConsumption;
-    float m_gridFrequency;
-    float m_currentPhase1;
-    float m_activePowerPhase1;
-    float m_voltagePhase1;
-    float m_currentPhase2;
-    float m_activePowerPhase2;
-    float m_voltagePhase2;
-    float m_currentPhase3;
-    float m_activePowerPhase3;
-    float m_voltagePhase3;
-    float m_totalAcPower;
-    float m_batteryChargeCurrent;
-    float m_numberOfBytteryCycles;
-    float m_actualBatteryChargeCurrent;
-    float m_batteryStateOfCharge;
-    float m_batteryTemperature;
-    float m_batteryVoltage;
+    quint16 m_powerId = 0;
+    InverterState m_inverterState = InverterStateUnknown;
+    float m_totalDcPower = 0;
+    EnergyManagementState m_energyManagementState = EnergyManagementStateIdle;
+    float m_homeOwnConsumptionFromBattery = 0;
+    float m_homeOwnConsumptionFromGrid = 0;
+    float m_totalHomeConsumptionFromBattery = 0;
+    float m_totalHomeConsumptionFromGrid = 0;
+    float m_totalHomeConsumptionFromPv = 0;
+    float m_homeOwnConsumptionPv = 0;
+    float m_totalHomeConsumption = 0;
+    float m_gridFrequency = 0;
+    float m_currentPhase1 = 0;
+    float m_activePowerPhase1 = 0;
+    float m_voltagePhase1 = 0;
+    float m_currentPhase2 = 0;
+    float m_activePowerPhase2 = 0;
+    float m_voltagePhase2 = 0;
+    float m_currentPhase3 = 0;
+    float m_activePowerPhase3 = 0;
+    float m_voltagePhase3 = 0;
+    float m_totalAcPower = 0;
+    float m_batteryChargeCurrent = 0;
+    float m_numberOfBytteryCycles = 0;
+    float m_actualBatteryChargeCurrent = 0;
+    float m_batteryStateOfCharge = 0;
+    float m_batteryTemperature = 0;
+    float m_batteryVoltage = 0;
+    float m_powerMeterCurrentPhase1 = 0;
+    float m_powerMeterActivePowerPhase1 = 0;
+    float m_powerMeterVoltagePhase1 = 0;
+    float m_powerMeterCurrentPhase2 = 0;
+    float m_powerMeterActivePowerPhase2 = 0;
+    float m_powerMeterVoltagePhase2 = 0;
+    float m_powerMeterCurrentPhase3 = 0;
+    float m_powerMeterActivePowerPhase3 = 0;
+    float m_powerMeterVoltagePhase3 = 0;
+    float m_powerMeterTotalActivePower = 0;
+    QString m_batteryManufacturer;
+    quint32 m_batteryModelId = 0;
+    quint32 m_batterySerialNumber = 0;
+    QString m_inverterManufacturer;
+    QString m_inverterSerialNumber;
+    qint16 m_energyScaleFactor = 0;
+    BatteryType m_batteryType = BatteryTypeNoBattery;
+    float m_totalEnergyAcToGrid = 0;
 
     void verifyInitFinished();
 
@@ -337,8 +445,28 @@ private:
     QModbusReply *readBatteryStateOfCharge();
     QModbusReply *readBatteryTemperature();
     QModbusReply *readBatteryVoltage();
+    QModbusReply *readPowerMeterCurrentPhase1();
+    QModbusReply *readPowerMeterActivePowerPhase1();
+    QModbusReply *readPowerMeterVoltagePhase1();
+    QModbusReply *readPowerMeterCurrentPhase2();
+    QModbusReply *readPowerMeterActivePowerPhase2();
+    QModbusReply *readPowerMeterVoltagePhase2();
+    QModbusReply *readPowerMeterCurrentPhase3();
+    QModbusReply *readPowerMeterActivePowerPhase3();
+    QModbusReply *readPowerMeterVoltagePhase3();
+    QModbusReply *readPowerMeterTotalActivePower();
+    QModbusReply *readBatteryManufacturer();
+    QModbusReply *readBatteryModelId();
+    QModbusReply *readBatterySerialNumber();
+    QModbusReply *readInverterManufacturer();
+    QModbusReply *readInverterSerialNumber();
+    QModbusReply *readEnergyScaleFactor();
+    QModbusReply *readBatteryType();
+    QModbusReply *readTotalEnergyAcToGrid();
 
 
 };
+
+QDebug operator<<(QDebug debug, KostalConnection *kostalConnection);
 
 #endif // KOSTALCONNECTION_H
