@@ -13,7 +13,7 @@
                     "displayName": "KOSTAL Inverter",
                     "id": "7dc6db14-6f5a-4ac8-9684-4c6a526bd0de",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": ["smartmeterproducer", "connectable"],
+                    "interfaces": ["solarinverter", "connectable"],
                     "paramTypes": [
                         {
                             "id": "f1c43b1e-cffe-4d30-bda0-c23ed648dd71",
