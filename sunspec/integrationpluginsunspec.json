@@ -403,7 +403,7 @@
                     "displayName": "SunSpec three phase inverter",
                     "id": "2e4122ea-96a5-415c-b5e2-7d6012265a83",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["smartmeterproducer", "connectable"],
+                    "interfaces": ["solarinverter", "connectable"],
                     "paramTypes": [
                         {
                             "id": "8d5b2b58-ce46-406d-844e-f53136afcf09",
