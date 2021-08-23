@@ -50,7 +50,6 @@ class SunSpecSettingsModel;
 class SunSpecStatusModel;
 class SunSpecControlsModel;
 class SunSpecStorageModel;
-class SunSpecEnergyStorageBaseModelDeprecatedModel;
 class SunSpecPricingModel;
 class SunSpecVoltVarModel;
 class SunSpecFreqWattParamModel;
@@ -76,20 +75,14 @@ class SunSpecMpptModel;
 class SunSpecMeterSinglePhaseModel;
 class SunSpecMeterSplitSinglePhaseAbnModel;
 class SunSpecMeterThreePhaseModel;
-class SunSpecMeterThreePhaseDeltaConnectModel;
 class SunSpecMeterSinglePhaseFloatModel;
 class SunSpecMeterSplitSinglePhaseFloatModel;
 class SunSpecMeterThreePhaseWyeConnectModel;
-class SunSpecDeltaConnectThreePhaseAbcMeterModel;
-class SunSpecSecureAcMeterSelectedReadingsModel;
 class SunSpecIrradianceModel;
 class SunSpecLocationModel;
 class SunSpecRefPointModel;
 class SunSpecBaseMetModel;
 class SunSpecMiniMetModel;
-class SunSpecStringCombinerCurrentModel;
-class SunSpecStringCombinerAdvancedModel;
-class SunSpecSolarModuleModel;
 class SunSpecTrackerControllerModel;
 class SunSpecBatteryModel;
 class SunSpecLithiumIonBankModel;
@@ -118,7 +111,6 @@ public:
         ModelIdStatus = 122,
         ModelIdControls = 123,
         ModelIdStorage = 124,
-        ModelIdEnergyStorageBaseDeprecated = 801,
         ModelIdPricing = 125,
         ModelIdVoltVar = 126,
         ModelIdFreqWattParam = 127,
@@ -144,20 +136,14 @@ public:
         ModelIdMeterSinglePhase = 201,
         ModelIdMeterSplitSinglePhaseAbn = 202,
         ModelIdMeterThreePhase = 203,
-        ModelIdMeterThreePhaseDeltaConnect = 204,
         ModelIdMeterSinglePhaseFloat = 211,
         ModelIdMeterSplitSinglePhaseFloat = 212,
         ModelIdMeterThreePhaseWyeConnect = 213,
-        ModelIdDeltaConnectThreePhaseAbcMeter = 214,
-        ModelIdSecureAcMeterSelectedReadings = 220,
         ModelIdIrradiance = 302,
         ModelIdLocation = 305,
         ModelIdRefPoint = 306,
         ModelIdBaseMet = 307,
         ModelIdMiniMet = 308,
-        ModelIdStringCombinerCurrent = 403,
-        ModelIdStringCombinerAdvanced = 404,
-        ModelIdSolarModule = 502,
         ModelIdTrackerController = 601,
         ModelIdBattery = 802,
         ModelIdLithiumIonBank = 803,

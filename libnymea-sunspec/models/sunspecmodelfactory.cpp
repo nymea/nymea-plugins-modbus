@@ -32,67 +32,20 @@
 #include "sunspecconnection.h"
 
 #include "sunspeccommonmodel.h"
-#include "sunspecaggregatormodel.h"
 #include "sunspecinvertersinglephasemodel.h"
 #include "sunspecinvertersplitphasemodel.h"
 #include "sunspecinverterthreephasemodel.h"
 #include "sunspecinvertersinglephasefloatmodel.h"
 #include "sunspecinvertersplitphasefloatmodel.h"
 #include "sunspecinverterthreephasefloatmodel.h"
-#include "sunspecnameplatemodel.h"
-#include "sunspecsettingsmodel.h"
-#include "sunspecstatusmodel.h"
-#include "sunspeccontrolsmodel.h"
 #include "sunspecstoragemodel.h"
-#include "sunspecenergystoragebasemodeldeprecatedmodel.h"
-#include "sunspecpricingmodel.h"
-#include "sunspecvoltvarmodel.h"
-#include "sunspecfreqwattparammodel.h"
-#include "sunspecreactivecurrentmodel.h"
-#include "sunspeclvrtmodel.h"
-#include "sunspechvrtmodel.h"
-#include "sunspecwattpfmodel.h"
-#include "sunspecvoltwattmodel.h"
-#include "sunspecschedulemodel.h"
-#include "sunspecfreqwattmodel.h"
-#include "sunspeclfrtmodel.h"
-#include "sunspechfrtmodel.h"
-#include "sunspeclvrtcmodel.h"
-#include "sunspechvrtcmodel.h"
-#include "sunspeclvrtxmodel.h"
-#include "sunspechvrtxmodel.h"
-#include "sunspeclfrtcmodel.h"
-#include "sunspechfrtcmodel.h"
-#include "sunspeclfrtxmodel.h"
-#include "sunspechfrtxmodel.h"
-#include "sunspecextsettingsmodel.h"
-#include "sunspecmpptmodel.h"
 #include "sunspecmetersinglephasemodel.h"
 #include "sunspecmetersplitsinglephaseabnmodel.h"
 #include "sunspecmeterthreephasemodel.h"
-#include "sunspecmeterthreephasedeltaconnectmodel.h"
 #include "sunspecmetersinglephasefloatmodel.h"
 #include "sunspecmetersplitsinglephasefloatmodel.h"
 #include "sunspecmeterthreephasewyeconnectmodel.h"
-#include "sunspecdeltaconnectthreephaseabcmetermodel.h"
-#include "sunspecsecureacmeterselectedreadingsmodel.h"
-#include "sunspecirradiancemodel.h"
-#include "sunspeclocationmodel.h"
-#include "sunspecrefpointmodel.h"
-#include "sunspecbasemetmodel.h"
-#include "sunspecminimetmodel.h"
-#include "sunspecstringcombinercurrentmodel.h"
-#include "sunspecstringcombineradvancedmodel.h"
-#include "sunspecsolarmodulemodel.h"
-#include "sunspectrackercontrollermodel.h"
 #include "sunspecbatterymodel.h"
-#include "sunspeclithiumionbankmodel.h"
-#include "sunspeclithiumionstringmodel.h"
-#include "sunspeclithiumionmodulemodel.h"
-#include "sunspecflowbatterymodel.h"
-#include "sunspecflowbatterystringmodel.h"
-#include "sunspecflowbatterymodulemodel.h"
-#include "sunspecflowbatterystackmodel.h"
 
 SunSpecModelFactory::SunSpecModelFactory(QObject *parent) :
     QObject(parent)
@@ -129,8 +82,6 @@ SunSpecModel *SunSpecModelFactory::createModel(SunSpecConnection *connection, qu
         return new SunSpecControlsModel(connection, modbusStartRegister, modelLength, connection);
     case ModelIdStorage:
         return new SunSpecStorageModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdEnergyStorageBaseDeprecated:
-        return new SunSpecEnergyStorageBaseModelDeprecatedModel(connection, modbusStartRegister, modelLength, connection);
     case ModelIdPricing:
         return new SunSpecPricingModel(connection, modbusStartRegister, modelLength, connection);
     case ModelIdVoltVar:
@@ -181,18 +132,12 @@ SunSpecModel *SunSpecModelFactory::createModel(SunSpecConnection *connection, qu
         return new SunSpecMeterSplitSinglePhaseAbnModel(connection, modbusStartRegister, modelLength, connection);
     case ModelIdMeterThreePhase:
         return new SunSpecMeterThreePhaseModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdMeterThreePhaseDeltaConnect:
-        return new SunSpecMeterThreePhaseDeltaConnectModel(connection, modbusStartRegister, modelLength, connection);
     case ModelIdMeterSinglePhaseFloat:
         return new SunSpecMeterSinglePhaseFloatModel(connection, modbusStartRegister, modelLength, connection);
     case ModelIdMeterSplitSinglePhaseFloat:
         return new SunSpecMeterSplitSinglePhaseFloatModel(connection, modbusStartRegister, modelLength, connection);
     case ModelIdMeterThreePhaseWyeConnect:
         return new SunSpecMeterThreePhaseWyeConnectModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdDeltaConnectThreePhaseAbcMeter:
-        return new SunSpecDeltaConnectThreePhaseAbcMeterModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdSecureAcMeterSelectedReadings:
-        return new SunSpecSecureAcMeterSelectedReadingsModel(connection, modbusStartRegister, modelLength, connection);
     case ModelIdIrradiance:
         return new SunSpecIrradianceModel(connection, modbusStartRegister, modelLength, connection);
     case ModelIdLocation:
@@ -203,12 +148,6 @@ SunSpecModel *SunSpecModelFactory::createModel(SunSpecConnection *connection, qu
         return new SunSpecBaseMetModel(connection, modbusStartRegister, modelLength, connection);
     case ModelIdMiniMet:
         return new SunSpecMiniMetModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdStringCombinerCurrent:
-        return new SunSpecStringCombinerCurrentModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdStringCombinerAdvanced:
-        return new SunSpecStringCombinerAdvancedModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdSolarModule:
-        return new SunSpecSolarModuleModel(connection, modbusStartRegister, modelLength, connection);
     case ModelIdTrackerController:
         return new SunSpecTrackerControllerModel(connection, modbusStartRegister, modelLength, connection);
     case ModelIdBattery:

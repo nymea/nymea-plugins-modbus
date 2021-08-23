@@ -1183,6 +1183,9 @@ def getClassName(groupName):
 
 
 def createClass(className, modelId):
+    if len(modelWhiteList) > 0 and modelId not in modelWhiteList:
+        return
+
     print('Creating class -->', className, 'using model id', modelId)
     headerFileName = os.path.join(outputDirectory, className.lower() + '.h')
     sourceFileName = os.path.join(outputDirectory, className.lower() + '.cpp')
@@ -1302,6 +1305,10 @@ def writeModelFactorySource(fileDescriptor):
 scriptPath = os.path.dirname(os.path.realpath(sys.argv[0]))
 modelJsonFolder = os.path.join(scriptPath, 'models/json')
 outputDirectory = os.path.join(scriptPath, '../models')
+modelWhiteList = []
+
+# Note: to minimize the lib size, only generate models used by the plugin
+modelWhiteList = [1, 101, 102, 103, 111, 112, 113, 124, 201, 202, 203, 211, 212, 213, 802]
 
 # id, {name, lable}
 models = {}
@@ -1321,6 +1328,9 @@ classes = {}
 for group in groups.keys():
     if len(groups[group]) > 1:
         for modelId in groups[group]:
+            if len(modelWhiteList) > 0 and modelId not in modelWhiteList:
+                continue
+
             modelData = models[modelId]
             lable = modelData['group']['label']
             className = getClassName(lable)
@@ -1332,7 +1342,6 @@ for group in groups.keys():
 
 # Print defined class names for models
 for className in classes.keys():
-    print(classes[className], '-->', className)
     createClass(className, classes[className])
 
 print('Generated header files')
