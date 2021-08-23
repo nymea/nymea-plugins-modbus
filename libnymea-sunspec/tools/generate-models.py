@@ -91,8 +91,11 @@ def loadModel(modelFilePath):
     print('--> Loading model', modelFilePath)
     modelFile = open(modelFilePath, 'r')
     modelData = json.load(modelFile)
-    models[modelData['id']] = modelData
-    
+    if len(modelWhiteList) > 0:
+        if modelData['id'] in modelWhiteList:
+            models[modelData['id']] = modelData
+    else:
+        models[modelData['id']] = modelData
 
 def loadModels():
     modelFiles = os.listdir(modelJsonFolder)
@@ -1209,6 +1212,7 @@ def writeModelFactoryHeader(fileDescriptor):
     writeLine(fileDescriptor)
 
     for cn in classes.keys():
+        
         writeLine(fileDescriptor, 'class %s;' % cn)
 
     writeLine(fileDescriptor)
@@ -1308,7 +1312,7 @@ outputDirectory = os.path.join(scriptPath, '../models')
 modelWhiteList = []
 
 # Note: to minimize the lib size, only generate models used by the plugin
-modelWhiteList = [1, 101, 102, 103, 111, 112, 113, 124, 201, 202, 203, 211, 212, 213, 802]
+modelWhiteList = [1, 101, 102, 103, 111, 112, 113, 124, 201, 202, 203, 204, 211, 212, 213, 214, 802]
 
 # id, {name, lable}
 models = {}
@@ -1328,9 +1332,6 @@ classes = {}
 for group in groups.keys():
     if len(groups[group]) > 1:
         for modelId in groups[group]:
-            if len(modelWhiteList) > 0 and modelId not in modelWhiteList:
-                continue
-
             modelData = models[modelId]
             lable = modelData['group']['label']
             className = getClassName(lable)

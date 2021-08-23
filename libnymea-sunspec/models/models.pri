@@ -10,9 +10,11 @@ HEADERS += \
     $$PWD/sunspecmetersinglephasemodel.h \
     $$PWD/sunspecmetersplitsinglephaseabnmodel.h \
     $$PWD/sunspecmeterthreephasemodel.h \
+    $$PWD/sunspecmeterthreephasedeltaconnectmodel.h \
     $$PWD/sunspecmetersinglephasefloatmodel.h \
     $$PWD/sunspecmetersplitsinglephasefloatmodel.h \
     $$PWD/sunspecmeterthreephasewyeconnectmodel.h \
+    $$PWD/sunspecdeltaconnectthreephaseabcmetermodel.h \
     $$PWD/sunspecbatterymodel.h \
     $$PWD/sunspecmodelfactory.h
 
@@ -28,8 +30,10 @@ SOURCES += \
     $$PWD/sunspecmetersinglephasemodel.cpp \
     $$PWD/sunspecmetersplitsinglephaseabnmodel.cpp \
     $$PWD/sunspecmeterthreephasemodel.cpp \
+    $$PWD/sunspecmeterthreephasedeltaconnectmodel.cpp \
     $$PWD/sunspecmetersinglephasefloatmodel.cpp \
     $$PWD/sunspecmetersplitsinglephasefloatmodel.cpp \
     $$PWD/sunspecmeterthreephasewyeconnectmodel.cpp \
+    $$PWD/sunspecdeltaconnectthreephaseabcmetermodel.cpp \
     $$PWD/sunspecbatterymodel.cpp \
     $$PWD/sunspecmodelfactory.cpp
