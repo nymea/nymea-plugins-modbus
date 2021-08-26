@@ -74,53 +74,76 @@ public:
     QString label() const override;
 
 
+    /* Setpoint for maximum charge. [W] */
     float wChaMax() const;
     QModbusReply *setWChaMax(float wChaMax);
 
+    /* Setpoint for maximum charging rate. Default is MaxChaRte. [% WChaMax/sec] */
     float wChaGra() const;
     QModbusReply *setWChaGra(float wChaGra);
 
+    /* Setpoint for maximum discharge rate. Default is MaxDisChaRte. [% WChaMax/sec] */
     float wDisChaGra() const;
     QModbusReply *setWDisChaGra(float wDisChaGra);
 
+    /* Activate hold/discharge/charge storage control mode. Bitfield value. */
     Storctl_modFlags storCtlMod() const;
     QModbusReply *setStorCtlMod(Storctl_modFlags storCtlMod);
 
+    /* Setpoint for maximum charging VA. [VA] */
     float vaChaMax() const;
     QModbusReply *setVaChaMax(float vaChaMax);
 
+    /* Setpoint for minimum reserve for storage as a percentage of the nominal maximum storage. [% WChaMax] */
     float minRsvPct() const;
     QModbusReply *setMinRsvPct(float minRsvPct);
 
+    /* Currently available energy as a percent of the capacity rating. [% AhrRtg] */
     float chaState() const;
+    /* State of charge (ChaState) minus storage reserve (MinRsvPct) times capacity rating (AhrRtg). [AH] */
     float storAval() const;
+    /* Internal battery voltage. [V] */
     float inBatV() const;
+    /* Charge status of storage device. Enumerated value. */
     Chast chaSt() const;
+    /* Percent of max discharge rate. [% WDisChaMax] */
     float outWRte() const;
     QModbusReply *setOutWRte(float outWRte);
 
+    /* Percent of max charging rate. [ % WChaMax] */
     float inWRte() const;
     QModbusReply *setInWRte(float inWRte);
 
+    /* Time window for charge/discharge rate change. [Secs] */
     quint16 inOutWRteWinTms() const;
     QModbusReply *setInOutWRteWinTms(quint16 inOutWRteWinTms);
 
+    /* Timeout period for charge/discharge rate. [Secs] */
     quint16 inOutWRteRvrtTms() const;
     QModbusReply *setInOutWRteRvrtTms(quint16 inOutWRteRvrtTms);
 
+    /* Ramp time for moving from current setpoint to new setpoint. [Secs] */
     quint16 inOutWRteRmpTms() const;
     QModbusReply *setInOutWRteRmpTms(quint16 inOutWRteRmpTms);
 
     Chagriset chaGriSet() const;
     QModbusReply *setChaGriSet(Chagriset chaGriSet);
 
+    /* Scale factor for maximum charge. */
     qint16 wChaMaxSf() const;
+    /* Scale factor for maximum charge and discharge rate. */
     qint16 wChaDisChaGraSf() const;
+    /* Scale factor for maximum charging VA. */
     qint16 vaChaMaxSf() const;
+    /* Scale factor for minimum reserve percentage. */
     qint16 minRsvPctSf() const;
+    /* Scale factor for available energy percent. */
     qint16 chaStateSf() const;
+    /* Scale factor for state of charge. */
     qint16 storAvalSf() const;
+    /* Scale factor for battery voltage. */
     qint16 inBatVSf() const;
+    /* Scale factor for percent charge/discharge rate. */
     qint16 inOutWRteSf() const;
 
 protected:

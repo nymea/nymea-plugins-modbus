@@ -83,67 +83,129 @@ public:
     QString description() const override;
     QString label() const override;
 
+    /* Total AC Current [A] */
     float amps() const;
+    /* Phase A Current [A] */
     float ampsPhaseA() const;
+    /* Phase B Current [A] */
     float ampsPhaseB() const;
+    /* Phase C Current [A] */
     float ampsPhaseC() const;
+    /* Line to Neutral AC Voltage (average of active phases) [V] */
     float voltageLn() const;
+    /* Phase Voltage AN [V] */
     float phaseVoltageAn() const;
+    /* Phase Voltage BN [V] */
     float phaseVoltageBn() const;
+    /* Phase Voltage CN [V] */
     float phaseVoltageCn() const;
+    /* Line to Line AC Voltage (average of active phases) [V] */
     float voltageLl() const;
+    /* Phase Voltage AB [V] */
     float phaseVoltageAb() const;
+    /* Phase Voltage BC [V] */
     float phaseVoltageBc() const;
+    /* Phase Voltage CA [V] */
     float phaseVoltageCa() const;
+    /* Frequency [Hz] */
     float hz() const;
+    /* Total Real Power [W] */
     float watts() const;
+    /* Watts phase A [W] */
     float wattsPhaseA() const;
+    /* Watts phase B [W] */
     float wattsPhaseB() const;
+    /* Watts phase C [W] */
     float wattsPhaseC() const;
+    /* AC Apparent Power [VA] */
     float va() const;
+    /* VA phase A [VA] */
     float vaPhaseA() const;
+    /* VA phase B [VA] */
     float vaPhaseB() const;
+    /* VA phase C [VA] */
     float vaPhaseC() const;
+    /* Reactive Power [var] */
     float var() const;
+    /* VAR phase A [var] */
     float varPhaseA() const;
+    /* VAR phase B [var] */
     float varPhaseB() const;
+    /* VAR phase C [var] */
     float varPhaseC() const;
+    /* Power Factor [PF] */
     float pf() const;
+    /* PF phase A [PF] */
     float pfPhaseA() const;
+    /* PF phase B [PF] */
     float pfPhaseB() const;
+    /* PF phase C [PF] */
     float pfPhaseC() const;
+    /* Total Real Energy Exported [Wh] */
     float totalWattHoursExported() const;
+    /* Total Watt-hours Exported phase A [Wh] */
     float totalWattHoursExportedPhaseA() const;
+    /* Total Watt-hours Exported phase B [Wh] */
     float totalWattHoursExportedPhaseB() const;
+    /* Total Watt-hours Exported phase C [Wh] */
     float totalWattHoursExportedPhaseC() const;
+    /* Total Real Energy Imported [Wh] */
     float totalWattHoursImported() const;
+    /* Total Watt-hours Imported phase A [Wh] */
     float totalWattHoursImportedPhaseA() const;
+    /* Total Watt-hours Imported phase B [Wh] */
     float totalWattHoursImportedPhaseB() const;
+    /* Total Watt-hours Imported phase C [Wh] */
     float totalWattHoursImportedPhaseC() const;
+    /* Total Apparent Energy Exported [VAh] */
     float totalVaHoursExported() const;
+    /* Total VA-hours Exported phase A [VAh] */
     float totalVaHoursExportedPhaseA() const;
+    /* Total VA-hours Exported phase B [VAh] */
     float totalVaHoursExportedPhaseB() const;
+    /* Total VA-hours Exported phase C [VAh] */
     float totalVaHoursExportedPhaseC() const;
+    /* Total Apparent Energy Imported [VAh] */
     float totalVaHoursImported() const;
+    /* Total VA-hours Imported phase A [VAh] */
     float totalVaHoursImportedPhaseA() const;
+    /* Total VA-hours Imported phase B [VAh] */
     float totalVaHoursImportedPhaseB() const;
+    /* Total VA-hours Imported phase C [VAh] */
     float totalVaHoursImportedPhaseC() const;
+    /* Total Reactive Energy Imported Quadrant 1 [varh] */
     float totalVarHoursImportedQ1() const;
+    /* Total VAr-hours Imported Q1 phase A [varh] */
     float totalVArHoursImportedQ1PhaseA() const;
+    /* Total VAr-hours Imported Q1 phase B [varh] */
     float totalVArHoursImportedQ1PhaseB() const;
+    /* Total VAr-hours Imported Q1 phase C [varh] */
     float totalVArHoursImportedQ1PhaseC() const;
+    /* Total Reactive Power Imported Quadrant 2 [varh] */
     float totalVArHoursImportedQ2() const;
+    /* Total VAr-hours Imported Q2 phase A [varh] */
     float totalVArHoursImportedQ2PhaseA() const;
+    /* Total VAr-hours Imported Q2 phase B [varh] */
     float totalVArHoursImportedQ2PhaseB() const;
+    /* Total VAr-hours Imported Q2 phase C [varh] */
     float totalVArHoursImportedQ2PhaseC() const;
+    /* Total Reactive Power Exported Quadrant 3 [varh] */
     float totalVArHoursExportedQ3() const;
+    /* Total VAr-hours Exported Q3 phase A [varh] */
     float totalVArHoursExportedQ3PhaseA() const;
+    /* Total VAr-hours Exported Q3 phase B [varh] */
     float totalVArHoursExportedQ3PhaseB() const;
+    /* Total VAr-hours Exported Q3 phase C [varh] */
     float totalVArHoursExportedQ3PhaseC() const;
+    /* Total Reactive Power Exported Quadrant 4 [varh] */
     float totalVArHoursExportedQ4() const;
+    /* Total VAr-hours Exported Q4 Imported phase A [varh] */
     float totalVArHoursExportedQ4ImportedPhaseA() const;
+    /* Total VAr-hours Exported Q4 Imported phase B [varh] */
     float totalVArHoursExportedQ4ImportedPhaseB() const;
+    /* Total VAr-hours Exported Q4 Imported phase C [varh] */
     float totalVArHoursExportedQ4ImportedPhaseC() const;
+    /* Meter Event Flags */
     EvtFlags events() const;
 
 protected:

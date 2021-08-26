@@ -111,37 +111,68 @@ public:
     QString description() const override;
     QString label() const override;
 
+    /* Total AC Current [A] */
     float amps() const;
+    /* Current scale factor */
     qint16 a_SF() const;
+    /* Average phase or line voltage [V] */
     float voltage() const;
+    /* Voltage scale factor */
     qint16 v_SF() const;
+    /* Frequency [Hz] */
     float hz() const;
+    /* Frequency scale factor */
     qint16 hz_SF() const;
+    /* Total Real Power [W] */
     float watts() const;
+    /* Real Power scale factor */
     qint16 w_SF() const;
+    /* AC Apparent Power [VA] */
     float va() const;
+    /* Apparent Power scale factor */
     qint16 vA_SF() const;
+    /* Reactive Power [var] */
     float var() const;
+    /* Reactive Power scale factor */
     qint16 vAR_SF() const;
+    /* Power Factor [Pct] */
     float pf() const;
+    /* Power Factor scale factor */
     qint16 pF_SF() const;
+    /* Total Real Energy Exported [Wh] */
     quint32 totalWattHoursExported() const;
+    /* Total Real Energy Imported [Wh] */
     quint32 totalWattHoursImported() const;
+    /* Real Energy scale factor */
     qint16 totWh_SF() const;
+    /* Total Apparent Energy Exported [VAh] */
     quint32 totalVaHoursExported() const;
+    /* Total Apparent Energy Imported [VAh] */
     quint32 totalVaHoursImported() const;
+    /* Apparent Energy scale factor */
     qint16 totVAh_SF() const;
+    /* Total Reactive Energy Imported Quadrant 1 [varh] */
     quint32 totalVarHoursImportedQ1() const;
+    /* Total Reactive Power Imported Quadrant 2 [varh] */
     quint32 totalVArHoursImportedQ2() const;
+    /* Total Reactive Power Exported Quadrant 3 [varh] */
     quint32 totalVArHoursExportedQ3() const;
+    /* Total Reactive Power Exported Quadrant 4 [varh] */
     quint32 totalVArHoursExportedQ4() const;
+    /* Reactive Energy scale factor */
     qint16 totVArh_SF() const;
+    /* Meter Event Flags */
     EvtFlags events() const;
     quint16 rsrvd() const;
+    /* Timestamp value is the number of seconds since January 1, 2000 */
     quint32 timestamp() const;
+    /* Millisecond counter 0-999 */
     quint16 milliseconds() const;
+    /* Sequence number of request */
     quint16 sequence() const;
+    /* Algorithm used to compute the digital signature */
     Alg algorithm() const;
+    /* Number of registers comprising the digital signature. */
     quint16 n() const;
 
 protected:

@@ -90,99 +90,131 @@ public:
 
     QString name() const override;
 
+    /* Number of active entries in schedule. */
     quint16 actPts() const;
     QModbusReply *setActPts(quint16 actPts);
 
+    /* Schedule start in seconds since 2000 JAN 01 00:00:00 UTC. [Secs] */
     quint32 strTms() const;
     QModbusReply *setStrTms(quint32 strTms);
 
+    /* The repetition count for time-based schedules (0=repeat forever) */
     quint16 repPer() const;
     QModbusReply *setRepPer(quint16 repPer);
 
+    /* The repetition frequency for time-based schedules: no repeat=0 */
     Intvtyp schdTyp() const;
     QModbusReply *setSchdTyp(Intvtyp schdTyp);
 
+    /* The meaning of the X-values in the array.  */
     Xtyp xTyp() const;
     QModbusReply *setXTyp(Xtyp xTyp);
 
+    /* Scale factor for schedule range values. */
     qint16 xSf() const;
     QModbusReply *setXSf(qint16 xSf);
 
+    /* The meaning of the Y-values in the array. */
     Ytyp yTyp() const;
     QModbusReply *setYTyp(Ytyp yTyp);
 
+    /* Scale factor for schedule target values. */
     qint16 ySf() const;
     QModbusReply *setYSf(qint16 ySf);
 
+    /* Entry 1 range. */
     float x1() const;
     QModbusReply *setX1(float x1);
 
+    /* Entry 1 target. */
     float y1() const;
     QModbusReply *setY1(float y1);
 
+    /* Entry 2 range. */
     float x2() const;
     QModbusReply *setX2(float x2);
 
+    /* Entry 2 target. */
     float y2() const;
     QModbusReply *setY2(float y2);
 
+    /* Entry 3 range. */
     float x3() const;
     QModbusReply *setX3(float x3);
 
+    /* Entry 3 target. */
     float y3() const;
     QModbusReply *setY3(float y3);
 
+    /* Entry 4 range. */
     float x4() const;
     QModbusReply *setX4(float x4);
 
+    /* Entry 4 target. */
     float y4() const;
     QModbusReply *setY4(float y4);
 
+    /* Entry 15range. */
     float x5() const;
     QModbusReply *setX5(float x5);
 
+    /* Entry 5 target. */
     float y5() const;
     QModbusReply *setY5(float y5);
 
+    /* Entry 6 range. */
     float x6() const;
     QModbusReply *setX6(float x6);
 
+    /* Entry 6 target. */
     float y6() const;
     QModbusReply *setY6(float y6);
 
+    /* Entry 7 range. */
     float x7() const;
     QModbusReply *setX7(float x7);
 
+    /* Entry 7 target. */
     float y7() const;
     QModbusReply *setY7(float y7);
 
+    /* Entry 8 range. */
     float x8() const;
     QModbusReply *setX8(float x8);
 
+    /* Entry 8 target. */
     float y8() const;
     QModbusReply *setY8(float y8);
 
+    /* Entry 9 range. */
     float x9() const;
     QModbusReply *setX9(float x9);
 
+    /* Entry 9 target. */
     float y9() const;
     QModbusReply *setY9(float y9);
 
+    /* Entry 10 range. */
     float x10() const;
     QModbusReply *setX10(float x10);
 
+    /* Entry 10 target. */
     float y10() const;
     QModbusReply *setY10(float y10);
 
+    /* Optional description for schedule. */
     QString nam() const;
     QModbusReply *setNam(const QString &nam);
 
+    /* Time window for schedule entry change. [Secs] */
     quint16 winTms() const;
     QModbusReply *setWinTms(quint16 winTms);
 
+    /* Ramp time for moving from current target to new target. [Secs] */
     quint16 rmpTms() const;
     QModbusReply *setRmpTms(quint16 rmpTms);
 
+    /* Index of active entry in the active schedule. */
     quint16 actIndx() const;
 
     void processBlockData(const QVector<quint16> blockData) override;
@@ -285,14 +317,19 @@ public:
     QString label() const override;
 
 
+    /* Bitfield of active schedules */
     ActschdFlags actSchd() const;
     QModbusReply *setActSchd(ActschdFlags actSchd);
 
+    /* Is basic scheduling active. */
     ModenaFlags modEna() const;
     QModbusReply *setModEna(ModenaFlags modEna);
 
+    /* Number of schedules supported (recommend min. 4, max 32) */
     quint16 nSchd() const;
+    /* Number of schedule entries supported (maximum of 10). */
     quint16 nPts() const;
+    /* Pad register. */
     quint16 pad() const;
 
 protected:

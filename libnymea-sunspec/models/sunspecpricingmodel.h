@@ -65,24 +65,31 @@ public:
     QString label() const override;
 
 
+    /* Is price-based charge/discharge mode active? */
     ModenaFlags modEna() const;
     QModbusReply *setModEna(ModenaFlags modEna);
 
+    /* Meaning of the pricing signal. When a Price schedule is used, type must match the schedule range variable description. */
     Sigtype sigType() const;
     QModbusReply *setSigType(Sigtype sigType);
 
+    /* Utility/ESP specific pricing signal. Content depends on pricing signal type. When H/M/L type is specified. Low=0; Med=1; High=2. */
     float sig() const;
     QModbusReply *setSig(float sig);
 
+    /* Time window for charge/discharge pricing change. [Secs] */
     quint16 winTms() const;
     QModbusReply *setWinTms(quint16 winTms);
 
+    /* Timeout period for charge/discharge pricing change. [Secs] */
     quint16 rvtTms() const;
     QModbusReply *setRvtTms(quint16 rvtTms);
 
+    /* Ramp time for moving from current charge or discharge level to new level. [Secs] */
     quint16 rmpTms() const;
     QModbusReply *setRmpTms(quint16 rmpTms);
 
+    /* Pricing signal scale factor. */
     qint16 sigSf() const;
     quint16 pad() const;
 

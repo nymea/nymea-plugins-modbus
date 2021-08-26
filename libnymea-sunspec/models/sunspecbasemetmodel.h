@@ -49,16 +49,27 @@ public:
     QString description() const override;
     QString label() const override;
 
+    /* Ambient Temperature [C] */
     float ambientTemperature() const;
+    /* Relative Humidity [Pct] */
     qint16 relativeHumidity() const;
+    /* Barometric Pressure [HPa] */
     qint16 barometricPressure() const;
+    /* Wind Speed [mps] */
     qint16 windSpeed() const;
+    /* Wind Direction [deg] */
     qint16 windDirection() const;
+    /* Rainfall [mm] */
     qint16 rainfall() const;
+    /* Snow Depth [mm] */
     qint16 snowDepth() const;
+    /* Precipitation Type (WMO 4680 SYNOP code reference) */
     qint16 precipitationType() const;
+    /* Electric Field [Vm] */
     qint16 electricField() const;
+    /* Surface Wetness [kO] */
     qint16 surfaceWetness() const;
+    /* Soil Wetness [Pct] */
     qint16 soilWetness() const;
 
 protected:

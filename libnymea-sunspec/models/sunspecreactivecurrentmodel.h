@@ -62,40 +62,53 @@ public:
     QString label() const override;
 
 
+    /* Indicates if gradients trend toward zero at the edges of the deadband or trend toward zero at the center of the deadband. */
     Argramod arGraMod() const;
     QModbusReply *setArGraMod(Argramod arGraMod);
 
+    /* The gradient used to increase capacitive dynamic current. A value of 0 indicates no additional reactive current support. [%ARtg/%dV] */
     float arGraSag() const;
     QModbusReply *setArGraSag(float arGraSag);
 
+    /* The gradient used to increase inductive dynamic current.  A value of 0 indicates no additional reactive current support. [%ARtg/%dV] */
     float arGraSwell() const;
     QModbusReply *setArGraSwell(float arGraSwell);
 
+    /* Activate dynamic reactive current model */
     ModenaFlags modEna() const;
     QModbusReply *setModEna(ModenaFlags modEna);
 
+    /* The time window used to calculate the moving average voltage. [Secs] */
     quint16 filTms() const;
     QModbusReply *setFilTms(quint16 filTms);
 
+    /* The lower delta voltage limit for which negative voltage deviations less than this value no dynamic vars are produced. [% VRef] */
     float dbVMin() const;
     QModbusReply *setDbVMin(float dbVMin);
 
+    /* The upper delta voltage limit for which positive voltage deviations less than this value no dynamic current produced. [% VRef] */
     float dbVMax() const;
     QModbusReply *setDbVMax(float dbVMax);
 
+    /* Block zone voltage which defines a lower voltage boundary below which no dynamic current is produced. [% VRef] */
     float blkZnV() const;
     QModbusReply *setBlkZnV(float blkZnV);
 
+    /* Hysteresis voltage used with BlkZnV. [% VRef] */
     float hysBlkZnV() const;
     QModbusReply *setHysBlkZnV(float hysBlkZnV);
 
+    /* Block zone time the time before which reactive current support remains active regardless of how low the voltage drops. [mSecs] */
     quint16 blkZnTmms() const;
     QModbusReply *setBlkZnTmms(quint16 blkZnTmms);
 
+    /* Hold time during which reactive current support continues after the average voltage has entered the dead zone. [mSecs] */
     quint16 holdTmms() const;
     QModbusReply *setHoldTmms(quint16 holdTmms);
 
+    /* Scale factor for the gradients. */
     qint16 arGraSf() const;
+    /* Scale factor for the voltage zone and limit settings. */
     qint16 vRefPctSf() const;
     quint16 pad() const;
 

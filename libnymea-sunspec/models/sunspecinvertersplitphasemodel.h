@@ -82,48 +82,79 @@ public:
     QString description() const override;
     QString label() const override;
 
+    /* AC Current [A] */
     float amps() const;
+    /* Phase A Current [A] */
     float ampsPhaseA() const;
+    /* Phase B Current [A] */
     float ampsPhaseB() const;
+    /* Phase C Current [A] */
     float ampsPhaseC() const;
     qint16 a_SF() const;
+    /* Phase Voltage AB [V] */
     float phaseVoltageAb() const;
+    /* Phase Voltage BC [V] */
     float phaseVoltageBc() const;
+    /* Phase Voltage CA [V] */
     float phaseVoltageCa() const;
+    /* Phase Voltage AN [V] */
     float phaseVoltageAn() const;
+    /* Phase Voltage BN [V] */
     float phaseVoltageBn() const;
+    /* Phase Voltage CN [V] */
     float phaseVoltageCn() const;
     qint16 v_SF() const;
+    /* AC Power [W] */
     float watts() const;
     qint16 w_SF() const;
+    /* Line Frequency [Hz] */
     float hz() const;
     qint16 hz_SF() const;
+    /* AC Apparent Power [VA] */
     float va() const;
     qint16 vA_SF() const;
+    /* AC Reactive Power [var] */
     float vAr() const;
     qint16 vAr_SF() const;
+    /* AC Power Factor [Pct] */
     float pf() const;
     qint16 pF_SF() const;
+    /* AC Energy [Wh] */
     quint32 wattHours() const;
     qint16 wH_SF() const;
+    /* DC Current [A] */
     float dcAmps() const;
     qint16 dCA_SF() const;
+    /* DC Voltage [V] */
     float dcVoltage() const;
     qint16 dCV_SF() const;
+    /* DC Power [W] */
     float dcWatts() const;
     qint16 dCW_SF() const;
+    /* Cabinet Temperature [C] */
     float cabinetTemperature() const;
+    /* Heat Sink Temperature [C] */
     float heatSinkTemperature() const;
+    /* Transformer Temperature [C] */
     float transformerTemperature() const;
+    /* Other Temperature [C] */
     float otherTemperature() const;
     qint16 tmp_SF() const;
+    /* Enumerated value.  Operating state */
     St operatingState() const;
+    /* Vendor specific operating state code */
     quint16 vendorOperatingState() const;
+    /* Bitmask value. Event fields */
     Evt1Flags event1() const;
+    /* Reserved for future use */
     quint32 eventBitfield2() const;
+    /* Vendor defined events */
     quint32 vendorEventBitfield1() const;
+    /* Vendor defined events */
     quint32 vendorEventBitfield2() const;
+    /* Vendor defined events */
     quint32 vendorEventBitfield3() const;
+    /* Vendor defined events */
     quint32 vendorEventBitfield4() const;
 
 protected:

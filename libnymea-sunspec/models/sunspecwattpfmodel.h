@@ -57,141 +57,187 @@ public:
 
     QString name() const override;
 
+    /* Number of active points in array. */
     quint16 actPt() const;
     QModbusReply *setActPt(quint16 actPt);
 
+    /* Point 1 Watts. [% WMax] */
     float w1() const;
     QModbusReply *setW1(float w1);
 
+    /* Point 1 PF in EEI notation. [cos()] */
     float pf1() const;
     QModbusReply *setPf1(float pf1);
 
+    /* Point 2 Watts. [% WMax] */
     float w2() const;
     QModbusReply *setW2(float w2);
 
+    /* Point 2 PF in EEI notation. [cos()] */
     float pf2() const;
     QModbusReply *setPf2(float pf2);
 
+    /* Point 3 Watts. [% WMax] */
     float w3() const;
     QModbusReply *setW3(float w3);
 
+    /* Point 3 PF in EEI notation. [cos()] */
     float pf3() const;
     QModbusReply *setPf3(float pf3);
 
+    /* Point 4 Watts. [% WMax] */
     float w4() const;
     QModbusReply *setW4(float w4);
 
+    /* Point 4 PF in EEI notation. [cos()] */
     float pf4() const;
     QModbusReply *setPf4(float pf4);
 
+    /* Point 5 Watts. [% WMax] */
     float w5() const;
     QModbusReply *setW5(float w5);
 
+    /* Point 5 PF in EEI notation. [cos()] */
     float pf5() const;
     QModbusReply *setPf5(float pf5);
 
+    /* Point 6 Watts. [% WMax] */
     float w6() const;
     QModbusReply *setW6(float w6);
 
+    /* Point 6 PF in EEI notation. [cos()] */
     float pf6() const;
     QModbusReply *setPf6(float pf6);
 
+    /* Point 7 Watts. [% WMax] */
     float w7() const;
     QModbusReply *setW7(float w7);
 
+    /* Point 7 PF in EEI notation. [cos()] */
     float pf7() const;
     QModbusReply *setPf7(float pf7);
 
+    /* Point 8 Watts. [% WMax] */
     float w8() const;
     QModbusReply *setW8(float w8);
 
+    /* Point 8 PF in EEI notation. [cos()] */
     float pf8() const;
     QModbusReply *setPf8(float pf8);
 
+    /* Point 9 Watts. [% WMax] */
     float w9() const;
     QModbusReply *setW9(float w9);
 
+    /* Point 9 PF in EEI notation. [cos()] */
     float pf9() const;
     QModbusReply *setPf9(float pf9);
 
+    /* Point 10 Watts. [% WMax] */
     float w10() const;
     QModbusReply *setW10(float w10);
 
+    /* Point 10 PF in EEI notation. [cos()] */
     float pf10() const;
     QModbusReply *setPf10(float pf10);
 
+    /* Point 11 Watts. [% WMax] */
     float w11() const;
     QModbusReply *setW11(float w11);
 
+    /* Point 11 PF in EEI notation. [cos()] */
     float pf11() const;
     QModbusReply *setPf11(float pf11);
 
+    /* Point 12 Watts. [% WMax] */
     float w12() const;
     QModbusReply *setW12(float w12);
 
+    /* Point 12 PF in EEI notation. [cos()] */
     float pf12() const;
     QModbusReply *setPf12(float pf12);
 
+    /* Point 13 Watts. [% WMax] */
     float w13() const;
     QModbusReply *setW13(float w13);
 
+    /* Point 13 PF in EEI notation. [cos()] */
     float pf13() const;
     QModbusReply *setPf13(float pf13);
 
+    /* Point 14 Watts. [% WMax] */
     float w14() const;
     QModbusReply *setW14(float w14);
 
+    /* Point 14 PF in EEI notation. [cos()] */
     float pf14() const;
     QModbusReply *setPf14(float pf14);
 
+    /* Point 15 Watts. [% WMax] */
     float w15() const;
     QModbusReply *setW15(float w15);
 
+    /* Point 15 PF in EEI notation. [cos()] */
     float pf15() const;
     QModbusReply *setPf15(float pf15);
 
+    /* Point 16 Watts. [% WMax] */
     float w16() const;
     QModbusReply *setW16(float w16);
 
+    /* Point 16 PF in EEI notation. [cos()] */
     float pf16() const;
     QModbusReply *setPf16(float pf16);
 
+    /* Point 17 Watts. [% WMax] */
     float w17() const;
     QModbusReply *setW17(float w17);
 
+    /* Point 17 PF in EEI notation. [cos()] */
     float pf17() const;
     QModbusReply *setPf17(float pf17);
 
+    /* Point 18 Watts. [% WMax] */
     float w18() const;
     QModbusReply *setW18(float w18);
 
+    /* Point 18 PF in EEI notation. [cos()] */
     float pf18() const;
     QModbusReply *setPf18(float pf18);
 
+    /* Point 19 Watts. [% WMax] */
     float w19() const;
     QModbusReply *setW19(float w19);
 
+    /* Point 19 PF in EEI notation. [cos()] */
     float pf19() const;
     QModbusReply *setPf19(float pf19);
 
+    /* Point 20 Watts. [% WMax] */
     float w20() const;
     QModbusReply *setW20(float w20);
 
+    /* Point 20 PF in EEI notation. [cos()] */
     float pf20() const;
     QModbusReply *setPf20(float pf20);
 
+    /* Optional description for curve. */
     QString crvNam() const;
     QModbusReply *setCrvNam(const QString &crvNam);
 
+    /* The time of the PT1 in seconds (time to accomplish a change of 95%). [Secs] */
     quint16 rmpPt1Tms() const;
     QModbusReply *setRmpPt1Tms(quint16 rmpPt1Tms);
 
+    /* The maximum rate at which the power factor may be reduced in response to changes in the power value. [% PF/min] */
     float rmpDecTmm() const;
     QModbusReply *setRmpDecTmm(float rmpDecTmm);
 
+    /* The maximum rate at which the power factor may be increased in response to changes in the power value. [% PF/min] */
     float rmpIncTmm() const;
     QModbusReply *setRmpIncTmm(float rmpIncTmm);
 
+    /* Enumerated value indicates if curve is read-only or can be modified. */
     Readonly readOnly() const;
     quint16 pad() const;
 
@@ -274,25 +320,35 @@ public:
     QString label() const override;
 
 
+    /* Index of active curve. 0=no active curve. */
     quint16 actCrv() const;
     QModbusReply *setActCrv(quint16 actCrv);
 
+    /* Is watt-PF mode active. */
     ModenaFlags modEna() const;
     QModbusReply *setModEna(ModenaFlags modEna);
 
+    /* Time window for watt-PF change. [Secs] */
     quint16 winTms() const;
     QModbusReply *setWinTms(quint16 winTms);
 
+    /* Timeout period for watt-PF curve selection. [Secs] */
     quint16 rvrtTms() const;
     QModbusReply *setRvrtTms(quint16 rvrtTms);
 
+    /* Ramp time for moving from current mode to new mode. [Secs] */
     quint16 rmpTms() const;
     QModbusReply *setRmpTms(quint16 rmpTms);
 
+    /* Number of curves supported (recommend 4). */
     quint16 nCrv() const;
+    /* Max number of points in array. */
     quint16 nPt() const;
+    /* Scale factor for percent WMax. */
     qint16 wSf() const;
+    /* Scale factor for PF. */
     qint16 pfSf() const;
+    /* Scale factor for increment and decrement ramps. */
     qint16 rmpIncDecSf() const;
 
 protected:

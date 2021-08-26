@@ -92,15 +92,25 @@ public:
     SunSpecMpptModel *parentModel() const;
 
     QString name() const override;
+    /* Input ID */
     quint16 inputId() const;
+    /* Input ID Sting */
     QString inputIdSting() const;
+    /* DC Current [A] */
     float dcCurrent() const;
+    /* DC Voltage [V] */
     float dcVoltage() const;
+    /* DC Power [W] */
     float dcPower() const;
+    /* Lifetime Energy [Wh] */
     quint32 lifetimeEnergy() const;
+    /* Timestamp [Secs] */
     quint32 timestamp() const;
+    /* Temperature [C] */
     qint16 temperature() const;
+    /* Operating State */
     Dcst operatingState() const;
+    /* Module Events */
     DcevtFlags moduleEvents() const;
 
     void processBlockData(const QVector<quint16> blockData) override;
@@ -166,12 +176,19 @@ public:
     QString description() const override;
     QString label() const override;
 
+    /* Current Scale Factor */
     qint16 currentScaleFactor() const;
+    /* Voltage Scale Factor */
     qint16 voltageScaleFactor() const;
+    /* Power Scale Factor */
     qint16 powerScaleFactor() const;
+    /* Energy Scale Factor */
     qint16 energyScaleFactor() const;
+    /* Global Events */
     EvtFlags globalEvents() const;
+    /* Number of Modules */
     int numberOfModules() const;
+    /* Timestamp Period */
     quint16 timestampPeriod() const;
 
 protected:

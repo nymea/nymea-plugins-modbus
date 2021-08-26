@@ -162,36 +162,62 @@ public:
     SunSpecLithiumIonBankModel *parentModel() const;
 
     QString name() const override;
+    /* Count of modules in the string. */
     quint16 moduleCount() const;
+    /* Current status of the string. */
     StrstFlags stringStatus() const;
+    /* Connection Failure Reason */
     Strconfail connectionFailureReason() const;
+    /* Battery string state of charge, expressed as a percentage. [%] */
     float stringStateOfCharge() const;
+    /* Battery string state of health, expressed as a percentage. [%] */
     float stringStateOfHealth() const;
+    /* String current measurement. [A] */
     float stringCurrent() const;
+    /* Maximum voltage for all cells in the string. [V] */
     float maxCellVoltage() const;
+    /* Module containing the maximum cell voltage. */
     quint16 maxCellVoltageModule() const;
+    /* Minimum voltage for all cells in the string. [V] */
     float minCellVoltage() const;
+    /* Module containing the minimum cell voltage. */
     quint16 minCellVoltageModule() const;
+    /* Average voltage for all cells in the string. [V] */
     float averageCellVoltage() const;
+    /* Maximum temperature for all modules in the bank. [C] */
     float maxModuleTemperature() const;
+    /* Module with the maximum temperature. */
     quint16 maxModuleTemperatureModule() const;
+    /* Minimum temperature for all modules in the bank. [C] */
     float minModuleTemperature() const;
+    /* Module with the minimum temperature. */
     quint16 minModuleTemperatureModule() const;
+    /* Average temperature for all modules in the bank. [C] */
     float averageModuleTemperature() const;
+    /* Reason why the string is currently disabled. */
     Strdisrsn disabledReason() const;
+    /* Status of the contactor(s) for the string. */
     StrconstFlags contactorStatus() const;
+    /* Alarms, warnings and status values.  Bit flags. */
     Strevt1Flags stringEvent1() const;
+    /* Alarms, warnings and status values.  Bit flags. */
     quint32 stringEvent2() const;
+    /* Vendor defined events. */
     quint32 vendorStringEventBitfield1() const;
+    /* Vendor defined events. */
     quint32 vendorStringEventBitfield2() const;
 
+    /* Enables and disables the string. */
     Strsetena enableDisableString() const;
     QModbusReply *setEnableDisableString(Strsetena enableDisableString);
 
+    /* Connects and disconnects the string. */
     Strsetcon connectDisconnectString() const;
     QModbusReply *setConnectDisconnectString(Strsetcon connectDisconnectString);
 
+    /* Pad register. */
     quint16 pad1() const;
+    /* Pad register. */
     quint16 pad2() const;
 
     void processBlockData(const QVector<quint16> blockData) override;
@@ -245,31 +271,57 @@ public:
     QString description() const override;
     QString label() const override;
 
+    /* Number of strings in the bank. */
     quint16 stringCount() const;
+    /* Number of strings with contactor closed. */
     quint16 connectedStringCount() const;
+    /* Maximum temperature for all modules in the bank. */
     float maxModuleTemperature() const;
+    /* String containing the module with maximum temperature. */
     quint16 maxModuleTemperatureString() const;
+    /* Module with maximum temperature. */
     quint16 maxModuleTemperatureModule() const;
+    /* Minimum temperature for all modules in the bank. [C] */
     float minModuleTemperature() const;
+    /* String containing the module with minimum temperature. */
     quint16 minModuleTemperatureString() const;
+    /* Module with minimum temperature. */
     quint16 minModuleTemperatureModule() const;
+    /* Average temperature for all modules in the bank. */
     qint16 averageModuleTemperature() const;
+    /* Maximum string voltage for all strings in the bank. [V] */
     float maxStringVoltage() const;
+    /* String with maximum voltage. */
     quint16 maxStringVoltageString() const;
+    /* Minimum string voltage for all strings in the bank. [V] */
     float minStringVoltage() const;
+    /* String with minimum voltage. */
     quint16 minStringVoltageString() const;
+    /* Average string voltage for all strings in the bank. [V] */
     float averageStringVoltage() const;
+    /* Maximum current of any string in the bank. [A] */
     float maxStringCurrent() const;
+    /* String with the maximum current. */
     quint16 maxStringCurrentString() const;
+    /* Minimum current of any string in the bank. [A] */
     float minStringCurrent() const;
+    /* String with the minimum current. */
     quint16 minStringCurrentString() const;
+    /* Average string current for all strings in the bank. [A] */
     float averageStringCurrent() const;
+    /* Total number of cells that are currently being balanced. */
     quint16 batteryCellBalancingCount() const;
+    /* Scale factor for cell voltage. */
     qint16 cellV_SF() const;
+    /* Scale factor for module temperatures. */
     qint16 modTmp_SF() const;
+    /* Scale factor for string currents. */
     qint16 a_SF() const;
+    /* Scale factor for string state of health. */
     qint16 soH_SF() const;
+    /* Scale factor for string state of charge. */
     qint16 soC_SF() const;
+    /* Scale factor for string voltage. */
     qint16 v_SF() const;
 
 protected:

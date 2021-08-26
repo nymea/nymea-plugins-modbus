@@ -173,30 +173,50 @@ public:
     SunSpecFlowBatteryStringModel *parentModel() const;
 
     QString name() const override;
+    /* Index of the module within the string. */
     quint16 moduleIndex() const;
+    /* Number of stacks in this module. */
     quint16 stackCount() const;
+    /* Current status of the module. */
     ModstFlags moduleStatus() const;
+    /* State of charge for this module. [%] */
     float moduleStateOfCharge() const;
+    /* Open circuit voltage for this module. [V] */
     float openCircuitVoltage() const;
+    /* External voltage fo this module. [V] */
     float externalVoltage() const;
+    /* Maximum voltage for all cells in this module. [V] */
     float maximumCellVoltage() const;
+    /* Cell with the maximum cell voltage. */
     quint16 maxCellVoltageCell() const;
+    /* Minimum voltage for all cells in this module. [V] */
     float minimumCellVoltage() const;
+    /* Cell with the minimum cell voltage. */
     quint16 minCellVoltageCell() const;
+    /* Average voltage for all cells in this module. [V] */
     float averageCellVoltage() const;
+    /* Anolyte Temperature [C] */
     float anolyteTemperature() const;
+    /* Catholyte Temperature [C] */
     float catholyteTemperature() const;
+    /* Contactor Status */
     ModconstFlags contactorStatus() const;
+    /* Alarms, warnings and status values.  Bit flags. */
     Modevt1Flags moduleEvent1() const;
+    /* Alarms, warnings and status values.  Bit flags. */
     Modevt2Flags moduleEvent2() const;
+    /* Connection Failure Reason */
     Modconfail connectionFailureReason() const;
 
+    /* Enables and disables the module. */
     Modsetena enableDisableModule() const;
     QModbusReply *setEnableDisableModule(Modsetena enableDisableModule);
 
+    /* Connects and disconnects the module. */
     Modsetcon connectDisconnectModule() const;
     QModbusReply *setConnectDisconnectModule(Modsetcon connectDisconnectModule);
 
+    /* Reason why the module is currently disabled. */
     Moddisrsn disabledReason() const;
 
     void processBlockData(const QVector<quint16> blockData) override;
@@ -290,35 +310,64 @@ public:
     QString description() const override;
     QString label() const override;
 
+    /* Index of the string within the bank. */
     quint16 stringIndex() const;
+    /* Number of modules in this string. */
     quint16 moduleCount() const;
+    /* Number of electrically connected modules in this string. */
     quint16 connectedModuleCount() const;
+    /* Maximum voltage for all modules in the string. [V] */
     float maxModuleVoltage() const;
+    /* Module with the maximum voltage. */
     quint16 maxModuleVoltageModule() const;
+    /* Minimum voltage for all modules in the string. [V] */
     float minModuleVoltage() const;
+    /* Module with the minimum voltage. */
     quint16 minModuleVoltageModule() const;
+    /* Average voltage for all modules in the string. [V] */
     float averageModuleVoltage() const;
+    /* Maximum voltage for all cells in the string. [V] */
     float maxCellVoltage() const;
+    /* Module containing the cell with the maximum voltage. */
     quint16 maxCellVoltageModule() const;
+    /* Stack containing the cell with the maximum voltage. */
     quint16 maxCellVoltageStack() const;
+    /* Minimum voltage for all cells in the string. [V] */
     float minCellVoltage() const;
+    /* Module containing the cell with the minimum voltage. */
     quint16 minCellVoltageModule() const;
+    /* Stack containing the cell with the minimum voltage. */
     quint16 minCellVoltageStack() const;
+    /* Average voltage for all cells in the string. [V] */
     float averageCellVoltage() const;
+    /* Maximum electrolyte temperature for all modules in the string. [C] */
     float maxTemperature() const;
+    /* Module with the maximum temperature. */
     quint16 maxTemperatureModule() const;
+    /* Minimum electrolyte temperature for all modules in the string. [C] */
     float minTemperature() const;
+    /* Module with the minimum temperature. */
     quint16 minTemperatureModule() const;
+    /* Average electrolyte temperature for all modules in the string. [C] */
     float averageTemperature() const;
+    /* Alarms, warnings and status values.  Bit flags. */
     Evt1Flags stringEvent1() const;
+    /* Alarms, warnings and status values.  Bit flags. */
     Evt2Flags stringEvent2() const;
+    /* Vendor defined events. */
     quint32 vendorEventBitfield1() const;
+    /* Vendor defined events. */
     quint32 vendorEventBitfield2() const;
     qint16 modV_SF() const;
+    /* Scale factor for voltage. */
     qint16 cellV_SF() const;
+    /* Scale factor for temperature. */
     qint16 tmp_SF() const;
+    /* Scale factor for state of charge. */
     qint16 soC_SF() const;
+    /* Scale factor for open circuit voltage. */
     qint16 oCV_SF() const;
+    /* Pad register. */
     quint16 pad1() const;
 
 protected:

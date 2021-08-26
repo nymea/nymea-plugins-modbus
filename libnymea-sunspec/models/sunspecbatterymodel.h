@@ -148,74 +148,130 @@ public:
     QString description() const override;
     QString label() const override;
 
+    /* Nameplate charge capacity in amp-hours. [Ah] */
     float nameplateChargeCapacity() const;
+    /* Nameplate energy capacity in DC watt-hours. [Wh] */
     float nameplateEnergyCapacity() const;
+    /* Maximum rate of energy transfer into the storage device in DC watts. [W] */
     float nameplateMaxChargeRate() const;
+    /* Maximum rate of energy transfer out of the storage device in DC watts. [W] */
     float nameplateMaxDischargeRate() const;
+    /* Self discharge rate.  Percentage of capacity (WHRtg) discharged per day. [%WHRtg] */
     float selfDischargeRate() const;
+    /* Manufacturer maximum state of charge, expressed as a percentage. [%WHRtg] */
     float nameplateMaxSoC() const;
+    /* Manufacturer minimum state of charge, expressed as a percentage. [%WHRtg] */
     float nameplateMinSoC() const;
 
+    /* Setpoint for maximum reserve for storage as a percentage of the nominal maximum storage. [%WHRtg] */
     float maxReservePercent() const;
     QModbusReply *setMaxReservePercent(float maxReservePercent);
 
+    /* Setpoint for minimum reserve for storage as a percentage of the nominal maximum storage. [%WHRtg] */
     float minReservePercent() const;
     QModbusReply *setMinReservePercent(float minReservePercent);
 
+    /* State of charge, expressed as a percentage. [%WHRtg] */
     float stateOfCharge() const;
+    /* Depth of discharge, expressed as a percentage. [%] */
     float depthOfDischarge() const;
+    /* Percentage of battery life remaining. [%] */
     float stateOfHealth() const;
+    /* Number of cycles executed in the battery. */
     quint32 cycleCount() const;
+    /* Charge status of storage device. Enumeration. */
     Chast chargeStatus() const;
+    /* Battery control mode. Enumeration. */
     Locremctl controlMode() const;
+    /* Value is incremented every second with periodic resets to zero. */
     quint16 batteryHeartbeat() const;
+    /* Value is incremented every second with periodic resets to zero. */
     quint16 controllerHeartbeat() const;
     QModbusReply *setControllerHeartbeat(quint16 controllerHeartbeat);
 
+    /* Used to reset any latched alarms.  1 = Reset. */
     quint16 alarmReset() const;
     QModbusReply *setAlarmReset(quint16 alarmReset);
 
+    /* Type of battery. Enumeration. */
     Typ batteryType() const;
+    /* State of the battery bank.  Enumeration. */
     State stateOfTheBatteryBank() const;
+    /* Vendor specific battery bank state.  Enumeration. */
     quint16 vendorBatteryBankState() const;
+    /* Date the device warranty expires. */
     quint32 warrantyDate() const;
+    /* Alarms and warnings.  Bit flags. */
     Evt1Flags batteryEvent1Bitfield() const;
+    /* Alarms and warnings.  Bit flags. */
     quint32 batteryEvent2Bitfield() const;
+    /* Vendor defined events. */
     quint32 vendorEventBitfield1() const;
+    /* Vendor defined events. */
     quint32 vendorEventBitfield2() const;
+    /* DC Bus Voltage. [V] */
     float externalBatteryVoltage() const;
+    /* Instantaneous maximum battery voltage. [V] */
     float maxBatteryVoltage() const;
+    /* Instantaneous minimum battery voltage. [V] */
     float minBatteryVoltage() const;
+    /* Maximum voltage for all cells in the bank. [V] */
     float maxCellVoltage() const;
+    /* String containing the cell with maximum voltage. */
     quint16 maxCellVoltageString() const;
+    /* Module containing the cell with maximum voltage. */
     quint16 maxCellVoltageModule() const;
+    /* Minimum voltage for all cells in the bank. [V] */
     float minCellVoltage() const;
+    /* String containing the cell with minimum voltage. */
     quint16 minCellVoltageString() const;
+    /* Module containing the cell with minimum voltage. */
     quint16 minCellVoltageModule() const;
+    /* Average cell voltage for all cells in the bank. [V] */
     float averageCellVoltage() const;
+    /* Total DC current flowing to/from the battery bank. [A] */
     float totalDcCurrent() const;
+    /* Instantaneous maximum DC charge current. [A] */
     float maxChargeCurrent() const;
+    /* Instantaneous maximum DC discharge current. [A] */
     float maxDischargeCurrent() const;
+    /* Total power flowing to/from the battery bank. [W] */
     float totalPower() const;
+    /* Request from battery to start or stop the inverter.  Enumeration. */
     Reqinvstate inverterStateRequest() const;
+    /* AC Power requested by battery. [W] */
     float batteryPowerRequest() const;
+    /* Instruct the battery bank to perform an operation such as connecting.  Enumeration. */
     Setop setOperation() const;
     QModbusReply *setSetOperation(Setop setOperation);
 
+    /* Set the current state of the inverter. */
     Setinvstate setInverterState() const;
     QModbusReply *setSetInverterState(Setinvstate setInverterState);
 
+    /* Scale factor for charge capacity. */
     qint16 aHRtg_SF() const;
+    /* Scale factor for energy capacity. */
     qint16 wHRtg_SF() const;
+    /* Scale factor for maximum charge and discharge rate. */
     qint16 wChaDisChaMax_SF() const;
+    /* Scale factor for self discharge rate. */
     qint16 disChaRte_SF() const;
+    /* Scale factor for state of charge values. */
     qint16 soC_SF() const;
+    /* Scale factor for depth of discharge. */
     qint16 doD_SF() const;
+    /* Scale factor for state of health. */
     qint16 soH_SF() const;
+    /* Scale factor for DC bus voltage. */
     qint16 v_SF() const;
+    /* Scale factor for cell voltage. */
     qint16 cellV_SF() const;
+    /* Scale factor for DC current. */
     qint16 a_SF() const;
+    /* Scale factor for instantaneous DC charge/discharge current. */
     qint16 aMax_SF() const;
+    /* Scale factor for AC power request. */
     qint16 w_SF() const;
 
 protected:

@@ -50,6 +50,7 @@ public:
     SunSpecFlowBatteryModuleModel *parentModel() const;
 
     QString name() const override;
+    /* Stack Points To Be Determined */
     quint16 stackPointsToBeDetermined() const;
 
     void processBlockData(const QVector<quint16> blockData) override;
@@ -78,6 +79,7 @@ public:
     QString description() const override;
     QString label() const override;
 
+    /* Module Points To Be Determined */
     quint16 modulePointsToBeDetermined() const;
 
 protected:

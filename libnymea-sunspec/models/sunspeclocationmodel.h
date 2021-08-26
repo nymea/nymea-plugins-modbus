@@ -49,11 +49,17 @@ public:
     QString description() const override;
     QString label() const override;
 
+    /* UTC 24 hour time stamp to millisecond hhmmss.sssZ format [hhmmss.sssZ] */
     QString tm() const;
+    /* UTC Date string YYYYMMDD format [YYYYMMDD] */
     QString date() const;
+    /* Location string (40 chars max) [text] */
     QString location() const;
+    /* Latitude with seven degrees of precision [Degrees] */
     float lat() const;
+    /* Longitude with seven degrees of precision [Degrees] */
     float longitude() const;
+    /* Altitude measurement in meters [meters] */
     qint32 altitude() const;
 
 protected:

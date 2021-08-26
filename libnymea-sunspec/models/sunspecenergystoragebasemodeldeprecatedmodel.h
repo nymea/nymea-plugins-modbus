@@ -49,6 +49,7 @@ public:
     QString description() const override;
     QString label() const override;
 
+    /* This model has been deprecated. */
     quint16 deprecatedModel() const;
 
 protected:
