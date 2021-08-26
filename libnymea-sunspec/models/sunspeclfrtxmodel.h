@@ -57,132 +57,175 @@ public:
 
     QString name() const override;
 
+    /* Number of active points in array. */
     quint16 actPt() const;
     QModbusReply *setActPt(quint16 actPt);
 
+    /* Point 1 duration. [Secs] */
     float tms1() const;
     QModbusReply *setTms1(float tms1);
 
+    /* Point 1 frequency. [Hz] */
     float hz1() const;
     QModbusReply *setHz1(float hz1);
 
+    /* Point 2 duration. [Secs] */
     float tms2() const;
     QModbusReply *setTms2(float tms2);
 
+    /* Point 2 frequency. [Hz] */
     float hz2() const;
     QModbusReply *setHz2(float hz2);
 
+    /* Point 3 duration. [Secs] */
     float tms3() const;
     QModbusReply *setTms3(float tms3);
 
+    /* Point 3 frequency. [Hz] */
     float hz3() const;
     QModbusReply *setHz3(float hz3);
 
+    /* Point 4 duration. [Secs] */
     float tms4() const;
     QModbusReply *setTms4(float tms4);
 
+    /* Point 4 frequency. [Hz] */
     float hz4() const;
     QModbusReply *setHz4(float hz4);
 
+    /* Point 5 duration. [Secs] */
     float tms5() const;
     QModbusReply *setTms5(float tms5);
 
+    /* Point 5 frequency. [Hz] */
     float hz5() const;
     QModbusReply *setHz5(float hz5);
 
+    /* Point 6 duration. [Secs] */
     float tms6() const;
     QModbusReply *setTms6(float tms6);
 
+    /* Point 6 frequency. [Hz] */
     float hz6() const;
     QModbusReply *setHz6(float hz6);
 
+    /* Point 7 duration. [Secs] */
     float tms7() const;
     QModbusReply *setTms7(float tms7);
 
+    /* Point 7 frequency. [Hz] */
     float hz7() const;
     QModbusReply *setHz7(float hz7);
 
+    /* Point 8 duration. [Secs] */
     float tms8() const;
     QModbusReply *setTms8(float tms8);
 
+    /* Point 8 frequency. [Hz] */
     float hz8() const;
     QModbusReply *setHz8(float hz8);
 
+    /* Point 9 duration. [Secs] */
     float tms9() const;
     QModbusReply *setTms9(float tms9);
 
+    /* Point 9 frequency. [Hz] */
     float hz9() const;
     QModbusReply *setHz9(float hz9);
 
+    /* Point 10 duration. [Secs] */
     float tms10() const;
     QModbusReply *setTms10(float tms10);
 
+    /* Point 10 frequency. [Hz] */
     float hz10() const;
     QModbusReply *setHz10(float hz10);
 
+    /* Point 11 duration. [Secs] */
     float tms11() const;
     QModbusReply *setTms11(float tms11);
 
+    /* Point 11 frequency. [Hz] */
     float hz11() const;
     QModbusReply *setHz11(float hz11);
 
+    /* Point 12 duration. [Secs] */
     float tms12() const;
     QModbusReply *setTms12(float tms12);
 
+    /* Point 12 frequency. [Hz] */
     float hz12() const;
     QModbusReply *setHz12(float hz12);
 
+    /* Point 13 duration. [Secs] */
     float tms13() const;
     QModbusReply *setTms13(float tms13);
 
+    /* Point 13 frequency. [Hz] */
     float hz13() const;
     QModbusReply *setHz13(float hz13);
 
+    /* Point 14 duration. [Secs] */
     float tms14() const;
     QModbusReply *setTms14(float tms14);
 
+    /* Point 14 frequency. [Hz] */
     float hz14() const;
     QModbusReply *setHz14(float hz14);
 
+    /* Point 15 duration. [Secs] */
     float tms15() const;
     QModbusReply *setTms15(float tms15);
 
+    /* Point 15 frequency. [Hz] */
     float hz15() const;
     QModbusReply *setHz15(float hz15);
 
+    /* Point 16 duration. [Secs] */
     float tms16() const;
     QModbusReply *setTms16(float tms16);
 
+    /* Point 16 frequency. [Hz] */
     float hz16() const;
     QModbusReply *setHz16(float hz16);
 
+    /* Point 17 duration. [Secs] */
     float tms17() const;
     QModbusReply *setTms17(float tms17);
 
+    /* Point 17 frequency. [Hz] */
     float hz17() const;
     QModbusReply *setHz17(float hz17);
 
+    /* Point 18 duration. [Secs] */
     float tms18() const;
     QModbusReply *setTms18(float tms18);
 
+    /* Point 18 frequency. [Hz] */
     float hz18() const;
     QModbusReply *setHz18(float hz18);
 
+    /* Point 19 duration. [Secs] */
     float tms19() const;
     QModbusReply *setTms19(float tms19);
 
+    /* Point 19 frequency. [Hz] */
     float hz19() const;
     QModbusReply *setHz19(float hz19);
 
+    /* Point 20 duration. [Secs] */
     float tms20() const;
     QModbusReply *setTms20(float tms20);
 
+    /* Point 20 frequency. [Hz] */
     float hz20() const;
     QModbusReply *setHz20(float hz20);
 
+    /* Optional description for curve. */
     QString crvNam() const;
     QModbusReply *setCrvNam(const QString &crvNam);
 
+    /* Enumerated value indicates if curve is read-only or can be modified. */
     Readonly readOnly() const;
 
     void processBlockData(const QVector<quint16> blockData) override;
@@ -265,24 +308,33 @@ public:
     QString label() const override;
 
 
+    /* Index of active curve. 0=no active curve. */
     quint16 actCrv() const;
     QModbusReply *setActCrv(quint16 actCrv);
 
+    /* LHzRT control mode. Enable active curve.  Bitfield value. */
     ModenaFlags modEna() const;
     QModbusReply *setModEna(ModenaFlags modEna);
 
+    /* Time window for LFRT change. [Secs] */
     quint16 winTms() const;
     QModbusReply *setWinTms(quint16 winTms);
 
+    /* Timeout period for LFRT curve selection. [Secs] */
     quint16 rvrtTms() const;
     QModbusReply *setRvrtTms(quint16 rvrtTms);
 
+    /* Ramp time for moving from current mode to new mode. [Secs] */
     quint16 rmpTms() const;
     QModbusReply *setRmpTms(quint16 rmpTms);
 
+    /* Number of curves supported (recommend 4). */
     quint16 nCrv() const;
+    /* Number of curve points supported (maximum of 20). */
     quint16 nPt() const;
+    /* Scale factor for duration. */
     qint16 tmsSf() const;
+    /* Scale factor for frequency. */
     qint16 hzSf() const;
     Crvtype crvType() const;
 

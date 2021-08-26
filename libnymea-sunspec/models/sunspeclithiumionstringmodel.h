@@ -50,21 +50,37 @@ public:
     SunSpecLithiumIonStringModel *parentModel() const;
 
     QString name() const override;
+    /* Count of all cells in the module. */
     quint16 moduleCellCount() const;
+    /* Module state of charge, expressed as a percentage. [%] */
     float moduleSoC() const;
+    /* Module state of health, expressed as a percentage. [%] */
     float moduleSoH() const;
+    /* Maximum voltage for all cells in the module. [V] */
     float maxCellVoltage() const;
+    /* Cell with maximum voltage. */
     quint16 maxCellVoltageCell() const;
+    /* Minimum voltage for all cells in the module. [V] */
     float minCellVoltage() const;
+    /* Cell with minimum voltage. [V] */
     float minCellVoltageCell() const;
+    /* Average voltage for all cells in the module. [V] */
     float averageCellVoltage() const;
+    /* Maximum temperature for all cells in the module. [C] */
     float maxCellTemperature() const;
+    /* Cell with maximum temperature. */
     quint16 maxCellTemperatureCell() const;
+    /* Minimum temperature for all cells in the module. [C] */
     float minCellTemperature() const;
+    /* Cell with minimum temperature. */
     quint16 minCellTemperatureCell() const;
+    /* Average temperature for all cells in the module. [C] */
     float averageCellTemperature() const;
+    /* Pad register. */
     quint16 pad5() const;
+    /* Pad register. */
     quint16 pad6() const;
+    /* Pad register. */
     quint16 pad7() const;
 
     void processBlockData(const QVector<quint16> blockData) override;
@@ -205,49 +221,88 @@ public:
     QString description() const override;
     QString label() const override;
 
+    /* Index of the string within the bank. */
     quint16 stringIndex() const;
+    /* Count of modules in the string. */
     quint16 moduleCount() const;
+    /* Current status of the string. */
     StFlags stringStatus() const;
+    /* Connection Failure Reason */
     Confail connectionFailureReason() const;
+    /* Number of cells currently being balanced in the string. */
     quint16 stringCellBalancingCount() const;
+    /* Battery string state of charge, expressed as a percentage. [%] */
     float stringStateOfCharge() const;
+    /* Depth of discharge for the string, expressed as a percentage. [%] */
     float stringDepthOfDischarge() const;
+    /* Number of discharge cycles executed upon the string. */
     quint32 stringCycleCount() const;
+    /* Battery string state of health, expressed as a percentage. [%] */
     float stringStateOfHealth() const;
+    /* String current measurement. [A] */
     float stringCurrent() const;
+    /* String voltage measurement. [V] */
     float stringVoltage() const;
+    /* Maximum voltage for all cells in the string. [V] */
     float maxCellVoltage() const;
+    /* Module containing the cell with maximum cell voltage. */
     quint16 maxCellVoltageModule() const;
+    /* Minimum voltage for all cells in the string. [V] */
     float minCellVoltage() const;
+    /* Module containing the cell with minimum cell voltage. */
     quint16 minCellVoltageModule() const;
+    /* Average voltage for all cells in the string. [V] */
     float averageCellVoltage() const;
+    /* Maximum temperature for all modules in the string. [C] */
     float maxModuleTemperature() const;
+    /* Module with the maximum temperature. */
     quint16 maxModuleTemperatureModule() const;
+    /* Minimum temperature for all modules in the string. [C] */
     float minModuleTemperature() const;
+    /* Module with the minimum temperature. */
     quint16 minModuleTemperatureModule() const;
+    /* Average temperature for all modules in the string. [C] */
     float averageModuleTemperature() const;
+    /* Pad register. */
     quint16 pad1() const;
+    /* Status of the contactor(s) for the string. */
     ConstFlags contactorStatus() const;
+    /* Alarms, warnings and status values.  Bit flags. */
     Evt1Flags stringEvent1() const;
+    /* Alarms, warnings and status values.  Bit flags. */
     quint32 stringEvent2() const;
+    /* Vendor defined events. */
     quint32 vendorEventBitfield1() const;
+    /* Vendor defined events. */
     quint32 vendorEventBitfield2() const;
 
+    /* Enables and disables the string.  Should reset to 0 upon completion. */
     quint16 enableDisableString() const;
     QModbusReply *setEnableDisableString(quint16 enableDisableString);
 
+    /* Connects and disconnects the string. */
     Setcon connectDisconnectString() const;
     QModbusReply *setConnectDisconnectString(Setcon connectDisconnectString);
 
+    /* Scale factor for string state of charge. */
     qint16 soC_SF() const;
+    /* Scale factor for string state of health. */
     qint16 soH_SF() const;
+    /* Scale factor for string depth of discharge. */
     qint16 doD_SF() const;
+    /* Scale factor for string current. */
     qint16 a_SF() const;
+    /* Scale factor for string voltage. */
     qint16 v_SF() const;
+    /* Scale factor for cell voltage. */
     qint16 cellV_SF() const;
+    /* Scale factor for module temperature. */
     qint16 modTmp_SF() const;
+    /* Pad register. */
     quint16 pad2() const;
+    /* Pad register. */
     quint16 pad3() const;
+    /* Pad register. */
     quint16 pad4() const;
 
 protected:

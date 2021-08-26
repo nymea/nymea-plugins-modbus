@@ -49,9 +49,13 @@ public:
     QString description() const override;
     QString label() const override;
 
+    /* Global Horizontal Irradiance [W/m2] */
     quint16 ghi() const;
+    /* Back of module temperature measurement [C] */
     float temp() const;
+    /* Ambient Temperature [C] */
     float ambientTemperature() const;
+    /* Wind Speed [m/s] */
     quint16 windSpeed() const;
 
 protected:

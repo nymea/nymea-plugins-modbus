@@ -92,15 +92,25 @@ public:
     QString description() const override;
     QString label() const override;
 
+    /* Aggregated model id */
     quint16 aid() const;
+    /* Number of aggregated models */
     quint16 n() const;
+    /* Update Number.  Incrementing number each time the mapping is changed.  If the number is not changed from the last reading the direct access to a specific offset will result in reading the same logical model as before.  Otherwise the entire model must be read to refresh the changes */
     quint16 un() const;
+    /* Enumerated status code */
     St status() const;
+    /* Vendor specific status code */
     quint16 vendorStatus() const;
+    /* Bitmask event code */
     EvtFlags eventCode() const;
+    /* Vendor specific event code */
     quint32 vendorEventCode() const;
+    /* Control register for all aggregated devices */
     Ctl control() const;
+    /* Vendor control register for all aggregated devices */
     quint32 vendorControl() const;
+    /* Numerical value used as a parameter to the control */
     quint32 controlValue() const;
 
 protected:

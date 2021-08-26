@@ -74,10 +74,15 @@ public:
     SunSpecStringCombinerCurrentModel *parentModel() const;
 
     QString name() const override;
+    /* Uniquely identifies this input set */
     quint16 id() const;
+    /* String Input Event Flags */
     InevtFlags inputEvent() const;
+    /* String Input Vendor Event Flags */
     quint32 inputEventVendor() const;
+    /* String Input Current [A] */
     float amps() const;
+    /* String Input Amp-Hours [Ah] */
     quint32 ampHours() const;
 
     void processBlockData(const QVector<quint16> blockData) override;
@@ -134,18 +139,31 @@ public:
     QString description() const override;
     QString label() const override;
 
+    /* Current scale factor */
     qint16 dCA_SF() const;
+    /* Amp-hour scale factor */
     qint16 dCAhr_SF() const;
+    /* Voltage scale factor */
     qint16 dCV_SF() const;
+    /* Maximum DC Current Rating [A] */
     float rating() const;
+    /* Number of Inputs */
     int n() const;
+    /* Bitmask value.  Events */
     EvtFlags eventFlags() const;
+    /* Bitmask value.  Vendor defined events */
     quint32 vendorEvent() const;
+    /* Total measured current [A] */
     float amps() const;
+    /* Total metered Amp-hours [Ah] */
     quint32 ampHours() const;
+    /* Output Voltage [V] */
     float voltage() const;
+    /* Internal operating temperature [C] */
     qint16 temp() const;
+    /* Current scale factor for inputs */
     qint16 inDCA_SF() const;
+    /* Amp-hour scale factor for inputs */
     qint16 inDCAhr_SF() const;
 
 protected:

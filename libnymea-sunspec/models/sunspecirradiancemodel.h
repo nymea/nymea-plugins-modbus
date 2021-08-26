@@ -50,10 +50,15 @@ public:
     SunSpecIrradianceModel *parentModel() const;
 
     QString name() const override;
+    /* Global Horizontal Irradiance [W/m2] */
     quint16 ghi() const;
+    /* Plane-of-Array Irradiance [W/m2] */
     quint16 poai() const;
+    /* Diffuse Irradiance [W/m2] */
     quint16 dfi() const;
+    /* Direct Normal Irradiance [W/m2] */
     quint16 dni() const;
+    /* Other Irradiance [W/m2] */
     quint16 oti() const;
 
     void processBlockData(const QVector<quint16> blockData) override;

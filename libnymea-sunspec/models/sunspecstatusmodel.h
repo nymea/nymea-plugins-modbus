@@ -117,25 +117,45 @@ public:
     QString description() const override;
     QString label() const override;
 
+    /* PV inverter present/available status. Enumerated value. */
     PvconnFlags pvConn() const;
+    /* Storage inverter present/available status. Enumerated value. */
     StorconnFlags storConn() const;
+    /* ECP connection status: disconnected=0  connected=1. */
     EcpconnFlags ecpConn() const;
+    /* AC lifetime active (real) energy output. [Wh] */
     quint64 actWh() const;
+    /* AC lifetime apparent energy output. [VAh] */
     quint64 actVAh() const;
+    /* AC lifetime reactive energy output in quadrant 1. [varh] */
     quint64 actVArhQ1() const;
+    /* AC lifetime reactive energy output in quadrant 2. [varh] */
     quint64 actVArhQ2() const;
+    /* AC lifetime negative energy output  in quadrant 3. [varh] */
     quint64 actVArhQ3() const;
+    /* AC lifetime reactive energy output  in quadrant 4. [varh] */
     quint64 actVArhQ4() const;
+    /* Amount of VARs available without impacting watts output. [var] */
     float vArAval() const;
+    /* Scale factor for available VARs. */
     qint16 vArAvalSf() const;
+    /* Amount of Watts available. [var] */
     float wAval() const;
+    /* Scale factor for available Watts. */
     qint16 wAvalSf() const;
+    /* Bit Mask indicating setpoint limit(s) reached. */
     StsetlimmskFlags stSetLimMsk() const;
+    /* Bit Mask indicating which inverter controls are currently active. */
     StactctlFlags stActCtl() const;
+    /* Source of time synchronization. */
     QString tmSrc() const;
+    /* Seconds since 01-01-2000 00:00 UTC [Secs] */
     quint32 tms() const;
+    /* Bit Mask indicating active ride-through status. */
     RtstFlags rtSt() const;
+    /* Isolation resistance. [ohms] */
     float ris() const;
+    /* Scale factor for isolation resistance. */
     qint16 risSf() const;
 
 protected:

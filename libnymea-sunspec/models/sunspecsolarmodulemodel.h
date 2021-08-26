@@ -89,33 +89,54 @@ public:
     QString description() const override;
     QString label() const override;
 
+    /* Current scale factor */
     qint16 a_SF() const;
+    /* Voltage scale factor */
     qint16 v_SF() const;
+    /* Power scale factor */
     qint16 w_SF() const;
+    /* Energy scale factor */
     qint16 wh_SF() const;
+    /* Enumerated value.  Module Status Code */
     Stat status() const;
+    /* Module Vendor Status Code */
     quint16 vendorStatus() const;
+    /* Bitmask value.  Module Event Flags */
     EvtFlags events() const;
+    /* Vendor specific flags */
     quint32 vendorModuleEventFlags() const;
 
+    /* Module Control */
     quint16 control() const;
     QModbusReply *setControl(quint16 control);
 
+    /* Vendor Module Control */
     quint32 vendorControl() const;
     QModbusReply *setVendorControl(quint32 vendorControl);
 
+    /* Module Control Value */
     qint32 controlValue() const;
     QModbusReply *setControlValue(qint32 controlValue);
 
+    /* Time in seconds since 2000 epoch [Secs] */
     quint32 timestamp() const;
+    /* Output Current [A] */
     float outputCurrent() const;
+    /* Output Voltage [V] */
     float outputVoltage() const;
+    /* Output Energy [Wh] */
     quint32 outputEnergy() const;
+    /* Output Power [W] */
     float outputPower() const;
+    /* Module Temperature [C] */
     qint16 temp() const;
+    /* Input Current [A] */
     float inputCurrent() const;
+    /* Input Voltage [V] */
     float inputVoltage() const;
+    /* Input Energy [Wh] */
     quint32 inputEnergy() const;
+    /* Input Power [W] */
     float inputPower() const;
 
 protected:

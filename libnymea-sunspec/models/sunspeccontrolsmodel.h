@@ -82,71 +82,95 @@ public:
     QString label() const override;
 
 
+    /* Time window for connect/disconnect. [Secs] */
     quint16 connWinTms() const;
     QModbusReply *setConnWinTms(quint16 connWinTms);
 
+    /* Timeout period for connect/disconnect. [Secs] */
     quint16 connRvrtTms() const;
     QModbusReply *setConnRvrtTms(quint16 connRvrtTms);
 
+    /* Enumerated valued.  Connection control. */
     Conn conn() const;
     QModbusReply *setConn(Conn conn);
 
+    /* Set power output to specified level. [% WMax] */
     float wMaxLimPct() const;
     QModbusReply *setWMaxLimPct(float wMaxLimPct);
 
+    /* Time window for power limit change. [Secs] */
     quint16 wMaxLimPctWinTms() const;
     QModbusReply *setWMaxLimPctWinTms(quint16 wMaxLimPctWinTms);
 
+    /* Timeout period for power limit. [Secs] */
     quint16 wMaxLimPctRvrtTms() const;
     QModbusReply *setWMaxLimPctRvrtTms(quint16 wMaxLimPctRvrtTms);
 
+    /* Ramp time for moving from current setpoint to new setpoint. [Secs] */
     quint16 wMaxLimPctRmpTms() const;
     QModbusReply *setWMaxLimPctRmpTms(quint16 wMaxLimPctRmpTms);
 
+    /* Enumerated valued.  Throttle enable/disable control. */
     Wmaxlim_ena wMaxLimEna() const;
     QModbusReply *setWMaxLimEna(Wmaxlim_ena wMaxLimEna);
 
+    /* Set power factor to specific value - cosine of angle. [cos()] */
     float outPfSet() const;
     QModbusReply *setOutPfSet(float outPfSet);
 
+    /* Time window for power factor change. [Secs] */
     quint16 outPfSetWinTms() const;
     QModbusReply *setOutPfSetWinTms(quint16 outPfSetWinTms);
 
+    /* Timeout period for power factor. [Secs] */
     quint16 outPfSetRvrtTms() const;
     QModbusReply *setOutPfSetRvrtTms(quint16 outPfSetRvrtTms);
 
+    /* Ramp time for moving from current setpoint to new setpoint. [Secs] */
     quint16 outPfSetRmpTms() const;
     QModbusReply *setOutPfSetRmpTms(quint16 outPfSetRmpTms);
 
+    /* Enumerated valued.  Fixed power factor enable/disable control. */
     Outpfset_ena outPfSetEna() const;
     QModbusReply *setOutPfSetEna(Outpfset_ena outPfSetEna);
 
+    /* Reactive power in percent of WMax. [% WMax] */
     float vArWMaxPct() const;
     QModbusReply *setVArWMaxPct(float vArWMaxPct);
 
+    /* Reactive power in percent of VArMax. [% VArMax] */
     float vArMaxPct() const;
     QModbusReply *setVArMaxPct(float vArMaxPct);
 
+    /* Reactive power in percent of VArAval. [% VArAval] */
     float vArAvalPct() const;
     QModbusReply *setVArAvalPct(float vArAvalPct);
 
+    /* Time window for VAR limit change. [Secs] */
     quint16 vArPctWinTms() const;
     QModbusReply *setVArPctWinTms(quint16 vArPctWinTms);
 
+    /* Timeout period for VAR limit. [Secs] */
     quint16 vArPctRvrtTms() const;
     QModbusReply *setVArPctRvrtTms(quint16 vArPctRvrtTms);
 
+    /* Ramp time for moving from current setpoint to new setpoint. [Secs] */
     quint16 vArPctRmpTms() const;
     QModbusReply *setVArPctRmpTms(quint16 vArPctRmpTms);
 
+    /* Enumerated value. VAR percent limit mode. */
     Varpct_mod vArPctMod() const;
     QModbusReply *setVArPctMod(Varpct_mod vArPctMod);
 
+    /* Enumerated valued.  Percent limit VAr enable/disable control. */
     Varpct_ena vArPctEna() const;
     QModbusReply *setVArPctEna(Varpct_ena vArPctEna);
 
+    /* Scale factor for power output percent. */
     qint16 wMaxLimPctSf() const;
+    /* Scale factor for power factor. */
     qint16 outPfSetSf() const;
+    /* Scale factor for reactive power percent. */
     qint16 vArPctSf() const;
 
 protected:

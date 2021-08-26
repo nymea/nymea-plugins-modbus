@@ -50,27 +50,35 @@ public:
     QString label() const override;
 
 
+    /* Ramp up rate as a percentage of max current. [Pct] */
     float rampUpRate() const;
     QModbusReply *setRampUpRate(float rampUpRate);
 
+    /* Ramp down rate as a percentage of max current. [Pct] */
     float nomRmpDnRte() const;
     QModbusReply *setNomRmpDnRte(float nomRmpDnRte);
 
+    /* Emergency ramp up rate as a percentage of max current. [Pct] */
     float emergencyRampUpRate() const;
     QModbusReply *setEmergencyRampUpRate(float emergencyRampUpRate);
 
+    /* Emergency ramp down rate as a percentage of max current. [Pct] */
     float emergencyRampDownRate() const;
     QModbusReply *setEmergencyRampDownRate(float emergencyRampDownRate);
 
+    /* Connect ramp up rate as a percentage of max current. [Pct] */
     float connectRampUpRate() const;
     QModbusReply *setConnectRampUpRate(float connectRampUpRate);
 
+    /* Connect ramp down rate as a percentage of max current. [Pct] */
     float connectRampDownRate() const;
     QModbusReply *setConnectRampDownRate(float connectRampDownRate);
 
+    /* Ramp rate specified in percent of max current. [Pct] */
     float defaultRampRate() const;
     QModbusReply *setDefaultRampRate(float defaultRampRate);
 
+    /* Ramp Rate Scale Factor */
     qint16 rampRateScaleFactor() const;
 
 protected:

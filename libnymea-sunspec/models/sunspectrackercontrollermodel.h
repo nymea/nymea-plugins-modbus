@@ -65,21 +65,30 @@ public:
     SunSpecTrackerControllerModel *parentModel() const;
 
     QString name() const override;
+    /* Descriptive name for this tracker unit */
     QString tracker() const;
+    /* Auto target elevation in degrees from horizontal.  Unimplemented for single axis azimuth tracker type [Degrees] */
     float targetElevation() const;
+    /* Auto target azimuth  in degrees from true north towards east.  Unimplemented for single axis horizontal tracker type [Degrees] */
     float targetAzimuth() const;
+    /* Actual elevation position  in degrees from horizontal.  Unimplemented for single axis azimuth tracker type [Degrees] */
     float elevation() const;
+    /* Actual azimuth position  in degrees from true north towards east.  Unimplemented for single axis horizontal tracker type [Degrees] */
     float azimuth() const;
 
+    /* Manual override target position of elevation in degrees from horizontal.  Unimplemented for single axis azimuth tracker type [Degrees] */
     float manualElevation() const;
     QModbusReply *setManualElevation(float manualElevation);
 
+    /* Manual override target position of azimuth in degrees from true north towards east.  Unimplemented for single axis azimuth tracker type [Degrees] */
     float manualAzimuth() const;
     QModbusReply *setManualAzimuth(float manualAzimuth);
 
+    /* Control register. Normal operation is automatic.  Operator can override the position by setting the ElCtl, AzCtl and enabling Manual operation. Entering calibration mode will revert to automatic operation after calibration is complete. */
     Ctl mode() const;
     QModbusReply *setMode(Ctl mode);
 
+    /* Tracker alarm conditions */
     AlmFlags alarm() const;
 
     void processBlockData(const QVector<quint16> blockData) override;
@@ -142,23 +151,34 @@ public:
     QString description() const override;
     QString label() const override;
 
+    /* Descriptive name for this control unit */
     QString controller() const;
+    /* Type of tracker */
     Typ type() const;
+    /* Local date in YYYYMMDD format [YYYYMMDD] */
     QString date() const;
+    /* 24 hour local time stamp to second [hhmmss] */
     QString time() const;
+    /* Number of the day in the year (1-366) */
     quint16 day() const;
 
+    /* Global manual override target position of elevation in degrees from horizontal.  Unimplemented for single axis azimuth tracker type [Degrees] */
     float manualElevation() const;
     QModbusReply *setManualElevation(float manualElevation);
 
+    /* Global manual override target position of azimuth in degrees from true north towards east.  Unimplemented for single axis azimuth tracker type [Degrees] */
     float manualAzimuth() const;
     QModbusReply *setManualAzimuth(float manualAzimuth);
 
+    /* Global Control register operates on all trackers. Normal operation is automatic.  Operator can override the position by setting the ElCtl, AzCtl and enabling Manual operation. Entering calibration mode will revert to automatic operation after calibration is complete. */
     Glblctl globalMode() const;
     QModbusReply *setGlobalMode(Glblctl globalMode);
 
+    /* Global tracker alarm conditions */
     GlblalmFlags globalAlarm() const;
+    /* Scale Factor for targets and position measurements in degrees */
     qint16 sf() const;
+    /* Number of trackers being controlled.  Size of repeating block. */
     quint16 trackers() const;
 
 protected:

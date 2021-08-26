@@ -74,15 +74,25 @@ public:
     SunSpecStringCombinerAdvancedModel *parentModel() const;
 
     QString name() const override;
+    /* Uniquely identifies this input set */
     quint16 id() const;
+    /* String Input Event Flags */
     InevtFlags inputEvent() const;
+    /* String Input Vendor Event Flags */
     quint32 inputEventVendor() const;
+    /* String Input Current [A] */
     float amps() const;
+    /* String Input Amp-Hours [Ah] */
     quint32 ampHours() const;
+    /* String Input Voltage [V] */
     float voltage() const;
+    /* String Input Power [W] */
     float watts() const;
+    /* String Input Energy [Wh] */
     quint32 wattHours() const;
+    /* String Performance Ratio [Pct] */
     quint16 pr() const;
+    /* Number of modules in this input string */
     quint16 n() const;
 
     void processBlockData(const QVector<quint16> blockData) override;
@@ -144,26 +154,47 @@ public:
     QString description() const override;
     QString label() const override;
 
+    /* Current scale factor */
     qint16 dCA_SF() const;
+    /* Amp-hour scale factor */
     qint16 dCAhr_SF() const;
+    /* Voltage scale factor */
     qint16 dCV_SF() const;
+    /* Power scale factor */
     qint16 dCW_SF() const;
+    /* Energy scale factor */
     qint16 dCWh_SF() const;
+    /* Maximum DC Current Rating [A] */
     float rating() const;
+    /* Number of Inputs */
     int n() const;
+    /* Bitmask value.  Events */
     EvtFlags eventFlags() const;
+    /* Bitmask value.  Vendor defined events */
     quint32 vendorEvent() const;
+    /* Total measured current [A] */
     float amps() const;
+    /* Total metered Amp-hours [Ah] */
     quint32 ampHours() const;
+    /* Output Voltage [V] */
     float voltage() const;
+    /* Internal operating temperature [C] */
     qint16 temp() const;
+    /* Output power [W] */
     float watts() const;
+    /* DC Performance ratio value [Pct] */
     qint16 pr() const;
+    /* Output energy [Wh] */
     quint32 wattHours() const;
+    /* Current scale factor for inputs */
     qint16 inDCA_SF() const;
+    /* Amp-hour scale factor for inputs */
     qint16 inDCAhr_SF() const;
+    /* Voltage scale factor for inputs */
     qint16 inDCV_SF() const;
+    /* Power scale factor for inputs */
     qint16 inDCW_SF() const;
+    /* Energy scale factor for inputs */
     qint16 inDCWh_SF() const;
 
 protected:

@@ -56,8 +56,11 @@ public:
     SunSpecLithiumIonModuleModel *parentModel() const;
 
     QString name() const override;
+    /* Cell terminal voltage. [V] */
     float cellVoltage() const;
+    /* Cell temperature. [C] */
     float cellTemperature() const;
+    /* Status of the cell. */
     CellstFlags cellStatus() const;
 
     void processBlockData(const QVector<quint16> blockData) override;
@@ -88,31 +91,57 @@ public:
     QString description() const override;
     QString label() const override;
 
+    /* Index of the string containing the module. */
     quint16 stringIndex() const;
+    /* Index of the module within the string. */
     quint16 moduleIndex() const;
+    /* Count of all cells in the module. */
     quint16 moduleCellCount() const;
+    /* Module state of charge, expressed as a percentage. [%] */
     float moduleSoC() const;
+    /* Depth of discharge for the module. [%] */
     float depthOfDischarge() const;
+    /* Module state of health, expressed as a percentage. [%] */
     float moduleSoH() const;
+    /* Count of cycles executed. */
     quint32 cycleCount() const;
+    /* Voltage of the module. [V] */
     float moduleVoltage() const;
+    /* Maximum voltage for all cells in the module. [V] */
     float maxCellVoltage() const;
+    /* Cell with the maximum voltage. */
     quint16 maxCellVoltageCell() const;
+    /* Minimum voltage for all cells in the module. [V] */
     float minCellVoltage() const;
+    /* Cell with the minimum voltage. */
     quint16 minCellVoltageCell() const;
+    /* Average voltage for all cells in the module. [V] */
     float averageCellVoltage() const;
+    /* Maximum temperature for all cells in the module. [C] */
     float maxCellTemperature() const;
+    /* Cell with the maximum cell temperature. */
     quint16 maxCellTemperatureCell() const;
+    /* Minimum temperature for all cells in the module. [C] */
     float minCellTemperature() const;
+    /* Cell with the minimum cell temperature. */
     quint16 minCellTemperatureCell() const;
+    /* Average temperature for all cells in the module. [C] */
     float averageCellTemperature() const;
+    /* Number of cells currently being balanced in the module. */
     quint16 balancedCellCount() const;
+    /* Serial number for the module. */
     QString serialNumber() const;
+    /* Scale factor for module state of charge. */
     qint16 soC_SF() const;
+    /* Scale factor for module state of health. */
     qint16 soH_SF() const;
+    /* Scale factor for module depth of discharge. */
     qint16 doD_SF() const;
+    /* Scale factor for module voltage. */
     qint16 v_SF() const;
+    /* Scale factor for cell voltage. */
     qint16 cellV_SF() const;
+    /* Scale factor for module temperature. */
     qint16 tmp_SF() const;
 
 protected:

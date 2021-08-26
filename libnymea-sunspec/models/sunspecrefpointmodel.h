@@ -49,9 +49,13 @@ public:
     QString description() const override;
     QString label() const override;
 
+    /* Global Horizontal Irradiance [W/m2] */
     quint16 ghi() const;
+    /* Current measurement at reference point [W/m2] */
     quint16 amps() const;
+    /* Voltage  measurement at reference point [W/m2] */
     quint16 voltage() const;
+    /* Temperature measurement at reference point [W/m2] */
     quint16 temperature() const;
 
 protected:

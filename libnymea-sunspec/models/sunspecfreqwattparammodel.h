@@ -62,26 +62,35 @@ public:
     QString label() const override;
 
 
+    /* The slope of the reduction in the maximum allowed watts output as a function of frequency. [% PM/Hz] */
     float wGra() const;
     QModbusReply *setWGra(float wGra);
 
+    /* The frequency deviation from nominal frequency (ECPNomHz) at which a snapshot of the instantaneous power output is taken to act as the CAPPED power level (PM) and above which reduction in power output occurs. [Hz] */
     float hzStr() const;
     QModbusReply *setHzStr(float hzStr);
 
+    /* The frequency deviation from nominal frequency (ECPNomHz) at which curtailed power output may return to normal and the cap on the power level value is removed. [Hz] */
     float hzStop() const;
     QModbusReply *setHzStop(float hzStop);
 
+    /* Enable hysteresis */
     HysenaFlags hysEna() const;
     QModbusReply *setHysEna(HysenaFlags hysEna);
 
+    /* Is Parameterized Frequency-Watt control active. */
     ModenaFlags modEna() const;
     QModbusReply *setModEna(ModenaFlags modEna);
 
+    /* The maximum time-based rate of change at which power output returns to normal after having been capped by an over frequency event. [% WMax/min] */
     float hzStopWGra() const;
     QModbusReply *setHzStopWGra(float hzStopWGra);
 
+    /* Scale factor for output gradient. */
     qint16 wGraSf() const;
+    /* Scale factor for frequency deviations. */
     qint16 hzStrStopSf() const;
+    /* Scale factor for increment and decrement ramps. */
     qint16 rmpIncDecSf() const;
     quint16 pad() const;
 

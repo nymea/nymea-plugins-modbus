@@ -82,36 +82,67 @@ public:
     QString description() const override;
     QString label() const override;
 
+    /* AC Current [A] */
     float amps() const;
+    /* Phase A Current [A] */
     float ampsPhaseA() const;
+    /* Phase B Current [A] */
     float ampsPhaseB() const;
+    /* Phase C Current [A] */
     float ampsPhaseC() const;
+    /* Phase Voltage AB [V] */
     float phaseVoltageAb() const;
+    /* Phase Voltage BC [V] */
     float phaseVoltageBc() const;
+    /* Phase Voltage CA [V] */
     float phaseVoltageCa() const;
+    /* Phase Voltage AN [V] */
     float phaseVoltageAn() const;
+    /* Phase Voltage BN [V] */
     float phaseVoltageBn() const;
+    /* Phase Voltage CN [V] */
     float phaseVoltageCn() const;
+    /* AC Power [W] */
     float watts() const;
+    /* Line Frequency [Hz] */
     float hz() const;
+    /* AC Apparent Power [VA] */
     float va() const;
+    /* AC Reactive Power [var] */
     float vAr() const;
+    /* AC Power Factor [Pct] */
     float pf() const;
+    /* AC Energy [Wh] */
     float wattHours() const;
+    /* DC Current [A] */
     float dcAmps() const;
+    /* DC Voltage [V] */
     float dcVoltage() const;
+    /* DC Power [W] */
     float dcWatts() const;
+    /* Cabinet Temperature [C] */
     float cabinetTemperature() const;
+    /* Heat Sink Temperature [C] */
     float heatSinkTemperature() const;
+    /* Transformer Temperature [C] */
     float transformerTemperature() const;
+    /* Other Temperature [C] */
     float otherTemperature() const;
+    /* Enumerated value.  Operating state */
     St operatingState() const;
+    /* Vendor specific operating state code */
     quint16 vendorOperatingState() const;
+    /* Bitmask value. Event fields */
     Evt1Flags event1() const;
+    /* Reserved for future use */
     quint32 eventBitfield2() const;
+    /* Vendor defined events */
     quint32 vendorEventBitfield1() const;
+    /* Vendor defined events */
     quint32 vendorEventBitfield2() const;
+    /* Vendor defined events */
     quint32 vendorEventBitfield3() const;
+    /* Vendor defined events */
     quint32 vendorEventBitfield4() const;
 
 protected:

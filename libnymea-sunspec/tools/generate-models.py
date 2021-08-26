@@ -594,6 +594,18 @@ def addPropertiesMethodDeclaration(fileDescriptor, dataPoints):
             continue
 
         typeName = dataPoint['type']
+        # Write comment for better understanding in the code
+        commentLine = ''
+        if 'desc' in dataPoint:
+            commentLine += dataPoint['desc'] 
+        elif 'label' in dataPoint:
+            commentLine += dataPoint['label'] 
+
+        if 'units' in dataPoint:
+            commentLine += ' [' + dataPoint['units'] + ']'
+
+        if commentLine != '':
+            writeLine(fileDescriptor, '    /* %s */' % commentLine)
         writeLine(fileDescriptor, '    %s %s() const;' %(getCppType(dataPoint), propertyName))
 
         if defineWriteMethod:

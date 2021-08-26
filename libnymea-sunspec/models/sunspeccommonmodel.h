@@ -49,15 +49,22 @@ public:
     QString description() const override;
     QString label() const override;
 
+    /* Well known value registered with SunSpec for compliance */
     QString manufacturer() const;
+    /* Manufacturer specific value (32 chars) */
     QString model() const;
+    /* Manufacturer specific value (16 chars) */
     QString options() const;
+    /* Manufacturer specific value (16 chars) */
     QString version() const;
+    /* Manufacturer specific value (32 chars) */
     QString serialNumber() const;
 
+    /* Modbus device address */
     quint16 deviceAddress() const;
     QModbusReply *setDeviceAddress(quint16 deviceAddress);
 
+    /* Force even alignment */
     quint16 pad() const;
 
 protected:
