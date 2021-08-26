@@ -40,24 +40,6 @@
 
 IntegrationPluginSunSpec::IntegrationPluginSunSpec()
 {
-//    QVector<quint16> valuesReverted;
-//    QVector<quint16> values;
-//    values = {0x0000, 0x41b4};
-//    quint32 valueUint32 = SunSpecDataPoint::convertToUInt32(values);
-//    valuesReverted = SunSpecDataPoint::convertFromUInt32(valueUint32);
-//    qCCritical(dcSunSpec()) << valueUint32 << SunSpecDataPoint::registersToString(valuesReverted);
-
-//    qint32 valueInt32 = SunSpecDataPoint::convertToInt32(values);
-//    float valueFloat = SunSpecDataPoint::convertToFloat32(values);
-//    qCCritical(dcSunSpec()) << valueUint32 << valueInt32 << valueFloat;
-//    valuesReverted = SunSpecDataPoint::convertFromFloat32(valueFloat);
-//    qCCritical(dcSunSpec()) << valueUint32 << valueInt32 << valueFloat << endl << SunSpecDataPoint::registersToString(values) << endl << SunSpecDataPoint::registersToString(valuesReverted);
-
-//    // 0x3438, 0x565f, 0x4c47, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x4c47, 0x4320, 0x5245, 0x5355, 0x2031, 0x3000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x3438, 0x5620, 0x4443, 0x4443, 0x2032, 0x2e32, 0x2e38, 0x3020, 0x424d, 0x5320, 0x302e, 0x302e, 0x3000, 0x0000, 0x0000, 0x0000, 0x3745, 0x3034, 0x3432, 0x4543, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0070, 0x0000, 0x2000, 0x4619, 0x4000, 0x459c, 0x4000, 0x459c, 0x0000, 0x4248, 0x4000, 0x459c
-//    values = {0x3438, 0x565f, 0x4c47, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
-//    QString valueString = SunSpecDataPoint::convertToString(values);
-//    valuesReverted = SunSpecDataPoint::convertFromString(valueString, 16);
-//    qCCritical(dcSunSpec()) << valueString << endl << SunSpecDataPoint::registersToString(values) << endl << SunSpecDataPoint::registersToString(valuesReverted);
 
 }
 
