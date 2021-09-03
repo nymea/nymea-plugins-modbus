@@ -16,6 +16,11 @@ PLUGIN_DIRS = \
     wallbe                  \
     webasto                 \
 
+gcc {
+    COMPILER_VERSION = $$system($$QMAKE_CXX " -dumpversion")
+    COMPILER_MAJOR_VERSION = $$str_member($$COMPILER_VERSION)
+    greaterThan(COMPILER_MAJOR_VERSION, 7): QMAKE_CXXFLAGS += -Wno-deprecated-copy
+}
 
 message(============================================)
 message("Qt version:" $$[QT_VERSION])
