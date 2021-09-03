@@ -32,41 +32,13 @@
 #include "sunspecconnection.h"
 
 #include "sunspeccommonmodel.h"
-#include "sunspecaggregatormodel.h"
 #include "sunspecinvertersinglephasemodel.h"
 #include "sunspecinvertersplitphasemodel.h"
 #include "sunspecinverterthreephasemodel.h"
 #include "sunspecinvertersinglephasefloatmodel.h"
 #include "sunspecinvertersplitphasefloatmodel.h"
 #include "sunspecinverterthreephasefloatmodel.h"
-#include "sunspecnameplatemodel.h"
-#include "sunspecsettingsmodel.h"
-#include "sunspecstatusmodel.h"
-#include "sunspeccontrolsmodel.h"
 #include "sunspecstoragemodel.h"
-#include "sunspecenergystoragebasemodeldeprecatedmodel.h"
-#include "sunspecpricingmodel.h"
-#include "sunspecvoltvarmodel.h"
-#include "sunspecfreqwattparammodel.h"
-#include "sunspecreactivecurrentmodel.h"
-#include "sunspeclvrtmodel.h"
-#include "sunspechvrtmodel.h"
-#include "sunspecwattpfmodel.h"
-#include "sunspecvoltwattmodel.h"
-#include "sunspecschedulemodel.h"
-#include "sunspecfreqwattmodel.h"
-#include "sunspeclfrtmodel.h"
-#include "sunspechfrtmodel.h"
-#include "sunspeclvrtcmodel.h"
-#include "sunspechvrtcmodel.h"
-#include "sunspeclvrtxmodel.h"
-#include "sunspechvrtxmodel.h"
-#include "sunspeclfrtcmodel.h"
-#include "sunspechfrtcmodel.h"
-#include "sunspeclfrtxmodel.h"
-#include "sunspechfrtxmodel.h"
-#include "sunspecextsettingsmodel.h"
-#include "sunspecmpptmodel.h"
 #include "sunspecmetersinglephasemodel.h"
 #include "sunspecmetersplitsinglephaseabnmodel.h"
 #include "sunspecmeterthreephasemodel.h"
@@ -75,24 +47,7 @@
 #include "sunspecmetersplitsinglephasefloatmodel.h"
 #include "sunspecmeterthreephasewyeconnectmodel.h"
 #include "sunspecdeltaconnectthreephaseabcmetermodel.h"
-#include "sunspecsecureacmeterselectedreadingsmodel.h"
-#include "sunspecirradiancemodel.h"
-#include "sunspeclocationmodel.h"
-#include "sunspecrefpointmodel.h"
-#include "sunspecbasemetmodel.h"
-#include "sunspecminimetmodel.h"
-#include "sunspecstringcombinercurrentmodel.h"
-#include "sunspecstringcombineradvancedmodel.h"
-#include "sunspecsolarmodulemodel.h"
-#include "sunspectrackercontrollermodel.h"
 #include "sunspecbatterymodel.h"
-#include "sunspeclithiumionbankmodel.h"
-#include "sunspeclithiumionstringmodel.h"
-#include "sunspeclithiumionmodulemodel.h"
-#include "sunspecflowbatterymodel.h"
-#include "sunspecflowbatterystringmodel.h"
-#include "sunspecflowbatterymodulemodel.h"
-#include "sunspecflowbatterystackmodel.h"
 
 SunSpecModelFactory::SunSpecModelFactory(QObject *parent) :
     QObject(parent)
@@ -105,8 +60,6 @@ SunSpecModel *SunSpecModelFactory::createModel(SunSpecConnection *connection, qu
     switch(modelId) {
     case ModelIdCommon:
         return new SunSpecCommonModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdAggregator:
-        return new SunSpecAggregatorModel(connection, modbusStartRegister, modelLength, connection);
     case ModelIdInverterSinglePhase:
         return new SunSpecInverterSinglePhaseModel(connection, modbusStartRegister, modelLength, connection);
     case ModelIdInverterSplitPhase:
@@ -119,62 +72,8 @@ SunSpecModel *SunSpecModelFactory::createModel(SunSpecConnection *connection, qu
         return new SunSpecInverterSplitPhaseFloatModel(connection, modbusStartRegister, modelLength, connection);
     case ModelIdInverterThreePhaseFloat:
         return new SunSpecInverterThreePhaseFloatModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdNameplate:
-        return new SunSpecNameplateModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdSettings:
-        return new SunSpecSettingsModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdStatus:
-        return new SunSpecStatusModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdControls:
-        return new SunSpecControlsModel(connection, modbusStartRegister, modelLength, connection);
     case ModelIdStorage:
         return new SunSpecStorageModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdEnergyStorageBaseDeprecated:
-        return new SunSpecEnergyStorageBaseModelDeprecatedModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdPricing:
-        return new SunSpecPricingModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdVoltVar:
-        return new SunSpecVoltVarModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdFreqWattParam:
-        return new SunSpecFreqWattParamModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdReactiveCurrent:
-        return new SunSpecReactiveCurrentModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdLvrt:
-        return new SunSpecLvrtModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdHvrt:
-        return new SunSpecHvrtModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdWattPf:
-        return new SunSpecWattPfModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdVoltWatt:
-        return new SunSpecVoltWattModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdSchedule:
-        return new SunSpecScheduleModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdFreqWatt:
-        return new SunSpecFreqWattModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdLfrt:
-        return new SunSpecLfrtModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdHfrt:
-        return new SunSpecHfrtModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdLvrtc:
-        return new SunSpecLvrtcModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdHvrtc:
-        return new SunSpecHvrtcModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdLvrtx:
-        return new SunSpecLvrtxModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdHvrtx:
-        return new SunSpecHvrtxModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdLfrtc:
-        return new SunSpecLfrtcModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdHfrtc:
-        return new SunSpecHfrtcModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdLfrtx:
-        return new SunSpecLfrtxModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdHfrtx:
-        return new SunSpecHfrtxModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdExtSettings:
-        return new SunSpecExtSettingsModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdMppt:
-        return new SunSpecMpptModel(connection, modbusStartRegister, modelLength, connection);
     case ModelIdMeterSinglePhase:
         return new SunSpecMeterSinglePhaseModel(connection, modbusStartRegister, modelLength, connection);
     case ModelIdMeterSplitSinglePhaseAbn:
@@ -191,42 +90,8 @@ SunSpecModel *SunSpecModelFactory::createModel(SunSpecConnection *connection, qu
         return new SunSpecMeterThreePhaseWyeConnectModel(connection, modbusStartRegister, modelLength, connection);
     case ModelIdDeltaConnectThreePhaseAbcMeter:
         return new SunSpecDeltaConnectThreePhaseAbcMeterModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdSecureAcMeterSelectedReadings:
-        return new SunSpecSecureAcMeterSelectedReadingsModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdIrradiance:
-        return new SunSpecIrradianceModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdLocation:
-        return new SunSpecLocationModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdRefPoint:
-        return new SunSpecRefPointModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdBaseMet:
-        return new SunSpecBaseMetModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdMiniMet:
-        return new SunSpecMiniMetModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdStringCombinerCurrent:
-        return new SunSpecStringCombinerCurrentModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdStringCombinerAdvanced:
-        return new SunSpecStringCombinerAdvancedModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdSolarModule:
-        return new SunSpecSolarModuleModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdTrackerController:
-        return new SunSpecTrackerControllerModel(connection, modbusStartRegister, modelLength, connection);
     case ModelIdBattery:
         return new SunSpecBatteryModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdLithiumIonBank:
-        return new SunSpecLithiumIonBankModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdLithiumIonString:
-        return new SunSpecLithiumIonStringModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdLithiumIonModule:
-        return new SunSpecLithiumIonModuleModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdFlowBattery:
-        return new SunSpecFlowBatteryModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdFlowBatteryString:
-        return new SunSpecFlowBatteryStringModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdFlowBatteryModule:
-        return new SunSpecFlowBatteryModuleModel(connection, modbusStartRegister, modelLength, connection);
-    case ModelIdFlowBatteryStack:
-        return new SunSpecFlowBatteryStackModel(connection, modbusStartRegister, modelLength, connection);
     default:
         return nullptr;
     }
