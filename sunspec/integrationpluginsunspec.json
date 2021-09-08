@@ -951,7 +951,7 @@
                     "displayName": "SunSpec three phase meter",
                     "id": "68f822f9-ff30-4275-b229-39a3674fead7",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["smartmeterconsumer", "connectable"],
+                    "interfaces": ["energymeter", "connectable"],
                     "paramTypes": [
                         {
                             "id": "a1960821-155c-4176-86fa-974429039182",
