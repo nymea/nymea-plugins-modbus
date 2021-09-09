@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2020, nymea GmbH
+* Copyright 2013 - 2021, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -34,7 +34,8 @@
 #include "integrations/integrationplugin.h"
 #include "plugintimer.h"
 
-#include "../modbus/modbustcpmaster.h"
+#include <sunspecconnection.h>
+#include <models/sunspecmodelfactory.h>
 
 #include "sunspecinverter.h"
 #include "sunspecstorage.h"
@@ -59,49 +60,50 @@ public:
     void executeAction(ThingActionInfo *info) override;
 
 private:
+    // Connected state for all things
+    QHash<ThingClassId, StateTypeId> m_connectedStateTypeIds;
+
+    // SunSpec Connection params map
+    QHash<ThingClassId, ParamTypeId> m_connectionIpParamTypeIds;
+    QHash<ThingClassId, ParamTypeId> m_connectionPortParamTypeIds;
+    QHash<ThingClassId, ParamTypeId> m_connectionMacAddressParamTypeIds;
+    QHash<ThingClassId, ParamTypeId> m_connectionSlaveIdParamTypeIds;
+
+    // SunSpec thing params map
     QHash<ThingClassId, ParamTypeId> m_modelIdParamTypeIds;
     QHash<ThingClassId, ParamTypeId> m_modbusAddressParamTypeIds;
-
-    QHash<ThingClassId, StateTypeId> m_connectedStateTypeIds;
-    QHash<ThingClassId, StateTypeId> m_frequencyStateTypeIds;
-
-    QHash<ThingClassId, StateTypeId> m_inverterCurrentPowerStateTypeIds;
-    QHash<ThingClassId, StateTypeId> m_inverterTotalEnergyProducedStateTypeIds;
-    QHash<ThingClassId, StateTypeId> m_inverterOperatingStateTypeIds;
-    QHash<ThingClassId, StateTypeId> m_inverterErrorStateTypeIds;
-    QHash<ThingClassId, StateTypeId> m_inverterCabinetTemperatureStateTypeIds;
-    QHash<ThingClassId, StateTypeId> m_inverterAcCurrentStateTypeIds;
+    QHash<ThingClassId, ParamTypeId> m_manufacturerParamTypeIds;
+    QHash<ThingClassId, ParamTypeId> m_deviceModelParamTypeIds;
+    QHash<ThingClassId, ParamTypeId> m_serialNumberParamTypeIds;
 
     PluginTimer *m_refreshTimer = nullptr;
-    QHash<QUuid, ThingActionInfo *> m_asyncActions;
-    QHash<ThingId, SunSpec *> m_sunSpecConnections;
 
-    QHash<Thing *, SunSpecInverter *> m_sunSpecInverters;
-    QHash<Thing *, SunSpecStorage *> m_sunSpecStorages;
-    QHash<Thing *, SunSpecMeter *> m_sunSpecMeters;
+    QHash<ThingId, SunSpecConnection *> m_sunSpecConnections;
+    QHash<Thing *, SunSpecThing *> m_sunspecThings;
 
-    bool checkIfThingExists(uint modelId, uint modbusAddress);
+    bool sunspecThingAlreadyAdded(uint modelId, uint modbusAddress, const ThingId &parentId);
+    void processDiscoveryResult(Thing *thing, SunSpecConnection *connection);
+    void checkAutoSetupModels(Thing *connectionThing, QList<SunSpecModel *> models);
 
+    // SunSpec things
+    void setupConnection(ThingSetupInfo *info);
     void setupInverter(ThingSetupInfo *info);
     void setupMeter(ThingSetupInfo *info);
     void setupStorage(ThingSetupInfo *info);
 
+    // Custom types
+    void setupSolarEdgeBattery(ThingSetupInfo *info);
+
+    // Discover SolarEdge batteries
+    void searchSolarEdgeBatteries(SunSpecConnection *connection);
+    void searchSolarEdgeBattery(SunSpecConnection *connection, const ThingId &parentThingId, quint16 startRegister);
+
+    void autocreateSunSpecModelThing(const ThingClassId &thingClassId, const QString &thingName, const ThingId &parentId, SunSpecModel *model);
+
 private slots:
     void onRefreshTimer();
-
     void onPluginConfigurationChanged(const ParamTypeId &paramTypeId, const QVariant &value);
 
-    void onConnectionStateChanged(bool status);
-
-    void onFoundSunSpecModel(SunSpec::ModelId modelId, int modbusStartRegister);
-    void onSunSpecModelSearchFinished(const QHash<SunSpec::ModelId, int> &modelIds);
-
-    void onWriteRequestExecuted(QUuid requestId, bool success);
-    void onWriteRequestError(QUuid requestId, const QString &error);
-
-    void onInverterDataReceived(const SunSpecInverter::InverterData &inverterData);
-    void onStorageDataReceived(const SunSpecStorage::StorageData &mandatory, const SunSpecStorage::StorageDataOptional &optional);
-    void onMeterDataReceived(const SunSpecMeter::MeterData &meterData);
 };
 #endif // INTEGRATIONPLUGINSUNSPEC_H
 

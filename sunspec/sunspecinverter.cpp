@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2020, nymea GmbH
+* Copyright 2013 - 2021, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -29,144 +29,253 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "sunspecinverter.h"
-#include "extern-plugininfo.h"
 
-#include <QTimer>
+#include <models/sunspecmodelfactory.h>
+#include <models/sunspecinvertersinglephasemodel.h>
+#include <models/sunspecinvertersinglephasefloatmodel.h>
+#include <models/sunspecinvertersplitphasemodel.h>
+#include <models/sunspecinvertersplitphasefloatmodel.h>
+#include <models/sunspecinverterthreephasemodel.h>
+#include <models/sunspecinverterthreephasefloatmodel.h>
 
-SunSpecInverter::SunSpecInverter(SunSpec *sunspec, SunSpec::ModelId modelId, int modbusAddress) :
-    QObject(sunspec),
-    m_connection(sunspec),
-    m_id(modelId),
-    m_modelModbusStartRegister(modbusAddress)
+SunSpecInverter::SunSpecInverter(Thing *thing, SunSpecModel *model, QObject *parent) :
+    SunSpecThing(thing, model, parent)
 {
-    qCDebug(dcSunSpec()) << "SunSpecInverter: Setting up inverter";
-    connect(m_connection, &SunSpec::modelDataBlockReceived, this, &SunSpecInverter::onModelDataBlockReceived);
+    connect(m_model, &SunSpecModel::blockUpdated, this, &SunSpecInverter::onBlockDataUpdated);
 }
 
-SunSpec::ModelId SunSpecInverter::modelId()
+void SunSpecInverter::readBlockData()
 {
-    return m_id;
+    m_model->readBlockData();
 }
 
-void SunSpecInverter::init()
+void SunSpecInverter::onBlockDataUpdated()
 {
-    qCDebug(dcSunSpec()) << "SunSpecInverter: Init";
-    m_connection->readModelHeader(m_modelModbusStartRegister);
-    connect(m_connection, &SunSpec::modelHeaderReceived, this, [this] (uint modbusAddress, SunSpec::ModelId modelId, uint length) {
-        if (modelId == m_id) {
-            qCDebug(dcSunSpec()) << "SunSpecInverter: Model Header received, modbus address:" << modbusAddress << "model Id:" << modelId << "length:" << length;
-            m_modelLength = length;
-            emit initFinished(true);
-            m_initFinishedSuccess = true;
-        }
-    });
-    QTimer::singleShot(10000, this,[this] {
-        if (!m_initFinishedSuccess) {
-            emit initFinished(false);
-        }
-    });
-}
+    switch (m_model->modelId()) {
+    case SunSpecModelFactory::ModelIdInverterSinglePhase: {
+        SunSpecInverterSinglePhaseModel *inverter = qobject_cast<SunSpecInverterSinglePhaseModel *>(m_model);
+        qCDebug(dcSunSpec()) << m_thing->name() << "block data updated" << inverter;
+        m_thing->setStateValue(sunspecSinglePhaseInverterConnectedStateTypeId, true);
+        m_thing->setStateValue(sunspecSinglePhaseInverterVersionStateTypeId, m_model->commonModelInfo().versionString);
 
-void SunSpecInverter::getInverterModelDataBlock()
-{
-    qCDebug(dcSunSpec()) << "SunSpecInverter: get inverter model data block, modbus register" << m_modelModbusStartRegister << "length" << m_modelLength;
-    m_connection->readModelDataBlock(m_modelModbusStartRegister, m_modelLength);
-}
-
-SunSpecInverter::SunSpecEvent1 SunSpecInverter::bitfieldToSunSpecEvent1(quint16 register0, quint16 register1)
-{
-    SunSpecEvent1 event1;
-    quint32 value = (static_cast<quint32>(register0)<<16 | register1);
-    //qCDebug(dcSunSpec()) << "Event1" << QString::number(value, 16);
-    event1.groundFault      = ((value & (0x01 << 0)) != 0);
-    event1.dcOverVoltage    = ((value & (0x01 << 1)) != 0);
-    event1.acDisconnect     = ((value & (0x01 << 2)) != 0);
-    event1.dcDicconnect     = ((value & (0x01 << 3)) != 0);
-    event1.gridDisconnect   = ((value & (0x01 << 4)) != 0);
-    event1.cabinetOpen      = ((value & (0x01 << 5)) != 0);
-    event1.manualShutdown   = ((value & (0x01 << 6)) != 0);
-    event1.overTemperature  = ((value & (0x01 << 7)) != 0);
-    event1.overFrequency    = ((value & (0x01 << 8)) != 0);
-    event1.underFrequency   = ((value & (0x01 << 9)) != 0);
-    event1.acOverVolt       = ((value & (0x01 << 10)) != 0);
-    event1.acUnderVolt      = ((value & (0x01 << 11)) != 0);
-    event1.blownStringFuse  = ((value & (0x01 << 12)) != 0);
-    event1.underTemperature = ((value & (0x01 << 13)) != 0);
-    event1.memoryLoss       = ((value & (0x01 << 14)) != 0);
-    event1.hwTestFailure    = ((value & (0x01 << 15)) != 0);
-    return event1;
-}
-
-void SunSpecInverter::getInverterModelHeader()
-{
-    qCDebug(dcSunSpec()) << "SunSpecInverter: get inverter model header, modbus register" << m_modelModbusStartRegister;
-    m_connection->readModelHeader(m_modelModbusStartRegister);
-}
-
-void SunSpecInverter::onModelDataBlockReceived(SunSpec::ModelId modelId, uint length, QVector<quint16> data)
-{
-    Q_UNUSED(length)
-    if (modelId != m_id) {
-        return;
-    }
-    if (length < m_modelLength) {
-        qCDebug(dcSunSpec()) << "SunSpecInverter: on model data block received, model length is too short" << length;
-        return;
-    }
-    InverterData inverterData;
-
-    qCDebug(dcSunSpec()) << "SunSpecInverter: Received" << modelId;
-    switch (modelId) {
-    case SunSpec::ModelIdInverterSinglePhase:
-    case SunSpec::ModelIdInverterSplitPhase:
-    case SunSpec::ModelIdInverterThreePhase: {
-        inverterData.acCurrent= m_connection->convertToFloatWithSSF(data[Model10X::Model10XAcCurrent], data[Model10X::Model10XAmpereScaleFactor]);
-        inverterData.acPower = m_connection->convertToFloatWithSSF(data[Model10X::Model10XACPower], data[Model10X::Model10XWattScaleFactor]);
-        inverterData.lineFrequency = m_connection->convertToFloatWithSSF(data[Model10X::Model10XLineFrequency], data[Model10X::Model10XHerzScaleFactor]);
-
-        quint16 ampereScaleFactor =  data[Model10X::Model10XAmpereScaleFactor];
-        inverterData.phaseACurrent = m_connection->convertToFloatWithSSF(data[Model10X::Model10XPhaseACurrent], ampereScaleFactor);
-        inverterData.phaseBCurrent = m_connection->convertToFloatWithSSF(data[Model10X::Model10XPhaseBCurrent], ampereScaleFactor);
-        inverterData.phaseCCurrent = m_connection->convertToFloatWithSSF(data[Model10X::Model10XPhaseCCurrent], ampereScaleFactor);
-        quint16 voltageScaleFactor = data[Model10X::Model10XVoltageScaleFactor];
-        inverterData.phaseVoltageAN = m_connection->convertToFloatWithSSF(data[Model10X::Model10XPhaseVoltageAN], voltageScaleFactor);
-        inverterData.phaseVoltageBN = m_connection->convertToFloatWithSSF(data[Model10X::Model10XPhaseVoltageBN], voltageScaleFactor);
-        inverterData.phaseVoltageCN = m_connection->convertToFloatWithSSF(data[Model10X::Model10XPhaseVoltageCN], voltageScaleFactor);
-
-        quint32 acEnergy = ((static_cast<quint32>(data.value(Model10X::Model10XAcEnergy))<<16)|static_cast<quint32>(data.value(Model10X::Model10XAcEnergy+1)));
-        inverterData.acEnergy = m_connection->convertToFloatWithSSF(acEnergy, data[Model10X::Model10XWattHoursScaleFactor]);
-
-        inverterData.cabinetTemperature = m_connection->convertToFloatWithSSF(data[Model10X::Model10XCabinetTemperature], data[Model10X::Model10XTemperatureScaleFactor]);
-        inverterData.event1 = bitfieldToSunSpecEvent1(data[Model10X::Model10XEvent1], data[Model10X::Model10XEvent1+1]);
-        inverterData.operatingState = SunSpec::SunSpecOperatingState(data[Model10X::Model10XOperatingState]);
-        emit inverterDataReceived(inverterData);
-
-    } break;
-    case SunSpec::ModelIdInverterThreePhaseFloat:
-    case SunSpec::ModelIdInverterSplitPhaseFloat:
-    case SunSpec::ModelIdInverterSinglePhaseFloat: {
-
-        inverterData.acCurrent = m_connection->convertFloatValues(data[Model11X::Model11XAcCurrent], data[Model11X::Model11XAcCurrent+1]);
-
-        inverterData.phaseVoltageAN = m_connection->convertFloatValues(data[Model11X::Model11XPhaseVoltageAN], data[Model11X::Model11XPhaseVoltageAN+1]);
-        inverterData.phaseVoltageBN = m_connection->convertFloatValues(data[Model11X::Model11XPhaseVoltageBN], data[Model11X::Model11XPhaseVoltageBN+1]);
-        inverterData.phaseVoltageCN = m_connection->convertFloatValues(data[Model11X::Model11XPhaseVoltageCN], data[Model11X::Model11XPhaseVoltageCN+1]);
-
-        inverterData.phaseACurrent  = m_connection->convertFloatValues(data[Model11X::Model11XPhaseACurrent], data[Model11X::Model11XPhaseACurrent+1]);
-        inverterData.phaseBCurrent  = m_connection->convertFloatValues(data[Model11X::Model11XPhaseBCurrent], data[Model11X::Model11XPhaseBCurrent+1]);
-        inverterData.phaseCCurrent  = m_connection->convertFloatValues(data[Model11X::Model11XPhaseCCurrent], data[Model11X::Model11XPhaseCCurrent+1]);
-
-        inverterData.acPower        = m_connection->convertFloatValues(data[Model11X::Model11XACPower], data[Model11X::Model11XACPower+1]);
-        inverterData.lineFrequency  = m_connection->convertFloatValues(data[Model11X::Model11XLineFrequency], data[Model11X::Model11XLineFrequency+1]);
-
-        inverterData.acEnergy       = m_connection->convertFloatValues(data[Model11X::Model11XAcEnergy], data[Model11X::Model11XAcEnergy+1]);
-        inverterData.cabinetTemperature = m_connection->convertFloatValues(data[Model11X::Model11XCabinetTemperature], data[Model11X::Model11XCabinetTemperature+1]);
-        inverterData.event1 = bitfieldToSunSpecEvent1(data[Model11X::Model11XEvent1], data[Model11X::Model11XEvent1+1]);
-        inverterData.operatingState = SunSpec::SunSpecOperatingState(data[Model11X::Model11XOperatingState]);
-        emit inverterDataReceived(inverterData);
-    } break;
-    default:
-        //ignore
+        m_thing->setStateValue(sunspecSinglePhaseInverterTotalCurrentStateTypeId, inverter->amps());
+        m_thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerStateTypeId, inverter->watts());
+        m_thing->setStateValue(sunspecSinglePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
+        m_thing->setStateValue(sunspecSinglePhaseInverterFrequencyStateTypeId, inverter->hz());
+        m_thing->setStateValue(sunspecSinglePhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
+        m_thing->setStateValue(sunspecSinglePhaseInverterPhaseVoltageStateTypeId, inverter->phaseVoltageAn());
+        m_thing->setStateValue(sunspecSinglePhaseInverterOperatingStateStateTypeId, getStateString(inverter->operatingState()));
+        m_thing->setStateValue(sunspecSinglePhaseInverterErrorStateTypeId, getErrorString(inverter->event1()));
         break;
     }
+    case SunSpecModelFactory::ModelIdInverterSinglePhaseFloat: {
+        SunSpecInverterSinglePhaseFloatModel *inverter = qobject_cast<SunSpecInverterSinglePhaseFloatModel *>(m_model);
+        qCDebug(dcSunSpec()) << m_thing->name() << "block data updated" << inverter;
+        m_thing->setStateValue(sunspecSinglePhaseInverterConnectedStateTypeId, true);
+        m_thing->setStateValue(sunspecSinglePhaseInverterVersionStateTypeId, m_model->commonModelInfo().versionString);
+
+        m_thing->setStateValue(sunspecSinglePhaseInverterTotalCurrentStateTypeId, inverter->amps());
+        m_thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerStateTypeId, inverter->watts());
+        m_thing->setStateValue(sunspecSinglePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
+        m_thing->setStateValue(sunspecSinglePhaseInverterFrequencyStateTypeId, inverter->hz());
+        m_thing->setStateValue(sunspecSinglePhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
+        m_thing->setStateValue(sunspecSinglePhaseInverterPhaseVoltageStateTypeId, inverter->phaseVoltageAn());
+        m_thing->setStateValue(sunspecSinglePhaseInverterOperatingStateStateTypeId, getStateString(inverter->operatingState()));
+        m_thing->setStateValue(sunspecSinglePhaseInverterErrorStateTypeId, getErrorString(inverter->event1()));
+        break;
+    }
+    case SunSpecModelFactory::ModelIdInverterSplitPhase: {
+        SunSpecInverterSplitPhaseModel *inverter = qobject_cast<SunSpecInverterSplitPhaseModel *>(m_model);
+        qCDebug(dcSunSpec()) << m_thing->name() << "block data updated" << inverter;
+        m_thing->setStateValue(sunspecSplitPhaseInverterConnectedStateTypeId, true);
+        m_thing->setStateValue(sunspecSplitPhaseInverterVersionStateTypeId, m_model->commonModelInfo().versionString);
+
+        m_thing->setStateValue(sunspecSplitPhaseInverterTotalCurrentStateTypeId, inverter->amps());
+        m_thing->setStateValue(sunspecSplitPhaseInverterCurrentPowerStateTypeId, inverter->watts());
+        m_thing->setStateValue(sunspecSplitPhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
+        m_thing->setStateValue(sunspecSplitPhaseInverterFrequencyStateTypeId, inverter->hz());
+        m_thing->setStateValue(sunspecSplitPhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
+        m_thing->setStateValue(sunspecSplitPhaseInverterPhaseANVoltageStateTypeId, inverter->phaseVoltageAn());
+        m_thing->setStateValue(sunspecSplitPhaseInverterPhaseBNVoltageStateTypeId, inverter->phaseVoltageBn());
+        m_thing->setStateValue(sunspecSplitPhaseInverterPhaseACurrentStateTypeId, inverter->ampsPhaseA());
+        m_thing->setStateValue(sunspecSplitPhaseInverterPhaseBCurrentStateTypeId, inverter->ampsPhaseB());
+        m_thing->setStateValue(sunspecSplitPhaseInverterOperatingStateStateTypeId, getStateString(inverter->operatingState()));
+        m_thing->setStateValue(sunspecSplitPhaseInverterErrorStateTypeId, getErrorString(inverter->event1()));
+        break;
+    }
+    case SunSpecModelFactory::ModelIdInverterSplitPhaseFloat: {
+        SunSpecInverterSplitPhaseFloatModel *inverter = qobject_cast<SunSpecInverterSplitPhaseFloatModel *>(m_model);
+        qCDebug(dcSunSpec()) << m_thing->name() << "block data updated" << inverter;
+        m_thing->setStateValue(sunspecSplitPhaseInverterConnectedStateTypeId, true);
+        m_thing->setStateValue(sunspecSplitPhaseInverterVersionStateTypeId, m_model->commonModelInfo().versionString);
+
+        m_thing->setStateValue(sunspecSplitPhaseInverterTotalCurrentStateTypeId, inverter->amps());
+        m_thing->setStateValue(sunspecSplitPhaseInverterCurrentPowerStateTypeId, inverter->watts());
+        m_thing->setStateValue(sunspecSplitPhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
+        m_thing->setStateValue(sunspecSplitPhaseInverterFrequencyStateTypeId, inverter->hz());
+        m_thing->setStateValue(sunspecSplitPhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
+        m_thing->setStateValue(sunspecSplitPhaseInverterPhaseANVoltageStateTypeId, inverter->phaseVoltageAn());
+        m_thing->setStateValue(sunspecSplitPhaseInverterPhaseBNVoltageStateTypeId, inverter->phaseVoltageBn());
+        m_thing->setStateValue(sunspecSplitPhaseInverterPhaseACurrentStateTypeId, inverter->ampsPhaseA());
+        m_thing->setStateValue(sunspecSplitPhaseInverterPhaseBCurrentStateTypeId, inverter->ampsPhaseB());
+        m_thing->setStateValue(sunspecSplitPhaseInverterOperatingStateStateTypeId, getStateString(inverter->operatingState()));
+        m_thing->setStateValue(sunspecSplitPhaseInverterErrorStateTypeId, getErrorString(inverter->event1()));
+        break;
+    }
+    case SunSpecModelFactory::ModelIdInverterThreePhase: {
+        SunSpecInverterThreePhaseModel *inverter = qobject_cast<SunSpecInverterThreePhaseModel *>(m_model);
+        qCDebug(dcSunSpec()) << m_thing->name() << "block data updated" << inverter;
+        m_thing->setStateValue(sunspecThreePhaseInverterConnectedStateTypeId, true);
+        m_thing->setStateValue(sunspecThreePhaseInverterVersionStateTypeId, m_model->commonModelInfo().versionString);
+
+        m_thing->setStateValue(sunspecThreePhaseInverterTotalCurrentStateTypeId, inverter->amps());
+        m_thing->setStateValue(sunspecThreePhaseInverterCurrentPowerStateTypeId, inverter->watts());
+        m_thing->setStateValue(sunspecThreePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
+        m_thing->setStateValue(sunspecThreePhaseInverterFrequencyStateTypeId, inverter->hz());
+        m_thing->setStateValue(sunspecThreePhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
+        m_thing->setStateValue(sunspecThreePhaseInverterPhaseANVoltageStateTypeId, inverter->phaseVoltageAn());
+        m_thing->setStateValue(sunspecThreePhaseInverterPhaseBNVoltageStateTypeId, inverter->phaseVoltageBn());
+        m_thing->setStateValue(sunspecThreePhaseInverterPhaseCNVoltageStateTypeId, inverter->phaseVoltageCn());
+        m_thing->setStateValue(sunspecThreePhaseInverterPhaseACurrentStateTypeId, inverter->ampsPhaseA());
+        m_thing->setStateValue(sunspecThreePhaseInverterPhaseBCurrentStateTypeId, inverter->ampsPhaseB());
+        m_thing->setStateValue(sunspecThreePhaseInverterPhaseCCurrentStateTypeId, inverter->ampsPhaseC());
+        m_thing->setStateValue(sunspecThreePhaseInverterOperatingStateStateTypeId, getStateString(inverter->operatingState()));
+        m_thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, getErrorString(inverter->event1()));
+        break;
+    }
+    case SunSpecModelFactory::ModelIdInverterThreePhaseFloat: {
+        SunSpecInverterThreePhaseFloatModel *inverter = qobject_cast<SunSpecInverterThreePhaseFloatModel *>(m_model);
+        qCDebug(dcSunSpec()) << m_thing->name() << "block data updated" << inverter;
+        m_thing->setStateValue(sunspecThreePhaseInverterConnectedStateTypeId, true);
+        m_thing->setStateValue(sunspecThreePhaseInverterVersionStateTypeId, m_model->commonModelInfo().versionString);
+
+        m_thing->setStateValue(sunspecThreePhaseInverterTotalCurrentStateTypeId, inverter->amps());
+        m_thing->setStateValue(sunspecThreePhaseInverterCurrentPowerStateTypeId, inverter->watts());
+        m_thing->setStateValue(sunspecThreePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
+        m_thing->setStateValue(sunspecThreePhaseInverterFrequencyStateTypeId, inverter->hz());
+        m_thing->setStateValue(sunspecThreePhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
+        m_thing->setStateValue(sunspecThreePhaseInverterPhaseANVoltageStateTypeId, inverter->phaseVoltageAn());
+        m_thing->setStateValue(sunspecThreePhaseInverterPhaseBNVoltageStateTypeId, inverter->phaseVoltageBn());
+        m_thing->setStateValue(sunspecThreePhaseInverterPhaseCNVoltageStateTypeId, inverter->phaseVoltageCn());
+        m_thing->setStateValue(sunspecThreePhaseInverterPhaseACurrentStateTypeId, inverter->ampsPhaseA());
+        m_thing->setStateValue(sunspecThreePhaseInverterPhaseBCurrentStateTypeId, inverter->ampsPhaseB());
+        m_thing->setStateValue(sunspecThreePhaseInverterPhaseCCurrentStateTypeId, inverter->ampsPhaseC());
+        m_thing->setStateValue(sunspecThreePhaseInverterOperatingStateStateTypeId, getStateString(inverter->operatingState()));
+        m_thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, getErrorString(inverter->event1()));
+        break;
+    }
+    default:
+        qCWarning(dcSunSpec()) << "Received block data from unhandled model" << m_model;
+        break;
+    }
+}
+
+QString SunSpecInverter::getStateString(quint16 state)
+{
+    // Note: this works because the models have all the same value
+    QString stateString;
+    switch (state) {
+    case SunSpecInverterSinglePhaseModel::StOff:
+        stateString = "Off";
+        break;
+    case SunSpecInverterSinglePhaseModel::StSleeping:
+        stateString = "Sleeping";
+        break;
+    case SunSpecInverterSinglePhaseModel::StStarting:
+        stateString = "Starting";
+        break;
+    case SunSpecInverterSinglePhaseModel::StMppt:
+        stateString = "MPPT";
+        break;
+    case SunSpecInverterSinglePhaseModel::StThrottled:
+        stateString = "Throttled";
+        break;
+    case SunSpecInverterSinglePhaseModel::StShuttingDown:
+        stateString = "Shutting down";
+        break;
+    case SunSpecInverterSinglePhaseModel::StFault:
+        stateString = "Fault";
+        break;
+    case SunSpecInverterSinglePhaseModel::StStandby:
+        stateString = "Standby";
+        break;
+    }
+    return stateString;
+}
+
+QString SunSpecInverter::getErrorString(quint32 flag)
+{
+    // Note: this works because the models have all the same value
+    QStringList errorStrings;
+    SunSpecInverterSinglePhaseModel::Evt1Flags event1Flag = static_cast<SunSpecInverterSinglePhaseModel::Evt1Flags>(flag);
+    if (event1Flag.testFlag(SunSpecInverterSinglePhaseModel::Evt1GroundFault)) {
+        errorStrings.append(QT_TR_NOOP("Ground fault"));
+    }
+
+    if (event1Flag.testFlag(SunSpecInverterSinglePhaseModel::Evt1DcOverVolt)) {
+        errorStrings.append(QT_TR_NOOP("DC over voltage"));
+    }
+
+    if (event1Flag.testFlag(SunSpecInverterSinglePhaseModel::Evt1AcDisconnect)) {
+        errorStrings.append(QT_TR_NOOP("AC disconnect"));
+    }
+
+    if (event1Flag.testFlag(SunSpecInverterSinglePhaseModel::Evt1DcDisconnect)) {
+        errorStrings.append(QT_TR_NOOP("DC disconnect"));
+    }
+
+    if (event1Flag.testFlag(SunSpecInverterSinglePhaseModel::Evt1GridDisconnect)) {
+        errorStrings.append(QT_TR_NOOP("Grid disconnect"));
+    }
+
+    if (event1Flag.testFlag(SunSpecInverterSinglePhaseModel::Evt1CabinetOpen)) {
+        errorStrings.append(QT_TR_NOOP("Cabinet open"));
+    }
+
+    if (event1Flag.testFlag(SunSpecInverterSinglePhaseModel::Evt1ManualShutdown)) {
+        errorStrings.append(QT_TR_NOOP("Manual shutdown"));
+    }
+
+    if (event1Flag.testFlag(SunSpecInverterSinglePhaseModel::Evt1OverTemp)) {
+        errorStrings.append(QT_TR_NOOP("Over temperature"));
+    }
+
+    if (event1Flag.testFlag(SunSpecInverterSinglePhaseModel::Evt1OverFrequency)) {
+        errorStrings.append(QT_TR_NOOP("Over frequency"));
+    }
+
+    if (event1Flag.testFlag(SunSpecInverterSinglePhaseModel::Evt1UnderFrequency)) {
+        errorStrings.append(QT_TR_NOOP("Under frequency"));
+    }
+
+    if (event1Flag.testFlag(SunSpecInverterSinglePhaseModel::Evt1AcOverVolt)) {
+        errorStrings.append(QT_TR_NOOP("AC over voltage"));
+    }
+
+    if (event1Flag.testFlag(SunSpecInverterSinglePhaseModel::Evt1AcUnderVolt)) {
+        errorStrings.append(QT_TR_NOOP("AC under voltage"));
+    }
+
+    if (event1Flag.testFlag(SunSpecInverterSinglePhaseModel::Evt1BlownStringFuse)) {
+        errorStrings.append(QT_TR_NOOP("Blown string fuse"));
+    }
+
+    if (event1Flag.testFlag(SunSpecInverterSinglePhaseModel::Evt1UnderTemp)) {
+        errorStrings.append(QT_TR_NOOP("Under temperature"));
+    }
+
+    if (event1Flag.testFlag(SunSpecInverterSinglePhaseModel::Evt1MemoryLoss)) {
+        errorStrings.append(QT_TR_NOOP("Memory loss"));
+    }
+
+    if (event1Flag.testFlag(SunSpecInverterSinglePhaseModel::Evt1HwTestFailure)) {
+        errorStrings.append(QT_TR_NOOP("Hardware test failure"));
+    }
+
+    if (errorStrings.isEmpty()) {
+        return QT_TR_NOOP("No error");
+    } else {
+        return errorStrings.join(", ");
+    }
+
 }
