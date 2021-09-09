@@ -22,6 +22,7 @@ import sys
 import json
 import shutil
 import datetime
+import argparse
 
 def convertToAlphaNumeric(text):
     finalText = ''
@@ -91,7 +92,11 @@ def loadModel(modelFilePath):
     print('--> Loading model', modelFilePath)
     modelFile = open(modelFilePath, 'r')
     modelData = json.load(modelFile)
-    models[modelData['id']] = modelData
+    if useWhiteList:
+        if modelData['id'] in modelWhiteList:
+            models[modelData['id']] = modelData
+    else:
+        models[modelData['id']] = modelData
     
 
 def loadModels():
@@ -1195,6 +1200,9 @@ def getClassName(groupName):
 
 
 def createClass(className, modelId):
+    if useWhiteList and modelId not in modelWhiteList:
+        return
+
     print('Creating class -->', className, 'using model id', modelId)
     headerFileName = os.path.join(outputDirectory, className.lower() + '.h')
     sourceFileName = os.path.join(outputDirectory, className.lower() + '.cpp')
@@ -1307,13 +1315,20 @@ def writeModelFactorySource(fileDescriptor):
 # Main
 ############################################################################################
 
-#testCamelCase()
-#exit(0)
+parser = argparse.ArgumentParser(description='Generate sunspec model classes from specification json definitions.')
+parser.add_argument('-m', '--minimal', action='store_true', help='Generate a minimal set of model classes used in the sunspec plugin. Option to minimize the library size.')
+args = parser.parse_args()
 
 # Paths
 scriptPath = os.path.dirname(os.path.realpath(sys.argv[0]))
 modelJsonFolder = os.path.join(scriptPath, 'models/json')
 outputDirectory = os.path.join(scriptPath, '../models')
+
+# Whitelist for minimal library size
+modelWhiteList = [1, 101, 102, 103, 111, 112, 113, 124, 201, 202, 203, 204, 211, 212, 213, 214, 802]
+useWhiteList = args.minimal
+if useWhiteList:
+    print('Using the white list for minimizing the library size: %s' % modelWhiteList)
 
 # id, {name, lable}
 models = {}
