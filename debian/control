@@ -4,6 +4,7 @@ Priority: options
 Maintainer: Bernhard Trinnes <bernhard.trinnes@nymea.io>
 Build-depends: debhelper (>= 9.0.0),
                libnymea-dev (>= 0.17),
+               libnymea-gpio-dev,
                libqt5serialbus5-dev,
                libqt5serialport5-dev,
                nymea-dev-tools:native,

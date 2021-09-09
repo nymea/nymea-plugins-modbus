@@ -3,6 +3,8 @@ include(../plugins.pri)
 LIBS += \
     -li2c \
 
+PKGCONFIG += nymea-gpio
+
 QT += \
     network \
     serialport \
