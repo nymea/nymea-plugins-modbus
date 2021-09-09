@@ -1,7 +1,20 @@
-nymea-plugins-modbus (0.29.0) UNRELEASED; urgency=medium
+nymea-plugins-modbus (0.29.0) xenial; urgency=medium
 
 
- -- Michael Zanetti <michael.zanetti@nymea.io>  Fri, 09 Jul 2021 13:43:35 +0200
+  [ Simon Stürz ]
+  * Add libnymea-sunspec and update SunSpec plugin containing SolarEdge
+    battery
+
+  [ Michael Zanetti ]
+  * Bump version to 0.29.0
+
+  [ Simon Stürz ]
+  * Build with gcc 9
+  * Add option to generate libnymea-sunspec with a minimal model set to
+    minimize the library size
+  * Unipi: Update to libnymea-gpio
+
+ -- Jenkins <jenkins@nymea.io>  Thu, 09 Sep 2021 13:01:39 +0200
 
 nymea-plugins-modbus (0.24.5) xenial; urgency=medium
 
