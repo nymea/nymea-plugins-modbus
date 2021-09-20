@@ -1,3 +1,8 @@
+nymea-plugins-modbus (0.30.0) UNRELEASED; urgency=medium
+
+
+ -- Michael Zanetti <michael.zanetti@nymea.io>  Mon, 20 Sep 2021 11:18:02 +0200
+
 nymea-plugins-modbus (0.29.1) xenial; urgency=medium
 
   [ Michael Zanetti ]
