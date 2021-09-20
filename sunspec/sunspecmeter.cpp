@@ -60,7 +60,7 @@ void SunSpecMeter::onBlockDataUpdated()
         SunSpecMeterSinglePhaseModel *meter = qobject_cast<SunSpecMeterSinglePhaseModel *>(m_model);
         qCDebug(dcSunSpec()) << m_thing->name() << "block data updated" << meter;
         m_thing->setStateValue(sunspecSinglePhaseMeterConnectedStateTypeId, true);
-        m_thing->setStateValue(sunspecSinglePhaseMeterCurrentPowerStateTypeId, meter->watts());
+        m_thing->setStateValue(sunspecSinglePhaseMeterCurrentPowerStateTypeId, -meter->watts());
         m_thing->setStateValue(sunspecSinglePhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
         m_thing->setStateValue(sunspecSinglePhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
         m_thing->setStateValue(sunspecSinglePhaseMeterCurrentPhaseAStateTypeId, meter->ampsPhaseA());
@@ -73,7 +73,7 @@ void SunSpecMeter::onBlockDataUpdated()
         SunSpecMeterSinglePhaseFloatModel *meter = qobject_cast<SunSpecMeterSinglePhaseFloatModel *>(m_model);
         qCDebug(dcSunSpec()) << m_thing->name() << "block data updated" << meter;
         m_thing->setStateValue(sunspecSinglePhaseMeterConnectedStateTypeId, true);
-        m_thing->setStateValue(sunspecSinglePhaseMeterCurrentPowerStateTypeId, meter->watts());
+        m_thing->setStateValue(sunspecSinglePhaseMeterCurrentPowerStateTypeId, -meter->watts());
         m_thing->setStateValue(sunspecSinglePhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
         m_thing->setStateValue(sunspecSinglePhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
         m_thing->setStateValue(sunspecSinglePhaseMeterCurrentPhaseAStateTypeId, meter->ampsPhaseA());
@@ -88,7 +88,7 @@ void SunSpecMeter::onBlockDataUpdated()
         m_thing->setStateValue(sunspecSplitPhaseMeterConnectedStateTypeId, true);
         m_thing->setStateValue(sunspecSplitPhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
         m_thing->setStateValue(sunspecSplitPhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
-        m_thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerStateTypeId, meter->watts());
+        m_thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerStateTypeId, -meter->watts());
         m_thing->setStateValue(sunspecSplitPhaseMeterEnergyConsumedPhaseAStateTypeId, meter->totalWattHoursImportedPhaseA() / 1000.0);
         m_thing->setStateValue(sunspecSplitPhaseMeterEnergyConsumedPhaseBStateTypeId, meter->totalWattHoursImportedPhaseB() / 1000.0);
         m_thing->setStateValue(sunspecSplitPhaseMeterEnergyProducedPhaseAStateTypeId, meter->totalWattHoursExportedPhaseA() / 1000.0);
@@ -111,7 +111,7 @@ void SunSpecMeter::onBlockDataUpdated()
         m_thing->setStateValue(sunspecSplitPhaseMeterConnectedStateTypeId, true);
         m_thing->setStateValue(sunspecSplitPhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
         m_thing->setStateValue(sunspecSplitPhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
-        m_thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerStateTypeId, meter->watts());
+        m_thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerStateTypeId, -meter->watts());
         m_thing->setStateValue(sunspecSplitPhaseMeterEnergyConsumedPhaseAStateTypeId, meter->totalWattHoursImportedPhaseA() / 1000.0);
         m_thing->setStateValue(sunspecSplitPhaseMeterEnergyConsumedPhaseBStateTypeId, meter->totalWattHoursImportedPhaseB() / 1000.0);
         m_thing->setStateValue(sunspecSplitPhaseMeterEnergyProducedPhaseAStateTypeId, meter->totalWattHoursExportedPhaseA() / 1000.0);
@@ -134,7 +134,7 @@ void SunSpecMeter::onBlockDataUpdated()
         m_thing->setStateValue(sunspecThreePhaseMeterConnectedStateTypeId, true);
         m_thing->setStateValue(sunspecThreePhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
         m_thing->setStateValue(sunspecThreePhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
-        m_thing->setStateValue(sunspecThreePhaseMeterCurrentPowerStateTypeId, meter->watts());
+        m_thing->setStateValue(sunspecThreePhaseMeterCurrentPowerStateTypeId, -meter->watts());
         m_thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseAStateTypeId, meter->totalWattHoursImportedPhaseA() / 1000.0);
         m_thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseBStateTypeId, meter->totalWattHoursImportedPhaseB() / 1000.0);
         m_thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseCStateTypeId, meter->totalWattHoursImportedPhaseC() / 1000.0);
@@ -160,7 +160,7 @@ void SunSpecMeter::onBlockDataUpdated()
         m_thing->setStateValue(sunspecThreePhaseMeterConnectedStateTypeId, true);
         m_thing->setStateValue(sunspecThreePhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
         m_thing->setStateValue(sunspecThreePhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
-        m_thing->setStateValue(sunspecThreePhaseMeterCurrentPowerStateTypeId, meter->watts());
+        m_thing->setStateValue(sunspecThreePhaseMeterCurrentPowerStateTypeId, -meter->watts());
         m_thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseAStateTypeId, meter->totalWattHoursImportedPhaseA() / 1000.0);
         m_thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseBStateTypeId, meter->totalWattHoursImportedPhaseB() / 1000.0);
         m_thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseCStateTypeId, meter->totalWattHoursImportedPhaseC() / 1000.0);
@@ -186,7 +186,7 @@ void SunSpecMeter::onBlockDataUpdated()
         m_thing->setStateValue(sunspecThreePhaseMeterConnectedStateTypeId, true);
         m_thing->setStateValue(sunspecThreePhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
         m_thing->setStateValue(sunspecThreePhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
-        m_thing->setStateValue(sunspecThreePhaseMeterCurrentPowerStateTypeId, meter->watts());
+        m_thing->setStateValue(sunspecThreePhaseMeterCurrentPowerStateTypeId, -meter->watts());
         m_thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseAStateTypeId, meter->totalWattHoursImportedPhaseA() / 1000.0);
         m_thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseBStateTypeId, meter->totalWattHoursImportedPhaseB() / 1000.0);
         m_thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseCStateTypeId, meter->totalWattHoursImportedPhaseC() / 1000.0);
@@ -212,7 +212,7 @@ void SunSpecMeter::onBlockDataUpdated()
         m_thing->setStateValue(sunspecThreePhaseMeterConnectedStateTypeId, true);
         m_thing->setStateValue(sunspecThreePhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
         m_thing->setStateValue(sunspecThreePhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
-        m_thing->setStateValue(sunspecThreePhaseMeterCurrentPowerStateTypeId, meter->watts());
+        m_thing->setStateValue(sunspecThreePhaseMeterCurrentPowerStateTypeId, -meter->watts());
         m_thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseAStateTypeId, meter->totalWattHoursImportedPhaseA() / 1000.0);
         m_thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseBStateTypeId, meter->totalWattHoursImportedPhaseB() / 1000.0);
         m_thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseCStateTypeId, meter->totalWattHoursImportedPhaseC() / 1000.0);

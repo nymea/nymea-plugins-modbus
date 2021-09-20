@@ -59,7 +59,7 @@ void SunSpecInverter::onBlockDataUpdated()
         m_thing->setStateValue(sunspecSinglePhaseInverterVersionStateTypeId, m_model->commonModelInfo().versionString);
 
         m_thing->setStateValue(sunspecSinglePhaseInverterTotalCurrentStateTypeId, inverter->amps());
-        m_thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerStateTypeId, inverter->watts());
+        m_thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerStateTypeId, -inverter->watts());
         m_thing->setStateValue(sunspecSinglePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
         m_thing->setStateValue(sunspecSinglePhaseInverterFrequencyStateTypeId, inverter->hz());
         m_thing->setStateValue(sunspecSinglePhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
@@ -75,7 +75,7 @@ void SunSpecInverter::onBlockDataUpdated()
         m_thing->setStateValue(sunspecSinglePhaseInverterVersionStateTypeId, m_model->commonModelInfo().versionString);
 
         m_thing->setStateValue(sunspecSinglePhaseInverterTotalCurrentStateTypeId, inverter->amps());
-        m_thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerStateTypeId, inverter->watts());
+        m_thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerStateTypeId, -inverter->watts());
         m_thing->setStateValue(sunspecSinglePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
         m_thing->setStateValue(sunspecSinglePhaseInverterFrequencyStateTypeId, inverter->hz());
         m_thing->setStateValue(sunspecSinglePhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
@@ -91,7 +91,7 @@ void SunSpecInverter::onBlockDataUpdated()
         m_thing->setStateValue(sunspecSplitPhaseInverterVersionStateTypeId, m_model->commonModelInfo().versionString);
 
         m_thing->setStateValue(sunspecSplitPhaseInverterTotalCurrentStateTypeId, inverter->amps());
-        m_thing->setStateValue(sunspecSplitPhaseInverterCurrentPowerStateTypeId, inverter->watts());
+        m_thing->setStateValue(sunspecSplitPhaseInverterCurrentPowerStateTypeId, -inverter->watts());
         m_thing->setStateValue(sunspecSplitPhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
         m_thing->setStateValue(sunspecSplitPhaseInverterFrequencyStateTypeId, inverter->hz());
         m_thing->setStateValue(sunspecSplitPhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
@@ -110,7 +110,7 @@ void SunSpecInverter::onBlockDataUpdated()
         m_thing->setStateValue(sunspecSplitPhaseInverterVersionStateTypeId, m_model->commonModelInfo().versionString);
 
         m_thing->setStateValue(sunspecSplitPhaseInverterTotalCurrentStateTypeId, inverter->amps());
-        m_thing->setStateValue(sunspecSplitPhaseInverterCurrentPowerStateTypeId, inverter->watts());
+        m_thing->setStateValue(sunspecSplitPhaseInverterCurrentPowerStateTypeId, -inverter->watts());
         m_thing->setStateValue(sunspecSplitPhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
         m_thing->setStateValue(sunspecSplitPhaseInverterFrequencyStateTypeId, inverter->hz());
         m_thing->setStateValue(sunspecSplitPhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
@@ -129,7 +129,7 @@ void SunSpecInverter::onBlockDataUpdated()
         m_thing->setStateValue(sunspecThreePhaseInverterVersionStateTypeId, m_model->commonModelInfo().versionString);
 
         m_thing->setStateValue(sunspecThreePhaseInverterTotalCurrentStateTypeId, inverter->amps());
-        m_thing->setStateValue(sunspecThreePhaseInverterCurrentPowerStateTypeId, inverter->watts());
+        m_thing->setStateValue(sunspecThreePhaseInverterCurrentPowerStateTypeId, -inverter->watts());
         m_thing->setStateValue(sunspecThreePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
         m_thing->setStateValue(sunspecThreePhaseInverterFrequencyStateTypeId, inverter->hz());
         m_thing->setStateValue(sunspecThreePhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
@@ -150,7 +150,7 @@ void SunSpecInverter::onBlockDataUpdated()
         m_thing->setStateValue(sunspecThreePhaseInverterVersionStateTypeId, m_model->commonModelInfo().versionString);
 
         m_thing->setStateValue(sunspecThreePhaseInverterTotalCurrentStateTypeId, inverter->amps());
-        m_thing->setStateValue(sunspecThreePhaseInverterCurrentPowerStateTypeId, inverter->watts());
+        m_thing->setStateValue(sunspecThreePhaseInverterCurrentPowerStateTypeId, -inverter->watts());
         m_thing->setStateValue(sunspecThreePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
         m_thing->setStateValue(sunspecThreePhaseInverterFrequencyStateTypeId, inverter->hz());
         m_thing->setStateValue(sunspecThreePhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
