@@ -194,61 +194,51 @@ void SolarEdgeBattery::onBlockDataUpdated()
     if (!m_thing)
         return;
 
-    bool charging = false;
-    bool discharging = false;
+    QString chargingState = "idle";
 
     switch (m_batteryData.batteryStatus) {
     case SolarEdgeBattery::Off:
-        charging = false;
-        discharging = false;
+        chargingState = "idle";
         m_thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Off");
         break;
     case SolarEdgeBattery::Standby:
-        charging = false;
-        discharging = false;
+        chargingState = "idle";
         m_thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Standby");
         break;
     case SolarEdgeBattery::Init:
-        charging = false;
-        discharging = false;
+        chargingState = "idle";
         m_thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Init");
         break;
     case SolarEdgeBattery::Charge:
-        charging = true;
-        discharging = false;
+        chargingState = "charging";
         m_thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Charging");
         break;
     case SolarEdgeBattery::Discharge:
-        charging = false;
-        discharging = true;
+        chargingState = "discharging";
         m_thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Discharging");
         break;
     case SolarEdgeBattery::Fault:
-        charging = false;
-        discharging = false;
+        chargingState = "idle";
         m_thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Fault");
         break;
     case SolarEdgeBattery::Holding:
-        charging = false;
-        discharging = false;
+        chargingState = "idle";
         m_thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Holding");
         break;
     case SolarEdgeBattery::Idle:
-        charging = false;
-        discharging = false;
+        chargingState = "idle";
         m_thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Idle");
         break;
     }
 
-    m_thing->setStateValue(solarEdgeBatteryBatteryCriticalStateTypeId, (m_batteryData.stateOfEnergy < 5) && !charging);
+    m_thing->setStateValue(solarEdgeBatteryBatteryCriticalStateTypeId, (m_batteryData.stateOfEnergy < 5) && chargingState != "charging");
     m_thing->setStateValue(solarEdgeBatteryBatteryLevelStateTypeId, m_batteryData.stateOfEnergy);
-    m_thing->setStateValue(solarEdgeBatteryDischargingStateTypeId, discharging);
-    m_thing->setStateValue(solarEdgeBatteryChargingStateTypeId, charging);
+    m_thing->setStateValue(solarEdgeBatteryChargingStateStateTypeId, chargingState);
     m_thing->setStateValue(solarEdgeBatteryRatedEnergyStateTypeId, m_batteryData.ratedEnergy);
     m_thing->setStateValue(solarEdgeBatteryAverageTemperatureStateTypeId, m_batteryData.averageTemperature);
     m_thing->setStateValue(solarEdgeBatteryInstantaneousVoltageStateTypeId, m_batteryData.instantaneousVoltage);
     m_thing->setStateValue(solarEdgeBatteryInstantaneousCurrentStateTypeId, m_batteryData.instantaneousCurrent);
-    m_thing->setStateValue(solarEdgeBatteryInstantaneousPowerStateTypeId, m_batteryData.instantaneousPower);
+    m_thing->setStateValue(solarEdgeBatteryCurrentPowerStateTypeId, m_batteryData.instantaneousPower);
     m_thing->setStateValue(solarEdgeBatteryMaxEnergyStateTypeId, m_batteryData.maxEnergy);
     m_thing->setStateValue(solarEdgeBatteryAvailableEnergyStateTypeId, m_batteryData.availableEnergy);
     m_thing->setStateValue(solarEdgeBatteryStateOfHealthStateTypeId, m_batteryData.stateOfHealth);
