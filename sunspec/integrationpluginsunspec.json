@@ -1425,7 +1425,7 @@
                     "displayName": "SolarEdge battery",
                     "id": "7900471a-da3f-4f03-98be-3e3d9c841546",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["battery", "connectable"],
+                    "interfaces": ["energystorage", "connectable"],
                     "paramTypes": [
                         {
                             "id": "7413cce6-48c1-4924-89bc-915beed67b57",
@@ -1488,19 +1488,12 @@
                         },
                         {
                             "id": "815b0826-c392-4249-a271-19e92ebe46e0",
-                            "name": "charging",
-                            "displayName": "Charging",
-                            "displayNameEvent": "Charging changed",
-                            "type": "bool",
-                            "defaultValue": false
-                        },
-                        {
-                            "id": "3a0ee6f1-8a49-431d-9e6f-774cdfa8ae1a",
-                            "name": "discharging",
-                            "displayName": "Discharging",
-                            "displayNameEvent": "Discharging changed",
-                            "type": "bool",
-                            "defaultValue": false
+                            "name": "chargingState",
+                            "displayName": "Charging state",
+                            "displayNameEvent": "Charging state changed",
+                            "type": "QString",
+                            "possibleValues": ["idle", "charging", "discharging"],
+                            "defaultValue": "idle"
                         },
                         {
                             "id": "f6c6f548-8a12-4a62-a641-08bb003c55fa",
@@ -1540,7 +1533,7 @@
                         },
                         {
                             "id": "caccf9fd-0f83-4dd5-ae48-a497f13d2a2e",
-                            "name": "instantaneousPower",
+                            "name": "currentPower",
                             "displayName": "Instantaneous power",
                             "displayNameEvent": "Instantaneous power changed",
                             "type": "double",
