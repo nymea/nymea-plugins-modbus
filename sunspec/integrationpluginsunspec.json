@@ -1551,11 +1551,11 @@
                         },
                         {
                             "id": "7ac7ccd1-b5d1-488b-a99b-98ef000b7d03",
-                            "name": "availableEnergy",
+                            "name": "capacity",
                             "displayName": "Available energy",
                             "displayNameEvent": "Available energy changed",
                             "type": "double",
-                            "unit": "Watt",
+                            "unit": "KiloWattHour",
                             "defaultValue": 0.00
                         },
                         {

@@ -96,6 +96,25 @@
                             "name": "firmwareVersion",
                             "type": "QString",
                             "defaultValue": ""
+                        },
+                        {
+                            "id": "9198152b-deb4-413a-86ce-b01231c11d44",
+                            "name": "totalEnergyConsumed",
+                            "displayName": "TODO! Total consumed energy",
+                            "displayNameEvent": "Total consumed energy changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "74523f7e-5d63-4e01-a64d-e3aa35358f6a",
+                            "name": "currentPower",
+                            "displayName": "TODO! Current power usage",
+                            "displayNameEvent": "Current power usage changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0,
+                            "filter": "adaptive"
                         }
                     ]
                 }

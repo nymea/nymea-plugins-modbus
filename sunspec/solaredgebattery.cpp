@@ -240,7 +240,7 @@ void SolarEdgeBattery::onBlockDataUpdated()
     m_thing->setStateValue(solarEdgeBatteryInstantaneousCurrentStateTypeId, m_batteryData.instantaneousCurrent);
     m_thing->setStateValue(solarEdgeBatteryCurrentPowerStateTypeId, m_batteryData.instantaneousPower);
     m_thing->setStateValue(solarEdgeBatteryMaxEnergyStateTypeId, m_batteryData.maxEnergy);
-    m_thing->setStateValue(solarEdgeBatteryAvailableEnergyStateTypeId, m_batteryData.availableEnergy);
+    m_thing->setStateValue(solarEdgeBatteryCapacityStateTypeId, m_batteryData.availableEnergy);
     m_thing->setStateValue(solarEdgeBatteryStateOfHealthStateTypeId, m_batteryData.stateOfHealth);
     m_thing->setStateValue(solarEdgeBatteryVersionStateTypeId, m_batteryData.firmwareVersion);
 }
