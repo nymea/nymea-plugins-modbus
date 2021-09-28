@@ -66,6 +66,15 @@
                             "defaultValue": 0.00
                         },
                         {
+                            "id": "bd68fa44-2628-4e4e-ac9b-5f2cf563eb4d",
+                            "name": "currentPower",
+                            "displayName": "Active power",
+                            "displayNameEvent": "Active power changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0
+                        },
+                        {
                             "id": "5c1546d2-92be-4809-bc56-8bbdaab436d2",
                             "name": "totalEnergyProduced",
                             "displayName": "AC energy",

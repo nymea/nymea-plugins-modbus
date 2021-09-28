@@ -97,11 +97,17 @@ Earch register will be defined as a property in the resulting class modbus TCP c
 * `enum`: Optional: If the given data type represents an enum value, this propery can be set to the name of the used enum from the `enum` definition. The class will take care internally about the data convertion from and to the enum values.
 * `description`: Mandatory. A clear description of the register.
 * `unit`: Optional. Represents the unit of this register value.
+* `registerType`: Optional. Represents the type of the register and how to read/write it. Default is `holdingRegister`. Possible values are:
+    * `holdingRegister`
+    * `inputRegister`
+    * `coils`
+    * `discreteInputs`
 * `access`: Mandatory. Describes the access to this register. Possible valies are:
     * `RO`: Read only access. Only the get method and the changed singal will be defined.
     * `RW`: Read and write access. Also a set mehtod will be defined.
     * `WO`: Write only. Only the set method will be defined.
-* `scaleFactor`: Optional. Use a scale factor to convert this value to float. `floatValue = intValue * 10^scaleFactor value`. The scale factor value is normally a `int16` value, i.e. -10 or 10
+* `scaleFactor`: Optional. The name of the scale factor register to convert this value to float. `floatValue = intValue * 10^scaleFactor value`. The scale factor value is normally a `int16` value, i.e. -10 or 10
+* `staticScaleFactor`: Optional. Use this static scale factor to convert this register value to float. `floatValue = registerValue * 10^staticScaleFactor`. The scale factor value is normally a `int16` value, i.e. -10 or 10
 * `defaultValue`: Optional. The value for initializing the property.
 
 # Example
