@@ -129,12 +129,13 @@ def writeEnumDefinition(fileDescriptor, enumDefinition):
     writeLine(fileDescriptor)
 
 
-def getCppDataType(registerDefinition):
-    if 'enum' in registerDefinition:
-        return registerDefinition['enum']
+def getCppDataType(registerDefinition, rawType = False):
+    if not rawType:
+        if 'enum' in registerDefinition:
+            return registerDefinition['enum']
 
-    if 'scaleFactor' in registerDefinition:
-        return 'float'
+        if 'scaleFactor' in registerDefinition or 'staticScaleFactor' in registerDefinition:
+            return 'float'
 
     if registerDefinition['type'] == 'uint16':
         return 'quint16'
@@ -164,7 +165,68 @@ def getCppDataType(registerDefinition):
         return 'QString'
 
 
+def getConversionToValueMethod(registerDefinition):
+    # Handle enums
+    propertyName = registerDefinition['id']
+    propertyTyp = getCppDataType(registerDefinition, True)
+
+    if 'enum' in registerDefinition:
+        enumName = registerDefinition['enum']
+        if registerDefinition['type'] == 'uint16':
+            return ('ModbusDataUtils::convertFromUInt16(static_cast<%s>(%s))' % (propertyTyp, propertyName))
+        elif registerDefinition['type'] == 'int16':
+            return ('ModbusDataUtils::convertFromInt16(static_cast<%s>(%s))' % (propertyTyp, propertyName))
+        elif registerDefinition['type'] == 'uint32':
+            return ('ModbusDataUtils::convertFromUInt32(static_cast<%s>(%s), ModbusDataUtils::ByteOrder%s)' % (propertyTyp, propertyName, endianness))
+        elif registerDefinition['type'] == 'int32':
+            return ('ModbusDataUtils::convertFromInt32(static_cast<%s>(%s), ModbusDataUtils::ByteOrder%s)' % (propertyTyp, propertyName, endianness))
+
+    # Handle scale factors
+    if 'scaleFactor' in registerDefinition:
+        scaleFactorProperty = 'm_%s' % registerDefinition['scaleFactor']
+        if registerDefinition['type'] == 'uint16':
+            return ('ModbusDataUtils::convertFromUInt16(static_cast<%s>(%s  * 1.0 / pow(10, %s)))' % (propertyTyp, propertyName, scaleFactorProperty))
+        elif registerDefinition['type'] == 'int16':
+            return ('ModbusDataUtils::convertFromInt16(static_cast<%s>(%s  * 1.0 / pow(10, %s)))' % (propertyTyp, propertyName, scaleFactorProperty))
+        elif registerDefinition['type'] == 'uint32':
+            return ('ModbusDataUtils::convertFromUInt32(static_cast<%s>(%s  * 1.0 / pow(10, %s)), ModbusDataUtils::ByteOrder%s)' % (propertyTyp, propertyName, scaleFactorProperty, endianness))
+        elif registerDefinition['type'] == 'int32':
+            return ('ModbusDataUtils::convertFromInt32(static_cast<%s>(%s  * 1.0 / pow(10, %s)), ModbusDataUtils::ByteOrder%s)' % (propertyTyp, propertyName, scaleFactorProperty, endianness))
+
+    elif 'staticScaleFactor' in registerDefinition:
+        scaleFactor = registerDefinition['staticScaleFactor']
+        if registerDefinition['type'] == 'uint16':
+            return ('ModbusDataUtils::convertFromUInt16(static_cast<%s>(%s  * 1.0 / pow(10, %s)))' % (propertyTyp, propertyName, scaleFactor))
+        elif registerDefinition['type'] == 'int16':
+            return ('ModbusDataUtils::convertFromInt16(static_cast<%s>(%s  * 1.0 / pow(10, %s)))' % (propertyTyp, propertyName, scaleFactor))
+        elif registerDefinition['type'] == 'uint32':
+            return ('ModbusDataUtils::convertFromUInt32(static_cast<%s>(%s  * 1.0 / pow(10, %s)), ModbusDataUtils::ByteOrder%s)' % (propertyTyp, propertyName, scaleFactor, endianness))
+        elif registerDefinition['type'] == 'int32':
+            return ('ModbusDataUtils::convertFromInt32(static_cast<%s>(%s  * 1.0 / pow(10, %s)), ModbusDataUtils::ByteOrder%s)' % (propertyTyp, propertyName, scaleFactor, endianness))
+
+    # Handle default types
+    elif registerDefinition['type'] == 'uint16':
+        return ('ModbusDataUtils::convertFromUInt16(%s)' % propertyName)
+    elif registerDefinition['type'] == 'int16':
+        return ('ModbusDataUtils::convertFromInt16(%s)' % propertyName)
+    elif registerDefinition['type'] == 'uint32':
+        return ('ModbusDataUtils::convertFromUInt32(%s, ModbusDataUtils::ByteOrder%s)' % (propertyName, endianness))
+    elif registerDefinition['type'] == 'int32':
+        return ('ModbusDataUtils::convertFromInt32(%s, ModbusDataUtils::ByteOrder%s)' % (propertyName, endianness))
+    elif registerDefinition['type'] == 'uint64':
+        return ('ModbusDataUtils::convertFromUInt64(%s, ModbusDataUtils::ByteOrder%s)' % (propertyName, endianness))
+    elif registerDefinition['type'] == 'int64':
+        return ('ModbusDataUtils::convertFromInt64(%s, ModbusDataUtils::ByteOrder%s)' % (propertyName, endianness))
+    elif registerDefinition['type'] == 'float':
+        return ('ModbusDataUtils::convertFromFloat32(%s, ModbusDataUtils::ByteOrder%s)' % propertyName, endianness)
+    elif registerDefinition['type'] == 'float64':
+        return ('ModbusDataUtils::convertFromFloat64(%s, ModbusDataUtils::ByteOrder%s)' % propertyName, endianness)
+    elif registerDefinition['type'] == 'string':
+        return ('ModbusDataUtils::convertFromString(%s)' % propertyName)    
+
+
 def getValueConversionMethod(registerDefinition):
+    # Handle enums
     if 'enum' in registerDefinition:
         enumName = registerDefinition['enum']
         if registerDefinition['type'] == 'uint16':
@@ -172,10 +234,11 @@ def getValueConversionMethod(registerDefinition):
         elif registerDefinition['type'] == 'int16':
             return ('static_cast<%s>(ModbusDataUtils::convertToInt16(unit.values()))' % (enumName))
         elif registerDefinition['type'] == 'uint32':
-            return ('static_cast<%s>(ModbusDataUtils::convertToUInt32(unit.values()))' % (enumName))
+            return ('static_cast<%s>(ModbusDataUtils::convertToUInt32(unit.values(), ModbusDataUtils::ByteOrder%s))' % (enumName, endianness))
         elif registerDefinition['type'] == 'int32':
-            return ('static_cast<%s>(ModbusDataUtils::convertToInt32(unit.values()))' % (enumName))
+            return ('static_cast<%s>(ModbusDataUtils::convertToInt32(unit.values(), ModbusDataUtils::ByteOrder%s))' % (enumName, endianness))
 
+    # Handle scale factors
     if 'scaleFactor' in registerDefinition:
         scaleFactorProperty = 'm_%s' % registerDefinition['scaleFactor']
         if registerDefinition['type'] == 'uint16':
@@ -183,32 +246,43 @@ def getValueConversionMethod(registerDefinition):
         elif registerDefinition['type'] == 'int16':
             return ('ModbusDataUtils::convertToInt16(unit.values()) * 1.0 * pow(10, %s)' % (scaleFactorProperty))
         elif registerDefinition['type'] == 'uint32':
-            return ('ModbusDataUtils::convertToUInt32(unit.values()) * 1.0 * pow(10, %s)' % (scaleFactorProperty))
+            return ('ModbusDataUtils::convertToUInt32(unit.values(), ModbusDataUtils::ByteOrder%s) * 1.0 * pow(10, %s)' % (endianness, scaleFactorProperty))
         elif registerDefinition['type'] == 'int32':
-            return ('ModbusDataUtils::convertToInt32(unit.values()) * 1.0 * pow(10, %s)' % (scaleFactorProperty))
+            return ('ModbusDataUtils::convertToInt32(unit.values(), ModbusDataUtils::ByteOrder%s) * 1.0 * pow(10, %s)' % (endianness, scaleFactorProperty))
 
+    elif 'staticScaleFactor' in registerDefinition:
+        scaleFactor = registerDefinition['staticScaleFactor']
+        if registerDefinition['type'] == 'uint16':
+            return ('ModbusDataUtils::convertToUInt16(unit.values()) * 1.0 * pow(10, %s)' % (scaleFactor))
+        elif registerDefinition['type'] == 'int16':
+            return ('ModbusDataUtils::convertToInt16(unit.values()) * 1.0 * pow(10, %s)' % (scaleFactor))
+        elif registerDefinition['type'] == 'uint32':
+            return ('ModbusDataUtils::convertToUInt32(unit.values(), ModbusDataUtils::ByteOrder%s) * 1.0 * pow(10, %s)' % (endianness, scaleFactor))
+        elif registerDefinition['type'] == 'int32':
+            return ('ModbusDataUtils::convertToInt32(unit.values(), ModbusDataUtils::ByteOrder%s) * 1.0 * pow(10, %s)' % (endianness, scaleFactor))
 
+    # Handle default types
     elif registerDefinition['type'] == 'uint16':
         return ('ModbusDataUtils::convertToUInt16(unit.values())')
     elif registerDefinition['type'] == 'int16':
         return ('ModbusDataUtils::convertToInt16(unit.values())')
     elif registerDefinition['type'] == 'uint32':
-        return ('ModbusDataUtils::convertToUInt32(unit.values())')
+        return ('ModbusDataUtils::convertToUInt32(unit.values(), ModbusDataUtils::ByteOrder%s)' % endianness)
     elif registerDefinition['type'] == 'int32':
-        return ('ModbusDataUtils::convertToInt32(unit.values())')
+        return ('ModbusDataUtils::convertToInt32(unit.values(), ModbusDataUtils::ByteOrder%s)' % endianness)
     elif registerDefinition['type'] == 'uint64':
-        return ('ModbusDataUtils::convertToUInt64(unit.values())')
+        return ('ModbusDataUtils::convertToUInt64(unit.values(), ModbusDataUtils::ByteOrder%s)' % endianness)
     elif registerDefinition['type'] == 'int64':
-        return ('ModbusDataUtils::convertToInt64(unit.values())')
+        return ('ModbusDataUtils::convertToInt64(unit.values(), ModbusDataUtils::ByteOrder%s)' % endianness)
     elif registerDefinition['type'] == 'float':
-        return ('ModbusDataUtils::convertToFloat32(unit.values())')
+        return ('ModbusDataUtils::convertToFloat32(unit.values(), ModbusDataUtils::ByteOrder%s)' % endianness)
     elif registerDefinition['type'] == 'float64':
-        return ('ModbusDataUtils::convertToFloat64(unit.values())')
+        return ('ModbusDataUtils::convertToFloat64(unit.values(), ModbusDataUtils::ByteOrder%s)' % endianness)
     elif registerDefinition['type'] == 'string':
         return ('ModbusDataUtils::convertToString(unit.values())')
 
 
-def writePropertyGetMethodDeclarations(fileDescriptor, registerDefinitions):
+def writePropertyGetSetMethodDeclarations(fileDescriptor, registerDefinitions):
     for registerDefinition in registerDefinitions:
         propertyName = registerDefinition['id']
         propertyTyp = getCppDataType(registerDefinition)
@@ -218,13 +292,19 @@ def writePropertyGetMethodDeclarations(fileDescriptor, registerDefinitions):
             writeLine(fileDescriptor, '    /* %s - Address: %s, Size: %s */' % (registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
 
         writeLine(fileDescriptor, '    %s %s() const;' % (propertyTyp, propertyName))
+
+        # Check if we require a set method
+        if registerDefinition['access'] == 'RW' or registerDefinition['access'] == 'WO':
+            writeLine(fileDescriptor, '    QModbusReply *set%s(%s %s);' % (propertyName[0].upper() + propertyName[1:], propertyTyp, propertyName))
+
         writeLine(fileDescriptor)
 
 
-def writePropertyGetMethodImplementations(fileDescriptor, className, registerDefinitions):
+def writePropertyGetSetMethodImplementations(fileDescriptor, className, registerDefinitions):
     for registerDefinition in registerDefinitions:
         propertyName = registerDefinition['id']
         propertyTyp = getCppDataType(registerDefinition)
+        # Get
         if 'enum' in registerDefinition:
             writeLine(fileDescriptor, '%s::%s %s::%s() const' % (className, propertyTyp, className, propertyName))
         else:
@@ -234,6 +314,24 @@ def writePropertyGetMethodImplementations(fileDescriptor, className, registerDef
         writeLine(fileDescriptor, '    return m_%s;' % propertyName)
         writeLine(fileDescriptor, '}')
         writeLine(fileDescriptor)
+
+        # Check if we require a set method
+        if registerDefinition['access'] == 'RW' or registerDefinition['access'] == 'WO':
+            writeLine(fileDescriptor, 'QModbusReply *%s::set%s(%s %s)' % (className, propertyName[0].upper() + propertyName[1:], propertyTyp, propertyName))
+            writeLine(fileDescriptor, '{')
+
+            writeLine(fileDescriptor, '    QVector<quint16> values = %s;' % getConversionToValueMethod(registerDefinition))
+            writeLine(fileDescriptor, '    qCDebug(dc%s()) << "--> Write \\"%s\\" register:" << %s << "size:" << %s << values;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
+            if registerDefinition['registerType'] == 'holdingRegister':
+                writeLine(fileDescriptor, '    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, %s, values.count());' % (registerDefinition['address']))
+
+            # TODO: other write methods
+
+            writeLine(fileDescriptor, '    request.setValues(values);')
+            writeLine(fileDescriptor, '    return sendWriteRequest(request, m_slaveId);')
+            writeLine(fileDescriptor, '}')
+            writeLine(fileDescriptor)
+
 
 
 def writePropertyUpdateMethodDeclarations(fileDescriptor, registerDefinitions):
@@ -256,6 +354,7 @@ def writePropertyUpdateMethodImplementations(fileDescriptor, className, register
         writeLine(fileDescriptor, 'void %s::update%s()' % (className, propertyName[0].upper() + propertyName[1:]))
         writeLine(fileDescriptor, '{')
         writeLine(fileDescriptor, '    // Update registers from %s' % registerDefinition['description'])
+        writeLine(fileDescriptor, '    qCDebug(dc%s()) << "--> Read \\"%s\\" register:" << %s << "size:" << %s;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
         writeLine(fileDescriptor, '    QModbusReply *reply = read%s();' % (propertyName[0].upper() + propertyName[1:]))
         writeLine(fileDescriptor, '    if (reply) {')
         writeLine(fileDescriptor, '        if (!reply->isFinished()) {')
@@ -263,6 +362,9 @@ def writePropertyUpdateMethodImplementations(fileDescriptor, className, register
         writeLine(fileDescriptor, '            connect(reply, &QModbusReply::finished, this, [this, reply](){')
         writeLine(fileDescriptor, '                if (reply->error() == QModbusDevice::NoError) {')
         writeLine(fileDescriptor, '                    const QModbusDataUnit unit = reply->result();')
+        writeLine(fileDescriptor, '                    qCDebug(dc%s()) << "<-- Response from \\"%s\\" register" << %s << "size:" << %s << unit.values();' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
+
+        # FIXME: introduce bool and check register type for parsing
         writeLine(fileDescriptor, '                    %s received%s = %s;' % (propertyTyp, propertyName[0].upper() + propertyName[1:], getValueConversionMethod(registerDefinition)))
         writeLine(fileDescriptor, '                    if (m_%s != received%s) {' % (propertyName, propertyName[0].upper() + propertyName[1:]))
         writeLine(fileDescriptor, '                        m_%s = received%s;' % (propertyName, propertyName[0].upper() + propertyName[1:]))
@@ -296,7 +398,18 @@ def writeInternalPropertyReadMethodImplementations(fileDescriptor, className, re
         propertyName = registerDefinition['id']
         writeLine(fileDescriptor, 'QModbusReply *%s::read%s()' % (className, propertyName[0].upper() + propertyName[1:]))
         writeLine(fileDescriptor, '{')
-        writeLine(fileDescriptor, '    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, %s, %s);' % (registerDefinition['address'], registerDefinition['size']))
+
+        # Build request depending on the register type
+        if registerDefinition['registerType'] == 'inputRegister':
+            writeLine(fileDescriptor, '    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::InputRegisters, %s, %s);' % (registerDefinition['address'], registerDefinition['size']))
+        elif registerDefinition['registerType'] == 'discreteInputs':
+            writeLine(fileDescriptor, '    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::DiscreteInputs, %s, %s);' % (registerDefinition['address'], registerDefinition['size']))
+        elif registerDefinition['registerType'] == 'coils':
+            writeLine(fileDescriptor, '    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, %s, %s);' % (registerDefinition['address'], registerDefinition['size']))
+        else:
+            #Default to holdingRegister
+            writeLine(fileDescriptor, '    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, %s, %s);' % (registerDefinition['address'], registerDefinition['size']))
+
         writeLine(fileDescriptor, '    return sendReadRequest(request, m_slaveId);')
         writeLine(fileDescriptor, '}')
         writeLine(fileDescriptor)
@@ -326,52 +439,63 @@ def writeInitializeMethod(fileDescriptor, className, registerDefinitions):
     writeLine(fileDescriptor, 'void %s::initialize()' % (className))
     writeLine(fileDescriptor, '{')
 
-    writeLine(fileDescriptor, '    QModbusReply *reply = nullptr;')
-    writeLine(fileDescriptor)
-    writeLine(fileDescriptor, '    if (!m_pendingInitReplies.isEmpty()) {')
-    writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Tried to initialize but there are still some init replies pending.";' % className)
-    writeLine(fileDescriptor, '        return;')
-    writeLine(fileDescriptor, '    }')
-    writeLine(fileDescriptor)
-
+    # First check if there are any init registers
+    initRequired = False
     for registerDefinition in registerDefinitions:
-        propertyName = registerDefinition['id']
-        propertyTyp = getCppDataType(registerDefinition)
+        if registerDefinition['readSchedule'] == 'init':
+            initRequired = True
+            break
 
-        if 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'init':
-            writeLine(fileDescriptor, '    // Read %s' % registerDefinition['description'])
-            writeLine(fileDescriptor, '    reply = read%s();' % (propertyName[0].upper() + propertyName[1:]))
-            writeLine(fileDescriptor, '    if (reply) {')
-            writeLine(fileDescriptor, '        if (!reply->isFinished()) {')
-            writeLine(fileDescriptor, '            m_pendingInitReplies.append(reply);')
-            writeLine(fileDescriptor, '            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);')
-            writeLine(fileDescriptor, '            connect(reply, &QModbusReply::finished, this, [this, reply](){')
-            writeLine(fileDescriptor, '                if (reply->error() == QModbusDevice::NoError) {')
-            writeLine(fileDescriptor, '                    const QModbusDataUnit unit = reply->result();')
-            writeLine(fileDescriptor, '                    %s received%s = %s;' % (propertyTyp, propertyName[0].upper() + propertyName[1:], getValueConversionMethod(registerDefinition)))
-            writeLine(fileDescriptor, '                    if (m_%s != received%s) {' % (propertyName, propertyName[0].upper() + propertyName[1:]))
-            writeLine(fileDescriptor, '                        m_%s = received%s;' % (propertyName, propertyName[0].upper() + propertyName[1:]))
-            writeLine(fileDescriptor, '                        emit %sChanged(m_%s);' % (propertyName, propertyName))
-            writeLine(fileDescriptor, '                    }')
-            writeLine(fileDescriptor, '                }')
-            writeLine(fileDescriptor)
-            writeLine(fileDescriptor, '                m_pendingInitReplies.removeAll(reply);')
-            writeLine(fileDescriptor, '                verifyInitFinished();')
-            writeLine(fileDescriptor, '            });')
-            writeLine(fileDescriptor)
-            writeLine(fileDescriptor, '            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){')
-            writeLine(fileDescriptor, '                qCWarning(dc%s()) << "Modbus reply error occurred while reading \\"%s\\" registers from" << hostAddress().toString() << error << reply->errorString();' % (className, registerDefinition['description']))
-            writeLine(fileDescriptor, '                emit reply->finished(); // To make sure it will be deleted')
-            writeLine(fileDescriptor, '            });')
-            writeLine(fileDescriptor, '        } else {')
-            writeLine(fileDescriptor, '            delete reply; // Broadcast reply returns immediatly')
-            writeLine(fileDescriptor, '        }')
-            writeLine(fileDescriptor, '    } else {')
-            writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Error occurred while reading \\"%s\\" registers from" << hostAddress().toString() << errorString();' % (className, registerDefinition['description']))
-            writeLine(fileDescriptor, '    }')
-            writeLine(fileDescriptor)
+    if initRequired:
+        writeLine(fileDescriptor, '    QModbusReply *reply = nullptr;')
+        writeLine(fileDescriptor)
+        writeLine(fileDescriptor, '    if (!m_pendingInitReplies.isEmpty()) {')
+        writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Tried to initialize but there are still some init replies pending.";' % className)
+        writeLine(fileDescriptor, '        return;')
+        writeLine(fileDescriptor, '    }')
 
-    writeLine(fileDescriptor, '    ')
+        for registerDefinition in registerDefinitions:
+            propertyName = registerDefinition['id']
+            propertyTyp = getCppDataType(registerDefinition)
+
+            if 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'init':
+                writeLine(fileDescriptor)
+                writeLine(fileDescriptor, '    // Read %s' % registerDefinition['description'])
+                writeLine(fileDescriptor, '    reply = read%s();' % (propertyName[0].upper() + propertyName[1:]))
+                writeLine(fileDescriptor, '    if (reply) {')
+                writeLine(fileDescriptor, '        if (!reply->isFinished()) {')
+                writeLine(fileDescriptor, '            m_pendingInitReplies.append(reply);')
+                writeLine(fileDescriptor, '            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);')
+                writeLine(fileDescriptor, '            connect(reply, &QModbusReply::finished, this, [this, reply](){')
+                writeLine(fileDescriptor, '                if (reply->error() == QModbusDevice::NoError) {')
+                writeLine(fileDescriptor, '                    const QModbusDataUnit unit = reply->result();')
+                writeLine(fileDescriptor, '                    %s received%s = %s;' % (propertyTyp, propertyName[0].upper() + propertyName[1:], getValueConversionMethod(registerDefinition)))
+                writeLine(fileDescriptor, '                    if (m_%s != received%s) {' % (propertyName, propertyName[0].upper() + propertyName[1:]))
+                writeLine(fileDescriptor, '                        m_%s = received%s;' % (propertyName, propertyName[0].upper() + propertyName[1:]))
+                writeLine(fileDescriptor, '                        emit %sChanged(m_%s);' % (propertyName, propertyName))
+                writeLine(fileDescriptor, '                    }')
+                writeLine(fileDescriptor, '                }')
+                writeLine(fileDescriptor)
+                writeLine(fileDescriptor, '                m_pendingInitReplies.removeAll(reply);')
+                writeLine(fileDescriptor, '                verifyInitFinished();')
+                writeLine(fileDescriptor, '            });')
+                writeLine(fileDescriptor)
+                writeLine(fileDescriptor, '            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){')
+                writeLine(fileDescriptor, '                qCWarning(dc%s()) << "Modbus reply error occurred while reading \\"%s\\" registers from" << hostAddress().toString() << error << reply->errorString();' % (className, registerDefinition['description']))
+                writeLine(fileDescriptor, '                emit reply->finished(); // To make sure it will be deleted')
+                writeLine(fileDescriptor, '            });')
+                writeLine(fileDescriptor, '        } else {')
+                writeLine(fileDescriptor, '            delete reply; // Broadcast reply returns immediatly')
+                writeLine(fileDescriptor, '        }')
+                writeLine(fileDescriptor, '    } else {')
+                writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Error occurred while reading \\"%s\\" registers from" << hostAddress().toString() << errorString();' % (className, registerDefinition['description']))
+                writeLine(fileDescriptor, '    }')
+
+
+    else:
+        writeLine(fileDescriptor, '    // No init registers defined. Nothing to be done and we are finished.')
+        writeLine(fileDescriptor, '    emit initializationFinished();')
+
     writeLine(fileDescriptor, '}')
     writeLine(fileDescriptor)
 
@@ -417,6 +541,11 @@ print('Source file: %s' % sourceFileName)
 print('Header file path: %s' % headerFilePath)
 print('Source file path: %s' % sourceFilePath)
 
+endianness = 'BigEndian'
+if 'endianness' in registerJson:
+    endianness = registerJson['endianness']
+
+
 #############################################################################
 # Write header file
 #############################################################################
@@ -452,7 +581,7 @@ writeLine(headerFile, '    ~%s() = default;' % className)
 writeLine(headerFile)
 
 # Write registers get method declarations
-writePropertyGetMethodDeclarations(headerFile, registerJson['registers'])
+writePropertyGetSetMethodDeclarations(headerFile, registerJson['registers'])
 
 # Write init and update method declarations
 writeLine(headerFile, '    virtual void initialize();')
@@ -516,7 +645,7 @@ writeLine(sourceFile, '}')
 writeLine(sourceFile)
 
 # Property get methods
-writePropertyGetMethodImplementations(sourceFile, className, registerJson['registers'])
+writePropertyGetSetMethodImplementations(sourceFile, className, registerJson['registers'])
 
 # Write init and update method implementation
 writeInitializeMethod(sourceFile, className, registerJson['registers'])

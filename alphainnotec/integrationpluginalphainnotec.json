@@ -1,0 +1,343 @@
+{
+    "name": "AlphaInnotec",
+    "displayName": "alpha innotec",
+    "id": "b3225a18-e9b0-443e-8c88-802d3132f94d",
+    "vendors": [
+        {
+            "name": "alphaInnotec",
+            "displayName": "alpha Innotec",
+            "id": "2c2101ae-7bb8-4012-97ba-cedf4cecd924",
+            "thingClasses": [
+                {
+                    "name": "alphaConnect",
+                    "displayName": "alpha connect",
+                    "id": "c5437b68-cfd2-4ec8-bad6-006fb5e8a8da",
+                    "createMethods": ["discovery", "user"],
+                    "interfaces": ["smartgridheatpump", "connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "64a18910-9111-4eaf-986d-f7b64b03b99a",
+                            "name": "ipAddress",
+                            "displayName": "IP address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": "127.0.0.1"
+                        },
+                        {
+                            "id": "f791c219-98a5-41ee-8e5f-1bfb5136dc9c",
+                            "name":"macAddress",
+                            "displayName": "MAC address",
+                            "type": "QString",
+                            "inputType": "MacAddress",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "b92025c1-8978-4d47-bd3c-4df749dbfd0f",
+                            "name":"port",
+                            "displayName": "Port",
+                            "type": "int",
+                            "defaultValue": 502
+                        },
+                        {
+                            "id": "1d9517ca-680c-49e2-a8d1-320743c27559",
+                            "name":"slaveId",
+                            "displayName": "Modbus slave ID",
+                            "type": "int",
+                            "defaultValue": 1
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "01ce0d61-3813-4c1b-a18b-555913d689a2",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "07465fbb-6949-4bd1-90d5-acf2d80c161d",
+                            "name": "heatingOn",
+                            "displayName": "Heating on",
+                            "displayNameEvent": "Heating turned on/off",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "8b407c1d-b84f-48d4-9961-b29bc58fff0e",
+                            "name": "coolingOn",
+                            "displayName": "Cooling on",
+                            "displayNameEvent": "Cooling turned on/off",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "fb448191-69d7-4f2e-87bf-6e4fb61e403f",
+                            "name": "flowTemperature",
+                            "displayName": "Flow temperature",
+                            "displayNameEvent": "Flow temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "6f96706e-67a3-43d3-bf74-e2e3e5fd0d6d",
+                            "name": "returnTemperature",
+                            "displayName": "Return temperature",
+                            "displayNameEvent": "Return temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "b6702fc5-889b-48b6-9257-64c5ee6e5e95",
+                            "name": "externalReturnTemperature",
+                            "displayName": "External return temperature",
+                            "displayNameEvent": "External return temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "da7e6bc9-95fd-4c90-931f-5b1cd69d864a",
+                            "name": "hotWaterTemperature",
+                            "displayName": "Hot water temperature",
+                            "displayNameEvent": "Hot water temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "bea6658e-64bf-4476-b75d-38c34a5fed85",
+                            "name": "hotGasTemperature",
+                            "displayName": "Hot gas temperature",
+                            "displayNameEvent": "Hot gas temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "e9facc5d-f41c-4256-85aa-b0f777431975",
+                            "name": "heatSourceInletTemperature",
+                            "displayName": "Heat source inlet temperature",
+                            "displayNameEvent": "Heat source inlet temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "48424285-4bc4-4110-8089-0486292d7371",
+                            "name": "heatSourceOutletTemperature",
+                            "displayName": "Heat source outlet temperature",
+                            "displayNameEvent": "Heat source outlet temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "52f8a581-7b9c-4c15-8aaa-c083763e7820",
+                            "name": "roomTemperature1",
+                            "displayName": "Room remote adjuster 1 temperature",
+                            "displayNameEvent": "Room remote adjuster 1 temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "91b57690-5daa-4766-86ae-f205fa0c805a",
+                            "name": "roomTemperature2",
+                            "displayName": "Room remote adjuster 2 temperature",
+                            "displayNameEvent": "Room remote adjuster 2 temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "a8c7e706-57ba-4572-b6e6-5eec91065ea8",
+                            "name": "roomTemperature3",
+                            "displayName": "Room remote adjuster 3 temperature",
+                            "displayNameEvent": "Room remote adjuster 3 temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "d4484305-eb0f-418b-bb15-f71b08e6fce1",
+                            "name": "solarCollectorTemperature",
+                            "displayName": "Solar collector temperature",
+                            "displayNameEvent": "Solar collector temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "75089369-c224-4fe5-91d1-9bdc5578f0a5",
+                            "name": "solarStorageTankTemperature",
+                            "displayName": "Solar storage tank temperature",
+                            "displayNameEvent": "Solar storage tank temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "519d7d45-1f3d-4118-ade9-3d7508451005",
+                            "name": "externalEnergySourceTemperature",
+                            "displayName": "External energy source temperature",
+                            "displayNameEvent": "External energy source temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "90d88164-3083-47c7-a396-b338bd9ea54c",
+                            "name": "supplyAirTemperature",
+                            "displayName": "Supply air temperature",
+                            "displayNameEvent": "Supply air temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "92594f19-8e4c-485b-bfd5-5371a0454267",
+                            "name": "externalAirTemperature",
+                            "displayName": "External air temperature",
+                            "displayNameEvent": "External air temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "5a21a131-f3a0-4ebd-9b2e-12eb25c84853",
+                            "name": "systemStatus",
+                            "displayName": "System status",
+                            "displayNameEvent": "System status changed",
+                            "type": "QString",
+                            "possibleValues": [
+                                "Heating mode",
+                                "Domestic hot water",
+                                "Swimming pool",
+                                "EUV off",
+                                "Defrost",
+                                "Off",
+                                "External energy source",
+                                "Cooling mode"
+                            ],
+                            "defaultValue": "Heating mode",
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "ef378ce6-f112-4022-8535-78cbd6ccfeeb",
+                            "name": "heatingPumpOperatingHours",
+                            "displayName": "Heating pump operating hours",
+                            "displayNameEvent": "Heating pump operating hours changed",
+                            "unit": "Hours",
+                            "type": "uint",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "d0c8f168-49b5-47ca-9988-c9922be38dd5",
+                            "name": "outdoorTemperature",
+                            "displayName": "Outdoor temperature",
+                            "displayNameEvent": "Outdoor temperature changed",
+                            "displayNameAction": "Set outdoor temperature",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "1ee6b189-ceff-4912-a577-2e3320307c3f",
+                            "name": "returnSetpointTemperature",
+                            "displayName": "Return temperature setpoint",
+                            "displayNameEvent": "Return temperature setpoint changed",
+                            "displayNameAction": "Set return temperature setpoint",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "writable": true,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "a7f1a688-51d3-4f9e-a323-86117c5542a8",
+                            "name": "hotWaterSetpointTemperature",
+                            "displayName": "Hot water temperature setpoint",
+                            "displayNameEvent": "Hot water temperature setpoint changed",
+                            "displayNameAction": "Set hot water temperature setpoint",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "writable": true,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "8cc9761f-b30e-4f54-aee7-b64190df57e1",
+                            "name": "sgReadyMode",
+                            "displayName": "Smart grid mode",
+                            "displayNameEvent": "Smart grid mode changed",
+                            "displayNameAction": "Set smart grid mode",
+                            "type": "QString",
+                            "possibleValues": [
+                                "Off",
+                                "Low",
+                                "Standard",
+                                "High"
+                            ],
+                            "writable": true,
+                            "defaultValue": "Standard",
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "c7948cf6-fd1a-44fa-a91b-98f2474ecc62",
+                            "name": "totalEnergy",
+                            "displayName": "Total energy",
+                            "displayNameEvent": "Total energy changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "24367fba-2883-40da-9b92-5d4db3c71c2f",
+                            "name": "heatingEnergy",
+                            "displayName": "Heating energy",
+                            "displayNameEvent": "Heating energy changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "be2430c3-54ef-441e-b684-9aabc1d984d6",
+                            "name": "hotWaterEnergy",
+                            "displayName": "Hot water energy",
+                            "displayNameEvent": "Hot water energy changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        }
+                    ],
+                    "actionTypes": [ ]
+                }
+            ]
+        }
+    ]
+}
