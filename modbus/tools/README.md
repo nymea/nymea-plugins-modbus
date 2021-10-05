@@ -23,6 +23,7 @@ The basic structure of the modbus register JSON looks like following example:
 
 ```
 {
+    "endianness": "BigEndian",
     "enums": [
         {
             "name": "NameOfEnum",
@@ -67,6 +68,15 @@ The basic structure of the modbus register JSON looks like following example:
 }
 
 ```
+
+## Endianness
+
+When converting multiple registers to one data type (i.e. 2 registers uint16 values to one uint32), the order of the registers are important to align with the endiness of the data receiving. 
+
+There are 2 possibilities:
+
+* `BigEndian`: default if not specified: register bytes come in following order `[0, 1, 2, 3]`: `ABCD`
+* `LittleEndian`: register bytes come in following order `[0, 1, 2, 3]`: `CDAB`
 
 ## Enums
 
