@@ -1501,7 +1501,7 @@
                             "displayName": "Rated energy",
                             "displayNameEvent": "Rated energy changed",
                             "type": "double",
-                            "unit": "Watt",
+                            "unit": "KiloWattHour",
                             "defaultValue": 0.00
                         },
                         {
@@ -1546,7 +1546,7 @@
                             "displayName": "Maximum energy",
                             "displayNameEvent": "Maximum energy changed",
                             "type": "double",
-                            "unit": "Watt",
+                            "unit": "KiloWattHour",
                             "defaultValue": 0.00
                         },
                         {
