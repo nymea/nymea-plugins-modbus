@@ -234,13 +234,13 @@ void SolarEdgeBattery::onBlockDataUpdated()
     m_thing->setStateValue(solarEdgeBatteryBatteryCriticalStateTypeId, (m_batteryData.stateOfEnergy < 5) && chargingState != "charging");
     m_thing->setStateValue(solarEdgeBatteryBatteryLevelStateTypeId, m_batteryData.stateOfEnergy);
     m_thing->setStateValue(solarEdgeBatteryChargingStateStateTypeId, chargingState);
-    m_thing->setStateValue(solarEdgeBatteryRatedEnergyStateTypeId, m_batteryData.ratedEnergy);
+    m_thing->setStateValue(solarEdgeBatteryRatedEnergyStateTypeId, m_batteryData.ratedEnergy / 1000.0); // kWh
     m_thing->setStateValue(solarEdgeBatteryAverageTemperatureStateTypeId, m_batteryData.averageTemperature);
     m_thing->setStateValue(solarEdgeBatteryInstantaneousVoltageStateTypeId, m_batteryData.instantaneousVoltage);
     m_thing->setStateValue(solarEdgeBatteryInstantaneousCurrentStateTypeId, m_batteryData.instantaneousCurrent);
     m_thing->setStateValue(solarEdgeBatteryCurrentPowerStateTypeId, m_batteryData.instantaneousPower);
-    m_thing->setStateValue(solarEdgeBatteryMaxEnergyStateTypeId, m_batteryData.maxEnergy);
-    m_thing->setStateValue(solarEdgeBatteryCapacityStateTypeId, m_batteryData.availableEnergy);
+    m_thing->setStateValue(solarEdgeBatteryMaxEnergyStateTypeId, m_batteryData.maxEnergy / 1000.0); // kWh
+    m_thing->setStateValue(solarEdgeBatteryCapacityStateTypeId, m_batteryData.availableEnergy / 1000.0); // kWh
     m_thing->setStateValue(solarEdgeBatteryStateOfHealthStateTypeId, m_batteryData.stateOfHealth);
     m_thing->setStateValue(solarEdgeBatteryVersionStateTypeId, m_batteryData.firmwareVersion);
 }
@@ -261,8 +261,8 @@ QDebug operator<<(QDebug debug, const SolarEdgeBattery::BatteryData &batteryData
     debug << "    - Instantuouse Voltage" << batteryData.instantaneousVoltage << "V" << endl;
     debug << "    - Instantuouse Current" << batteryData.instantaneousCurrent << "A" << endl;
     debug << "    - Instantuouse Power" << batteryData.instantaneousPower << "W" << endl;
-    debug << "    - Max energy" << batteryData.maxEnergy << "W" << endl;
-    debug << "    - Available energy" << batteryData.availableEnergy << "W" << endl;
+    debug << "    - Max energy" << batteryData.maxEnergy << "W * H" << endl;
+    debug << "    - Available energy" << batteryData.availableEnergy << "W * H" << endl;
     debug << "    - State of health" << batteryData.stateOfHealth << "%" << endl;
     debug << "    - State of energy" << batteryData.stateOfEnergy << "%" << endl;
     debug << "    - Battery status" << batteryData.batteryStatus << endl;
