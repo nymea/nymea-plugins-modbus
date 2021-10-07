@@ -57,6 +57,8 @@ private:
     PluginTimer *m_pluginTimer = nullptr;
     QHash<Thing *, KostalConnection *> m_kostalConnections;
 
+
+
 };
 
 #endif // INTEGRATIONPLUGINKOSTAL_H

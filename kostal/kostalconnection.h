@@ -185,9 +185,6 @@ public:
     /* Actual battery charge (-) / discharge (+) current [A] - Address: 200, Size: 2 */
     float actualBatteryChargeCurrent() const;
 
-    /* Actual state of charge [%] - Address: 210, Size: 2 */
-    float batteryStateOfCharge() const;
-
     /* Battery temperature [°C] - Address: 214, Size: 2 */
     float batteryTemperature() const;
 
@@ -224,6 +221,9 @@ public:
     /* Total active power (powermeter) [W] - Address: 252, Size: 2 */
     float powerMeterTotalActivePower() const;
 
+    /* Battery SoC [%] - Address: 514, Size: 1 */
+    quint16 batteryStateOfCharge() const;
+
     /* Battery Manufacturer - Address: 517, Size: 8 */
     QString batteryManufacturer() const;
 
@@ -233,6 +233,9 @@ public:
     /* Battery serial number - Address: 527, Size: 2 */
     quint32 batterySerialNumber() const;
 
+    /* Battery work capacity [Wh] - Address: 529, Size: 2 */
+    quint32 batteryWorkCapacity() const;
+
     /* Inverter manufacturer - Address: 535, Size: 16 */
     QString inverterManufacturer() const;
 
@@ -241,6 +244,9 @@ public:
 
     /* Energy scale factor - Address: 579, Size: 1 */
     qint16 energyScaleFactor() const;
+
+    /* Actual battery charge/discharge power [W] - Address: 582, Size: 1 */
+    qint16 batteryActualPower() const;
 
     /* Battery type - Address: 588, Size: 1 */
     BatteryType batteryType() const;
@@ -275,7 +281,6 @@ public:
     void updateBatteryChargeCurrent();
     void updateNumberOfBytteryCycles();
     void updateActualBatteryChargeCurrent();
-    void updateBatteryStateOfCharge();
     void updateBatteryTemperature();
     void updateBatteryVoltage();
     void updatePowerMeterCurrentPhase1();
@@ -288,6 +293,8 @@ public:
     void updatePowerMeterActivePowerPhase3();
     void updatePowerMeterVoltagePhase3();
     void updatePowerMeterTotalActivePower();
+    void updateBatteryStateOfCharge();
+    void updateBatteryActualPower();
     void updateTotalEnergyAcToGrid();
 
 signals:
@@ -326,7 +333,6 @@ signals:
     void batteryChargeCurrentChanged(float batteryChargeCurrent);
     void numberOfBytteryCyclesChanged(float numberOfBytteryCycles);
     void actualBatteryChargeCurrentChanged(float actualBatteryChargeCurrent);
-    void batteryStateOfChargeChanged(float batteryStateOfCharge);
     void batteryTemperatureChanged(float batteryTemperature);
     void batteryVoltageChanged(float batteryVoltage);
     void powerMeterCurrentPhase1Changed(float powerMeterCurrentPhase1);
@@ -339,12 +345,15 @@ signals:
     void powerMeterActivePowerPhase3Changed(float powerMeterActivePowerPhase3);
     void powerMeterVoltagePhase3Changed(float powerMeterVoltagePhase3);
     void powerMeterTotalActivePowerChanged(float powerMeterTotalActivePower);
+    void batteryStateOfChargeChanged(quint16 batteryStateOfCharge);
     void batteryManufacturerChanged(const QString &batteryManufacturer);
     void batteryModelIdChanged(quint32 batteryModelId);
     void batterySerialNumberChanged(quint32 batterySerialNumber);
+    void batteryWorkCapacityChanged(quint32 batteryWorkCapacity);
     void inverterManufacturerChanged(const QString &inverterManufacturer);
     void inverterSerialNumberChanged(const QString &inverterSerialNumber);
     void energyScaleFactorChanged(qint16 energyScaleFactor);
+    void batteryActualPowerChanged(qint16 batteryActualPower);
     void batteryTypeChanged(BatteryType batteryType);
     void totalEnergyAcToGridChanged(float totalEnergyAcToGrid);
 
@@ -385,7 +394,6 @@ private:
     float m_batteryChargeCurrent = 0;
     float m_numberOfBytteryCycles = 0;
     float m_actualBatteryChargeCurrent = 0;
-    float m_batteryStateOfCharge = 0;
     float m_batteryTemperature = 0;
     float m_batteryVoltage = 0;
     float m_powerMeterCurrentPhase1 = 0;
@@ -398,12 +406,15 @@ private:
     float m_powerMeterActivePowerPhase3 = 0;
     float m_powerMeterVoltagePhase3 = 0;
     float m_powerMeterTotalActivePower = 0;
+    quint16 m_batteryStateOfCharge;
     QString m_batteryManufacturer;
     quint32 m_batteryModelId = 0;
     quint32 m_batterySerialNumber = 0;
+    quint32 m_batteryWorkCapacity = 0;
     QString m_inverterManufacturer;
     QString m_inverterSerialNumber;
     qint16 m_energyScaleFactor = 0;
+    qint16 m_batteryActualPower = 0;
     BatteryType m_batteryType = BatteryTypeNoBattery;
     float m_totalEnergyAcToGrid = 0;
 
@@ -442,7 +453,6 @@ private:
     QModbusReply *readBatteryChargeCurrent();
     QModbusReply *readNumberOfBytteryCycles();
     QModbusReply *readActualBatteryChargeCurrent();
-    QModbusReply *readBatteryStateOfCharge();
     QModbusReply *readBatteryTemperature();
     QModbusReply *readBatteryVoltage();
     QModbusReply *readPowerMeterCurrentPhase1();
@@ -455,12 +465,15 @@ private:
     QModbusReply *readPowerMeterActivePowerPhase3();
     QModbusReply *readPowerMeterVoltagePhase3();
     QModbusReply *readPowerMeterTotalActivePower();
+    QModbusReply *readBatteryStateOfCharge();
     QModbusReply *readBatteryManufacturer();
     QModbusReply *readBatteryModelId();
     QModbusReply *readBatterySerialNumber();
+    QModbusReply *readBatteryWorkCapacity();
     QModbusReply *readInverterManufacturer();
     QModbusReply *readInverterSerialNumber();
     QModbusReply *readEnergyScaleFactor();
+    QModbusReply *readBatteryActualPower();
     QModbusReply *readBatteryType();
     QModbusReply *readTotalEnergyAcToGrid();
 

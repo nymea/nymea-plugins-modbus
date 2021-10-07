@@ -484,17 +484,6 @@
             "access": "RO"
         },
         {
-            "id": "batteryStateOfCharge",
-            "address": 210,
-            "size": 2,
-            "type": "float",
-            "readSchedule": "update",
-            "description": "Actual state of charge",
-            "unit": "%",
-            "defaultValue": "0",
-            "access": "RO"
-        },
-        {
             "id": "batteryTemperature",
             "address": 214,
             "size": 2,
@@ -627,6 +616,16 @@
             "access": "RO"
         },
         {
+            "id": "batteryStateOfCharge",
+            "address": 514,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "description": "Battery SoC",
+            "unit": "%",
+            "access": "RO"
+        },
+        {
             "id": "batteryManufacturer",
             "address": 517,
             "size": 8,
@@ -656,6 +655,17 @@
             "access": "RO"
         },
         {
+            "id": "batteryWorkCapacity",
+            "address": 529,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "init",
+            "description": "Battery work capacity",
+            "defaultValue": "0",
+            "unit": "Wh",
+            "access": "RO"
+        },
+        {
             "id": "inverterManufacturer",
             "address": 535,
             "size": 16,
@@ -680,6 +690,17 @@
             "type": "int16",
             "readSchedule": "init",
             "description": "Energy scale factor",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "batteryActualPower",
+            "address": 582,
+            "size": 1,
+            "type": "int16",
+            "readSchedule": "update",
+            "description": "Actual battery charge/discharge power",
+            "unit": "W",
             "defaultValue": "0",
             "access": "RO"
         },

@@ -206,11 +206,6 @@ float KostalConnection::actualBatteryChargeCurrent() const
     return m_actualBatteryChargeCurrent;
 }
 
-float KostalConnection::batteryStateOfCharge() const
-{
-    return m_batteryStateOfCharge;
-}
-
 float KostalConnection::batteryTemperature() const
 {
     return m_batteryTemperature;
@@ -271,6 +266,11 @@ float KostalConnection::powerMeterTotalActivePower() const
     return m_powerMeterTotalActivePower;
 }
 
+quint16 KostalConnection::batteryStateOfCharge() const
+{
+    return m_batteryStateOfCharge;
+}
+
 QString KostalConnection::batteryManufacturer() const
 {
     return m_batteryManufacturer;
@@ -286,6 +286,11 @@ quint32 KostalConnection::batterySerialNumber() const
     return m_batterySerialNumber;
 }
 
+quint32 KostalConnection::batteryWorkCapacity() const
+{
+    return m_batteryWorkCapacity;
+}
+
 QString KostalConnection::inverterManufacturer() const
 {
     return m_inverterManufacturer;
@@ -299,6 +304,11 @@ QString KostalConnection::inverterSerialNumber() const
 qint16 KostalConnection::energyScaleFactor() const
 {
     return m_energyScaleFactor;
+}
+
+qint16 KostalConnection::batteryActualPower() const
+{
+    return m_batteryActualPower;
 }
 
 KostalConnection::BatteryType KostalConnection::batteryType() const
@@ -692,6 +702,37 @@ void KostalConnection::initialize()
         qCWarning(dcKostalConnection()) << "Error occurred while reading \"Battery serial number\" registers from" << hostAddress().toString() << errorString();
     }
 
+    // Read Battery work capacity
+    reply = readBatteryWorkCapacity();
+    if (reply) {
+        if (!reply->isFinished()) {
+            m_pendingInitReplies.append(reply);
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    quint32 receivedBatteryWorkCapacity = ModbusDataUtils::convertToUInt32(unit.values());
+                    if (m_batteryWorkCapacity != receivedBatteryWorkCapacity) {
+                        m_batteryWorkCapacity = receivedBatteryWorkCapacity;
+                        emit batteryWorkCapacityChanged(m_batteryWorkCapacity);
+                    }
+                }
+
+                m_pendingInitReplies.removeAll(reply);
+                verifyInitFinished();
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcKostalConnection()) << "Modbus reply error occurred while reading \"Battery work capacity\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcKostalConnection()) << "Error occurred while reading \"Battery work capacity\" registers from" << hostAddress().toString() << errorString();
+    }
+
     // Read Inverter manufacturer
     reply = readInverterManufacturer();
     if (reply) {
@@ -845,7 +886,6 @@ void KostalConnection::update()
     updateBatteryChargeCurrent();
     updateNumberOfBytteryCycles();
     updateActualBatteryChargeCurrent();
-    updateBatteryStateOfCharge();
     updateBatteryTemperature();
     updateBatteryVoltage();
     updatePowerMeterCurrentPhase1();
@@ -858,6 +898,8 @@ void KostalConnection::update()
     updatePowerMeterActivePowerPhase3();
     updatePowerMeterVoltagePhase3();
     updatePowerMeterTotalActivePower();
+    updateBatteryStateOfCharge();
+    updateBatteryActualPower();
     updateTotalEnergyAcToGrid();
 }
 
@@ -1581,36 +1623,6 @@ void KostalConnection::updateActualBatteryChargeCurrent()
     }
 }
 
-void KostalConnection::updateBatteryStateOfCharge()
-{
-    // Update registers from Actual state of charge
-    QModbusReply *reply = readBatteryStateOfCharge();
-    if (reply) {
-        if (!reply->isFinished()) {
-            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
-            connect(reply, &QModbusReply::finished, this, [this, reply](){
-                if (reply->error() == QModbusDevice::NoError) {
-                    const QModbusDataUnit unit = reply->result();
-                    float receivedBatteryStateOfCharge = ModbusDataUtils::convertToFloat32(unit.values());
-                    if (m_batteryStateOfCharge != receivedBatteryStateOfCharge) {
-                        m_batteryStateOfCharge = receivedBatteryStateOfCharge;
-                        emit batteryStateOfChargeChanged(m_batteryStateOfCharge);
-                    }
-                }
-            });
-
-            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
-                qCWarning(dcKostalConnection()) << "Modbus reply error occurred while updating \"Actual state of charge\" registers from" << hostAddress().toString() << error << reply->errorString();
-                emit reply->finished(); // To make sure it will be deleted
-            });
-        } else {
-            delete reply; // Broadcast reply returns immediatly
-        }
-    } else {
-        qCWarning(dcKostalConnection()) << "Error occurred while reading \"Actual state of charge\" registers from" << hostAddress().toString() << errorString();
-    }
-}
-
 void KostalConnection::updateBatteryTemperature()
 {
     // Update registers from Battery temperature
@@ -1971,6 +1983,66 @@ void KostalConnection::updatePowerMeterTotalActivePower()
     }
 }
 
+void KostalConnection::updateBatteryStateOfCharge()
+{
+    // Update registers from Battery SoC
+    QModbusReply *reply = readBatteryStateOfCharge();
+    if (reply) {
+        if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    quint16 receivedBatteryStateOfCharge = ModbusDataUtils::convertToUInt16(unit.values());
+                    if (m_batteryStateOfCharge != receivedBatteryStateOfCharge) {
+                        m_batteryStateOfCharge = receivedBatteryStateOfCharge;
+                        emit batteryStateOfChargeChanged(m_batteryStateOfCharge);
+                    }
+                }
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcKostalConnection()) << "Modbus reply error occurred while updating \"Battery SoC\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcKostalConnection()) << "Error occurred while reading \"Battery SoC\" registers from" << hostAddress().toString() << errorString();
+    }
+}
+
+void KostalConnection::updateBatteryActualPower()
+{
+    // Update registers from Actual battery charge/discharge power
+    QModbusReply *reply = readBatteryActualPower();
+    if (reply) {
+        if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    qint16 receivedBatteryActualPower = ModbusDataUtils::convertToInt16(unit.values());
+                    if (m_batteryActualPower != receivedBatteryActualPower) {
+                        m_batteryActualPower = receivedBatteryActualPower;
+                        emit batteryActualPowerChanged(m_batteryActualPower);
+                    }
+                }
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcKostalConnection()) << "Modbus reply error occurred while updating \"Actual battery charge/discharge power\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcKostalConnection()) << "Error occurred while reading \"Actual battery charge/discharge power\" registers from" << hostAddress().toString() << errorString();
+    }
+}
+
 void KostalConnection::updateTotalEnergyAcToGrid()
 {
     // Update registers from Total energy AC-side to grid
@@ -2199,12 +2271,6 @@ QModbusReply *KostalConnection::readActualBatteryChargeCurrent()
     return sendReadRequest(request, m_slaveId);
 }
 
-QModbusReply *KostalConnection::readBatteryStateOfCharge()
-{
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 210, 2);
-    return sendReadRequest(request, m_slaveId);
-}
-
 QModbusReply *KostalConnection::readBatteryTemperature()
 {
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 214, 2);
@@ -2277,6 +2343,12 @@ QModbusReply *KostalConnection::readPowerMeterTotalActivePower()
     return sendReadRequest(request, m_slaveId);
 }
 
+QModbusReply *KostalConnection::readBatteryStateOfCharge()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 514, 1);
+    return sendReadRequest(request, m_slaveId);
+}
+
 QModbusReply *KostalConnection::readBatteryManufacturer()
 {
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 517, 8);
@@ -2295,6 +2367,12 @@ QModbusReply *KostalConnection::readBatterySerialNumber()
     return sendReadRequest(request, m_slaveId);
 }
 
+QModbusReply *KostalConnection::readBatteryWorkCapacity()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 529, 2);
+    return sendReadRequest(request, m_slaveId);
+}
+
 QModbusReply *KostalConnection::readInverterManufacturer()
 {
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 535, 16);
@@ -2310,6 +2388,12 @@ QModbusReply *KostalConnection::readInverterSerialNumber()
 QModbusReply *KostalConnection::readEnergyScaleFactor()
 {
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 579, 1);
+    return sendReadRequest(request, m_slaveId);
+}
+
+QModbusReply *KostalConnection::readBatteryActualPower()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 582, 1);
     return sendReadRequest(request, m_slaveId);
 }
 
@@ -2369,7 +2453,6 @@ QDebug operator<<(QDebug debug, KostalConnection *kostalConnection)
     debug.nospace().noquote() << "    - Battery charge current:" << kostalConnection->batteryChargeCurrent() << " [A]" << "\n";
     debug.nospace().noquote() << "    - Number of battery cycles:" << kostalConnection->numberOfBytteryCycles() << "\n";
     debug.nospace().noquote() << "    - Actual battery charge (-) / discharge (+) current:" << kostalConnection->actualBatteryChargeCurrent() << " [A]" << "\n";
-    debug.nospace().noquote() << "    - Actual state of charge:" << kostalConnection->batteryStateOfCharge() << " [%]" << "\n";
     debug.nospace().noquote() << "    - Battery temperature:" << kostalConnection->batteryTemperature() << " [°C]" << "\n";
     debug.nospace().noquote() << "    - Battery voltage:" << kostalConnection->batteryVoltage() << " [V]" << "\n";
     debug.nospace().noquote() << "    - Current phase 1 (powermeter):" << kostalConnection->powerMeterCurrentPhase1() << " [A]" << "\n";
@@ -2382,12 +2465,15 @@ QDebug operator<<(QDebug debug, KostalConnection *kostalConnection)
     debug.nospace().noquote() << "    - Active power phase 3 (powermeter):" << kostalConnection->powerMeterActivePowerPhase3() << " [W]" << "\n";
     debug.nospace().noquote() << "    - Voltage phase 3 (powermeter):" << kostalConnection->powerMeterVoltagePhase3() << " [V]" << "\n";
     debug.nospace().noquote() << "    - Total active power (powermeter):" << kostalConnection->powerMeterTotalActivePower() << " [W]" << "\n";
+    debug.nospace().noquote() << "    - Battery SoC:" << kostalConnection->batteryStateOfCharge() << " [%]" << "\n";
     debug.nospace().noquote() << "    - Battery Manufacturer:" << kostalConnection->batteryManufacturer() << "\n";
     debug.nospace().noquote() << "    - Battery model ID:" << kostalConnection->batteryModelId() << "\n";
     debug.nospace().noquote() << "    - Battery serial number:" << kostalConnection->batterySerialNumber() << "\n";
+    debug.nospace().noquote() << "    - Battery work capacity:" << kostalConnection->batteryWorkCapacity() << " [Wh]" << "\n";
     debug.nospace().noquote() << "    - Inverter manufacturer:" << kostalConnection->inverterManufacturer() << "\n";
     debug.nospace().noquote() << "    - Inverter serial number:" << kostalConnection->inverterSerialNumber() << "\n";
     debug.nospace().noquote() << "    - Energy scale factor:" << kostalConnection->energyScaleFactor() << "\n";
+    debug.nospace().noquote() << "    - Actual battery charge/discharge power:" << kostalConnection->batteryActualPower() << " [W]" << "\n";
     debug.nospace().noquote() << "    - Battery type:" << kostalConnection->batteryType() << "\n";
     debug.nospace().noquote() << "    - Total energy AC-side to grid:" << kostalConnection->totalEnergyAcToGrid() << " [Wh]" << "\n";
     return debug.quote().space();
