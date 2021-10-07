@@ -1284,20 +1284,13 @@
                             "defaultValue": "Off"
                         },
                         {
-                            "id": "9d191d9f-154e-4de5-81ee-5d7928d24fe2",
-                            "name": "charging",
-                            "displayName": "Charging",
-                            "displayNameEvent": "Charging changed",
-                            "type": "bool",
-                            "defaultValue": false
-                        },
-                        {
-                            "id": "466c2e36-f305-4e3f-9c05-496de7d1cf6d",
-                            "name": "discharging",
-                            "displayName": "Discharging",
-                            "displayNameEvent": "Discharging changed",
-                            "type": "bool",
-                            "defaultValue": false
+                            "id": "f6178427-8e04-45c7-abec-27d04dd5ff04",
+                            "name": "chargingState",
+                            "displayName": "Charging state",
+                            "displayNameEvent": "Charging state changed",
+                            "type": "QString",
+                            "possibleValues": ["idle", "charging", "discharging"],
+                            "defaultValue": "idle"
                         },
                         {
                             "id": "221a2ef6-0a92-4ff0-87fe-7bd920dbec0b",

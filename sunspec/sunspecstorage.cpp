@@ -138,38 +138,31 @@ void SunSpecStorage::onBlockDataUpdated()
     switch (storage->chaSt()) {
     case SunSpecStorageModel::ChastOff:
         m_thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Off");
-        m_thing->setStateValue(sunspecStorageChargingStateTypeId, false);
-        m_thing->setStateValue(sunspecStorageDischargingStateTypeId, false);
+        m_thing->setStateValue(sunspecStorageChargingStateStateTypeId, "idle");
         break;
     case SunSpecStorageModel::ChastEmpty:
         m_thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Empty");
-        m_thing->setStateValue(sunspecStorageChargingStateTypeId, false);
-        m_thing->setStateValue(sunspecStorageDischargingStateTypeId, false);
+        m_thing->setStateValue(sunspecStorageChargingStateStateTypeId, "idle");
         break;
     case SunSpecStorageModel::ChastDischarging:
         m_thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Discharging");
-        m_thing->setStateValue(sunspecStorageChargingStateTypeId, false);
-        m_thing->setStateValue(sunspecStorageDischargingStateTypeId, true);
+        m_thing->setStateValue(sunspecStorageChargingStateStateTypeId, "discharging");
         break;
     case SunSpecStorageModel::ChastCharging:
         m_thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Charging");
-        m_thing->setStateValue(sunspecStorageChargingStateTypeId, true);
-        m_thing->setStateValue(sunspecStorageDischargingStateTypeId, false);
+        m_thing->setStateValue(sunspecStorageChargingStateStateTypeId, "charging");
         break;
     case SunSpecStorageModel::ChastFull:
         m_thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Full");
-        m_thing->setStateValue(sunspecStorageChargingStateTypeId, false);
-        m_thing->setStateValue(sunspecStorageDischargingStateTypeId, false);
+        m_thing->setStateValue(sunspecStorageChargingStateStateTypeId, "idle");
         break;
     case SunSpecStorageModel::ChastHolding:
         m_thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Holding");
-        m_thing->setStateValue(sunspecStorageChargingStateTypeId, false);
-        m_thing->setStateValue(sunspecStorageDischargingStateTypeId, false);
+        m_thing->setStateValue(sunspecStorageChargingStateStateTypeId, "idle");
         break;
     case SunSpecStorageModel::ChastTesting:
         m_thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Testing");
-        m_thing->setStateValue(sunspecStorageChargingStateTypeId, false);
-        m_thing->setStateValue(sunspecStorageDischargingStateTypeId, false);
+        m_thing->setStateValue(sunspecStorageChargingStateStateTypeId, "idle");
         break;
     }
 

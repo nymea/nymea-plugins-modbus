@@ -121,6 +121,7 @@ public:
 
 signals:
     void initFinished(bool success);
+    void instantaneousPowerChanged(float instantaneousPower);
 
 private:
     QTimer m_timer;
