@@ -37,8 +37,7 @@
 #include <sunspecconnection.h>
 #include <models/sunspecmodelfactory.h>
 
-#include "sunspecstorage.h"
-#include "sunspecmeter.h"
+#include "sunspecthing.h"
 
 #include <QUuid>
 
@@ -82,6 +81,8 @@ private:
     QHash<Thing *, SunSpecThing *> m_sunSpecThings;
 
     QHash<Thing *, SunSpecModel *> m_sunSpecInverters;
+    QHash<Thing *, SunSpecModel *> m_sunSpecMeters;
+    QHash<Thing *, SunSpecModel *> m_sunSpecStorages;
 
     bool sunspecThingAlreadyAdded(uint modelId, uint modbusAddress, const ThingId &parentId);
     void processDiscoveryResult(Thing *thing, SunSpecConnection *connection);
