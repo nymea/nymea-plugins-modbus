@@ -34,15 +34,28 @@
 #include "solaredgebattery.h"
 
 #include <sunspecmodel.h>
+#include <models/sunspecmodelfactory.h>
 #include <models/sunspeccommonmodel.h>
 
-#include <models/sunspecmodelfactory.h>
+// Inverters
 #include <models/sunspecinvertersinglephasemodel.h>
 #include <models/sunspecinvertersinglephasefloatmodel.h>
 #include <models/sunspecinvertersplitphasemodel.h>
 #include <models/sunspecinvertersplitphasefloatmodel.h>
 #include <models/sunspecinverterthreephasemodel.h>
 #include <models/sunspecinverterthreephasefloatmodel.h>
+
+// Meters
+#include <models/sunspecmeterthreephasemodel.h>
+#include <models/sunspecmetersinglephasemodel.h>
+#include <models/sunspecmetersinglephasefloatmodel.h>
+#include <models/sunspecmetersplitsinglephaseabnmodel.h>
+#include <models/sunspecmetersplitsinglephasefloatmodel.h>
+#include <models/sunspecmeterthreephasewyeconnectmodel.h>
+#include <models/sunspecmeterthreephasedeltaconnectmodel.h>
+#include <models/sunspecdeltaconnectthreephaseabcmetermodel.h>
+
+#include <models/sunspecstoragemodel.h>
 
 #include <QHostAddress>
 
@@ -277,6 +290,10 @@ void IntegrationPluginSunSpec::postSetupThing(Thing *thing)
         sunSpecThing->readBlockData();
     } else if (m_sunSpecInverters.contains(thing)) {
         m_sunSpecInverters.value(thing)->readBlockData();
+    } else if (m_sunSpecMeters.contains(thing)) {
+        m_sunSpecMeters.value(thing)->readBlockData();
+    } else if (m_sunSpecStorages.contains(thing)) {
+        m_sunSpecStorages.value(thing)->readBlockData();
     }  else {
         Q_ASSERT_X(false, "postSetupThing", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
     }
@@ -298,6 +315,10 @@ void IntegrationPluginSunSpec::thingRemoved(Thing *thing)
 
     } else if (m_sunSpecInverters.contains(thing)) {
         m_sunSpecInverters.remove(thing);
+    } else if (m_sunSpecMeters.contains(thing)) {
+        m_sunSpecMeters.remove(thing);
+    } else if (m_sunSpecStorages.contains(thing)) {
+        m_sunSpecStorages.remove(thing);
     } else {
         Q_ASSERT_X(false, "thingRemoved", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
     }
@@ -315,20 +336,88 @@ void IntegrationPluginSunSpec::executeAction(ThingActionInfo *info)
     Action action = info->action();
 
     if (thing->thingClassId() == sunspecStorageThingClassId) {
-        SunSpecStorage *sunSpecStorage = qobject_cast<SunSpecStorage *>(m_sunSpecThings.value(thing));
-        if (!sunSpecStorage) {
-            qWarning(dcSunSpec()) << "Could not find sunspec instance for thing";
+        SunSpecStorageModel *storage = qobject_cast<SunSpecStorageModel *>(m_sunSpecStorages.value(thing));
+        if (!storage) {
+            qWarning(dcSunSpec()) << "Could not find sunspec model instance for thing" << thing;
             info->finish(Thing::ThingErrorHardwareNotAvailable);
             return;
         }
 
-        if (!sunSpecStorage->model()->connection()->connected()) {
+        if (!thing->stateValue(sunspecStorageConnectedStateTypeId).toBool()) {
             qWarning(dcSunSpec()) << "Could not execute action for" << thing << "because the SunSpec connection is not connected.";
             info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("The SunSpec connection is not connected."));
             return;
         }
 
-        sunSpecStorage->executeAction(info);
+        if (action.actionTypeId() == sunspecStorageGridChargingActionTypeId) {
+            bool gridCharging = action.param(sunspecStorageGridChargingActionGridChargingParamTypeId).value().toBool();
+            QModbusReply *reply = storage->setChaGriSet(gridCharging ? SunSpecStorageModel::ChagrisetGrid : SunSpecStorageModel::ChagrisetPv);
+            if (!reply) {
+                info->finish(Thing::ThingErrorHardwareFailure);
+                return;
+            }
+
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, info, [info, reply]{
+                if (reply->error() != QModbusDevice::NoError) {
+                    info->finish(Thing::ThingErrorHardwareFailure);
+                    return;
+                }
+                info->finish(Thing::ThingErrorNoError);
+            });
+        } else if (action.actionTypeId() == sunspecStorageEnableChargingActionTypeId || action.actionTypeId() == sunspecStorageEnableDischargingActionTypeId) {
+            SunSpecStorageModel::Storctl_modFlags controlModeFlags;
+            if (action.param(sunspecStorageEnableChargingActionEnableChargingParamTypeId).value().toBool())
+                controlModeFlags.setFlag(SunSpecStorageModel::Storctl_modCharge);
+
+            if (thing->stateValue(sunspecStorageEnableDischargingStateTypeId).toBool())
+                controlModeFlags.setFlag(SunSpecStorageModel::Storctl_modDiScharge);
+
+            QModbusReply *reply = storage->setStorCtlMod(controlModeFlags);
+            if (!reply) {
+                info->finish(Thing::ThingErrorHardwareFailure);
+                return;
+            }
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, info, [info, reply]{
+                if (reply->error() != QModbusDevice::NoError) {
+                    info->finish(Thing::ThingErrorHardwareFailure);
+                    return;
+                }
+                info->finish(Thing::ThingErrorNoError);
+            });
+        } else if (action.actionTypeId() == sunspecStorageChargingRateActionTypeId) {
+            QModbusReply *reply = storage->setInWRte(action.param(sunspecStorageChargingRateActionChargingRateParamTypeId).value().toInt());
+            if (!reply) {
+                info->finish(Thing::ThingErrorHardwareFailure);
+                return;
+            }
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, info, [info, reply]{
+                if (reply->error() != QModbusDevice::NoError) {
+                    info->finish(Thing::ThingErrorHardwareFailure);
+                    return;
+                }
+                info->finish(Thing::ThingErrorNoError);
+            });
+        } else if (action.actionTypeId() == sunspecStorageDischargingRateActionTypeId) {
+            QModbusReply *reply = storage->setOutWRte(action.param(sunspecStorageDischargingRateActionDischargingRateParamTypeId).value().toInt());
+            if (!reply) {
+                info->finish(Thing::ThingErrorHardwareFailure);
+                return;
+            }
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, info, [info, reply]{
+                if (reply->error() != QModbusDevice::NoError) {
+                    info->finish(Thing::ThingErrorHardwareFailure);
+                    return;
+                }
+                info->finish(Thing::ThingErrorNoError);
+            });
+        } else {
+            Q_ASSERT_X(false, "executeAction", QString("Unhandled action: %1").arg(action.actionTypeId().toString()).toUtf8());
+        }
+
     } else {
         Q_ASSERT_X(false, "executeAction", QString("Unhandled thingClassId: %1").arg(info->thing()->thingClassId().toString()).toUtf8());
     }
@@ -546,10 +635,8 @@ void IntegrationPluginSunSpec::setupMeter(ThingSetupInfo *info)
     // Get the model from the connection
     foreach (SunSpecModel *model, connection->models()) {
         if (model->modelId() == modelId && model->modbusStartRegister() == modbusStartRegister) {
-//            m_sunSpecInverters.insert(thing, model);
-//            connect(model, &SunSpecModel::blockUpdated, this, &IntegrationPluginSunSpec::onInverterBlockUpdated);
-            SunSpecMeter *meter = new SunSpecMeter(thing, model, this);
-            m_sunSpecThings.insert(thing, meter);
+            m_sunSpecMeters.insert(thing, model);
+            connect(model, &SunSpecModel::blockUpdated, this, &IntegrationPluginSunSpec::onMeterBlockUpdated);
             info->finish(Thing::ThingErrorNoError);
             return;
         }
@@ -570,8 +657,8 @@ void IntegrationPluginSunSpec::setupStorage(ThingSetupInfo *info)
     // Get the model from the connection
     foreach (SunSpecModel *model, connection->models()) {
         if (model->modelId() == modelId && model->modbusStartRegister() == modbusStartRegister) {
-            SunSpecStorage *storage = new SunSpecStorage(thing, model, this);
-            m_sunSpecThings.insert(thing, storage);
+            connect(model, &SunSpecModel::blockUpdated, this, &IntegrationPluginSunSpec::onStorageBlockUpdated);
+            m_sunSpecStorages.insert(thing, model);
             info->finish(Thing::ThingErrorNoError);
             return;
         }
@@ -836,6 +923,14 @@ void IntegrationPluginSunSpec::onRefreshTimer()
     foreach (SunSpecModel *model, m_sunSpecInverters.values()) {
         model->readBlockData();
     }
+
+    foreach (SunSpecModel *model, m_sunSpecMeters.values()) {
+        model->readBlockData();
+    }
+
+    foreach (SunSpecModel *model, m_sunSpecStorages.values()) {
+        model->readBlockData();
+    }
 }
 
 void IntegrationPluginSunSpec::onPluginConfigurationChanged(const ParamTypeId &paramTypeId, const QVariant &value)
@@ -990,10 +1085,240 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
 
 void IntegrationPluginSunSpec::onMeterBlockUpdated()
 {
+    SunSpecModel *model = qobject_cast<SunSpecModel *>(sender());
+    Thing *thing = m_sunSpecMeters.key(model);
+    if (!thing) return;
 
+    switch (model->modelId()) {
+    case SunSpecModelFactory::ModelIdMeterSinglePhase: {
+        SunSpecMeterSinglePhaseModel *meter = qobject_cast<SunSpecMeterSinglePhaseModel *>(model);
+        qCDebug(dcSunSpec()) << thing->name() << "block data updated" << meter;
+        thing->setStateValue(sunspecSinglePhaseMeterConnectedStateTypeId, true);
+        thing->setStateValue(sunspecSinglePhaseMeterCurrentPowerStateTypeId, meter->watts());
+        thing->setStateValue(sunspecSinglePhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
+        thing->setStateValue(sunspecSinglePhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
+        thing->setStateValue(sunspecSinglePhaseMeterCurrentPhaseAStateTypeId, meter->ampsPhaseA());
+        thing->setStateValue(sunspecSinglePhaseMeterVoltagePhaseAStateTypeId, meter->phaseVoltageAn());
+        thing->setStateValue(sunspecSinglePhaseMeterFrequencyStateTypeId, meter->hz());
+        thing->setStateValue(sunspecSinglePhaseMeterVersionStateTypeId, model->commonModelInfo().versionString);
+        break;
+    }
+    case SunSpecModelFactory::ModelIdMeterSinglePhaseFloat: {
+        SunSpecMeterSinglePhaseFloatModel *meter = qobject_cast<SunSpecMeterSinglePhaseFloatModel *>(model);
+        qCDebug(dcSunSpec()) << thing->name() << "block data updated" << meter;
+        thing->setStateValue(sunspecSinglePhaseMeterConnectedStateTypeId, true);
+        thing->setStateValue(sunspecSinglePhaseMeterCurrentPowerStateTypeId, meter->watts());
+        thing->setStateValue(sunspecSinglePhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
+        thing->setStateValue(sunspecSinglePhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
+        thing->setStateValue(sunspecSinglePhaseMeterCurrentPhaseAStateTypeId, meter->ampsPhaseA());
+        thing->setStateValue(sunspecSinglePhaseMeterVoltagePhaseAStateTypeId, meter->phaseVoltageAn());
+        thing->setStateValue(sunspecSinglePhaseMeterFrequencyStateTypeId, meter->hz());
+        thing->setStateValue(sunspecSinglePhaseMeterVersionStateTypeId, model->commonModelInfo().versionString);
+        break;
+    }
+    case SunSpecModelFactory::ModelIdMeterSplitSinglePhaseAbn: {
+        SunSpecMeterSplitSinglePhaseAbnModel *meter = qobject_cast<SunSpecMeterSplitSinglePhaseAbnModel *>(model);
+        qCDebug(dcSunSpec()) << thing->name() << "block data updated" << meter;
+        thing->setStateValue(sunspecSplitPhaseMeterConnectedStateTypeId, true);
+        thing->setStateValue(sunspecSplitPhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
+        thing->setStateValue(sunspecSplitPhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
+        thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerStateTypeId, meter->watts());
+        thing->setStateValue(sunspecSplitPhaseMeterEnergyConsumedPhaseAStateTypeId, meter->totalWattHoursImportedPhaseA() / 1000.0);
+        thing->setStateValue(sunspecSplitPhaseMeterEnergyConsumedPhaseBStateTypeId, meter->totalWattHoursImportedPhaseB() / 1000.0);
+        thing->setStateValue(sunspecSplitPhaseMeterEnergyProducedPhaseAStateTypeId, meter->totalWattHoursExportedPhaseA() / 1000.0);
+        thing->setStateValue(sunspecSplitPhaseMeterEnergyProducedPhaseBStateTypeId, meter->totalWattHoursExportedPhaseB() / 1000.0);
+        thing->setStateValue(sunspecSplitPhaseMeterTotalCurrentStateTypeId, meter->amps());
+        thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerPhaseAStateTypeId, meter->wattsPhaseA());
+        thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerPhaseBStateTypeId, meter->wattsPhaseB());
+        thing->setStateValue(sunspecSplitPhaseMeterCurrentPhaseAStateTypeId, meter->ampsPhaseA());
+        thing->setStateValue(sunspecSplitPhaseMeterCurrentPhaseBStateTypeId, meter->ampsPhaseB());
+        thing->setStateValue(sunspecSplitPhaseMeterLnACVoltageStateTypeId, meter->voltageLn());
+        thing->setStateValue(sunspecSplitPhaseMeterVoltagePhaseAStateTypeId, meter->phaseVoltageAn());
+        thing->setStateValue(sunspecSplitPhaseMeterVoltagePhaseBStateTypeId, meter->phaseVoltageBn());
+        thing->setStateValue(sunspecSplitPhaseMeterFrequencyStateTypeId, meter->hz());
+        thing->setStateValue(sunspecSplitPhaseMeterVersionStateTypeId, model->commonModelInfo().versionString);
+        break;
+    }
+    case SunSpecModelFactory::ModelIdMeterSplitSinglePhaseFloat: {
+        SunSpecMeterSplitSinglePhaseFloatModel *meter = qobject_cast<SunSpecMeterSplitSinglePhaseFloatModel *>(model);
+        qCDebug(dcSunSpec()) << thing->name() << "block data updated" << meter;
+        thing->setStateValue(sunspecSplitPhaseMeterConnectedStateTypeId, true);
+        thing->setStateValue(sunspecSplitPhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
+        thing->setStateValue(sunspecSplitPhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
+        thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerStateTypeId, meter->watts());
+        thing->setStateValue(sunspecSplitPhaseMeterEnergyConsumedPhaseAStateTypeId, meter->totalWattHoursImportedPhaseA() / 1000.0);
+        thing->setStateValue(sunspecSplitPhaseMeterEnergyConsumedPhaseBStateTypeId, meter->totalWattHoursImportedPhaseB() / 1000.0);
+        thing->setStateValue(sunspecSplitPhaseMeterEnergyProducedPhaseAStateTypeId, meter->totalWattHoursExportedPhaseA() / 1000.0);
+        thing->setStateValue(sunspecSplitPhaseMeterEnergyProducedPhaseBStateTypeId, meter->totalWattHoursExportedPhaseB() / 1000.0);
+        thing->setStateValue(sunspecSplitPhaseMeterTotalCurrentStateTypeId, meter->amps());
+        thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerPhaseAStateTypeId, meter->wattsPhaseA());
+        thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerPhaseBStateTypeId, meter->wattsPhaseB());
+        thing->setStateValue(sunspecSplitPhaseMeterCurrentPhaseAStateTypeId, meter->ampsPhaseA());
+        thing->setStateValue(sunspecSplitPhaseMeterCurrentPhaseBStateTypeId, meter->ampsPhaseB());
+        thing->setStateValue(sunspecSplitPhaseMeterLnACVoltageStateTypeId, meter->voltageLn());
+        thing->setStateValue(sunspecSplitPhaseMeterVoltagePhaseAStateTypeId, meter->phaseVoltageAn());
+        thing->setStateValue(sunspecSplitPhaseMeterVoltagePhaseBStateTypeId, meter->phaseVoltageBn());
+        thing->setStateValue(sunspecSplitPhaseMeterFrequencyStateTypeId, meter->hz());
+        thing->setStateValue(sunspecSplitPhaseMeterVersionStateTypeId, model->commonModelInfo().versionString);
+        break;
+    }
+    case SunSpecModelFactory::ModelIdMeterThreePhase: {
+        SunSpecMeterThreePhaseModel *meter = qobject_cast<SunSpecMeterThreePhaseModel *>(model);
+        qCDebug(dcSunSpec()) << thing->name() << "block data updated" << meter;
+        thing->setStateValue(sunspecThreePhaseMeterConnectedStateTypeId, true);
+        thing->setStateValue(sunspecThreePhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerStateTypeId, meter->watts());
+        thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseAStateTypeId, meter->totalWattHoursImportedPhaseA() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseBStateTypeId, meter->totalWattHoursImportedPhaseB() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseCStateTypeId, meter->totalWattHoursImportedPhaseC() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterEnergyProducedPhaseAStateTypeId, meter->totalWattHoursExportedPhaseA() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterEnergyProducedPhaseBStateTypeId, meter->totalWattHoursExportedPhaseB() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterEnergyProducedPhaseCStateTypeId, meter->totalWattHoursExportedPhaseC() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseAStateTypeId, meter->wattsPhaseA());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseBStateTypeId, meter->wattsPhaseB());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseCStateTypeId, meter->wattsPhaseC());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseAStateTypeId, meter->ampsPhaseA());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseBStateTypeId, meter->ampsPhaseB());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseCStateTypeId, meter->ampsPhaseC());
+        thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseAStateTypeId, meter->phaseVoltageAn());
+        thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseBStateTypeId, meter->phaseVoltageBn());
+        thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseBStateTypeId, meter->phaseVoltageCn());
+        thing->setStateValue(sunspecThreePhaseMeterFrequencyStateTypeId, meter->hz());
+        thing->setStateValue(sunspecThreePhaseMeterVersionStateTypeId, model->commonModelInfo().versionString);
+        break;
+    }
+    case SunSpecModelFactory::ModelIdDeltaConnectThreePhaseAbcMeter: {
+        SunSpecDeltaConnectThreePhaseAbcMeterModel *meter = qobject_cast<SunSpecDeltaConnectThreePhaseAbcMeterModel *>(model);
+        qCDebug(dcSunSpec()) << thing->name() << "block data updated" << meter;
+        thing->setStateValue(sunspecThreePhaseMeterConnectedStateTypeId, true);
+        thing->setStateValue(sunspecThreePhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerStateTypeId, meter->watts());
+        thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseAStateTypeId, meter->totalWattHoursImportedPhaseA() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseBStateTypeId, meter->totalWattHoursImportedPhaseB() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseCStateTypeId, meter->totalWattHoursImportedPhaseC() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterEnergyProducedPhaseAStateTypeId, meter->totalWattHoursExportedPhaseA() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterEnergyProducedPhaseBStateTypeId, meter->totalWattHoursExportedPhaseB() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterEnergyProducedPhaseCStateTypeId, meter->totalWattHoursExportedPhaseC() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseAStateTypeId, meter->wattsPhaseA());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseBStateTypeId, meter->wattsPhaseB());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseCStateTypeId, meter->wattsPhaseC());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseAStateTypeId, meter->ampsPhaseA());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseBStateTypeId, meter->ampsPhaseB());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseCStateTypeId, meter->ampsPhaseC());
+        thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseAStateTypeId, meter->phaseVoltageAn());
+        thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseBStateTypeId, meter->phaseVoltageBn());
+        thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseBStateTypeId, meter->phaseVoltageCn());
+        thing->setStateValue(sunspecThreePhaseMeterFrequencyStateTypeId, meter->hz());
+        thing->setStateValue(sunspecThreePhaseMeterVersionStateTypeId, model->commonModelInfo().versionString);
+        break;
+    }
+    case SunSpecModelFactory::ModelIdMeterThreePhaseWyeConnect: {
+        SunSpecMeterThreePhaseWyeConnectModel *meter = qobject_cast<SunSpecMeterThreePhaseWyeConnectModel *>(model);
+        qCDebug(dcSunSpec()) << thing->name() << "block data updated" << meter;
+        thing->setStateValue(sunspecThreePhaseMeterConnectedStateTypeId, true);
+        thing->setStateValue(sunspecThreePhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerStateTypeId, meter->watts());
+        thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseAStateTypeId, meter->totalWattHoursImportedPhaseA() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseBStateTypeId, meter->totalWattHoursImportedPhaseB() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseCStateTypeId, meter->totalWattHoursImportedPhaseC() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterEnergyProducedPhaseAStateTypeId, meter->totalWattHoursExportedPhaseA() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterEnergyProducedPhaseBStateTypeId, meter->totalWattHoursExportedPhaseB() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterEnergyProducedPhaseCStateTypeId, meter->totalWattHoursExportedPhaseC() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseAStateTypeId, meter->wattsPhaseA());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseBStateTypeId, meter->wattsPhaseB());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseCStateTypeId, meter->wattsPhaseC());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseAStateTypeId, meter->ampsPhaseA());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseBStateTypeId, meter->ampsPhaseB());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseCStateTypeId, meter->ampsPhaseC());
+        thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseAStateTypeId, meter->phaseVoltageAn());
+        thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseBStateTypeId, meter->phaseVoltageBn());
+        thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseBStateTypeId, meter->phaseVoltageCn());
+        thing->setStateValue(sunspecThreePhaseMeterFrequencyStateTypeId, meter->hz());
+        thing->setStateValue(sunspecThreePhaseMeterVersionStateTypeId, model->commonModelInfo().versionString);
+        break;
+    }
+    case SunSpecModelFactory::ModelIdMeterThreePhaseDeltaConnect: {
+        SunSpecMeterThreePhaseDeltaConnectModel *meter = qobject_cast<SunSpecMeterThreePhaseDeltaConnectModel *>(model);
+        qCDebug(dcSunSpec()) << thing->name() << "block data updated" << meter;
+        thing->setStateValue(sunspecThreePhaseMeterConnectedStateTypeId, true);
+        thing->setStateValue(sunspecThreePhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerStateTypeId, meter->watts());
+        thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseAStateTypeId, meter->totalWattHoursImportedPhaseA() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseBStateTypeId, meter->totalWattHoursImportedPhaseB() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseCStateTypeId, meter->totalWattHoursImportedPhaseC() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterEnergyProducedPhaseAStateTypeId, meter->totalWattHoursExportedPhaseA() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterEnergyProducedPhaseBStateTypeId, meter->totalWattHoursExportedPhaseB() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterEnergyProducedPhaseCStateTypeId, meter->totalWattHoursExportedPhaseC() / 1000.0);
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseAStateTypeId, meter->wattsPhaseA());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseBStateTypeId, meter->wattsPhaseB());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseCStateTypeId, meter->wattsPhaseC());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseAStateTypeId, meter->ampsPhaseA());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseBStateTypeId, meter->ampsPhaseB());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseCStateTypeId, meter->ampsPhaseC());
+        thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseAStateTypeId, meter->phaseVoltageAn());
+        thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseBStateTypeId, meter->phaseVoltageBn());
+        thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseBStateTypeId, meter->phaseVoltageCn());
+        thing->setStateValue(sunspecThreePhaseMeterFrequencyStateTypeId, meter->hz());
+        thing->setStateValue(sunspecThreePhaseMeterVersionStateTypeId, model->commonModelInfo().versionString);
+        break;
+    }
+    default:
+        qCWarning(dcSunSpec()) << "Received block data from unhandled model" << model;
+        break;
+    }
 }
 
 void IntegrationPluginSunSpec::onStorageBlockUpdated()
 {
+    SunSpecModel *model = qobject_cast<SunSpecModel *>(sender());
+    Thing *thing = m_sunSpecStorages.key(model);
+    if (!thing) return;
 
+    SunSpecStorageModel *storage = qobject_cast<SunSpecStorageModel *>(model);
+    qCDebug(dcSunSpec()) << thing->name() << "block data updated" << storage;
+
+    thing->setStateValue(sunspecStorageConnectedStateTypeId, true);
+    thing->setStateValue(sunspecStorageVersionStateTypeId, model->commonModelInfo().versionString);
+
+    thing->setStateValue(sunspecStorageBatteryCriticalStateTypeId, storage->chaState() < 5);
+    thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, qRound(storage->chaState()));
+    thing->setStateValue(sunspecStorageGridChargingStateTypeId, storage->chaGriSet() == SunSpecStorageModel::ChagrisetGrid);
+    thing->setStateValue(sunspecStorageEnableChargingStateTypeId, storage->storCtlMod().testFlag(SunSpecStorageModel::Storctl_modCharge));
+    thing->setStateValue(sunspecStorageChargingRateStateTypeId, storage->wChaGra());
+    thing->setStateValue(sunspecStorageDischargingRateStateTypeId, storage->wDisChaGra());
+
+    switch (storage->chaSt()) {
+    case SunSpecStorageModel::ChastOff:
+        thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Off");
+        thing->setStateValue(sunspecStorageChargingStateStateTypeId, "idle");
+        break;
+    case SunSpecStorageModel::ChastEmpty:
+        thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Empty");
+        thing->setStateValue(sunspecStorageChargingStateStateTypeId, "idle");
+        break;
+    case SunSpecStorageModel::ChastDischarging:
+        thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Discharging");
+        thing->setStateValue(sunspecStorageChargingStateStateTypeId, "discharging");
+        break;
+    case SunSpecStorageModel::ChastCharging:
+        thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Charging");
+        thing->setStateValue(sunspecStorageChargingStateStateTypeId, "charging");
+        break;
+    case SunSpecStorageModel::ChastFull:
+        thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Full");
+        thing->setStateValue(sunspecStorageChargingStateStateTypeId, "idle");
+        break;
+    case SunSpecStorageModel::ChastHolding:
+        thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Holding");
+        thing->setStateValue(sunspecStorageChargingStateStateTypeId, "idle");
+        break;
+    case SunSpecStorageModel::ChastTesting:
+        thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Testing");
+        thing->setStateValue(sunspecStorageChargingStateStateTypeId, "idle");
+        break;
+    }
 }
