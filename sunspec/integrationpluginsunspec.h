@@ -113,6 +113,7 @@ private slots:
     void onInverterBlockUpdated();
     void onMeterBlockUpdated();
     void onStorageBlockUpdated();
+    void onSolarEdgeBatteryBlockUpdated();
 
 };
 #endif // INTEGRATIONPLUGINSUNSPEC_H

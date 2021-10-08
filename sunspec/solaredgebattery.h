@@ -121,7 +121,7 @@ public:
 
 signals:
     void initFinished(bool success);
-    void instantaneousPowerChanged(float instantaneousPower);
+    void blockDataUpdated();
 
 private:
     QTimer m_timer;
@@ -129,9 +129,6 @@ private:
     int m_modbusStartRegister;
     bool m_initFinishedSuccess = false;
     BatteryData m_batteryData;
-
-private slots:
-    void onBlockDataUpdated() override;
 
 };
 

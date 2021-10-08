@@ -31,7 +31,6 @@
 #include "plugininfo.h"
 #include "integrationpluginsunspec.h"
 #include "network/networkdevicediscovery.h"
-#include "solaredgebattery.h"
 
 #include <sunspecmodel.h>
 #include <models/sunspecmodelfactory.h>
@@ -56,6 +55,8 @@
 #include <models/sunspecdeltaconnectthreephaseabcmetermodel.h>
 
 #include <models/sunspecstoragemodel.h>
+
+#include "solaredgebattery.h"
 
 #include <QHostAddress>
 
@@ -684,6 +685,7 @@ void IntegrationPluginSunSpec::setupSolarEdgeBattery(ThingSetupInfo *info)
         }
 
         m_sunSpecThings.insert(thing, battery);
+        connect(battery, &SolarEdgeBattery::blockDataUpdated, this, &IntegrationPluginSunSpec::onSolarEdgeBatteryBlockUpdated);
         info->finish(Thing::ThingErrorNoError);
     });
 
@@ -972,7 +974,7 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecSinglePhaseInverterVersionStateTypeId, model->commonModelInfo().versionString);
 
         thing->setStateValue(sunspecSinglePhaseInverterTotalCurrentStateTypeId, inverter->amps());
-        thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerStateTypeId, inverter->watts());
+        thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerStateTypeId, -inverter->watts());
         thing->setStateValue(sunspecSinglePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
         thing->setStateValue(sunspecSinglePhaseInverterFrequencyStateTypeId, inverter->hz());
         thing->setStateValue(sunspecSinglePhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
@@ -988,7 +990,7 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecSinglePhaseInverterVersionStateTypeId, model->commonModelInfo().versionString);
 
         thing->setStateValue(sunspecSinglePhaseInverterTotalCurrentStateTypeId, inverter->amps());
-        thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerStateTypeId, inverter->watts());
+        thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerStateTypeId, -inverter->watts());
         thing->setStateValue(sunspecSinglePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
         thing->setStateValue(sunspecSinglePhaseInverterFrequencyStateTypeId, inverter->hz());
         thing->setStateValue(sunspecSinglePhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
@@ -1004,7 +1006,7 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecSplitPhaseInverterVersionStateTypeId, model->commonModelInfo().versionString);
 
         thing->setStateValue(sunspecSplitPhaseInverterTotalCurrentStateTypeId, inverter->amps());
-        thing->setStateValue(sunspecSplitPhaseInverterCurrentPowerStateTypeId, inverter->watts());
+        thing->setStateValue(sunspecSplitPhaseInverterCurrentPowerStateTypeId, -inverter->watts());
         thing->setStateValue(sunspecSplitPhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
         thing->setStateValue(sunspecSplitPhaseInverterFrequencyStateTypeId, inverter->hz());
         thing->setStateValue(sunspecSplitPhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
@@ -1023,7 +1025,7 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecSplitPhaseInverterVersionStateTypeId, model->commonModelInfo().versionString);
 
         thing->setStateValue(sunspecSplitPhaseInverterTotalCurrentStateTypeId, inverter->amps());
-        thing->setStateValue(sunspecSplitPhaseInverterCurrentPowerStateTypeId, inverter->watts());
+        thing->setStateValue(sunspecSplitPhaseInverterCurrentPowerStateTypeId, -inverter->watts());
         thing->setStateValue(sunspecSplitPhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
         thing->setStateValue(sunspecSplitPhaseInverterFrequencyStateTypeId, inverter->hz());
         thing->setStateValue(sunspecSplitPhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
@@ -1042,7 +1044,7 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecThreePhaseInverterVersionStateTypeId, model->commonModelInfo().versionString);
 
         thing->setStateValue(sunspecThreePhaseInverterTotalCurrentStateTypeId, inverter->amps());
-        thing->setStateValue(sunspecThreePhaseInverterCurrentPowerStateTypeId, inverter->watts());
+        thing->setStateValue(sunspecThreePhaseInverterCurrentPowerStateTypeId, -inverter->watts());
         thing->setStateValue(sunspecThreePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
         thing->setStateValue(sunspecThreePhaseInverterFrequencyStateTypeId, inverter->hz());
         thing->setStateValue(sunspecThreePhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
@@ -1063,7 +1065,7 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecThreePhaseInverterVersionStateTypeId, model->commonModelInfo().versionString);
 
         thing->setStateValue(sunspecThreePhaseInverterTotalCurrentStateTypeId, inverter->amps());
-        thing->setStateValue(sunspecThreePhaseInverterCurrentPowerStateTypeId, inverter->watts());
+        thing->setStateValue(sunspecThreePhaseInverterCurrentPowerStateTypeId, -inverter->watts());
         thing->setStateValue(sunspecThreePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
         thing->setStateValue(sunspecThreePhaseInverterFrequencyStateTypeId, inverter->hz());
         thing->setStateValue(sunspecThreePhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
@@ -1094,7 +1096,7 @@ void IntegrationPluginSunSpec::onMeterBlockUpdated()
         SunSpecMeterSinglePhaseModel *meter = qobject_cast<SunSpecMeterSinglePhaseModel *>(model);
         qCDebug(dcSunSpec()) << thing->name() << "block data updated" << meter;
         thing->setStateValue(sunspecSinglePhaseMeterConnectedStateTypeId, true);
-        thing->setStateValue(sunspecSinglePhaseMeterCurrentPowerStateTypeId, meter->watts());
+        thing->setStateValue(sunspecSinglePhaseMeterCurrentPowerStateTypeId, -meter->watts());
         thing->setStateValue(sunspecSinglePhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
         thing->setStateValue(sunspecSinglePhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
         thing->setStateValue(sunspecSinglePhaseMeterCurrentPhaseAStateTypeId, meter->ampsPhaseA());
@@ -1107,7 +1109,7 @@ void IntegrationPluginSunSpec::onMeterBlockUpdated()
         SunSpecMeterSinglePhaseFloatModel *meter = qobject_cast<SunSpecMeterSinglePhaseFloatModel *>(model);
         qCDebug(dcSunSpec()) << thing->name() << "block data updated" << meter;
         thing->setStateValue(sunspecSinglePhaseMeterConnectedStateTypeId, true);
-        thing->setStateValue(sunspecSinglePhaseMeterCurrentPowerStateTypeId, meter->watts());
+        thing->setStateValue(sunspecSinglePhaseMeterCurrentPowerStateTypeId, -meter->watts());
         thing->setStateValue(sunspecSinglePhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
         thing->setStateValue(sunspecSinglePhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
         thing->setStateValue(sunspecSinglePhaseMeterCurrentPhaseAStateTypeId, meter->ampsPhaseA());
@@ -1122,7 +1124,7 @@ void IntegrationPluginSunSpec::onMeterBlockUpdated()
         thing->setStateValue(sunspecSplitPhaseMeterConnectedStateTypeId, true);
         thing->setStateValue(sunspecSplitPhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
         thing->setStateValue(sunspecSplitPhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
-        thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerStateTypeId, meter->watts());
+        thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerStateTypeId, -meter->watts());
         thing->setStateValue(sunspecSplitPhaseMeterEnergyConsumedPhaseAStateTypeId, meter->totalWattHoursImportedPhaseA() / 1000.0);
         thing->setStateValue(sunspecSplitPhaseMeterEnergyConsumedPhaseBStateTypeId, meter->totalWattHoursImportedPhaseB() / 1000.0);
         thing->setStateValue(sunspecSplitPhaseMeterEnergyProducedPhaseAStateTypeId, meter->totalWattHoursExportedPhaseA() / 1000.0);
@@ -1145,7 +1147,7 @@ void IntegrationPluginSunSpec::onMeterBlockUpdated()
         thing->setStateValue(sunspecSplitPhaseMeterConnectedStateTypeId, true);
         thing->setStateValue(sunspecSplitPhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
         thing->setStateValue(sunspecSplitPhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
-        thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerStateTypeId, meter->watts());
+        thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerStateTypeId, -meter->watts());
         thing->setStateValue(sunspecSplitPhaseMeterEnergyConsumedPhaseAStateTypeId, meter->totalWattHoursImportedPhaseA() / 1000.0);
         thing->setStateValue(sunspecSplitPhaseMeterEnergyConsumedPhaseBStateTypeId, meter->totalWattHoursImportedPhaseB() / 1000.0);
         thing->setStateValue(sunspecSplitPhaseMeterEnergyProducedPhaseAStateTypeId, meter->totalWattHoursExportedPhaseA() / 1000.0);
@@ -1168,7 +1170,7 @@ void IntegrationPluginSunSpec::onMeterBlockUpdated()
         thing->setStateValue(sunspecThreePhaseMeterConnectedStateTypeId, true);
         thing->setStateValue(sunspecThreePhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
         thing->setStateValue(sunspecThreePhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerStateTypeId, meter->watts());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerStateTypeId, -meter->watts());
         thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseAStateTypeId, meter->totalWattHoursImportedPhaseA() / 1000.0);
         thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseBStateTypeId, meter->totalWattHoursImportedPhaseB() / 1000.0);
         thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseCStateTypeId, meter->totalWattHoursImportedPhaseC() / 1000.0);
@@ -1194,7 +1196,7 @@ void IntegrationPluginSunSpec::onMeterBlockUpdated()
         thing->setStateValue(sunspecThreePhaseMeterConnectedStateTypeId, true);
         thing->setStateValue(sunspecThreePhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
         thing->setStateValue(sunspecThreePhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerStateTypeId, meter->watts());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerStateTypeId, -meter->watts());
         thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseAStateTypeId, meter->totalWattHoursImportedPhaseA() / 1000.0);
         thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseBStateTypeId, meter->totalWattHoursImportedPhaseB() / 1000.0);
         thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseCStateTypeId, meter->totalWattHoursImportedPhaseC() / 1000.0);
@@ -1220,7 +1222,7 @@ void IntegrationPluginSunSpec::onMeterBlockUpdated()
         thing->setStateValue(sunspecThreePhaseMeterConnectedStateTypeId, true);
         thing->setStateValue(sunspecThreePhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
         thing->setStateValue(sunspecThreePhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerStateTypeId, meter->watts());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerStateTypeId, -meter->watts());
         thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseAStateTypeId, meter->totalWattHoursImportedPhaseA() / 1000.0);
         thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseBStateTypeId, meter->totalWattHoursImportedPhaseB() / 1000.0);
         thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseCStateTypeId, meter->totalWattHoursImportedPhaseC() / 1000.0);
@@ -1246,7 +1248,7 @@ void IntegrationPluginSunSpec::onMeterBlockUpdated()
         thing->setStateValue(sunspecThreePhaseMeterConnectedStateTypeId, true);
         thing->setStateValue(sunspecThreePhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
         thing->setStateValue(sunspecThreePhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerStateTypeId, meter->watts());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerStateTypeId, -meter->watts());
         thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseAStateTypeId, meter->totalWattHoursImportedPhaseA() / 1000.0);
         thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseBStateTypeId, meter->totalWattHoursImportedPhaseB() / 1000.0);
         thing->setStateValue(sunspecThreePhaseMeterEnergyConsumedPhaseCStateTypeId, meter->totalWattHoursImportedPhaseC() / 1000.0);
@@ -1321,4 +1323,61 @@ void IntegrationPluginSunSpec::onStorageBlockUpdated()
         thing->setStateValue(sunspecStorageChargingStateStateTypeId, "idle");
         break;
     }
+}
+
+void IntegrationPluginSunSpec::onSolarEdgeBatteryBlockUpdated()
+{
+    SolarEdgeBattery *battery = qobject_cast<SolarEdgeBattery *>(sender());
+    Thing *thing = battery->thing();
+
+    qCDebug(dcSunSpec()) << "SolarEdgeBattery: block updated:" << battery->batteryData();
+
+    QString chargingState = "idle";
+    switch (battery->batteryData().batteryStatus) {
+    case SolarEdgeBattery::Off:
+        chargingState = "idle";
+        thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Off");
+        break;
+    case SolarEdgeBattery::Standby:
+        chargingState = "idle";
+        thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Standby");
+        break;
+    case SolarEdgeBattery::Init:
+        chargingState = "idle";
+        thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Init");
+        break;
+    case SolarEdgeBattery::Charge:
+        chargingState = "charging";
+        thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Charging");
+        break;
+    case SolarEdgeBattery::Discharge:
+        chargingState = "discharging";
+        thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Discharging");
+        break;
+    case SolarEdgeBattery::Fault:
+        chargingState = "idle";
+        thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Fault");
+        break;
+    case SolarEdgeBattery::Holding:
+        chargingState = "idle";
+        thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Holding");
+        break;
+    case SolarEdgeBattery::Idle:
+        chargingState = "idle";
+        thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Idle");
+        break;
+    }
+
+    thing->setStateValue(solarEdgeBatteryBatteryCriticalStateTypeId, (battery->batteryData().stateOfEnergy < 5) && chargingState != "charging");
+    thing->setStateValue(solarEdgeBatteryBatteryLevelStateTypeId, battery->batteryData().stateOfEnergy);
+    thing->setStateValue(solarEdgeBatteryChargingStateStateTypeId, chargingState);
+    thing->setStateValue(solarEdgeBatteryRatedEnergyStateTypeId, battery->batteryData().ratedEnergy / 1000.0); // kWh
+    thing->setStateValue(solarEdgeBatteryAverageTemperatureStateTypeId, battery->batteryData().averageTemperature);
+    thing->setStateValue(solarEdgeBatteryInstantaneousVoltageStateTypeId, battery->batteryData().instantaneousVoltage);
+    thing->setStateValue(solarEdgeBatteryInstantaneousCurrentStateTypeId, battery->batteryData().instantaneousCurrent);
+    thing->setStateValue(solarEdgeBatteryCurrentPowerStateTypeId, battery->batteryData().instantaneousPower);
+    thing->setStateValue(solarEdgeBatteryMaxEnergyStateTypeId, battery->batteryData().maxEnergy / 1000.0); // kWh
+    thing->setStateValue(solarEdgeBatteryCapacityStateTypeId, battery->batteryData().availableEnergy / 1000.0); // kWh
+    thing->setStateValue(solarEdgeBatteryStateOfHealthStateTypeId, battery->batteryData().stateOfHealth);
+    thing->setStateValue(solarEdgeBatteryVersionStateTypeId, battery->batteryData().firmwareVersion);
 }

@@ -61,7 +61,7 @@ protected:
     SunSpecModel *m_model = nullptr;
 
 private slots:
-    virtual void onBlockDataUpdated() = 0;
+    virtual void onBlockDataUpdated();
 
 };
 
