@@ -1055,6 +1055,24 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecThreePhaseInverterConnectedStateTypeId, true);
         thing->setStateValue(sunspecThreePhaseInverterVersionStateTypeId, model->commonModelInfo().versionString);
 
+        // Note: for solar edge, we need to calculate how much current DC is coming from the battery
+        // and the difference is the actual power receiving from the PV. We need to calculate the difference
+        Thing *parentThing = myThings().findById(thing->parentId());
+        if (parentThing && parentThing->thingClassId() == solarEdgeConnectionThingClassId) {
+            // This is a solar edge, let's see if we have a batter for this connection
+            foreach (Thing *sunspecThing, m_sunSpecThings.keys()) {
+                if (sunspecThing->thingClassId() == solarEdgeBatteryThingClassId && thing->parentId() == parentThing->id()) {
+                    SolarEdgeBattery *battery = qobject_cast<SolarEdgeBattery *>(m_sunSpecThings.value(sunspecThing));
+                    qCDebug(dcSunSpec()) << "SolarEdge: found battery for inverter: calculate actual PV power from battery DC power and inverter DC power...";
+                    qCDebug(dcSunSpec()) << "--> SolarEdge: inverter AC power:" << -inverter->watts();
+                    qCDebug(dcSunSpec()) << "--> SolarEdge: inverter DC power:" << inverter->dcWatts();
+                    qCDebug(dcSunSpec()) << "--> SolarEdge: battery DC power:" << battery->batteryData().instantaneousPower;
+                    qCDebug(dcSunSpec()) << "--> SolarEdge: calculate actual PV DC power: battery power + inverter DC =" << battery->batteryData().instantaneousPower + inverter->dcWatts();
+                    qCDebug(dcSunSpec()) << "--> SolarEdge: calculate actual AC power from battery and pv:" << battery->batteryData().instantaneousPower + inverter->dcWatts();
+                }
+            }
+        }
+
         thing->setStateValue(sunspecThreePhaseInverterTotalCurrentStateTypeId, inverter->amps());
         thing->setStateValue(sunspecThreePhaseInverterCurrentPowerStateTypeId, -inverter->watts());
         thing->setStateValue(sunspecThreePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
