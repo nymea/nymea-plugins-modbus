@@ -981,6 +981,9 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecSinglePhaseInverterPhaseVoltageStateTypeId, inverter->phaseVoltageAn());
         thing->setStateValue(sunspecSinglePhaseInverterOperatingStateStateTypeId, getInverterStateString(inverter->operatingState()));
         thing->setStateValue(sunspecSinglePhaseInverterErrorStateTypeId, getInverterErrorString(inverter->event1()));
+        thing->setStateValue(sunspecSinglePhaseInverterVoltageDcStateTypeId, inverter->dcVoltage());
+        thing->setStateValue(sunspecSinglePhaseInverterCurrentDcStateTypeId, inverter->dcAmps());
+        thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerDcStateTypeId, inverter->dcWatts());
         break;
     }
     case SunSpecModelFactory::ModelIdInverterSinglePhaseFloat: {
@@ -997,6 +1000,9 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecSinglePhaseInverterPhaseVoltageStateTypeId, inverter->phaseVoltageAn());
         thing->setStateValue(sunspecSinglePhaseInverterOperatingStateStateTypeId, getInverterStateString(inverter->operatingState()));
         thing->setStateValue(sunspecSinglePhaseInverterErrorStateTypeId, getInverterErrorString(inverter->event1()));
+        thing->setStateValue(sunspecSinglePhaseInverterVoltageDcStateTypeId, inverter->dcVoltage());
+        thing->setStateValue(sunspecSinglePhaseInverterCurrentDcStateTypeId, inverter->dcAmps());
+        thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerDcStateTypeId, inverter->dcWatts());
         break;
     }
     case SunSpecModelFactory::ModelIdInverterSplitPhase: {
@@ -1016,6 +1022,9 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecSplitPhaseInverterPhaseBCurrentStateTypeId, inverter->ampsPhaseB());
         thing->setStateValue(sunspecSplitPhaseInverterOperatingStateStateTypeId, getInverterStateString(inverter->operatingState()));
         thing->setStateValue(sunspecSplitPhaseInverterErrorStateTypeId, getInverterErrorString(inverter->event1()));
+        thing->setStateValue(sunspecSplitPhaseInverterVoltageDcStateTypeId, inverter->dcVoltage());
+        thing->setStateValue(sunspecSplitPhaseInverterCurrentDcStateTypeId, inverter->dcAmps());
+        thing->setStateValue(sunspecSplitPhaseInverterCurrentPowerDcStateTypeId, inverter->dcWatts());
         break;
     }
     case SunSpecModelFactory::ModelIdInverterSplitPhaseFloat: {
@@ -1035,6 +1044,9 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecSplitPhaseInverterPhaseBCurrentStateTypeId, inverter->ampsPhaseB());
         thing->setStateValue(sunspecSplitPhaseInverterOperatingStateStateTypeId, getInverterStateString(inverter->operatingState()));
         thing->setStateValue(sunspecSplitPhaseInverterErrorStateTypeId, getInverterErrorString(inverter->event1()));
+        thing->setStateValue(sunspecSplitPhaseInverterVoltageDcStateTypeId, inverter->dcVoltage());
+        thing->setStateValue(sunspecSplitPhaseInverterCurrentDcStateTypeId, inverter->dcAmps());
+        thing->setStateValue(sunspecSplitPhaseInverterCurrentPowerDcStateTypeId, inverter->dcWatts());
         break;
     }
     case SunSpecModelFactory::ModelIdInverterThreePhase: {
@@ -1056,6 +1068,9 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecThreePhaseInverterPhaseCCurrentStateTypeId, inverter->ampsPhaseC());
         thing->setStateValue(sunspecThreePhaseInverterOperatingStateStateTypeId, getInverterStateString(inverter->operatingState()));
         thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, getInverterErrorString(inverter->event1()));
+        thing->setStateValue(sunspecThreePhaseInverterVoltageDcStateTypeId, inverter->dcVoltage());
+        thing->setStateValue(sunspecThreePhaseInverterCurrentDcStateTypeId, inverter->dcAmps());
+        thing->setStateValue(sunspecThreePhaseInverterCurrentPowerDcStateTypeId, inverter->dcWatts());
         break;
     }
     case SunSpecModelFactory::ModelIdInverterThreePhaseFloat: {
@@ -1077,6 +1092,9 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecThreePhaseInverterPhaseCCurrentStateTypeId, inverter->ampsPhaseC());
         thing->setStateValue(sunspecThreePhaseInverterOperatingStateStateTypeId, getInverterStateString(inverter->operatingState()));
         thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, getInverterErrorString(inverter->event1()));
+        thing->setStateValue(sunspecThreePhaseInverterVoltageDcStateTypeId, inverter->dcVoltage());
+        thing->setStateValue(sunspecThreePhaseInverterCurrentDcStateTypeId, inverter->dcAmps());
+        thing->setStateValue(sunspecThreePhaseInverterCurrentPowerDcStateTypeId, inverter->dcWatts());
         break;
     }
     default:

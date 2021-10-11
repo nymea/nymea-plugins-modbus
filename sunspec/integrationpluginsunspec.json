@@ -186,6 +186,36 @@
                             "defaultValue": 0.00
                         },
                         {
+                            "id": "157376b8-19ae-415f-b693-cb0a9ba88863",
+                            "name": "voltageDc",
+                            "displayName": "DC voltage",
+                            "displayNameEvent": "DC volatage changed",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0.00,
+                            "filter": "adaptive"
+                        },
+                        {
+                            "id": "79bd1748-b540-467d-b6fa-b0cc56d9775a",
+                            "name": "currentDc",
+                            "displayName": "DC current",
+                            "displayNameEvent": "DC current changed",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0.00,
+                            "filter": "adaptive"
+                        },
+                        {
+                            "id": "852a8c28-b14d-492e-b2b3-f22219f4ed36",
+                            "name": "currentPowerDc",
+                            "displayName": "DC power",
+                            "displayNameEvent": "DC power changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0.00,
+                            "filter": "adaptive"
+                        },
+                        {
                             "id": "51461bde-1a6b-4aa1-94cc-59829ea0a7c8",
                             "name": "cabinetTemperature",
                             "displayName": "Cabinet temperature",
@@ -361,6 +391,36 @@
                             "type": "double",
                             "unit": "KiloWattHour",
                             "defaultValue": 0.00
+                        },
+                        {
+                            "id": "d36bcaba-1e77-431e-89dc-af8ac6172d7d",
+                            "name": "voltageDc",
+                            "displayName": "DC voltage",
+                            "displayNameEvent": "DC volatage changed",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0.00,
+                            "filter": "adaptive"
+                        },
+                        {
+                            "id": "68e7239f-d7b2-4ab2-9cf3-e769fb5ddfc0",
+                            "name": "currentDc",
+                            "displayName": "DC current",
+                            "displayNameEvent": "DC current changed",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0.00,
+                            "filter": "adaptive"
+                        },
+                        {
+                            "id": "560b5ec8-1b2c-47d3-b55e-40f4d0aebfe0",
+                            "name": "currentPowerDc",
+                            "displayName": "DC power",
+                            "displayNameEvent": "DC power changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0.00,
+                            "filter": "adaptive"
                         },
                         {
                             "id": "6d314d50-b990-4a58-a37f-4a3da42c4407",
@@ -558,6 +618,36 @@
                             "type": "double",
                             "unit": "KiloWattHour",
                             "defaultValue": 0.00
+                        },
+                        {
+                            "id": "8c1c71c4-28fd-472a-83a6-3e96ab03d677",
+                            "name": "voltageDc",
+                            "displayName": "DC voltage",
+                            "displayNameEvent": "DC volatage changed",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0.00,
+                            "filter": "adaptive"
+                        },
+                        {
+                            "id": "81a989aa-4104-438e-bfc5-4f44ce5ceeaf",
+                            "name": "currentDc",
+                            "displayName": "DC current",
+                            "displayNameEvent": "DC current changed",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0.00,
+                            "filter": "adaptive"
+                        },
+                        {
+                            "id": "1397d935-1206-4ceb-883d-1fcf41ba6214",
+                            "name": "currentPowerDc",
+                            "displayName": "DC power",
+                            "displayNameEvent": "DC power changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0.00,
+                            "filter": "adaptive"
                         },
                         {
                             "id": "44b0320f-89a7-4248-bad4-288ef898a5cc",
