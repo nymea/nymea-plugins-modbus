@@ -101,10 +101,14 @@ private:
     void searchSolarEdgeBatteries(SunSpecConnection *connection);
     void searchSolarEdgeBattery(SunSpecConnection *connection, const ThingId &parentThingId, quint16 startRegister);
 
+    // SolarEdge
+    double calculateSolarEdgePvProduction(Thing *thing, double acPower, double dcPower);
+
     void autocreateSunSpecModelThing(const ThingClassId &thingClassId, const QString &thingName, const ThingId &parentId, SunSpecModel *model);
 
     QString getInverterStateString(quint16 state);
     QString getInverterErrorString(quint32 flag);
+
 
 private slots:
     void onRefreshTimer();
