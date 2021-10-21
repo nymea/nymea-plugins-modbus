@@ -778,6 +778,52 @@ void IntegrationPluginSunSpec::searchSolarEdgeBattery(SunSpecConnection *connect
     }
 }
 
+double IntegrationPluginSunSpec::calculateSolarEdgePvProduction(Thing *thing, double acPower, double dcPower)
+{
+    // Note: for solar edge, we need to calculate pv power from battery and AC/DC current depending
+    // on loading or discharging of the battery
+
+    double pvPower = acPower;
+    Thing *parentThing = myThings().findById(thing->parentId());
+    if (parentThing && parentThing->thingClassId() == solarEdgeConnectionThingClassId) {
+        // This is a solar edge, let's see if we have a batter for this connection
+        foreach (Thing *sunspecThing, m_sunSpecThings.keys()) {
+            if (sunspecThing->thingClassId() == solarEdgeBatteryThingClassId && thing->parentId() == parentThing->id()) {
+                SolarEdgeBattery *battery = qobject_cast<SolarEdgeBattery *>(m_sunSpecThings.value(sunspecThing));
+                qCDebug(dcSunSpec()) << "SolarEdge: found battery for inverter: calculate actual PV power from battery DC power and inverter DC power...";
+                qCDebug(dcSunSpec()) << "--> SolarEdge: inverter AC power:" << acPower;
+                qCDebug(dcSunSpec()) << "--> SolarEdge: inverter DC power:" << dcPower;
+                qCDebug(dcSunSpec()) << "--> SolarEdge: battery DC power:" << battery->batteryData().instantaneousPower;
+                qCDebug(dcSunSpec()) << "--> SolarEdge: battery DC state:" << battery->batteryData().batteryStatus;
+                switch (battery->batteryData().batteryStatus) {
+                case SolarEdgeBattery::BatteryStatus::Charge: {
+                    // Actual PV = inverter AC power - battery power
+                    pvPower = acPower - battery->batteryData().instantaneousPower;
+                    qCDebug(dcSunSpec()) << "--> SolarEdge: calculate actual PV power: inverter AC power - battery power:" << acPower << "-" << battery->batteryData().instantaneousPower << "=" << pvPower;
+                    break;
+                }
+                case SolarEdgeBattery::BatteryStatus::Discharge: {
+                    // Actual PV = inverter DC power + battery power
+                    pvPower = dcPower + battery->batteryData().instantaneousPower;
+                    qCDebug(dcSunSpec()) << "--> SolarEdge: calculate actual PV power: inverter DC power + battery power:" << dcPower << "+" << battery->batteryData().instantaneousPower << "=" << pvPower;
+                    if (pvPower < 0) {
+                        qCDebug(dcSunSpec()) << "--> SolarEdge: actual PV power: 0W | loss:" << pvPower << "W";
+                        pvPower = 0;
+                    }
+                    break;
+                }
+                default:
+                    // Idle: No change required, AC power is actual PV energy
+                    pvPower = acPower;
+                    break;
+                }
+            }
+        }
+    }
+
+    return pvPower;
+}
+
 void IntegrationPluginSunSpec::autocreateSunSpecModelThing(const ThingClassId &thingClassId, const QString &thingName, const ThingId &parentId, SunSpecModel *model)
 {
     ThingDescriptor descriptor(thingClassId);
@@ -912,9 +958,20 @@ QString IntegrationPluginSunSpec::getInverterErrorString(quint32 flag)
 
 }
 
+
 void IntegrationPluginSunSpec::onRefreshTimer()
 {
-    // Update all sunspec thing blocks
+    // Update meters
+    foreach (SunSpecModel *model, m_sunSpecMeters.values()) {
+        model->readBlockData();
+    }
+
+    // Update storage
+    foreach (SunSpecModel *model, m_sunSpecStorages.values()) {
+        model->readBlockData();
+    }
+
+    // Update all other sunspec thing blocks
     foreach (SunSpecThing *sunSpecThing, m_sunSpecThings) {
         if (sunSpecThing->connection()->connected()) {
             sunSpecThing->readBlockData();
@@ -923,14 +980,6 @@ void IntegrationPluginSunSpec::onRefreshTimer()
 
     // Update inverters
     foreach (SunSpecModel *model, m_sunSpecInverters.values()) {
-        model->readBlockData();
-    }
-
-    foreach (SunSpecModel *model, m_sunSpecMeters.values()) {
-        model->readBlockData();
-    }
-
-    foreach (SunSpecModel *model, m_sunSpecStorages.values()) {
         model->readBlockData();
     }
 }
@@ -943,7 +992,10 @@ void IntegrationPluginSunSpec::onPluginConfigurationChanged(const ParamTypeId &p
         if (m_refreshTimer) {
             int refreshTime = value.toInt();
             m_refreshTimer->stop();
-            m_refreshTimer->startTimer(refreshTime);
+            hardwareManager()->pluginTimerManager()->unregisterTimer(m_refreshTimer);
+            m_refreshTimer = hardwareManager()->pluginTimerManager()->registerTimer(refreshTime);
+            connect(m_refreshTimer, &PluginTimer::timeout, this, &IntegrationPluginSunSpec::onRefreshTimer);
+            m_refreshTimer->start();
         }
     } else if (paramTypeId == sunSpecPluginNumberOfRetriesParamTypeId) {
         qCDebug(dcSunSpec()) << "Updating number of retries" << value.toUInt();
@@ -973,8 +1025,11 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecSinglePhaseInverterConnectedStateTypeId, true);
         thing->setStateValue(sunspecSinglePhaseInverterVersionStateTypeId, model->commonModelInfo().versionString);
 
+        // Note: solar edge needs some calculations for the current pv power
+        double currentPower = calculateSolarEdgePvProduction(thing, -inverter->watts(), -inverter->dcWatts());
+        thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerStateTypeId, currentPower);
+
         thing->setStateValue(sunspecSinglePhaseInverterTotalCurrentStateTypeId, inverter->amps());
-        thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerStateTypeId, -inverter->watts());
         thing->setStateValue(sunspecSinglePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
         thing->setStateValue(sunspecSinglePhaseInverterFrequencyStateTypeId, inverter->hz());
         thing->setStateValue(sunspecSinglePhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
@@ -983,7 +1038,7 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecSinglePhaseInverterErrorStateTypeId, getInverterErrorString(inverter->event1()));
         thing->setStateValue(sunspecSinglePhaseInverterVoltageDcStateTypeId, inverter->dcVoltage());
         thing->setStateValue(sunspecSinglePhaseInverterCurrentDcStateTypeId, inverter->dcAmps());
-        thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerDcStateTypeId, inverter->dcWatts());
+        thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerDcStateTypeId, -inverter->dcWatts());
         break;
     }
     case SunSpecModelFactory::ModelIdInverterSinglePhaseFloat: {
@@ -992,8 +1047,11 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecSinglePhaseInverterConnectedStateTypeId, true);
         thing->setStateValue(sunspecSinglePhaseInverterVersionStateTypeId, model->commonModelInfo().versionString);
 
+        // Note: solar edge needs some calculations for the current pv power
+        double currentPower = calculateSolarEdgePvProduction(thing, -inverter->watts(), -inverter->dcWatts());
+        thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerStateTypeId, currentPower);
+
         thing->setStateValue(sunspecSinglePhaseInverterTotalCurrentStateTypeId, inverter->amps());
-        thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerStateTypeId, -inverter->watts());
         thing->setStateValue(sunspecSinglePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
         thing->setStateValue(sunspecSinglePhaseInverterFrequencyStateTypeId, inverter->hz());
         thing->setStateValue(sunspecSinglePhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
@@ -1002,7 +1060,7 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecSinglePhaseInverterErrorStateTypeId, getInverterErrorString(inverter->event1()));
         thing->setStateValue(sunspecSinglePhaseInverterVoltageDcStateTypeId, inverter->dcVoltage());
         thing->setStateValue(sunspecSinglePhaseInverterCurrentDcStateTypeId, inverter->dcAmps());
-        thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerDcStateTypeId, inverter->dcWatts());
+        thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerDcStateTypeId, -inverter->dcWatts());
         break;
     }
     case SunSpecModelFactory::ModelIdInverterSplitPhase: {
@@ -1011,8 +1069,10 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecSplitPhaseInverterConnectedStateTypeId, true);
         thing->setStateValue(sunspecSplitPhaseInverterVersionStateTypeId, model->commonModelInfo().versionString);
 
+        double currentPower = calculateSolarEdgePvProduction(thing, -inverter->watts(), -inverter->dcWatts());
+        thing->setStateValue(sunspecSplitPhaseInverterCurrentPowerStateTypeId, currentPower);
+
         thing->setStateValue(sunspecSplitPhaseInverterTotalCurrentStateTypeId, inverter->amps());
-        thing->setStateValue(sunspecSplitPhaseInverterCurrentPowerStateTypeId, -inverter->watts());
         thing->setStateValue(sunspecSplitPhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
         thing->setStateValue(sunspecSplitPhaseInverterFrequencyStateTypeId, inverter->hz());
         thing->setStateValue(sunspecSplitPhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
@@ -1024,7 +1084,7 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecSplitPhaseInverterErrorStateTypeId, getInverterErrorString(inverter->event1()));
         thing->setStateValue(sunspecSplitPhaseInverterVoltageDcStateTypeId, inverter->dcVoltage());
         thing->setStateValue(sunspecSplitPhaseInverterCurrentDcStateTypeId, inverter->dcAmps());
-        thing->setStateValue(sunspecSplitPhaseInverterCurrentPowerDcStateTypeId, inverter->dcWatts());
+        thing->setStateValue(sunspecSplitPhaseInverterCurrentPowerDcStateTypeId, -inverter->dcWatts());
         break;
     }
     case SunSpecModelFactory::ModelIdInverterSplitPhaseFloat: {
@@ -1033,8 +1093,10 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecSplitPhaseInverterConnectedStateTypeId, true);
         thing->setStateValue(sunspecSplitPhaseInverterVersionStateTypeId, model->commonModelInfo().versionString);
 
+        double currentPower = calculateSolarEdgePvProduction(thing, -inverter->watts(), -inverter->dcWatts());
+        thing->setStateValue(sunspecSplitPhaseInverterCurrentPowerStateTypeId, currentPower);
+
         thing->setStateValue(sunspecSplitPhaseInverterTotalCurrentStateTypeId, inverter->amps());
-        thing->setStateValue(sunspecSplitPhaseInverterCurrentPowerStateTypeId, -inverter->watts());
         thing->setStateValue(sunspecSplitPhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
         thing->setStateValue(sunspecSplitPhaseInverterFrequencyStateTypeId, inverter->hz());
         thing->setStateValue(sunspecSplitPhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
@@ -1046,7 +1108,7 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecSplitPhaseInverterErrorStateTypeId, getInverterErrorString(inverter->event1()));
         thing->setStateValue(sunspecSplitPhaseInverterVoltageDcStateTypeId, inverter->dcVoltage());
         thing->setStateValue(sunspecSplitPhaseInverterCurrentDcStateTypeId, inverter->dcAmps());
-        thing->setStateValue(sunspecSplitPhaseInverterCurrentPowerDcStateTypeId, inverter->dcWatts());
+        thing->setStateValue(sunspecSplitPhaseInverterCurrentPowerDcStateTypeId, -inverter->dcWatts());
         break;
     }
     case SunSpecModelFactory::ModelIdInverterThreePhase: {
@@ -1055,26 +1117,10 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecThreePhaseInverterConnectedStateTypeId, true);
         thing->setStateValue(sunspecThreePhaseInverterVersionStateTypeId, model->commonModelInfo().versionString);
 
-        // Note: for solar edge, we need to calculate how much current DC is coming from the battery
-        // and the difference is the actual power receiving from the PV. We need to calculate the difference
-        Thing *parentThing = myThings().findById(thing->parentId());
-        if (parentThing && parentThing->thingClassId() == solarEdgeConnectionThingClassId) {
-            // This is a solar edge, let's see if we have a batter for this connection
-            foreach (Thing *sunspecThing, m_sunSpecThings.keys()) {
-                if (sunspecThing->thingClassId() == solarEdgeBatteryThingClassId && thing->parentId() == parentThing->id()) {
-                    SolarEdgeBattery *battery = qobject_cast<SolarEdgeBattery *>(m_sunSpecThings.value(sunspecThing));
-                    qCDebug(dcSunSpec()) << "SolarEdge: found battery for inverter: calculate actual PV power from battery DC power and inverter DC power...";
-                    qCDebug(dcSunSpec()) << "--> SolarEdge: inverter AC power:" << -inverter->watts();
-                    qCDebug(dcSunSpec()) << "--> SolarEdge: inverter DC power:" << inverter->dcWatts();
-                    qCDebug(dcSunSpec()) << "--> SolarEdge: battery DC power:" << battery->batteryData().instantaneousPower;
-                    qCDebug(dcSunSpec()) << "--> SolarEdge: calculate actual PV DC power: battery power + inverter DC =" << battery->batteryData().instantaneousPower + inverter->dcWatts();
-                    qCDebug(dcSunSpec()) << "--> SolarEdge: calculate actual AC power from battery and pv:" << battery->batteryData().instantaneousPower + inverter->dcWatts();
-                }
-            }
-        }
+        double currentPower = calculateSolarEdgePvProduction(thing, -inverter->watts(), -inverter->dcWatts());
+        thing->setStateValue(sunspecThreePhaseInverterCurrentPowerStateTypeId, currentPower);
 
         thing->setStateValue(sunspecThreePhaseInverterTotalCurrentStateTypeId, inverter->amps());
-        thing->setStateValue(sunspecThreePhaseInverterCurrentPowerStateTypeId, -inverter->watts());
         thing->setStateValue(sunspecThreePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
         thing->setStateValue(sunspecThreePhaseInverterFrequencyStateTypeId, inverter->hz());
         thing->setStateValue(sunspecThreePhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
@@ -1088,7 +1134,7 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, getInverterErrorString(inverter->event1()));
         thing->setStateValue(sunspecThreePhaseInverterVoltageDcStateTypeId, inverter->dcVoltage());
         thing->setStateValue(sunspecThreePhaseInverterCurrentDcStateTypeId, inverter->dcAmps());
-        thing->setStateValue(sunspecThreePhaseInverterCurrentPowerDcStateTypeId, inverter->dcWatts());
+        thing->setStateValue(sunspecThreePhaseInverterCurrentPowerDcStateTypeId, -inverter->dcWatts());
         break;
     }
     case SunSpecModelFactory::ModelIdInverterThreePhaseFloat: {
@@ -1097,8 +1143,10 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecThreePhaseInverterConnectedStateTypeId, true);
         thing->setStateValue(sunspecThreePhaseInverterVersionStateTypeId, model->commonModelInfo().versionString);
 
+        double currentPower = calculateSolarEdgePvProduction(thing, -inverter->watts(), -inverter->dcWatts());
+        thing->setStateValue(sunspecThreePhaseInverterCurrentPowerStateTypeId, currentPower);
+
         thing->setStateValue(sunspecThreePhaseInverterTotalCurrentStateTypeId, inverter->amps());
-        thing->setStateValue(sunspecThreePhaseInverterCurrentPowerStateTypeId, -inverter->watts());
         thing->setStateValue(sunspecThreePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
         thing->setStateValue(sunspecThreePhaseInverterFrequencyStateTypeId, inverter->hz());
         thing->setStateValue(sunspecThreePhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
@@ -1112,7 +1160,7 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         thing->setStateValue(sunspecThreePhaseInverterErrorStateTypeId, getInverterErrorString(inverter->event1()));
         thing->setStateValue(sunspecThreePhaseInverterVoltageDcStateTypeId, inverter->dcVoltage());
         thing->setStateValue(sunspecThreePhaseInverterCurrentDcStateTypeId, inverter->dcAmps());
-        thing->setStateValue(sunspecThreePhaseInverterCurrentPowerDcStateTypeId, inverter->dcWatts());
+        thing->setStateValue(sunspecThreePhaseInverterCurrentPowerDcStateTypeId, -inverter->dcWatts());
         break;
     }
     default:
