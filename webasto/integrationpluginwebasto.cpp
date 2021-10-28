@@ -266,6 +266,27 @@ void IntegrationPluginWebasto::update(Webasto *webasto)
     webasto->getRegister(Webasto::TqUserId, 10);
 }
 
+void IntegrationPluginWebasto::evaluatePhaseCount(Thing *thing)
+{
+    uint amperePhase1 = thing->stateValue(liveWallboxCurrentPhase1StateTypeId).toUInt();
+    uint amperePhase2 = thing->stateValue(liveWallboxCurrentPhase2StateTypeId).toUInt();
+    uint amperePhase3 = thing->stateValue(liveWallboxCurrentPhase3StateTypeId).toUInt();
+    // Check how many phases are actually charging, and update the phase count only if something happens on the phases (current or power)
+    if (!(amperePhase1 == 0 && amperePhase2 == 0 && amperePhase3 == 0)) {
+        uint phaseCount = 0;
+        if (amperePhase1 != 0)
+            phaseCount += 1;
+
+        if (amperePhase2 != 0)
+            phaseCount += 1;
+
+        if (amperePhase3 != 0)
+            phaseCount += 1;
+
+        thing->setStateValue(liveWallboxPhaseCountStateTypeId, phaseCount);
+    }
+}
+
 void IntegrationPluginWebasto::onConnectionChanged(bool connected)
 {
     Webasto *connection = static_cast<Webasto *>(sender());
@@ -339,6 +360,8 @@ void IntegrationPluginWebasto::onReceivedRegister(Webasto::TqModbusRegister modb
                 thing->setStateValue(liveWallboxChargePointStateStateTypeId, "User not authorized (car attached)");
                 break;
             }
+
+            thing->setStateValue(liveWallboxChargingStateTypeId, Webasto::ChargePointState(data[0]) == Webasto::ChargePointStateCharging);
             break;
         case Webasto::TqChargeState:
             qCDebug(dcWebasto()) << "   - Charge state:" << data[0];
@@ -351,15 +374,19 @@ void IntegrationPluginWebasto::onReceivedRegister(Webasto::TqModbusRegister modb
             switch (Webasto::CableState(data[0])) {
             case Webasto::CableStateNoCableAttached:
                 thing->setStateValue(liveWallboxCableStateStateTypeId, "No cable attached");
+                thing->setStateValue(liveWallboxPluggedInStateTypeId, false);
                 break;
             case Webasto::CableStateCableAttachedNoCarAttached:
                 thing->setStateValue(liveWallboxCableStateStateTypeId, "Cable attached but no car attached)");
+                thing->setStateValue(liveWallboxPluggedInStateTypeId, false);
                 break;
             case Webasto::CableStateCableAttachedCarAttached:
                 thing->setStateValue(liveWallboxCableStateStateTypeId, "Cable attached and car attached");
+                thing->setStateValue(liveWallboxPluggedInStateTypeId, true);
                 break;
             case Webasto::CableStateCableAttachedCarAttachedLockActive:
                 thing->setStateValue(liveWallboxCableStateStateTypeId, "Cable attached, car attached and lock active");
+                thing->setStateValue(liveWallboxPluggedInStateTypeId, true);
                 break;
             }
             break;
@@ -370,21 +397,24 @@ void IntegrationPluginWebasto::onReceivedRegister(Webasto::TqModbusRegister modb
         case Webasto::TqCurrentL1:
             qCDebug(dcWebasto()) << "   - Current L1:" << data[0];
             thing->setStateValue(liveWallboxCurrentPhase1StateTypeId, data[0]);
+            evaluatePhaseCount(thing);
             break;
         case Webasto::TqCurrentL2:
             qCDebug(dcWebasto()) << "   - Current L2:" << data[0];
             thing->setStateValue(liveWallboxCurrentPhase2StateTypeId, data[0]);
+            evaluatePhaseCount(thing);
             break;
         case Webasto::TqCurrentL3:
             qCDebug(dcWebasto()) << "   - Current L3:" << data[0];
             thing->setStateValue(liveWallboxCurrentPhase3StateTypeId, data[0]);
+            evaluatePhaseCount(thing);
             break;
         case Webasto::TqActivePower: {
             if (data.count() < 2)
                 return;
             int power = (static_cast<quint32>(data[0])<<16 | data[1]);
             qCDebug(dcWebasto()) << "   - Active power:" << power;
-            thing->setStateValue(liveWallboxPowerConsumptionStateTypeId, power);
+            thing->setStateValue(liveWallboxCurrentPowerStateTypeId, power);
         } break;
         case Webasto::TqEnergyMeter: {
             if (data.count() < 2)

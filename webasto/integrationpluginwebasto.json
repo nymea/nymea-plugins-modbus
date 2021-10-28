@@ -99,6 +99,32 @@
                             "writable": true
                         },
                         {
+                            "id": "0e15e78e-a233-4026-a0fd-f65edc824f1e",
+                            "name": "pluggedIn",
+                            "displayName": "Car plugged in",
+                            "displayNameEvent": "Car plugged in changed",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "8f35404d-8237-4ff8-8774-9ad10ceee5c3",
+                            "name": "charging",
+                            "displayName": "Charging",
+                            "displayNameEvent": "Charging changed",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "179e6136-2ac1-4247-b457-f804e2212293",
+                            "name": "phaseCount",
+                            "displayName": "Number of connected phases",
+                            "displayNameEvent": "Number of connected phases changed",
+                            "type": "uint",
+                            "minValue": 1,
+                            "maxValue": 3,
+                            "defaultValue": 1
+                        },
+                        {
                             "id": "2027fbb6-c9d2-4a75-bdd0-a3ad3785cdc6",
                             "name": "currentPhase1",
                             "displayName": "Current phase 1",
@@ -127,7 +153,7 @@
                         },
                         {
                             "id": "b20a46ee-0f22-4096-a348-34e68e99e0be",
-                            "name": "powerConsumption",
+                            "name": "currentPower",
                             "displayName": "Power consumption",
                             "displayNameEvent": "Power consumtion changed",
                             "type": "double",
