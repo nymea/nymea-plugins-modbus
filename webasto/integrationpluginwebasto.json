@@ -91,11 +91,11 @@
                             "displayName": "Charging current",
                             "displayNameAction": "Set charging current",
                             "displayNameEvent": "Charging current changed",
-                            "type": "double",
+                            "type": "uint",
                             "unit": "Ampere",
-                            "minValue": 6.00,
-                            "maxValue": 80.00,
-                            "defaultValue": 6.00,
+                            "minValue": 6,
+                            "maxValue": 80,
+                            "defaultValue": 6,
                             "writable": true
                         },
                         {

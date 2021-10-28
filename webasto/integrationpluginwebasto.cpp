@@ -209,7 +209,7 @@ void IntegrationPluginWebasto::executeAction(ThingActionInfo *info)
             thing->setStateValue(liveWallboxPowerActionTypeId, enabled);
             int ampere = 0;
             if (enabled) {
-                ampere = thing->stateValue(liveWallboxMaxChargingCurrentStateTypeId).toInt();
+                ampere = thing->stateValue(liveWallboxMaxChargingCurrentStateTypeId).toUInt();
             }
             QUuid requestId = connection->setChargeCurrent(ampere);
             if (requestId.isNull()) {
@@ -218,7 +218,7 @@ void IntegrationPluginWebasto::executeAction(ThingActionInfo *info)
                 m_asyncActions.insert(requestId, info);
             }
         } else if (action.actionTypeId() == liveWallboxMaxChargingCurrentActionTypeId) {
-            int ampere = action.paramValue(liveWallboxMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toInt();
+            int ampere = action.paramValue(liveWallboxMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toUInt();
             thing->setStateValue(liveWallboxMaxChargingCurrentStateTypeId, ampere);
             QUuid requestId = connection->setChargeCurrent(ampere);
             if (requestId.isNull()) {
