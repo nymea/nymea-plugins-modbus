@@ -164,8 +164,7 @@
                             "displayNameEvent": "AC power changed",
                             "type": "double",
                             "unit": "Watt",
-                            "defaultValue": 0.00,
-                            "filter": "adaptive"
+                            "defaultValue": 0.00
                         },
                         {
                             "id": "611df2ce-2b9c-49f3-9fa7-5706776e812c",
@@ -371,8 +370,7 @@
                             "displayNameEvent": "AC power changed",
                             "type": "double",
                             "unit": "Watt",
-                            "defaultValue": 0.00,
-                            "filter": "adaptive"
+                            "defaultValue": 0.00
                         },
                         {
                             "id": "874f5e4a-a009-4c28-b211-2af90a24b2ac",
@@ -598,8 +596,7 @@
                             "displayNameEvent": "AC power changed",
                             "type": "double",
                             "unit": "Watt",
-                            "defaultValue": 0.00,
-                            "filter": "adaptive"
+                            "defaultValue": 0.00
                         },
                         {
                             "id": "faa45cae-ed28-4150-9036-fceddf9d6776",
@@ -646,8 +643,7 @@
                             "displayNameEvent": "DC power changed",
                             "type": "double",
                             "unit": "Watt",
-                            "defaultValue": 0.00,
-                            "filter": "adaptive"
+                            "defaultValue": 0.00
                         },
                         {
                             "id": "44b0320f-89a7-4248-bad4-288ef898a5cc",
@@ -756,8 +752,7 @@
                             "displayNameEvent": "Total real power changed",
                             "type": "double",
                             "unit": "Watt",
-                            "defaultValue": 0.00,
-                            "filter": "adaptive"
+                            "defaultValue": 0.00
                         },
                         {
                             "id": "ba275bdf-f418-4ef0-afbe-ac425c6f6783",
@@ -896,8 +891,7 @@
                             "displayNameEvent": "Total real power changed",
                             "type": "double",
                             "unit": "Watt",
-                            "defaultValue": 0.00,
-                            "filter": "adaptive"
+                            "defaultValue": 0.00
                         },
                         {
                             "id": "481b9895-1c3e-4e74-9418-ee51dae80a63",
@@ -1116,8 +1110,7 @@
                             "displayNameEvent": "Total real power changed",
                             "type": "double",
                             "unit": "Watt",
-                            "defaultValue": 0.00,
-                            "filter": "adaptive"
+                            "defaultValue": 0.00
                         },
                         {
                             "id": "cc0fd197-22ed-4461-8bba-47460396798a",
