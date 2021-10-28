@@ -786,38 +786,61 @@ double IntegrationPluginSunSpec::calculateSolarEdgePvProduction(Thing *thing, do
     double pvPower = acPower;
     Thing *parentThing = myThings().findById(thing->parentId());
     if (parentThing && parentThing->thingClassId() == solarEdgeConnectionThingClassId) {
-        // This is a solar edge, let's see if we have a batter for this connection
+        SolarEdgeBattery *battery = nullptr;
+        // This is a solar edge, let's see if we have a battery for this connection
         foreach (Thing *sunspecThing, m_sunSpecThings.keys()) {
             if (sunspecThing->thingClassId() == solarEdgeBatteryThingClassId && thing->parentId() == parentThing->id()) {
-                SolarEdgeBattery *battery = qobject_cast<SolarEdgeBattery *>(m_sunSpecThings.value(sunspecThing));
-                qCDebug(dcSunSpec()) << "SolarEdge: found battery for inverter: calculate actual PV power from battery DC power and inverter DC power...";
-                qCDebug(dcSunSpec()) << "--> SolarEdge: inverter AC power:" << acPower;
-                qCDebug(dcSunSpec()) << "--> SolarEdge: inverter DC power:" << dcPower;
-                qCDebug(dcSunSpec()) << "--> SolarEdge: battery DC power:" << battery->batteryData().instantaneousPower;
-                qCDebug(dcSunSpec()) << "--> SolarEdge: battery DC state:" << battery->batteryData().batteryStatus;
-                switch (battery->batteryData().batteryStatus) {
-                case SolarEdgeBattery::BatteryStatus::Charge: {
-                    // Actual PV = inverter AC power - battery power
-                    pvPower = acPower - battery->batteryData().instantaneousPower;
-                    qCDebug(dcSunSpec()) << "--> SolarEdge: calculate actual PV power: inverter AC power - battery power:" << acPower << "-" << battery->batteryData().instantaneousPower << "=" << pvPower;
-                    break;
-                }
-                case SolarEdgeBattery::BatteryStatus::Discharge: {
-                    // Actual PV = inverter DC power + battery power
-                    pvPower = dcPower + battery->batteryData().instantaneousPower;
-                    qCDebug(dcSunSpec()) << "--> SolarEdge: calculate actual PV power: inverter DC power + battery power:" << dcPower << "+" << battery->batteryData().instantaneousPower << "=" << pvPower;
-                    if (pvPower < 0) {
-                        qCDebug(dcSunSpec()) << "--> SolarEdge: actual PV power: 0W | loss:" << pvPower << "W";
-                        pvPower = 0;
-                    }
-                    break;
-                }
-                default:
-                    // Idle: No change required, AC power is actual PV energy
-                    pvPower = acPower;
-                    break;
-                }
+                battery = qobject_cast<SolarEdgeBattery *>(m_sunSpecThings.value(sunspecThing));
+                break;
             }
+        }
+
+        // Check if we have a meter...
+        Thing *meterThing = nullptr;
+        foreach (Thing *sunspecThing, m_sunSpecMeters.keys()) {
+            if (thing->parentId() == parentThing->id()) {
+                meterThing = sunspecThing;
+                break;
+            }
+        }
+
+        // This is a solar edge, let's see if we have a batter for this connection
+        if (battery) {
+            double meterCurrentPower = meterThing ? meterThing->stateValue("currentPower").toDouble() : 0;
+            qCDebug(dcSunSpec()) << "SolarEdge: found battery for inverter: calculate actual PV power from battery DC power and inverter DC power...";
+            qCDebug(dcSunSpec()) << "--> SolarEdge: -------------------------------------------------------";
+            qCDebug(dcSunSpec()) << "--> SolarEdge: meter power:" << meterCurrentPower << "W";
+            qCDebug(dcSunSpec()) << "--> SolarEdge: inverter AC power:" << acPower << "W";
+            qCDebug(dcSunSpec()) << "--> SolarEdge: inverter DC power:" << dcPower << "W";
+            qCDebug(dcSunSpec()) << "--> SolarEdge: battery DC power:" << battery->batteryData().instantaneousPower << "W";
+            qCDebug(dcSunSpec()) << "--> SolarEdge: battery DC state:" << battery->batteryData().batteryStatus;
+
+            switch (battery->batteryData().batteryStatus) {
+            case SolarEdgeBattery::BatteryStatus::Charge: {
+                // Actual PV = inverter AC power - battery power
+                pvPower = acPower - battery->batteryData().instantaneousPower;
+                qCDebug(dcSunSpec()) << "--> SolarEdge: calculate actual PV power: inverter AC power - battery power:" << acPower << "-" << battery->batteryData().instantaneousPower << "=" << pvPower;
+                break;
+            }
+            case SolarEdgeBattery::BatteryStatus::Discharge: {
+                // Actual PV = inverter DC power + battery power
+                pvPower = dcPower + battery->batteryData().instantaneousPower;
+                qCDebug(dcSunSpec()) << "--> SolarEdge: calculate actual PV power: inverter DC power + battery power:" << dcPower << "+" << battery->batteryData().instantaneousPower << "=" << pvPower;
+                if (pvPower < 0) {
+                    qCDebug(dcSunSpec()) << "--> SolarEdge: actual PV power: 0W | loss:" << pvPower << "W";
+                    pvPower = 0;
+                }
+                break;
+            }
+            default:
+                // Idle: No change required, AC power is actual PV energy
+                pvPower = acPower;
+                break;
+            }
+
+            // Calculate self consumption
+            double selfConsumption = pvPower - meterCurrentPower + battery->batteryData().instantaneousPower;
+            qCDebug(dcSunSpec()) << "--> SolarEdge: self consumption" << selfConsumption << "W";
         }
     }
 
