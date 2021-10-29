@@ -826,10 +826,10 @@ double IntegrationPluginSunSpec::calculateSolarEdgePvProduction(Thing *thing, do
                 // Actual PV = inverter DC power + battery power
                 pvPower = dcPower - battery->batteryData().instantaneousPower;
                 qCDebug(dcSunSpec()) << "--> SolarEdge: calculate actual PV power: inverter DC power - battery power:" << dcPower << "-" << battery->batteryData().instantaneousPower << "=" << pvPower;
-//                if (pvPower < 0) {
-//                    qCDebug(dcSunSpec()) << "--> SolarEdge: actual PV power: 0W | loss:" << pvPower << "W";
-//                    pvPower = 0;
-//                }
+                if (pvPower > 0) {
+                    qCDebug(dcSunSpec()) << "--> SolarEdge: actual PV power: 0W | loss:" << pvPower << "W";
+                    pvPower = 0;
+                }
                 break;
             }
             default:
