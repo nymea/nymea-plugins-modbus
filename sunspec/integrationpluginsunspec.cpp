@@ -824,12 +824,12 @@ double IntegrationPluginSunSpec::calculateSolarEdgePvProduction(Thing *thing, do
             }
             case SolarEdgeBattery::BatteryStatus::Discharge: {
                 // Actual PV = inverter DC power + battery power
-                pvPower = dcPower + battery->batteryData().instantaneousPower;
-                qCDebug(dcSunSpec()) << "--> SolarEdge: calculate actual PV power: inverter DC power + battery power:" << dcPower << "+" << battery->batteryData().instantaneousPower << "=" << pvPower;
-                if (pvPower < 0) {
-                    qCDebug(dcSunSpec()) << "--> SolarEdge: actual PV power: 0W | loss:" << pvPower << "W";
-                    pvPower = 0;
-                }
+                pvPower = dcPower - battery->batteryData().instantaneousPower;
+                qCDebug(dcSunSpec()) << "--> SolarEdge: calculate actual PV power: inverter DC power - battery power:" << dcPower << "-" << battery->batteryData().instantaneousPower << "=" << pvPower;
+//                if (pvPower < 0) {
+//                    qCDebug(dcSunSpec()) << "--> SolarEdge: actual PV power: 0W | loss:" << pvPower << "W";
+//                    pvPower = 0;
+//                }
                 break;
             }
             default:
@@ -1041,6 +1041,11 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
     Thing *thing = m_sunSpecInverters.key(model);
     if (!thing) return;
 
+    // Get parent thing
+    Thing *parentThing = myThings().findById(thing->parentId());
+    if (!parentThing)
+        return;
+
     switch (model->modelId()) {
     case SunSpecModelFactory::ModelIdInverterSinglePhase: {
         SunSpecInverterSinglePhaseModel *inverter = qobject_cast<SunSpecInverterSinglePhaseModel *>(model);
@@ -1052,8 +1057,14 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         double currentPower = calculateSolarEdgePvProduction(thing, -inverter->watts(), -inverter->dcWatts());
         thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerStateTypeId, currentPower);
 
+        // Note: Solar Edge uses scale factor 0, for that reason the value is wrong by 1000 (mWh instead of sunspec Wh). This is a spec violation.
+        if (parentThing->thingClassId() == solarEdgeConnectionThingClassId) {
+            thing->setStateValue(sunspecSinglePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000000.0);
+        } else {
+            thing->setStateValue(sunspecSinglePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
+        }
+
         thing->setStateValue(sunspecSinglePhaseInverterTotalCurrentStateTypeId, inverter->amps());
-        thing->setStateValue(sunspecSinglePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
         thing->setStateValue(sunspecSinglePhaseInverterFrequencyStateTypeId, inverter->hz());
         thing->setStateValue(sunspecSinglePhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
         thing->setStateValue(sunspecSinglePhaseInverterPhaseVoltageStateTypeId, inverter->phaseVoltageAn());
@@ -1074,8 +1085,14 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         double currentPower = calculateSolarEdgePvProduction(thing, -inverter->watts(), -inverter->dcWatts());
         thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerStateTypeId, currentPower);
 
+        // Note: Solar Edge uses scale factor 0, for that reason the value is wrong by 1000 (mWh instead of sunspec Wh). This is a spec violation.
+        if (parentThing->thingClassId() == solarEdgeConnectionThingClassId) {
+            thing->setStateValue(sunspecSinglePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000000.0);
+        } else {
+            thing->setStateValue(sunspecSinglePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
+        }
+
         thing->setStateValue(sunspecSinglePhaseInverterTotalCurrentStateTypeId, inverter->amps());
-        thing->setStateValue(sunspecSinglePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
         thing->setStateValue(sunspecSinglePhaseInverterFrequencyStateTypeId, inverter->hz());
         thing->setStateValue(sunspecSinglePhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
         thing->setStateValue(sunspecSinglePhaseInverterPhaseVoltageStateTypeId, inverter->phaseVoltageAn());
@@ -1095,8 +1112,14 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         double currentPower = calculateSolarEdgePvProduction(thing, -inverter->watts(), -inverter->dcWatts());
         thing->setStateValue(sunspecSplitPhaseInverterCurrentPowerStateTypeId, currentPower);
 
+        // Note: Solar Edge uses scale factor 0, for that reason the value is wrong by 1000 (mWh instead of sunspec Wh). This is a spec violation.
+        if (parentThing->thingClassId() == solarEdgeConnectionThingClassId) {
+            thing->setStateValue(sunspecSplitPhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000000.0);
+        } else {
+            thing->setStateValue(sunspecSplitPhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
+        }
+
         thing->setStateValue(sunspecSplitPhaseInverterTotalCurrentStateTypeId, inverter->amps());
-        thing->setStateValue(sunspecSplitPhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
         thing->setStateValue(sunspecSplitPhaseInverterFrequencyStateTypeId, inverter->hz());
         thing->setStateValue(sunspecSplitPhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
         thing->setStateValue(sunspecSplitPhaseInverterPhaseANVoltageStateTypeId, inverter->phaseVoltageAn());
@@ -1119,8 +1142,14 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         double currentPower = calculateSolarEdgePvProduction(thing, -inverter->watts(), -inverter->dcWatts());
         thing->setStateValue(sunspecSplitPhaseInverterCurrentPowerStateTypeId, currentPower);
 
+        // Note: Solar Edge uses scale factor 0, for that reason the value is wrong by 1000 (mWh instead of sunspec Wh). This is a spec violation.
+        if (parentThing->thingClassId() == solarEdgeConnectionThingClassId) {
+            thing->setStateValue(sunspecSplitPhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000000.0);
+        } else {
+            thing->setStateValue(sunspecSplitPhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
+        }
+
         thing->setStateValue(sunspecSplitPhaseInverterTotalCurrentStateTypeId, inverter->amps());
-        thing->setStateValue(sunspecSplitPhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
         thing->setStateValue(sunspecSplitPhaseInverterFrequencyStateTypeId, inverter->hz());
         thing->setStateValue(sunspecSplitPhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
         thing->setStateValue(sunspecSplitPhaseInverterPhaseANVoltageStateTypeId, inverter->phaseVoltageAn());
@@ -1143,8 +1172,14 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         double currentPower = calculateSolarEdgePvProduction(thing, -inverter->watts(), -inverter->dcWatts());
         thing->setStateValue(sunspecThreePhaseInverterCurrentPowerStateTypeId, currentPower);
 
+        // Note: Solar Edge uses scale factor 0, for that reason the value is wrong by 1000 (mWh instead of sunspec Wh). This is a spec violation.
+        if (parentThing->thingClassId() == solarEdgeConnectionThingClassId) {
+            thing->setStateValue(sunspecThreePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000000.0);
+        } else {
+            thing->setStateValue(sunspecThreePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
+        }
+
         thing->setStateValue(sunspecThreePhaseInverterTotalCurrentStateTypeId, inverter->amps());
-        thing->setStateValue(sunspecThreePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
         thing->setStateValue(sunspecThreePhaseInverterFrequencyStateTypeId, inverter->hz());
         thing->setStateValue(sunspecThreePhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
         thing->setStateValue(sunspecThreePhaseInverterPhaseANVoltageStateTypeId, inverter->phaseVoltageAn());
@@ -1169,8 +1204,14 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         double currentPower = calculateSolarEdgePvProduction(thing, -inverter->watts(), -inverter->dcWatts());
         thing->setStateValue(sunspecThreePhaseInverterCurrentPowerStateTypeId, currentPower);
 
+        // Note: Solar Edge uses scale factor 0, for that reason the value is wrong by 1000 (mWh instead of sunspec Wh). This is a spec violation.
+        if (parentThing->thingClassId() == solarEdgeConnectionThingClassId) {
+            thing->setStateValue(sunspecThreePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000000.0);
+        } else {
+            thing->setStateValue(sunspecThreePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
+        }
+
         thing->setStateValue(sunspecThreePhaseInverterTotalCurrentStateTypeId, inverter->amps());
-        thing->setStateValue(sunspecThreePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
         thing->setStateValue(sunspecThreePhaseInverterFrequencyStateTypeId, inverter->hz());
         thing->setStateValue(sunspecThreePhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
         thing->setStateValue(sunspecThreePhaseInverterPhaseANVoltageStateTypeId, inverter->phaseVoltageAn());
