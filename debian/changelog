@@ -1,3 +1,10 @@
+nymea-plugins-modbus (0.29.1) xenial; urgency=medium
+
+  [ Michael Zanetti ]
+  * UniPi: Fix gpio includes
+
+ -- Jenkins <jenkins@nymea.io>  Tue, 09 Nov 2021 00:48:57 +0100
+
 nymea-plugins-modbus (0.29.0) xenial; urgency=medium
 
 
