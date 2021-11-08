@@ -36,8 +36,8 @@
 #include "mcp342xchannel.h"
 #include "unipipwm.h"
 
-#include "gpio.h"
-#include "gpiomonitor.h"
+#include <gpio.h>
+#include <gpiomonitor.h>
 #include "hardware/i2c/i2cmanager.h"
 
 class I2CDevice;
