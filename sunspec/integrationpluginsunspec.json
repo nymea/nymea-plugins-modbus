@@ -41,6 +41,7 @@
                     "id": "f51853f3-8815-4cf3-b337-45cda1f3e6d5",
                     "createMethods": [ "User", "Discovery" ],
                     "interfaces": ["gateway"],
+                    "providedInterfaces": ["smartmeterproducer", "solarinverter", "energymeter", "energystorage", "battery"],
                     "paramTypes": [
                         {
                             "id": "6be6abc4-e2b2-4687-9343-0e5164ed0ab2",
@@ -1454,6 +1455,7 @@
                     "id": "7a92bf65-b443-4491-a012-2bec35eb5bf0",
                     "createMethods": [ "User", "Discovery" ],
                     "interfaces": ["gateway"],
+                    "providedInterfaces": ["smartmeterproducer", "solarinverter", "energymeter", "energystorage", "battery"],
                     "paramTypes": [
                         {
                             "id": "94f6ba3c-6b8b-47a9-a5cb-73a091ae4cf7",
@@ -1684,6 +1686,7 @@
                     "id": "0cad2dca-66ac-489c-8443-074e32aa27a0",
                     "createMethods": [ "User", "Discovery" ],
                     "interfaces": ["gateway"],
+                    "providedInterfaces": ["solarinverter", "energystorage", "battery"],
                     "paramTypes": [
                         {
                             "id": "9fe10047-b2fd-460b-88ad-7f00977efc57",
