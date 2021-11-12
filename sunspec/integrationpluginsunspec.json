@@ -37,11 +37,11 @@
             "thingClasses": [
                 {
                     "name": "sunspecConnection",
-                    "displayName": "SunSpec connection",
+                    "displayName": "SunSpec Generic",
                     "id": "f51853f3-8815-4cf3-b337-45cda1f3e6d5",
                     "createMethods": [ "User", "Discovery" ],
                     "interfaces": ["gateway"],
-                    "providedInterfaces": ["smartmeterproducer", "solarinverter", "energymeter", "energystorage", "battery"],
+                    "providedInterfaces": [ "solarinverter", "energymeter", "energystorage"],
                     "paramTypes": [
                         {
                             "id": "6be6abc4-e2b2-4687-9343-0e5164ed0ab2",
@@ -89,7 +89,7 @@
                     "displayName": "SunSpec single phase inverter",
                     "id": "c5d5204e-3375-4b92-8128-fab77a671fed",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["smartmeterproducer", "connectable"],
+                    "interfaces": [ "solarinverter", "connectable" ],
                     "paramTypes": [
                         {
                             "id": "41715d00-a947-4f43-a475-cea05790e01d",
@@ -265,7 +265,7 @@
                     "displayName": "SunSpec split phase inverter",
                     "id": "61b38f93-d331-42bf-b1ef-d3fb16ad1230",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["smartmeterproducer", "connectable"],
+                    "interfaces": [ "solarinverter", "connectable" ],
                     "paramTypes": [
                         {
                             "id": "c42fb50e-210f-4b53-88eb-fa216e15f88f",
@@ -471,7 +471,7 @@
                     "displayName": "SunSpec three phase inverter",
                     "id": "2e4122ea-96a5-415c-b5e2-7d6012265a83",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["solarinverter", "connectable"],
+                    "interfaces": [ "solarinverter", "connectable" ],
                     "paramTypes": [
                         {
                             "id": "8d5b2b58-ce46-406d-844e-f53136afcf09",
@@ -696,7 +696,7 @@
                     "displayName": "SunSpec single phase meter",
                     "id": "7ffa43b8-b56f-4435-8509-980e9d81dfa8",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["energymeter", "connectable"],
+                    "interfaces": [ "energymeter", "connectable" ],
                     "paramTypes": [
                         {
                             "id": "7d6fcafb-c62e-4a21-aae2-f4041c487149",
@@ -817,7 +817,7 @@
                     "displayName": "SunSpec split phase meter",
                     "id": "b8a18e45-5ff5-4f43-915f-04ee216c809d",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["energymeter", "connectable"],
+                    "interfaces": [ "energymeter", "connectable" ],
                     "paramTypes": [
                         {
                             "id": "89aeec6d-abeb-48b5-9594-214ad5db2d03",
@@ -1036,7 +1036,7 @@
                     "displayName": "SunSpec three phase meter",
                     "id": "68f822f9-ff30-4275-b229-39a3674fead7",
                     "createMethods": [ "Auto" ],
-                    "interfaces": ["energymeter", "connectable"],
+                    "interfaces": [ "energymeter", "connectable" ],
                     "paramTypes": [
                         {
                             "id": "a1960821-155c-4176-86fa-974429039182",
@@ -1451,11 +1451,11 @@
             "thingClasses": [
                 {
                     "name": "solarEdgeConnection",
-                    "displayName": "SolarEdge connection",
+                    "displayName": "SolarEdge",
                     "id": "7a92bf65-b443-4491-a012-2bec35eb5bf0",
                     "createMethods": [ "User", "Discovery" ],
                     "interfaces": ["gateway"],
-                    "providedInterfaces": ["smartmeterproducer", "solarinverter", "energymeter", "energystorage", "battery"],
+                    "providedInterfaces": [ "solarinverter", "energymeter", "energystorage" ],
                     "paramTypes": [
                         {
                             "id": "94f6ba3c-6b8b-47a9-a5cb-73a091ae4cf7",
@@ -1682,11 +1682,11 @@
             "thingClasses": [
                 {
                     "name": "kostalConnection",
-                    "displayName": "Kostal SunSpec connection",
+                    "displayName": "Kostal SunSpec",
                     "id": "0cad2dca-66ac-489c-8443-074e32aa27a0",
                     "createMethods": [ "User", "Discovery" ],
                     "interfaces": ["gateway"],
-                    "providedInterfaces": ["solarinverter", "energystorage", "battery"],
+                    "providedInterfaces": ["solarinverter", "energystorage"],
                     "paramTypes": [
                         {
                             "id": "9fe10047-b2fd-460b-88ad-7f00977efc57",
