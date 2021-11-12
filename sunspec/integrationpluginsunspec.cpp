@@ -90,6 +90,7 @@ void IntegrationPluginSunSpec::init()
     m_connectedStateTypeIds.insert(solarEdgeBatteryThingClassId, solarEdgeBatteryConnectedStateTypeId);
     m_connectedStateTypeIds.insert(kostalConnectionThingClassId, kostalConnectionConnectedStateTypeId);
 
+    // Child things
     m_connectedStateTypeIds.insert(sunspecStorageThingClassId, sunspecStorageConnectedStateTypeId);
     m_connectedStateTypeIds.insert(sunspecSinglePhaseInverterThingClassId, sunspecSinglePhaseInverterConnectedStateTypeId);
     m_connectedStateTypeIds.insert(sunspecSplitPhaseInverterThingClassId, sunspecSplitPhaseInverterConnectedStateTypeId);
@@ -97,6 +98,7 @@ void IntegrationPluginSunSpec::init()
     m_connectedStateTypeIds.insert(sunspecSinglePhaseMeterThingClassId, sunspecSinglePhaseMeterConnectedStateTypeId);
     m_connectedStateTypeIds.insert(sunspecSplitPhaseMeterThingClassId, sunspecSplitPhaseMeterConnectedStateTypeId);
     m_connectedStateTypeIds.insert(sunspecThreePhaseMeterThingClassId, sunspecThreePhaseMeterConnectedStateTypeId);
+    m_connectedStateTypeIds.insert(solarEdgeBatteryThingClassId, solarEdgeBatteryConnectedStateTypeId);
 
     // Params for sunspec things
     m_modelIdParamTypeIds.insert(sunspecSinglePhaseInverterThingClassId, sunspecSinglePhaseInverterThingModelIdParamTypeId);
@@ -681,6 +683,7 @@ void IntegrationPluginSunSpec::setupSolarEdgeBattery(ThingSetupInfo *info)
     connect(battery, &SolarEdgeBattery::initFinished, connection, [=](bool success) {
         if (!success) {
             qCWarning(dcSunSpec()) << "Failed to initialize SolarEdge battery data during setup";
+            battery->deleteLater();
             return info->finish(Thing::ThingErrorHardwareFailure);
         }
 
