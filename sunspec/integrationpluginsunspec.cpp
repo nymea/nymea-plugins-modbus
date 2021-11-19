@@ -98,7 +98,6 @@ void IntegrationPluginSunSpec::init()
     m_connectedStateTypeIds.insert(sunspecSinglePhaseMeterThingClassId, sunspecSinglePhaseMeterConnectedStateTypeId);
     m_connectedStateTypeIds.insert(sunspecSplitPhaseMeterThingClassId, sunspecSplitPhaseMeterConnectedStateTypeId);
     m_connectedStateTypeIds.insert(sunspecThreePhaseMeterThingClassId, sunspecThreePhaseMeterConnectedStateTypeId);
-    m_connectedStateTypeIds.insert(solarEdgeBatteryThingClassId, solarEdgeBatteryConnectedStateTypeId);
 
     // Params for sunspec things
     m_modelIdParamTypeIds.insert(sunspecSinglePhaseInverterThingClassId, sunspecSinglePhaseInverterThingModelIdParamTypeId);
@@ -690,6 +689,8 @@ void IntegrationPluginSunSpec::setupSolarEdgeBattery(ThingSetupInfo *info)
         m_sunSpecThings.insert(thing, battery);
         connect(battery, &SolarEdgeBattery::blockDataUpdated, this, &IntegrationPluginSunSpec::onSolarEdgeBatteryBlockUpdated);
         info->finish(Thing::ThingErrorNoError);
+        // Set up successfully, init done, we are connected for sure
+        thing->setSettingValue(solarEdgeBatteryConnectedStateTypeId, true);
     });
 
     // Start initializing battery data
