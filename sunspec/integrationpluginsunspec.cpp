@@ -1089,8 +1089,9 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         double currentPower = calculateSolarEdgePvProduction(thing, -inverter->watts(), -inverter->dcWatts());
         thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerStateTypeId, currentPower);
 
-        // Note: Solar Edge uses scale factor 0, for that reason the value is wrong by 1000 (mWh instead of sunspec Wh). This is a spec violation.
+        // Note: Solar Edge has changed the endiness for the whatever reason. This is a spec violation.
         if (parentThing->thingClassId() == solarEdgeConnectionThingClassId) {
+            // Note:
             thing->setStateValue(sunspecSinglePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000000.0);
         } else {
             thing->setStateValue(sunspecSinglePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);

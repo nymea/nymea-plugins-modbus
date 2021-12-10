@@ -73,6 +73,7 @@ void SunSpecEnergyStorageBaseModelDeprecatedModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -83,6 +84,7 @@ void SunSpecEnergyStorageBaseModelDeprecatedModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint deprecatedModelDataPoint;
@@ -94,6 +96,7 @@ void SunSpecEnergyStorageBaseModelDeprecatedModel::initDataPoints()
     deprecatedModelDataPoint.setAddressOffset(2);
     deprecatedModelDataPoint.setBlockOffset(0);
     deprecatedModelDataPoint.setSunSpecDataType("enum16");
+    deprecatedModelDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(deprecatedModelDataPoint.name(), deprecatedModelDataPoint);
 
 }

@@ -291,6 +291,7 @@ def addDataPointInitialization(fileDescriptor, dataPoint, addressOffset, indenta
     if 'access' in dataPoint and dataPoint['access'] == 'RW':
         writeLine(fileDescriptor, linePrepend + '%s.setAccess(SunSpecDataPoint::AccessReadWrite);' % (propertyName))
 
+    writeLine(fileDescriptor, linePrepend + '%s.setByteOrder(m_byteOrder);' % (propertyName))
     writeLine(fileDescriptor, linePrepend + 'm_dataPoints.insert(%s.name(), %s);' % (propertyName, propertyName))
     writeLine(fileDescriptor)
     return size
@@ -924,6 +925,7 @@ def writeRepeatingBlockClassImplementation(fileDescriptor, className, modelId):
     writeLine(fileDescriptor, '%s::%s(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, %s *parent) :' % (blockClassName, blockClassName, className))
     writeLine(fileDescriptor, '    SunSpecModelRepeatingBlock(blockIndex, blockSize, modbusStartRegister, parent)')
     writeLine(fileDescriptor, '{')
+    writeLine(fileDescriptor, '    m_byteOrder = parent->byteOrder();')
     writeLine(fileDescriptor, '    initDataPoints();')
     writeLine(fileDescriptor, '}')
     writeLine(fileDescriptor)
@@ -1220,6 +1222,7 @@ def writeModelFactoryHeader(fileDescriptor):
     writeLine(fileDescriptor, '#include <QObject>')
     writeLine(fileDescriptor)
     writeLine(fileDescriptor, '#include "sunspecmodel.h"')
+    writeLine(fileDescriptor, '#include "sunspecdatapoint.h"')
     writeLine(fileDescriptor)
 
     writeLine(fileDescriptor, 'class SunSpecConnection;')
@@ -1259,7 +1262,7 @@ def writeModelFactoryHeader(fileDescriptor):
     writeLine(fileDescriptor, '    ~%s() = default;' % className)
     writeLine(fileDescriptor)
 
-    writeLine(fileDescriptor, '    SunSpecModel *createModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelId, quint16 modelLength);')
+    writeLine(fileDescriptor, '    SunSpecModel *createModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelId, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder);')
 
     # Private members
     writeLine(fileDescriptor)
@@ -1295,14 +1298,17 @@ def writeModelFactorySource(fileDescriptor):
     writeLine(fileDescriptor)
 
     # Write factory class
-    writeLine(fileDescriptor, 'SunSpecModel *%s::createModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelId, quint16 modelLength)' % className)
+    writeLine(fileDescriptor, 'SunSpecModel *%s::createModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelId, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder)' % className)
     writeLine(fileDescriptor, '{')  
     writeLine(fileDescriptor, '    switch(modelId) {')
 
     for cn in classes:
         enumName = 'ModelId' + cn.replace('Model', '').replace('SunSpec', '')
-        writeLine(fileDescriptor, '    case %s:' % enumName)
-        writeLine(fileDescriptor, '        return new %s(connection, modbusStartRegister, modelLength, connection);' % cn)
+        writeLine(fileDescriptor, '    case %s: {' % enumName)
+        writeLine(fileDescriptor, '        %s *model = new %s(connection, modbusStartRegister, modelLength, connection);' % (cn, cn))
+        writeLine(fileDescriptor, '        model->setByteOrder(byteOrder);')
+        writeLine(fileDescriptor, '        return model;')
+        writeLine(fileDescriptor, '    };')
 
     writeLine(fileDescriptor, '    default:')
     writeLine(fileDescriptor, '        return nullptr;')

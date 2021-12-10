@@ -39,6 +39,12 @@ class SunSpecDataPoint
 {
     Q_GADGET
 public:
+    enum ByteOrder {
+        ByteOrderLittleEndian,
+        ByteOrderBigEndian
+    };
+    Q_ENUM(ByteOrder)
+
     enum Access {
         AccessReadOnly,
         AccessReadWrite
@@ -108,6 +114,9 @@ public:
     DataType dataType() const;
     void setDataType(DataType dataType);
 
+    ByteOrder byteOrder() const;
+    void setByteOrder(ByteOrder byteOrder);
+
     int size() const;
     void setSize(int size);
 
@@ -138,25 +147,25 @@ public:
     // Convert to
     static quint16 convertToUInt16(const QVector<quint16> &registers);
     static qint16 convertToInt16(const QVector<quint16> &registers);
-    static quint32 convertToUInt32(const QVector<quint16> &registers);
-    static qint32 convertToInt32(const QVector<quint16> &registers);
-    static quint64 convertToUInt64(const QVector<quint16> &registers);
-    static qint64 convertToInt64(const QVector<quint16> &registers);
+    static quint32 convertToUInt32(const QVector<quint16> &registers, ByteOrder byteOrder = ByteOrderLittleEndian);
+    static qint32 convertToInt32(const QVector<quint16> &registers, ByteOrder byteOrder = ByteOrderLittleEndian);
+    static quint64 convertToUInt64(const QVector<quint16> &registers, ByteOrder byteOrder = ByteOrderLittleEndian);
+    static qint64 convertToInt64(const QVector<quint16> &registers, ByteOrder byteOrder = ByteOrderLittleEndian);
     static QString convertToString(const QVector<quint16> &registers);
-    static float convertToFloat32(const QVector<quint16> &registers);
-    static double convertToFloat64(const QVector<quint16> &registers);
+    static float convertToFloat32(const QVector<quint16> &registers, ByteOrder byteOrder = ByteOrderLittleEndian);
+    static double convertToFloat64(const QVector<quint16> &registers, ByteOrder byteOrder = ByteOrderLittleEndian);
 
     // Convert from
     static QVector<quint16> convertFromUInt16(quint16 value);
     static QVector<quint16> convertFromInt16(qint16 value);
-    static QVector<quint16> convertFromUInt32(quint32 value);
-    static QVector<quint16> convertFromInt32(qint32 value);
-    static QVector<quint16> convertFromUInt64(quint64 value);
-    static QVector<quint16> convertFromInt64(qint64 value);
+    static QVector<quint16> convertFromUInt32(quint32 value, ByteOrder byteOrder = ByteOrderLittleEndian);
+    static QVector<quint16> convertFromInt32(qint32 value, ByteOrder byteOrder = ByteOrderLittleEndian);
+    static QVector<quint16> convertFromUInt64(quint64 value, ByteOrder byteOrder = ByteOrderLittleEndian);
+    static QVector<quint16> convertFromInt64(qint64 value, ByteOrder byteOrder = ByteOrderLittleEndian);
     static QVector<quint16> convertFromString(const QString &value, quint16 stringLength);
-    static QVector<quint16> convertFromFloatWithSSF(float value, qint16 scaleFactor, DataType dataType);
-    static QVector<quint16> convertFromFloat32(float value);
-    static QVector<quint16> convertFromFloat64(double value);
+    static QVector<quint16> convertFromFloatWithSSF(float value, qint16 scaleFactor, DataType dataType, ByteOrder byteOrder = ByteOrderLittleEndian);
+    static QVector<quint16> convertFromFloat32(float value, ByteOrder byteOrder = ByteOrderLittleEndian);
+    static QVector<quint16> convertFromFloat64(double value, ByteOrder byteOrder = ByteOrderLittleEndian);
 
 private:
     QString m_name;
@@ -170,6 +179,7 @@ private:
     quint16 m_blockOffset = 0;
     QString m_sunSpecDataType = "uint16";
     DataType m_dataType = DataType::UInt16;
+    ByteOrder m_byteOrder = ByteOrder::ByteOrderLittleEndian; // Default is little endian: 0xAABB 0xCCDD -> 0xCCDDAABB
     int m_size = 1;
     QString m_scaleFactorName;
 

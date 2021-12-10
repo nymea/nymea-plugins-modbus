@@ -37,6 +37,8 @@
 #include <QModbusTcpClient>
 #include <QLoggingCategory>
 
+#include "sunspecdatapoint.h"
+
 Q_DECLARE_LOGGING_CATEGORY(dcSunSpec)
 
 class SunSpecModel;
@@ -46,6 +48,7 @@ class SunSpecConnection : public QObject
     Q_OBJECT
 public:
     explicit SunSpecConnection(const QHostAddress &hostAddress, uint port = 502, uint slaveId = 1, QObject *parent = nullptr);
+    explicit SunSpecConnection(const QHostAddress &hostAddress, uint port = 502, uint slaveId = 1, SunSpecDataPoint::ByteOrder byteOrder = SunSpecDataPoint::ByteOrderLittleEndian, QObject *parent = nullptr);
     ~SunSpecConnection() = default;
 
     QModbusTcpClient *modbusTcpClient() const;
@@ -58,6 +61,8 @@ public:
 
     uint slaveId() const;
     void setSlaveId(uint slaveId);
+
+    SunSpecDataPoint::ByteOrder byteOrder() const;
 
     int timeout() const;
     void setTimeout(int milliSeconds);
@@ -105,6 +110,9 @@ private:
     QList<ModuleDiscoveryResult> m_modelDiscoveryResult;
     QList<SunSpecModel *> m_models;
     QList<SunSpecModel *> m_uninitializedModels;
+    SunSpecDataPoint::ByteOrder m_byteOrder = SunSpecDataPoint::ByteOrderLittleEndian;
+
+    void createConnection();
 
     void processDiscoveryResult();
 

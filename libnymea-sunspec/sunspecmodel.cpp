@@ -74,6 +74,16 @@ quint16 SunSpecModel::modbusStartRegister() const
     return m_modbusStartRegister;
 }
 
+SunSpecDataPoint::ByteOrder SunSpecModel::byteOrder() const
+{
+    return m_byteOrder;
+}
+
+void SunSpecModel::setByteOrder(SunSpecDataPoint::ByteOrder byteOrder)
+{
+    m_byteOrder = byteOrder;
+}
+
 QHash<QString, SunSpecDataPoint> SunSpecModel::dataPoints() const
 {
     return m_dataPoints;

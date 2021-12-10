@@ -79,6 +79,9 @@ public:
     quint16 modelLength() const;
     quint16 modbusStartRegister() const;
 
+    SunSpecDataPoint::ByteOrder byteOrder() const;
+    void setByteOrder(SunSpecDataPoint::ByteOrder byteOrder);
+
     QHash<QString, SunSpecDataPoint> dataPoints() const;
 
     QVector<quint16> blockData() const;
@@ -99,6 +102,7 @@ protected:
     quint16 m_modelLength = 0;
 
     ModelBlockType m_modelBlockType = ModelBlockTypeFixed;
+    SunSpecDataPoint::ByteOrder m_byteOrder = SunSpecDataPoint::ByteOrderLittleEndian;
 
     bool m_initialized = false;
 

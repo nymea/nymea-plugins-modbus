@@ -34,6 +34,7 @@
 SunSpecStringCombinerCurrentModelRepeatingBlock::SunSpecStringCombinerCurrentModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecStringCombinerCurrentModel *parent) :
     SunSpecModelRepeatingBlock(blockIndex, blockSize, modbusStartRegister, parent)
 {
+    m_byteOrder = parent->byteOrder();
     initDataPoints();
 }
 
@@ -78,6 +79,7 @@ void SunSpecStringCombinerCurrentModelRepeatingBlock::initDataPoints()
     idDataPoint.setSize(1);
     idDataPoint.setAddressOffset(0);
     idDataPoint.setSunSpecDataType("uint16");
+    idDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(idDataPoint.name(), idDataPoint);
 
     SunSpecDataPoint inputEventDataPoint;
@@ -88,6 +90,7 @@ void SunSpecStringCombinerCurrentModelRepeatingBlock::initDataPoints()
     inputEventDataPoint.setSize(2);
     inputEventDataPoint.setAddressOffset(1);
     inputEventDataPoint.setSunSpecDataType("bitfield32");
+    inputEventDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(inputEventDataPoint.name(), inputEventDataPoint);
 
     SunSpecDataPoint inputEventVendorDataPoint;
@@ -98,6 +101,7 @@ void SunSpecStringCombinerCurrentModelRepeatingBlock::initDataPoints()
     inputEventVendorDataPoint.setAddressOffset(3);
     inputEventVendorDataPoint.setBlockOffset(1);
     inputEventVendorDataPoint.setSunSpecDataType("bitfield32");
+    inputEventVendorDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(inputEventVendorDataPoint.name(), inputEventVendorDataPoint);
 
     SunSpecDataPoint ampsDataPoint;
@@ -111,6 +115,7 @@ void SunSpecStringCombinerCurrentModelRepeatingBlock::initDataPoints()
     ampsDataPoint.setBlockOffset(3);
     ampsDataPoint.setScaleFactorName("InDCA_SF");
     ampsDataPoint.setSunSpecDataType("int16");
+    ampsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
     SunSpecDataPoint ampHoursDataPoint;
@@ -123,6 +128,7 @@ void SunSpecStringCombinerCurrentModelRepeatingBlock::initDataPoints()
     ampHoursDataPoint.setBlockOffset(4);
     ampHoursDataPoint.setScaleFactorName("InDCAhr_SF");
     ampHoursDataPoint.setSunSpecDataType("acc32");
+    ampHoursDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(ampHoursDataPoint.name(), ampHoursDataPoint);
 
 }
@@ -242,6 +248,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -252,6 +259,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint dCA_SFDataPoint;
@@ -262,6 +270,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     dCA_SFDataPoint.setAddressOffset(2);
     dCA_SFDataPoint.setBlockOffset(0);
     dCA_SFDataPoint.setSunSpecDataType("sunssf");
+    dCA_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(dCA_SFDataPoint.name(), dCA_SFDataPoint);
 
     SunSpecDataPoint dCAhr_SFDataPoint;
@@ -271,6 +280,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     dCAhr_SFDataPoint.setAddressOffset(3);
     dCAhr_SFDataPoint.setBlockOffset(1);
     dCAhr_SFDataPoint.setSunSpecDataType("sunssf");
+    dCAhr_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(dCAhr_SFDataPoint.name(), dCAhr_SFDataPoint);
 
     SunSpecDataPoint dCV_SFDataPoint;
@@ -280,6 +290,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     dCV_SFDataPoint.setAddressOffset(4);
     dCV_SFDataPoint.setBlockOffset(2);
     dCV_SFDataPoint.setSunSpecDataType("sunssf");
+    dCV_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(dCV_SFDataPoint.name(), dCV_SFDataPoint);
 
     SunSpecDataPoint ratingDataPoint;
@@ -293,6 +304,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     ratingDataPoint.setBlockOffset(3);
     ratingDataPoint.setScaleFactorName("DCA_SF");
     ratingDataPoint.setSunSpecDataType("uint16");
+    ratingDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(ratingDataPoint.name(), ratingDataPoint);
 
     SunSpecDataPoint nDataPoint;
@@ -304,6 +316,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     nDataPoint.setAddressOffset(6);
     nDataPoint.setBlockOffset(4);
     nDataPoint.setSunSpecDataType("count");
+    nDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(nDataPoint.name(), nDataPoint);
 
     SunSpecDataPoint eventFlagsDataPoint;
@@ -315,6 +328,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     eventFlagsDataPoint.setAddressOffset(7);
     eventFlagsDataPoint.setBlockOffset(5);
     eventFlagsDataPoint.setSunSpecDataType("bitfield32");
+    eventFlagsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(eventFlagsDataPoint.name(), eventFlagsDataPoint);
 
     SunSpecDataPoint vendorEventDataPoint;
@@ -325,6 +339,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     vendorEventDataPoint.setAddressOffset(9);
     vendorEventDataPoint.setBlockOffset(7);
     vendorEventDataPoint.setSunSpecDataType("bitfield32");
+    vendorEventDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vendorEventDataPoint.name(), vendorEventDataPoint);
 
     SunSpecDataPoint ampsDataPoint;
@@ -338,6 +353,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     ampsDataPoint.setBlockOffset(9);
     ampsDataPoint.setScaleFactorName("DCA_SF");
     ampsDataPoint.setSunSpecDataType("int16");
+    ampsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
     SunSpecDataPoint ampHoursDataPoint;
@@ -350,6 +366,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     ampHoursDataPoint.setBlockOffset(10);
     ampHoursDataPoint.setScaleFactorName("DCAhr_SF");
     ampHoursDataPoint.setSunSpecDataType("acc32");
+    ampHoursDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(ampHoursDataPoint.name(), ampHoursDataPoint);
 
     SunSpecDataPoint voltageDataPoint;
@@ -362,6 +379,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     voltageDataPoint.setBlockOffset(12);
     voltageDataPoint.setScaleFactorName("DCV_SF");
     voltageDataPoint.setSunSpecDataType("int16");
+    voltageDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(voltageDataPoint.name(), voltageDataPoint);
 
     SunSpecDataPoint tempDataPoint;
@@ -373,6 +391,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     tempDataPoint.setAddressOffset(15);
     tempDataPoint.setBlockOffset(13);
     tempDataPoint.setSunSpecDataType("int16");
+    tempDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tempDataPoint.name(), tempDataPoint);
 
     SunSpecDataPoint inDCA_SFDataPoint;
@@ -382,6 +401,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     inDCA_SFDataPoint.setAddressOffset(16);
     inDCA_SFDataPoint.setBlockOffset(14);
     inDCA_SFDataPoint.setSunSpecDataType("sunssf");
+    inDCA_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(inDCA_SFDataPoint.name(), inDCA_SFDataPoint);
 
     SunSpecDataPoint inDCAhr_SFDataPoint;
@@ -391,6 +411,7 @@ void SunSpecStringCombinerCurrentModel::initDataPoints()
     inDCAhr_SFDataPoint.setAddressOffset(17);
     inDCAhr_SFDataPoint.setBlockOffset(15);
     inDCAhr_SFDataPoint.setSunSpecDataType("sunssf");
+    inDCAhr_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(inDCAhr_SFDataPoint.name(), inDCAhr_SFDataPoint);
 
 }

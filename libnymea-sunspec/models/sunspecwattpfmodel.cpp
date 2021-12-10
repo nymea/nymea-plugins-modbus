@@ -34,6 +34,7 @@
 SunSpecWattPfModelRepeatingBlock::SunSpecWattPfModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecWattPfModel *parent) :
     SunSpecModelRepeatingBlock(blockIndex, blockSize, modbusStartRegister, parent)
 {
+    m_byteOrder = parent->byteOrder();
     initDataPoints();
 }
 
@@ -787,6 +788,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     actPtDataPoint.setAddressOffset(0);
     actPtDataPoint.setSunSpecDataType("uint16");
     actPtDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    actPtDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(actPtDataPoint.name(), actPtDataPoint);
 
     SunSpecDataPoint w1DataPoint;
@@ -800,6 +802,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     w1DataPoint.setScaleFactorName("W_SF");
     w1DataPoint.setSunSpecDataType("int16");
     w1DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    w1DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(w1DataPoint.name(), w1DataPoint);
 
     SunSpecDataPoint pf1DataPoint;
@@ -814,6 +817,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     pf1DataPoint.setScaleFactorName("PF_SF");
     pf1DataPoint.setSunSpecDataType("int16");
     pf1DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    pf1DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pf1DataPoint.name(), pf1DataPoint);
 
     SunSpecDataPoint w2DataPoint;
@@ -827,6 +831,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     w2DataPoint.setScaleFactorName("W_SF");
     w2DataPoint.setSunSpecDataType("int16");
     w2DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    w2DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(w2DataPoint.name(), w2DataPoint);
 
     SunSpecDataPoint pf2DataPoint;
@@ -840,6 +845,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     pf2DataPoint.setScaleFactorName("PF_SF");
     pf2DataPoint.setSunSpecDataType("int16");
     pf2DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    pf2DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pf2DataPoint.name(), pf2DataPoint);
 
     SunSpecDataPoint w3DataPoint;
@@ -853,6 +859,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     w3DataPoint.setScaleFactorName("W_SF");
     w3DataPoint.setSunSpecDataType("int16");
     w3DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    w3DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(w3DataPoint.name(), w3DataPoint);
 
     SunSpecDataPoint pf3DataPoint;
@@ -866,6 +873,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     pf3DataPoint.setScaleFactorName("PF_SF");
     pf3DataPoint.setSunSpecDataType("int16");
     pf3DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    pf3DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pf3DataPoint.name(), pf3DataPoint);
 
     SunSpecDataPoint w4DataPoint;
@@ -879,6 +887,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     w4DataPoint.setScaleFactorName("W_SF");
     w4DataPoint.setSunSpecDataType("int16");
     w4DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    w4DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(w4DataPoint.name(), w4DataPoint);
 
     SunSpecDataPoint pf4DataPoint;
@@ -892,6 +901,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     pf4DataPoint.setScaleFactorName("PF_SF");
     pf4DataPoint.setSunSpecDataType("int16");
     pf4DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    pf4DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pf4DataPoint.name(), pf4DataPoint);
 
     SunSpecDataPoint w5DataPoint;
@@ -905,6 +915,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     w5DataPoint.setScaleFactorName("W_SF");
     w5DataPoint.setSunSpecDataType("int16");
     w5DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    w5DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(w5DataPoint.name(), w5DataPoint);
 
     SunSpecDataPoint pf5DataPoint;
@@ -918,6 +929,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     pf5DataPoint.setScaleFactorName("PF_SF");
     pf5DataPoint.setSunSpecDataType("int16");
     pf5DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    pf5DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pf5DataPoint.name(), pf5DataPoint);
 
     SunSpecDataPoint w6DataPoint;
@@ -931,6 +943,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     w6DataPoint.setScaleFactorName("W_SF");
     w6DataPoint.setSunSpecDataType("int16");
     w6DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    w6DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(w6DataPoint.name(), w6DataPoint);
 
     SunSpecDataPoint pf6DataPoint;
@@ -944,6 +957,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     pf6DataPoint.setScaleFactorName("PF_SF");
     pf6DataPoint.setSunSpecDataType("int16");
     pf6DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    pf6DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pf6DataPoint.name(), pf6DataPoint);
 
     SunSpecDataPoint w7DataPoint;
@@ -957,6 +971,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     w7DataPoint.setScaleFactorName("W_SF");
     w7DataPoint.setSunSpecDataType("int16");
     w7DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    w7DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(w7DataPoint.name(), w7DataPoint);
 
     SunSpecDataPoint pf7DataPoint;
@@ -970,6 +985,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     pf7DataPoint.setScaleFactorName("PF_SF");
     pf7DataPoint.setSunSpecDataType("int16");
     pf7DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    pf7DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pf7DataPoint.name(), pf7DataPoint);
 
     SunSpecDataPoint w8DataPoint;
@@ -983,6 +999,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     w8DataPoint.setScaleFactorName("W_SF");
     w8DataPoint.setSunSpecDataType("int16");
     w8DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    w8DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(w8DataPoint.name(), w8DataPoint);
 
     SunSpecDataPoint pf8DataPoint;
@@ -996,6 +1013,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     pf8DataPoint.setScaleFactorName("PF_SF");
     pf8DataPoint.setSunSpecDataType("int16");
     pf8DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    pf8DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pf8DataPoint.name(), pf8DataPoint);
 
     SunSpecDataPoint w9DataPoint;
@@ -1009,6 +1027,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     w9DataPoint.setScaleFactorName("W_SF");
     w9DataPoint.setSunSpecDataType("int16");
     w9DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    w9DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(w9DataPoint.name(), w9DataPoint);
 
     SunSpecDataPoint pf9DataPoint;
@@ -1022,6 +1041,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     pf9DataPoint.setScaleFactorName("PF_SF");
     pf9DataPoint.setSunSpecDataType("int16");
     pf9DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    pf9DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pf9DataPoint.name(), pf9DataPoint);
 
     SunSpecDataPoint w10DataPoint;
@@ -1035,6 +1055,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     w10DataPoint.setScaleFactorName("W_SF");
     w10DataPoint.setSunSpecDataType("int16");
     w10DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    w10DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(w10DataPoint.name(), w10DataPoint);
 
     SunSpecDataPoint pf10DataPoint;
@@ -1048,6 +1069,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     pf10DataPoint.setScaleFactorName("PF_SF");
     pf10DataPoint.setSunSpecDataType("int16");
     pf10DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    pf10DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pf10DataPoint.name(), pf10DataPoint);
 
     SunSpecDataPoint w11DataPoint;
@@ -1061,6 +1083,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     w11DataPoint.setScaleFactorName("W_SF");
     w11DataPoint.setSunSpecDataType("int16");
     w11DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    w11DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(w11DataPoint.name(), w11DataPoint);
 
     SunSpecDataPoint pf11DataPoint;
@@ -1074,6 +1097,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     pf11DataPoint.setScaleFactorName("PF_SF");
     pf11DataPoint.setSunSpecDataType("int16");
     pf11DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    pf11DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pf11DataPoint.name(), pf11DataPoint);
 
     SunSpecDataPoint w12DataPoint;
@@ -1087,6 +1111,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     w12DataPoint.setScaleFactorName("W_SF");
     w12DataPoint.setSunSpecDataType("int16");
     w12DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    w12DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(w12DataPoint.name(), w12DataPoint);
 
     SunSpecDataPoint pf12DataPoint;
@@ -1100,6 +1125,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     pf12DataPoint.setScaleFactorName("PF_SF");
     pf12DataPoint.setSunSpecDataType("int16");
     pf12DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    pf12DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pf12DataPoint.name(), pf12DataPoint);
 
     SunSpecDataPoint w13DataPoint;
@@ -1113,6 +1139,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     w13DataPoint.setScaleFactorName("W_SF");
     w13DataPoint.setSunSpecDataType("int16");
     w13DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    w13DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(w13DataPoint.name(), w13DataPoint);
 
     SunSpecDataPoint pf13DataPoint;
@@ -1126,6 +1153,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     pf13DataPoint.setScaleFactorName("PF_SF");
     pf13DataPoint.setSunSpecDataType("int16");
     pf13DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    pf13DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pf13DataPoint.name(), pf13DataPoint);
 
     SunSpecDataPoint w14DataPoint;
@@ -1139,6 +1167,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     w14DataPoint.setScaleFactorName("W_SF");
     w14DataPoint.setSunSpecDataType("int16");
     w14DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    w14DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(w14DataPoint.name(), w14DataPoint);
 
     SunSpecDataPoint pf14DataPoint;
@@ -1152,6 +1181,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     pf14DataPoint.setScaleFactorName("PF_SF");
     pf14DataPoint.setSunSpecDataType("int16");
     pf14DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    pf14DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pf14DataPoint.name(), pf14DataPoint);
 
     SunSpecDataPoint w15DataPoint;
@@ -1165,6 +1195,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     w15DataPoint.setScaleFactorName("W_SF");
     w15DataPoint.setSunSpecDataType("int16");
     w15DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    w15DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(w15DataPoint.name(), w15DataPoint);
 
     SunSpecDataPoint pf15DataPoint;
@@ -1178,6 +1209,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     pf15DataPoint.setScaleFactorName("PF_SF");
     pf15DataPoint.setSunSpecDataType("int16");
     pf15DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    pf15DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pf15DataPoint.name(), pf15DataPoint);
 
     SunSpecDataPoint w16DataPoint;
@@ -1191,6 +1223,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     w16DataPoint.setScaleFactorName("W_SF");
     w16DataPoint.setSunSpecDataType("int16");
     w16DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    w16DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(w16DataPoint.name(), w16DataPoint);
 
     SunSpecDataPoint pf16DataPoint;
@@ -1204,6 +1237,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     pf16DataPoint.setScaleFactorName("PF_SF");
     pf16DataPoint.setSunSpecDataType("int16");
     pf16DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    pf16DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pf16DataPoint.name(), pf16DataPoint);
 
     SunSpecDataPoint w17DataPoint;
@@ -1217,6 +1251,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     w17DataPoint.setScaleFactorName("W_SF");
     w17DataPoint.setSunSpecDataType("int16");
     w17DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    w17DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(w17DataPoint.name(), w17DataPoint);
 
     SunSpecDataPoint pf17DataPoint;
@@ -1230,6 +1265,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     pf17DataPoint.setScaleFactorName("PF_SF");
     pf17DataPoint.setSunSpecDataType("int16");
     pf17DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    pf17DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pf17DataPoint.name(), pf17DataPoint);
 
     SunSpecDataPoint w18DataPoint;
@@ -1243,6 +1279,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     w18DataPoint.setScaleFactorName("W_SF");
     w18DataPoint.setSunSpecDataType("int16");
     w18DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    w18DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(w18DataPoint.name(), w18DataPoint);
 
     SunSpecDataPoint pf18DataPoint;
@@ -1256,6 +1293,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     pf18DataPoint.setScaleFactorName("PF_SF");
     pf18DataPoint.setSunSpecDataType("int16");
     pf18DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    pf18DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pf18DataPoint.name(), pf18DataPoint);
 
     SunSpecDataPoint w19DataPoint;
@@ -1269,6 +1307,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     w19DataPoint.setScaleFactorName("W_SF");
     w19DataPoint.setSunSpecDataType("int16");
     w19DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    w19DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(w19DataPoint.name(), w19DataPoint);
 
     SunSpecDataPoint pf19DataPoint;
@@ -1282,6 +1321,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     pf19DataPoint.setScaleFactorName("PF_SF");
     pf19DataPoint.setSunSpecDataType("int16");
     pf19DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    pf19DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pf19DataPoint.name(), pf19DataPoint);
 
     SunSpecDataPoint w20DataPoint;
@@ -1295,6 +1335,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     w20DataPoint.setScaleFactorName("W_SF");
     w20DataPoint.setSunSpecDataType("int16");
     w20DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    w20DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(w20DataPoint.name(), w20DataPoint);
 
     SunSpecDataPoint pf20DataPoint;
@@ -1308,6 +1349,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     pf20DataPoint.setScaleFactorName("PF_SF");
     pf20DataPoint.setSunSpecDataType("int16");
     pf20DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    pf20DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pf20DataPoint.name(), pf20DataPoint);
 
     SunSpecDataPoint crvNamDataPoint;
@@ -1319,6 +1361,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     crvNamDataPoint.setBlockOffset(39);
     crvNamDataPoint.setSunSpecDataType("string");
     crvNamDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    crvNamDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(crvNamDataPoint.name(), crvNamDataPoint);
 
     SunSpecDataPoint rmpPt1TmsDataPoint;
@@ -1331,6 +1374,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     rmpPt1TmsDataPoint.setBlockOffset(47);
     rmpPt1TmsDataPoint.setSunSpecDataType("uint16");
     rmpPt1TmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    rmpPt1TmsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(rmpPt1TmsDataPoint.name(), rmpPt1TmsDataPoint);
 
     SunSpecDataPoint rmpDecTmmDataPoint;
@@ -1344,6 +1388,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     rmpDecTmmDataPoint.setScaleFactorName("RmpIncDec_SF");
     rmpDecTmmDataPoint.setSunSpecDataType("uint16");
     rmpDecTmmDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    rmpDecTmmDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(rmpDecTmmDataPoint.name(), rmpDecTmmDataPoint);
 
     SunSpecDataPoint rmpIncTmmDataPoint;
@@ -1357,6 +1402,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     rmpIncTmmDataPoint.setScaleFactorName("RmpIncDec_SF");
     rmpIncTmmDataPoint.setSunSpecDataType("uint16");
     rmpIncTmmDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    rmpIncTmmDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(rmpIncTmmDataPoint.name(), rmpIncTmmDataPoint);
 
     SunSpecDataPoint readOnlyDataPoint;
@@ -1368,6 +1414,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     readOnlyDataPoint.setAddressOffset(52);
     readOnlyDataPoint.setBlockOffset(50);
     readOnlyDataPoint.setSunSpecDataType("enum16");
+    readOnlyDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(readOnlyDataPoint.name(), readOnlyDataPoint);
 
     SunSpecDataPoint padDataPoint;
@@ -1376,6 +1423,7 @@ void SunSpecWattPfModelRepeatingBlock::initDataPoints()
     padDataPoint.setAddressOffset(53);
     padDataPoint.setBlockOffset(51);
     padDataPoint.setSunSpecDataType("pad");
+    padDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(padDataPoint.name(), padDataPoint);
 
 }
@@ -1679,6 +1727,7 @@ void SunSpecWattPfModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -1689,6 +1738,7 @@ void SunSpecWattPfModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint actCrvDataPoint;
@@ -1701,6 +1751,7 @@ void SunSpecWattPfModel::initDataPoints()
     actCrvDataPoint.setBlockOffset(0);
     actCrvDataPoint.setSunSpecDataType("uint16");
     actCrvDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    actCrvDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(actCrvDataPoint.name(), actCrvDataPoint);
 
     SunSpecDataPoint modEnaDataPoint;
@@ -1713,6 +1764,7 @@ void SunSpecWattPfModel::initDataPoints()
     modEnaDataPoint.setBlockOffset(1);
     modEnaDataPoint.setSunSpecDataType("bitfield16");
     modEnaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    modEnaDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modEnaDataPoint.name(), modEnaDataPoint);
 
     SunSpecDataPoint winTmsDataPoint;
@@ -1725,6 +1777,7 @@ void SunSpecWattPfModel::initDataPoints()
     winTmsDataPoint.setBlockOffset(2);
     winTmsDataPoint.setSunSpecDataType("uint16");
     winTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    winTmsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(winTmsDataPoint.name(), winTmsDataPoint);
 
     SunSpecDataPoint rvrtTmsDataPoint;
@@ -1737,6 +1790,7 @@ void SunSpecWattPfModel::initDataPoints()
     rvrtTmsDataPoint.setBlockOffset(3);
     rvrtTmsDataPoint.setSunSpecDataType("uint16");
     rvrtTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    rvrtTmsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(rvrtTmsDataPoint.name(), rvrtTmsDataPoint);
 
     SunSpecDataPoint rmpTmsDataPoint;
@@ -1749,6 +1803,7 @@ void SunSpecWattPfModel::initDataPoints()
     rmpTmsDataPoint.setBlockOffset(4);
     rmpTmsDataPoint.setSunSpecDataType("uint16");
     rmpTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    rmpTmsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(rmpTmsDataPoint.name(), rmpTmsDataPoint);
 
     SunSpecDataPoint nCrvDataPoint;
@@ -1760,6 +1815,7 @@ void SunSpecWattPfModel::initDataPoints()
     nCrvDataPoint.setAddressOffset(7);
     nCrvDataPoint.setBlockOffset(5);
     nCrvDataPoint.setSunSpecDataType("uint16");
+    nCrvDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(nCrvDataPoint.name(), nCrvDataPoint);
 
     SunSpecDataPoint nPtDataPoint;
@@ -1771,6 +1827,7 @@ void SunSpecWattPfModel::initDataPoints()
     nPtDataPoint.setAddressOffset(8);
     nPtDataPoint.setBlockOffset(6);
     nPtDataPoint.setSunSpecDataType("uint16");
+    nPtDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(nPtDataPoint.name(), nPtDataPoint);
 
     SunSpecDataPoint wSfDataPoint;
@@ -1782,6 +1839,7 @@ void SunSpecWattPfModel::initDataPoints()
     wSfDataPoint.setAddressOffset(9);
     wSfDataPoint.setBlockOffset(7);
     wSfDataPoint.setSunSpecDataType("sunssf");
+    wSfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(wSfDataPoint.name(), wSfDataPoint);
 
     SunSpecDataPoint pfSfDataPoint;
@@ -1793,6 +1851,7 @@ void SunSpecWattPfModel::initDataPoints()
     pfSfDataPoint.setAddressOffset(10);
     pfSfDataPoint.setBlockOffset(8);
     pfSfDataPoint.setSunSpecDataType("sunssf");
+    pfSfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pfSfDataPoint.name(), pfSfDataPoint);
 
     SunSpecDataPoint rmpIncDecSfDataPoint;
@@ -1803,6 +1862,7 @@ void SunSpecWattPfModel::initDataPoints()
     rmpIncDecSfDataPoint.setAddressOffset(11);
     rmpIncDecSfDataPoint.setBlockOffset(9);
     rmpIncDecSfDataPoint.setSunSpecDataType("sunssf");
+    rmpIncDecSfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(rmpIncDecSfDataPoint.name(), rmpIncDecSfDataPoint);
 
 }

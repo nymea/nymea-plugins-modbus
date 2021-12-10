@@ -193,6 +193,7 @@ void SunSpecFreqWattParamModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -203,6 +204,7 @@ void SunSpecFreqWattParamModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint wGraDataPoint;
@@ -217,6 +219,7 @@ void SunSpecFreqWattParamModel::initDataPoints()
     wGraDataPoint.setScaleFactorName("WGra_SF");
     wGraDataPoint.setSunSpecDataType("uint16");
     wGraDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    wGraDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(wGraDataPoint.name(), wGraDataPoint);
 
     SunSpecDataPoint hzStrDataPoint;
@@ -231,6 +234,7 @@ void SunSpecFreqWattParamModel::initDataPoints()
     hzStrDataPoint.setScaleFactorName("HzStrStop_SF");
     hzStrDataPoint.setSunSpecDataType("int16");
     hzStrDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    hzStrDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(hzStrDataPoint.name(), hzStrDataPoint);
 
     SunSpecDataPoint hzStopDataPoint;
@@ -245,6 +249,7 @@ void SunSpecFreqWattParamModel::initDataPoints()
     hzStopDataPoint.setScaleFactorName("HzStrStop_SF");
     hzStopDataPoint.setSunSpecDataType("int16");
     hzStopDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    hzStopDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(hzStopDataPoint.name(), hzStopDataPoint);
 
     SunSpecDataPoint hysEnaDataPoint;
@@ -257,6 +262,7 @@ void SunSpecFreqWattParamModel::initDataPoints()
     hysEnaDataPoint.setBlockOffset(3);
     hysEnaDataPoint.setSunSpecDataType("bitfield16");
     hysEnaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    hysEnaDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(hysEnaDataPoint.name(), hysEnaDataPoint);
 
     SunSpecDataPoint modEnaDataPoint;
@@ -269,6 +275,7 @@ void SunSpecFreqWattParamModel::initDataPoints()
     modEnaDataPoint.setBlockOffset(4);
     modEnaDataPoint.setSunSpecDataType("bitfield16");
     modEnaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    modEnaDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modEnaDataPoint.name(), modEnaDataPoint);
 
     SunSpecDataPoint hzStopWGraDataPoint;
@@ -282,6 +289,7 @@ void SunSpecFreqWattParamModel::initDataPoints()
     hzStopWGraDataPoint.setScaleFactorName("RmpIncDec_SF");
     hzStopWGraDataPoint.setSunSpecDataType("uint16");
     hzStopWGraDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    hzStopWGraDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(hzStopWGraDataPoint.name(), hzStopWGraDataPoint);
 
     SunSpecDataPoint wGraSfDataPoint;
@@ -292,6 +300,7 @@ void SunSpecFreqWattParamModel::initDataPoints()
     wGraSfDataPoint.setAddressOffset(8);
     wGraSfDataPoint.setBlockOffset(6);
     wGraSfDataPoint.setSunSpecDataType("sunssf");
+    wGraSfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(wGraSfDataPoint.name(), wGraSfDataPoint);
 
     SunSpecDataPoint hzStrStopSfDataPoint;
@@ -302,6 +311,7 @@ void SunSpecFreqWattParamModel::initDataPoints()
     hzStrStopSfDataPoint.setAddressOffset(9);
     hzStrStopSfDataPoint.setBlockOffset(7);
     hzStrStopSfDataPoint.setSunSpecDataType("sunssf");
+    hzStrStopSfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(hzStrStopSfDataPoint.name(), hzStrStopSfDataPoint);
 
     SunSpecDataPoint rmpIncDecSfDataPoint;
@@ -312,6 +322,7 @@ void SunSpecFreqWattParamModel::initDataPoints()
     rmpIncDecSfDataPoint.setAddressOffset(10);
     rmpIncDecSfDataPoint.setBlockOffset(8);
     rmpIncDecSfDataPoint.setSunSpecDataType("sunssf");
+    rmpIncDecSfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(rmpIncDecSfDataPoint.name(), rmpIncDecSfDataPoint);
 
     SunSpecDataPoint padDataPoint;
@@ -320,6 +331,7 @@ void SunSpecFreqWattParamModel::initDataPoints()
     padDataPoint.setAddressOffset(11);
     padDataPoint.setBlockOffset(9);
     padDataPoint.setSunSpecDataType("pad");
+    padDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(padDataPoint.name(), padDataPoint);
 
 }

@@ -34,6 +34,7 @@
 SunSpecFlowBatteryStringModelRepeatingBlock::SunSpecFlowBatteryStringModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecFlowBatteryStringModel *parent) :
     SunSpecModelRepeatingBlock(blockIndex, blockSize, modbusStartRegister, parent)
 {
+    m_byteOrder = parent->byteOrder();
     initDataPoints();
 }
 
@@ -162,6 +163,7 @@ void SunSpecFlowBatteryStringModelRepeatingBlock::initDataPoints()
     moduleIndexDataPoint.setSize(1);
     moduleIndexDataPoint.setAddressOffset(0);
     moduleIndexDataPoint.setSunSpecDataType("uint16");
+    moduleIndexDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(moduleIndexDataPoint.name(), moduleIndexDataPoint);
 
     SunSpecDataPoint stackCountDataPoint;
@@ -172,6 +174,7 @@ void SunSpecFlowBatteryStringModelRepeatingBlock::initDataPoints()
     stackCountDataPoint.setSize(1);
     stackCountDataPoint.setAddressOffset(1);
     stackCountDataPoint.setSunSpecDataType("uint16");
+    stackCountDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(stackCountDataPoint.name(), stackCountDataPoint);
 
     SunSpecDataPoint moduleStatusDataPoint;
@@ -183,6 +186,7 @@ void SunSpecFlowBatteryStringModelRepeatingBlock::initDataPoints()
     moduleStatusDataPoint.setAddressOffset(2);
     moduleStatusDataPoint.setBlockOffset(0);
     moduleStatusDataPoint.setSunSpecDataType("bitfield32");
+    moduleStatusDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(moduleStatusDataPoint.name(), moduleStatusDataPoint);
 
     SunSpecDataPoint moduleStateOfChargeDataPoint;
@@ -196,6 +200,7 @@ void SunSpecFlowBatteryStringModelRepeatingBlock::initDataPoints()
     moduleStateOfChargeDataPoint.setBlockOffset(2);
     moduleStateOfChargeDataPoint.setScaleFactorName("SoC_SF");
     moduleStateOfChargeDataPoint.setSunSpecDataType("uint16");
+    moduleStateOfChargeDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(moduleStateOfChargeDataPoint.name(), moduleStateOfChargeDataPoint);
 
     SunSpecDataPoint openCircuitVoltageDataPoint;
@@ -209,6 +214,7 @@ void SunSpecFlowBatteryStringModelRepeatingBlock::initDataPoints()
     openCircuitVoltageDataPoint.setBlockOffset(3);
     openCircuitVoltageDataPoint.setScaleFactorName("OCV_SF");
     openCircuitVoltageDataPoint.setSunSpecDataType("uint16");
+    openCircuitVoltageDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(openCircuitVoltageDataPoint.name(), openCircuitVoltageDataPoint);
 
     SunSpecDataPoint externalVoltageDataPoint;
@@ -222,6 +228,7 @@ void SunSpecFlowBatteryStringModelRepeatingBlock::initDataPoints()
     externalVoltageDataPoint.setBlockOffset(4);
     externalVoltageDataPoint.setScaleFactorName("ModV_SF");
     externalVoltageDataPoint.setSunSpecDataType("uint16");
+    externalVoltageDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(externalVoltageDataPoint.name(), externalVoltageDataPoint);
 
     SunSpecDataPoint maximumCellVoltageDataPoint;
@@ -234,6 +241,7 @@ void SunSpecFlowBatteryStringModelRepeatingBlock::initDataPoints()
     maximumCellVoltageDataPoint.setBlockOffset(5);
     maximumCellVoltageDataPoint.setScaleFactorName("CellV_SF");
     maximumCellVoltageDataPoint.setSunSpecDataType("uint16");
+    maximumCellVoltageDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(maximumCellVoltageDataPoint.name(), maximumCellVoltageDataPoint);
 
     SunSpecDataPoint maxCellVoltageCellDataPoint;
@@ -244,6 +252,7 @@ void SunSpecFlowBatteryStringModelRepeatingBlock::initDataPoints()
     maxCellVoltageCellDataPoint.setAddressOffset(8);
     maxCellVoltageCellDataPoint.setBlockOffset(6);
     maxCellVoltageCellDataPoint.setSunSpecDataType("uint16");
+    maxCellVoltageCellDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(maxCellVoltageCellDataPoint.name(), maxCellVoltageCellDataPoint);
 
     SunSpecDataPoint minimumCellVoltageDataPoint;
@@ -256,6 +265,7 @@ void SunSpecFlowBatteryStringModelRepeatingBlock::initDataPoints()
     minimumCellVoltageDataPoint.setBlockOffset(7);
     minimumCellVoltageDataPoint.setScaleFactorName("CellV_SF");
     minimumCellVoltageDataPoint.setSunSpecDataType("uint16");
+    minimumCellVoltageDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(minimumCellVoltageDataPoint.name(), minimumCellVoltageDataPoint);
 
     SunSpecDataPoint minCellVoltageCellDataPoint;
@@ -266,6 +276,7 @@ void SunSpecFlowBatteryStringModelRepeatingBlock::initDataPoints()
     minCellVoltageCellDataPoint.setAddressOffset(10);
     minCellVoltageCellDataPoint.setBlockOffset(8);
     minCellVoltageCellDataPoint.setSunSpecDataType("uint16");
+    minCellVoltageCellDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(minCellVoltageCellDataPoint.name(), minCellVoltageCellDataPoint);
 
     SunSpecDataPoint averageCellVoltageDataPoint;
@@ -278,6 +289,7 @@ void SunSpecFlowBatteryStringModelRepeatingBlock::initDataPoints()
     averageCellVoltageDataPoint.setBlockOffset(9);
     averageCellVoltageDataPoint.setScaleFactorName("CellV_SF");
     averageCellVoltageDataPoint.setSunSpecDataType("uint16");
+    averageCellVoltageDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(averageCellVoltageDataPoint.name(), averageCellVoltageDataPoint);
 
     SunSpecDataPoint anolyteTemperatureDataPoint;
@@ -289,6 +301,7 @@ void SunSpecFlowBatteryStringModelRepeatingBlock::initDataPoints()
     anolyteTemperatureDataPoint.setBlockOffset(10);
     anolyteTemperatureDataPoint.setScaleFactorName("Tmp_SF");
     anolyteTemperatureDataPoint.setSunSpecDataType("uint16");
+    anolyteTemperatureDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(anolyteTemperatureDataPoint.name(), anolyteTemperatureDataPoint);
 
     SunSpecDataPoint catholyteTemperatureDataPoint;
@@ -300,6 +313,7 @@ void SunSpecFlowBatteryStringModelRepeatingBlock::initDataPoints()
     catholyteTemperatureDataPoint.setBlockOffset(11);
     catholyteTemperatureDataPoint.setScaleFactorName("Tmp_SF");
     catholyteTemperatureDataPoint.setSunSpecDataType("uint16");
+    catholyteTemperatureDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(catholyteTemperatureDataPoint.name(), catholyteTemperatureDataPoint);
 
     SunSpecDataPoint contactorStatusDataPoint;
@@ -309,6 +323,7 @@ void SunSpecFlowBatteryStringModelRepeatingBlock::initDataPoints()
     contactorStatusDataPoint.setAddressOffset(14);
     contactorStatusDataPoint.setBlockOffset(12);
     contactorStatusDataPoint.setSunSpecDataType("bitfield32");
+    contactorStatusDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(contactorStatusDataPoint.name(), contactorStatusDataPoint);
 
     SunSpecDataPoint moduleEvent1DataPoint;
@@ -320,6 +335,7 @@ void SunSpecFlowBatteryStringModelRepeatingBlock::initDataPoints()
     moduleEvent1DataPoint.setAddressOffset(16);
     moduleEvent1DataPoint.setBlockOffset(14);
     moduleEvent1DataPoint.setSunSpecDataType("bitfield32");
+    moduleEvent1DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(moduleEvent1DataPoint.name(), moduleEvent1DataPoint);
 
     SunSpecDataPoint moduleEvent2DataPoint;
@@ -331,6 +347,7 @@ void SunSpecFlowBatteryStringModelRepeatingBlock::initDataPoints()
     moduleEvent2DataPoint.setAddressOffset(18);
     moduleEvent2DataPoint.setBlockOffset(16);
     moduleEvent2DataPoint.setSunSpecDataType("bitfield32");
+    moduleEvent2DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(moduleEvent2DataPoint.name(), moduleEvent2DataPoint);
 
     SunSpecDataPoint connectionFailureReasonDataPoint;
@@ -340,6 +357,7 @@ void SunSpecFlowBatteryStringModelRepeatingBlock::initDataPoints()
     connectionFailureReasonDataPoint.setAddressOffset(20);
     connectionFailureReasonDataPoint.setBlockOffset(18);
     connectionFailureReasonDataPoint.setSunSpecDataType("enum16");
+    connectionFailureReasonDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(connectionFailureReasonDataPoint.name(), connectionFailureReasonDataPoint);
 
     SunSpecDataPoint enableDisableModuleDataPoint;
@@ -351,6 +369,7 @@ void SunSpecFlowBatteryStringModelRepeatingBlock::initDataPoints()
     enableDisableModuleDataPoint.setBlockOffset(19);
     enableDisableModuleDataPoint.setSunSpecDataType("enum16");
     enableDisableModuleDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    enableDisableModuleDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(enableDisableModuleDataPoint.name(), enableDisableModuleDataPoint);
 
     SunSpecDataPoint connectDisconnectModuleDataPoint;
@@ -362,6 +381,7 @@ void SunSpecFlowBatteryStringModelRepeatingBlock::initDataPoints()
     connectDisconnectModuleDataPoint.setBlockOffset(20);
     connectDisconnectModuleDataPoint.setSunSpecDataType("enum16");
     connectDisconnectModuleDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    connectDisconnectModuleDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(connectDisconnectModuleDataPoint.name(), connectDisconnectModuleDataPoint);
 
     SunSpecDataPoint disabledReasonDataPoint;
@@ -372,6 +392,7 @@ void SunSpecFlowBatteryStringModelRepeatingBlock::initDataPoints()
     disabledReasonDataPoint.setAddressOffset(23);
     disabledReasonDataPoint.setBlockOffset(21);
     disabledReasonDataPoint.setSunSpecDataType("enum16");
+    disabledReasonDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(disabledReasonDataPoint.name(), disabledReasonDataPoint);
 
 }
@@ -604,6 +625,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -614,6 +636,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint stringIndexDataPoint;
@@ -625,6 +648,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     stringIndexDataPoint.setAddressOffset(2);
     stringIndexDataPoint.setBlockOffset(0);
     stringIndexDataPoint.setSunSpecDataType("uint16");
+    stringIndexDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(stringIndexDataPoint.name(), stringIndexDataPoint);
 
     SunSpecDataPoint moduleCountDataPoint;
@@ -636,6 +660,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     moduleCountDataPoint.setAddressOffset(3);
     moduleCountDataPoint.setBlockOffset(1);
     moduleCountDataPoint.setSunSpecDataType("uint16");
+    moduleCountDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(moduleCountDataPoint.name(), moduleCountDataPoint);
 
     SunSpecDataPoint connectedModuleCountDataPoint;
@@ -647,6 +672,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     connectedModuleCountDataPoint.setAddressOffset(4);
     connectedModuleCountDataPoint.setBlockOffset(2);
     connectedModuleCountDataPoint.setSunSpecDataType("uint16");
+    connectedModuleCountDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(connectedModuleCountDataPoint.name(), connectedModuleCountDataPoint);
 
     SunSpecDataPoint maxModuleVoltageDataPoint;
@@ -660,6 +686,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     maxModuleVoltageDataPoint.setBlockOffset(3);
     maxModuleVoltageDataPoint.setScaleFactorName("ModV_SF");
     maxModuleVoltageDataPoint.setSunSpecDataType("uint16");
+    maxModuleVoltageDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(maxModuleVoltageDataPoint.name(), maxModuleVoltageDataPoint);
 
     SunSpecDataPoint maxModuleVoltageModuleDataPoint;
@@ -670,6 +697,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     maxModuleVoltageModuleDataPoint.setAddressOffset(6);
     maxModuleVoltageModuleDataPoint.setBlockOffset(4);
     maxModuleVoltageModuleDataPoint.setSunSpecDataType("uint16");
+    maxModuleVoltageModuleDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(maxModuleVoltageModuleDataPoint.name(), maxModuleVoltageModuleDataPoint);
 
     SunSpecDataPoint minModuleVoltageDataPoint;
@@ -683,6 +711,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     minModuleVoltageDataPoint.setBlockOffset(5);
     minModuleVoltageDataPoint.setScaleFactorName("ModV_SF");
     minModuleVoltageDataPoint.setSunSpecDataType("uint16");
+    minModuleVoltageDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(minModuleVoltageDataPoint.name(), minModuleVoltageDataPoint);
 
     SunSpecDataPoint minModuleVoltageModuleDataPoint;
@@ -693,6 +722,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     minModuleVoltageModuleDataPoint.setAddressOffset(8);
     minModuleVoltageModuleDataPoint.setBlockOffset(6);
     minModuleVoltageModuleDataPoint.setSunSpecDataType("uint16");
+    minModuleVoltageModuleDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(minModuleVoltageModuleDataPoint.name(), minModuleVoltageModuleDataPoint);
 
     SunSpecDataPoint averageModuleVoltageDataPoint;
@@ -706,6 +736,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     averageModuleVoltageDataPoint.setBlockOffset(7);
     averageModuleVoltageDataPoint.setScaleFactorName("ModV_SF");
     averageModuleVoltageDataPoint.setSunSpecDataType("uint16");
+    averageModuleVoltageDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(averageModuleVoltageDataPoint.name(), averageModuleVoltageDataPoint);
 
     SunSpecDataPoint maxCellVoltageDataPoint;
@@ -718,6 +749,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     maxCellVoltageDataPoint.setBlockOffset(8);
     maxCellVoltageDataPoint.setScaleFactorName("CellV_SF");
     maxCellVoltageDataPoint.setSunSpecDataType("uint16");
+    maxCellVoltageDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(maxCellVoltageDataPoint.name(), maxCellVoltageDataPoint);
 
     SunSpecDataPoint maxCellVoltageModuleDataPoint;
@@ -728,6 +760,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     maxCellVoltageModuleDataPoint.setAddressOffset(11);
     maxCellVoltageModuleDataPoint.setBlockOffset(9);
     maxCellVoltageModuleDataPoint.setSunSpecDataType("uint16");
+    maxCellVoltageModuleDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(maxCellVoltageModuleDataPoint.name(), maxCellVoltageModuleDataPoint);
 
     SunSpecDataPoint maxCellVoltageStackDataPoint;
@@ -738,6 +771,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     maxCellVoltageStackDataPoint.setAddressOffset(12);
     maxCellVoltageStackDataPoint.setBlockOffset(10);
     maxCellVoltageStackDataPoint.setSunSpecDataType("uint16");
+    maxCellVoltageStackDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(maxCellVoltageStackDataPoint.name(), maxCellVoltageStackDataPoint);
 
     SunSpecDataPoint minCellVoltageDataPoint;
@@ -750,6 +784,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     minCellVoltageDataPoint.setBlockOffset(11);
     minCellVoltageDataPoint.setScaleFactorName("CellV_SF");
     minCellVoltageDataPoint.setSunSpecDataType("uint16");
+    minCellVoltageDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(minCellVoltageDataPoint.name(), minCellVoltageDataPoint);
 
     SunSpecDataPoint minCellVoltageModuleDataPoint;
@@ -760,6 +795,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     minCellVoltageModuleDataPoint.setAddressOffset(14);
     minCellVoltageModuleDataPoint.setBlockOffset(12);
     minCellVoltageModuleDataPoint.setSunSpecDataType("uint16");
+    minCellVoltageModuleDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(minCellVoltageModuleDataPoint.name(), minCellVoltageModuleDataPoint);
 
     SunSpecDataPoint minCellVoltageStackDataPoint;
@@ -770,6 +806,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     minCellVoltageStackDataPoint.setAddressOffset(15);
     minCellVoltageStackDataPoint.setBlockOffset(13);
     minCellVoltageStackDataPoint.setSunSpecDataType("uint16");
+    minCellVoltageStackDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(minCellVoltageStackDataPoint.name(), minCellVoltageStackDataPoint);
 
     SunSpecDataPoint averageCellVoltageDataPoint;
@@ -782,6 +819,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     averageCellVoltageDataPoint.setBlockOffset(14);
     averageCellVoltageDataPoint.setScaleFactorName("CellV_SF");
     averageCellVoltageDataPoint.setSunSpecDataType("uint16");
+    averageCellVoltageDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(averageCellVoltageDataPoint.name(), averageCellVoltageDataPoint);
 
     SunSpecDataPoint maxTemperatureDataPoint;
@@ -795,6 +833,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     maxTemperatureDataPoint.setBlockOffset(15);
     maxTemperatureDataPoint.setScaleFactorName("Tmp_SF");
     maxTemperatureDataPoint.setSunSpecDataType("int16");
+    maxTemperatureDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(maxTemperatureDataPoint.name(), maxTemperatureDataPoint);
 
     SunSpecDataPoint maxTemperatureModuleDataPoint;
@@ -805,6 +844,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     maxTemperatureModuleDataPoint.setAddressOffset(18);
     maxTemperatureModuleDataPoint.setBlockOffset(16);
     maxTemperatureModuleDataPoint.setSunSpecDataType("uint16");
+    maxTemperatureModuleDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(maxTemperatureModuleDataPoint.name(), maxTemperatureModuleDataPoint);
 
     SunSpecDataPoint minTemperatureDataPoint;
@@ -818,6 +858,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     minTemperatureDataPoint.setBlockOffset(17);
     minTemperatureDataPoint.setScaleFactorName("Tmp_SF");
     minTemperatureDataPoint.setSunSpecDataType("int16");
+    minTemperatureDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(minTemperatureDataPoint.name(), minTemperatureDataPoint);
 
     SunSpecDataPoint minTemperatureModuleDataPoint;
@@ -828,6 +869,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     minTemperatureModuleDataPoint.setAddressOffset(20);
     minTemperatureModuleDataPoint.setBlockOffset(18);
     minTemperatureModuleDataPoint.setSunSpecDataType("uint16");
+    minTemperatureModuleDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(minTemperatureModuleDataPoint.name(), minTemperatureModuleDataPoint);
 
     SunSpecDataPoint averageTemperatureDataPoint;
@@ -841,6 +883,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     averageTemperatureDataPoint.setBlockOffset(19);
     averageTemperatureDataPoint.setScaleFactorName("Tmp_SF");
     averageTemperatureDataPoint.setSunSpecDataType("int16");
+    averageTemperatureDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(averageTemperatureDataPoint.name(), averageTemperatureDataPoint);
 
     SunSpecDataPoint stringEvent1DataPoint;
@@ -852,6 +895,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     stringEvent1DataPoint.setAddressOffset(22);
     stringEvent1DataPoint.setBlockOffset(20);
     stringEvent1DataPoint.setSunSpecDataType("bitfield32");
+    stringEvent1DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(stringEvent1DataPoint.name(), stringEvent1DataPoint);
 
     SunSpecDataPoint stringEvent2DataPoint;
@@ -863,6 +907,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     stringEvent2DataPoint.setAddressOffset(24);
     stringEvent2DataPoint.setBlockOffset(22);
     stringEvent2DataPoint.setSunSpecDataType("bitfield32");
+    stringEvent2DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(stringEvent2DataPoint.name(), stringEvent2DataPoint);
 
     SunSpecDataPoint vendorEventBitfield1DataPoint;
@@ -874,6 +919,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     vendorEventBitfield1DataPoint.setAddressOffset(26);
     vendorEventBitfield1DataPoint.setBlockOffset(24);
     vendorEventBitfield1DataPoint.setSunSpecDataType("bitfield32");
+    vendorEventBitfield1DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vendorEventBitfield1DataPoint.name(), vendorEventBitfield1DataPoint);
 
     SunSpecDataPoint vendorEventBitfield2DataPoint;
@@ -885,6 +931,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     vendorEventBitfield2DataPoint.setAddressOffset(28);
     vendorEventBitfield2DataPoint.setBlockOffset(26);
     vendorEventBitfield2DataPoint.setSunSpecDataType("bitfield32");
+    vendorEventBitfield2DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vendorEventBitfield2DataPoint.name(), vendorEventBitfield2DataPoint);
 
     SunSpecDataPoint modV_SFDataPoint;
@@ -894,6 +941,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     modV_SFDataPoint.setAddressOffset(30);
     modV_SFDataPoint.setBlockOffset(28);
     modV_SFDataPoint.setSunSpecDataType("sunssf");
+    modV_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modV_SFDataPoint.name(), modV_SFDataPoint);
 
     SunSpecDataPoint cellV_SFDataPoint;
@@ -904,6 +952,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     cellV_SFDataPoint.setAddressOffset(31);
     cellV_SFDataPoint.setBlockOffset(29);
     cellV_SFDataPoint.setSunSpecDataType("sunssf");
+    cellV_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(cellV_SFDataPoint.name(), cellV_SFDataPoint);
 
     SunSpecDataPoint tmp_SFDataPoint;
@@ -914,6 +963,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     tmp_SFDataPoint.setAddressOffset(32);
     tmp_SFDataPoint.setBlockOffset(30);
     tmp_SFDataPoint.setSunSpecDataType("sunssf");
+    tmp_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tmp_SFDataPoint.name(), tmp_SFDataPoint);
 
     SunSpecDataPoint soC_SFDataPoint;
@@ -924,6 +974,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     soC_SFDataPoint.setAddressOffset(33);
     soC_SFDataPoint.setBlockOffset(31);
     soC_SFDataPoint.setSunSpecDataType("sunssf");
+    soC_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(soC_SFDataPoint.name(), soC_SFDataPoint);
 
     SunSpecDataPoint oCV_SFDataPoint;
@@ -934,6 +985,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     oCV_SFDataPoint.setAddressOffset(34);
     oCV_SFDataPoint.setBlockOffset(32);
     oCV_SFDataPoint.setSunSpecDataType("sunssf");
+    oCV_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(oCV_SFDataPoint.name(), oCV_SFDataPoint);
 
     SunSpecDataPoint pad1DataPoint;
@@ -945,6 +997,7 @@ void SunSpecFlowBatteryStringModel::initDataPoints()
     pad1DataPoint.setAddressOffset(35);
     pad1DataPoint.setBlockOffset(33);
     pad1DataPoint.setSunSpecDataType("pad");
+    pad1DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pad1DataPoint.name(), pad1DataPoint);
 
 }
