@@ -34,6 +34,7 @@
 SunSpecFlowBatteryModelRepeatingBlock::SunSpecFlowBatteryModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecFlowBatteryModel *parent) :
     SunSpecModelRepeatingBlock(blockIndex, blockSize, modbusStartRegister, parent)
 {
+    m_byteOrder = parent->byteOrder();
     initDataPoints();
 }
 
@@ -61,6 +62,7 @@ void SunSpecFlowBatteryModelRepeatingBlock::initDataPoints()
     batteryStringPointsToBeDeterminedDataPoint.setSize(1);
     batteryStringPointsToBeDeterminedDataPoint.setAddressOffset(0);
     batteryStringPointsToBeDeterminedDataPoint.setSunSpecDataType("uint16");
+    batteryStringPointsToBeDeterminedDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(batteryStringPointsToBeDeterminedDataPoint.name(), batteryStringPointsToBeDeterminedDataPoint);
 
 }
@@ -120,6 +122,7 @@ void SunSpecFlowBatteryModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -130,6 +133,7 @@ void SunSpecFlowBatteryModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint batteryPointsToBeDeterminedDataPoint;
@@ -140,6 +144,7 @@ void SunSpecFlowBatteryModel::initDataPoints()
     batteryPointsToBeDeterminedDataPoint.setAddressOffset(2);
     batteryPointsToBeDeterminedDataPoint.setBlockOffset(0);
     batteryPointsToBeDeterminedDataPoint.setSunSpecDataType("uint16");
+    batteryPointsToBeDeterminedDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(batteryPointsToBeDeterminedDataPoint.name(), batteryPointsToBeDeterminedDataPoint);
 
 }

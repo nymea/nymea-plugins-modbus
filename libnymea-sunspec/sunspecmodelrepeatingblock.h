@@ -56,6 +56,7 @@ protected:
     quint16 m_blockSize;
     quint16 m_modbusStartRegister;
 
+    SunSpecDataPoint::ByteOrder m_byteOrder = SunSpecDataPoint::ByteOrderLittleEndian;
     QVector<quint16> m_blockData;
     QHash<QString, SunSpecDataPoint> m_dataPoints;
 

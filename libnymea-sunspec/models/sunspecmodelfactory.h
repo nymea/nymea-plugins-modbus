@@ -34,6 +34,7 @@
 #include <QObject>
 
 #include "sunspecmodel.h"
+#include "sunspecdatapoint.h"
 
 class SunSpecConnection;
 
@@ -173,7 +174,7 @@ public:
     explicit SunSpecModelFactory(QObject *parent = nullptr);
     ~SunSpecModelFactory() = default;
 
-    SunSpecModel *createModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelId, quint16 modelLength);
+    SunSpecModel *createModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelId, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder);
 
 private:
 

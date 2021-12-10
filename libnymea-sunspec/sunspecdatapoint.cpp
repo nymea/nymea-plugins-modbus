@@ -149,6 +149,16 @@ void SunSpecDataPoint::setDataType(DataType dataType)
     m_dataType = dataType;
 }
 
+SunSpecDataPoint::ByteOrder SunSpecDataPoint::byteOrder() const
+{
+    return m_byteOrder;
+}
+
+void SunSpecDataPoint::setByteOrder(ByteOrder byteOrder)
+{
+    m_byteOrder = byteOrder;
+}
+
 int SunSpecDataPoint::size() const
 {
     return m_size;
@@ -342,22 +352,22 @@ qint16 SunSpecDataPoint::toInt16() const
 
 quint32 SunSpecDataPoint::toUInt32() const
 {
-    return SunSpecDataPoint::convertToUInt32(m_rawData);
+    return SunSpecDataPoint::convertToUInt32(m_rawData, m_byteOrder);
 }
 
 qint32 SunSpecDataPoint::toInt32() const
 {
-    return SunSpecDataPoint::convertToInt32(m_rawData);
+    return SunSpecDataPoint::convertToInt32(m_rawData, m_byteOrder);
 }
 
 quint64 SunSpecDataPoint::toUInt64() const
 {
-    return SunSpecDataPoint::convertToUInt64(m_rawData);
+    return SunSpecDataPoint::convertToUInt64(m_rawData, m_byteOrder);
 }
 
 qint64 SunSpecDataPoint::toInt64() const
 {
-    return SunSpecDataPoint::convertToInt64(m_rawData);
+    return SunSpecDataPoint::convertToInt64(m_rawData, m_byteOrder);
 }
 
 QString SunSpecDataPoint::toString() const
@@ -368,7 +378,7 @@ QString SunSpecDataPoint::toString() const
 float SunSpecDataPoint::toFloat() const
 {
     Q_ASSERT_X(m_dataType == Float32,  "SunSpecDataPoint", "invalid raw data size for converting value to float");
-    return SunSpecDataPoint::convertToFloat32(m_rawData);
+    return SunSpecDataPoint::convertToFloat32(m_rawData, m_byteOrder);
 }
 
 float SunSpecDataPoint::toFloatWithSSF(qint16 scaleFactor) const
@@ -400,7 +410,7 @@ float SunSpecDataPoint::toFloatWithSSF(qint16 scaleFactor) const
 double SunSpecDataPoint::toDouble() const
 {
     Q_ASSERT_X(m_dataType == Float64,  "SunSpecDataPoint", "invalid raw data size for converting value to double");
-    return SunSpecDataPoint::convertToFloat64(m_rawData);
+    return SunSpecDataPoint::convertToFloat64(m_rawData, m_byteOrder);
 }
 
 QString SunSpecDataPoint::registersToString(const QVector<quint16> &registers)
@@ -427,13 +437,18 @@ qint16 SunSpecDataPoint::convertToInt16(const QVector<quint16> &registers)
     return static_cast<qint16>(registers.at(0));
 }
 
-quint32 SunSpecDataPoint::convertToUInt32(const QVector<quint16> &registers)
+quint32 SunSpecDataPoint::convertToUInt32(const QVector<quint16> &registers, ByteOrder byteOrder)
 {
     Q_ASSERT_X(registers.count() == 2,  "SunSpecDataPoint", "invalid raw data size for converting value to quint32");
     QByteArray data;
     QDataStream inputStream(&data, QIODevice::WriteOnly);
-    inputStream << registers.at(1);
-    inputStream << registers.at(0);
+    if (byteOrder == ByteOrderBigEndian) {
+        inputStream << registers.at(0);
+        inputStream << registers.at(1);
+    } else {
+        inputStream << registers.at(1);
+        inputStream << registers.at(0);
+    }
 
     QDataStream outputStream(&data, QIODevice::ReadOnly);
     quint32 result = 0;
@@ -441,13 +456,18 @@ quint32 SunSpecDataPoint::convertToUInt32(const QVector<quint16> &registers)
     return result;
 }
 
-qint32 SunSpecDataPoint::convertToInt32(const QVector<quint16> &registers)
+qint32 SunSpecDataPoint::convertToInt32(const QVector<quint16> &registers, ByteOrder byteOrder)
 {
     Q_ASSERT_X(registers.count() == 2,  "SunSpecDataPoint", "invalid raw data size for converting value to quint32");
     QByteArray data;
     QDataStream inputStream(&data, QIODevice::WriteOnly);
-    inputStream << registers.at(1);
-    inputStream << registers.at(0);
+    if (byteOrder == ByteOrderBigEndian) {
+        inputStream << registers.at(0);
+        inputStream << registers.at(1);
+    } else {
+        inputStream << registers.at(1);
+        inputStream << registers.at(0);
+    }
 
     QDataStream outputStream(&data, QIODevice::ReadOnly);
     qint32 result = 0;
@@ -455,15 +475,22 @@ qint32 SunSpecDataPoint::convertToInt32(const QVector<quint16> &registers)
     return result;
 }
 
-quint64 SunSpecDataPoint::convertToUInt64(const QVector<quint16> &registers)
+quint64 SunSpecDataPoint::convertToUInt64(const QVector<quint16> &registers, ByteOrder byteOrder)
 {
     Q_ASSERT_X(registers.count() == 4,  "SunSpecDataPoint", "invalid raw data size for converting value to quint64");
     QByteArray data;
     QDataStream inputStream(&data, QIODevice::WriteOnly);
-    inputStream << registers.at(3);
-    inputStream << registers.at(2);
-    inputStream << registers.at(1);
-    inputStream << registers.at(0);
+    if (byteOrder == ByteOrderBigEndian) {
+        inputStream << registers.at(0);
+        inputStream << registers.at(1);
+        inputStream << registers.at(2);
+        inputStream << registers.at(3);
+    } else {
+        inputStream << registers.at(3);
+        inputStream << registers.at(2);
+        inputStream << registers.at(1);
+        inputStream << registers.at(0);
+    }
 
     QDataStream outputStream(&data, QIODevice::ReadOnly);
     quint64 result = 0;
@@ -471,15 +498,22 @@ quint64 SunSpecDataPoint::convertToUInt64(const QVector<quint16> &registers)
     return result;
 }
 
-qint64 SunSpecDataPoint::convertToInt64(const QVector<quint16> &registers)
+qint64 SunSpecDataPoint::convertToInt64(const QVector<quint16> &registers, ByteOrder byteOrder)
 {
     Q_ASSERT_X(registers.count() == 4,  "SunSpecDataPoint", "invalid raw data size for converting value to qint64");
     QByteArray data;
     QDataStream inputStream(&data, QIODevice::WriteOnly);
-    inputStream << registers.at(3);
-    inputStream << registers.at(2);
-    inputStream << registers.at(1);
-    inputStream << registers.at(0);
+    if (byteOrder == ByteOrderBigEndian) {
+        inputStream << registers.at(0);
+        inputStream << registers.at(1);
+        inputStream << registers.at(2);
+        inputStream << registers.at(3);
+    } else {
+        inputStream << registers.at(3);
+        inputStream << registers.at(2);
+        inputStream << registers.at(1);
+        inputStream << registers.at(0);
+    }
 
     QDataStream outputStream(&data, QIODevice::ReadOnly);
     qint64 result = 0;
@@ -498,19 +532,19 @@ QString SunSpecDataPoint::convertToString(const QVector<quint16> &registers)
     return QString::fromUtf8(bytes).trimmed();
 }
 
-float SunSpecDataPoint::convertToFloat32(const QVector<quint16> &registers)
+float SunSpecDataPoint::convertToFloat32(const QVector<quint16> &registers, ByteOrder byteOrder)
 {
     Q_ASSERT_X(registers.count() == 2,  "SunSpecDataPoint", "invalid raw data size for converting value to float32");
-    quint32 rawValue = SunSpecDataPoint::convertToUInt32(registers);
+    quint32 rawValue = SunSpecDataPoint::convertToUInt32(registers, byteOrder);
     float value = 0;
     memcpy(&value, &rawValue, sizeof(quint32));
     return value;
 }
 
-double SunSpecDataPoint::convertToFloat64(const QVector<quint16> &registers)
+double SunSpecDataPoint::convertToFloat64(const QVector<quint16> &registers, ByteOrder byteOrder)
 {
     Q_ASSERT_X(registers.count() == 4,  "SunSpecDataPoint", "invalid raw data size for converting value to float64");
-    quint64 rawValue = SunSpecDataPoint::convertToUInt64(registers);
+    quint64 rawValue = SunSpecDataPoint::convertToUInt64(registers, byteOrder);
     double value = 0;
     memcpy(&value, &rawValue, sizeof(quint64));
     return value;
@@ -526,7 +560,7 @@ QVector<quint16> SunSpecDataPoint::convertFromInt16(qint16 value)
     return SunSpecDataPoint::convertFromUInt16(static_cast<quint16>(value));
 }
 
-QVector<quint16> SunSpecDataPoint::convertFromUInt32(quint32 value)
+QVector<quint16> SunSpecDataPoint::convertFromUInt32(quint32 value, ByteOrder byteOrder)
 {
     QByteArray data;
     QDataStream inputStream(&data, QIODevice::WriteOnly);
@@ -535,19 +569,23 @@ QVector<quint16> SunSpecDataPoint::convertFromUInt32(quint32 value)
     QDataStream outputStream(&data, QIODevice::ReadOnly);
     QVector<quint16> values;
     for (int i = 0; i < 2; i++) {
-        quint16 registerValue = 0;
-        outputStream >> registerValue;
-        values.prepend(registerValue);
-    }
+         quint16 registerValue = 0;
+         outputStream >> registerValue;
+         if (byteOrder == ByteOrderBigEndian) {
+             values.append(registerValue);
+         } else {
+             values.prepend(registerValue);
+         }
+     }
     return values;
 }
 
-QVector<quint16> SunSpecDataPoint::convertFromInt32(qint32 value)
+QVector<quint16> SunSpecDataPoint::convertFromInt32(qint32 value, ByteOrder byteOrder)
 {
-    return SunSpecDataPoint::convertFromUInt32(static_cast<quint32>(value));
+    return SunSpecDataPoint::convertFromUInt32(static_cast<quint32>(value), byteOrder);
 }
 
-QVector<quint16> SunSpecDataPoint::convertFromUInt64(quint64 value)
+QVector<quint16> SunSpecDataPoint::convertFromUInt64(quint64 value, ByteOrder byteOrder)
 {
     QByteArray data;
     QDataStream inputStream(&data, QIODevice::WriteOnly);
@@ -558,12 +596,16 @@ QVector<quint16> SunSpecDataPoint::convertFromUInt64(quint64 value)
     for (int i = 0; i < 4; i++) {
         quint16 registerValue = 0;
         outputStream >> registerValue;
-        values.prepend(registerValue);
+        if (byteOrder == ByteOrderBigEndian) {
+            values.append(registerValue);
+        } else {
+            values.prepend(registerValue);
+        }
     }
     return values;
 }
 
-QVector<quint16> SunSpecDataPoint::convertFromInt64(qint64 value)
+QVector<quint16> SunSpecDataPoint::convertFromInt64(qint64 value, ByteOrder byteOrder)
 {
     QByteArray data;
     QDataStream inputStream(&data, QIODevice::WriteOnly);
@@ -574,7 +616,11 @@ QVector<quint16> SunSpecDataPoint::convertFromInt64(qint64 value)
     for (int i = 0; i < 4; i++) {
         quint16 registerValue = 0;
         outputStream >> registerValue;
-        values.prepend(registerValue);
+        if (byteOrder == ByteOrderBigEndian) {
+            values.append(registerValue);
+        } else {
+            values.prepend(registerValue);
+        }
     }
     return values;
 }
@@ -593,7 +639,7 @@ QVector<quint16> SunSpecDataPoint::convertFromString(const QString &value, quint
     return values;
 }
 
-QVector<quint16> SunSpecDataPoint::convertFromFloatWithSSF(float value, qint16 scaleFactor, DataType dataType)
+QVector<quint16> SunSpecDataPoint::convertFromFloatWithSSF(float value, qint16 scaleFactor, DataType dataType, ByteOrder byteOrder)
 {
     QVector<quint16> rawData;
     switch (dataType) {
@@ -611,12 +657,12 @@ QVector<quint16> SunSpecDataPoint::convertFromFloatWithSSF(float value, qint16 s
     case Acc32:
     case UInt32: {
         quint32 rawValue = static_cast<quint32>(value * pow(10, -1 * scaleFactor));
-        rawData = SunSpecDataPoint::convertFromUInt32(rawValue);
+        rawData = SunSpecDataPoint::convertFromUInt32(rawValue, byteOrder);
         break;
     }
     case Int32: {
         qint32 rawValue = static_cast<qint32>(value * pow(10, -1 * scaleFactor));
-        rawData = SunSpecDataPoint::convertFromInt32(rawValue);
+        rawData = SunSpecDataPoint::convertFromInt32(rawValue, byteOrder);
         break;
     }
     default:
@@ -627,18 +673,18 @@ QVector<quint16> SunSpecDataPoint::convertFromFloatWithSSF(float value, qint16 s
     return rawData;
 }
 
-QVector<quint16> SunSpecDataPoint::convertFromFloat32(float value)
+QVector<quint16> SunSpecDataPoint::convertFromFloat32(float value, ByteOrder byteOrder)
 {
     quint32 rawValue = 0;
     memcpy(&rawValue, &value, sizeof(float));
-    return SunSpecDataPoint::convertFromUInt32(rawValue);
+    return SunSpecDataPoint::convertFromUInt32(rawValue, byteOrder);
 }
 
-QVector<quint16> SunSpecDataPoint::convertFromFloat64(double value)
+QVector<quint16> SunSpecDataPoint::convertFromFloat64(double value, ByteOrder byteOrder)
 {
     quint64 rawValue = 0;
     memcpy(&rawValue, &value, sizeof(double));
-    return SunSpecDataPoint::convertFromUInt64(rawValue);
+    return SunSpecDataPoint::convertFromUInt64(rawValue, byteOrder);
 }
 
 QDebug operator<<(QDebug debug, const SunSpecDataPoint &dataPoint)

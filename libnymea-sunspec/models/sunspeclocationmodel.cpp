@@ -93,6 +93,7 @@ void SunSpecLocationModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -103,6 +104,7 @@ void SunSpecLocationModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint tmDataPoint;
@@ -114,6 +116,7 @@ void SunSpecLocationModel::initDataPoints()
     tmDataPoint.setAddressOffset(2);
     tmDataPoint.setBlockOffset(0);
     tmDataPoint.setSunSpecDataType("string");
+    tmDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tmDataPoint.name(), tmDataPoint);
 
     SunSpecDataPoint dateDataPoint;
@@ -125,6 +128,7 @@ void SunSpecLocationModel::initDataPoints()
     dateDataPoint.setAddressOffset(8);
     dateDataPoint.setBlockOffset(6);
     dateDataPoint.setSunSpecDataType("string");
+    dateDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(dateDataPoint.name(), dateDataPoint);
 
     SunSpecDataPoint locationDataPoint;
@@ -136,6 +140,7 @@ void SunSpecLocationModel::initDataPoints()
     locationDataPoint.setAddressOffset(12);
     locationDataPoint.setBlockOffset(10);
     locationDataPoint.setSunSpecDataType("string");
+    locationDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(locationDataPoint.name(), locationDataPoint);
 
     SunSpecDataPoint latDataPoint;
@@ -148,6 +153,7 @@ void SunSpecLocationModel::initDataPoints()
     latDataPoint.setBlockOffset(30);
     latDataPoint.setScaleFactorName("-7");
     latDataPoint.setSunSpecDataType("int32");
+    latDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(latDataPoint.name(), latDataPoint);
 
     SunSpecDataPoint longitudeDataPoint;
@@ -160,6 +166,7 @@ void SunSpecLocationModel::initDataPoints()
     longitudeDataPoint.setBlockOffset(32);
     longitudeDataPoint.setScaleFactorName("-7");
     longitudeDataPoint.setSunSpecDataType("int32");
+    longitudeDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(longitudeDataPoint.name(), longitudeDataPoint);
 
     SunSpecDataPoint altitudeDataPoint;
@@ -171,6 +178,7 @@ void SunSpecLocationModel::initDataPoints()
     altitudeDataPoint.setAddressOffset(36);
     altitudeDataPoint.setBlockOffset(34);
     altitudeDataPoint.setSunSpecDataType("int32");
+    altitudeDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(altitudeDataPoint.name(), altitudeDataPoint);
 
 }

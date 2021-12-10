@@ -279,6 +279,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -289,6 +290,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint arGraModDataPoint;
@@ -301,6 +303,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     arGraModDataPoint.setBlockOffset(0);
     arGraModDataPoint.setSunSpecDataType("enum16");
     arGraModDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    arGraModDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(arGraModDataPoint.name(), arGraModDataPoint);
 
     SunSpecDataPoint arGraSagDataPoint;
@@ -315,6 +318,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     arGraSagDataPoint.setScaleFactorName("ArGra_SF");
     arGraSagDataPoint.setSunSpecDataType("uint16");
     arGraSagDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    arGraSagDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(arGraSagDataPoint.name(), arGraSagDataPoint);
 
     SunSpecDataPoint arGraSwellDataPoint;
@@ -329,6 +333,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     arGraSwellDataPoint.setScaleFactorName("ArGra_SF");
     arGraSwellDataPoint.setSunSpecDataType("uint16");
     arGraSwellDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    arGraSwellDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(arGraSwellDataPoint.name(), arGraSwellDataPoint);
 
     SunSpecDataPoint modEnaDataPoint;
@@ -341,6 +346,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     modEnaDataPoint.setBlockOffset(3);
     modEnaDataPoint.setSunSpecDataType("bitfield16");
     modEnaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    modEnaDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modEnaDataPoint.name(), modEnaDataPoint);
 
     SunSpecDataPoint filTmsDataPoint;
@@ -353,6 +359,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     filTmsDataPoint.setBlockOffset(4);
     filTmsDataPoint.setSunSpecDataType("uint16");
     filTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    filTmsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(filTmsDataPoint.name(), filTmsDataPoint);
 
     SunSpecDataPoint dbVMinDataPoint;
@@ -366,6 +373,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     dbVMinDataPoint.setScaleFactorName("VRefPct_SF");
     dbVMinDataPoint.setSunSpecDataType("uint16");
     dbVMinDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    dbVMinDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(dbVMinDataPoint.name(), dbVMinDataPoint);
 
     SunSpecDataPoint dbVMaxDataPoint;
@@ -379,6 +387,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     dbVMaxDataPoint.setScaleFactorName("VRefPct_SF");
     dbVMaxDataPoint.setSunSpecDataType("uint16");
     dbVMaxDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    dbVMaxDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(dbVMaxDataPoint.name(), dbVMaxDataPoint);
 
     SunSpecDataPoint blkZnVDataPoint;
@@ -392,6 +401,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     blkZnVDataPoint.setScaleFactorName("VRefPct_SF");
     blkZnVDataPoint.setSunSpecDataType("uint16");
     blkZnVDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    blkZnVDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(blkZnVDataPoint.name(), blkZnVDataPoint);
 
     SunSpecDataPoint hysBlkZnVDataPoint;
@@ -405,6 +415,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     hysBlkZnVDataPoint.setScaleFactorName("VRefPct_SF");
     hysBlkZnVDataPoint.setSunSpecDataType("uint16");
     hysBlkZnVDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    hysBlkZnVDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(hysBlkZnVDataPoint.name(), hysBlkZnVDataPoint);
 
     SunSpecDataPoint blkZnTmmsDataPoint;
@@ -417,6 +428,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     blkZnTmmsDataPoint.setBlockOffset(9);
     blkZnTmmsDataPoint.setSunSpecDataType("uint16");
     blkZnTmmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    blkZnTmmsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(blkZnTmmsDataPoint.name(), blkZnTmmsDataPoint);
 
     SunSpecDataPoint holdTmmsDataPoint;
@@ -429,6 +441,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     holdTmmsDataPoint.setBlockOffset(10);
     holdTmmsDataPoint.setSunSpecDataType("uint16");
     holdTmmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    holdTmmsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(holdTmmsDataPoint.name(), holdTmmsDataPoint);
 
     SunSpecDataPoint arGraSfDataPoint;
@@ -440,6 +453,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     arGraSfDataPoint.setAddressOffset(13);
     arGraSfDataPoint.setBlockOffset(11);
     arGraSfDataPoint.setSunSpecDataType("sunssf");
+    arGraSfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(arGraSfDataPoint.name(), arGraSfDataPoint);
 
     SunSpecDataPoint vRefPctSfDataPoint;
@@ -450,6 +464,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     vRefPctSfDataPoint.setAddressOffset(14);
     vRefPctSfDataPoint.setBlockOffset(12);
     vRefPctSfDataPoint.setSunSpecDataType("sunssf");
+    vRefPctSfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vRefPctSfDataPoint.name(), vRefPctSfDataPoint);
 
     SunSpecDataPoint padDataPoint;
@@ -458,6 +473,7 @@ void SunSpecReactiveCurrentModel::initDataPoints()
     padDataPoint.setAddressOffset(15);
     padDataPoint.setBlockOffset(13);
     padDataPoint.setSunSpecDataType("pad");
+    padDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(padDataPoint.name(), padDataPoint);
 
 }

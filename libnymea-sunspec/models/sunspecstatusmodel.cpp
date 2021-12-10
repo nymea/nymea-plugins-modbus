@@ -149,6 +149,7 @@ void SunSpecStatusModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -159,6 +160,7 @@ void SunSpecStatusModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint pvConnDataPoint;
@@ -170,6 +172,7 @@ void SunSpecStatusModel::initDataPoints()
     pvConnDataPoint.setAddressOffset(2);
     pvConnDataPoint.setBlockOffset(0);
     pvConnDataPoint.setSunSpecDataType("bitfield16");
+    pvConnDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pvConnDataPoint.name(), pvConnDataPoint);
 
     SunSpecDataPoint storConnDataPoint;
@@ -181,6 +184,7 @@ void SunSpecStatusModel::initDataPoints()
     storConnDataPoint.setAddressOffset(3);
     storConnDataPoint.setBlockOffset(1);
     storConnDataPoint.setSunSpecDataType("bitfield16");
+    storConnDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(storConnDataPoint.name(), storConnDataPoint);
 
     SunSpecDataPoint ecpConnDataPoint;
@@ -192,6 +196,7 @@ void SunSpecStatusModel::initDataPoints()
     ecpConnDataPoint.setAddressOffset(4);
     ecpConnDataPoint.setBlockOffset(2);
     ecpConnDataPoint.setSunSpecDataType("bitfield16");
+    ecpConnDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(ecpConnDataPoint.name(), ecpConnDataPoint);
 
     SunSpecDataPoint actWhDataPoint;
@@ -203,6 +208,7 @@ void SunSpecStatusModel::initDataPoints()
     actWhDataPoint.setAddressOffset(5);
     actWhDataPoint.setBlockOffset(3);
     actWhDataPoint.setSunSpecDataType("acc64");
+    actWhDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(actWhDataPoint.name(), actWhDataPoint);
 
     SunSpecDataPoint actVAhDataPoint;
@@ -214,6 +220,7 @@ void SunSpecStatusModel::initDataPoints()
     actVAhDataPoint.setAddressOffset(9);
     actVAhDataPoint.setBlockOffset(7);
     actVAhDataPoint.setSunSpecDataType("acc64");
+    actVAhDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(actVAhDataPoint.name(), actVAhDataPoint);
 
     SunSpecDataPoint actVArhQ1DataPoint;
@@ -225,6 +232,7 @@ void SunSpecStatusModel::initDataPoints()
     actVArhQ1DataPoint.setAddressOffset(13);
     actVArhQ1DataPoint.setBlockOffset(11);
     actVArhQ1DataPoint.setSunSpecDataType("acc64");
+    actVArhQ1DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(actVArhQ1DataPoint.name(), actVArhQ1DataPoint);
 
     SunSpecDataPoint actVArhQ2DataPoint;
@@ -236,6 +244,7 @@ void SunSpecStatusModel::initDataPoints()
     actVArhQ2DataPoint.setAddressOffset(17);
     actVArhQ2DataPoint.setBlockOffset(15);
     actVArhQ2DataPoint.setSunSpecDataType("acc64");
+    actVArhQ2DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(actVArhQ2DataPoint.name(), actVArhQ2DataPoint);
 
     SunSpecDataPoint actVArhQ3DataPoint;
@@ -247,6 +256,7 @@ void SunSpecStatusModel::initDataPoints()
     actVArhQ3DataPoint.setAddressOffset(21);
     actVArhQ3DataPoint.setBlockOffset(19);
     actVArhQ3DataPoint.setSunSpecDataType("acc64");
+    actVArhQ3DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(actVArhQ3DataPoint.name(), actVArhQ3DataPoint);
 
     SunSpecDataPoint actVArhQ4DataPoint;
@@ -258,6 +268,7 @@ void SunSpecStatusModel::initDataPoints()
     actVArhQ4DataPoint.setAddressOffset(25);
     actVArhQ4DataPoint.setBlockOffset(23);
     actVArhQ4DataPoint.setSunSpecDataType("acc64");
+    actVArhQ4DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(actVArhQ4DataPoint.name(), actVArhQ4DataPoint);
 
     SunSpecDataPoint vArAvalDataPoint;
@@ -270,6 +281,7 @@ void SunSpecStatusModel::initDataPoints()
     vArAvalDataPoint.setBlockOffset(27);
     vArAvalDataPoint.setScaleFactorName("VArAval_SF");
     vArAvalDataPoint.setSunSpecDataType("int16");
+    vArAvalDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vArAvalDataPoint.name(), vArAvalDataPoint);
 
     SunSpecDataPoint vArAvalSfDataPoint;
@@ -280,6 +292,7 @@ void SunSpecStatusModel::initDataPoints()
     vArAvalSfDataPoint.setAddressOffset(30);
     vArAvalSfDataPoint.setBlockOffset(28);
     vArAvalSfDataPoint.setSunSpecDataType("sunssf");
+    vArAvalSfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vArAvalSfDataPoint.name(), vArAvalSfDataPoint);
 
     SunSpecDataPoint wAvalDataPoint;
@@ -292,6 +305,7 @@ void SunSpecStatusModel::initDataPoints()
     wAvalDataPoint.setBlockOffset(29);
     wAvalDataPoint.setScaleFactorName("WAval_SF");
     wAvalDataPoint.setSunSpecDataType("uint16");
+    wAvalDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(wAvalDataPoint.name(), wAvalDataPoint);
 
     SunSpecDataPoint wAvalSfDataPoint;
@@ -302,6 +316,7 @@ void SunSpecStatusModel::initDataPoints()
     wAvalSfDataPoint.setAddressOffset(32);
     wAvalSfDataPoint.setBlockOffset(30);
     wAvalSfDataPoint.setSunSpecDataType("sunssf");
+    wAvalSfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(wAvalSfDataPoint.name(), wAvalSfDataPoint);
 
     SunSpecDataPoint stSetLimMskDataPoint;
@@ -312,6 +327,7 @@ void SunSpecStatusModel::initDataPoints()
     stSetLimMskDataPoint.setAddressOffset(33);
     stSetLimMskDataPoint.setBlockOffset(31);
     stSetLimMskDataPoint.setSunSpecDataType("bitfield32");
+    stSetLimMskDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(stSetLimMskDataPoint.name(), stSetLimMskDataPoint);
 
     SunSpecDataPoint stActCtlDataPoint;
@@ -322,6 +338,7 @@ void SunSpecStatusModel::initDataPoints()
     stActCtlDataPoint.setAddressOffset(35);
     stActCtlDataPoint.setBlockOffset(33);
     stActCtlDataPoint.setSunSpecDataType("bitfield32");
+    stActCtlDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(stActCtlDataPoint.name(), stActCtlDataPoint);
 
     SunSpecDataPoint tmSrcDataPoint;
@@ -332,6 +349,7 @@ void SunSpecStatusModel::initDataPoints()
     tmSrcDataPoint.setAddressOffset(37);
     tmSrcDataPoint.setBlockOffset(35);
     tmSrcDataPoint.setSunSpecDataType("string");
+    tmSrcDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tmSrcDataPoint.name(), tmSrcDataPoint);
 
     SunSpecDataPoint tmsDataPoint;
@@ -343,6 +361,7 @@ void SunSpecStatusModel::initDataPoints()
     tmsDataPoint.setAddressOffset(41);
     tmsDataPoint.setBlockOffset(39);
     tmsDataPoint.setSunSpecDataType("uint32");
+    tmsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tmsDataPoint.name(), tmsDataPoint);
 
     SunSpecDataPoint rtStDataPoint;
@@ -353,6 +372,7 @@ void SunSpecStatusModel::initDataPoints()
     rtStDataPoint.setAddressOffset(43);
     rtStDataPoint.setBlockOffset(41);
     rtStDataPoint.setSunSpecDataType("bitfield16");
+    rtStDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(rtStDataPoint.name(), rtStDataPoint);
 
     SunSpecDataPoint risDataPoint;
@@ -365,6 +385,7 @@ void SunSpecStatusModel::initDataPoints()
     risDataPoint.setBlockOffset(42);
     risDataPoint.setScaleFactorName("Ris_SF");
     risDataPoint.setSunSpecDataType("uint16");
+    risDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(risDataPoint.name(), risDataPoint);
 
     SunSpecDataPoint risSfDataPoint;
@@ -375,6 +396,7 @@ void SunSpecStatusModel::initDataPoints()
     risSfDataPoint.setAddressOffset(45);
     risSfDataPoint.setBlockOffset(43);
     risSfDataPoint.setSunSpecDataType("sunssf");
+    risSfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(risSfDataPoint.name(), risSfDataPoint);
 
 }

@@ -34,6 +34,7 @@
 SunSpecSecureAcMeterSelectedReadingsModelRepeatingBlock::SunSpecSecureAcMeterSelectedReadingsModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecSecureAcMeterSelectedReadingsModel *parent) :
     SunSpecModelRepeatingBlock(blockIndex, blockSize, modbusStartRegister, parent)
 {
+    m_byteOrder = parent->byteOrder();
     initDataPoints();
 }
 
@@ -60,6 +61,7 @@ void SunSpecSecureAcMeterSelectedReadingsModelRepeatingBlock::initDataPoints()
     dSDataPoint.setSize(1);
     dSDataPoint.setAddressOffset(0);
     dSDataPoint.setSunSpecDataType("uint16");
+    dSDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(dSDataPoint.name(), dSDataPoint);
 
 }
@@ -243,6 +245,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -253,6 +256,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint ampsDataPoint;
@@ -266,6 +270,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     ampsDataPoint.setBlockOffset(0);
     ampsDataPoint.setScaleFactorName("A_SF");
     ampsDataPoint.setSunSpecDataType("int16");
+    ampsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
     SunSpecDataPoint a_SFDataPoint;
@@ -276,6 +281,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     a_SFDataPoint.setAddressOffset(3);
     a_SFDataPoint.setBlockOffset(1);
     a_SFDataPoint.setSunSpecDataType("sunssf");
+    a_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(a_SFDataPoint.name(), a_SFDataPoint);
 
     SunSpecDataPoint voltageDataPoint;
@@ -288,6 +294,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     voltageDataPoint.setBlockOffset(2);
     voltageDataPoint.setScaleFactorName("V_SF");
     voltageDataPoint.setSunSpecDataType("int16");
+    voltageDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(voltageDataPoint.name(), voltageDataPoint);
 
     SunSpecDataPoint v_SFDataPoint;
@@ -298,6 +305,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     v_SFDataPoint.setAddressOffset(5);
     v_SFDataPoint.setBlockOffset(3);
     v_SFDataPoint.setSunSpecDataType("sunssf");
+    v_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(v_SFDataPoint.name(), v_SFDataPoint);
 
     SunSpecDataPoint hzDataPoint;
@@ -311,6 +319,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     hzDataPoint.setBlockOffset(4);
     hzDataPoint.setScaleFactorName("Hz_SF");
     hzDataPoint.setSunSpecDataType("int16");
+    hzDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(hzDataPoint.name(), hzDataPoint);
 
     SunSpecDataPoint hz_SFDataPoint;
@@ -320,6 +329,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     hz_SFDataPoint.setAddressOffset(7);
     hz_SFDataPoint.setBlockOffset(5);
     hz_SFDataPoint.setSunSpecDataType("sunssf");
+    hz_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(hz_SFDataPoint.name(), hz_SFDataPoint);
 
     SunSpecDataPoint wattsDataPoint;
@@ -333,6 +343,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     wattsDataPoint.setBlockOffset(6);
     wattsDataPoint.setScaleFactorName("W_SF");
     wattsDataPoint.setSunSpecDataType("int16");
+    wattsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(wattsDataPoint.name(), wattsDataPoint);
 
     SunSpecDataPoint w_SFDataPoint;
@@ -343,6 +354,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     w_SFDataPoint.setAddressOffset(9);
     w_SFDataPoint.setBlockOffset(7);
     w_SFDataPoint.setSunSpecDataType("sunssf");
+    w_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(w_SFDataPoint.name(), w_SFDataPoint);
 
     SunSpecDataPoint vaDataPoint;
@@ -355,6 +367,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     vaDataPoint.setBlockOffset(8);
     vaDataPoint.setScaleFactorName("VA_SF");
     vaDataPoint.setSunSpecDataType("int16");
+    vaDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vaDataPoint.name(), vaDataPoint);
 
     SunSpecDataPoint vA_SFDataPoint;
@@ -364,6 +377,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     vA_SFDataPoint.setAddressOffset(11);
     vA_SFDataPoint.setBlockOffset(9);
     vA_SFDataPoint.setSunSpecDataType("sunssf");
+    vA_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vA_SFDataPoint.name(), vA_SFDataPoint);
 
     SunSpecDataPoint varDataPoint;
@@ -376,6 +390,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     varDataPoint.setBlockOffset(10);
     varDataPoint.setScaleFactorName("VAR_SF");
     varDataPoint.setSunSpecDataType("int16");
+    varDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(varDataPoint.name(), varDataPoint);
 
     SunSpecDataPoint vAR_SFDataPoint;
@@ -385,6 +400,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     vAR_SFDataPoint.setAddressOffset(13);
     vAR_SFDataPoint.setBlockOffset(11);
     vAR_SFDataPoint.setSunSpecDataType("sunssf");
+    vAR_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vAR_SFDataPoint.name(), vAR_SFDataPoint);
 
     SunSpecDataPoint pfDataPoint;
@@ -397,6 +413,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     pfDataPoint.setBlockOffset(12);
     pfDataPoint.setScaleFactorName("PF_SF");
     pfDataPoint.setSunSpecDataType("int16");
+    pfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pfDataPoint.name(), pfDataPoint);
 
     SunSpecDataPoint pF_SFDataPoint;
@@ -406,6 +423,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     pF_SFDataPoint.setAddressOffset(15);
     pF_SFDataPoint.setBlockOffset(13);
     pF_SFDataPoint.setSunSpecDataType("sunssf");
+    pF_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pF_SFDataPoint.name(), pF_SFDataPoint);
 
     SunSpecDataPoint totalWattHoursExportedDataPoint;
@@ -419,6 +437,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     totalWattHoursExportedDataPoint.setBlockOffset(14);
     totalWattHoursExportedDataPoint.setScaleFactorName("TotWh_SF");
     totalWattHoursExportedDataPoint.setSunSpecDataType("acc32");
+    totalWattHoursExportedDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalWattHoursExportedDataPoint.name(), totalWattHoursExportedDataPoint);
 
     SunSpecDataPoint totalWattHoursImportedDataPoint;
@@ -432,6 +451,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     totalWattHoursImportedDataPoint.setBlockOffset(16);
     totalWattHoursImportedDataPoint.setScaleFactorName("TotWh_SF");
     totalWattHoursImportedDataPoint.setSunSpecDataType("acc32");
+    totalWattHoursImportedDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalWattHoursImportedDataPoint.name(), totalWattHoursImportedDataPoint);
 
     SunSpecDataPoint totWh_SFDataPoint;
@@ -442,6 +462,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     totWh_SFDataPoint.setAddressOffset(20);
     totWh_SFDataPoint.setBlockOffset(18);
     totWh_SFDataPoint.setSunSpecDataType("sunssf");
+    totWh_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totWh_SFDataPoint.name(), totWh_SFDataPoint);
 
     SunSpecDataPoint totalVaHoursExportedDataPoint;
@@ -454,6 +475,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     totalVaHoursExportedDataPoint.setBlockOffset(19);
     totalVaHoursExportedDataPoint.setScaleFactorName("TotVAh_SF");
     totalVaHoursExportedDataPoint.setSunSpecDataType("acc32");
+    totalVaHoursExportedDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVaHoursExportedDataPoint.name(), totalVaHoursExportedDataPoint);
 
     SunSpecDataPoint totalVaHoursImportedDataPoint;
@@ -466,6 +488,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     totalVaHoursImportedDataPoint.setBlockOffset(21);
     totalVaHoursImportedDataPoint.setScaleFactorName("TotVAh_SF");
     totalVaHoursImportedDataPoint.setSunSpecDataType("acc32");
+    totalVaHoursImportedDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVaHoursImportedDataPoint.name(), totalVaHoursImportedDataPoint);
 
     SunSpecDataPoint totVAh_SFDataPoint;
@@ -475,6 +498,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     totVAh_SFDataPoint.setAddressOffset(25);
     totVAh_SFDataPoint.setBlockOffset(23);
     totVAh_SFDataPoint.setSunSpecDataType("sunssf");
+    totVAh_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totVAh_SFDataPoint.name(), totVAh_SFDataPoint);
 
     SunSpecDataPoint totalVarHoursImportedQ1DataPoint;
@@ -487,6 +511,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     totalVarHoursImportedQ1DataPoint.setBlockOffset(24);
     totalVarHoursImportedQ1DataPoint.setScaleFactorName("TotVArh_SF");
     totalVarHoursImportedQ1DataPoint.setSunSpecDataType("acc32");
+    totalVarHoursImportedQ1DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVarHoursImportedQ1DataPoint.name(), totalVarHoursImportedQ1DataPoint);
 
     SunSpecDataPoint totalVArHoursImportedQ2DataPoint;
@@ -499,6 +524,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     totalVArHoursImportedQ2DataPoint.setBlockOffset(26);
     totalVArHoursImportedQ2DataPoint.setScaleFactorName("TotVArh_SF");
     totalVArHoursImportedQ2DataPoint.setSunSpecDataType("acc32");
+    totalVArHoursImportedQ2DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVArHoursImportedQ2DataPoint.name(), totalVArHoursImportedQ2DataPoint);
 
     SunSpecDataPoint totalVArHoursExportedQ3DataPoint;
@@ -511,6 +537,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     totalVArHoursExportedQ3DataPoint.setBlockOffset(28);
     totalVArHoursExportedQ3DataPoint.setScaleFactorName("TotVArh_SF");
     totalVArHoursExportedQ3DataPoint.setSunSpecDataType("acc32");
+    totalVArHoursExportedQ3DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVArHoursExportedQ3DataPoint.name(), totalVArHoursExportedQ3DataPoint);
 
     SunSpecDataPoint totalVArHoursExportedQ4DataPoint;
@@ -523,6 +550,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     totalVArHoursExportedQ4DataPoint.setBlockOffset(30);
     totalVArHoursExportedQ4DataPoint.setScaleFactorName("TotVArh_SF");
     totalVArHoursExportedQ4DataPoint.setSunSpecDataType("acc32");
+    totalVArHoursExportedQ4DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVArHoursExportedQ4DataPoint.name(), totalVArHoursExportedQ4DataPoint);
 
     SunSpecDataPoint totVArh_SFDataPoint;
@@ -532,6 +560,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     totVArh_SFDataPoint.setAddressOffset(34);
     totVArh_SFDataPoint.setBlockOffset(32);
     totVArh_SFDataPoint.setSunSpecDataType("sunssf");
+    totVArh_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totVArh_SFDataPoint.name(), totVArh_SFDataPoint);
 
     SunSpecDataPoint eventsDataPoint;
@@ -543,6 +572,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     eventsDataPoint.setAddressOffset(35);
     eventsDataPoint.setBlockOffset(33);
     eventsDataPoint.setSunSpecDataType("bitfield32");
+    eventsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(eventsDataPoint.name(), eventsDataPoint);
 
     SunSpecDataPoint rsrvdDataPoint;
@@ -552,6 +582,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     rsrvdDataPoint.setAddressOffset(37);
     rsrvdDataPoint.setBlockOffset(35);
     rsrvdDataPoint.setSunSpecDataType("pad");
+    rsrvdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(rsrvdDataPoint.name(), rsrvdDataPoint);
 
     SunSpecDataPoint timestampDataPoint;
@@ -563,6 +594,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     timestampDataPoint.setAddressOffset(38);
     timestampDataPoint.setBlockOffset(36);
     timestampDataPoint.setSunSpecDataType("uint32");
+    timestampDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(timestampDataPoint.name(), timestampDataPoint);
 
     SunSpecDataPoint millisecondsDataPoint;
@@ -574,6 +606,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     millisecondsDataPoint.setAddressOffset(40);
     millisecondsDataPoint.setBlockOffset(38);
     millisecondsDataPoint.setSunSpecDataType("uint16");
+    millisecondsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(millisecondsDataPoint.name(), millisecondsDataPoint);
 
     SunSpecDataPoint sequenceDataPoint;
@@ -585,6 +618,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     sequenceDataPoint.setAddressOffset(41);
     sequenceDataPoint.setBlockOffset(39);
     sequenceDataPoint.setSunSpecDataType("uint16");
+    sequenceDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(sequenceDataPoint.name(), sequenceDataPoint);
 
     SunSpecDataPoint algorithmDataPoint;
@@ -596,6 +630,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     algorithmDataPoint.setAddressOffset(42);
     algorithmDataPoint.setBlockOffset(40);
     algorithmDataPoint.setSunSpecDataType("enum16");
+    algorithmDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(algorithmDataPoint.name(), algorithmDataPoint);
 
     SunSpecDataPoint nDataPoint;
@@ -607,6 +642,7 @@ void SunSpecSecureAcMeterSelectedReadingsModel::initDataPoints()
     nDataPoint.setAddressOffset(43);
     nDataPoint.setBlockOffset(41);
     nDataPoint.setSunSpecDataType("uint16");
+    nDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(nDataPoint.name(), nDataPoint);
 
 }

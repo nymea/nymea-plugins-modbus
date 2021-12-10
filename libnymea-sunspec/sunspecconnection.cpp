@@ -41,43 +41,17 @@ SunSpecConnection::SunSpecConnection(const QHostAddress &hostAddress, uint port,
     m_port(port),
     m_slaveId(slaveId)
 {
-    qCDebug(dcSunSpec()) << "Creating connection for" << QString("%1:%2").arg(m_hostAddress.toString()).arg(m_port);
-    m_modbusTcpClient = new QModbusTcpClient(this);
-    m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkPortParameter, m_port);
-    m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkAddressParameter, m_hostAddress.toString());
-    m_modbusTcpClient->setTimeout(2000);
-    m_modbusTcpClient->setNumberOfRetries(3);
+    createConnection();
+}
 
-    m_reconnectTimer.setInterval(10000);
-    m_reconnectTimer.setSingleShot(false);
-    connect(&m_reconnectTimer, &QTimer::timeout, this, [=](){
-        if (connected()) {
-            m_reconnectTimer.stop();
-            return;
-        }
-
-        if (!m_modbusTcpClient->connectDevice()) {
-            m_reconnectTimer.start();
-        }
-    });
-
-    connect(m_modbusTcpClient, &QModbusTcpClient::stateChanged, this, [this](QModbusDevice::State state){
-        bool connected = (state == QModbusDevice::ConnectedState);
-        bool disconnected = (state == QModbusDevice::UnconnectedState);
-
-        if (connected) {
-            m_reconnectTimer.stop();
-            emit connectedChanged(true);
-            return;
-        }
-
-        if (disconnected) {
-            // Try to reconnect in 10 seconds
-            m_reconnectTimer.start();
-            emit connectedChanged(false);
-            return;
-        }
-    });
+SunSpecConnection::SunSpecConnection(const QHostAddress &hostAddress, uint port, uint slaveId, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    QObject(parent),
+    m_hostAddress(hostAddress),
+    m_port(port),
+    m_slaveId(slaveId),
+    m_byteOrder(byteOrder)
+{
+    createConnection();
 }
 
 QModbusTcpClient *SunSpecConnection::modbusTcpClient() const
@@ -120,6 +94,11 @@ uint SunSpecConnection::slaveId() const
 void SunSpecConnection::setSlaveId(uint slaveId)
 {
     m_slaveId = slaveId;
+}
+
+SunSpecDataPoint::ByteOrder SunSpecConnection::byteOrder() const
+{
+    return m_byteOrder;
 }
 
 int SunSpecConnection::timeout() const
@@ -205,6 +184,47 @@ bool SunSpecConnection::startDiscovery()
     return true;
 }
 
+void SunSpecConnection::createConnection()
+{
+    qCDebug(dcSunSpec()) << "Creating connection for" << QString("%1:%2").arg(m_hostAddress.toString()).arg(m_port);
+    m_modbusTcpClient = new QModbusTcpClient(this);
+    m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkPortParameter, m_port);
+    m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkAddressParameter, m_hostAddress.toString());
+    m_modbusTcpClient->setTimeout(2000);
+    m_modbusTcpClient->setNumberOfRetries(3);
+
+    m_reconnectTimer.setInterval(10000);
+    m_reconnectTimer.setSingleShot(false);
+    connect(&m_reconnectTimer, &QTimer::timeout, this, [=](){
+        if (connected()) {
+            m_reconnectTimer.stop();
+            return;
+        }
+
+        if (!m_modbusTcpClient->connectDevice()) {
+            m_reconnectTimer.start();
+        }
+    });
+
+    connect(m_modbusTcpClient, &QModbusTcpClient::stateChanged, this, [this](QModbusDevice::State state){
+        bool connected = (state == QModbusDevice::ConnectedState);
+        bool disconnected = (state == QModbusDevice::UnconnectedState);
+
+        if (connected) {
+            m_reconnectTimer.stop();
+            emit connectedChanged(true);
+            return;
+        }
+
+        if (disconnected) {
+            // Try to reconnect in 10 seconds
+            m_reconnectTimer.start();
+            emit connectedChanged(false);
+            return;
+        }
+    });
+}
+
 void SunSpecConnection::processDiscoveryResult()
 {
     qCDebug(dcSunSpec()) << "Creating models from the discovery results...";
@@ -217,7 +237,7 @@ void SunSpecConnection::processDiscoveryResult()
 
     SunSpecModelFactory factory;
     foreach (ModuleDiscoveryResult result, m_modelDiscoveryResult) {
-        SunSpecModel *model = factory.createModel(this, result.modbusStartRegister, result.modelId, result.modelLength);
+        SunSpecModel *model = factory.createModel(this, result.modbusStartRegister, result.modelId, result.modelLength, m_byteOrder);
         if (model) {
             if (modelAlreadyAdded(model)) {
                 qCDebug(dcSunSpec()) << "Detected an already added model" << model << "and keep the already existing one.";
