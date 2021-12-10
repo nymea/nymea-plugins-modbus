@@ -556,11 +556,11 @@ void IntegrationPluginSunSpec::setupConnection(ThingSetupInfo *info)
 
     SunSpecConnection *connection = nullptr;
     if (thing->thingClassId() == solarEdgeConnectionThingClassId) {
-        connection = new SunSpecConnection(address, port, slaveId, this);
-    } else {
         // Note: for some reason, solar edge is using big endian register order instead
         // of little endian as specified in sunspec and even solar edge documentation
         connection = new SunSpecConnection(address, port, slaveId, SunSpecDataPoint::ByteOrderBigEndian, this);
+    } else {
+        connection = new SunSpecConnection(address, port, slaveId, this);
     }
     connection->setTimeout(configValue(sunSpecPluginTimeoutParamTypeId).toUInt());
     connection->setNumberOfRetries(configValue(sunSpecPluginNumberOfRetriesParamTypeId).toUInt());
