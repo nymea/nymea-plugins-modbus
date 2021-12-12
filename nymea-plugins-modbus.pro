@@ -5,6 +5,7 @@ CONFIG += ordered
 SUBDIRS += libnymea-sunspec
 
 PLUGIN_DIRS = \
+    alphainnotec            \
     drexelundweiss          \
     energymeters            \ 
     modbuscommander         \
