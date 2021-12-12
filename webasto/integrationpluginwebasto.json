@@ -91,12 +91,38 @@
                             "displayName": "Charging current",
                             "displayNameAction": "Set charging current",
                             "displayNameEvent": "Charging current changed",
-                            "type": "double",
+                            "type": "uint",
                             "unit": "Ampere",
-                            "minValue": 6.00,
-                            "maxValue": 80.00,
-                            "defaultValue": 6.00,
+                            "minValue": 6,
+                            "maxValue": 80,
+                            "defaultValue": 6,
                             "writable": true
+                        },
+                        {
+                            "id": "0e15e78e-a233-4026-a0fd-f65edc824f1e",
+                            "name": "pluggedIn",
+                            "displayName": "Car plugged in",
+                            "displayNameEvent": "Car plugged in changed",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "8f35404d-8237-4ff8-8774-9ad10ceee5c3",
+                            "name": "charging",
+                            "displayName": "Charging",
+                            "displayNameEvent": "Charging changed",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "179e6136-2ac1-4247-b457-f804e2212293",
+                            "name": "phaseCount",
+                            "displayName": "Number of connected phases",
+                            "displayNameEvent": "Number of connected phases changed",
+                            "type": "uint",
+                            "minValue": 1,
+                            "maxValue": 3,
+                            "defaultValue": 1
                         },
                         {
                             "id": "2027fbb6-c9d2-4a75-bdd0-a3ad3785cdc6",

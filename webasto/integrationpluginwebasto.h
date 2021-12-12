@@ -62,6 +62,7 @@ private:
     QHash<QUuid, ThingActionInfo *> m_asyncActions;
 
     void update(Webasto *webasto);
+    void evaluatePhaseCount(Thing *thing);
 
 private slots:
     void onConnectionChanged(bool connected);
