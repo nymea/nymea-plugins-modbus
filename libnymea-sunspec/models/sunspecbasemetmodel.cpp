@@ -31,8 +31,8 @@
 #include "sunspecbasemetmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecBaseMetModel::SunSpecBaseMetModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 307, modelLength, parent)
+SunSpecBaseMetModel::SunSpecBaseMetModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 307, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
 
@@ -113,6 +113,7 @@ void SunSpecBaseMetModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -123,6 +124,7 @@ void SunSpecBaseMetModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint ambientTemperatureDataPoint;
@@ -134,6 +136,7 @@ void SunSpecBaseMetModel::initDataPoints()
     ambientTemperatureDataPoint.setBlockOffset(0);
     ambientTemperatureDataPoint.setScaleFactorName("-1");
     ambientTemperatureDataPoint.setSunSpecDataType("int16");
+    ambientTemperatureDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(ambientTemperatureDataPoint.name(), ambientTemperatureDataPoint);
 
     SunSpecDataPoint relativeHumidityDataPoint;
@@ -144,6 +147,7 @@ void SunSpecBaseMetModel::initDataPoints()
     relativeHumidityDataPoint.setAddressOffset(3);
     relativeHumidityDataPoint.setBlockOffset(1);
     relativeHumidityDataPoint.setSunSpecDataType("int16");
+    relativeHumidityDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(relativeHumidityDataPoint.name(), relativeHumidityDataPoint);
 
     SunSpecDataPoint barometricPressureDataPoint;
@@ -154,6 +158,7 @@ void SunSpecBaseMetModel::initDataPoints()
     barometricPressureDataPoint.setAddressOffset(4);
     barometricPressureDataPoint.setBlockOffset(2);
     barometricPressureDataPoint.setSunSpecDataType("int16");
+    barometricPressureDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(barometricPressureDataPoint.name(), barometricPressureDataPoint);
 
     SunSpecDataPoint windSpeedDataPoint;
@@ -164,6 +169,7 @@ void SunSpecBaseMetModel::initDataPoints()
     windSpeedDataPoint.setAddressOffset(5);
     windSpeedDataPoint.setBlockOffset(3);
     windSpeedDataPoint.setSunSpecDataType("int16");
+    windSpeedDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(windSpeedDataPoint.name(), windSpeedDataPoint);
 
     SunSpecDataPoint windDirectionDataPoint;
@@ -174,6 +180,7 @@ void SunSpecBaseMetModel::initDataPoints()
     windDirectionDataPoint.setAddressOffset(6);
     windDirectionDataPoint.setBlockOffset(4);
     windDirectionDataPoint.setSunSpecDataType("int16");
+    windDirectionDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(windDirectionDataPoint.name(), windDirectionDataPoint);
 
     SunSpecDataPoint rainfallDataPoint;
@@ -184,6 +191,7 @@ void SunSpecBaseMetModel::initDataPoints()
     rainfallDataPoint.setAddressOffset(7);
     rainfallDataPoint.setBlockOffset(5);
     rainfallDataPoint.setSunSpecDataType("int16");
+    rainfallDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(rainfallDataPoint.name(), rainfallDataPoint);
 
     SunSpecDataPoint snowDepthDataPoint;
@@ -194,6 +202,7 @@ void SunSpecBaseMetModel::initDataPoints()
     snowDepthDataPoint.setAddressOffset(8);
     snowDepthDataPoint.setBlockOffset(6);
     snowDepthDataPoint.setSunSpecDataType("int16");
+    snowDepthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(snowDepthDataPoint.name(), snowDepthDataPoint);
 
     SunSpecDataPoint precipitationTypeDataPoint;
@@ -204,6 +213,7 @@ void SunSpecBaseMetModel::initDataPoints()
     precipitationTypeDataPoint.setAddressOffset(9);
     precipitationTypeDataPoint.setBlockOffset(7);
     precipitationTypeDataPoint.setSunSpecDataType("int16");
+    precipitationTypeDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(precipitationTypeDataPoint.name(), precipitationTypeDataPoint);
 
     SunSpecDataPoint electricFieldDataPoint;
@@ -214,6 +224,7 @@ void SunSpecBaseMetModel::initDataPoints()
     electricFieldDataPoint.setAddressOffset(10);
     electricFieldDataPoint.setBlockOffset(8);
     electricFieldDataPoint.setSunSpecDataType("int16");
+    electricFieldDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(electricFieldDataPoint.name(), electricFieldDataPoint);
 
     SunSpecDataPoint surfaceWetnessDataPoint;
@@ -224,6 +235,7 @@ void SunSpecBaseMetModel::initDataPoints()
     surfaceWetnessDataPoint.setAddressOffset(11);
     surfaceWetnessDataPoint.setBlockOffset(9);
     surfaceWetnessDataPoint.setSunSpecDataType("int16");
+    surfaceWetnessDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(surfaceWetnessDataPoint.name(), surfaceWetnessDataPoint);
 
     SunSpecDataPoint soilWetnessDataPoint;
@@ -234,6 +246,7 @@ void SunSpecBaseMetModel::initDataPoints()
     soilWetnessDataPoint.setAddressOffset(12);
     soilWetnessDataPoint.setBlockOffset(10);
     soilWetnessDataPoint.setSunSpecDataType("int16");
+    soilWetnessDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(soilWetnessDataPoint.name(), soilWetnessDataPoint);
 
 }

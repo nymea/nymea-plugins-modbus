@@ -31,8 +31,8 @@
 #include "sunspecpricingmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecPricingModel::SunSpecPricingModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 125, modelLength, parent)
+SunSpecPricingModel::SunSpecPricingModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 125, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
 
@@ -185,6 +185,7 @@ void SunSpecPricingModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -195,6 +196,7 @@ void SunSpecPricingModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint modEnaDataPoint;
@@ -207,6 +209,7 @@ void SunSpecPricingModel::initDataPoints()
     modEnaDataPoint.setBlockOffset(0);
     modEnaDataPoint.setSunSpecDataType("bitfield16");
     modEnaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    modEnaDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modEnaDataPoint.name(), modEnaDataPoint);
 
     SunSpecDataPoint sigTypeDataPoint;
@@ -218,6 +221,7 @@ void SunSpecPricingModel::initDataPoints()
     sigTypeDataPoint.setBlockOffset(1);
     sigTypeDataPoint.setSunSpecDataType("enum16");
     sigTypeDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    sigTypeDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(sigTypeDataPoint.name(), sigTypeDataPoint);
 
     SunSpecDataPoint sigDataPoint;
@@ -231,6 +235,7 @@ void SunSpecPricingModel::initDataPoints()
     sigDataPoint.setScaleFactorName("Sig_SF");
     sigDataPoint.setSunSpecDataType("int16");
     sigDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    sigDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(sigDataPoint.name(), sigDataPoint);
 
     SunSpecDataPoint winTmsDataPoint;
@@ -243,6 +248,7 @@ void SunSpecPricingModel::initDataPoints()
     winTmsDataPoint.setBlockOffset(3);
     winTmsDataPoint.setSunSpecDataType("uint16");
     winTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    winTmsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(winTmsDataPoint.name(), winTmsDataPoint);
 
     SunSpecDataPoint rvtTmsDataPoint;
@@ -255,6 +261,7 @@ void SunSpecPricingModel::initDataPoints()
     rvtTmsDataPoint.setBlockOffset(4);
     rvtTmsDataPoint.setSunSpecDataType("uint16");
     rvtTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    rvtTmsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(rvtTmsDataPoint.name(), rvtTmsDataPoint);
 
     SunSpecDataPoint rmpTmsDataPoint;
@@ -267,6 +274,7 @@ void SunSpecPricingModel::initDataPoints()
     rmpTmsDataPoint.setBlockOffset(5);
     rmpTmsDataPoint.setSunSpecDataType("uint16");
     rmpTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    rmpTmsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(rmpTmsDataPoint.name(), rmpTmsDataPoint);
 
     SunSpecDataPoint sigSfDataPoint;
@@ -278,6 +286,7 @@ void SunSpecPricingModel::initDataPoints()
     sigSfDataPoint.setAddressOffset(8);
     sigSfDataPoint.setBlockOffset(6);
     sigSfDataPoint.setSunSpecDataType("sunssf");
+    sigSfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(sigSfDataPoint.name(), sigSfDataPoint);
 
     SunSpecDataPoint padDataPoint;
@@ -286,6 +295,7 @@ void SunSpecPricingModel::initDataPoints()
     padDataPoint.setAddressOffset(9);
     padDataPoint.setBlockOffset(7);
     padDataPoint.setSunSpecDataType("pad");
+    padDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(padDataPoint.name(), padDataPoint);
 
 }

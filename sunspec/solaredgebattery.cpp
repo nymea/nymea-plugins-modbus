@@ -154,7 +154,7 @@ void SolarEdgeBattery::readBlockData()
                                 emit initFinished(true);
                             }
 
-                            onBlockDataUpdated();
+                            emit blockDataUpdated();
                         });
 
                         connect(reply, &QModbusReply::errorOccurred, this, [reply] (QModbusDevice::Error error) {
@@ -187,64 +187,6 @@ void SolarEdgeBattery::readBlockData()
     }
 }
 
-void SolarEdgeBattery::onBlockDataUpdated()
-{
-    qCDebug(dcSunSpec()) << "SolarEdgeBattery: block updated:" << m_batteryData;
-
-    if (!m_thing)
-        return;
-
-    QString chargingState = "idle";
-
-    switch (m_batteryData.batteryStatus) {
-    case SolarEdgeBattery::Off:
-        chargingState = "idle";
-        m_thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Off");
-        break;
-    case SolarEdgeBattery::Standby:
-        chargingState = "idle";
-        m_thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Standby");
-        break;
-    case SolarEdgeBattery::Init:
-        chargingState = "idle";
-        m_thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Init");
-        break;
-    case SolarEdgeBattery::Charge:
-        chargingState = "charging";
-        m_thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Charging");
-        break;
-    case SolarEdgeBattery::Discharge:
-        chargingState = "discharging";
-        m_thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Discharging");
-        break;
-    case SolarEdgeBattery::Fault:
-        chargingState = "idle";
-        m_thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Fault");
-        break;
-    case SolarEdgeBattery::Holding:
-        chargingState = "idle";
-        m_thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Holding");
-        break;
-    case SolarEdgeBattery::Idle:
-        chargingState = "idle";
-        m_thing->setStateValue(solarEdgeBatteryBatteryStatusStateTypeId, "Idle");
-        break;
-    }
-
-    m_thing->setStateValue(solarEdgeBatteryBatteryCriticalStateTypeId, (m_batteryData.stateOfEnergy < 5) && chargingState != "charging");
-    m_thing->setStateValue(solarEdgeBatteryBatteryLevelStateTypeId, m_batteryData.stateOfEnergy);
-    m_thing->setStateValue(solarEdgeBatteryChargingStateStateTypeId, chargingState);
-    m_thing->setStateValue(solarEdgeBatteryRatedEnergyStateTypeId, m_batteryData.ratedEnergy);
-    m_thing->setStateValue(solarEdgeBatteryAverageTemperatureStateTypeId, m_batteryData.averageTemperature);
-    m_thing->setStateValue(solarEdgeBatteryInstantaneousVoltageStateTypeId, m_batteryData.instantaneousVoltage);
-    m_thing->setStateValue(solarEdgeBatteryInstantaneousCurrentStateTypeId, m_batteryData.instantaneousCurrent);
-    m_thing->setStateValue(solarEdgeBatteryCurrentPowerStateTypeId, m_batteryData.instantaneousPower);
-    m_thing->setStateValue(solarEdgeBatteryMaxEnergyStateTypeId, m_batteryData.maxEnergy);
-    m_thing->setStateValue(solarEdgeBatteryCapacityStateTypeId, m_batteryData.availableEnergy);
-    m_thing->setStateValue(solarEdgeBatteryStateOfHealthStateTypeId, m_batteryData.stateOfHealth);
-    m_thing->setStateValue(solarEdgeBatteryVersionStateTypeId, m_batteryData.firmwareVersion);
-}
-
 QDebug operator<<(QDebug debug, const SolarEdgeBattery::BatteryData &batteryData)
 {
     debug << "SolarEdgeBatteryData(" << batteryData.manufacturerName << "-" << batteryData.model << ")" << endl;
@@ -261,8 +203,8 @@ QDebug operator<<(QDebug debug, const SolarEdgeBattery::BatteryData &batteryData
     debug << "    - Instantuouse Voltage" << batteryData.instantaneousVoltage << "V" << endl;
     debug << "    - Instantuouse Current" << batteryData.instantaneousCurrent << "A" << endl;
     debug << "    - Instantuouse Power" << batteryData.instantaneousPower << "W" << endl;
-    debug << "    - Max energy" << batteryData.maxEnergy << "W" << endl;
-    debug << "    - Available energy" << batteryData.availableEnergy << "W" << endl;
+    debug << "    - Max energy" << batteryData.maxEnergy << "W * H" << endl;
+    debug << "    - Available energy" << batteryData.availableEnergy << "W * H" << endl;
     debug << "    - State of health" << batteryData.stateOfHealth << "%" << endl;
     debug << "    - State of energy" << batteryData.stateOfEnergy << "%" << endl;
     debug << "    - Battery status" << batteryData.batteryStatus << endl;

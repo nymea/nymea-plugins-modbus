@@ -66,7 +66,7 @@ public:
     Q_DECLARE_FLAGS(Storctl_modFlags, Storctl_mod)
     Q_FLAG(Storctl_mod)
 
-    explicit SunSpecStorageModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
+    explicit SunSpecStorageModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent = nullptr);
     ~SunSpecStorageModel() override; 
 
     QString name() const override;

@@ -34,6 +34,7 @@
 SunSpecHvrtcModelRepeatingBlock::SunSpecHvrtcModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecHvrtcModel *parent) :
     SunSpecModelRepeatingBlock(blockIndex, blockSize, modbusStartRegister, parent)
 {
+    m_byteOrder = parent->byteOrder();
     initDataPoints();
 }
 
@@ -735,6 +736,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     actPtDataPoint.setAddressOffset(0);
     actPtDataPoint.setSunSpecDataType("uint16");
     actPtDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    actPtDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(actPtDataPoint.name(), actPtDataPoint);
 
     SunSpecDataPoint tms1DataPoint;
@@ -748,6 +750,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     tms1DataPoint.setScaleFactorName("Tms_SF");
     tms1DataPoint.setSunSpecDataType("uint16");
     tms1DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    tms1DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tms1DataPoint.name(), tms1DataPoint);
 
     SunSpecDataPoint v1DataPoint;
@@ -762,6 +765,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     v1DataPoint.setScaleFactorName("V_SF");
     v1DataPoint.setSunSpecDataType("uint16");
     v1DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    v1DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(v1DataPoint.name(), v1DataPoint);
 
     SunSpecDataPoint tms2DataPoint;
@@ -775,6 +779,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     tms2DataPoint.setScaleFactorName("Tms_SF");
     tms2DataPoint.setSunSpecDataType("uint16");
     tms2DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    tms2DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tms2DataPoint.name(), tms2DataPoint);
 
     SunSpecDataPoint v2DataPoint;
@@ -788,6 +793,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     v2DataPoint.setScaleFactorName("V_SF");
     v2DataPoint.setSunSpecDataType("uint16");
     v2DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    v2DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(v2DataPoint.name(), v2DataPoint);
 
     SunSpecDataPoint tms3DataPoint;
@@ -801,6 +807,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     tms3DataPoint.setScaleFactorName("Tms_SF");
     tms3DataPoint.setSunSpecDataType("uint16");
     tms3DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    tms3DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tms3DataPoint.name(), tms3DataPoint);
 
     SunSpecDataPoint v3DataPoint;
@@ -814,6 +821,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     v3DataPoint.setScaleFactorName("V_SF");
     v3DataPoint.setSunSpecDataType("uint16");
     v3DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    v3DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(v3DataPoint.name(), v3DataPoint);
 
     SunSpecDataPoint tms4DataPoint;
@@ -827,6 +835,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     tms4DataPoint.setScaleFactorName("Tms_SF");
     tms4DataPoint.setSunSpecDataType("uint16");
     tms4DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    tms4DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tms4DataPoint.name(), tms4DataPoint);
 
     SunSpecDataPoint v4DataPoint;
@@ -840,6 +849,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     v4DataPoint.setScaleFactorName("V_SF");
     v4DataPoint.setSunSpecDataType("uint16");
     v4DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    v4DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(v4DataPoint.name(), v4DataPoint);
 
     SunSpecDataPoint tms5DataPoint;
@@ -853,6 +863,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     tms5DataPoint.setScaleFactorName("Tms_SF");
     tms5DataPoint.setSunSpecDataType("uint16");
     tms5DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    tms5DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tms5DataPoint.name(), tms5DataPoint);
 
     SunSpecDataPoint v5DataPoint;
@@ -866,6 +877,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     v5DataPoint.setScaleFactorName("V_SF");
     v5DataPoint.setSunSpecDataType("uint16");
     v5DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    v5DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(v5DataPoint.name(), v5DataPoint);
 
     SunSpecDataPoint tms6DataPoint;
@@ -879,6 +891,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     tms6DataPoint.setScaleFactorName("Tms_SF");
     tms6DataPoint.setSunSpecDataType("uint16");
     tms6DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    tms6DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tms6DataPoint.name(), tms6DataPoint);
 
     SunSpecDataPoint v6DataPoint;
@@ -892,6 +905,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     v6DataPoint.setScaleFactorName("V_SF");
     v6DataPoint.setSunSpecDataType("uint16");
     v6DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    v6DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(v6DataPoint.name(), v6DataPoint);
 
     SunSpecDataPoint tms7DataPoint;
@@ -905,6 +919,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     tms7DataPoint.setScaleFactorName("Tms_SF");
     tms7DataPoint.setSunSpecDataType("uint16");
     tms7DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    tms7DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tms7DataPoint.name(), tms7DataPoint);
 
     SunSpecDataPoint v7DataPoint;
@@ -918,6 +933,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     v7DataPoint.setScaleFactorName("V_SF");
     v7DataPoint.setSunSpecDataType("uint16");
     v7DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    v7DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(v7DataPoint.name(), v7DataPoint);
 
     SunSpecDataPoint tms8DataPoint;
@@ -931,6 +947,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     tms8DataPoint.setScaleFactorName("Tms_SF");
     tms8DataPoint.setSunSpecDataType("uint16");
     tms8DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    tms8DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tms8DataPoint.name(), tms8DataPoint);
 
     SunSpecDataPoint v8DataPoint;
@@ -944,6 +961,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     v8DataPoint.setScaleFactorName("V_SF");
     v8DataPoint.setSunSpecDataType("uint16");
     v8DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    v8DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(v8DataPoint.name(), v8DataPoint);
 
     SunSpecDataPoint tms9DataPoint;
@@ -957,6 +975,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     tms9DataPoint.setScaleFactorName("Tms_SF");
     tms9DataPoint.setSunSpecDataType("uint16");
     tms9DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    tms9DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tms9DataPoint.name(), tms9DataPoint);
 
     SunSpecDataPoint v9DataPoint;
@@ -970,6 +989,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     v9DataPoint.setScaleFactorName("V_SF");
     v9DataPoint.setSunSpecDataType("uint16");
     v9DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    v9DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(v9DataPoint.name(), v9DataPoint);
 
     SunSpecDataPoint tms10DataPoint;
@@ -983,6 +1003,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     tms10DataPoint.setScaleFactorName("Tms_SF");
     tms10DataPoint.setSunSpecDataType("uint16");
     tms10DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    tms10DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tms10DataPoint.name(), tms10DataPoint);
 
     SunSpecDataPoint v10DataPoint;
@@ -996,6 +1017,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     v10DataPoint.setScaleFactorName("V_SF");
     v10DataPoint.setSunSpecDataType("uint16");
     v10DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    v10DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(v10DataPoint.name(), v10DataPoint);
 
     SunSpecDataPoint tms11DataPoint;
@@ -1009,6 +1031,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     tms11DataPoint.setScaleFactorName("Tms_SF");
     tms11DataPoint.setSunSpecDataType("uint16");
     tms11DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    tms11DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tms11DataPoint.name(), tms11DataPoint);
 
     SunSpecDataPoint v11DataPoint;
@@ -1022,6 +1045,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     v11DataPoint.setScaleFactorName("V_SF");
     v11DataPoint.setSunSpecDataType("uint16");
     v11DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    v11DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(v11DataPoint.name(), v11DataPoint);
 
     SunSpecDataPoint tms12DataPoint;
@@ -1035,6 +1059,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     tms12DataPoint.setScaleFactorName("Tms_SF");
     tms12DataPoint.setSunSpecDataType("uint16");
     tms12DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    tms12DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tms12DataPoint.name(), tms12DataPoint);
 
     SunSpecDataPoint v12DataPoint;
@@ -1048,6 +1073,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     v12DataPoint.setScaleFactorName("V_SF");
     v12DataPoint.setSunSpecDataType("uint16");
     v12DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    v12DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(v12DataPoint.name(), v12DataPoint);
 
     SunSpecDataPoint tms13DataPoint;
@@ -1061,6 +1087,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     tms13DataPoint.setScaleFactorName("Tms_SF");
     tms13DataPoint.setSunSpecDataType("uint16");
     tms13DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    tms13DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tms13DataPoint.name(), tms13DataPoint);
 
     SunSpecDataPoint v13DataPoint;
@@ -1074,6 +1101,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     v13DataPoint.setScaleFactorName("V_SF");
     v13DataPoint.setSunSpecDataType("uint16");
     v13DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    v13DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(v13DataPoint.name(), v13DataPoint);
 
     SunSpecDataPoint tms14DataPoint;
@@ -1087,6 +1115,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     tms14DataPoint.setScaleFactorName("Tms_SF");
     tms14DataPoint.setSunSpecDataType("uint16");
     tms14DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    tms14DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tms14DataPoint.name(), tms14DataPoint);
 
     SunSpecDataPoint v14DataPoint;
@@ -1100,6 +1129,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     v14DataPoint.setScaleFactorName("V_SF");
     v14DataPoint.setSunSpecDataType("uint16");
     v14DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    v14DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(v14DataPoint.name(), v14DataPoint);
 
     SunSpecDataPoint tms15DataPoint;
@@ -1113,6 +1143,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     tms15DataPoint.setScaleFactorName("Tms_SF");
     tms15DataPoint.setSunSpecDataType("uint16");
     tms15DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    tms15DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tms15DataPoint.name(), tms15DataPoint);
 
     SunSpecDataPoint v15DataPoint;
@@ -1126,6 +1157,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     v15DataPoint.setScaleFactorName("V_SF");
     v15DataPoint.setSunSpecDataType("uint16");
     v15DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    v15DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(v15DataPoint.name(), v15DataPoint);
 
     SunSpecDataPoint tms16DataPoint;
@@ -1139,6 +1171,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     tms16DataPoint.setScaleFactorName("Tms_SF");
     tms16DataPoint.setSunSpecDataType("uint16");
     tms16DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    tms16DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tms16DataPoint.name(), tms16DataPoint);
 
     SunSpecDataPoint v16DataPoint;
@@ -1152,6 +1185,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     v16DataPoint.setScaleFactorName("V_SF");
     v16DataPoint.setSunSpecDataType("uint16");
     v16DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    v16DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(v16DataPoint.name(), v16DataPoint);
 
     SunSpecDataPoint tms17DataPoint;
@@ -1165,6 +1199,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     tms17DataPoint.setScaleFactorName("Tms_SF");
     tms17DataPoint.setSunSpecDataType("uint16");
     tms17DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    tms17DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tms17DataPoint.name(), tms17DataPoint);
 
     SunSpecDataPoint v17DataPoint;
@@ -1178,6 +1213,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     v17DataPoint.setScaleFactorName("V_SF");
     v17DataPoint.setSunSpecDataType("uint16");
     v17DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    v17DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(v17DataPoint.name(), v17DataPoint);
 
     SunSpecDataPoint tms18DataPoint;
@@ -1191,6 +1227,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     tms18DataPoint.setScaleFactorName("Tms_SF");
     tms18DataPoint.setSunSpecDataType("uint16");
     tms18DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    tms18DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tms18DataPoint.name(), tms18DataPoint);
 
     SunSpecDataPoint v18DataPoint;
@@ -1204,6 +1241,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     v18DataPoint.setScaleFactorName("V_SF");
     v18DataPoint.setSunSpecDataType("uint16");
     v18DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    v18DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(v18DataPoint.name(), v18DataPoint);
 
     SunSpecDataPoint tms19DataPoint;
@@ -1217,6 +1255,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     tms19DataPoint.setScaleFactorName("Tms_SF");
     tms19DataPoint.setSunSpecDataType("uint16");
     tms19DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    tms19DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tms19DataPoint.name(), tms19DataPoint);
 
     SunSpecDataPoint v19DataPoint;
@@ -1230,6 +1269,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     v19DataPoint.setScaleFactorName("V_SF");
     v19DataPoint.setSunSpecDataType("uint16");
     v19DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    v19DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(v19DataPoint.name(), v19DataPoint);
 
     SunSpecDataPoint tms20DataPoint;
@@ -1243,6 +1283,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     tms20DataPoint.setScaleFactorName("Tms_SF");
     tms20DataPoint.setSunSpecDataType("uint16");
     tms20DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    tms20DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tms20DataPoint.name(), tms20DataPoint);
 
     SunSpecDataPoint v20DataPoint;
@@ -1256,6 +1297,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     v20DataPoint.setScaleFactorName("V_SF");
     v20DataPoint.setSunSpecDataType("uint16");
     v20DataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    v20DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(v20DataPoint.name(), v20DataPoint);
 
     SunSpecDataPoint crvNamDataPoint;
@@ -1267,6 +1309,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     crvNamDataPoint.setBlockOffset(39);
     crvNamDataPoint.setSunSpecDataType("string");
     crvNamDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    crvNamDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(crvNamDataPoint.name(), crvNamDataPoint);
 
     SunSpecDataPoint readOnlyDataPoint;
@@ -1278,6 +1321,7 @@ void SunSpecHvrtcModelRepeatingBlock::initDataPoints()
     readOnlyDataPoint.setAddressOffset(49);
     readOnlyDataPoint.setBlockOffset(47);
     readOnlyDataPoint.setSunSpecDataType("enum16");
+    readOnlyDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(readOnlyDataPoint.name(), readOnlyDataPoint);
 
 }
@@ -1421,8 +1465,8 @@ void SunSpecHvrtcModelRepeatingBlock::processBlockData(const QVector<quint16> bl
 }
 
 
-SunSpecHvrtcModel::SunSpecHvrtcModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 138, modelLength, parent)
+SunSpecHvrtcModel::SunSpecHvrtcModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 138, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixedAndRepeating;
 
@@ -1569,6 +1613,7 @@ void SunSpecHvrtcModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -1579,6 +1624,7 @@ void SunSpecHvrtcModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint actCrvDataPoint;
@@ -1591,6 +1637,7 @@ void SunSpecHvrtcModel::initDataPoints()
     actCrvDataPoint.setBlockOffset(0);
     actCrvDataPoint.setSunSpecDataType("uint16");
     actCrvDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    actCrvDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(actCrvDataPoint.name(), actCrvDataPoint);
 
     SunSpecDataPoint modEnaDataPoint;
@@ -1603,6 +1650,7 @@ void SunSpecHvrtcModel::initDataPoints()
     modEnaDataPoint.setBlockOffset(1);
     modEnaDataPoint.setSunSpecDataType("bitfield16");
     modEnaDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    modEnaDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modEnaDataPoint.name(), modEnaDataPoint);
 
     SunSpecDataPoint winTmsDataPoint;
@@ -1615,6 +1663,7 @@ void SunSpecHvrtcModel::initDataPoints()
     winTmsDataPoint.setBlockOffset(2);
     winTmsDataPoint.setSunSpecDataType("uint16");
     winTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    winTmsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(winTmsDataPoint.name(), winTmsDataPoint);
 
     SunSpecDataPoint rvrtTmsDataPoint;
@@ -1627,6 +1676,7 @@ void SunSpecHvrtcModel::initDataPoints()
     rvrtTmsDataPoint.setBlockOffset(3);
     rvrtTmsDataPoint.setSunSpecDataType("uint16");
     rvrtTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    rvrtTmsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(rvrtTmsDataPoint.name(), rvrtTmsDataPoint);
 
     SunSpecDataPoint rmpTmsDataPoint;
@@ -1639,6 +1689,7 @@ void SunSpecHvrtcModel::initDataPoints()
     rmpTmsDataPoint.setBlockOffset(4);
     rmpTmsDataPoint.setSunSpecDataType("uint16");
     rmpTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    rmpTmsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(rmpTmsDataPoint.name(), rmpTmsDataPoint);
 
     SunSpecDataPoint nCrvDataPoint;
@@ -1650,6 +1701,7 @@ void SunSpecHvrtcModel::initDataPoints()
     nCrvDataPoint.setAddressOffset(7);
     nCrvDataPoint.setBlockOffset(5);
     nCrvDataPoint.setSunSpecDataType("uint16");
+    nCrvDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(nCrvDataPoint.name(), nCrvDataPoint);
 
     SunSpecDataPoint nPtDataPoint;
@@ -1661,6 +1713,7 @@ void SunSpecHvrtcModel::initDataPoints()
     nPtDataPoint.setAddressOffset(8);
     nPtDataPoint.setBlockOffset(6);
     nPtDataPoint.setSunSpecDataType("uint16");
+    nPtDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(nPtDataPoint.name(), nPtDataPoint);
 
     SunSpecDataPoint tmsSfDataPoint;
@@ -1672,6 +1725,7 @@ void SunSpecHvrtcModel::initDataPoints()
     tmsSfDataPoint.setAddressOffset(9);
     tmsSfDataPoint.setBlockOffset(7);
     tmsSfDataPoint.setSunSpecDataType("sunssf");
+    tmsSfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tmsSfDataPoint.name(), tmsSfDataPoint);
 
     SunSpecDataPoint vSfDataPoint;
@@ -1683,6 +1737,7 @@ void SunSpecHvrtcModel::initDataPoints()
     vSfDataPoint.setAddressOffset(10);
     vSfDataPoint.setBlockOffset(8);
     vSfDataPoint.setSunSpecDataType("sunssf");
+    vSfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vSfDataPoint.name(), vSfDataPoint);
 
     SunSpecDataPoint padDataPoint;
@@ -1691,6 +1746,7 @@ void SunSpecHvrtcModel::initDataPoints()
     padDataPoint.setAddressOffset(11);
     padDataPoint.setBlockOffset(9);
     padDataPoint.setSunSpecDataType("pad");
+    padDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(padDataPoint.name(), padDataPoint);
 
 }

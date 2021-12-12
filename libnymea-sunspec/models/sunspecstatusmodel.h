@@ -110,7 +110,7 @@ public:
     Q_DECLARE_FLAGS(RtstFlags, Rtst)
     Q_FLAG(Rtst)
 
-    explicit SunSpecStatusModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
+    explicit SunSpecStatusModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent = nullptr);
     ~SunSpecStatusModel() override; 
 
     QString name() const override;

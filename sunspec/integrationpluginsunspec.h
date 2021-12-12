@@ -37,9 +37,7 @@
 #include <sunspecconnection.h>
 #include <models/sunspecmodelfactory.h>
 
-#include "sunspecinverter.h"
-#include "sunspecstorage.h"
-#include "sunspecmeter.h"
+#include "sunspecthing.h"
 
 #include <QUuid>
 
@@ -52,6 +50,7 @@ class IntegrationPluginSunSpec: public IntegrationPlugin
 
 public:
     explicit IntegrationPluginSunSpec();
+
     void init() override;
     void discoverThings(ThingDiscoveryInfo *info) override;
     void setupThing(ThingSetupInfo *info) override;
@@ -79,7 +78,11 @@ private:
     PluginTimer *m_refreshTimer = nullptr;
 
     QHash<ThingId, SunSpecConnection *> m_sunSpecConnections;
-    QHash<Thing *, SunSpecThing *> m_sunspecThings;
+    QHash<Thing *, SunSpecThing *> m_sunSpecThings;
+
+    QHash<Thing *, SunSpecModel *> m_sunSpecInverters;
+    QHash<Thing *, SunSpecModel *> m_sunSpecMeters;
+    QHash<Thing *, SunSpecModel *> m_sunSpecStorages;
 
     bool sunspecThingAlreadyAdded(uint modelId, uint modbusAddress, const ThingId &parentId);
     void processDiscoveryResult(Thing *thing, SunSpecConnection *connection);
@@ -98,11 +101,23 @@ private:
     void searchSolarEdgeBatteries(SunSpecConnection *connection);
     void searchSolarEdgeBattery(SunSpecConnection *connection, const ThingId &parentThingId, quint16 startRegister);
 
+    // SolarEdge
+    double calculateSolarEdgePvProduction(Thing *thing, double acPower, double dcPower);
+
     void autocreateSunSpecModelThing(const ThingClassId &thingClassId, const QString &thingName, const ThingId &parentId, SunSpecModel *model);
+
+    QString getInverterStateString(quint16 state);
+    QString getInverterErrorString(quint32 flag);
+
 
 private slots:
     void onRefreshTimer();
     void onPluginConfigurationChanged(const ParamTypeId &paramTypeId, const QVariant &value);
+
+    void onInverterBlockUpdated();
+    void onMeterBlockUpdated();
+    void onStorageBlockUpdated();
+    void onSolarEdgeBatteryBlockUpdated();
 
 };
 #endif // INTEGRATIONPLUGINSUNSPEC_H

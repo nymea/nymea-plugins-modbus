@@ -31,8 +31,8 @@
 #include "sunspecaggregatormodel.h"
 #include "sunspecconnection.h"
 
-SunSpecAggregatorModel::SunSpecAggregatorModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 2, modelLength, parent)
+SunSpecAggregatorModel::SunSpecAggregatorModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 2, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
 
@@ -109,6 +109,7 @@ void SunSpecAggregatorModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -119,6 +120,7 @@ void SunSpecAggregatorModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint aidDataPoint;
@@ -130,6 +132,7 @@ void SunSpecAggregatorModel::initDataPoints()
     aidDataPoint.setAddressOffset(2);
     aidDataPoint.setBlockOffset(0);
     aidDataPoint.setSunSpecDataType("uint16");
+    aidDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(aidDataPoint.name(), aidDataPoint);
 
     SunSpecDataPoint nDataPoint;
@@ -141,6 +144,7 @@ void SunSpecAggregatorModel::initDataPoints()
     nDataPoint.setAddressOffset(3);
     nDataPoint.setBlockOffset(1);
     nDataPoint.setSunSpecDataType("uint16");
+    nDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(nDataPoint.name(), nDataPoint);
 
     SunSpecDataPoint unDataPoint;
@@ -152,6 +156,7 @@ void SunSpecAggregatorModel::initDataPoints()
     unDataPoint.setAddressOffset(4);
     unDataPoint.setBlockOffset(2);
     unDataPoint.setSunSpecDataType("uint16");
+    unDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(unDataPoint.name(), unDataPoint);
 
     SunSpecDataPoint statusDataPoint;
@@ -163,6 +168,7 @@ void SunSpecAggregatorModel::initDataPoints()
     statusDataPoint.setAddressOffset(5);
     statusDataPoint.setBlockOffset(3);
     statusDataPoint.setSunSpecDataType("enum16");
+    statusDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(statusDataPoint.name(), statusDataPoint);
 
     SunSpecDataPoint vendorStatusDataPoint;
@@ -173,6 +179,7 @@ void SunSpecAggregatorModel::initDataPoints()
     vendorStatusDataPoint.setAddressOffset(6);
     vendorStatusDataPoint.setBlockOffset(4);
     vendorStatusDataPoint.setSunSpecDataType("enum16");
+    vendorStatusDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vendorStatusDataPoint.name(), vendorStatusDataPoint);
 
     SunSpecDataPoint eventCodeDataPoint;
@@ -184,6 +191,7 @@ void SunSpecAggregatorModel::initDataPoints()
     eventCodeDataPoint.setAddressOffset(7);
     eventCodeDataPoint.setBlockOffset(5);
     eventCodeDataPoint.setSunSpecDataType("bitfield32");
+    eventCodeDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(eventCodeDataPoint.name(), eventCodeDataPoint);
 
     SunSpecDataPoint vendorEventCodeDataPoint;
@@ -194,6 +202,7 @@ void SunSpecAggregatorModel::initDataPoints()
     vendorEventCodeDataPoint.setAddressOffset(9);
     vendorEventCodeDataPoint.setBlockOffset(7);
     vendorEventCodeDataPoint.setSunSpecDataType("bitfield32");
+    vendorEventCodeDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vendorEventCodeDataPoint.name(), vendorEventCodeDataPoint);
 
     SunSpecDataPoint controlDataPoint;
@@ -204,6 +213,7 @@ void SunSpecAggregatorModel::initDataPoints()
     controlDataPoint.setAddressOffset(11);
     controlDataPoint.setBlockOffset(9);
     controlDataPoint.setSunSpecDataType("enum16");
+    controlDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(controlDataPoint.name(), controlDataPoint);
 
     SunSpecDataPoint vendorControlDataPoint;
@@ -214,6 +224,7 @@ void SunSpecAggregatorModel::initDataPoints()
     vendorControlDataPoint.setAddressOffset(12);
     vendorControlDataPoint.setBlockOffset(10);
     vendorControlDataPoint.setSunSpecDataType("enum32");
+    vendorControlDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vendorControlDataPoint.name(), vendorControlDataPoint);
 
     SunSpecDataPoint controlValueDataPoint;
@@ -224,6 +235,7 @@ void SunSpecAggregatorModel::initDataPoints()
     controlValueDataPoint.setAddressOffset(14);
     controlValueDataPoint.setBlockOffset(12);
     controlValueDataPoint.setSunSpecDataType("enum32");
+    controlValueDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(controlValueDataPoint.name(), controlValueDataPoint);
 
 }

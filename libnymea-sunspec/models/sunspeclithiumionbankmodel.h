@@ -264,7 +264,7 @@ class SunSpecLithiumIonBankModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    explicit SunSpecLithiumIonBankModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
+    explicit SunSpecLithiumIonBankModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent = nullptr);
     ~SunSpecLithiumIonBankModel() override; 
 
     QString name() const override;

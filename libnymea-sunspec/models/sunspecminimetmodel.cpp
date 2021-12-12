@@ -31,8 +31,8 @@
 #include "sunspecminimetmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecMiniMetModel::SunSpecMiniMetModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 308, modelLength, parent)
+SunSpecMiniMetModel::SunSpecMiniMetModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 308, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
 
@@ -85,6 +85,7 @@ void SunSpecMiniMetModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -95,6 +96,7 @@ void SunSpecMiniMetModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint ghiDataPoint;
@@ -106,6 +108,7 @@ void SunSpecMiniMetModel::initDataPoints()
     ghiDataPoint.setAddressOffset(2);
     ghiDataPoint.setBlockOffset(0);
     ghiDataPoint.setSunSpecDataType("uint16");
+    ghiDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(ghiDataPoint.name(), ghiDataPoint);
 
     SunSpecDataPoint tempDataPoint;
@@ -118,6 +121,7 @@ void SunSpecMiniMetModel::initDataPoints()
     tempDataPoint.setBlockOffset(1);
     tempDataPoint.setScaleFactorName("-1");
     tempDataPoint.setSunSpecDataType("int16");
+    tempDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(tempDataPoint.name(), tempDataPoint);
 
     SunSpecDataPoint ambientTemperatureDataPoint;
@@ -129,6 +133,7 @@ void SunSpecMiniMetModel::initDataPoints()
     ambientTemperatureDataPoint.setBlockOffset(2);
     ambientTemperatureDataPoint.setScaleFactorName("-1");
     ambientTemperatureDataPoint.setSunSpecDataType("int16");
+    ambientTemperatureDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(ambientTemperatureDataPoint.name(), ambientTemperatureDataPoint);
 
     SunSpecDataPoint windSpeedDataPoint;
@@ -139,6 +144,7 @@ void SunSpecMiniMetModel::initDataPoints()
     windSpeedDataPoint.setAddressOffset(5);
     windSpeedDataPoint.setBlockOffset(3);
     windSpeedDataPoint.setSunSpecDataType("uint16");
+    windSpeedDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(windSpeedDataPoint.name(), windSpeedDataPoint);
 
 }

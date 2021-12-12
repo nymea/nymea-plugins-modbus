@@ -34,6 +34,7 @@
 SunSpecMpptModelRepeatingBlock::SunSpecMpptModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecMpptModel *parent) :
     SunSpecModelRepeatingBlock(blockIndex, blockSize, modbusStartRegister, parent)
 {
+    m_byteOrder = parent->byteOrder();
     initDataPoints();
 }
 
@@ -96,6 +97,7 @@ void SunSpecMpptModelRepeatingBlock::initDataPoints()
     inputIdDataPoint.setSize(1);
     inputIdDataPoint.setAddressOffset(0);
     inputIdDataPoint.setSunSpecDataType("uint16");
+    inputIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(inputIdDataPoint.name(), inputIdDataPoint);
 
     SunSpecDataPoint inputIdStingDataPoint;
@@ -104,6 +106,7 @@ void SunSpecMpptModelRepeatingBlock::initDataPoints()
     inputIdStingDataPoint.setSize(8);
     inputIdStingDataPoint.setAddressOffset(1);
     inputIdStingDataPoint.setSunSpecDataType("string");
+    inputIdStingDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(inputIdStingDataPoint.name(), inputIdStingDataPoint);
 
     SunSpecDataPoint dcCurrentDataPoint;
@@ -115,6 +118,7 @@ void SunSpecMpptModelRepeatingBlock::initDataPoints()
     dcCurrentDataPoint.setBlockOffset(7);
     dcCurrentDataPoint.setScaleFactorName("DCA_SF");
     dcCurrentDataPoint.setSunSpecDataType("uint16");
+    dcCurrentDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(dcCurrentDataPoint.name(), dcCurrentDataPoint);
 
     SunSpecDataPoint dcVoltageDataPoint;
@@ -126,6 +130,7 @@ void SunSpecMpptModelRepeatingBlock::initDataPoints()
     dcVoltageDataPoint.setBlockOffset(8);
     dcVoltageDataPoint.setScaleFactorName("DCV_SF");
     dcVoltageDataPoint.setSunSpecDataType("uint16");
+    dcVoltageDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(dcVoltageDataPoint.name(), dcVoltageDataPoint);
 
     SunSpecDataPoint dcPowerDataPoint;
@@ -137,6 +142,7 @@ void SunSpecMpptModelRepeatingBlock::initDataPoints()
     dcPowerDataPoint.setBlockOffset(9);
     dcPowerDataPoint.setScaleFactorName("DCW_SF");
     dcPowerDataPoint.setSunSpecDataType("uint16");
+    dcPowerDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(dcPowerDataPoint.name(), dcPowerDataPoint);
 
     SunSpecDataPoint lifetimeEnergyDataPoint;
@@ -148,6 +154,7 @@ void SunSpecMpptModelRepeatingBlock::initDataPoints()
     lifetimeEnergyDataPoint.setBlockOffset(10);
     lifetimeEnergyDataPoint.setScaleFactorName("DCWH_SF");
     lifetimeEnergyDataPoint.setSunSpecDataType("acc32");
+    lifetimeEnergyDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(lifetimeEnergyDataPoint.name(), lifetimeEnergyDataPoint);
 
     SunSpecDataPoint timestampDataPoint;
@@ -158,6 +165,7 @@ void SunSpecMpptModelRepeatingBlock::initDataPoints()
     timestampDataPoint.setAddressOffset(14);
     timestampDataPoint.setBlockOffset(12);
     timestampDataPoint.setSunSpecDataType("uint32");
+    timestampDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(timestampDataPoint.name(), timestampDataPoint);
 
     SunSpecDataPoint temperatureDataPoint;
@@ -168,6 +176,7 @@ void SunSpecMpptModelRepeatingBlock::initDataPoints()
     temperatureDataPoint.setAddressOffset(16);
     temperatureDataPoint.setBlockOffset(14);
     temperatureDataPoint.setSunSpecDataType("int16");
+    temperatureDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(temperatureDataPoint.name(), temperatureDataPoint);
 
     SunSpecDataPoint operatingStateDataPoint;
@@ -177,6 +186,7 @@ void SunSpecMpptModelRepeatingBlock::initDataPoints()
     operatingStateDataPoint.setAddressOffset(17);
     operatingStateDataPoint.setBlockOffset(15);
     operatingStateDataPoint.setSunSpecDataType("enum16");
+    operatingStateDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(operatingStateDataPoint.name(), operatingStateDataPoint);
 
     SunSpecDataPoint moduleEventsDataPoint;
@@ -186,6 +196,7 @@ void SunSpecMpptModelRepeatingBlock::initDataPoints()
     moduleEventsDataPoint.setAddressOffset(18);
     moduleEventsDataPoint.setBlockOffset(16);
     moduleEventsDataPoint.setSunSpecDataType("bitfield32");
+    moduleEventsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(moduleEventsDataPoint.name(), moduleEventsDataPoint);
 
 }
@@ -230,8 +241,8 @@ void SunSpecMpptModelRepeatingBlock::processBlockData(const QVector<quint16> blo
 }
 
 
-SunSpecMpptModel::SunSpecMpptModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 160, modelLength, parent)
+SunSpecMpptModel::SunSpecMpptModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 160, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixedAndRepeating;
 
@@ -296,6 +307,7 @@ void SunSpecMpptModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -306,6 +318,7 @@ void SunSpecMpptModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint currentScaleFactorDataPoint;
@@ -315,6 +328,7 @@ void SunSpecMpptModel::initDataPoints()
     currentScaleFactorDataPoint.setAddressOffset(2);
     currentScaleFactorDataPoint.setBlockOffset(0);
     currentScaleFactorDataPoint.setSunSpecDataType("sunssf");
+    currentScaleFactorDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(currentScaleFactorDataPoint.name(), currentScaleFactorDataPoint);
 
     SunSpecDataPoint voltageScaleFactorDataPoint;
@@ -324,6 +338,7 @@ void SunSpecMpptModel::initDataPoints()
     voltageScaleFactorDataPoint.setAddressOffset(3);
     voltageScaleFactorDataPoint.setBlockOffset(1);
     voltageScaleFactorDataPoint.setSunSpecDataType("sunssf");
+    voltageScaleFactorDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(voltageScaleFactorDataPoint.name(), voltageScaleFactorDataPoint);
 
     SunSpecDataPoint powerScaleFactorDataPoint;
@@ -333,6 +348,7 @@ void SunSpecMpptModel::initDataPoints()
     powerScaleFactorDataPoint.setAddressOffset(4);
     powerScaleFactorDataPoint.setBlockOffset(2);
     powerScaleFactorDataPoint.setSunSpecDataType("sunssf");
+    powerScaleFactorDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(powerScaleFactorDataPoint.name(), powerScaleFactorDataPoint);
 
     SunSpecDataPoint energyScaleFactorDataPoint;
@@ -342,6 +358,7 @@ void SunSpecMpptModel::initDataPoints()
     energyScaleFactorDataPoint.setAddressOffset(5);
     energyScaleFactorDataPoint.setBlockOffset(3);
     energyScaleFactorDataPoint.setSunSpecDataType("sunssf");
+    energyScaleFactorDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(energyScaleFactorDataPoint.name(), energyScaleFactorDataPoint);
 
     SunSpecDataPoint globalEventsDataPoint;
@@ -351,6 +368,7 @@ void SunSpecMpptModel::initDataPoints()
     globalEventsDataPoint.setAddressOffset(6);
     globalEventsDataPoint.setBlockOffset(4);
     globalEventsDataPoint.setSunSpecDataType("bitfield32");
+    globalEventsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(globalEventsDataPoint.name(), globalEventsDataPoint);
 
     SunSpecDataPoint numberOfModulesDataPoint;
@@ -360,6 +378,7 @@ void SunSpecMpptModel::initDataPoints()
     numberOfModulesDataPoint.setAddressOffset(8);
     numberOfModulesDataPoint.setBlockOffset(6);
     numberOfModulesDataPoint.setSunSpecDataType("count");
+    numberOfModulesDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(numberOfModulesDataPoint.name(), numberOfModulesDataPoint);
 
     SunSpecDataPoint timestampPeriodDataPoint;
@@ -369,6 +388,7 @@ void SunSpecMpptModel::initDataPoints()
     timestampPeriodDataPoint.setAddressOffset(9);
     timestampPeriodDataPoint.setBlockOffset(7);
     timestampPeriodDataPoint.setSunSpecDataType("uint16");
+    timestampPeriodDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(timestampPeriodDataPoint.name(), timestampPeriodDataPoint);
 
 }

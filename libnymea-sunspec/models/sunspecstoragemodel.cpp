@@ -31,8 +31,8 @@
 #include "sunspecstoragemodel.h"
 #include "sunspecconnection.h"
 
-SunSpecStorageModel::SunSpecStorageModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 124, modelLength, parent)
+SunSpecStorageModel::SunSpecStorageModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 124, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
 
@@ -333,6 +333,7 @@ void SunSpecStorageModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -343,6 +344,7 @@ void SunSpecStorageModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint wChaMaxDataPoint;
@@ -357,6 +359,7 @@ void SunSpecStorageModel::initDataPoints()
     wChaMaxDataPoint.setScaleFactorName("WChaMax_SF");
     wChaMaxDataPoint.setSunSpecDataType("uint16");
     wChaMaxDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    wChaMaxDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(wChaMaxDataPoint.name(), wChaMaxDataPoint);
 
     SunSpecDataPoint wChaGraDataPoint;
@@ -371,6 +374,7 @@ void SunSpecStorageModel::initDataPoints()
     wChaGraDataPoint.setScaleFactorName("WChaDisChaGra_SF");
     wChaGraDataPoint.setSunSpecDataType("uint16");
     wChaGraDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    wChaGraDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(wChaGraDataPoint.name(), wChaGraDataPoint);
 
     SunSpecDataPoint wDisChaGraDataPoint;
@@ -385,6 +389,7 @@ void SunSpecStorageModel::initDataPoints()
     wDisChaGraDataPoint.setScaleFactorName("WChaDisChaGra_SF");
     wDisChaGraDataPoint.setSunSpecDataType("uint16");
     wDisChaGraDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    wDisChaGraDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(wDisChaGraDataPoint.name(), wDisChaGraDataPoint);
 
     SunSpecDataPoint storCtlModDataPoint;
@@ -397,6 +402,7 @@ void SunSpecStorageModel::initDataPoints()
     storCtlModDataPoint.setBlockOffset(3);
     storCtlModDataPoint.setSunSpecDataType("bitfield16");
     storCtlModDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    storCtlModDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(storCtlModDataPoint.name(), storCtlModDataPoint);
 
     SunSpecDataPoint vaChaMaxDataPoint;
@@ -410,6 +416,7 @@ void SunSpecStorageModel::initDataPoints()
     vaChaMaxDataPoint.setScaleFactorName("VAChaMax_SF");
     vaChaMaxDataPoint.setSunSpecDataType("uint16");
     vaChaMaxDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    vaChaMaxDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vaChaMaxDataPoint.name(), vaChaMaxDataPoint);
 
     SunSpecDataPoint minRsvPctDataPoint;
@@ -423,6 +430,7 @@ void SunSpecStorageModel::initDataPoints()
     minRsvPctDataPoint.setScaleFactorName("MinRsvPct_SF");
     minRsvPctDataPoint.setSunSpecDataType("uint16");
     minRsvPctDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    minRsvPctDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(minRsvPctDataPoint.name(), minRsvPctDataPoint);
 
     SunSpecDataPoint chaStateDataPoint;
@@ -435,6 +443,7 @@ void SunSpecStorageModel::initDataPoints()
     chaStateDataPoint.setBlockOffset(6);
     chaStateDataPoint.setScaleFactorName("ChaState_SF");
     chaStateDataPoint.setSunSpecDataType("uint16");
+    chaStateDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(chaStateDataPoint.name(), chaStateDataPoint);
 
     SunSpecDataPoint storAvalDataPoint;
@@ -447,6 +456,7 @@ void SunSpecStorageModel::initDataPoints()
     storAvalDataPoint.setBlockOffset(7);
     storAvalDataPoint.setScaleFactorName("StorAval_SF");
     storAvalDataPoint.setSunSpecDataType("uint16");
+    storAvalDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(storAvalDataPoint.name(), storAvalDataPoint);
 
     SunSpecDataPoint inBatVDataPoint;
@@ -459,6 +469,7 @@ void SunSpecStorageModel::initDataPoints()
     inBatVDataPoint.setBlockOffset(8);
     inBatVDataPoint.setScaleFactorName("InBatV_SF");
     inBatVDataPoint.setSunSpecDataType("uint16");
+    inBatVDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(inBatVDataPoint.name(), inBatVDataPoint);
 
     SunSpecDataPoint chaStDataPoint;
@@ -469,6 +480,7 @@ void SunSpecStorageModel::initDataPoints()
     chaStDataPoint.setAddressOffset(11);
     chaStDataPoint.setBlockOffset(9);
     chaStDataPoint.setSunSpecDataType("enum16");
+    chaStDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(chaStDataPoint.name(), chaStDataPoint);
 
     SunSpecDataPoint outWRteDataPoint;
@@ -482,6 +494,7 @@ void SunSpecStorageModel::initDataPoints()
     outWRteDataPoint.setScaleFactorName("InOutWRte_SF");
     outWRteDataPoint.setSunSpecDataType("int16");
     outWRteDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    outWRteDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(outWRteDataPoint.name(), outWRteDataPoint);
 
     SunSpecDataPoint inWRteDataPoint;
@@ -495,6 +508,7 @@ void SunSpecStorageModel::initDataPoints()
     inWRteDataPoint.setScaleFactorName("InOutWRte_SF");
     inWRteDataPoint.setSunSpecDataType("int16");
     inWRteDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    inWRteDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(inWRteDataPoint.name(), inWRteDataPoint);
 
     SunSpecDataPoint inOutWRteWinTmsDataPoint;
@@ -507,6 +521,7 @@ void SunSpecStorageModel::initDataPoints()
     inOutWRteWinTmsDataPoint.setBlockOffset(12);
     inOutWRteWinTmsDataPoint.setSunSpecDataType("uint16");
     inOutWRteWinTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    inOutWRteWinTmsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(inOutWRteWinTmsDataPoint.name(), inOutWRteWinTmsDataPoint);
 
     SunSpecDataPoint inOutWRteRvrtTmsDataPoint;
@@ -519,6 +534,7 @@ void SunSpecStorageModel::initDataPoints()
     inOutWRteRvrtTmsDataPoint.setBlockOffset(13);
     inOutWRteRvrtTmsDataPoint.setSunSpecDataType("uint16");
     inOutWRteRvrtTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    inOutWRteRvrtTmsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(inOutWRteRvrtTmsDataPoint.name(), inOutWRteRvrtTmsDataPoint);
 
     SunSpecDataPoint inOutWRteRmpTmsDataPoint;
@@ -531,6 +547,7 @@ void SunSpecStorageModel::initDataPoints()
     inOutWRteRmpTmsDataPoint.setBlockOffset(14);
     inOutWRteRmpTmsDataPoint.setSunSpecDataType("uint16");
     inOutWRteRmpTmsDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    inOutWRteRmpTmsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(inOutWRteRmpTmsDataPoint.name(), inOutWRteRmpTmsDataPoint);
 
     SunSpecDataPoint chaGriSetDataPoint;
@@ -540,6 +557,7 @@ void SunSpecStorageModel::initDataPoints()
     chaGriSetDataPoint.setBlockOffset(15);
     chaGriSetDataPoint.setSunSpecDataType("enum16");
     chaGriSetDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    chaGriSetDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(chaGriSetDataPoint.name(), chaGriSetDataPoint);
 
     SunSpecDataPoint wChaMaxSfDataPoint;
@@ -551,6 +569,7 @@ void SunSpecStorageModel::initDataPoints()
     wChaMaxSfDataPoint.setAddressOffset(18);
     wChaMaxSfDataPoint.setBlockOffset(16);
     wChaMaxSfDataPoint.setSunSpecDataType("sunssf");
+    wChaMaxSfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(wChaMaxSfDataPoint.name(), wChaMaxSfDataPoint);
 
     SunSpecDataPoint wChaDisChaGraSfDataPoint;
@@ -562,6 +581,7 @@ void SunSpecStorageModel::initDataPoints()
     wChaDisChaGraSfDataPoint.setAddressOffset(19);
     wChaDisChaGraSfDataPoint.setBlockOffset(17);
     wChaDisChaGraSfDataPoint.setSunSpecDataType("sunssf");
+    wChaDisChaGraSfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(wChaDisChaGraSfDataPoint.name(), wChaDisChaGraSfDataPoint);
 
     SunSpecDataPoint vaChaMaxSfDataPoint;
@@ -572,6 +592,7 @@ void SunSpecStorageModel::initDataPoints()
     vaChaMaxSfDataPoint.setAddressOffset(20);
     vaChaMaxSfDataPoint.setBlockOffset(18);
     vaChaMaxSfDataPoint.setSunSpecDataType("sunssf");
+    vaChaMaxSfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vaChaMaxSfDataPoint.name(), vaChaMaxSfDataPoint);
 
     SunSpecDataPoint minRsvPctSfDataPoint;
@@ -582,6 +603,7 @@ void SunSpecStorageModel::initDataPoints()
     minRsvPctSfDataPoint.setAddressOffset(21);
     minRsvPctSfDataPoint.setBlockOffset(19);
     minRsvPctSfDataPoint.setSunSpecDataType("sunssf");
+    minRsvPctSfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(minRsvPctSfDataPoint.name(), minRsvPctSfDataPoint);
 
     SunSpecDataPoint chaStateSfDataPoint;
@@ -592,6 +614,7 @@ void SunSpecStorageModel::initDataPoints()
     chaStateSfDataPoint.setAddressOffset(22);
     chaStateSfDataPoint.setBlockOffset(20);
     chaStateSfDataPoint.setSunSpecDataType("sunssf");
+    chaStateSfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(chaStateSfDataPoint.name(), chaStateSfDataPoint);
 
     SunSpecDataPoint storAvalSfDataPoint;
@@ -602,6 +625,7 @@ void SunSpecStorageModel::initDataPoints()
     storAvalSfDataPoint.setAddressOffset(23);
     storAvalSfDataPoint.setBlockOffset(21);
     storAvalSfDataPoint.setSunSpecDataType("sunssf");
+    storAvalSfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(storAvalSfDataPoint.name(), storAvalSfDataPoint);
 
     SunSpecDataPoint inBatVSfDataPoint;
@@ -612,6 +636,7 @@ void SunSpecStorageModel::initDataPoints()
     inBatVSfDataPoint.setAddressOffset(24);
     inBatVSfDataPoint.setBlockOffset(22);
     inBatVSfDataPoint.setSunSpecDataType("sunssf");
+    inBatVSfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(inBatVSfDataPoint.name(), inBatVSfDataPoint);
 
     SunSpecDataPoint inOutWRteSfDataPoint;
@@ -622,6 +647,7 @@ void SunSpecStorageModel::initDataPoints()
     inOutWRteSfDataPoint.setAddressOffset(25);
     inOutWRteSfDataPoint.setBlockOffset(23);
     inOutWRteSfDataPoint.setSunSpecDataType("sunssf");
+    inOutWRteSfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(inOutWRteSfDataPoint.name(), inOutWRteSfDataPoint);
 
 }

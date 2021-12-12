@@ -61,7 +61,7 @@ public:
     };
     Q_ENUM(Connph)
 
-    explicit SunSpecSettingsModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
+    explicit SunSpecSettingsModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent = nullptr);
     ~SunSpecSettingsModel() override; 
 
     QString name() const override;

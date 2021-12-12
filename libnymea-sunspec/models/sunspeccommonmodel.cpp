@@ -31,8 +31,8 @@
 #include "sunspeccommonmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecCommonModel::SunSpecCommonModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 1, modelLength, parent)
+SunSpecCommonModel::SunSpecCommonModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 1, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
 
@@ -111,6 +111,7 @@ void SunSpecCommonModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -121,6 +122,7 @@ void SunSpecCommonModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint manufacturerDataPoint;
@@ -132,6 +134,7 @@ void SunSpecCommonModel::initDataPoints()
     manufacturerDataPoint.setAddressOffset(2);
     manufacturerDataPoint.setBlockOffset(0);
     manufacturerDataPoint.setSunSpecDataType("string");
+    manufacturerDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(manufacturerDataPoint.name(), manufacturerDataPoint);
 
     SunSpecDataPoint modelDataPoint;
@@ -143,6 +146,7 @@ void SunSpecCommonModel::initDataPoints()
     modelDataPoint.setAddressOffset(18);
     modelDataPoint.setBlockOffset(16);
     modelDataPoint.setSunSpecDataType("string");
+    modelDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelDataPoint.name(), modelDataPoint);
 
     SunSpecDataPoint optionsDataPoint;
@@ -153,6 +157,7 @@ void SunSpecCommonModel::initDataPoints()
     optionsDataPoint.setAddressOffset(34);
     optionsDataPoint.setBlockOffset(32);
     optionsDataPoint.setSunSpecDataType("string");
+    optionsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(optionsDataPoint.name(), optionsDataPoint);
 
     SunSpecDataPoint versionDataPoint;
@@ -163,6 +168,7 @@ void SunSpecCommonModel::initDataPoints()
     versionDataPoint.setAddressOffset(42);
     versionDataPoint.setBlockOffset(40);
     versionDataPoint.setSunSpecDataType("string");
+    versionDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(versionDataPoint.name(), versionDataPoint);
 
     SunSpecDataPoint serialNumberDataPoint;
@@ -174,6 +180,7 @@ void SunSpecCommonModel::initDataPoints()
     serialNumberDataPoint.setAddressOffset(50);
     serialNumberDataPoint.setBlockOffset(48);
     serialNumberDataPoint.setSunSpecDataType("string");
+    serialNumberDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(serialNumberDataPoint.name(), serialNumberDataPoint);
 
     SunSpecDataPoint deviceAddressDataPoint;
@@ -185,6 +192,7 @@ void SunSpecCommonModel::initDataPoints()
     deviceAddressDataPoint.setBlockOffset(64);
     deviceAddressDataPoint.setSunSpecDataType("uint16");
     deviceAddressDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    deviceAddressDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(deviceAddressDataPoint.name(), deviceAddressDataPoint);
 
     SunSpecDataPoint padDataPoint;
@@ -194,6 +202,7 @@ void SunSpecCommonModel::initDataPoints()
     padDataPoint.setAddressOffset(67);
     padDataPoint.setBlockOffset(65);
     padDataPoint.setSunSpecDataType("pad");
+    padDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(padDataPoint.name(), padDataPoint);
 
 }

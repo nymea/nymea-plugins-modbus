@@ -31,8 +31,8 @@
 #include "sunspecmetersplitsinglephaseabnmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecMeterSplitSinglePhaseAbnModel::SunSpecMeterSplitSinglePhaseAbnModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 202, modelLength, parent)
+SunSpecMeterSplitSinglePhaseAbnModel::SunSpecMeterSplitSinglePhaseAbnModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 202, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
 
@@ -357,6 +357,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -367,6 +368,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint ampsDataPoint;
@@ -380,6 +382,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     ampsDataPoint.setBlockOffset(0);
     ampsDataPoint.setScaleFactorName("A_SF");
     ampsDataPoint.setSunSpecDataType("int16");
+    ampsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
     SunSpecDataPoint ampsPhaseADataPoint;
@@ -392,6 +395,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     ampsPhaseADataPoint.setBlockOffset(1);
     ampsPhaseADataPoint.setScaleFactorName("A_SF");
     ampsPhaseADataPoint.setSunSpecDataType("int16");
+    ampsPhaseADataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(ampsPhaseADataPoint.name(), ampsPhaseADataPoint);
 
     SunSpecDataPoint ampsPhaseBDataPoint;
@@ -405,6 +409,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     ampsPhaseBDataPoint.setBlockOffset(2);
     ampsPhaseBDataPoint.setScaleFactorName("A_SF");
     ampsPhaseBDataPoint.setSunSpecDataType("int16");
+    ampsPhaseBDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(ampsPhaseBDataPoint.name(), ampsPhaseBDataPoint);
 
     SunSpecDataPoint ampsPhaseCDataPoint;
@@ -418,6 +423,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     ampsPhaseCDataPoint.setBlockOffset(3);
     ampsPhaseCDataPoint.setScaleFactorName("A_SF");
     ampsPhaseCDataPoint.setSunSpecDataType("int16");
+    ampsPhaseCDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(ampsPhaseCDataPoint.name(), ampsPhaseCDataPoint);
 
     SunSpecDataPoint a_SFDataPoint;
@@ -428,6 +434,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     a_SFDataPoint.setAddressOffset(6);
     a_SFDataPoint.setBlockOffset(4);
     a_SFDataPoint.setSunSpecDataType("sunssf");
+    a_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(a_SFDataPoint.name(), a_SFDataPoint);
 
     SunSpecDataPoint voltageLnDataPoint;
@@ -441,6 +448,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     voltageLnDataPoint.setBlockOffset(5);
     voltageLnDataPoint.setScaleFactorName("V_SF");
     voltageLnDataPoint.setSunSpecDataType("int16");
+    voltageLnDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(voltageLnDataPoint.name(), voltageLnDataPoint);
 
     SunSpecDataPoint phaseVoltageAnDataPoint;
@@ -454,6 +462,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     phaseVoltageAnDataPoint.setBlockOffset(6);
     phaseVoltageAnDataPoint.setScaleFactorName("V_SF");
     phaseVoltageAnDataPoint.setSunSpecDataType("int16");
+    phaseVoltageAnDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(phaseVoltageAnDataPoint.name(), phaseVoltageAnDataPoint);
 
     SunSpecDataPoint phaseVoltageBnDataPoint;
@@ -467,6 +476,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     phaseVoltageBnDataPoint.setBlockOffset(7);
     phaseVoltageBnDataPoint.setScaleFactorName("V_SF");
     phaseVoltageBnDataPoint.setSunSpecDataType("int16");
+    phaseVoltageBnDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(phaseVoltageBnDataPoint.name(), phaseVoltageBnDataPoint);
 
     SunSpecDataPoint phaseVoltageCnDataPoint;
@@ -479,6 +489,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     phaseVoltageCnDataPoint.setBlockOffset(8);
     phaseVoltageCnDataPoint.setScaleFactorName("V_SF");
     phaseVoltageCnDataPoint.setSunSpecDataType("int16");
+    phaseVoltageCnDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(phaseVoltageCnDataPoint.name(), phaseVoltageCnDataPoint);
 
     SunSpecDataPoint voltageLlDataPoint;
@@ -492,6 +503,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     voltageLlDataPoint.setBlockOffset(9);
     voltageLlDataPoint.setScaleFactorName("V_SF");
     voltageLlDataPoint.setSunSpecDataType("int16");
+    voltageLlDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(voltageLlDataPoint.name(), voltageLlDataPoint);
 
     SunSpecDataPoint phaseVoltageAbDataPoint;
@@ -505,6 +517,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     phaseVoltageAbDataPoint.setBlockOffset(10);
     phaseVoltageAbDataPoint.setScaleFactorName("V_SF");
     phaseVoltageAbDataPoint.setSunSpecDataType("int16");
+    phaseVoltageAbDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(phaseVoltageAbDataPoint.name(), phaseVoltageAbDataPoint);
 
     SunSpecDataPoint phaseVoltageBcDataPoint;
@@ -517,6 +530,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     phaseVoltageBcDataPoint.setBlockOffset(11);
     phaseVoltageBcDataPoint.setScaleFactorName("V_SF");
     phaseVoltageBcDataPoint.setSunSpecDataType("int16");
+    phaseVoltageBcDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(phaseVoltageBcDataPoint.name(), phaseVoltageBcDataPoint);
 
     SunSpecDataPoint phaseVoltageCaDataPoint;
@@ -529,6 +543,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     phaseVoltageCaDataPoint.setBlockOffset(12);
     phaseVoltageCaDataPoint.setScaleFactorName("V_SF");
     phaseVoltageCaDataPoint.setSunSpecDataType("int16");
+    phaseVoltageCaDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(phaseVoltageCaDataPoint.name(), phaseVoltageCaDataPoint);
 
     SunSpecDataPoint v_SFDataPoint;
@@ -539,6 +554,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     v_SFDataPoint.setAddressOffset(15);
     v_SFDataPoint.setBlockOffset(13);
     v_SFDataPoint.setSunSpecDataType("sunssf");
+    v_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(v_SFDataPoint.name(), v_SFDataPoint);
 
     SunSpecDataPoint hzDataPoint;
@@ -552,6 +568,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     hzDataPoint.setBlockOffset(14);
     hzDataPoint.setScaleFactorName("Hz_SF");
     hzDataPoint.setSunSpecDataType("int16");
+    hzDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(hzDataPoint.name(), hzDataPoint);
 
     SunSpecDataPoint hz_SFDataPoint;
@@ -561,6 +578,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     hz_SFDataPoint.setAddressOffset(17);
     hz_SFDataPoint.setBlockOffset(15);
     hz_SFDataPoint.setSunSpecDataType("sunssf");
+    hz_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(hz_SFDataPoint.name(), hz_SFDataPoint);
 
     SunSpecDataPoint wattsDataPoint;
@@ -574,6 +592,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     wattsDataPoint.setBlockOffset(16);
     wattsDataPoint.setScaleFactorName("W_SF");
     wattsDataPoint.setSunSpecDataType("int16");
+    wattsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(wattsDataPoint.name(), wattsDataPoint);
 
     SunSpecDataPoint wattsPhaseADataPoint;
@@ -585,6 +604,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     wattsPhaseADataPoint.setBlockOffset(17);
     wattsPhaseADataPoint.setScaleFactorName("W_SF");
     wattsPhaseADataPoint.setSunSpecDataType("int16");
+    wattsPhaseADataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(wattsPhaseADataPoint.name(), wattsPhaseADataPoint);
 
     SunSpecDataPoint wattsPhaseBDataPoint;
@@ -596,6 +616,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     wattsPhaseBDataPoint.setBlockOffset(18);
     wattsPhaseBDataPoint.setScaleFactorName("W_SF");
     wattsPhaseBDataPoint.setSunSpecDataType("int16");
+    wattsPhaseBDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(wattsPhaseBDataPoint.name(), wattsPhaseBDataPoint);
 
     SunSpecDataPoint wattsPhaseCDataPoint;
@@ -607,6 +628,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     wattsPhaseCDataPoint.setBlockOffset(19);
     wattsPhaseCDataPoint.setScaleFactorName("W_SF");
     wattsPhaseCDataPoint.setSunSpecDataType("int16");
+    wattsPhaseCDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(wattsPhaseCDataPoint.name(), wattsPhaseCDataPoint);
 
     SunSpecDataPoint w_SFDataPoint;
@@ -617,6 +639,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     w_SFDataPoint.setAddressOffset(22);
     w_SFDataPoint.setBlockOffset(20);
     w_SFDataPoint.setSunSpecDataType("sunssf");
+    w_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(w_SFDataPoint.name(), w_SFDataPoint);
 
     SunSpecDataPoint vaDataPoint;
@@ -629,6 +652,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     vaDataPoint.setBlockOffset(21);
     vaDataPoint.setScaleFactorName("VA_SF");
     vaDataPoint.setSunSpecDataType("int16");
+    vaDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vaDataPoint.name(), vaDataPoint);
 
     SunSpecDataPoint vaPhaseADataPoint;
@@ -640,6 +664,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     vaPhaseADataPoint.setBlockOffset(22);
     vaPhaseADataPoint.setScaleFactorName("VA_SF");
     vaPhaseADataPoint.setSunSpecDataType("int16");
+    vaPhaseADataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vaPhaseADataPoint.name(), vaPhaseADataPoint);
 
     SunSpecDataPoint vaPhaseBDataPoint;
@@ -651,6 +676,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     vaPhaseBDataPoint.setBlockOffset(23);
     vaPhaseBDataPoint.setScaleFactorName("VA_SF");
     vaPhaseBDataPoint.setSunSpecDataType("int16");
+    vaPhaseBDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vaPhaseBDataPoint.name(), vaPhaseBDataPoint);
 
     SunSpecDataPoint vaPhaseCDataPoint;
@@ -662,6 +688,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     vaPhaseCDataPoint.setBlockOffset(24);
     vaPhaseCDataPoint.setScaleFactorName("VA_SF");
     vaPhaseCDataPoint.setSunSpecDataType("int16");
+    vaPhaseCDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vaPhaseCDataPoint.name(), vaPhaseCDataPoint);
 
     SunSpecDataPoint vA_SFDataPoint;
@@ -671,6 +698,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     vA_SFDataPoint.setAddressOffset(27);
     vA_SFDataPoint.setBlockOffset(25);
     vA_SFDataPoint.setSunSpecDataType("sunssf");
+    vA_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vA_SFDataPoint.name(), vA_SFDataPoint);
 
     SunSpecDataPoint varDataPoint;
@@ -683,6 +711,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     varDataPoint.setBlockOffset(26);
     varDataPoint.setScaleFactorName("VAR_SF");
     varDataPoint.setSunSpecDataType("int16");
+    varDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(varDataPoint.name(), varDataPoint);
 
     SunSpecDataPoint varPhaseADataPoint;
@@ -694,6 +723,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     varPhaseADataPoint.setBlockOffset(27);
     varPhaseADataPoint.setScaleFactorName("VAR_SF");
     varPhaseADataPoint.setSunSpecDataType("int16");
+    varPhaseADataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(varPhaseADataPoint.name(), varPhaseADataPoint);
 
     SunSpecDataPoint varPhaseBDataPoint;
@@ -705,6 +735,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     varPhaseBDataPoint.setBlockOffset(28);
     varPhaseBDataPoint.setScaleFactorName("VAR_SF");
     varPhaseBDataPoint.setSunSpecDataType("int16");
+    varPhaseBDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(varPhaseBDataPoint.name(), varPhaseBDataPoint);
 
     SunSpecDataPoint varPhaseCDataPoint;
@@ -716,6 +747,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     varPhaseCDataPoint.setBlockOffset(29);
     varPhaseCDataPoint.setScaleFactorName("VAR_SF");
     varPhaseCDataPoint.setSunSpecDataType("int16");
+    varPhaseCDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(varPhaseCDataPoint.name(), varPhaseCDataPoint);
 
     SunSpecDataPoint vAR_SFDataPoint;
@@ -725,6 +757,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     vAR_SFDataPoint.setAddressOffset(32);
     vAR_SFDataPoint.setBlockOffset(30);
     vAR_SFDataPoint.setSunSpecDataType("sunssf");
+    vAR_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vAR_SFDataPoint.name(), vAR_SFDataPoint);
 
     SunSpecDataPoint pfDataPoint;
@@ -737,6 +770,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     pfDataPoint.setBlockOffset(31);
     pfDataPoint.setScaleFactorName("PF_SF");
     pfDataPoint.setSunSpecDataType("int16");
+    pfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pfDataPoint.name(), pfDataPoint);
 
     SunSpecDataPoint pfPhaseADataPoint;
@@ -748,6 +782,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     pfPhaseADataPoint.setBlockOffset(32);
     pfPhaseADataPoint.setScaleFactorName("PF_SF");
     pfPhaseADataPoint.setSunSpecDataType("int16");
+    pfPhaseADataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pfPhaseADataPoint.name(), pfPhaseADataPoint);
 
     SunSpecDataPoint pfPhaseBDataPoint;
@@ -759,6 +794,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     pfPhaseBDataPoint.setBlockOffset(33);
     pfPhaseBDataPoint.setScaleFactorName("PF_SF");
     pfPhaseBDataPoint.setSunSpecDataType("int16");
+    pfPhaseBDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pfPhaseBDataPoint.name(), pfPhaseBDataPoint);
 
     SunSpecDataPoint pfPhaseCDataPoint;
@@ -770,6 +806,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     pfPhaseCDataPoint.setBlockOffset(34);
     pfPhaseCDataPoint.setScaleFactorName("PF_SF");
     pfPhaseCDataPoint.setSunSpecDataType("int16");
+    pfPhaseCDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pfPhaseCDataPoint.name(), pfPhaseCDataPoint);
 
     SunSpecDataPoint pF_SFDataPoint;
@@ -779,6 +816,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     pF_SFDataPoint.setAddressOffset(37);
     pF_SFDataPoint.setBlockOffset(35);
     pF_SFDataPoint.setSunSpecDataType("sunssf");
+    pF_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pF_SFDataPoint.name(), pF_SFDataPoint);
 
     SunSpecDataPoint totalWattHoursExportedDataPoint;
@@ -792,6 +830,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalWattHoursExportedDataPoint.setBlockOffset(36);
     totalWattHoursExportedDataPoint.setScaleFactorName("TotWh_SF");
     totalWattHoursExportedDataPoint.setSunSpecDataType("acc32");
+    totalWattHoursExportedDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalWattHoursExportedDataPoint.name(), totalWattHoursExportedDataPoint);
 
     SunSpecDataPoint totalWattHoursExportedPhaseADataPoint;
@@ -803,6 +842,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalWattHoursExportedPhaseADataPoint.setBlockOffset(38);
     totalWattHoursExportedPhaseADataPoint.setScaleFactorName("TotWh_SF");
     totalWattHoursExportedPhaseADataPoint.setSunSpecDataType("acc32");
+    totalWattHoursExportedPhaseADataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalWattHoursExportedPhaseADataPoint.name(), totalWattHoursExportedPhaseADataPoint);
 
     SunSpecDataPoint totalWattHoursExportedPhaseBDataPoint;
@@ -814,6 +854,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalWattHoursExportedPhaseBDataPoint.setBlockOffset(40);
     totalWattHoursExportedPhaseBDataPoint.setScaleFactorName("TotWh_SF");
     totalWattHoursExportedPhaseBDataPoint.setSunSpecDataType("acc32");
+    totalWattHoursExportedPhaseBDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalWattHoursExportedPhaseBDataPoint.name(), totalWattHoursExportedPhaseBDataPoint);
 
     SunSpecDataPoint totalWattHoursExportedPhaseCDataPoint;
@@ -825,6 +866,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalWattHoursExportedPhaseCDataPoint.setBlockOffset(42);
     totalWattHoursExportedPhaseCDataPoint.setScaleFactorName("TotWh_SF");
     totalWattHoursExportedPhaseCDataPoint.setSunSpecDataType("acc32");
+    totalWattHoursExportedPhaseCDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalWattHoursExportedPhaseCDataPoint.name(), totalWattHoursExportedPhaseCDataPoint);
 
     SunSpecDataPoint totalWattHoursImportedDataPoint;
@@ -838,6 +880,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalWattHoursImportedDataPoint.setBlockOffset(44);
     totalWattHoursImportedDataPoint.setScaleFactorName("TotWh_SF");
     totalWattHoursImportedDataPoint.setSunSpecDataType("acc32");
+    totalWattHoursImportedDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalWattHoursImportedDataPoint.name(), totalWattHoursImportedDataPoint);
 
     SunSpecDataPoint totalWattHoursImportedPhaseADataPoint;
@@ -849,6 +892,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalWattHoursImportedPhaseADataPoint.setBlockOffset(46);
     totalWattHoursImportedPhaseADataPoint.setScaleFactorName("TotWh_SF");
     totalWattHoursImportedPhaseADataPoint.setSunSpecDataType("acc32");
+    totalWattHoursImportedPhaseADataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalWattHoursImportedPhaseADataPoint.name(), totalWattHoursImportedPhaseADataPoint);
 
     SunSpecDataPoint totalWattHoursImportedPhaseBDataPoint;
@@ -860,6 +904,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalWattHoursImportedPhaseBDataPoint.setBlockOffset(48);
     totalWattHoursImportedPhaseBDataPoint.setScaleFactorName("TotWh_SF");
     totalWattHoursImportedPhaseBDataPoint.setSunSpecDataType("acc32");
+    totalWattHoursImportedPhaseBDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalWattHoursImportedPhaseBDataPoint.name(), totalWattHoursImportedPhaseBDataPoint);
 
     SunSpecDataPoint totalWattHoursImportedPhaseCDataPoint;
@@ -871,6 +916,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalWattHoursImportedPhaseCDataPoint.setBlockOffset(50);
     totalWattHoursImportedPhaseCDataPoint.setScaleFactorName("TotWh_SF");
     totalWattHoursImportedPhaseCDataPoint.setSunSpecDataType("acc32");
+    totalWattHoursImportedPhaseCDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalWattHoursImportedPhaseCDataPoint.name(), totalWattHoursImportedPhaseCDataPoint);
 
     SunSpecDataPoint totWh_SFDataPoint;
@@ -881,6 +927,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totWh_SFDataPoint.setAddressOffset(54);
     totWh_SFDataPoint.setBlockOffset(52);
     totWh_SFDataPoint.setSunSpecDataType("sunssf");
+    totWh_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totWh_SFDataPoint.name(), totWh_SFDataPoint);
 
     SunSpecDataPoint totalVaHoursExportedDataPoint;
@@ -893,6 +940,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalVaHoursExportedDataPoint.setBlockOffset(53);
     totalVaHoursExportedDataPoint.setScaleFactorName("TotVAh_SF");
     totalVaHoursExportedDataPoint.setSunSpecDataType("acc32");
+    totalVaHoursExportedDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVaHoursExportedDataPoint.name(), totalVaHoursExportedDataPoint);
 
     SunSpecDataPoint totalVaHoursExportedPhaseADataPoint;
@@ -904,6 +952,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalVaHoursExportedPhaseADataPoint.setBlockOffset(55);
     totalVaHoursExportedPhaseADataPoint.setScaleFactorName("TotVAh_SF");
     totalVaHoursExportedPhaseADataPoint.setSunSpecDataType("acc32");
+    totalVaHoursExportedPhaseADataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVaHoursExportedPhaseADataPoint.name(), totalVaHoursExportedPhaseADataPoint);
 
     SunSpecDataPoint totalVaHoursExportedPhaseBDataPoint;
@@ -915,6 +964,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalVaHoursExportedPhaseBDataPoint.setBlockOffset(57);
     totalVaHoursExportedPhaseBDataPoint.setScaleFactorName("TotVAh_SF");
     totalVaHoursExportedPhaseBDataPoint.setSunSpecDataType("acc32");
+    totalVaHoursExportedPhaseBDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVaHoursExportedPhaseBDataPoint.name(), totalVaHoursExportedPhaseBDataPoint);
 
     SunSpecDataPoint totalVaHoursExportedPhaseCDataPoint;
@@ -926,6 +976,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalVaHoursExportedPhaseCDataPoint.setBlockOffset(59);
     totalVaHoursExportedPhaseCDataPoint.setScaleFactorName("TotVAh_SF");
     totalVaHoursExportedPhaseCDataPoint.setSunSpecDataType("acc32");
+    totalVaHoursExportedPhaseCDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVaHoursExportedPhaseCDataPoint.name(), totalVaHoursExportedPhaseCDataPoint);
 
     SunSpecDataPoint totalVaHoursImportedDataPoint;
@@ -938,6 +989,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalVaHoursImportedDataPoint.setBlockOffset(61);
     totalVaHoursImportedDataPoint.setScaleFactorName("TotVAh_SF");
     totalVaHoursImportedDataPoint.setSunSpecDataType("acc32");
+    totalVaHoursImportedDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVaHoursImportedDataPoint.name(), totalVaHoursImportedDataPoint);
 
     SunSpecDataPoint totalVaHoursImportedPhaseADataPoint;
@@ -949,6 +1001,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalVaHoursImportedPhaseADataPoint.setBlockOffset(63);
     totalVaHoursImportedPhaseADataPoint.setScaleFactorName("TotVAh_SF");
     totalVaHoursImportedPhaseADataPoint.setSunSpecDataType("acc32");
+    totalVaHoursImportedPhaseADataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVaHoursImportedPhaseADataPoint.name(), totalVaHoursImportedPhaseADataPoint);
 
     SunSpecDataPoint totalVaHoursImportedPhaseBDataPoint;
@@ -960,6 +1013,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalVaHoursImportedPhaseBDataPoint.setBlockOffset(65);
     totalVaHoursImportedPhaseBDataPoint.setScaleFactorName("TotVAh_SF");
     totalVaHoursImportedPhaseBDataPoint.setSunSpecDataType("acc32");
+    totalVaHoursImportedPhaseBDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVaHoursImportedPhaseBDataPoint.name(), totalVaHoursImportedPhaseBDataPoint);
 
     SunSpecDataPoint totalVaHoursImportedPhaseCDataPoint;
@@ -971,6 +1025,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalVaHoursImportedPhaseCDataPoint.setBlockOffset(67);
     totalVaHoursImportedPhaseCDataPoint.setScaleFactorName("TotVAh_SF");
     totalVaHoursImportedPhaseCDataPoint.setSunSpecDataType("acc32");
+    totalVaHoursImportedPhaseCDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVaHoursImportedPhaseCDataPoint.name(), totalVaHoursImportedPhaseCDataPoint);
 
     SunSpecDataPoint totVAh_SFDataPoint;
@@ -980,6 +1035,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totVAh_SFDataPoint.setAddressOffset(71);
     totVAh_SFDataPoint.setBlockOffset(69);
     totVAh_SFDataPoint.setSunSpecDataType("sunssf");
+    totVAh_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totVAh_SFDataPoint.name(), totVAh_SFDataPoint);
 
     SunSpecDataPoint totalVarHoursImportedQ1DataPoint;
@@ -992,6 +1048,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalVarHoursImportedQ1DataPoint.setBlockOffset(70);
     totalVarHoursImportedQ1DataPoint.setScaleFactorName("TotVArh_SF");
     totalVarHoursImportedQ1DataPoint.setSunSpecDataType("acc32");
+    totalVarHoursImportedQ1DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVarHoursImportedQ1DataPoint.name(), totalVarHoursImportedQ1DataPoint);
 
     SunSpecDataPoint totalVArHoursImportedQ1PhaseADataPoint;
@@ -1003,6 +1060,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalVArHoursImportedQ1PhaseADataPoint.setBlockOffset(72);
     totalVArHoursImportedQ1PhaseADataPoint.setScaleFactorName("TotVArh_SF");
     totalVArHoursImportedQ1PhaseADataPoint.setSunSpecDataType("acc32");
+    totalVArHoursImportedQ1PhaseADataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVArHoursImportedQ1PhaseADataPoint.name(), totalVArHoursImportedQ1PhaseADataPoint);
 
     SunSpecDataPoint totalVArHoursImportedQ1PhaseBDataPoint;
@@ -1014,6 +1072,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalVArHoursImportedQ1PhaseBDataPoint.setBlockOffset(74);
     totalVArHoursImportedQ1PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
     totalVArHoursImportedQ1PhaseBDataPoint.setSunSpecDataType("acc32");
+    totalVArHoursImportedQ1PhaseBDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVArHoursImportedQ1PhaseBDataPoint.name(), totalVArHoursImportedQ1PhaseBDataPoint);
 
     SunSpecDataPoint totalVArHoursImportedQ1PhaseCDataPoint;
@@ -1025,6 +1084,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalVArHoursImportedQ1PhaseCDataPoint.setBlockOffset(76);
     totalVArHoursImportedQ1PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
     totalVArHoursImportedQ1PhaseCDataPoint.setSunSpecDataType("acc32");
+    totalVArHoursImportedQ1PhaseCDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVArHoursImportedQ1PhaseCDataPoint.name(), totalVArHoursImportedQ1PhaseCDataPoint);
 
     SunSpecDataPoint totalVArHoursImportedQ2DataPoint;
@@ -1037,6 +1097,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalVArHoursImportedQ2DataPoint.setBlockOffset(78);
     totalVArHoursImportedQ2DataPoint.setScaleFactorName("TotVArh_SF");
     totalVArHoursImportedQ2DataPoint.setSunSpecDataType("acc32");
+    totalVArHoursImportedQ2DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVArHoursImportedQ2DataPoint.name(), totalVArHoursImportedQ2DataPoint);
 
     SunSpecDataPoint totalVArHoursImportedQ2PhaseADataPoint;
@@ -1048,6 +1109,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalVArHoursImportedQ2PhaseADataPoint.setBlockOffset(80);
     totalVArHoursImportedQ2PhaseADataPoint.setScaleFactorName("TotVArh_SF");
     totalVArHoursImportedQ2PhaseADataPoint.setSunSpecDataType("acc32");
+    totalVArHoursImportedQ2PhaseADataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVArHoursImportedQ2PhaseADataPoint.name(), totalVArHoursImportedQ2PhaseADataPoint);
 
     SunSpecDataPoint totalVArHoursImportedQ2PhaseBDataPoint;
@@ -1059,6 +1121,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalVArHoursImportedQ2PhaseBDataPoint.setBlockOffset(82);
     totalVArHoursImportedQ2PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
     totalVArHoursImportedQ2PhaseBDataPoint.setSunSpecDataType("acc32");
+    totalVArHoursImportedQ2PhaseBDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVArHoursImportedQ2PhaseBDataPoint.name(), totalVArHoursImportedQ2PhaseBDataPoint);
 
     SunSpecDataPoint totalVArHoursImportedQ2PhaseCDataPoint;
@@ -1070,6 +1133,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalVArHoursImportedQ2PhaseCDataPoint.setBlockOffset(84);
     totalVArHoursImportedQ2PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
     totalVArHoursImportedQ2PhaseCDataPoint.setSunSpecDataType("acc32");
+    totalVArHoursImportedQ2PhaseCDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVArHoursImportedQ2PhaseCDataPoint.name(), totalVArHoursImportedQ2PhaseCDataPoint);
 
     SunSpecDataPoint totalVArHoursExportedQ3DataPoint;
@@ -1082,6 +1146,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalVArHoursExportedQ3DataPoint.setBlockOffset(86);
     totalVArHoursExportedQ3DataPoint.setScaleFactorName("TotVArh_SF");
     totalVArHoursExportedQ3DataPoint.setSunSpecDataType("acc32");
+    totalVArHoursExportedQ3DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVArHoursExportedQ3DataPoint.name(), totalVArHoursExportedQ3DataPoint);
 
     SunSpecDataPoint totalVArHoursExportedQ3PhaseADataPoint;
@@ -1093,6 +1158,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalVArHoursExportedQ3PhaseADataPoint.setBlockOffset(88);
     totalVArHoursExportedQ3PhaseADataPoint.setScaleFactorName("TotVArh_SF");
     totalVArHoursExportedQ3PhaseADataPoint.setSunSpecDataType("acc32");
+    totalVArHoursExportedQ3PhaseADataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVArHoursExportedQ3PhaseADataPoint.name(), totalVArHoursExportedQ3PhaseADataPoint);
 
     SunSpecDataPoint totalVArHoursExportedQ3PhaseBDataPoint;
@@ -1104,6 +1170,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalVArHoursExportedQ3PhaseBDataPoint.setBlockOffset(90);
     totalVArHoursExportedQ3PhaseBDataPoint.setScaleFactorName("TotVArh_SF");
     totalVArHoursExportedQ3PhaseBDataPoint.setSunSpecDataType("acc32");
+    totalVArHoursExportedQ3PhaseBDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVArHoursExportedQ3PhaseBDataPoint.name(), totalVArHoursExportedQ3PhaseBDataPoint);
 
     SunSpecDataPoint totalVArHoursExportedQ3PhaseCDataPoint;
@@ -1115,6 +1182,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalVArHoursExportedQ3PhaseCDataPoint.setBlockOffset(92);
     totalVArHoursExportedQ3PhaseCDataPoint.setScaleFactorName("TotVArh_SF");
     totalVArHoursExportedQ3PhaseCDataPoint.setSunSpecDataType("acc32");
+    totalVArHoursExportedQ3PhaseCDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVArHoursExportedQ3PhaseCDataPoint.name(), totalVArHoursExportedQ3PhaseCDataPoint);
 
     SunSpecDataPoint totalVArHoursExportedQ4DataPoint;
@@ -1127,6 +1195,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalVArHoursExportedQ4DataPoint.setBlockOffset(94);
     totalVArHoursExportedQ4DataPoint.setScaleFactorName("TotVArh_SF");
     totalVArHoursExportedQ4DataPoint.setSunSpecDataType("acc32");
+    totalVArHoursExportedQ4DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVArHoursExportedQ4DataPoint.name(), totalVArHoursExportedQ4DataPoint);
 
     SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseADataPoint;
@@ -1138,6 +1207,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalVArHoursExportedQ4ImportedPhaseADataPoint.setBlockOffset(96);
     totalVArHoursExportedQ4ImportedPhaseADataPoint.setScaleFactorName("TotVArh_SF");
     totalVArHoursExportedQ4ImportedPhaseADataPoint.setSunSpecDataType("acc32");
+    totalVArHoursExportedQ4ImportedPhaseADataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseADataPoint.name(), totalVArHoursExportedQ4ImportedPhaseADataPoint);
 
     SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseBDataPoint;
@@ -1149,6 +1219,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalVArHoursExportedQ4ImportedPhaseBDataPoint.setBlockOffset(98);
     totalVArHoursExportedQ4ImportedPhaseBDataPoint.setScaleFactorName("TotVArh_SF");
     totalVArHoursExportedQ4ImportedPhaseBDataPoint.setSunSpecDataType("acc32");
+    totalVArHoursExportedQ4ImportedPhaseBDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseBDataPoint.name(), totalVArHoursExportedQ4ImportedPhaseBDataPoint);
 
     SunSpecDataPoint totalVArHoursExportedQ4ImportedPhaseCDataPoint;
@@ -1160,6 +1231,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totalVArHoursExportedQ4ImportedPhaseCDataPoint.setBlockOffset(100);
     totalVArHoursExportedQ4ImportedPhaseCDataPoint.setScaleFactorName("TotVArh_SF");
     totalVArHoursExportedQ4ImportedPhaseCDataPoint.setSunSpecDataType("acc32");
+    totalVArHoursExportedQ4ImportedPhaseCDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totalVArHoursExportedQ4ImportedPhaseCDataPoint.name(), totalVArHoursExportedQ4ImportedPhaseCDataPoint);
 
     SunSpecDataPoint totVArh_SFDataPoint;
@@ -1169,6 +1241,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     totVArh_SFDataPoint.setAddressOffset(104);
     totVArh_SFDataPoint.setBlockOffset(102);
     totVArh_SFDataPoint.setSunSpecDataType("sunssf");
+    totVArh_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(totVArh_SFDataPoint.name(), totVArh_SFDataPoint);
 
     SunSpecDataPoint eventsDataPoint;
@@ -1180,6 +1253,7 @@ void SunSpecMeterSplitSinglePhaseAbnModel::initDataPoints()
     eventsDataPoint.setAddressOffset(105);
     eventsDataPoint.setBlockOffset(103);
     eventsDataPoint.setSunSpecDataType("bitfield32");
+    eventsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(eventsDataPoint.name(), eventsDataPoint);
 
 }

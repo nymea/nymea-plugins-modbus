@@ -34,6 +34,7 @@
 SunSpecLithiumIonStringModelRepeatingBlock::SunSpecLithiumIonStringModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecLithiumIonStringModel *parent) :
     SunSpecModelRepeatingBlock(blockIndex, blockSize, modbusStartRegister, parent)
 {
+    m_byteOrder = parent->byteOrder();
     initDataPoints();
 }
 
@@ -122,6 +123,7 @@ void SunSpecLithiumIonStringModelRepeatingBlock::initDataPoints()
     moduleCellCountDataPoint.setSize(1);
     moduleCellCountDataPoint.setAddressOffset(0);
     moduleCellCountDataPoint.setSunSpecDataType("uint16");
+    moduleCellCountDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(moduleCellCountDataPoint.name(), moduleCellCountDataPoint);
 
     SunSpecDataPoint moduleSoCDataPoint;
@@ -133,6 +135,7 @@ void SunSpecLithiumIonStringModelRepeatingBlock::initDataPoints()
     moduleSoCDataPoint.setAddressOffset(1);
     moduleSoCDataPoint.setScaleFactorName("SoC_SF");
     moduleSoCDataPoint.setSunSpecDataType("uint16");
+    moduleSoCDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(moduleSoCDataPoint.name(), moduleSoCDataPoint);
 
     SunSpecDataPoint moduleSoHDataPoint;
@@ -145,6 +148,7 @@ void SunSpecLithiumIonStringModelRepeatingBlock::initDataPoints()
     moduleSoHDataPoint.setBlockOffset(0);
     moduleSoHDataPoint.setScaleFactorName("SoH_SF");
     moduleSoHDataPoint.setSunSpecDataType("uint16");
+    moduleSoHDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(moduleSoHDataPoint.name(), moduleSoHDataPoint);
 
     SunSpecDataPoint maxCellVoltageDataPoint;
@@ -158,6 +162,7 @@ void SunSpecLithiumIonStringModelRepeatingBlock::initDataPoints()
     maxCellVoltageDataPoint.setBlockOffset(1);
     maxCellVoltageDataPoint.setScaleFactorName("CellV_SF");
     maxCellVoltageDataPoint.setSunSpecDataType("uint16");
+    maxCellVoltageDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(maxCellVoltageDataPoint.name(), maxCellVoltageDataPoint);
 
     SunSpecDataPoint maxCellVoltageCellDataPoint;
@@ -168,6 +173,7 @@ void SunSpecLithiumIonStringModelRepeatingBlock::initDataPoints()
     maxCellVoltageCellDataPoint.setAddressOffset(4);
     maxCellVoltageCellDataPoint.setBlockOffset(2);
     maxCellVoltageCellDataPoint.setSunSpecDataType("uint16");
+    maxCellVoltageCellDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(maxCellVoltageCellDataPoint.name(), maxCellVoltageCellDataPoint);
 
     SunSpecDataPoint minCellVoltageDataPoint;
@@ -181,6 +187,7 @@ void SunSpecLithiumIonStringModelRepeatingBlock::initDataPoints()
     minCellVoltageDataPoint.setBlockOffset(3);
     minCellVoltageDataPoint.setScaleFactorName("CellV_SF");
     minCellVoltageDataPoint.setSunSpecDataType("uint16");
+    minCellVoltageDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(minCellVoltageDataPoint.name(), minCellVoltageDataPoint);
 
     SunSpecDataPoint minCellVoltageCellDataPoint;
@@ -193,6 +200,7 @@ void SunSpecLithiumIonStringModelRepeatingBlock::initDataPoints()
     minCellVoltageCellDataPoint.setBlockOffset(4);
     minCellVoltageCellDataPoint.setScaleFactorName("CellV_SF");
     minCellVoltageCellDataPoint.setSunSpecDataType("uint16");
+    minCellVoltageCellDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(minCellVoltageCellDataPoint.name(), minCellVoltageCellDataPoint);
 
     SunSpecDataPoint averageCellVoltageDataPoint;
@@ -206,6 +214,7 @@ void SunSpecLithiumIonStringModelRepeatingBlock::initDataPoints()
     averageCellVoltageDataPoint.setBlockOffset(5);
     averageCellVoltageDataPoint.setScaleFactorName("CellV_SF");
     averageCellVoltageDataPoint.setSunSpecDataType("uint16");
+    averageCellVoltageDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(averageCellVoltageDataPoint.name(), averageCellVoltageDataPoint);
 
     SunSpecDataPoint maxCellTemperatureDataPoint;
@@ -219,6 +228,7 @@ void SunSpecLithiumIonStringModelRepeatingBlock::initDataPoints()
     maxCellTemperatureDataPoint.setBlockOffset(6);
     maxCellTemperatureDataPoint.setScaleFactorName("ModTmp_SF");
     maxCellTemperatureDataPoint.setSunSpecDataType("int16");
+    maxCellTemperatureDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(maxCellTemperatureDataPoint.name(), maxCellTemperatureDataPoint);
 
     SunSpecDataPoint maxCellTemperatureCellDataPoint;
@@ -229,6 +239,7 @@ void SunSpecLithiumIonStringModelRepeatingBlock::initDataPoints()
     maxCellTemperatureCellDataPoint.setAddressOffset(9);
     maxCellTemperatureCellDataPoint.setBlockOffset(7);
     maxCellTemperatureCellDataPoint.setSunSpecDataType("uint16");
+    maxCellTemperatureCellDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(maxCellTemperatureCellDataPoint.name(), maxCellTemperatureCellDataPoint);
 
     SunSpecDataPoint minCellTemperatureDataPoint;
@@ -242,6 +253,7 @@ void SunSpecLithiumIonStringModelRepeatingBlock::initDataPoints()
     minCellTemperatureDataPoint.setBlockOffset(8);
     minCellTemperatureDataPoint.setScaleFactorName("ModTmp_SF");
     minCellTemperatureDataPoint.setSunSpecDataType("int16");
+    minCellTemperatureDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(minCellTemperatureDataPoint.name(), minCellTemperatureDataPoint);
 
     SunSpecDataPoint minCellTemperatureCellDataPoint;
@@ -252,6 +264,7 @@ void SunSpecLithiumIonStringModelRepeatingBlock::initDataPoints()
     minCellTemperatureCellDataPoint.setAddressOffset(11);
     minCellTemperatureCellDataPoint.setBlockOffset(9);
     minCellTemperatureCellDataPoint.setSunSpecDataType("uint16");
+    minCellTemperatureCellDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(minCellTemperatureCellDataPoint.name(), minCellTemperatureCellDataPoint);
 
     SunSpecDataPoint averageCellTemperatureDataPoint;
@@ -265,6 +278,7 @@ void SunSpecLithiumIonStringModelRepeatingBlock::initDataPoints()
     averageCellTemperatureDataPoint.setBlockOffset(10);
     averageCellTemperatureDataPoint.setScaleFactorName("ModTmp_SF");
     averageCellTemperatureDataPoint.setSunSpecDataType("int16");
+    averageCellTemperatureDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(averageCellTemperatureDataPoint.name(), averageCellTemperatureDataPoint);
 
     SunSpecDataPoint pad5DataPoint;
@@ -276,6 +290,7 @@ void SunSpecLithiumIonStringModelRepeatingBlock::initDataPoints()
     pad5DataPoint.setAddressOffset(13);
     pad5DataPoint.setBlockOffset(11);
     pad5DataPoint.setSunSpecDataType("pad");
+    pad5DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pad5DataPoint.name(), pad5DataPoint);
 
     SunSpecDataPoint pad6DataPoint;
@@ -287,6 +302,7 @@ void SunSpecLithiumIonStringModelRepeatingBlock::initDataPoints()
     pad6DataPoint.setAddressOffset(14);
     pad6DataPoint.setBlockOffset(12);
     pad6DataPoint.setSunSpecDataType("pad");
+    pad6DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pad6DataPoint.name(), pad6DataPoint);
 
     SunSpecDataPoint pad7DataPoint;
@@ -298,6 +314,7 @@ void SunSpecLithiumIonStringModelRepeatingBlock::initDataPoints()
     pad7DataPoint.setAddressOffset(15);
     pad7DataPoint.setBlockOffset(13);
     pad7DataPoint.setSunSpecDataType("pad");
+    pad7DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pad7DataPoint.name(), pad7DataPoint);
 
 }
@@ -360,8 +377,8 @@ void SunSpecLithiumIonStringModelRepeatingBlock::processBlockData(const QVector<
 }
 
 
-SunSpecLithiumIonStringModel::SunSpecLithiumIonStringModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 804, modelLength, parent)
+SunSpecLithiumIonStringModel::SunSpecLithiumIonStringModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 804, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixedAndRepeating;
 
@@ -582,6 +599,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -592,6 +610,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint stringIndexDataPoint;
@@ -603,6 +622,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     stringIndexDataPoint.setAddressOffset(2);
     stringIndexDataPoint.setBlockOffset(0);
     stringIndexDataPoint.setSunSpecDataType("uint16");
+    stringIndexDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(stringIndexDataPoint.name(), stringIndexDataPoint);
 
     SunSpecDataPoint moduleCountDataPoint;
@@ -614,6 +634,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     moduleCountDataPoint.setAddressOffset(3);
     moduleCountDataPoint.setBlockOffset(1);
     moduleCountDataPoint.setSunSpecDataType("uint16");
+    moduleCountDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(moduleCountDataPoint.name(), moduleCountDataPoint);
 
     SunSpecDataPoint stringStatusDataPoint;
@@ -625,6 +646,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     stringStatusDataPoint.setAddressOffset(4);
     stringStatusDataPoint.setBlockOffset(2);
     stringStatusDataPoint.setSunSpecDataType("bitfield32");
+    stringStatusDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(stringStatusDataPoint.name(), stringStatusDataPoint);
 
     SunSpecDataPoint connectionFailureReasonDataPoint;
@@ -634,6 +656,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     connectionFailureReasonDataPoint.setAddressOffset(6);
     connectionFailureReasonDataPoint.setBlockOffset(4);
     connectionFailureReasonDataPoint.setSunSpecDataType("enum16");
+    connectionFailureReasonDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(connectionFailureReasonDataPoint.name(), connectionFailureReasonDataPoint);
 
     SunSpecDataPoint stringCellBalancingCountDataPoint;
@@ -644,6 +667,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     stringCellBalancingCountDataPoint.setAddressOffset(7);
     stringCellBalancingCountDataPoint.setBlockOffset(5);
     stringCellBalancingCountDataPoint.setSunSpecDataType("uint16");
+    stringCellBalancingCountDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(stringCellBalancingCountDataPoint.name(), stringCellBalancingCountDataPoint);
 
     SunSpecDataPoint stringStateOfChargeDataPoint;
@@ -657,6 +681,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     stringStateOfChargeDataPoint.setBlockOffset(6);
     stringStateOfChargeDataPoint.setScaleFactorName("SoC_SF");
     stringStateOfChargeDataPoint.setSunSpecDataType("uint16");
+    stringStateOfChargeDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(stringStateOfChargeDataPoint.name(), stringStateOfChargeDataPoint);
 
     SunSpecDataPoint stringDepthOfDischargeDataPoint;
@@ -669,6 +694,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     stringDepthOfDischargeDataPoint.setBlockOffset(7);
     stringDepthOfDischargeDataPoint.setScaleFactorName("DoD_SF");
     stringDepthOfDischargeDataPoint.setSunSpecDataType("uint16");
+    stringDepthOfDischargeDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(stringDepthOfDischargeDataPoint.name(), stringDepthOfDischargeDataPoint);
 
     SunSpecDataPoint stringCycleCountDataPoint;
@@ -679,6 +705,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     stringCycleCountDataPoint.setAddressOffset(10);
     stringCycleCountDataPoint.setBlockOffset(8);
     stringCycleCountDataPoint.setSunSpecDataType("uint32");
+    stringCycleCountDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(stringCycleCountDataPoint.name(), stringCycleCountDataPoint);
 
     SunSpecDataPoint stringStateOfHealthDataPoint;
@@ -691,6 +718,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     stringStateOfHealthDataPoint.setBlockOffset(10);
     stringStateOfHealthDataPoint.setScaleFactorName("SoH_SF");
     stringStateOfHealthDataPoint.setSunSpecDataType("uint16");
+    stringStateOfHealthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(stringStateOfHealthDataPoint.name(), stringStateOfHealthDataPoint);
 
     SunSpecDataPoint stringCurrentDataPoint;
@@ -704,6 +732,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     stringCurrentDataPoint.setBlockOffset(11);
     stringCurrentDataPoint.setScaleFactorName("A_SF");
     stringCurrentDataPoint.setSunSpecDataType("int16");
+    stringCurrentDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(stringCurrentDataPoint.name(), stringCurrentDataPoint);
 
     SunSpecDataPoint stringVoltageDataPoint;
@@ -716,6 +745,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     stringVoltageDataPoint.setBlockOffset(12);
     stringVoltageDataPoint.setScaleFactorName("V_SF");
     stringVoltageDataPoint.setSunSpecDataType("uint16");
+    stringVoltageDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(stringVoltageDataPoint.name(), stringVoltageDataPoint);
 
     SunSpecDataPoint maxCellVoltageDataPoint;
@@ -729,6 +759,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     maxCellVoltageDataPoint.setBlockOffset(13);
     maxCellVoltageDataPoint.setScaleFactorName("CellV_SF");
     maxCellVoltageDataPoint.setSunSpecDataType("uint16");
+    maxCellVoltageDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(maxCellVoltageDataPoint.name(), maxCellVoltageDataPoint);
 
     SunSpecDataPoint maxCellVoltageModuleDataPoint;
@@ -739,6 +770,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     maxCellVoltageModuleDataPoint.setAddressOffset(16);
     maxCellVoltageModuleDataPoint.setBlockOffset(14);
     maxCellVoltageModuleDataPoint.setSunSpecDataType("uint16");
+    maxCellVoltageModuleDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(maxCellVoltageModuleDataPoint.name(), maxCellVoltageModuleDataPoint);
 
     SunSpecDataPoint minCellVoltageDataPoint;
@@ -752,6 +784,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     minCellVoltageDataPoint.setBlockOffset(15);
     minCellVoltageDataPoint.setScaleFactorName("CellV_SF");
     minCellVoltageDataPoint.setSunSpecDataType("uint16");
+    minCellVoltageDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(minCellVoltageDataPoint.name(), minCellVoltageDataPoint);
 
     SunSpecDataPoint minCellVoltageModuleDataPoint;
@@ -762,6 +795,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     minCellVoltageModuleDataPoint.setAddressOffset(18);
     minCellVoltageModuleDataPoint.setBlockOffset(16);
     minCellVoltageModuleDataPoint.setSunSpecDataType("uint16");
+    minCellVoltageModuleDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(minCellVoltageModuleDataPoint.name(), minCellVoltageModuleDataPoint);
 
     SunSpecDataPoint averageCellVoltageDataPoint;
@@ -775,6 +809,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     averageCellVoltageDataPoint.setBlockOffset(17);
     averageCellVoltageDataPoint.setScaleFactorName("CellV_SF");
     averageCellVoltageDataPoint.setSunSpecDataType("uint16");
+    averageCellVoltageDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(averageCellVoltageDataPoint.name(), averageCellVoltageDataPoint);
 
     SunSpecDataPoint maxModuleTemperatureDataPoint;
@@ -788,6 +823,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     maxModuleTemperatureDataPoint.setBlockOffset(18);
     maxModuleTemperatureDataPoint.setScaleFactorName("ModTmp_SF");
     maxModuleTemperatureDataPoint.setSunSpecDataType("int16");
+    maxModuleTemperatureDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(maxModuleTemperatureDataPoint.name(), maxModuleTemperatureDataPoint);
 
     SunSpecDataPoint maxModuleTemperatureModuleDataPoint;
@@ -799,6 +835,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     maxModuleTemperatureModuleDataPoint.setAddressOffset(21);
     maxModuleTemperatureModuleDataPoint.setBlockOffset(19);
     maxModuleTemperatureModuleDataPoint.setSunSpecDataType("uint16");
+    maxModuleTemperatureModuleDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(maxModuleTemperatureModuleDataPoint.name(), maxModuleTemperatureModuleDataPoint);
 
     SunSpecDataPoint minModuleTemperatureDataPoint;
@@ -812,6 +849,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     minModuleTemperatureDataPoint.setBlockOffset(20);
     minModuleTemperatureDataPoint.setScaleFactorName("ModTmp_SF");
     minModuleTemperatureDataPoint.setSunSpecDataType("int16");
+    minModuleTemperatureDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(minModuleTemperatureDataPoint.name(), minModuleTemperatureDataPoint);
 
     SunSpecDataPoint minModuleTemperatureModuleDataPoint;
@@ -823,6 +861,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     minModuleTemperatureModuleDataPoint.setAddressOffset(23);
     minModuleTemperatureModuleDataPoint.setBlockOffset(21);
     minModuleTemperatureModuleDataPoint.setSunSpecDataType("uint16");
+    minModuleTemperatureModuleDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(minModuleTemperatureModuleDataPoint.name(), minModuleTemperatureModuleDataPoint);
 
     SunSpecDataPoint averageModuleTemperatureDataPoint;
@@ -836,6 +875,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     averageModuleTemperatureDataPoint.setBlockOffset(22);
     averageModuleTemperatureDataPoint.setScaleFactorName("ModTmp_SF");
     averageModuleTemperatureDataPoint.setSunSpecDataType("int16");
+    averageModuleTemperatureDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(averageModuleTemperatureDataPoint.name(), averageModuleTemperatureDataPoint);
 
     SunSpecDataPoint pad1DataPoint;
@@ -847,6 +887,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     pad1DataPoint.setAddressOffset(25);
     pad1DataPoint.setBlockOffset(23);
     pad1DataPoint.setSunSpecDataType("pad");
+    pad1DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pad1DataPoint.name(), pad1DataPoint);
 
     SunSpecDataPoint contactorStatusDataPoint;
@@ -857,6 +898,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     contactorStatusDataPoint.setAddressOffset(26);
     contactorStatusDataPoint.setBlockOffset(24);
     contactorStatusDataPoint.setSunSpecDataType("bitfield32");
+    contactorStatusDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(contactorStatusDataPoint.name(), contactorStatusDataPoint);
 
     SunSpecDataPoint stringEvent1DataPoint;
@@ -868,6 +910,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     stringEvent1DataPoint.setAddressOffset(28);
     stringEvent1DataPoint.setBlockOffset(26);
     stringEvent1DataPoint.setSunSpecDataType("bitfield32");
+    stringEvent1DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(stringEvent1DataPoint.name(), stringEvent1DataPoint);
 
     SunSpecDataPoint stringEvent2DataPoint;
@@ -878,6 +921,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     stringEvent2DataPoint.setAddressOffset(30);
     stringEvent2DataPoint.setBlockOffset(28);
     stringEvent2DataPoint.setSunSpecDataType("bitfield32");
+    stringEvent2DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(stringEvent2DataPoint.name(), stringEvent2DataPoint);
 
     SunSpecDataPoint vendorEventBitfield1DataPoint;
@@ -888,6 +932,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     vendorEventBitfield1DataPoint.setAddressOffset(32);
     vendorEventBitfield1DataPoint.setBlockOffset(30);
     vendorEventBitfield1DataPoint.setSunSpecDataType("bitfield32");
+    vendorEventBitfield1DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vendorEventBitfield1DataPoint.name(), vendorEventBitfield1DataPoint);
 
     SunSpecDataPoint vendorEventBitfield2DataPoint;
@@ -898,6 +943,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     vendorEventBitfield2DataPoint.setAddressOffset(34);
     vendorEventBitfield2DataPoint.setBlockOffset(32);
     vendorEventBitfield2DataPoint.setSunSpecDataType("bitfield32");
+    vendorEventBitfield2DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vendorEventBitfield2DataPoint.name(), vendorEventBitfield2DataPoint);
 
     SunSpecDataPoint enableDisableStringDataPoint;
@@ -909,6 +955,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     enableDisableStringDataPoint.setBlockOffset(34);
     enableDisableStringDataPoint.setSunSpecDataType("enum16");
     enableDisableStringDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    enableDisableStringDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(enableDisableStringDataPoint.name(), enableDisableStringDataPoint);
 
     SunSpecDataPoint connectDisconnectStringDataPoint;
@@ -920,6 +967,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     connectDisconnectStringDataPoint.setBlockOffset(35);
     connectDisconnectStringDataPoint.setSunSpecDataType("enum16");
     connectDisconnectStringDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    connectDisconnectStringDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(connectDisconnectStringDataPoint.name(), connectDisconnectStringDataPoint);
 
     SunSpecDataPoint soC_SFDataPoint;
@@ -930,6 +978,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     soC_SFDataPoint.setAddressOffset(38);
     soC_SFDataPoint.setBlockOffset(36);
     soC_SFDataPoint.setSunSpecDataType("sunssf");
+    soC_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(soC_SFDataPoint.name(), soC_SFDataPoint);
 
     SunSpecDataPoint soH_SFDataPoint;
@@ -939,6 +988,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     soH_SFDataPoint.setAddressOffset(39);
     soH_SFDataPoint.setBlockOffset(37);
     soH_SFDataPoint.setSunSpecDataType("sunssf");
+    soH_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(soH_SFDataPoint.name(), soH_SFDataPoint);
 
     SunSpecDataPoint doD_SFDataPoint;
@@ -948,6 +998,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     doD_SFDataPoint.setAddressOffset(40);
     doD_SFDataPoint.setBlockOffset(38);
     doD_SFDataPoint.setSunSpecDataType("sunssf");
+    doD_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(doD_SFDataPoint.name(), doD_SFDataPoint);
 
     SunSpecDataPoint a_SFDataPoint;
@@ -958,6 +1009,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     a_SFDataPoint.setAddressOffset(41);
     a_SFDataPoint.setBlockOffset(39);
     a_SFDataPoint.setSunSpecDataType("sunssf");
+    a_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(a_SFDataPoint.name(), a_SFDataPoint);
 
     SunSpecDataPoint v_SFDataPoint;
@@ -967,6 +1019,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     v_SFDataPoint.setAddressOffset(42);
     v_SFDataPoint.setBlockOffset(40);
     v_SFDataPoint.setSunSpecDataType("sunssf");
+    v_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(v_SFDataPoint.name(), v_SFDataPoint);
 
     SunSpecDataPoint cellV_SFDataPoint;
@@ -977,6 +1030,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     cellV_SFDataPoint.setAddressOffset(43);
     cellV_SFDataPoint.setBlockOffset(41);
     cellV_SFDataPoint.setSunSpecDataType("sunssf");
+    cellV_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(cellV_SFDataPoint.name(), cellV_SFDataPoint);
 
     SunSpecDataPoint modTmp_SFDataPoint;
@@ -987,6 +1041,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     modTmp_SFDataPoint.setAddressOffset(44);
     modTmp_SFDataPoint.setBlockOffset(42);
     modTmp_SFDataPoint.setSunSpecDataType("sunssf");
+    modTmp_SFDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modTmp_SFDataPoint.name(), modTmp_SFDataPoint);
 
     SunSpecDataPoint pad2DataPoint;
@@ -998,6 +1053,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     pad2DataPoint.setAddressOffset(45);
     pad2DataPoint.setBlockOffset(43);
     pad2DataPoint.setSunSpecDataType("pad");
+    pad2DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pad2DataPoint.name(), pad2DataPoint);
 
     SunSpecDataPoint pad3DataPoint;
@@ -1009,6 +1065,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     pad3DataPoint.setAddressOffset(46);
     pad3DataPoint.setBlockOffset(44);
     pad3DataPoint.setSunSpecDataType("pad");
+    pad3DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pad3DataPoint.name(), pad3DataPoint);
 
     SunSpecDataPoint pad4DataPoint;
@@ -1020,6 +1077,7 @@ void SunSpecLithiumIonStringModel::initDataPoints()
     pad4DataPoint.setAddressOffset(47);
     pad4DataPoint.setBlockOffset(45);
     pad4DataPoint.setSunSpecDataType("pad");
+    pad4DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pad4DataPoint.name(), pad4DataPoint);
 
 }

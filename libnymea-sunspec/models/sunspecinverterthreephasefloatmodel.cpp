@@ -31,8 +31,8 @@
 #include "sunspecinverterthreephasefloatmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecInverterThreePhaseFloatModel::SunSpecInverterThreePhaseFloatModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 113, modelLength, parent)
+SunSpecInverterThreePhaseFloatModel::SunSpecInverterThreePhaseFloatModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 113, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
 
@@ -193,6 +193,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -203,6 +204,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint ampsDataPoint;
@@ -215,6 +217,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     ampsDataPoint.setAddressOffset(2);
     ampsDataPoint.setBlockOffset(0);
     ampsDataPoint.setSunSpecDataType("float32");
+    ampsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
     SunSpecDataPoint ampsPhaseADataPoint;
@@ -227,6 +230,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     ampsPhaseADataPoint.setAddressOffset(4);
     ampsPhaseADataPoint.setBlockOffset(2);
     ampsPhaseADataPoint.setSunSpecDataType("float32");
+    ampsPhaseADataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(ampsPhaseADataPoint.name(), ampsPhaseADataPoint);
 
     SunSpecDataPoint ampsPhaseBDataPoint;
@@ -239,6 +243,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     ampsPhaseBDataPoint.setAddressOffset(6);
     ampsPhaseBDataPoint.setBlockOffset(4);
     ampsPhaseBDataPoint.setSunSpecDataType("float32");
+    ampsPhaseBDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(ampsPhaseBDataPoint.name(), ampsPhaseBDataPoint);
 
     SunSpecDataPoint ampsPhaseCDataPoint;
@@ -251,6 +256,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     ampsPhaseCDataPoint.setAddressOffset(8);
     ampsPhaseCDataPoint.setBlockOffset(6);
     ampsPhaseCDataPoint.setSunSpecDataType("float32");
+    ampsPhaseCDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(ampsPhaseCDataPoint.name(), ampsPhaseCDataPoint);
 
     SunSpecDataPoint phaseVoltageAbDataPoint;
@@ -262,6 +268,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     phaseVoltageAbDataPoint.setAddressOffset(10);
     phaseVoltageAbDataPoint.setBlockOffset(8);
     phaseVoltageAbDataPoint.setSunSpecDataType("float32");
+    phaseVoltageAbDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(phaseVoltageAbDataPoint.name(), phaseVoltageAbDataPoint);
 
     SunSpecDataPoint phaseVoltageBcDataPoint;
@@ -273,6 +280,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     phaseVoltageBcDataPoint.setAddressOffset(12);
     phaseVoltageBcDataPoint.setBlockOffset(10);
     phaseVoltageBcDataPoint.setSunSpecDataType("float32");
+    phaseVoltageBcDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(phaseVoltageBcDataPoint.name(), phaseVoltageBcDataPoint);
 
     SunSpecDataPoint phaseVoltageCaDataPoint;
@@ -284,6 +292,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     phaseVoltageCaDataPoint.setAddressOffset(14);
     phaseVoltageCaDataPoint.setBlockOffset(12);
     phaseVoltageCaDataPoint.setSunSpecDataType("float32");
+    phaseVoltageCaDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(phaseVoltageCaDataPoint.name(), phaseVoltageCaDataPoint);
 
     SunSpecDataPoint phaseVoltageAnDataPoint;
@@ -296,6 +305,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     phaseVoltageAnDataPoint.setAddressOffset(16);
     phaseVoltageAnDataPoint.setBlockOffset(14);
     phaseVoltageAnDataPoint.setSunSpecDataType("float32");
+    phaseVoltageAnDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(phaseVoltageAnDataPoint.name(), phaseVoltageAnDataPoint);
 
     SunSpecDataPoint phaseVoltageBnDataPoint;
@@ -308,6 +318,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     phaseVoltageBnDataPoint.setAddressOffset(18);
     phaseVoltageBnDataPoint.setBlockOffset(16);
     phaseVoltageBnDataPoint.setSunSpecDataType("float32");
+    phaseVoltageBnDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(phaseVoltageBnDataPoint.name(), phaseVoltageBnDataPoint);
 
     SunSpecDataPoint phaseVoltageCnDataPoint;
@@ -320,6 +331,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     phaseVoltageCnDataPoint.setAddressOffset(20);
     phaseVoltageCnDataPoint.setBlockOffset(18);
     phaseVoltageCnDataPoint.setSunSpecDataType("float32");
+    phaseVoltageCnDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(phaseVoltageCnDataPoint.name(), phaseVoltageCnDataPoint);
 
     SunSpecDataPoint wattsDataPoint;
@@ -332,6 +344,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     wattsDataPoint.setAddressOffset(22);
     wattsDataPoint.setBlockOffset(20);
     wattsDataPoint.setSunSpecDataType("float32");
+    wattsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(wattsDataPoint.name(), wattsDataPoint);
 
     SunSpecDataPoint hzDataPoint;
@@ -344,6 +357,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     hzDataPoint.setAddressOffset(24);
     hzDataPoint.setBlockOffset(22);
     hzDataPoint.setSunSpecDataType("float32");
+    hzDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(hzDataPoint.name(), hzDataPoint);
 
     SunSpecDataPoint vaDataPoint;
@@ -355,6 +369,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     vaDataPoint.setAddressOffset(26);
     vaDataPoint.setBlockOffset(24);
     vaDataPoint.setSunSpecDataType("float32");
+    vaDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vaDataPoint.name(), vaDataPoint);
 
     SunSpecDataPoint vArDataPoint;
@@ -366,6 +381,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     vArDataPoint.setAddressOffset(28);
     vArDataPoint.setBlockOffset(26);
     vArDataPoint.setSunSpecDataType("float32");
+    vArDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vArDataPoint.name(), vArDataPoint);
 
     SunSpecDataPoint pfDataPoint;
@@ -377,6 +393,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     pfDataPoint.setAddressOffset(30);
     pfDataPoint.setBlockOffset(28);
     pfDataPoint.setSunSpecDataType("float32");
+    pfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(pfDataPoint.name(), pfDataPoint);
 
     SunSpecDataPoint wattHoursDataPoint;
@@ -389,6 +406,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     wattHoursDataPoint.setAddressOffset(32);
     wattHoursDataPoint.setBlockOffset(30);
     wattHoursDataPoint.setSunSpecDataType("float32");
+    wattHoursDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(wattHoursDataPoint.name(), wattHoursDataPoint);
 
     SunSpecDataPoint dcAmpsDataPoint;
@@ -400,6 +418,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     dcAmpsDataPoint.setAddressOffset(34);
     dcAmpsDataPoint.setBlockOffset(32);
     dcAmpsDataPoint.setSunSpecDataType("float32");
+    dcAmpsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(dcAmpsDataPoint.name(), dcAmpsDataPoint);
 
     SunSpecDataPoint dcVoltageDataPoint;
@@ -411,6 +430,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     dcVoltageDataPoint.setAddressOffset(36);
     dcVoltageDataPoint.setBlockOffset(34);
     dcVoltageDataPoint.setSunSpecDataType("float32");
+    dcVoltageDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(dcVoltageDataPoint.name(), dcVoltageDataPoint);
 
     SunSpecDataPoint dcWattsDataPoint;
@@ -422,6 +442,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     dcWattsDataPoint.setAddressOffset(38);
     dcWattsDataPoint.setBlockOffset(36);
     dcWattsDataPoint.setSunSpecDataType("float32");
+    dcWattsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(dcWattsDataPoint.name(), dcWattsDataPoint);
 
     SunSpecDataPoint cabinetTemperatureDataPoint;
@@ -434,6 +455,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     cabinetTemperatureDataPoint.setAddressOffset(40);
     cabinetTemperatureDataPoint.setBlockOffset(38);
     cabinetTemperatureDataPoint.setSunSpecDataType("float32");
+    cabinetTemperatureDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(cabinetTemperatureDataPoint.name(), cabinetTemperatureDataPoint);
 
     SunSpecDataPoint heatSinkTemperatureDataPoint;
@@ -445,6 +467,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     heatSinkTemperatureDataPoint.setAddressOffset(42);
     heatSinkTemperatureDataPoint.setBlockOffset(40);
     heatSinkTemperatureDataPoint.setSunSpecDataType("float32");
+    heatSinkTemperatureDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(heatSinkTemperatureDataPoint.name(), heatSinkTemperatureDataPoint);
 
     SunSpecDataPoint transformerTemperatureDataPoint;
@@ -456,6 +479,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     transformerTemperatureDataPoint.setAddressOffset(44);
     transformerTemperatureDataPoint.setBlockOffset(42);
     transformerTemperatureDataPoint.setSunSpecDataType("float32");
+    transformerTemperatureDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(transformerTemperatureDataPoint.name(), transformerTemperatureDataPoint);
 
     SunSpecDataPoint otherTemperatureDataPoint;
@@ -467,6 +491,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     otherTemperatureDataPoint.setAddressOffset(46);
     otherTemperatureDataPoint.setBlockOffset(44);
     otherTemperatureDataPoint.setSunSpecDataType("float32");
+    otherTemperatureDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(otherTemperatureDataPoint.name(), otherTemperatureDataPoint);
 
     SunSpecDataPoint operatingStateDataPoint;
@@ -478,6 +503,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     operatingStateDataPoint.setAddressOffset(48);
     operatingStateDataPoint.setBlockOffset(46);
     operatingStateDataPoint.setSunSpecDataType("enum16");
+    operatingStateDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(operatingStateDataPoint.name(), operatingStateDataPoint);
 
     SunSpecDataPoint vendorOperatingStateDataPoint;
@@ -488,6 +514,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     vendorOperatingStateDataPoint.setAddressOffset(49);
     vendorOperatingStateDataPoint.setBlockOffset(47);
     vendorOperatingStateDataPoint.setSunSpecDataType("enum16");
+    vendorOperatingStateDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vendorOperatingStateDataPoint.name(), vendorOperatingStateDataPoint);
 
     SunSpecDataPoint event1DataPoint;
@@ -499,6 +526,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     event1DataPoint.setAddressOffset(50);
     event1DataPoint.setBlockOffset(48);
     event1DataPoint.setSunSpecDataType("bitfield32");
+    event1DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(event1DataPoint.name(), event1DataPoint);
 
     SunSpecDataPoint eventBitfield2DataPoint;
@@ -510,6 +538,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     eventBitfield2DataPoint.setAddressOffset(52);
     eventBitfield2DataPoint.setBlockOffset(50);
     eventBitfield2DataPoint.setSunSpecDataType("bitfield32");
+    eventBitfield2DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(eventBitfield2DataPoint.name(), eventBitfield2DataPoint);
 
     SunSpecDataPoint vendorEventBitfield1DataPoint;
@@ -520,6 +549,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     vendorEventBitfield1DataPoint.setAddressOffset(54);
     vendorEventBitfield1DataPoint.setBlockOffset(52);
     vendorEventBitfield1DataPoint.setSunSpecDataType("bitfield32");
+    vendorEventBitfield1DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vendorEventBitfield1DataPoint.name(), vendorEventBitfield1DataPoint);
 
     SunSpecDataPoint vendorEventBitfield2DataPoint;
@@ -530,6 +560,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     vendorEventBitfield2DataPoint.setAddressOffset(56);
     vendorEventBitfield2DataPoint.setBlockOffset(54);
     vendorEventBitfield2DataPoint.setSunSpecDataType("bitfield32");
+    vendorEventBitfield2DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vendorEventBitfield2DataPoint.name(), vendorEventBitfield2DataPoint);
 
     SunSpecDataPoint vendorEventBitfield3DataPoint;
@@ -540,6 +571,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     vendorEventBitfield3DataPoint.setAddressOffset(58);
     vendorEventBitfield3DataPoint.setBlockOffset(56);
     vendorEventBitfield3DataPoint.setSunSpecDataType("bitfield32");
+    vendorEventBitfield3DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vendorEventBitfield3DataPoint.name(), vendorEventBitfield3DataPoint);
 
     SunSpecDataPoint vendorEventBitfield4DataPoint;
@@ -550,6 +582,7 @@ void SunSpecInverterThreePhaseFloatModel::initDataPoints()
     vendorEventBitfield4DataPoint.setAddressOffset(60);
     vendorEventBitfield4DataPoint.setBlockOffset(58);
     vendorEventBitfield4DataPoint.setSunSpecDataType("bitfield32");
+    vendorEventBitfield4DataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(vendorEventBitfield4DataPoint.name(), vendorEventBitfield4DataPoint);
 
 }

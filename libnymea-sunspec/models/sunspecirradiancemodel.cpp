@@ -34,6 +34,7 @@
 SunSpecIrradianceModelRepeatingBlock::SunSpecIrradianceModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecIrradianceModel *parent) :
     SunSpecModelRepeatingBlock(blockIndex, blockSize, modbusStartRegister, parent)
 {
+    m_byteOrder = parent->byteOrder();
     initDataPoints();
 }
 
@@ -78,6 +79,7 @@ void SunSpecIrradianceModelRepeatingBlock::initDataPoints()
     ghiDataPoint.setSize(1);
     ghiDataPoint.setAddressOffset(0);
     ghiDataPoint.setSunSpecDataType("uint16");
+    ghiDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(ghiDataPoint.name(), ghiDataPoint);
 
     SunSpecDataPoint poaiDataPoint;
@@ -88,6 +90,7 @@ void SunSpecIrradianceModelRepeatingBlock::initDataPoints()
     poaiDataPoint.setSize(1);
     poaiDataPoint.setAddressOffset(1);
     poaiDataPoint.setSunSpecDataType("uint16");
+    poaiDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(poaiDataPoint.name(), poaiDataPoint);
 
     SunSpecDataPoint dfiDataPoint;
@@ -99,6 +102,7 @@ void SunSpecIrradianceModelRepeatingBlock::initDataPoints()
     dfiDataPoint.setAddressOffset(2);
     dfiDataPoint.setBlockOffset(0);
     dfiDataPoint.setSunSpecDataType("uint16");
+    dfiDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(dfiDataPoint.name(), dfiDataPoint);
 
     SunSpecDataPoint dniDataPoint;
@@ -110,6 +114,7 @@ void SunSpecIrradianceModelRepeatingBlock::initDataPoints()
     dniDataPoint.setAddressOffset(3);
     dniDataPoint.setBlockOffset(1);
     dniDataPoint.setSunSpecDataType("uint16");
+    dniDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(dniDataPoint.name(), dniDataPoint);
 
     SunSpecDataPoint otiDataPoint;
@@ -121,6 +126,7 @@ void SunSpecIrradianceModelRepeatingBlock::initDataPoints()
     otiDataPoint.setAddressOffset(4);
     otiDataPoint.setBlockOffset(2);
     otiDataPoint.setSunSpecDataType("uint16");
+    otiDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(otiDataPoint.name(), otiDataPoint);
 
 }
@@ -150,8 +156,8 @@ void SunSpecIrradianceModelRepeatingBlock::processBlockData(const QVector<quint1
 }
 
 
-SunSpecIrradianceModel::SunSpecIrradianceModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 302, modelLength, parent)
+SunSpecIrradianceModel::SunSpecIrradianceModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 302, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixedAndRepeating;
 
@@ -188,6 +194,7 @@ void SunSpecIrradianceModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -198,6 +205,7 @@ void SunSpecIrradianceModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
 }

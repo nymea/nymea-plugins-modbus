@@ -34,6 +34,7 @@
 SunSpecTrackerControllerModelRepeatingBlock::SunSpecTrackerControllerModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecTrackerControllerModel *parent) :
     SunSpecModelRepeatingBlock(blockIndex, blockSize, modbusStartRegister, parent)
 {
+    m_byteOrder = parent->byteOrder();
     initDataPoints();
 }
 
@@ -129,6 +130,7 @@ void SunSpecTrackerControllerModelRepeatingBlock::initDataPoints()
     trackerDataPoint.setSize(8);
     trackerDataPoint.setAddressOffset(0);
     trackerDataPoint.setSunSpecDataType("string");
+    trackerDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(trackerDataPoint.name(), trackerDataPoint);
 
     SunSpecDataPoint targetElevationDataPoint;
@@ -141,6 +143,7 @@ void SunSpecTrackerControllerModelRepeatingBlock::initDataPoints()
     targetElevationDataPoint.setBlockOffset(6);
     targetElevationDataPoint.setScaleFactorName("Dgr_SF");
     targetElevationDataPoint.setSunSpecDataType("int32");
+    targetElevationDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(targetElevationDataPoint.name(), targetElevationDataPoint);
 
     SunSpecDataPoint targetAzimuthDataPoint;
@@ -153,6 +156,7 @@ void SunSpecTrackerControllerModelRepeatingBlock::initDataPoints()
     targetAzimuthDataPoint.setBlockOffset(8);
     targetAzimuthDataPoint.setScaleFactorName("Dgr_SF");
     targetAzimuthDataPoint.setSunSpecDataType("int32");
+    targetAzimuthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(targetAzimuthDataPoint.name(), targetAzimuthDataPoint);
 
     SunSpecDataPoint elevationDataPoint;
@@ -165,6 +169,7 @@ void SunSpecTrackerControllerModelRepeatingBlock::initDataPoints()
     elevationDataPoint.setBlockOffset(10);
     elevationDataPoint.setScaleFactorName("Dgr_SF");
     elevationDataPoint.setSunSpecDataType("int32");
+    elevationDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(elevationDataPoint.name(), elevationDataPoint);
 
     SunSpecDataPoint azimuthDataPoint;
@@ -177,6 +182,7 @@ void SunSpecTrackerControllerModelRepeatingBlock::initDataPoints()
     azimuthDataPoint.setBlockOffset(12);
     azimuthDataPoint.setScaleFactorName("Dgr_SF");
     azimuthDataPoint.setSunSpecDataType("int32");
+    azimuthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(azimuthDataPoint.name(), azimuthDataPoint);
 
     SunSpecDataPoint manualElevationDataPoint;
@@ -190,6 +196,7 @@ void SunSpecTrackerControllerModelRepeatingBlock::initDataPoints()
     manualElevationDataPoint.setScaleFactorName("Dgr_SF");
     manualElevationDataPoint.setSunSpecDataType("int32");
     manualElevationDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    manualElevationDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(manualElevationDataPoint.name(), manualElevationDataPoint);
 
     SunSpecDataPoint manualAzimuthDataPoint;
@@ -203,6 +210,7 @@ void SunSpecTrackerControllerModelRepeatingBlock::initDataPoints()
     manualAzimuthDataPoint.setScaleFactorName("Dgr_SF");
     manualAzimuthDataPoint.setSunSpecDataType("int32");
     manualAzimuthDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    manualAzimuthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(manualAzimuthDataPoint.name(), manualAzimuthDataPoint);
 
     SunSpecDataPoint modeDataPoint;
@@ -214,6 +222,7 @@ void SunSpecTrackerControllerModelRepeatingBlock::initDataPoints()
     modeDataPoint.setBlockOffset(18);
     modeDataPoint.setSunSpecDataType("enum16");
     modeDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    modeDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modeDataPoint.name(), modeDataPoint);
 
     SunSpecDataPoint alarmDataPoint;
@@ -224,6 +233,7 @@ void SunSpecTrackerControllerModelRepeatingBlock::initDataPoints()
     alarmDataPoint.setAddressOffset(21);
     alarmDataPoint.setBlockOffset(19);
     alarmDataPoint.setSunSpecDataType("bitfield16");
+    alarmDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(alarmDataPoint.name(), alarmDataPoint);
 
 }
@@ -265,8 +275,8 @@ void SunSpecTrackerControllerModelRepeatingBlock::processBlockData(const QVector
 }
 
 
-SunSpecTrackerControllerModel::SunSpecTrackerControllerModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 601, modelLength, parent)
+SunSpecTrackerControllerModel::SunSpecTrackerControllerModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 601, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixedAndRepeating;
 
@@ -389,6 +399,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -399,6 +410,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint controllerDataPoint;
@@ -409,6 +421,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     controllerDataPoint.setAddressOffset(2);
     controllerDataPoint.setBlockOffset(0);
     controllerDataPoint.setSunSpecDataType("string");
+    controllerDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(controllerDataPoint.name(), controllerDataPoint);
 
     SunSpecDataPoint typeDataPoint;
@@ -420,6 +433,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     typeDataPoint.setAddressOffset(10);
     typeDataPoint.setBlockOffset(8);
     typeDataPoint.setSunSpecDataType("enum16");
+    typeDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(typeDataPoint.name(), typeDataPoint);
 
     SunSpecDataPoint dateDataPoint;
@@ -431,6 +445,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     dateDataPoint.setAddressOffset(11);
     dateDataPoint.setBlockOffset(9);
     dateDataPoint.setSunSpecDataType("string");
+    dateDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(dateDataPoint.name(), dateDataPoint);
 
     SunSpecDataPoint timeDataPoint;
@@ -442,6 +457,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     timeDataPoint.setAddressOffset(16);
     timeDataPoint.setBlockOffset(14);
     timeDataPoint.setSunSpecDataType("string");
+    timeDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(timeDataPoint.name(), timeDataPoint);
 
     SunSpecDataPoint dayDataPoint;
@@ -452,6 +468,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     dayDataPoint.setAddressOffset(19);
     dayDataPoint.setBlockOffset(17);
     dayDataPoint.setSunSpecDataType("uint16");
+    dayDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(dayDataPoint.name(), dayDataPoint);
 
     SunSpecDataPoint manualElevationDataPoint;
@@ -465,6 +482,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     manualElevationDataPoint.setScaleFactorName("Dgr_SF");
     manualElevationDataPoint.setSunSpecDataType("int32");
     manualElevationDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    manualElevationDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(manualElevationDataPoint.name(), manualElevationDataPoint);
 
     SunSpecDataPoint manualAzimuthDataPoint;
@@ -478,6 +496,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     manualAzimuthDataPoint.setScaleFactorName("Dgr_SF");
     manualAzimuthDataPoint.setSunSpecDataType("int32");
     manualAzimuthDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    manualAzimuthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(manualAzimuthDataPoint.name(), manualAzimuthDataPoint);
 
     SunSpecDataPoint globalModeDataPoint;
@@ -489,6 +508,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     globalModeDataPoint.setBlockOffset(22);
     globalModeDataPoint.setSunSpecDataType("enum16");
     globalModeDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    globalModeDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(globalModeDataPoint.name(), globalModeDataPoint);
 
     SunSpecDataPoint globalAlarmDataPoint;
@@ -499,6 +519,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     globalAlarmDataPoint.setAddressOffset(25);
     globalAlarmDataPoint.setBlockOffset(23);
     globalAlarmDataPoint.setSunSpecDataType("bitfield16");
+    globalAlarmDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(globalAlarmDataPoint.name(), globalAlarmDataPoint);
 
     SunSpecDataPoint sfDataPoint;
@@ -510,6 +531,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     sfDataPoint.setAddressOffset(26);
     sfDataPoint.setBlockOffset(24);
     sfDataPoint.setSunSpecDataType("sunssf");
+    sfDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(sfDataPoint.name(), sfDataPoint);
 
     SunSpecDataPoint trackersDataPoint;
@@ -521,6 +543,7 @@ void SunSpecTrackerControllerModel::initDataPoints()
     trackersDataPoint.setAddressOffset(27);
     trackersDataPoint.setBlockOffset(25);
     trackersDataPoint.setSunSpecDataType("uint16");
+    trackersDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(trackersDataPoint.name(), trackersDataPoint);
 
 }

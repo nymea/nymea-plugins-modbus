@@ -31,8 +31,8 @@
 #include "sunspecrefpointmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecRefPointModel::SunSpecRefPointModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 306, modelLength, parent)
+SunSpecRefPointModel::SunSpecRefPointModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 306, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
 
@@ -85,6 +85,7 @@ void SunSpecRefPointModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -95,6 +96,7 @@ void SunSpecRefPointModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint ghiDataPoint;
@@ -106,6 +108,7 @@ void SunSpecRefPointModel::initDataPoints()
     ghiDataPoint.setAddressOffset(2);
     ghiDataPoint.setBlockOffset(0);
     ghiDataPoint.setSunSpecDataType("uint16");
+    ghiDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(ghiDataPoint.name(), ghiDataPoint);
 
     SunSpecDataPoint ampsDataPoint;
@@ -117,6 +120,7 @@ void SunSpecRefPointModel::initDataPoints()
     ampsDataPoint.setAddressOffset(3);
     ampsDataPoint.setBlockOffset(1);
     ampsDataPoint.setSunSpecDataType("uint16");
+    ampsDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(ampsDataPoint.name(), ampsDataPoint);
 
     SunSpecDataPoint voltageDataPoint;
@@ -128,6 +132,7 @@ void SunSpecRefPointModel::initDataPoints()
     voltageDataPoint.setAddressOffset(4);
     voltageDataPoint.setBlockOffset(2);
     voltageDataPoint.setSunSpecDataType("uint16");
+    voltageDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(voltageDataPoint.name(), voltageDataPoint);
 
     SunSpecDataPoint temperatureDataPoint;
@@ -139,6 +144,7 @@ void SunSpecRefPointModel::initDataPoints()
     temperatureDataPoint.setAddressOffset(5);
     temperatureDataPoint.setBlockOffset(3);
     temperatureDataPoint.setSunSpecDataType("uint16");
+    temperatureDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(temperatureDataPoint.name(), temperatureDataPoint);
 
 }

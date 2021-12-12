@@ -31,8 +31,8 @@
 #include "sunspecextsettingsmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecExtSettingsModel::SunSpecExtSettingsModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 145, modelLength, parent)
+SunSpecExtSettingsModel::SunSpecExtSettingsModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 145, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
 
@@ -199,6 +199,7 @@ void SunSpecExtSettingsModel::initDataPoints()
     modelIdDataPoint.setSize(1);
     modelIdDataPoint.setAddressOffset(0);
     modelIdDataPoint.setSunSpecDataType("uint16");
+    modelIdDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelIdDataPoint.name(), modelIdDataPoint);
 
     SunSpecDataPoint modelLengthDataPoint;
@@ -209,6 +210,7 @@ void SunSpecExtSettingsModel::initDataPoints()
     modelLengthDataPoint.setSize(1);
     modelLengthDataPoint.setAddressOffset(1);
     modelLengthDataPoint.setSunSpecDataType("uint16");
+    modelLengthDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(modelLengthDataPoint.name(), modelLengthDataPoint);
 
     SunSpecDataPoint rampUpRateDataPoint;
@@ -222,6 +224,7 @@ void SunSpecExtSettingsModel::initDataPoints()
     rampUpRateDataPoint.setScaleFactorName("Rmp_SF");
     rampUpRateDataPoint.setSunSpecDataType("uint16");
     rampUpRateDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    rampUpRateDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(rampUpRateDataPoint.name(), rampUpRateDataPoint);
 
     SunSpecDataPoint nomRmpDnRteDataPoint;
@@ -235,6 +238,7 @@ void SunSpecExtSettingsModel::initDataPoints()
     nomRmpDnRteDataPoint.setScaleFactorName("Rmp_SF");
     nomRmpDnRteDataPoint.setSunSpecDataType("uint16");
     nomRmpDnRteDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    nomRmpDnRteDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(nomRmpDnRteDataPoint.name(), nomRmpDnRteDataPoint);
 
     SunSpecDataPoint emergencyRampUpRateDataPoint;
@@ -248,6 +252,7 @@ void SunSpecExtSettingsModel::initDataPoints()
     emergencyRampUpRateDataPoint.setScaleFactorName("Rmp_SF");
     emergencyRampUpRateDataPoint.setSunSpecDataType("uint16");
     emergencyRampUpRateDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    emergencyRampUpRateDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(emergencyRampUpRateDataPoint.name(), emergencyRampUpRateDataPoint);
 
     SunSpecDataPoint emergencyRampDownRateDataPoint;
@@ -261,6 +266,7 @@ void SunSpecExtSettingsModel::initDataPoints()
     emergencyRampDownRateDataPoint.setScaleFactorName("Rmp_SF");
     emergencyRampDownRateDataPoint.setSunSpecDataType("uint16");
     emergencyRampDownRateDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    emergencyRampDownRateDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(emergencyRampDownRateDataPoint.name(), emergencyRampDownRateDataPoint);
 
     SunSpecDataPoint connectRampUpRateDataPoint;
@@ -274,6 +280,7 @@ void SunSpecExtSettingsModel::initDataPoints()
     connectRampUpRateDataPoint.setScaleFactorName("Rmp_SF");
     connectRampUpRateDataPoint.setSunSpecDataType("uint16");
     connectRampUpRateDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    connectRampUpRateDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(connectRampUpRateDataPoint.name(), connectRampUpRateDataPoint);
 
     SunSpecDataPoint connectRampDownRateDataPoint;
@@ -287,6 +294,7 @@ void SunSpecExtSettingsModel::initDataPoints()
     connectRampDownRateDataPoint.setScaleFactorName("Rmp_SF");
     connectRampDownRateDataPoint.setSunSpecDataType("uint16");
     connectRampDownRateDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    connectRampDownRateDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(connectRampDownRateDataPoint.name(), connectRampDownRateDataPoint);
 
     SunSpecDataPoint defaultRampRateDataPoint;
@@ -300,6 +308,7 @@ void SunSpecExtSettingsModel::initDataPoints()
     defaultRampRateDataPoint.setScaleFactorName("Rmp_SF");
     defaultRampRateDataPoint.setSunSpecDataType("uint16");
     defaultRampRateDataPoint.setAccess(SunSpecDataPoint::AccessReadWrite);
+    defaultRampRateDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(defaultRampRateDataPoint.name(), defaultRampRateDataPoint);
 
     SunSpecDataPoint rampRateScaleFactorDataPoint;
@@ -310,6 +319,7 @@ void SunSpecExtSettingsModel::initDataPoints()
     rampRateScaleFactorDataPoint.setAddressOffset(9);
     rampRateScaleFactorDataPoint.setBlockOffset(7);
     rampRateScaleFactorDataPoint.setSunSpecDataType("sunssf");
+    rampRateScaleFactorDataPoint.setByteOrder(m_byteOrder);
     m_dataPoints.insert(rampRateScaleFactorDataPoint.name(), rampRateScaleFactorDataPoint);
 
 }
