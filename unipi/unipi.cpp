@@ -97,7 +97,7 @@ bool UniPi::init()
             QProcess::execute(QString("gpio -g mode %1 up").arg(pin));
             QTimer::singleShot(1000, this, [gpioMonitor, circuit, this]() {
                 emit digitalInputStatusChanged(circuit, gpioMonitor->value()); //set initial status
-                connect(gpioMonitor, &GpioMonitor::enabledChanged, this, &UniPi::onInputValueChanged);
+                connect(gpioMonitor, &GpioMonitor::valueChanged, this, &UniPi::onInputValueChanged);
                 m_monitorGpios.insert(gpioMonitor, circuit);
             });
         }
