@@ -384,7 +384,7 @@ void IntegrationPluginWebasto::onReceivedRegister(Webasto::TqModbusRegister modb
                 return;
             int power = (static_cast<quint32>(data[0])<<16 | data[1]);
             qCDebug(dcWebasto()) << "   - Active power:" << power;
-            thing->setStateValue(liveWallboxPowerConsumptionStateTypeId, power);
+            thing->setStateValue(liveWallboxCurrentPowerStateTypeId, power);
         } break;
         case Webasto::TqEnergyMeter: {
             if (data.count() < 2)

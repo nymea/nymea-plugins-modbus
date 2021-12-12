@@ -127,11 +127,11 @@
                         },
                         {
                             "id": "b20a46ee-0f22-4096-a348-34e68e99e0be",
-                            "name": "powerConsumption",
-                            "displayName": "Power consumption",
-                            "displayNameEvent": "Power consumtion changed",
+                            "name": "currentPower",
+                            "displayName": "Current power consumption",
+                            "displayNameEvent": "Current power consumtion changed",
                             "type": "double",
-                            "unit": "KiloWatt",
+                            "unit": "Watt",
                             "defaultValue": 0.00
                         },
                         {
