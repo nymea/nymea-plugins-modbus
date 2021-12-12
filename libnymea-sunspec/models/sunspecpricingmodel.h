@@ -57,7 +57,7 @@ public:
     Q_DECLARE_FLAGS(ModenaFlags, Modena)
     Q_FLAG(Modena)
 
-    explicit SunSpecPricingModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
+    explicit SunSpecPricingModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent = nullptr);
     ~SunSpecPricingModel() override; 
 
     QString name() const override;

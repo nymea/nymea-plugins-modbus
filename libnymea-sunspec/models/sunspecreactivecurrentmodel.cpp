@@ -31,8 +31,8 @@
 #include "sunspecreactivecurrentmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecReactiveCurrentModel::SunSpecReactiveCurrentModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 128, modelLength, parent)
+SunSpecReactiveCurrentModel::SunSpecReactiveCurrentModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 128, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
 

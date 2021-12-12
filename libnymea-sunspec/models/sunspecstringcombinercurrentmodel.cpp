@@ -158,8 +158,8 @@ void SunSpecStringCombinerCurrentModelRepeatingBlock::processBlockData(const QVe
 }
 
 
-SunSpecStringCombinerCurrentModel::SunSpecStringCombinerCurrentModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 403, modelLength, parent)
+SunSpecStringCombinerCurrentModel::SunSpecStringCombinerCurrentModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 403, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixedAndRepeating;
 

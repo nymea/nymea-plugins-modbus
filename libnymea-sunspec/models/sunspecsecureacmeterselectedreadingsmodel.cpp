@@ -79,8 +79,8 @@ void SunSpecSecureAcMeterSelectedReadingsModelRepeatingBlock::processBlockData(c
 }
 
 
-SunSpecSecureAcMeterSelectedReadingsModel::SunSpecSecureAcMeterSelectedReadingsModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 220, modelLength, parent)
+SunSpecSecureAcMeterSelectedReadingsModel::SunSpecSecureAcMeterSelectedReadingsModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 220, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixedAndRepeating;
 

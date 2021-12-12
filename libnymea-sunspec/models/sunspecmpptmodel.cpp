@@ -241,8 +241,8 @@ void SunSpecMpptModelRepeatingBlock::processBlockData(const QVector<quint16> blo
 }
 
 
-SunSpecMpptModel::SunSpecMpptModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 160, modelLength, parent)
+SunSpecMpptModel::SunSpecMpptModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 160, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixedAndRepeating;
 

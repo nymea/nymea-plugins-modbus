@@ -31,8 +31,8 @@
 #include "sunspecextsettingsmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecExtSettingsModel::SunSpecExtSettingsModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 145, modelLength, parent)
+SunSpecExtSettingsModel::SunSpecExtSettingsModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 145, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
 

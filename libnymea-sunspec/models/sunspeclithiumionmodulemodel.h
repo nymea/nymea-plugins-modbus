@@ -84,7 +84,7 @@ class SunSpecLithiumIonModuleModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    explicit SunSpecLithiumIonModuleModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
+    explicit SunSpecLithiumIonModuleModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent = nullptr);
     ~SunSpecLithiumIonModuleModel() override; 
 
     QString name() const override;

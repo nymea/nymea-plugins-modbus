@@ -1465,8 +1465,8 @@ void SunSpecHvrtcModelRepeatingBlock::processBlockData(const QVector<quint16> bl
 }
 
 
-SunSpecHvrtcModel::SunSpecHvrtcModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 138, modelLength, parent)
+SunSpecHvrtcModel::SunSpecHvrtcModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 138, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixedAndRepeating;
 

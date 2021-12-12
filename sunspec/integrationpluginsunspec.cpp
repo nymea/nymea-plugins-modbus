@@ -221,6 +221,7 @@ void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
             || thing->thingClassId() == solarEdgeConnectionThingClassId
             || thing->thingClassId() == kostalConnectionThingClassId) {
         setupConnection(info);
+
     } else if (thing->thingClassId() == sunspecThreePhaseInverterThingClassId
                || thing->thingClassId() == sunspecSplitPhaseInverterThingClassId
                || thing->thingClassId() == sunspecSinglePhaseInverterThingClassId ) {
@@ -232,6 +233,7 @@ void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
                 setupInverter(info);
             });
         }
+
     } else if (thing->thingClassId() == sunspecThreePhaseMeterThingClassId
                || thing->thingClassId() == sunspecSplitPhaseMeterThingClassId
                || thing->thingClassId() == sunspecSinglePhaseMeterThingClassId ) {
@@ -243,6 +245,7 @@ void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
                 setupMeter(info);
             });
         }
+
     } else if (thing->thingClassId() == sunspecStorageThingClassId) {
         Thing *parentThing = myThings().findById(thing->parentId());
         if (parentThing->setupStatus() == Thing::ThingSetupStatusComplete) {
@@ -252,6 +255,7 @@ void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
                 setupStorage(info);
             });
         }
+
     } else if (thing->thingClassId() == solarEdgeBatteryThingClassId) {
         Thing *parentThing = myThings().findById(thing->parentId());
         if (parentThing->setupStatus() == Thing::ThingSetupStatusComplete) {
@@ -261,6 +265,7 @@ void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
                 setupSolarEdgeBattery(info);
             });
         }
+
     } else {
         Q_ASSERT_X(false, "setupThing", QString("Unhandled thingClassId: %1").arg(info->thing()->thingClassId().toString()).toUtf8());
     }

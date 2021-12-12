@@ -42,7 +42,7 @@ class SunSpecMiniMetModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    explicit SunSpecMiniMetModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
+    explicit SunSpecMiniMetModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent = nullptr);
     ~SunSpecMiniMetModel() override; 
 
     QString name() const override;

@@ -585,8 +585,8 @@ void SunSpecLithiumIonBankModelRepeatingBlock::processBlockData(const QVector<qu
 }
 
 
-SunSpecLithiumIonBankModel::SunSpecLithiumIonBankModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 803, modelLength, parent)
+SunSpecLithiumIonBankModel::SunSpecLithiumIonBankModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 803, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixedAndRepeating;
 

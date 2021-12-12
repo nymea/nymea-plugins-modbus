@@ -31,8 +31,8 @@
 #include "sunspecstoragemodel.h"
 #include "sunspecconnection.h"
 
-SunSpecStorageModel::SunSpecStorageModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 124, modelLength, parent)
+SunSpecStorageModel::SunSpecStorageModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 124, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
 

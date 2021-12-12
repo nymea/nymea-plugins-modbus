@@ -144,7 +144,7 @@ public:
     Q_DECLARE_FLAGS(GlblalmFlags, Glblalm)
     Q_FLAG(Glblalm)
 
-    explicit SunSpecTrackerControllerModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
+    explicit SunSpecTrackerControllerModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent = nullptr);
     ~SunSpecTrackerControllerModel() override; 
 
     QString name() const override;

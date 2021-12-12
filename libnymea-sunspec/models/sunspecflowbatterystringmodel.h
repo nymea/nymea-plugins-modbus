@@ -303,7 +303,7 @@ public:
     Q_DECLARE_FLAGS(Evt2Flags, Evt2)
     Q_FLAG(Evt2)
 
-    explicit SunSpecFlowBatteryStringModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
+    explicit SunSpecFlowBatteryStringModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent = nullptr);
     ~SunSpecFlowBatteryStringModel() override; 
 
     QString name() const override;

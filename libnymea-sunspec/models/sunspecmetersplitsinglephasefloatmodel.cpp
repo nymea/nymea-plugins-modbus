@@ -31,8 +31,8 @@
 #include "sunspecmetersplitsinglephasefloatmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecMeterSplitSinglePhaseFloatModel::SunSpecMeterSplitSinglePhaseFloatModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 212, modelLength, parent)
+SunSpecMeterSplitSinglePhaseFloatModel::SunSpecMeterSplitSinglePhaseFloatModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 212, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
 

@@ -63,7 +63,7 @@ public:
         QString versionString;
     } CommonModelInfo;
 
-    explicit SunSpecModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelId, quint16 modelLength, QObject *parent = nullptr);
+    explicit SunSpecModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelId, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent = nullptr);
     virtual ~SunSpecModel() = default;
 
     SunSpecConnection *connection() const;
@@ -80,8 +80,6 @@ public:
     quint16 modbusStartRegister() const;
 
     SunSpecDataPoint::ByteOrder byteOrder() const;
-    void setByteOrder(SunSpecDataPoint::ByteOrder byteOrder);
-
     QHash<QString, SunSpecDataPoint> dataPoints() const;
 
     QVector<quint16> blockData() const;

@@ -42,7 +42,7 @@ class SunSpecCommonModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    explicit SunSpecCommonModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
+    explicit SunSpecCommonModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent = nullptr);
     ~SunSpecCommonModel() override; 
 
     QString name() const override;

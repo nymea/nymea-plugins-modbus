@@ -75,7 +75,7 @@ public:
     Q_DECLARE_FLAGS(Evt1Flags, Evt1)
     Q_FLAG(Evt1)
 
-    explicit SunSpecInverterSplitPhaseModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
+    explicit SunSpecInverterSplitPhaseModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent = nullptr);
     ~SunSpecInverterSplitPhaseModel() override; 
 
     QString name() const override;

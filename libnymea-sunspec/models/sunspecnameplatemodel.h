@@ -48,7 +48,7 @@ public:
     };
     Q_ENUM(Dertyp)
 
-    explicit SunSpecNameplateModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
+    explicit SunSpecNameplateModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent = nullptr);
     ~SunSpecNameplateModel() override; 
 
     QString name() const override;
