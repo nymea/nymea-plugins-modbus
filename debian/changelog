@@ -1,7 +1,21 @@
-nymea-plugins-modbus (0.30.0) UNRELEASED; urgency=medium
+nymea-plugins-modbus (0.30.0) xenial; urgency=medium
 
+  [ Michael Zanetti ]
+  * 0.30
+  * Update to new energystorage interface
 
- -- Michael Zanetti <michael.zanetti@nymea.io>  Mon, 20 Sep 2021 11:18:02 +0200
+  [ Simon Stürz ]
+  * New plugin: Alpha Innotec heat pumps
+  * SunSpec: Fix energy values for solar edge battery
+  * Update wallbox interface states
+  * EnergyMeters: Refactor using modbus tools
+  * Unipi: Update unipi to libnymea-gpio changes
+  * Add modbus class generator tools
+
+  [ Michael Zanetti ]
+  * WebastoLive: Add modbus registers doc PDF
+
+ -- Jenkins <jenkins@nymea.io>  Mon, 13 Dec 2021 00:48:17 +0100
 
 nymea-plugins-modbus (0.29.1) xenial; urgency=medium
 
