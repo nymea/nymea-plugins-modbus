@@ -42,7 +42,7 @@ class SunSpecRefPointModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    explicit SunSpecRefPointModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
+    explicit SunSpecRefPointModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent = nullptr);
     ~SunSpecRefPointModel() override; 
 
     QString name() const override;

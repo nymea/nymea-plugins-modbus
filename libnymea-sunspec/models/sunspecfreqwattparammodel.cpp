@@ -31,8 +31,8 @@
 #include "sunspecfreqwattparammodel.h"
 #include "sunspecconnection.h"
 
-SunSpecFreqWattParamModel::SunSpecFreqWattParamModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 127, modelLength, parent)
+SunSpecFreqWattParamModel::SunSpecFreqWattParamModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 127, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
 

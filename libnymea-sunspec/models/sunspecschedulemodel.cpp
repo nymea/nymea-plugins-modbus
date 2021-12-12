@@ -1050,8 +1050,8 @@ void SunSpecScheduleModelRepeatingBlock::processBlockData(const QVector<quint16>
 }
 
 
-SunSpecScheduleModel::SunSpecScheduleModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 133, modelLength, parent)
+SunSpecScheduleModel::SunSpecScheduleModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 133, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixedAndRepeating;
 

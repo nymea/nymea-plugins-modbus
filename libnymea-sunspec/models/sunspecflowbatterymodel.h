@@ -72,7 +72,7 @@ class SunSpecFlowBatteryModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    explicit SunSpecFlowBatteryModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
+    explicit SunSpecFlowBatteryModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent = nullptr);
     ~SunSpecFlowBatteryModel() override; 
 
     QString name() const override;

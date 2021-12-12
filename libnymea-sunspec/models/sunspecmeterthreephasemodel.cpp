@@ -31,8 +31,8 @@
 #include "sunspecmeterthreephasemodel.h"
 #include "sunspecconnection.h"
 
-SunSpecMeterThreePhaseModel::SunSpecMeterThreePhaseModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 203, modelLength, parent)
+SunSpecMeterThreePhaseModel::SunSpecMeterThreePhaseModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 203, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
 

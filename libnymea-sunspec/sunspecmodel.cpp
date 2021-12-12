@@ -33,12 +33,13 @@
 
 Q_LOGGING_CATEGORY(dcSunSpecModelData, "SunSpecModelData")
 
-SunSpecModel::SunSpecModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelId, quint16 modelLength, QObject *parent) :
+SunSpecModel::SunSpecModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelId, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
     QObject(parent),
     m_connection(connection),
     m_modbusStartRegister(modbusStartRegister),
     m_modelId(modelId),
-    m_modelLength(modelLength)
+    m_modelLength(modelLength),
+    m_byteOrder(byteOrder)
 {
     m_initTimer.setSingleShot(true);
     m_initTimer.setInterval(10000);
@@ -77,11 +78,6 @@ quint16 SunSpecModel::modbusStartRegister() const
 SunSpecDataPoint::ByteOrder SunSpecModel::byteOrder() const
 {
     return m_byteOrder;
-}
-
-void SunSpecModel::setByteOrder(SunSpecDataPoint::ByteOrder byteOrder)
-{
-    m_byteOrder = byteOrder;
 }
 
 QHash<QString, SunSpecDataPoint> SunSpecModel::dataPoints() const

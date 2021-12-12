@@ -84,7 +84,7 @@ class SunSpecIrradianceModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    explicit SunSpecIrradianceModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
+    explicit SunSpecIrradianceModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent = nullptr);
     ~SunSpecIrradianceModel() override; 
 
     QString name() const override;

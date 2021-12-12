@@ -467,8 +467,8 @@ void SunSpecFlowBatteryStringModelRepeatingBlock::processBlockData(const QVector
 }
 
 
-SunSpecFlowBatteryStringModel::SunSpecFlowBatteryStringModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 807, modelLength, parent)
+SunSpecFlowBatteryStringModel::SunSpecFlowBatteryStringModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 807, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixedAndRepeating;
 

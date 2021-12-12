@@ -31,8 +31,8 @@
 #include "sunspecinvertersplitphasemodel.h"
 #include "sunspecconnection.h"
 
-SunSpecInverterSplitPhaseModel::SunSpecInverterSplitPhaseModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 102, modelLength, parent)
+SunSpecInverterSplitPhaseModel::SunSpecInverterSplitPhaseModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 102, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
 

@@ -104,314 +104,190 @@ SunSpecModel *SunSpecModelFactory::createModel(SunSpecConnection *connection, qu
 {
     switch(modelId) {
     case ModelIdCommon: {
-        SunSpecCommonModel *model = new SunSpecCommonModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecCommonModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdAggregator: {
-        SunSpecAggregatorModel *model = new SunSpecAggregatorModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecAggregatorModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdInverterSinglePhase: {
-        SunSpecInverterSinglePhaseModel *model = new SunSpecInverterSinglePhaseModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecInverterSinglePhaseModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdInverterSplitPhase: {
-        SunSpecInverterSplitPhaseModel *model = new SunSpecInverterSplitPhaseModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecInverterSplitPhaseModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdInverterThreePhase: {
-        SunSpecInverterThreePhaseModel *model = new SunSpecInverterThreePhaseModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecInverterThreePhaseModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdInverterSinglePhaseFloat: {
-        SunSpecInverterSinglePhaseFloatModel *model = new SunSpecInverterSinglePhaseFloatModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecInverterSinglePhaseFloatModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdInverterSplitPhaseFloat: {
-        SunSpecInverterSplitPhaseFloatModel *model = new SunSpecInverterSplitPhaseFloatModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecInverterSplitPhaseFloatModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdInverterThreePhaseFloat: {
-        SunSpecInverterThreePhaseFloatModel *model = new SunSpecInverterThreePhaseFloatModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecInverterThreePhaseFloatModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdNameplate: {
-        SunSpecNameplateModel *model = new SunSpecNameplateModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecNameplateModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdSettings: {
-        SunSpecSettingsModel *model = new SunSpecSettingsModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecSettingsModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdStatus: {
-        SunSpecStatusModel *model = new SunSpecStatusModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecStatusModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdControls: {
-        SunSpecControlsModel *model = new SunSpecControlsModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecControlsModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdStorage: {
-        SunSpecStorageModel *model = new SunSpecStorageModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecStorageModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdEnergyStorageBaseDeprecated: {
-        SunSpecEnergyStorageBaseModelDeprecatedModel *model = new SunSpecEnergyStorageBaseModelDeprecatedModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecEnergyStorageBaseModelDeprecatedModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdPricing: {
-        SunSpecPricingModel *model = new SunSpecPricingModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecPricingModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdVoltVar: {
-        SunSpecVoltVarModel *model = new SunSpecVoltVarModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecVoltVarModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdFreqWattParam: {
-        SunSpecFreqWattParamModel *model = new SunSpecFreqWattParamModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecFreqWattParamModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdReactiveCurrent: {
-        SunSpecReactiveCurrentModel *model = new SunSpecReactiveCurrentModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecReactiveCurrentModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdLvrt: {
-        SunSpecLvrtModel *model = new SunSpecLvrtModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecLvrtModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdHvrt: {
-        SunSpecHvrtModel *model = new SunSpecHvrtModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecHvrtModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdWattPf: {
-        SunSpecWattPfModel *model = new SunSpecWattPfModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecWattPfModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdVoltWatt: {
-        SunSpecVoltWattModel *model = new SunSpecVoltWattModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecVoltWattModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdSchedule: {
-        SunSpecScheduleModel *model = new SunSpecScheduleModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecScheduleModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdFreqWatt: {
-        SunSpecFreqWattModel *model = new SunSpecFreqWattModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecFreqWattModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdLfrt: {
-        SunSpecLfrtModel *model = new SunSpecLfrtModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecLfrtModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdHfrt: {
-        SunSpecHfrtModel *model = new SunSpecHfrtModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecHfrtModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdLvrtc: {
-        SunSpecLvrtcModel *model = new SunSpecLvrtcModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecLvrtcModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdHvrtc: {
-        SunSpecHvrtcModel *model = new SunSpecHvrtcModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecHvrtcModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdLvrtx: {
-        SunSpecLvrtxModel *model = new SunSpecLvrtxModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecLvrtxModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdHvrtx: {
-        SunSpecHvrtxModel *model = new SunSpecHvrtxModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecHvrtxModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdLfrtc: {
-        SunSpecLfrtcModel *model = new SunSpecLfrtcModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecLfrtcModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdHfrtc: {
-        SunSpecHfrtcModel *model = new SunSpecHfrtcModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecHfrtcModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdLfrtx: {
-        SunSpecLfrtxModel *model = new SunSpecLfrtxModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecLfrtxModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdHfrtx: {
-        SunSpecHfrtxModel *model = new SunSpecHfrtxModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecHfrtxModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdExtSettings: {
-        SunSpecExtSettingsModel *model = new SunSpecExtSettingsModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecExtSettingsModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdMppt: {
-        SunSpecMpptModel *model = new SunSpecMpptModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecMpptModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdMeterSinglePhase: {
-        SunSpecMeterSinglePhaseModel *model = new SunSpecMeterSinglePhaseModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecMeterSinglePhaseModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdMeterSplitSinglePhaseAbn: {
-        SunSpecMeterSplitSinglePhaseAbnModel *model = new SunSpecMeterSplitSinglePhaseAbnModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecMeterSplitSinglePhaseAbnModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdMeterThreePhase: {
-        SunSpecMeterThreePhaseModel *model = new SunSpecMeterThreePhaseModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecMeterThreePhaseModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdMeterThreePhaseDeltaConnect: {
-        SunSpecMeterThreePhaseDeltaConnectModel *model = new SunSpecMeterThreePhaseDeltaConnectModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecMeterThreePhaseDeltaConnectModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdMeterSinglePhaseFloat: {
-        SunSpecMeterSinglePhaseFloatModel *model = new SunSpecMeterSinglePhaseFloatModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecMeterSinglePhaseFloatModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdMeterSplitSinglePhaseFloat: {
-        SunSpecMeterSplitSinglePhaseFloatModel *model = new SunSpecMeterSplitSinglePhaseFloatModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecMeterSplitSinglePhaseFloatModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdMeterThreePhaseWyeConnect: {
-        SunSpecMeterThreePhaseWyeConnectModel *model = new SunSpecMeterThreePhaseWyeConnectModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecMeterThreePhaseWyeConnectModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdDeltaConnectThreePhaseAbcMeter: {
-        SunSpecDeltaConnectThreePhaseAbcMeterModel *model = new SunSpecDeltaConnectThreePhaseAbcMeterModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecDeltaConnectThreePhaseAbcMeterModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdSecureAcMeterSelectedReadings: {
-        SunSpecSecureAcMeterSelectedReadingsModel *model = new SunSpecSecureAcMeterSelectedReadingsModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecSecureAcMeterSelectedReadingsModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdIrradiance: {
-        SunSpecIrradianceModel *model = new SunSpecIrradianceModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecIrradianceModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdLocation: {
-        SunSpecLocationModel *model = new SunSpecLocationModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecLocationModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdRefPoint: {
-        SunSpecRefPointModel *model = new SunSpecRefPointModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecRefPointModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdBaseMet: {
-        SunSpecBaseMetModel *model = new SunSpecBaseMetModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecBaseMetModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdMiniMet: {
-        SunSpecMiniMetModel *model = new SunSpecMiniMetModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecMiniMetModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdStringCombinerCurrent: {
-        SunSpecStringCombinerCurrentModel *model = new SunSpecStringCombinerCurrentModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecStringCombinerCurrentModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdStringCombinerAdvanced: {
-        SunSpecStringCombinerAdvancedModel *model = new SunSpecStringCombinerAdvancedModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecStringCombinerAdvancedModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdSolarModule: {
-        SunSpecSolarModuleModel *model = new SunSpecSolarModuleModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecSolarModuleModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdTrackerController: {
-        SunSpecTrackerControllerModel *model = new SunSpecTrackerControllerModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecTrackerControllerModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdBattery: {
-        SunSpecBatteryModel *model = new SunSpecBatteryModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecBatteryModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdLithiumIonBank: {
-        SunSpecLithiumIonBankModel *model = new SunSpecLithiumIonBankModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecLithiumIonBankModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdLithiumIonString: {
-        SunSpecLithiumIonStringModel *model = new SunSpecLithiumIonStringModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecLithiumIonStringModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdLithiumIonModule: {
-        SunSpecLithiumIonModuleModel *model = new SunSpecLithiumIonModuleModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecLithiumIonModuleModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdFlowBattery: {
-        SunSpecFlowBatteryModel *model = new SunSpecFlowBatteryModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecFlowBatteryModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdFlowBatteryString: {
-        SunSpecFlowBatteryStringModel *model = new SunSpecFlowBatteryStringModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecFlowBatteryStringModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdFlowBatteryModule: {
-        SunSpecFlowBatteryModuleModel *model = new SunSpecFlowBatteryModuleModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecFlowBatteryModuleModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     case ModelIdFlowBatteryStack: {
-        SunSpecFlowBatteryStackModel *model = new SunSpecFlowBatteryStackModel(connection, modbusStartRegister, modelLength, connection);
-        model->setByteOrder(byteOrder);
-        return model;
+        return new SunSpecFlowBatteryStackModel(connection, modbusStartRegister, modelLength, byteOrder, connection);
     };
     default:
         return nullptr;

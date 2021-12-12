@@ -42,7 +42,7 @@ class SunSpecEnergyStorageBaseModelDeprecatedModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    explicit SunSpecEnergyStorageBaseModelDeprecatedModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
+    explicit SunSpecEnergyStorageBaseModelDeprecatedModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent = nullptr);
     ~SunSpecEnergyStorageBaseModelDeprecatedModel() override; 
 
     QString name() const override;

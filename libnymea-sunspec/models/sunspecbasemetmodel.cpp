@@ -31,8 +31,8 @@
 #include "sunspecbasemetmodel.h"
 #include "sunspecconnection.h"
 
-SunSpecBaseMetModel::SunSpecBaseMetModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent) :
-    SunSpecModel(connection, modbusStartRegister, 307, modelLength, parent)
+SunSpecBaseMetModel::SunSpecBaseMetModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent) :
+    SunSpecModel(connection, modbusStartRegister, 307, modelLength, byteOrder, parent)
 {
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixed;
 

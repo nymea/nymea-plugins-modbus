@@ -42,7 +42,7 @@ class SunSpecBaseMetModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    explicit SunSpecBaseMetModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
+    explicit SunSpecBaseMetModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent = nullptr);
     ~SunSpecBaseMetModel() override; 
 
     QString name() const override;

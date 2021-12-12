@@ -42,7 +42,7 @@ class SunSpecLocationModel : public SunSpecModel
     Q_OBJECT
 public:
 
-    explicit SunSpecLocationModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, QObject *parent = nullptr);
+    explicit SunSpecLocationModel(SunSpecConnection *connection, quint16 modbusStartRegister, quint16 modelLength, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent = nullptr);
     ~SunSpecLocationModel() override; 
 
     QString name() const override;
