@@ -275,9 +275,9 @@ void NeuronExtensionDiscovery::getNext(int address)
                 model = NeuronExtension::ExtensionTypes::xS10;
             } else if (result[4] == 2) {
                 model = NeuronExtension::ExtensionTypes::xS20;
-            } else if (result[4] == 3) {
+            } else if (result[4] == 784) {
                 model = NeuronExtension::ExtensionTypes::xS30;
-            } else if (result[4] == 4) {
+            } else if (result[4] == 528) {
                 model = NeuronExtension::ExtensionTypes::xS40;
             } else if (result[4] == 5) {
                 model = NeuronExtension::ExtensionTypes::xS50;
