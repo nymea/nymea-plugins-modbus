@@ -949,6 +949,10 @@ def writeTcpSourceFile():
     # Property get methods
     writePropertyGetSetMethodImplementationsTcp(sourceFile, className, registerJson['registers'])
 
+    # Block property get methods
+    for blockDefinition in registerJson['blocks']:
+        writePropertyGetSetMethodImplementationsTcp(sourceFile, className, blockDefinition['registers'])
+
     # Write init and update method implementation
     writeInitializeMethod(sourceFile, className, registerJson['registers'])
     writeUpdateMethod(sourceFile, className, registerJson['registers'])
