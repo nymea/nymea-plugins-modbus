@@ -1,0 +1,13 @@
+{
+    "title": "Schrack",
+    "tagline": "Integrate the Schrack i-CHARGE CION wallbox with nymea.",
+    "icon": "schrack.jpg",
+    "stability": "consumer",
+    "offline": true,
+    "technologies": [
+        "modbus"
+    ],
+    "categories": [
+        "energy"
+    ]
+}
