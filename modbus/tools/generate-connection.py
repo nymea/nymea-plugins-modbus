@@ -282,7 +282,7 @@ def getValueConversionMethod(registerDefinition):
         return ('ModbusDataUtils::convertToString(values)')
 
 
-def writePropertyGetSetMethodDeclarations(fileDescriptor, registerDefinitions):
+def writePropertyGetSetMethodDeclarationsTcp(fileDescriptor, registerDefinitions):
     for registerDefinition in registerDefinitions:
         propertyName = registerDefinition['id']
         propertyTyp = getCppDataType(registerDefinition)
@@ -296,6 +296,24 @@ def writePropertyGetSetMethodDeclarations(fileDescriptor, registerDefinitions):
         # Check if we require a set method
         if registerDefinition['access'] == 'RW' or registerDefinition['access'] == 'WO':
             writeLine(fileDescriptor, '    QModbusReply *set%s(%s %s);' % (propertyName[0].upper() + propertyName[1:], propertyTyp, propertyName))
+
+        writeLine(fileDescriptor)
+
+
+def writePropertyGetSetMethodDeclarationsRtu(fileDescriptor, registerDefinitions):
+    for registerDefinition in registerDefinitions:
+        propertyName = registerDefinition['id']
+        propertyTyp = getCppDataType(registerDefinition)
+        if 'unit' in registerDefinition and registerDefinition['unit'] != '':
+            writeLine(fileDescriptor, '    /* %s [%s] - Address: %s, Size: %s */' % (registerDefinition['description'], registerDefinition['unit'], registerDefinition['address'], registerDefinition['size']))
+        else:
+            writeLine(fileDescriptor, '    /* %s - Address: %s, Size: %s */' % (registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
+
+        writeLine(fileDescriptor, '    %s %s() const;' % (propertyTyp, propertyName))
+
+        # Check if we require a set method
+        if registerDefinition['access'] == 'RW' or registerDefinition['access'] == 'WO':
+            writeLine(fileDescriptor, '    ModbusRtuReply *set%s(%s %s);' % (propertyName[0].upper() + propertyName[1:], propertyTyp, propertyName))
 
         writeLine(fileDescriptor)
 
@@ -1031,7 +1049,7 @@ def writeRtuHeaderFile():
     writeLine(headerFile)
 
     # Write registers get/set method declarations
-    writePropertyGetSetMethodDeclarations(headerFile, registerJson['registers'])
+    writePropertyGetSetMethodDeclarationsRtu(headerFile, registerJson['registers'])
 
     # Write block get/set method declarations
     writeBlocksUpdateMethodDeclarations(headerFile, registerJson['blocks'])
