@@ -14,6 +14,7 @@ PLUGIN_DIRS = \
     modbuscommander         \
     mtec                    \
     mypv                    \
+    schrack                 \
     sunspec                 \
     unipi                   \
     wallbe                  \
