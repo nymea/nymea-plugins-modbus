@@ -6,7 +6,8 @@
     "offline": true,
     "technologies": [
         "network",
-        "serial-port"
+        "serial-port",
+        "modbus"
     ],
     "categories": [
         "diy"

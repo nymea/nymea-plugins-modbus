@@ -5,7 +5,8 @@
     "stability": "community",
     "offline": true,
     "technologies": [
-        "network"
+        "network",
+        "modbus"
     ],
     "categories": [
         "heating"
