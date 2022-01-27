@@ -1,7 +1,7 @@
 {
-    "title": "Energy Meters",
-    "tagline": "Connect Modbus RTU energy meters.",
-    "icon": "",
+    "title": "B+G E-Tech",
+    "tagline": "Connect B+G E-Tech energy meters.",
+    "icon": "bg-etech.jpg",
     "stability": "consumer",
     "offline": true,
     "technologies": [
