@@ -28,28 +28,29 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef INTEGRATIONPLUGINENERGYMETERS_H
-#define INTEGRATIONPLUGINENERGYMETERS_H
+#ifndef INTEGRATIONPLUGINBGETECH_H
+#define INTEGRATIONPLUGINBGETECH_H
 
 #include <integrations/integrationplugin.h>
 #include <hardware/modbus/modbusrtuhardwareresource.h>
 #include <plugintimer.h>
 
 #include "sdm630modbusrtuconnection.h"
-#include "pro380modbusrtuconnection.h"
+
+#include "extern-plugininfo.h"
 
 #include <QObject>
 #include <QTimer>
 
-class IntegrationPluginEnergyMeters : public IntegrationPlugin
+class IntegrationPluginBGETech: public IntegrationPlugin
 {
     Q_OBJECT
 
-    Q_PLUGIN_METADATA(IID "io.nymea.IntegrationPlugin" FILE "integrationpluginenergymeters.json")
+    Q_PLUGIN_METADATA(IID "io.nymea.IntegrationPlugin" FILE "integrationpluginbgetech.json")
     Q_INTERFACES(IntegrationPlugin)
 
 public:
-    explicit IntegrationPluginEnergyMeters();
+    explicit IntegrationPluginBGETech();
     void init() override;
     void discoverThings(ThingDiscoveryInfo *info) override;
     void setupThing(ThingSetupInfo *info) override;
@@ -59,14 +60,7 @@ public:
 private:
     PluginTimer *m_refreshTimer = nullptr;
 
-    QHash<Thing *, Sdm630ModbusRtuConnection *> m_sdmConnections; // sdm 630
-    QHash<Thing *, Pro380ModbusRtuConnection *> m_ineproConnections; // pro 380
-
-    QHash<ThingClassId, ParamTypeId> m_discoverySlaveAddressParamTypeIds;
-    QHash<ThingClassId, ParamTypeId> m_slaveIdParamTypeIds;
-    QHash<ThingClassId, ParamTypeId> m_modbusUuidParamTypeIds;
-    QHash<ThingClassId, StateTypeId> m_connectionStateTypeIds;
-
+    QHash<Thing *, Sdm630ModbusRtuConnection *> m_sdmConnections;
 };
 
-#endif // INTEGRATIONPLUGINENERGYMETERS_H
+#endif // INTEGRATIONPLUGINBGETECH_H

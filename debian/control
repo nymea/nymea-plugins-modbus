@@ -43,6 +43,17 @@ Description: nymea integration plugin for alpha innotec heat pumps
  This package contains the nymea integration plugin for alpha innotec head pumps.
 
 
+Package: nymea-plugin-bgetech
+Architecture: any
+Multi-Arch: same
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for B+G E-Tech Modbus based energy meters
+ This package contains the nymea integration plugin for Modbus based energy meters
+ made by B+G E-Tech.
+
+
 Package: nymea-plugin-drexelundweiss
 Architecture: any
 Section: libs
@@ -61,14 +72,15 @@ Description: nymea integration plugin for iDM heat pumps
  This package contains the nymea integration plugin for iDM heat pumps.
 
 
-Package: nymea-plugin-energymeters
+Package: nymea-plugin-inepro
 Architecture: any
 Multi-Arch: same
 Section: libs
 Depends: ${shlibs:Depends},
          ${misc:Depends},
-Description: nymea integration plugin for Modbus based energy meters
- This package contains a collection of energy meters.
+Description: nymea integration plugin for inepro Metering Modbus based energy meters
+ This package contains the nymea integration plugin for Modbus based energy meters
+ made by inepro Metering.
 
 
 Package: nymea-plugin-huawei      

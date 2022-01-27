@@ -1,0 +1,13 @@
+{
+    "title": "inepro Metering",
+    "tagline": "Connect inepro Metering Modbus RTU energy meters.",
+    "icon": "inepro.jpg",
+    "stability": "consumer",
+    "offline": true,
+    "technologies": [
+        "modbus"
+    ],
+    "categories": [
+        "energy"
+    ]
+}
