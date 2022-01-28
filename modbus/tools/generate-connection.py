@@ -914,7 +914,8 @@ def writeTcpHeaderFile():
     writePropertyGetSetMethodDeclarationsTcp(headerFile, registerJson['registers'])
 
     # Write block get/set method declarations
-    writeBlocksUpdateMethodDeclarations(headerFile, registerJson['blocks'])
+    if 'blocks' in registerJson:
+        writeBlocksUpdateMethodDeclarations(headerFile, registerJson['blocks'])
 
     # Write init and update method declarations
     writeLine(headerFile, '    virtual void initialize();')
@@ -929,8 +930,10 @@ def writeTcpHeaderFile():
     writeLine(headerFile, '    void initializationFinished();')
     writeLine(headerFile)
     writePropertyChangedSignals(headerFile, registerJson['registers'])
-    for blockDefinition in registerJson['blocks']:
-        writePropertyChangedSignals(headerFile, blockDefinition['registers'])
+    if 'blocks' in registerJson:
+        for blockDefinition in registerJson['blocks']:
+            writePropertyChangedSignals(headerFile, blockDefinition['registers'])
+
     writeLine(headerFile)
 
     # Protected members
@@ -944,8 +947,10 @@ def writeTcpHeaderFile():
     writeLine(headerFile, '    QVector<QModbusReply *> m_pendingInitReplies;')
     writeLine(headerFile)
     writePrivatePropertyMembers(headerFile, registerJson['registers'])
-    for blockDefinition in registerJson['blocks']:
-        writePrivatePropertyMembers(headerFile, blockDefinition['registers'])
+    if 'blocks' in registerJson:
+        for blockDefinition in registerJson['blocks']:
+            writePrivatePropertyMembers(headerFile, blockDefinition['registers'])
+
     writeLine(headerFile)
     writeLine(headerFile, '    void verifyInitFinished();')
     writeLine(headerFile)
@@ -986,8 +991,9 @@ def writeTcpSourceFile():
     writePropertyGetSetMethodImplementationsTcp(sourceFile, className, registerJson['registers'])
 
     # Block property get methods
-    for blockDefinition in registerJson['blocks']:
-        writePropertyGetSetMethodImplementationsTcp(sourceFile, className, blockDefinition['registers'])
+    if 'blocks' in registerJson:
+        for blockDefinition in registerJson['blocks']:
+            writePropertyGetSetMethodImplementationsTcp(sourceFile, className, blockDefinition['registers'])
 
     # Write init and update method implementation
     writeInitializeMethod(sourceFile, className, registerJson['registers'])
@@ -996,8 +1002,9 @@ def writeTcpSourceFile():
     # Write update methods
     writePropertyUpdateMethodImplementationsTcp(sourceFile, className, registerJson['registers'])
 
-   # Write block update method
-    writeBlockUpdateMethodImplementationsTcp(sourceFile, className, registerJson['blocks'])
+    # Write block update method
+    if 'blocks' in registerJson:
+        writeBlockUpdateMethodImplementationsTcp(sourceFile, className, registerJson['blocks'])
 
     # Write internal protected property read method implementations
     writeInternalPropertyReadMethodImplementationsTcp(sourceFile, className, registerJson['registers'])
@@ -1018,8 +1025,9 @@ def writeTcpSourceFile():
     writeLine(sourceFile, '    debug.nospace().noquote() << "%s(" << %s->hostAddress().toString() << ":" << %s->port() << ")" << "\\n";' % (className, debugObjectParamName, debugObjectParamName))
     writeRegistersDebugLine(sourceFile, debugObjectParamName, registerJson['registers'])
 
-    for blockDefinition in registerJson['blocks']:
-        writeRegistersDebugLine(sourceFile, debugObjectParamName, blockDefinition['registers'])
+    if 'blocks' in registerJson:
+        for blockDefinition in registerJson['blocks']:
+            writeRegistersDebugLine(sourceFile, debugObjectParamName, blockDefinition['registers'])
 
     writeLine(sourceFile, '    return debug.quote().space();')
     writeLine(sourceFile, '}')
@@ -1070,7 +1078,8 @@ def writeRtuHeaderFile():
     writePropertyGetSetMethodDeclarationsRtu(headerFile, registerJson['registers'])
 
     # Write block get/set method declarations
-    writeBlocksUpdateMethodDeclarations(headerFile, registerJson['blocks'])
+    if 'blocks' in registerJson:
+        writeBlocksUpdateMethodDeclarations(headerFile, registerJson['blocks'])
 
     writePropertyUpdateMethodDeclarations(headerFile, registerJson['registers'])
     writeLine(headerFile)
@@ -1085,8 +1094,9 @@ def writeRtuHeaderFile():
     writeLine(headerFile, '    void initializationFinished();')
     writeLine(headerFile)
     writePropertyChangedSignals(headerFile, registerJson['registers'])
-    for blockDefinition in registerJson['blocks']:
-        writePropertyChangedSignals(headerFile, blockDefinition['registers'])
+    if 'blocks' in registerJson:
+        for blockDefinition in registerJson['blocks']:
+            writePropertyChangedSignals(headerFile, blockDefinition['registers'])
     writeLine(headerFile)
 
     # Protected members
@@ -1101,8 +1111,9 @@ def writeRtuHeaderFile():
     writeLine(headerFile, '    QVector<ModbusRtuReply *> m_pendingInitReplies;')
     writeLine(headerFile)
     writePrivatePropertyMembers(headerFile, registerJson['registers'])
-    for blockDefinition in registerJson['blocks']:
-        writePrivatePropertyMembers(headerFile, blockDefinition['registers'])
+    if 'blocks' in registerJson:
+        for blockDefinition in registerJson['blocks']:
+            writePrivatePropertyMembers(headerFile, blockDefinition['registers'])
 
     writeLine(headerFile)
     writeLine(headerFile, '    void verifyInitFinished();')
@@ -1155,8 +1166,9 @@ def writeRtuSourceFile():
     writePropertyGetSetMethodImplementationsRtu(sourceFile, className, registerJson['registers'])
 
     # Block property get methods
-    for blockDefinition in registerJson['blocks']:
-        writePropertyGetSetMethodImplementationsRtu(sourceFile, className, blockDefinition['registers'])
+    if 'blocks' in registerJson:
+        for blockDefinition in registerJson['blocks']:
+            writePropertyGetSetMethodImplementationsRtu(sourceFile, className, blockDefinition['registers'])
 
     # Write init and update method implementation
     writeInitializeMethod(sourceFile, className, registerJson['registers'])
@@ -1166,7 +1178,8 @@ def writeRtuSourceFile():
     writePropertyUpdateMethodImplementationsRtu(sourceFile, className, registerJson['registers'])
 
     # Write block update method
-    writeBlockUpdateMethodImplementationsRtu(sourceFile, className, registerJson['blocks'])
+    if 'blocks' in registerJson:
+        writeBlockUpdateMethodImplementationsRtu(sourceFile, className, registerJson['blocks'])
 
     # Write internal protected property read method implementations
     writeInternalPropertyReadMethodImplementationsRtu(sourceFile, className, registerJson['registers'])
@@ -1187,8 +1200,9 @@ def writeRtuSourceFile():
     writeLine(sourceFile, '    debug.nospace().noquote() << "%s(" << %s->modbusRtuMaster()->modbusUuid().toString() << ", " << %s->modbusRtuMaster()->serialPort() << ", slave ID:" << %s->slaveId() << ")" << "\\n";' % (className, debugObjectParamName, debugObjectParamName, debugObjectParamName))
     writeRegistersDebugLine(sourceFile, debugObjectParamName, registerJson['registers'])
 
-    for blockDefinition in registerJson['blocks']:
-        writeRegistersDebugLine(sourceFile, debugObjectParamName, blockDefinition['registers'])
+    if 'blocks' in registerJson:
+        for blockDefinition in registerJson['blocks']:
+            writeRegistersDebugLine(sourceFile, debugObjectParamName, blockDefinition['registers'])
 
     writeLine(sourceFile, '    return debug.quote().space();')
     writeLine(sourceFile, '}')
@@ -1234,7 +1248,8 @@ protocol = 'TCP'
 if 'protocol' in registerJson:
     protocol = registerJson['protocol']
 
-validateBlocks(registerJson['blocks'])
+if 'blocks' in registerJson:
+    validateBlocks(registerJson['blocks'])
 
 if protocol == 'TCP':
     writeTcpHeaderFile()
