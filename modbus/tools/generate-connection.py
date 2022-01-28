@@ -300,6 +300,7 @@ def writePropertyGetSetMethodDeclarationsTcp(fileDescriptor, registerDefinitions
         writeLine(fileDescriptor)
 
 
+
 def writePropertyGetSetMethodDeclarationsRtu(fileDescriptor, registerDefinitions):
     for registerDefinition in registerDefinitions:
         propertyName = registerDefinition['id']
@@ -315,6 +316,19 @@ def writePropertyGetSetMethodDeclarationsRtu(fileDescriptor, registerDefinitions
         if registerDefinition['access'] == 'RW' or registerDefinition['access'] == 'WO':
             writeLine(fileDescriptor, '    ModbusRtuReply *set%s(%s %s);' % (propertyName[0].upper() + propertyName[1:], propertyTyp, propertyName))
 
+        writeLine(fileDescriptor)
+
+
+def writeBlockGetMethodDeclarations(fileDescriptor, registerDefinitions):
+    for registerDefinition in registerDefinitions:
+        propertyName = registerDefinition['id']
+        propertyTyp = getCppDataType(registerDefinition)
+        if 'unit' in registerDefinition and registerDefinition['unit'] != '':
+            writeLine(fileDescriptor, '    /* %s [%s] - Address: %s, Size: %s */' % (registerDefinition['description'], registerDefinition['unit'], registerDefinition['address'], registerDefinition['size']))
+        else:
+            writeLine(fileDescriptor, '    /* %s - Address: %s, Size: %s */' % (registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
+
+        writeLine(fileDescriptor, '    %s %s() const;' % (propertyTyp, propertyName))
         writeLine(fileDescriptor)
 
 
@@ -442,7 +456,7 @@ def writeBlocksUpdateMethodDeclarations(fileDescriptor, blockDefinitions):
         blockRegisters = blockDefinition['registers']
 
         # Write the property get / set methods for the block registers
-        writePropertyGetSetMethodDeclarations(fileDescriptor, blockRegisters)
+        writeBlockGetMethodDeclarations(fileDescriptor, blockRegisters)
         
         blockStartAddress = 0
         blockSize = 0
@@ -897,7 +911,7 @@ def writeTcpHeaderFile():
     writeLine(headerFile)
 
     # Write registers get method declarations
-    writePropertyGetSetMethodDeclarations(headerFile, registerJson['registers'])
+    writePropertyGetSetMethodDeclarationsTcp(headerFile, registerJson['registers'])
 
     # Write block get/set method declarations
     writeBlocksUpdateMethodDeclarations(headerFile, registerJson['blocks'])
