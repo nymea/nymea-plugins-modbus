@@ -1,0 +1,13 @@
+{
+    "title": "Huawei FusionSolar",
+    "tagline": "Connect to Huawei FusionSolar devices.",
+    "icon": "huawei.png",
+    "stability": "consumer",
+    "offline": true,
+    "technologies": [
+        "network"
+    ],
+    "categories": [
+        "energy"
+    ]
+}
