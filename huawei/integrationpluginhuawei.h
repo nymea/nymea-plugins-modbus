@@ -33,7 +33,7 @@
 
 #include "plugintimer.h"
 #include "integrations/integrationplugin.h"
-#include "huaweimodbustcpconnection.h"
+#include "huaweifusionsolar.h"
 
 class IntegrationPluginHuawei: public IntegrationPlugin
 {
@@ -54,7 +54,7 @@ public:
 
 private:
     PluginTimer *m_pluginTimer = nullptr;
-    QHash<Thing *, HuaweiModbusTcpConnection *> m_connections;
+    QHash<Thing *, HuaweiFusionSolar *> m_connections;
 
 };
 

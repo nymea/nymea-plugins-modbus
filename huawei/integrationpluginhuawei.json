@@ -14,6 +14,7 @@
                     "id": "87e75ee0-d544-457b-add3-bd4e58160fcd",
                     "createMethods": ["discovery", "user"],
                     "interfaces": ["solarinverter", "connectable"],
+                    "providedInterfaces": [ "solarinverter", "energymeter", "energystorage"],
                     "paramTypes": [
                         {
                             "id": "d93371db-0954-4dcd-a1a5-6881b78cb0ea",
@@ -72,87 +73,6 @@
                             "displayNameEvent": "AC energy changed",
                             "type": "double",
                             "unit": "KiloWattHour",
-                            "defaultValue": 0.00
-                        },
-                        {
-                            "id": "6609a589-8f0f-4747-9240-c0d0e0d87f29",
-                            "name": "phaseACurrent",
-                            "displayName": "Phase A current",
-                            "displayNameEvent": "Phase A current changed",
-                            "type": "double",
-                            "unit": "Ampere",
-                            "defaultValue": 0.00
-                        },
-                        {
-                            "id": "1bff8853-ec1e-4fe8-b148-c04d1db67e74",
-                            "name": "phaseBCurrent",
-                            "displayName": "Phase B current",
-                            "displayNameEvent": "Phase B current changed",
-                            "type": "double",
-                            "unit": "Ampere",
-                            "defaultValue": 0.00
-                        },
-                        {
-                            "id": "0977c3bc-7798-4161-a75f-19858d44c463",
-                            "name": "phaseCCurrent",
-                            "displayName": "Phase C current",
-                            "displayNameEvent": "Phase C current changed",
-                            "type": "double",
-                            "unit": "Ampere",
-                            "defaultValue": 0.00
-                        },
-                        {
-                            "id": "e91281b3-d89f-4d3e-b81e-96645a8de63f",
-                            "name": "voltagePhaseA",
-                            "displayName": "Voltage phase A",
-                            "displayNameEvent": "Voltage phase A changed",
-                            "type": "double",
-                            "unit": "Volt",
-                            "defaultValue": 0.00
-                        },
-                        {
-                            "id": "ee921f23-ceeb-4818-adca-8c2fa1e75b17",
-                            "name": "voltagePhaseB",
-                            "displayName": "Voltage phase B",
-                            "displayNameEvent": "Voltage phase B changed",
-                            "type": "double",
-                            "unit": "Volt",
-                            "defaultValue": 0.00
-                        },
-                        {
-                            "id": "5613cea9-11cb-4b81-9b61-0e9a7ec737a3",
-                            "name": "voltagePhaseC",
-                            "displayName": "Voltage phase C",
-                            "displayNameEvent": "Voltage phase C changed",
-                            "type": "double",
-                            "unit": "Volt",
-                            "defaultValue": 0.00
-                        },
-                        {
-                            "id": "4db7c66c-7676-449d-94c5-1b8c0ddf368a",
-                            "name": "currentPowerPhaseA",
-                            "displayName": "Current power phase A",
-                            "displayNameEvent": "Current power phase A changed",
-                            "type": "double",
-                            "unit": "Watt",
-                            "defaultValue": 0.00
-                        },
-                        {
-                            "id": "59026351-1cea-45e8-bffe-9ab65b44ddb2",
-                            "name": "currentPowerPhaseB",
-                            "displayName": "Current power phase B",
-                            "displayNameEvent": "Current power phase B changed",
-                            "type": "double",
-                            "unit": "Watt",
-                            "defaultValue": 0.00
-                        },
-                        {
-                            "id": "89ccd9d7-fd26-431a-b198-5001564373dc",
-                            "name": "currentPowerPhaseC",
-                            "displayName": "Current power phase C",
-                            "displayNameEvent": "Current power phase C changed",
-                            "type": "double",
-                            "unit": "Watt",
                             "defaultValue": 0.00
                         }
                     ],
@@ -303,6 +223,13 @@
                     "createMethods": ["auto"],
                     "interfaces": [ "energystorage", "connectable"],
                     "paramTypes": [
+                        {
+                            "id": "019287a6-c593-45a8-9695-2e1ad8e81c32",
+                            "name":"unit",
+                            "displayName": "Unit",
+                            "type": "uint",
+                            "defaultValue": 0
+                        }
                     ],
                     "stateTypes": [
                         {

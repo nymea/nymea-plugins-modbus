@@ -41,19 +41,29 @@ HuaweiModbusTcpConnection::HuaweiModbusTcpConnection(const QHostAddress &hostAdd
     
 }
 
-float HuaweiModbusTcpConnection::inverterDCPower() const
-{
-    return m_inverterDCPower;
-}
-
 float HuaweiModbusTcpConnection::inverterActivePower() const
 {
     return m_inverterActivePower;
 }
 
+HuaweiModbusTcpConnection::InverterDeviceStatus HuaweiModbusTcpConnection::inverterDeviceStatus() const
+{
+    return m_inverterDeviceStatus;
+}
+
+float HuaweiModbusTcpConnection::inverterEnergyProduced() const
+{
+    return m_inverterEnergyProduced;
+}
+
 qint32 HuaweiModbusTcpConnection::powerMeterActivePower() const
 {
     return m_powerMeterActivePower;
+}
+
+HuaweiModbusTcpConnection::BatteryDeviceStatus HuaweiModbusTcpConnection::lunaBattery1Status() const
+{
+    return m_lunaBattery1Status;
 }
 
 qint32 HuaweiModbusTcpConnection::lunaBattery1Power() const
@@ -64,6 +74,11 @@ qint32 HuaweiModbusTcpConnection::lunaBattery1Power() const
 float HuaweiModbusTcpConnection::lunaBattery1Soc() const
 {
     return m_lunaBattery1Soc;
+}
+
+HuaweiModbusTcpConnection::BatteryDeviceStatus HuaweiModbusTcpConnection::lunaBattery2Status() const
+{
+    return m_lunaBattery2Status;
 }
 
 qint32 HuaweiModbusTcpConnection::lunaBattery2Power() const
@@ -84,46 +99,16 @@ void HuaweiModbusTcpConnection::initialize()
 
 void HuaweiModbusTcpConnection::update()
 {
-    updateInverterDCPower();
     updateInverterActivePower();
+    updateInverterDeviceStatus();
+    updateInverterEnergyProduced();
     updatePowerMeterActivePower();
+    updateLunaBattery1Status();
     updateLunaBattery1Power();
     updateLunaBattery1Soc();
+    updateLunaBattery2Status();
     updateLunaBattery2Power();
     updateLunaBattery2Soc();
-}
-
-void HuaweiModbusTcpConnection::updateInverterDCPower()
-{
-    // Update registers from Inverter DC power
-    qCDebug(dcHuaweiModbusTcpConnection()) << "--> Read \"Inverter DC power\" register:" << 32064 << "size:" << 2;
-    QModbusReply *reply = readInverterDCPower();
-    if (reply) {
-        if (!reply->isFinished()) {
-            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
-            connect(reply, &QModbusReply::finished, this, [this, reply](){
-                if (reply->error() == QModbusDevice::NoError) {
-                    const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> values = unit.values();
-                    qCDebug(dcHuaweiModbusTcpConnection()) << "<-- Response from \"Inverter DC power\" register" << 32064 << "size:" << 2 << values;
-                    float receivedInverterDCPower = ModbusDataUtils::convertToInt32(values, ModbusDataUtils::ByteOrderBigEndian) * 1.0 * pow(10, -3);
-                    if (m_inverterDCPower != receivedInverterDCPower) {
-                        m_inverterDCPower = receivedInverterDCPower;
-                        emit inverterDCPowerChanged(m_inverterDCPower);
-                    }
-                }
-            });
-
-            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
-                qCWarning(dcHuaweiModbusTcpConnection()) << "Modbus reply error occurred while updating \"Inverter DC power\" registers from" << hostAddress().toString() << error << reply->errorString();
-                emit reply->finished(); // To make sure it will be deleted
-            });
-        } else {
-            delete reply; // Broadcast reply returns immediatly
-        }
-    } else {
-        qCWarning(dcHuaweiModbusTcpConnection()) << "Error occurred while reading \"Inverter DC power\" registers from" << hostAddress().toString() << errorString();
-    }
 }
 
 void HuaweiModbusTcpConnection::updateInverterActivePower()
@@ -159,6 +144,72 @@ void HuaweiModbusTcpConnection::updateInverterActivePower()
     }
 }
 
+void HuaweiModbusTcpConnection::updateInverterDeviceStatus()
+{
+    // Update registers from Inverter device status
+    qCDebug(dcHuaweiModbusTcpConnection()) << "--> Read \"Inverter device status\" register:" << 32089 << "size:" << 1;
+    QModbusReply *reply = readInverterDeviceStatus();
+    if (reply) {
+        if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    const QVector<quint16> values = unit.values();
+                    qCDebug(dcHuaweiModbusTcpConnection()) << "<-- Response from \"Inverter device status\" register" << 32089 << "size:" << 1 << values;
+                    InverterDeviceStatus receivedInverterDeviceStatus = static_cast<InverterDeviceStatus>(ModbusDataUtils::convertToUInt16(values));
+                    if (m_inverterDeviceStatus != receivedInverterDeviceStatus) {
+                        m_inverterDeviceStatus = receivedInverterDeviceStatus;
+                        emit inverterDeviceStatusChanged(m_inverterDeviceStatus);
+                    }
+                }
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcHuaweiModbusTcpConnection()) << "Modbus reply error occurred while updating \"Inverter device status\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcHuaweiModbusTcpConnection()) << "Error occurred while reading \"Inverter device status\" registers from" << hostAddress().toString() << errorString();
+    }
+}
+
+void HuaweiModbusTcpConnection::updateInverterEnergyProduced()
+{
+    // Update registers from Inverter energy produced
+    qCDebug(dcHuaweiModbusTcpConnection()) << "--> Read \"Inverter energy produced\" register:" << 32106 << "size:" << 2;
+    QModbusReply *reply = readInverterEnergyProduced();
+    if (reply) {
+        if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    const QVector<quint16> values = unit.values();
+                    qCDebug(dcHuaweiModbusTcpConnection()) << "<-- Response from \"Inverter energy produced\" register" << 32106 << "size:" << 2 << values;
+                    float receivedInverterEnergyProduced = ModbusDataUtils::convertToUInt32(values, ModbusDataUtils::ByteOrderBigEndian) * 1.0 * pow(10, -2);
+                    if (m_inverterEnergyProduced != receivedInverterEnergyProduced) {
+                        m_inverterEnergyProduced = receivedInverterEnergyProduced;
+                        emit inverterEnergyProducedChanged(m_inverterEnergyProduced);
+                    }
+                }
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcHuaweiModbusTcpConnection()) << "Modbus reply error occurred while updating \"Inverter energy produced\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcHuaweiModbusTcpConnection()) << "Error occurred while reading \"Inverter energy produced\" registers from" << hostAddress().toString() << errorString();
+    }
+}
+
 void HuaweiModbusTcpConnection::updatePowerMeterActivePower()
 {
     // Update registers from Power meter active power
@@ -189,6 +240,37 @@ void HuaweiModbusTcpConnection::updatePowerMeterActivePower()
         }
     } else {
         qCWarning(dcHuaweiModbusTcpConnection()) << "Error occurred while reading \"Power meter active power\" registers from" << hostAddress().toString() << errorString();
+    }
+}
+
+void HuaweiModbusTcpConnection::updateLunaBattery1Status()
+{
+    // Update registers from Luna 2000 Battery 1 status
+    qCDebug(dcHuaweiModbusTcpConnection()) << "--> Read \"Luna 2000 Battery 1 status\" register:" << 37000 << "size:" << 1;
+    QModbusReply *reply = readLunaBattery1Status();
+    if (reply) {
+        if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    const QVector<quint16> values = unit.values();
+                    qCDebug(dcHuaweiModbusTcpConnection()) << "<-- Response from \"Luna 2000 Battery 1 status\" register" << 37000 << "size:" << 1 << values;
+                    BatteryDeviceStatus receivedLunaBattery1Status = static_cast<BatteryDeviceStatus>(ModbusDataUtils::convertToUInt16(values));
+                    m_lunaBattery1Status = receivedLunaBattery1Status;
+                    emit lunaBattery1StatusChanged(m_lunaBattery1Status);
+                }
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcHuaweiModbusTcpConnection()) << "Modbus reply error occurred while updating \"Luna 2000 Battery 1 status\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcHuaweiModbusTcpConnection()) << "Error occurred while reading \"Luna 2000 Battery 1 status\" registers from" << hostAddress().toString() << errorString();
     }
 }
 
@@ -258,6 +340,37 @@ void HuaweiModbusTcpConnection::updateLunaBattery1Soc()
     }
 }
 
+void HuaweiModbusTcpConnection::updateLunaBattery2Status()
+{
+    // Update registers from Luna 2000 Battery 2 status
+    qCDebug(dcHuaweiModbusTcpConnection()) << "--> Read \"Luna 2000 Battery 2 status\" register:" << 37741 << "size:" << 1;
+    QModbusReply *reply = readLunaBattery2Status();
+    if (reply) {
+        if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, this, [this, reply](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    const QModbusDataUnit unit = reply->result();
+                    const QVector<quint16> values = unit.values();
+                    qCDebug(dcHuaweiModbusTcpConnection()) << "<-- Response from \"Luna 2000 Battery 2 status\" register" << 37741 << "size:" << 1 << values;
+                    BatteryDeviceStatus receivedLunaBattery2Status = static_cast<BatteryDeviceStatus>(ModbusDataUtils::convertToUInt16(values));
+                    m_lunaBattery2Status = receivedLunaBattery2Status;
+                    emit lunaBattery2StatusChanged(m_lunaBattery2Status);
+                }
+            });
+
+            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+                qCWarning(dcHuaweiModbusTcpConnection()) << "Modbus reply error occurred while updating \"Luna 2000 Battery 2 status\" registers from" << hostAddress().toString() << error << reply->errorString();
+                emit reply->finished(); // To make sure it will be deleted
+            });
+        } else {
+            delete reply; // Broadcast reply returns immediatly
+        }
+    } else {
+        qCWarning(dcHuaweiModbusTcpConnection()) << "Error occurred while reading \"Luna 2000 Battery 2 status\" registers from" << hostAddress().toString() << errorString();
+    }
+}
+
 void HuaweiModbusTcpConnection::updateLunaBattery2Power()
 {
     // Update registers from Luna 2000 Battery 2 power
@@ -324,21 +437,33 @@ void HuaweiModbusTcpConnection::updateLunaBattery2Soc()
     }
 }
 
-QModbusReply *HuaweiModbusTcpConnection::readInverterDCPower()
-{
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 32064, 2);
-    return sendReadRequest(request, m_slaveId);
-}
-
 QModbusReply *HuaweiModbusTcpConnection::readInverterActivePower()
 {
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 32080, 2);
     return sendReadRequest(request, m_slaveId);
 }
 
+QModbusReply *HuaweiModbusTcpConnection::readInverterDeviceStatus()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 32089, 1);
+    return sendReadRequest(request, m_slaveId);
+}
+
+QModbusReply *HuaweiModbusTcpConnection::readInverterEnergyProduced()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 32106, 2);
+    return sendReadRequest(request, m_slaveId);
+}
+
 QModbusReply *HuaweiModbusTcpConnection::readPowerMeterActivePower()
 {
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 37113, 2);
+    return sendReadRequest(request, m_slaveId);
+}
+
+QModbusReply *HuaweiModbusTcpConnection::readLunaBattery1Status()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 37000, 1);
     return sendReadRequest(request, m_slaveId);
 }
 
@@ -351,6 +476,12 @@ QModbusReply *HuaweiModbusTcpConnection::readLunaBattery1Power()
 QModbusReply *HuaweiModbusTcpConnection::readLunaBattery1Soc()
 {
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 37004, 1);
+    return sendReadRequest(request, m_slaveId);
+}
+
+QModbusReply *HuaweiModbusTcpConnection::readLunaBattery2Status()
+{
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 37741, 1);
     return sendReadRequest(request, m_slaveId);
 }
 
@@ -377,11 +508,14 @@ void HuaweiModbusTcpConnection::verifyInitFinished()
 QDebug operator<<(QDebug debug, HuaweiModbusTcpConnection *huaweiModbusTcpConnection)
 {
     debug.nospace().noquote() << "HuaweiModbusTcpConnection(" << huaweiModbusTcpConnection->hostAddress().toString() << ":" << huaweiModbusTcpConnection->port() << ")" << "\n";
-    debug.nospace().noquote() << "    - Inverter DC power:" << huaweiModbusTcpConnection->inverterDCPower() << " [kW]" << "\n";
     debug.nospace().noquote() << "    - Inverter active power:" << huaweiModbusTcpConnection->inverterActivePower() << " [kW]" << "\n";
+    debug.nospace().noquote() << "    - Inverter device status:" << huaweiModbusTcpConnection->inverterDeviceStatus() << "\n";
+    debug.nospace().noquote() << "    - Inverter energy produced:" << huaweiModbusTcpConnection->inverterEnergyProduced() << " [kWh]" << "\n";
     debug.nospace().noquote() << "    - Power meter active power:" << huaweiModbusTcpConnection->powerMeterActivePower() << " [W]" << "\n";
+    debug.nospace().noquote() << "    - Luna 2000 Battery 1 status:" << huaweiModbusTcpConnection->lunaBattery1Status() << "\n";
     debug.nospace().noquote() << "    - Luna 2000 Battery 1 power:" << huaweiModbusTcpConnection->lunaBattery1Power() << " [W]" << "\n";
     debug.nospace().noquote() << "    - Luna 2000 Battery 1 state of charge:" << huaweiModbusTcpConnection->lunaBattery1Soc() << " [%]" << "\n";
+    debug.nospace().noquote() << "    - Luna 2000 Battery 2 status:" << huaweiModbusTcpConnection->lunaBattery2Status() << "\n";
     debug.nospace().noquote() << "    - Luna 2000 Battery 2 power:" << huaweiModbusTcpConnection->lunaBattery2Power() << " [W]" << "\n";
     debug.nospace().noquote() << "    - Luna 2000 Battery 2 state of charge:" << huaweiModbusTcpConnection->lunaBattery2Soc() << " [%]" << "\n";
     return debug.quote().space();
