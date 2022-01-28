@@ -991,21 +991,20 @@ def writeTcpHeaderFile():
     writeLine(headerFile, 'protected:')
     writeInternalPropertyReadMethodDeclarationsTcp(headerFile, registerJson['registers'])
     writeLine(headerFile)
-
-    # Private members
-    writeLine(headerFile, 'private:')
-    writeLine(headerFile, '    quint16 m_slaveId = 1;')
-    writeLine(headerFile, '    QVector<QModbusReply *> m_pendingInitReplies;')
-    writeLine(headerFile)
     writePrivatePropertyMembers(headerFile, registerJson['registers'])
     if 'blocks' in registerJson:
         for blockDefinition in registerJson['blocks']:
             writePrivatePropertyMembers(headerFile, blockDefinition['registers'])
 
     writeLine(headerFile)
+
+    # Private members
+    writeLine(headerFile, 'private:')
+    writeLine(headerFile, '    quint16 m_slaveId = 1;')
+    writeLine(headerFile, '    QVector<QModbusReply *> m_pendingInitReplies;')
+    writeLine(headerFile)
     writeLine(headerFile, '    void verifyInitFinished();')
     writeLine(headerFile)
-
 
     # End of class
     writeLine(headerFile)
@@ -1157,18 +1156,18 @@ def writeRtuHeaderFile():
     writeLine(headerFile, 'protected:')
     writeInternalPropertyReadMethodDeclarationsRtu(headerFile, registerJson['registers'])
     writeLine(headerFile)
+    writePrivatePropertyMembers(headerFile, registerJson['registers'])
+    if 'blocks' in registerJson:
+        for blockDefinition in registerJson['blocks']:
+            writePrivatePropertyMembers(headerFile, blockDefinition['registers'])
+
+    writeLine(headerFile)
 
     # Private members
     writeLine(headerFile, 'private:')
     writeLine(headerFile, '    ModbusRtuMaster *m_modbusRtuMaster = nullptr;')
     writeLine(headerFile, '    quint16 m_slaveId = 1;')
     writeLine(headerFile, '    QVector<ModbusRtuReply *> m_pendingInitReplies;')
-    writeLine(headerFile)
-    writePrivatePropertyMembers(headerFile, registerJson['registers'])
-    if 'blocks' in registerJson:
-        for blockDefinition in registerJson['blocks']:
-            writePrivatePropertyMembers(headerFile, blockDefinition['registers'])
-
     writeLine(headerFile)
     writeLine(headerFile, '    void verifyInitFinished();')
     writeLine(headerFile)
