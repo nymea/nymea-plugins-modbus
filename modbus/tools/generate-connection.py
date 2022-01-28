@@ -933,6 +933,11 @@ def writeTcpHeaderFile():
         writePropertyChangedSignals(headerFile, blockDefinition['registers'])
     writeLine(headerFile)
 
+    # Protected members
+    writeLine(headerFile, 'protected:')
+    writeInternalPropertyReadMethodDeclarationsTcp(headerFile, registerJson['registers'])
+    writeLine(headerFile)
+
     # Private members
     writeLine(headerFile, 'private:')
     writeLine(headerFile, '    quint16 m_slaveId = 1;')
@@ -944,8 +949,7 @@ def writeTcpHeaderFile():
     writeLine(headerFile)
     writeLine(headerFile, '    void verifyInitFinished();')
     writeLine(headerFile)
-    writeInternalPropertyReadMethodDeclarationsTcp(headerFile, registerJson['registers'])
-    writeLine(headerFile)
+
 
     # End of class
     writeLine(headerFile)
@@ -995,7 +999,7 @@ def writeTcpSourceFile():
    # Write block update method
     writeBlockUpdateMethodImplementationsTcp(sourceFile, className, registerJson['blocks'])
 
-    # Write property read method implementations
+    # Write internal protected property read method implementations
     writeInternalPropertyReadMethodImplementationsTcp(sourceFile, className, registerJson['registers'])
 
     writeLine(sourceFile, 'void %s::verifyInitFinished()' % (className))
@@ -1085,6 +1089,11 @@ def writeRtuHeaderFile():
         writePropertyChangedSignals(headerFile, blockDefinition['registers'])
     writeLine(headerFile)
 
+    # Protected members
+    writeLine(headerFile, 'protected:')
+    writeInternalPropertyReadMethodDeclarationsRtu(headerFile, registerJson['registers'])
+    writeLine(headerFile)
+
     # Private members
     writeLine(headerFile, 'private:')
     writeLine(headerFile, '    ModbusRtuMaster *m_modbusRtuMaster = nullptr;')
@@ -1097,8 +1106,6 @@ def writeRtuHeaderFile():
 
     writeLine(headerFile)
     writeLine(headerFile, '    void verifyInitFinished();')
-    writeLine(headerFile)
-    writeInternalPropertyReadMethodDeclarationsRtu(headerFile, registerJson['registers'])
     writeLine(headerFile)
     
     # End of class
@@ -1161,7 +1168,7 @@ def writeRtuSourceFile():
     # Write block update method
     writeBlockUpdateMethodImplementationsRtu(sourceFile, className, registerJson['blocks'])
 
-    # Write property read method implementations
+    # Write internal protected property read method implementations
     writeInternalPropertyReadMethodImplementationsRtu(sourceFile, className, registerJson['registers'])
 
     writeLine(sourceFile, 'void %s::verifyInitFinished()' % (className))
