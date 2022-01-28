@@ -118,24 +118,36 @@
                     "value": 40960
                 }
             ]
+        },
+        {
+            "name": "BatteryDeviceStatus",
+            "values": [
+                {
+                    "key": "Offline",
+                    "value": 0
+                },
+                {
+                    "key": "Standby",
+                    "value": 1
+                },
+                {
+                    "key": "Running",
+                    "value": 1
+                },
+                {
+                    "key": "Fault",
+                    "value": 1
+                },
+                {
+                    "key": "SleepMode",
+                    "value": 1
+                }
+            ]
         }
     ],
     "blocks": [
     ],
     "registers": [
-        {
-            "id": "inverterDCPower",
-            "address": 32064,
-            "size": 2,
-            "type": "int32",
-            "registerType": "holdingRegister",
-            "readSchedule": "update",
-            "description": "Inverter DC power",
-            "unit": "kW",
-            "staticScaleFactor": -3,
-            "defaultValue": "0",
-            "access": "RO"
-        },
         {
             "id": "inverterActivePower",
             "address": 32080,
@@ -150,6 +162,31 @@
             "access": "RO"
         },
         {
+            "id": "inverterDeviceStatus",
+            "address": 32089,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "Inverter device status",
+            "enum": "InverterDeviceStatus",
+            "defaultValue": "InverterDeviceStatusStandbyInitializing",
+            "access": "RO"
+        },
+        {
+            "id": "inverterEnergyProduced",
+            "address": 32106,
+            "size": 2,
+            "type": "uint32",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "Inverter energy produced",
+            "unit": "kWh",
+            "staticScaleFactor": -2,
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
             "id": "powerMeterActivePower",
             "address": 37113,
             "size": 2,
@@ -159,6 +196,18 @@
             "description": "Power meter active power",
             "unit": "W",
             "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "lunaBattery1Status",
+            "address": 37000,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "Luna 2000 Battery 1 status",
+            "enum": "BatteryDeviceStatus",
+            "defaultValue": "BatteryDeviceStatusOffline",
             "access": "RO"
         },
         {
@@ -184,6 +233,18 @@
             "staticScaleFactor": -1,
             "unit": "%",
             "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "lunaBattery2Status",
+            "address": 37741,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "Luna 2000 Battery 2 status",
+            "enum": "BatteryDeviceStatus",
+            "defaultValue": "BatteryDeviceStatusOffline",
             "access": "RO"
         },
         {
