@@ -111,6 +111,54 @@ def writeLicenseHeader(fileDescriptor):
     writeLine(fileDescriptor)
 
 
+def writeRegistersEnum(fileDescriptor, registerJson):
+    print('Writing enum for all registers')
+
+    registerEnums = {}
+
+    # Read all register names and addresses
+    if 'blocks' in registerJson:
+        for blockDefinition in registerJson['blocks']:
+            blockRegisters = blockDefinition['registers']
+            for blockRegister in blockRegisters:
+                registerName = blockRegister['id']        
+                registerAddress = blockRegister['address']        
+                registerEnums[registerAddress] = registerName
+
+    for registerDefinition in registerJson['registers']:
+        registerName = registerDefinition['id']        
+        registerAddress = registerDefinition['address']        
+        registerEnums[registerAddress] = registerName
+
+
+    # Sort the enum map
+    registersKeys = registerEnums.keys()
+    sortedRegistersKeys = sorted(registersKeys)
+    sortedRegisterEnumList = []
+
+    print('Sorted registers')
+    for registerAddress in sortedRegistersKeys:
+        print('--> %s : %s' % (registerAddress, registerEnums[registerAddress]))
+        enumData = {}
+        enumData['key'] = registerEnums[registerAddress]
+        enumData['value'] = registerAddress
+        sortedRegisterEnumList.append(enumData)
+
+    enumName = 'Registers'
+    writeLine(fileDescriptor, '    enum %s {' % enumName)
+    for i in range(len(sortedRegisterEnumList)):
+        enumData = sortedRegisterEnumList[i]
+        line = ('        Register%s = %s' % (enumData['key'][0].upper() + enumData['key'][1:] , enumData['value']))
+        if i < (len(sortedRegisterEnumList) - 1):
+            line += ','
+
+        writeLine(fileDescriptor, line)
+
+    writeLine(fileDescriptor, '    };')
+    writeLine(fileDescriptor, '    Q_ENUM(%s)' % enumName)
+    writeLine(fileDescriptor)
+
+
 def writeEnumDefinition(fileDescriptor, enumDefinition):
     print('Writing enum', enumDefinition)
     enumName = enumDefinition['name']
@@ -900,6 +948,9 @@ def writeTcpHeaderFile():
     # Public members
     writeLine(headerFile, 'public:')
 
+    # Write enum for all register values
+    writeRegistersEnum(headerFile, registerJson)
+
     # Enum declarations
     if 'enums' in registerJson:
         for enumDefinition in registerJson['enums']:
@@ -1059,6 +1110,9 @@ def writeRtuHeaderFile():
 
     # Public members
     writeLine(headerFile, 'public:')
+
+    # Write enum for all register values
+    writeRegistersEnum(headerFile, registerJson)
 
     # Enum declarations
     if 'enums' in registerJson:
