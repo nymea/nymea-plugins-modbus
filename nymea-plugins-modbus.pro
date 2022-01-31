@@ -47,9 +47,6 @@ QMAKE_EXTRA_TARGETS += lrelease
 # For Qt-Creator's code model: Add CPATH to INCLUDEPATH explicitly
 INCLUDEPATH += $$(CPATH)
 
-CONFIG += selection
-PLUGINS=huawei
-
 # Verify if building only a selection of plugins
 contains(CONFIG, selection) {
     # Check each plugin if the subdir exists
