@@ -11,6 +11,7 @@ PLUGIN_DIRS = \
     modbuscommander         \
     mtec                    \
     mypv                    \
+    stiebeleltron           \
     sunspec                 \
     unipi                   \
     idm                     \

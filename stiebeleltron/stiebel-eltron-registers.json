@@ -1,0 +1,19 @@
+{
+    "protocol": "TCP",
+    "endianness": "BigEndian",
+    "registers": [
+        {
+            "id": "outdoorTemperature",
+            "address": 507,
+            "size": 1,
+            "type": "int16",
+            "registerType": "inputRegister",
+            "readSchedule": "update",
+            "description": "Outdoor temperature",
+            "staticScaleFactor": -1,
+            "defaultValue": "0",
+            "unit": "°C",
+            "access": "RO"
+        }
+    ]
+}
