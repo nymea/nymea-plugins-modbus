@@ -15,6 +15,7 @@ PLUGIN_DIRS = \
     mtec                    \
     mypv                    \
     schrack                 \
+    stiebeleltron           \
     sunspec                 \
     unipi                   \
     wallbe                  \

@@ -1,0 +1,112 @@
+{
+    "name": "StiebelEltron",
+    "displayName": "Stiebel Eltron",
+    "id": "956c848b-b538-4b8f-8cdb-7bbecfc9d361",
+    "vendors": [
+        {
+            "name": "stiebelEltron",
+            "displayName": "Stiebel Eltron",
+            "id": "c8607f85-a81e-40e0-bc95-1b7199cd2d99",
+            "thingClasses": [
+                {
+                    "name": "stiebelEltron",
+                    "displayName": "Stiebel Eltron Heatpump",
+                    "id": "e02ecf61-7d28-43c2-b87e-e7e98a48fbfd",
+                    "createMethods": ["discovery", "user"],
+                    "interfaces": ["smartgridheatpump", "connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "47d221fa-f6d2-400e-b80f-bb90abccb72c",
+                            "name": "ipAddress",
+                            "displayName": "IP address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": "127.0.0.1"
+                        },
+                        {
+                            "id": "05cd59b8-3068-460f-b0d2-6d49f27458df",
+                            "name":"macAddress",
+                            "displayName": "MAC address",
+                            "type": "QString",
+                            "inputType": "MacAddress",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "6842321f-1f1a-47e2-b12d-59ee322eb8a6",
+                            "name":"port",
+                            "displayName": "Port",
+                            "type": "int",
+                            "defaultValue": 502
+                        },
+                        {
+                            "id": "732de6da-bd0a-4215-b320-602117ebc75c",
+                            "name":"slaveId",
+                            "displayName": "Modbus slave ID",
+                            "type": "int",
+                            "defaultValue": 1
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "8d952a5e-87bd-492e-a213-277948521652",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "d6475acb-3a15-401b-8bad-8610eb056bf7",
+                            "name": "flowTemperature",
+                            "displayName": "Flow temperature",
+                            "displayNameEvent": "Flow temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "ce25e3fd-6544-40e9-bd39-032306553e32",
+                            "name": "returnTemperature",
+                            "displayName": "Return temperature",
+                            "displayNameEvent": "Return temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "7d474fb5-aa37-4f21-8166-b20f5bf84fb4",
+                            "name": "sgReadyMode",
+                            "displayName": "Smart grid mode",
+                            "displayNameEvent": "Smart grid mode changed",
+                            "displayNameAction": "Set smart grid mode",
+                            "type": "QString",
+                            "possibleValues": [
+                                "Off",
+                                "Low",
+                                "Standard",
+                                "High"
+                            ],
+                            "writable": true,
+                            "defaultValue": "Standard",
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "f4abbd8d-14d6-4294-9b63-411a9721f946",
+                            "name": "totalEnergy",
+                            "displayName": "Total energy",
+                            "displayNameEvent": "Total energy changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        }
+                    ],
+                    "actionTypes": [ ]
+                }
+            ]
+        }
+    ]
+}
