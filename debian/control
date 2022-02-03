@@ -159,6 +159,16 @@ Description: nymea.io plugin for M-TEC heat pumps
  This package will install the nymea.io plugin for M-TEC heat pumps
 
 
+Package: nymea-plugin-stiebeleltron
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         nymea-plugins-modbus-translations
+Description: nymea.io plugin for Stiebel Eltron heat pumps
+  This package will install the nymea.io plugin for Stiebel Eltron heat pumps.
+
+
 Package: nymea-plugin-sunspec
 Architecture: any
 Depends: ${shlibs:Depends},
