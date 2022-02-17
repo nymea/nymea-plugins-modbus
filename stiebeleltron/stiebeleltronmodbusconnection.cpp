@@ -131,9 +131,9 @@ quint16 StiebelEltronModbusConnection::systemStatus() const
     return m_systemStatus;
 }
 
-StiebelEltronModbusConnection::SmartGridState StiebelEltronModbusConnection::sgReadyState() const
+quint16 StiebelEltronModbusConnection::sgReadyStateRO() const
 {
-    return m_sgReadyState;
+    return m_sgReadyStateRO;
 }
 
 quint16 StiebelEltronModbusConnection::sgReadyActive() const
@@ -150,30 +150,16 @@ QModbusReply *StiebelEltronModbusConnection::setSgReadyActive(quint16 sgReadyAct
     return sendWriteRequest(request, m_slaveId);
 }
 
-quint16 StiebelEltronModbusConnection::sgReadyInputOne() const
+StiebelEltronModbusConnection::SmartGridState StiebelEltronModbusConnection::sgReadyState() const
 {
-    return m_sgReadyInputOne;
+    return m_sgReadyState;
 }
 
-QModbusReply *StiebelEltronModbusConnection::setSgReadyInputOne(quint16 sgReadyInputOne)
+QModbusReply *StiebelEltronModbusConnection::setSgReadyState(SmartGridState sgReadyState)
 {
-    QVector<quint16> values = ModbusDataUtils::convertFromUInt16(sgReadyInputOne);
-    qCDebug(dcStiebelEltronModbusConnection()) << "--> Write \"SG Ready Input 1\" register:" << 4001 << "size:" << 1 << values;
+    QVector<quint16> values = ModbusDataUtils::convertFromUInt32(static_cast<quint32>(sgReadyState), ModbusDataUtils::ByteOrderBigEndian);
+    qCDebug(dcStiebelEltronModbusConnection()) << "--> Write \"SG Ready mode\" register:" << 4001 << "size:" << 2 << values;
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 4001, values.count());
-    request.setValues(values);
-    return sendWriteRequest(request, m_slaveId);
-}
-
-quint16 StiebelEltronModbusConnection::sgReadyInputTwo() const
-{
-    return m_sgReadyInputTwo;
-}
-
-QModbusReply *StiebelEltronModbusConnection::setSgReadyInputTwo(quint16 sgReadyInputTwo)
-{
-    QVector<quint16> values = ModbusDataUtils::convertFromUInt16(sgReadyInputTwo);
-    qCDebug(dcStiebelEltronModbusConnection()) << "--> Write \"SG Read Input 2\" register:" << 4002 << "size:" << 1 << values;
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 4002, values.count());
     request.setValues(values);
     return sendWriteRequest(request, m_slaveId);
 }
@@ -204,10 +190,9 @@ void StiebelEltronModbusConnection::update()
     updateConsumedEnergyHotWater();
     updateOperatingMode();
     updateSystemStatus();
-    updateSgReadyState();
+    updateSgReadyStateRO();
     updateSgReadyActive();
-    updateSgReadyInputOne();
-    updateSgReadyInputTwo();
+    updateSgReadyState();
 }
 
 void StiebelEltronModbusConnection::updateOutdoorTemperature()
@@ -804,11 +789,11 @@ void StiebelEltronModbusConnection::updateSystemStatus()
     }
 }
 
-void StiebelEltronModbusConnection::updateSgReadyState()
+void StiebelEltronModbusConnection::updateSgReadyStateRO()
 {
     // Update registers from Smart grid status
     qCDebug(dcStiebelEltronModbusConnection()) << "--> Read \"Smart grid status\" register:" << 5000 << "size:" << 1;
-    QModbusReply *reply = readSgReadyState();
+    QModbusReply *reply = readSgReadyStateRO();
     if (reply) {
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
@@ -817,10 +802,10 @@ void StiebelEltronModbusConnection::updateSgReadyState()
                     const QModbusDataUnit unit = reply->result();
                     const QVector<quint16> values = unit.values();
                     qCDebug(dcStiebelEltronModbusConnection()) << "<-- Response from \"Smart grid status\" register" << 5000 << "size:" << 1 << values;
-                    SmartGridState receivedSgReadyState = static_cast<SmartGridState>(ModbusDataUtils::convertToUInt16(values));
-                    if (m_sgReadyState != receivedSgReadyState) {
-                        m_sgReadyState = receivedSgReadyState;
-                        emit sgReadyStateChanged(m_sgReadyState);
+                    quint16 receivedSgReadyStateRO = ModbusDataUtils::convertToUInt16(values);
+                    if (m_sgReadyStateRO != receivedSgReadyStateRO) {
+                        m_sgReadyStateRO = receivedSgReadyStateRO;
+                        emit sgReadyStateROChanged(m_sgReadyStateRO);
                     }
                 }
             });
@@ -870,11 +855,11 @@ void StiebelEltronModbusConnection::updateSgReadyActive()
     }
 }
 
-void StiebelEltronModbusConnection::updateSgReadyInputOne()
+void StiebelEltronModbusConnection::updateSgReadyState()
 {
-    // Update registers from SG Ready Input 1
-    qCDebug(dcStiebelEltronModbusConnection()) << "--> Read \"SG Ready Input 1\" register:" << 4001 << "size:" << 1;
-    QModbusReply *reply = readSgReadyInputOne();
+    // Update registers from SG Ready mode
+    qCDebug(dcStiebelEltronModbusConnection()) << "--> Read \"SG Ready mode\" register:" << 4001 << "size:" << 2;
+    QModbusReply *reply = readSgReadyState();
     if (reply) {
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
@@ -882,57 +867,24 @@ void StiebelEltronModbusConnection::updateSgReadyInputOne()
                 if (reply->error() == QModbusDevice::NoError) {
                     const QModbusDataUnit unit = reply->result();
                     const QVector<quint16> values = unit.values();
-                    qCDebug(dcStiebelEltronModbusConnection()) << "<-- Response from \"SG Ready Input 1\" register" << 4001 << "size:" << 1 << values;
-                    quint16 receivedSgReadyInputOne = ModbusDataUtils::convertToUInt16(values);
-                    if (m_sgReadyInputOne != receivedSgReadyInputOne) {
-                        m_sgReadyInputOne = receivedSgReadyInputOne;
-                        emit sgReadyInputOneChanged(m_sgReadyInputOne);
+                    qCDebug(dcStiebelEltronModbusConnection()) << "<-- Response from \"SG Ready mode\" register" << 4001 << "size:" << 2 << values;
+                    SmartGridState receivedSgReadyState = static_cast<SmartGridState>(ModbusDataUtils::convertToUInt32(values, ModbusDataUtils::ByteOrderBigEndian));
+                    if (m_sgReadyState != receivedSgReadyState) {
+                        m_sgReadyState = receivedSgReadyState;
+                        emit sgReadyStateChanged(m_sgReadyState);
                     }
                 }
             });
 
             connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
-                qCWarning(dcStiebelEltronModbusConnection()) << "Modbus reply error occurred while updating \"SG Ready Input 1\" registers from" << hostAddress().toString() << error << reply->errorString();
+                qCWarning(dcStiebelEltronModbusConnection()) << "Modbus reply error occurred while updating \"SG Ready mode\" registers from" << hostAddress().toString() << error << reply->errorString();
                 emit reply->finished(); // To make sure it will be deleted
             });
         } else {
             delete reply; // Broadcast reply returns immediatly
         }
     } else {
-        qCWarning(dcStiebelEltronModbusConnection()) << "Error occurred while reading \"SG Ready Input 1\" registers from" << hostAddress().toString() << errorString();
-    }
-}
-
-void StiebelEltronModbusConnection::updateSgReadyInputTwo()
-{
-    // Update registers from SG Read Input 2
-    qCDebug(dcStiebelEltronModbusConnection()) << "--> Read \"SG Read Input 2\" register:" << 4002 << "size:" << 1;
-    QModbusReply *reply = readSgReadyInputTwo();
-    if (reply) {
-        if (!reply->isFinished()) {
-            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
-            connect(reply, &QModbusReply::finished, this, [this, reply](){
-                if (reply->error() == QModbusDevice::NoError) {
-                    const QModbusDataUnit unit = reply->result();
-                    const QVector<quint16> values = unit.values();
-                    qCDebug(dcStiebelEltronModbusConnection()) << "<-- Response from \"SG Read Input 2\" register" << 4002 << "size:" << 1 << values;
-                    quint16 receivedSgReadyInputTwo = ModbusDataUtils::convertToUInt16(values);
-                    if (m_sgReadyInputTwo != receivedSgReadyInputTwo) {
-                        m_sgReadyInputTwo = receivedSgReadyInputTwo;
-                        emit sgReadyInputTwoChanged(m_sgReadyInputTwo);
-                    }
-                }
-            });
-
-            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
-                qCWarning(dcStiebelEltronModbusConnection()) << "Modbus reply error occurred while updating \"SG Read Input 2\" registers from" << hostAddress().toString() << error << reply->errorString();
-                emit reply->finished(); // To make sure it will be deleted
-            });
-        } else {
-            delete reply; // Broadcast reply returns immediatly
-        }
-    } else {
-        qCWarning(dcStiebelEltronModbusConnection()) << "Error occurred while reading \"SG Read Input 2\" registers from" << hostAddress().toString() << errorString();
+        qCWarning(dcStiebelEltronModbusConnection()) << "Error occurred while reading \"SG Ready mode\" registers from" << hostAddress().toString() << errorString();
     }
 }
 
@@ -1044,7 +996,7 @@ QModbusReply *StiebelEltronModbusConnection::readSystemStatus()
     return sendReadRequest(request, m_slaveId);
 }
 
-QModbusReply *StiebelEltronModbusConnection::readSgReadyState()
+QModbusReply *StiebelEltronModbusConnection::readSgReadyStateRO()
 {
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::InputRegisters, 5000, 1);
     return sendReadRequest(request, m_slaveId);
@@ -1056,15 +1008,9 @@ QModbusReply *StiebelEltronModbusConnection::readSgReadyActive()
     return sendReadRequest(request, m_slaveId);
 }
 
-QModbusReply *StiebelEltronModbusConnection::readSgReadyInputOne()
+QModbusReply *StiebelEltronModbusConnection::readSgReadyState()
 {
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 4001, 1);
-    return sendReadRequest(request, m_slaveId);
-}
-
-QModbusReply *StiebelEltronModbusConnection::readSgReadyInputTwo()
-{
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 4002, 1);
+    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, 4001, 2);
     return sendReadRequest(request, m_slaveId);
 }
 
@@ -1097,10 +1043,9 @@ QDebug operator<<(QDebug debug, StiebelEltronModbusConnection *stiebelEltronModb
     debug.nospace().noquote() << "    - Consumed energy hot water:" << stiebelEltronModbusConnection->consumedEnergyHotWater() << " [kWh]" << "\n";
     debug.nospace().noquote() << "    - Operating mode:" << stiebelEltronModbusConnection->operatingMode() << "\n";
     debug.nospace().noquote() << "    - System status:" << stiebelEltronModbusConnection->systemStatus() << "\n";
-    debug.nospace().noquote() << "    - Smart grid status:" << stiebelEltronModbusConnection->sgReadyState() << "\n";
+    debug.nospace().noquote() << "    - Smart grid status:" << stiebelEltronModbusConnection->sgReadyStateRO() << "\n";
     debug.nospace().noquote() << "    - SG ready active:" << stiebelEltronModbusConnection->sgReadyActive() << "\n";
-    debug.nospace().noquote() << "    - SG Ready Input 1:" << stiebelEltronModbusConnection->sgReadyInputOne() << "\n";
-    debug.nospace().noquote() << "    - SG Read Input 2:" << stiebelEltronModbusConnection->sgReadyInputTwo() << "\n";
+    debug.nospace().noquote() << "    - SG Ready mode:" << stiebelEltronModbusConnection->sgReadyState() << "\n";
     return debug.quote().space();
 }
 

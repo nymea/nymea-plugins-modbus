@@ -303,8 +303,8 @@ void IntegrationPluginStiebelEltron::setupThing(ThingSetupInfo *info) {
         connect(
             connection, &StiebelEltronModbusConnection::sgReadyStateChanged,
             this,
-            [thing](StiebelEltronModbusConnection::SmartGridState
-                        smartGridState) {
+            [thing](
+                StiebelEltronModbusConnection::SmartGridState smartGridState) {
                 qCDebug(dcStiebelEltron())
                     << thing << "SG Ready activation changed" << smartGridState;
                 switch (smartGridState) {
@@ -379,52 +379,130 @@ void IntegrationPluginStiebelEltron::executeAction(ThingActionInfo *info) {
     Thing *thing = info->thing();
     StiebelEltronModbusConnection *connection = m_connections.value(thing);
 
-    
-
     if (!connection->connected()) {
-        qCWarning(dcStiebelEltron()) << "Could not execute action. The modbus connection is currently not available.";
+        qCWarning(dcStiebelEltron())
+            << "Could not execute action. The modbus connection is currently "
+               "not available.";
         info->finish(Thing::ThingErrorHardwareNotAvailable);
         return;
     }
 
     // Got this from StiebelEltron plugin, not sure if necessary
-    if (thing->thingClassId() != stiebelEltronThingClassId) { 
+    if (thing->thingClassId() != stiebelEltronThingClassId) {
         info->finish(Thing::ThingErrorNoError);
     }
-  
-    if (info->action().actionTypeId() == stiebelEltronSgReadyActiveActionTypeId) {
-            bool sgReadyActiveBool = info->action().paramValue(stiebelEltronSgReadyActiveActionSgReadyActiveParamTypeId).toBool();
-            qCDebug(dcStiebelEltron()) << "Execute action" << info->action().actionTypeId().toString() << info->action().params();
-            qCDebug(dcStiebelEltron()) << "Value: " << sgReadyActiveBool;
-            
-            QModbusReply *reply = connection->setSgReadyActive(sgReadyActiveBool);
-            if (!reply) {
-                qCWarning(dcStiebelEltron()) << "Execute action failed because the reply could not be created.";
-                info->finish(Thing::ThingErrorHardwareFailure);
-                return;
-            }
 
+    if (info->action().actionTypeId() ==
+        stiebelEltronSgReadyActiveActionTypeId) {
+        bool sgReadyActiveBool =
+            info->action()
+                .paramValue(
+                    stiebelEltronSgReadyActiveActionSgReadyActiveParamTypeId)
+                .toBool();
+        qCDebug(dcStiebelEltron())
+            << "Execute action" << info->action().actionTypeId().toString()
+            << info->action().params();
+        qCDebug(dcStiebelEltron()) << "Value: " << sgReadyActiveBool;
 
-            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
-            connect(reply, &QModbusReply::finished, info, [info, reply, sgReadyActiveBool]{
-                if (reply->error() != QModbusDevice::NoError) {
-                    qCWarning(dcStiebelEltron()) << "Set SG ready activation finished with error" << reply->errorString();
-                    info->finish(Thing::ThingErrorHardwareFailure);
-                    return;
-                }
+        QModbusReply *reply = connection->setSgReadyActive(sgReadyActiveBool);
+        if (!reply) {
+            qCWarning(dcStiebelEltron()) << "Execute action failed because the "
+                                            "reply could not be created.";
+            info->finish(Thing::ThingErrorHardwareFailure);
+            return;
+        }
 
+        connect(reply, &QModbusReply::finished, reply,
+                &QModbusReply::deleteLater);
+        connect(reply, &QModbusReply::finished, info,
+                [info, reply, sgReadyActiveBool] {
+                    if (reply->error() != QModbusDevice::NoError) {
+                        qCWarning(dcStiebelEltron())
+                            << "Set SG ready activation finished with error"
+                            << reply->errorString();
+                        info->finish(Thing::ThingErrorHardwareFailure);
+                        return;
+                    }
 
-                qCDebug(dcStiebelEltron()) << "Execute action finished successfully" << info->action().actionTypeId().toString() << info->action().params();
-                info->thing()->setStateValue(stiebelEltronSgReadyActiveStateTypeId, sgReadyActiveBool);
-                info->finish(Thing::ThingErrorNoError);
-            });
+                    qCDebug(dcStiebelEltron())
+                        << "Execute action finished successfully"
+                        << info->action().actionTypeId().toString()
+                        << info->action().params();
+                    info->thing()->setStateValue(
+                        stiebelEltronSgReadyActiveStateTypeId,
+                        sgReadyActiveBool);
+                    info->finish(Thing::ThingErrorNoError);
+                });
 
-            connect(reply, &QModbusReply::errorOccurred, this, [reply] (QModbusDevice::Error error){
-                qCWarning(dcStiebelEltron()) << "Modbus reply error occurred while execute action" << error << reply->errorString();
-                emit reply->finished(); // To make sure it will be deleted
-            });
+        connect(reply, &QModbusReply::errorOccurred, this,
+                [reply](QModbusDevice::Error error) {
+                    qCWarning(dcStiebelEltron())
+                        << "Modbus reply error occurred while execute action"
+                        << error << reply->errorString();
+                    emit reply->finished();  // To make sure it will be deleted
+                });
+    } else if (info->action().actionTypeId() ==
+               stiebelEltronSgReadyModeActionTypeId) {
+        QString sgReadyModeString =
+            info->action()
+                .paramValue(
+                    stiebelEltronSgReadyModeActionSgReadyModeParamTypeId)
+                .toString();
+        qCDebug(dcStiebelEltron())
+            << "Execute action" << info->action().actionTypeId().toString()
+            << info->action().params();
+        StiebelEltronModbusConnection::SmartGridState sgReadyState;
+        if (sgReadyModeString == "Mode 1") {
+            sgReadyState =
+                StiebelEltronModbusConnection::SmartGridStateModeOne;
+        } else if (sgReadyModeString == "Mode 2") {
+            sgReadyState =
+                StiebelEltronModbusConnection::SmartGridStateModeTwo;
+        } else if (sgReadyModeString == "Mode 3") {
+            sgReadyState =
+                StiebelEltronModbusConnection::SmartGridStateModeThree;
+        } else {
+            sgReadyState =
+                StiebelEltronModbusConnection::SmartGridStateModeFour;
+        }
+
+        QModbusReply *reply = connection->setSgReadyState(sgReadyState);
+        if (!reply) {
+            qCWarning(dcStiebelEltron()) << "Execute action failed because the "
+                                            "reply could not be created.";
+            info->finish(Thing::ThingErrorHardwareFailure);
+            return;
+        }
+
+        connect(reply, &QModbusReply::finished, reply,
+                &QModbusReply::deleteLater);
+        connect(reply, &QModbusReply::finished, info,
+                [info, reply, sgReadyModeString] {
+                    if (reply->error() != QModbusDevice::NoError) {
+                        qCWarning(dcStiebelEltron())
+                            << "Set SG ready mode finished with error"
+                            << reply->errorString();
+                        info->finish(Thing::ThingErrorHardwareFailure);
+                        return;
+                    }
+
+                    qCDebug(dcStiebelEltron())
+                        << "Execute action finished successfully"
+                        << info->action().actionTypeId().toString()
+                        << info->action().params();
+                    info->thing()->setStateValue(
+                        stiebelEltronSgReadyModeStateTypeId, sgReadyModeString);
+                    info->finish(Thing::ThingErrorNoError);
+                });
+
+        connect(reply, &QModbusReply::errorOccurred, this,
+                [reply](QModbusDevice::Error error) {
+                    qCWarning(dcStiebelEltron())
+                        << "Modbus reply error occurred while execute action"
+                        << error << reply->errorString();
+                    emit reply->finished();  // To make sure it will be deleted
+                });
     }
-   
     info->finish(Thing::ThingErrorNoError);
 }
 
