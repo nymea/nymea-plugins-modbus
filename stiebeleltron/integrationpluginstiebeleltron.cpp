@@ -296,7 +296,7 @@ void IntegrationPluginStiebelEltron::setupThing(ThingSetupInfo *info) {
                                          systemStatus & (1 << 9));
                     thing->setStateValue(stiebelEltronSilentModeStateTypeId,
                                          systemStatus & (1 << 10));
-                    thing->setStateValue(stiebelEltronPowerStateTypeId,
+                    thing->setStateValue(stiebelEltronSilentMode2StateTypeId,
                                          systemStatus & (1 << 11));
                 });
 

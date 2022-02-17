@@ -96,37 +96,7 @@
                             "type": "double",
                             "defaultValue": 0,
                             "suggestLogging": true
-                        },
-                        {
-                            "id": "5833ceb6-5e7c-437b-a44a-e9f5eb42b6ac",
-                            "name": "sourceTemperature",
-                            "displayName": "Source temperature",
-                            "displayNameEvent": "Source temperature changed",
-                            "unit": "DegreeCelsius",
-                            "type": "double",
-                            "defaultValue": 0,
-                            "suggestLogging": true
-                        },
-                        {
-                            "id": "d1959819-9e56-47f7-b619-a393ce50738a",
-                            "name": "roomTemperature1",
-                            "displayName": "Room temperature 1",
-                            "displayNameEvent": "Room temperature 1 changed",
-                            "unit": "DegreeCelsius",
-                            "type": "double",
-                            "defaultValue": 0,
-                            "suggestLogging": true
-                        },
-                        {
-                            "id": "04ac741c-5277-4806-be73-576a164ecb46",
-                            "name": "roomTemperature2",
-                            "displayName": "Room temperature 1",
-                            "displayNameEvent": "Room temperature changed",
-                            "unit": "DegreeCelsius",
-                            "type": "double",
-                            "defaultValue": 0,
-                            "suggestLogging": true
-                        },
+                        }, 
                         {
                             "id": "43dd25b3-8782-4faa-a9e0-2fb10892fa0c",
                             "name": "storageTankTemperature",
@@ -297,9 +267,9 @@
                         },
                         {
                             "id": "d77a30d9-98f7-40ec-bc55-77c547f24145",
-                            "name": "power",
-                            "displayName": "Power",
-                            "displayNameEvent": "Power status changed",
+                            "name": "silentMode2",
+                            "displayName": "Silent mode 2 (Off)",
+                            "displayNameEvent": "Silent mode 2 status changed",
                             "type": "bool",
                             "defaultValue": false,
                             "suggestLogging": true
@@ -330,6 +300,26 @@
                             ],
                             "writable": true,
                             "defaultValue": "Mode 3",
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "5833ceb6-5e7c-437b-a44a-e9f5eb42b6ac",
+                            "name": "sourceTemperature",
+                            "displayName": "Source temperature (tbd)",
+                            "displayNameEvent": "Source temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "d1959819-9e56-47f7-b619-a393ce50738a",
+                            "name": "roomTemperature1",
+                            "displayName": "Room temperature (tbd)",
+                            "displayNameEvent": "Room temperature changed",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
                             "suggestLogging": true
                         }
                     ],
