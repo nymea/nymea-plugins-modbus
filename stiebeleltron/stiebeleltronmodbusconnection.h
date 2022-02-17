@@ -60,9 +60,8 @@ public:
         RegisterConsumedEnergyHeating = 3511,
         RegisterConsumedEnergyHotWater = 3514,
         RegisterSgReadyActive = 4000,
-        RegisterSgReadyInputOne = 4001,
-        RegisterSgReadyInputTwo = 4002,
-        RegisterSgReadyState = 5000
+        RegisterSgReadyState = 4001,
+        RegisterSgReadyStateRO = 5000
     };
     Q_ENUM(Registers)
 
@@ -78,9 +77,9 @@ public:
 
     enum SmartGridState {
         SmartGridStateModeOne = 1,
-        SmartGridStateModeTwo = 2,
-        SmartGridStateModeThree = 3,
-        SmartGridStateModeFour = 4
+        SmartGridStateModeTwo = 0,
+        SmartGridStateModeThree = 65536,
+        SmartGridStateModeFour = 65537
     };
     Q_ENUM(SmartGridState)
 
@@ -142,19 +141,15 @@ public:
     quint16 systemStatus() const;
 
     /* Smart grid status - Address: 5000, Size: 1 */
-    SmartGridState sgReadyState() const;
+    quint16 sgReadyStateRO() const;
 
     /* SG ready active - Address: 4000, Size: 1 */
     quint16 sgReadyActive() const;
     QModbusReply *setSgReadyActive(quint16 sgReadyActive);
 
-    /* SG Ready Input 1 - Address: 4001, Size: 1 */
-    quint16 sgReadyInputOne() const;
-    QModbusReply *setSgReadyInputOne(quint16 sgReadyInputOne);
-
-    /* SG Read Input 2 - Address: 4002, Size: 1 */
-    quint16 sgReadyInputTwo() const;
-    QModbusReply *setSgReadyInputTwo(quint16 sgReadyInputTwo);
+    /* SG Ready mode - Address: 4001, Size: 2 */
+    SmartGridState sgReadyState() const;
+    QModbusReply *setSgReadyState(SmartGridState sgReadyState);
 
     virtual void initialize();
     virtual void update();
@@ -177,10 +172,9 @@ public:
     void updateConsumedEnergyHotWater();
     void updateOperatingMode();
     void updateSystemStatus();
-    void updateSgReadyState();
+    void updateSgReadyStateRO();
     void updateSgReadyActive();
-    void updateSgReadyInputOne();
-    void updateSgReadyInputTwo();
+    void updateSgReadyState();
 
 signals:
     void initializationFinished();
@@ -203,10 +197,9 @@ signals:
     void consumedEnergyHotWaterChanged(quint32 consumedEnergyHotWater);
     void operatingModeChanged(OperatingMode operatingMode);
     void systemStatusChanged(quint16 systemStatus);
-    void sgReadyStateChanged(SmartGridState sgReadyState);
+    void sgReadyStateROChanged(quint16 sgReadyStateRO);
     void sgReadyActiveChanged(quint16 sgReadyActive);
-    void sgReadyInputOneChanged(quint16 sgReadyInputOne);
-    void sgReadyInputTwoChanged(quint16 sgReadyInputTwo);
+    void sgReadyStateChanged(SmartGridState sgReadyState);
 
 protected:
     QModbusReply *readOutdoorTemperature();
@@ -227,10 +220,9 @@ protected:
     QModbusReply *readConsumedEnergyHotWater();
     QModbusReply *readOperatingMode();
     QModbusReply *readSystemStatus();
-    QModbusReply *readSgReadyState();
+    QModbusReply *readSgReadyStateRO();
     QModbusReply *readSgReadyActive();
-    QModbusReply *readSgReadyInputOne();
-    QModbusReply *readSgReadyInputTwo();
+    QModbusReply *readSgReadyState();
 
     float m_outdoorTemperature = 0;
     float m_flowTemperature = 0;
@@ -250,10 +242,9 @@ protected:
     quint32 m_consumedEnergyHotWater = 0;
     OperatingMode m_operatingMode = OperatingModeStandby;
     quint16 m_systemStatus = 0;
-    SmartGridState m_sgReadyState = SmartGridStateModeTwo;
+    quint16 m_sgReadyStateRO = 3;
     quint16 m_sgReadyActive = 0;
-    quint16 m_sgReadyInputOne = 0;
-    quint16 m_sgReadyInputTwo = 0;
+    SmartGridState m_sgReadyState = SmartGridStateModeThree;
 
 private:
     quint16 m_slaveId = 1;
