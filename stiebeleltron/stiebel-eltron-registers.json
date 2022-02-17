@@ -36,19 +36,23 @@
             "values": [
                 {
                     "key": "ModeOne",
-                    "value": 1
+                    "value": 1,
+                    "comment": "0x00000001"
                 },
                 {
                     "key": "ModeTwo",
-                    "value": 2
+                    "value": 0,
+                    "comment": "0x00000000"
                 },
                 {
                     "key": "ModeThree",
-                    "value": 3
+                    "value": 65536,
+                    "comment": "0x00010000"
                 },
                 {
                     "key": "ModeFour",
-                    "value": 4
+                    "value": 65537,
+                    "comment": "0x00010001"
                 }
             ]
         }
@@ -282,15 +286,14 @@
             "access": "RO"
         },
         {
-            "id": "sgReadyState",
+            "id": "sgReadyStateRO",
             "address": 5000,
             "size": 1,
             "type": "uint16",
-            "enum": "SmartGridState",
             "registerType": "inputRegister",
             "readSchedule": "update",
             "description": "Smart grid status",
-            "defaultValue": "SmartGridStateModeTwo",
+            "defaultValue": 3,
             "access": "RO" 
         },
         {
@@ -305,27 +308,16 @@
             "access": "RW" 
         },
         {
-            "id": "sgReadyInputOne",
+            "id": "sgReadyState",
             "address": 4001,
-            "size": 1,
-            "type": "uint16",
+            "size": 2,
+            "type": "uint32",
             "registerType": "holdingRegister",
+            "enum": "SmartGridState",
             "readSchedule": "update",
-            "description": "SG Ready Input 1",
-            "defaultValue": 0,
-            "access": "RW" 
-        },
-        {
-            "id": "sgReadyInputTwo",
-            "address": 4002,
-            "size": 1,
-            "type": "uint16",
-            "registerType": "holdingRegister",
-            "readSchedule": "update",
-            "description": "SG Read Input 2",
-            "defaultValue": 0,
+            "description": "SG Ready mode",
+            "defaultValue": "SmartGridStateModeThree",
             "access": "RW" 
         }
-
     ]
 }
