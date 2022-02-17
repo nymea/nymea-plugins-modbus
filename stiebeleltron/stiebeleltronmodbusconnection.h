@@ -41,36 +41,226 @@ class StiebelEltronModbusConnection : public ModbusTCPMaster
     Q_OBJECT
 public:
     enum Registers {
-        RegisterOutdoorTemperature = 507
+        RegisterRoomTemperatureFEK = 502,
+        RegisterOutdoorTemperature = 506,
+        RegisterFlowTemperature = 514,
+        RegisterReturnTemperature = 515,
+        RegisterStorageTankTemperature = 517,
+        RegisterHotWaterTemperature = 521,
+        RegisterSolarCollectorTemperature = 527,
+        RegisterSolarStorageTankTemperature = 528,
+        RegisterExternalHeatSourceTemperature = 530,
+        RegisterHotGasTemperature1 = 543,
+        RegisterHotGasTemperature2 = 550,
+        RegisterSourceTemperature = 562,
+        RegisterOperatingMode = 1500,
+        RegisterSystemStatus = 2500,
+        RegisterHeatingEnergy = 3501,
+        RegisterHotWaterEnergy = 3504,
+        RegisterConsumedEnergyHeating = 3511,
+        RegisterConsumedEnergyHotWater = 3514,
+        RegisterSgReadyActive = 4000,
+        RegisterSgReadyInputOne = 4001,
+        RegisterSgReadyInputTwo = 4002,
+        RegisterSgReadyState = 5000
     };
     Q_ENUM(Registers)
+
+    enum OperatingMode {
+        OperatingModeEmergency = 0,
+        OperatingModeStandby = 1,
+        OperatingModeProgram = 2,
+        OperatingModeComfort = 3,
+        OperatingModeEco = 4,
+        OperatingModeHotWater = 5
+    };
+    Q_ENUM(OperatingMode)
+
+    enum SmartGridState {
+        SmartGridStateModeOne = 1,
+        SmartGridStateModeTwo = 2,
+        SmartGridStateModeThree = 3,
+        SmartGridStateModeFour = 4
+    };
+    Q_ENUM(SmartGridState)
 
     explicit StiebelEltronModbusConnection(const QHostAddress &hostAddress, uint port, quint16 slaveId, QObject *parent = nullptr);
     ~StiebelEltronModbusConnection() = default;
 
-    /* Flow [°C] - Address: 507, Size: 1 */
+    /* Outdoor temperature [°C] - Address: 506, Size: 1 */
     float outdoorTemperature() const;
+
+    /* Flow temperature [°C] - Address: 514, Size: 1 */
+    float flowTemperature() const;
+
+    /* Hot water temperature [°C] - Address: 521, Size: 1 */
+    float hotWaterTemperature() const;
+
+    /* Hot gas temperature HP 1 [°C] - Address: 543, Size: 1 */
+    float hotGasTemperature1() const;
+
+    /* Hot gas temperature HP 2 [°C] - Address: 550, Size: 1 */
+    float hotGasTemperature2() const;
+
+    /* Source temperature [°C] - Address: 562, Size: 1 */
+    float SourceTemperature() const;
+
+    /* Room temperature FEK [°C] - Address: 502, Size: 1 */
+    float roomTemperatureFEK() const;
+
+    /* Return temperature [°C] - Address: 515, Size: 1 */
+    float returnTemperature() const;
+
+    /* Solar collector temperature [°C] - Address: 527, Size: 1 */
+    float solarCollectorTemperature() const;
+
+    /* Solar storage tank temperature [°C] - Address: 528, Size: 1 */
+    float solarStorageTankTemperature() const;
+
+    /* Storage tank temperature [°C] - Address: 517, Size: 1 */
+    float storageTankTemperature() const;
+
+    /* External heat source temperature [°C] - Address: 530, Size: 1 */
+    float externalHeatSourceTemperature() const;
+
+    /* Heating energy [kWh] - Address: 3501, Size: 2 */
+    quint32 heatingEnergy() const;
+
+    /* Hot water energy [kWh] - Address: 3504, Size: 2 */
+    quint32 hotWaterEnergy() const;
+
+    /* Consumed energy heating [kWh] - Address: 3511, Size: 2 */
+    quint32 consumedEnergyHeating() const;
+
+    /* Consumed energy hot water [kWh] - Address: 3514, Size: 2 */
+    quint32 consumedEnergyHotWater() const;
+
+    /* Operating mode - Address: 1500, Size: 1 */
+    OperatingMode operatingMode() const;
+
+    /* System status - Address: 2500, Size: 1 */
+    quint16 systemStatus() const;
+
+    /* Smart grid status - Address: 5000, Size: 1 */
+    SmartGridState sgReadyState() const;
+
+    /* SG ready active - Address: 4000, Size: 1 */
+    quint16 sgReadyActive() const;
+    QModbusReply *setSgReadyActive(quint16 sgReadyActive);
+
+    /* SG Ready Input 1 - Address: 4001, Size: 1 */
+    quint16 sgReadyInputOne() const;
+    QModbusReply *setSgReadyInputOne(quint16 sgReadyInputOne);
+
+    /* SG Read Input 2 - Address: 4002, Size: 1 */
+    quint16 sgReadyInputTwo() const;
+    QModbusReply *setSgReadyInputTwo(quint16 sgReadyInputTwo);
 
     virtual void initialize();
     virtual void update();
 
     void updateOutdoorTemperature();
+    void updateFlowTemperature();
+    void updateHotWaterTemperature();
+    void updateHotGasTemperature1();
+    void updateHotGasTemperature2();
+    void updateSourceTemperature();
+    void updateRoomTemperatureFEK();
+    void updateReturnTemperature();
+    void updateSolarCollectorTemperature();
+    void updateSolarStorageTankTemperature();
+    void updateStorageTankTemperature();
+    void updateExternalHeatSourceTemperature();
+    void updateHeatingEnergy();
+    void updateHotWaterEnergy();
+    void updateConsumedEnergyHeating();
+    void updateConsumedEnergyHotWater();
+    void updateOperatingMode();
+    void updateSystemStatus();
+    void updateSgReadyState();
+    void updateSgReadyActive();
+    void updateSgReadyInputOne();
+    void updateSgReadyInputTwo();
 
 signals:
     void initializationFinished();
 
     void outdoorTemperatureChanged(float outdoorTemperature);
+    void flowTemperatureChanged(float flowTemperature);
+    void hotWaterTemperatureChanged(float hotWaterTemperature);
+    void hotGasTemperature1Changed(float hotGasTemperature1);
+    void hotGasTemperature2Changed(float hotGasTemperature2);
+    void SourceTemperatureChanged(float SourceTemperature);
+    void roomTemperatureFEKChanged(float roomTemperatureFEK);
+    void returnTemperatureChanged(float returnTemperature);
+    void solarCollectorTemperatureChanged(float solarCollectorTemperature);
+    void solarStorageTankTemperatureChanged(float solarStorageTankTemperature);
+    void storageTankTemperatureChanged(float storageTankTemperature);
+    void externalHeatSourceTemperatureChanged(float externalHeatSourceTemperature);
+    void heatingEnergyChanged(quint32 heatingEnergy);
+    void hotWaterEnergyChanged(quint32 hotWaterEnergy);
+    void consumedEnergyHeatingChanged(quint32 consumedEnergyHeating);
+    void consumedEnergyHotWaterChanged(quint32 consumedEnergyHotWater);
+    void operatingModeChanged(OperatingMode operatingMode);
+    void systemStatusChanged(quint16 systemStatus);
+    void sgReadyStateChanged(SmartGridState sgReadyState);
+    void sgReadyActiveChanged(quint16 sgReadyActive);
+    void sgReadyInputOneChanged(quint16 sgReadyInputOne);
+    void sgReadyInputTwoChanged(quint16 sgReadyInputTwo);
 
 protected:
     QModbusReply *readOutdoorTemperature();
+    QModbusReply *readFlowTemperature();
+    QModbusReply *readHotWaterTemperature();
+    QModbusReply *readHotGasTemperature1();
+    QModbusReply *readHotGasTemperature2();
+    QModbusReply *readSourceTemperature();
+    QModbusReply *readRoomTemperatureFEK();
+    QModbusReply *readReturnTemperature();
+    QModbusReply *readSolarCollectorTemperature();
+    QModbusReply *readSolarStorageTankTemperature();
+    QModbusReply *readStorageTankTemperature();
+    QModbusReply *readExternalHeatSourceTemperature();
+    QModbusReply *readHeatingEnergy();
+    QModbusReply *readHotWaterEnergy();
+    QModbusReply *readConsumedEnergyHeating();
+    QModbusReply *readConsumedEnergyHotWater();
+    QModbusReply *readOperatingMode();
+    QModbusReply *readSystemStatus();
+    QModbusReply *readSgReadyState();
+    QModbusReply *readSgReadyActive();
+    QModbusReply *readSgReadyInputOne();
+    QModbusReply *readSgReadyInputTwo();
 
     float m_outdoorTemperature = 0;
+    float m_flowTemperature = 0;
+    float m_hotWaterTemperature = 0;
+    float m_hotGasTemperature1 = 0;
+    float m_hotGasTemperature2 = 0;
+    float m_SourceTemperature = 0;
+    float m_roomTemperatureFEK = 0;
+    float m_returnTemperature = 0;
+    float m_solarCollectorTemperature = 0;
+    float m_solarStorageTankTemperature = 0;
+    float m_storageTankTemperature = 0;
+    float m_externalHeatSourceTemperature = 0;
+    quint32 m_heatingEnergy = 0;
+    quint32 m_hotWaterEnergy = 0;
+    quint32 m_consumedEnergyHeating = 0;
+    quint32 m_consumedEnergyHotWater = 0;
+    OperatingMode m_operatingMode = OperatingModeStandby;
+    quint16 m_systemStatus = 0;
+    SmartGridState m_sgReadyState = SmartGridStateModeTwo;
+    quint16 m_sgReadyActive = 0;
+    quint16 m_sgReadyInputOne = 0;
+    quint16 m_sgReadyInputTwo = 0;
 
 private:
     quint16 m_slaveId = 1;
     QVector<QModbusReply *> m_pendingInitReplies;
 
     void verifyInitFinished();
+
 
 };
 
