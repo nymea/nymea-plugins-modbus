@@ -5,9 +5,10 @@
     "stability": "consumer",
     "offline": true,
     "technologies": [
-        "network"
+        "network",
+        "modbus"
     ],
     "categories": [
-        "tool"
+        "energy"
     ]
 }
