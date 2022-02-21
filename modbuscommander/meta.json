@@ -6,9 +6,10 @@
     "offline": true,
     "technologies": [
         "serial-port",
-        "network"
+        "network",
+        "modbus"
     ],
     "categories": [
-        "tool"
+        "diy"
     ]
 }
