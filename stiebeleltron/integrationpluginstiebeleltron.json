@@ -293,13 +293,13 @@
                             "displayNameAction": "Set SG Ready mode",
                             "type": "QString",
                             "possibleValues": [
-                                "Mode 1",
-                                "Mode 2",
-                                "Mode 3",
-                                "Mode 4"
+                                "Off",
+                                "Low",
+                                "Standard",
+                                "High"
                             ],
                             "writable": true,
-                            "defaultValue": "Mode 3",
+                            "defaultValue": "Standard",
                             "suggestLogging": true
                         },
                         {
