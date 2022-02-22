@@ -11,6 +11,7 @@ PLUGIN_DIRS = \
     huawei                  \
     idm                     \
     inepro                  \
+    kostal                  \
     modbuscommander         \
     mtec                    \
     mypv                    \
