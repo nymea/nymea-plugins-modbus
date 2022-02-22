@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2021  nymea GmbH <developer@nymea.io>
+# Copyright (C) 2021 - 2022 nymea GmbH <developer@nymea.io>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -843,51 +843,56 @@ def writeInitializeMethod(fileDescriptor, className, registerDefinitions):
             break
 
     if initRequired:
-        # FIXME: distinguish between RTU and TCP 
-        writeLine(fileDescriptor, '    QModbusReply *reply = nullptr;')
-        writeLine(fileDescriptor)
-        writeLine(fileDescriptor, '    if (!m_pendingInitReplies.isEmpty()) {')
-        writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Tried to initialize but there are still some init replies pending.";' % className)
-        writeLine(fileDescriptor, '        return;')
-        writeLine(fileDescriptor, '    }')
+        if protocol == 'TCP':
+            # Init implementation for TCP
+            writeLine(fileDescriptor, '    QModbusReply *reply = nullptr;')
+            writeLine(fileDescriptor)
+            writeLine(fileDescriptor, '    if (!m_pendingInitReplies.isEmpty()) {')
+            writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Tried to initialize but there are still some init replies pending.";' % className)
+            writeLine(fileDescriptor, '        return;')
+            writeLine(fileDescriptor, '    }')
 
-        for registerDefinition in registerDefinitions:
-            propertyName = registerDefinition['id']
-            propertyTyp = getCppDataType(registerDefinition)
+            for registerDefinition in registerDefinitions:
+                propertyName = registerDefinition['id']
+                propertyTyp = getCppDataType(registerDefinition)
 
-            if 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'init':
-                writeLine(fileDescriptor)
-                writeLine(fileDescriptor, '    // Read %s' % registerDefinition['description'])
-                writeLine(fileDescriptor, '    reply = read%s();' % (propertyName[0].upper() + propertyName[1:]))
-                writeLine(fileDescriptor, '    if (reply) {')
-                writeLine(fileDescriptor, '        if (!reply->isFinished()) {')
-                writeLine(fileDescriptor, '            m_pendingInitReplies.append(reply);')
-                writeLine(fileDescriptor, '            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);')
-                writeLine(fileDescriptor, '            connect(reply, &QModbusReply::finished, this, [this, reply](){')
-                writeLine(fileDescriptor, '                if (reply->error() == QModbusDevice::NoError) {')
-                writeLine(fileDescriptor, '                    const QModbusDataUnit unit = reply->result();')
-                writeLine(fileDescriptor, '                    %s received%s = %s;' % (propertyTyp, propertyName[0].upper() + propertyName[1:], getValueConversionMethod(registerDefinition)))
-                writeLine(fileDescriptor, '                    if (m_%s != received%s) {' % (propertyName, propertyName[0].upper() + propertyName[1:]))
-                writeLine(fileDescriptor, '                        m_%s = received%s;' % (propertyName, propertyName[0].upper() + propertyName[1:]))
-                writeLine(fileDescriptor, '                        emit %sChanged(m_%s);' % (propertyName, propertyName))
-                writeLine(fileDescriptor, '                    }')
-                writeLine(fileDescriptor, '                }')
-                writeLine(fileDescriptor)
-                writeLine(fileDescriptor, '                m_pendingInitReplies.removeAll(reply);')
-                writeLine(fileDescriptor, '                verifyInitFinished();')
-                writeLine(fileDescriptor, '            });')
-                writeLine(fileDescriptor)
-                writeLine(fileDescriptor, '            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){')
-                writeLine(fileDescriptor, '                qCWarning(dc%s()) << "Modbus reply error occurred while reading \\"%s\\" registers from" << hostAddress().toString() << error << reply->errorString();' % (className, registerDefinition['description']))
-                writeLine(fileDescriptor, '                emit reply->finished(); // To make sure it will be deleted')
-                writeLine(fileDescriptor, '            });')
-                writeLine(fileDescriptor, '        } else {')
-                writeLine(fileDescriptor, '            delete reply; // Broadcast reply returns immediatly')
-                writeLine(fileDescriptor, '        }')
-                writeLine(fileDescriptor, '    } else {')
-                writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Error occurred while reading \\"%s\\" registers from" << hostAddress().toString() << errorString();' % (className, registerDefinition['description']))
-                writeLine(fileDescriptor, '    }')
+                if 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'init':
+                    writeLine(fileDescriptor)
+                    writeLine(fileDescriptor, '    // Read %s' % registerDefinition['description'])
+                    writeLine(fileDescriptor, '    reply = read%s();' % (propertyName[0].upper() + propertyName[1:]))
+                    writeLine(fileDescriptor, '    if (reply) {')
+                    writeLine(fileDescriptor, '        if (!reply->isFinished()) {')
+                    writeLine(fileDescriptor, '            m_pendingInitReplies.append(reply);')
+                    writeLine(fileDescriptor, '            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);')
+                    writeLine(fileDescriptor, '            connect(reply, &QModbusReply::finished, this, [this, reply](){')
+                    writeLine(fileDescriptor, '                if (reply->error() == QModbusDevice::NoError) {')
+                    writeLine(fileDescriptor, '                    const QModbusDataUnit unit = reply->result();')
+                    writeLine(fileDescriptor, '                    const QVector<quint16> values = unit.values();')
+                    writeLine(fileDescriptor, '                    %s received%s = %s;' % (propertyTyp, propertyName[0].upper() + propertyName[1:], getValueConversionMethod(registerDefinition)))
+                    writeLine(fileDescriptor, '                    if (m_%s != received%s) {' % (propertyName, propertyName[0].upper() + propertyName[1:]))
+                    writeLine(fileDescriptor, '                        m_%s = received%s;' % (propertyName, propertyName[0].upper() + propertyName[1:]))
+                    writeLine(fileDescriptor, '                        emit %sChanged(m_%s);' % (propertyName, propertyName))
+                    writeLine(fileDescriptor, '                    }')
+                    writeLine(fileDescriptor, '                }')
+                    writeLine(fileDescriptor)
+                    writeLine(fileDescriptor, '                m_pendingInitReplies.removeAll(reply);')
+                    writeLine(fileDescriptor, '                verifyInitFinished();')
+                    writeLine(fileDescriptor, '            });')
+                    writeLine(fileDescriptor)
+                    writeLine(fileDescriptor, '            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){')
+                    writeLine(fileDescriptor, '                qCWarning(dc%s()) << "Modbus reply error occurred while reading \\"%s\\" registers from" << hostAddress().toString() << error << reply->errorString();' % (className, registerDefinition['description']))
+                    writeLine(fileDescriptor, '                emit reply->finished(); // To make sure it will be deleted')
+                    writeLine(fileDescriptor, '            });')
+                    writeLine(fileDescriptor, '        } else {')
+                    writeLine(fileDescriptor, '            delete reply; // Broadcast reply returns immediatly')
+                    writeLine(fileDescriptor, '        }')
+                    writeLine(fileDescriptor, '    } else {')
+                    writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Error occurred while reading \\"%s\\" registers from" << hostAddress().toString() << errorString();' % (className, registerDefinition['description']))
+                    writeLine(fileDescriptor, '    }')
 
+        else:
+          print('TODO: this has not been implemented yet for RTU')
+          exit(1)
 
     else:
         writeLine(fileDescriptor, '    // No init registers defined. Nothing to be done and we are finished.')
