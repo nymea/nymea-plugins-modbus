@@ -12,7 +12,7 @@ Make sure the ISG firmware is up to date to ensure the Modbus/TCP connection is 
 
 ## Requirements
 
-* The package 'nymea-plugin-stiebeleltron' must be installed
+* The package `nymea-plugin-stiebeleltron` must be installed
 * Both devices must be in the same local area network.
 * Modbus enabled (may conflict with an installed SMA EMI).
 
