@@ -164,7 +164,6 @@ Architecture: any
 Section: libs
 Depends: ${shlibs:Depends},
          ${misc:Depends},
-         nymea-plugins-modbus-translations
 Description: nymea.io plugin for Stiebel Eltron heat pumps
   This package will install the nymea.io plugin for Stiebel Eltron heat pumps.
 
