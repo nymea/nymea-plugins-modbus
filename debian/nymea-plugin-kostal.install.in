@@ -1,0 +1,2 @@
+usr/lib/@DEB_HOST_MULTIARCH@/nymea/plugins/libnymea_integrationpluginkostal.so
+kostal/translations/*qm usr/share/nymea/translations/
