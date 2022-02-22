@@ -12,7 +12,7 @@ $(PREPROCESS_FILES:.in=): %: %.in
 
 override_dh_auto_build:
 	dh_auto_build
-	#make lrelease
+	make lrelease
 
 override_dh_install: $(PREPROCESS_FILES:.in=)
 	dh_install --fail-missing
