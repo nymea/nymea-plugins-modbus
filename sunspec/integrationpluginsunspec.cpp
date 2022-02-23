@@ -70,25 +70,20 @@ void IntegrationPluginSunSpec::init()
     // SunSpec connection params
     m_connectionIpParamTypeIds.insert(sunspecConnectionThingClassId, sunspecConnectionThingIpAddressParamTypeId);
     m_connectionIpParamTypeIds.insert(solarEdgeConnectionThingClassId, solarEdgeConnectionThingIpAddressParamTypeId);
-    m_connectionIpParamTypeIds.insert(kostalConnectionThingClassId, kostalConnectionThingIpAddressParamTypeId);
 
     m_connectionPortParamTypeIds.insert(sunspecConnectionThingClassId, sunspecConnectionThingPortParamTypeId);
     m_connectionPortParamTypeIds.insert(solarEdgeConnectionThingClassId, solarEdgeConnectionThingPortParamTypeId);
-    m_connectionPortParamTypeIds.insert(kostalConnectionThingClassId, kostalConnectionThingPortParamTypeId);
 
     m_connectionMacAddressParamTypeIds.insert(sunspecConnectionThingClassId, sunspecConnectionThingMacAddressParamTypeId);
     m_connectionMacAddressParamTypeIds.insert(solarEdgeConnectionThingClassId, solarEdgeConnectionThingMacAddressParamTypeId);
-    m_connectionMacAddressParamTypeIds.insert(kostalConnectionThingClassId, kostalConnectionThingMacAddressParamTypeId);
 
     m_connectionSlaveIdParamTypeIds.insert(sunspecConnectionThingClassId, sunspecConnectionThingSlaveIdParamTypeId);
     m_connectionSlaveIdParamTypeIds.insert(solarEdgeConnectionThingClassId, solarEdgeConnectionThingSlaveIdParamTypeId);
-    m_connectionSlaveIdParamTypeIds.insert(kostalConnectionThingClassId, kostalConnectionThingSlaveIdParamTypeId);
 
     // Connected state for all things
     m_connectedStateTypeIds.insert(sunspecConnectionThingClassId, sunspecConnectionConnectedStateTypeId);
     m_connectedStateTypeIds.insert(solarEdgeConnectionThingClassId, solarEdgeConnectionConnectedStateTypeId);
     m_connectedStateTypeIds.insert(solarEdgeBatteryThingClassId, solarEdgeBatteryConnectedStateTypeId);
-    m_connectedStateTypeIds.insert(kostalConnectionThingClassId, kostalConnectionConnectedStateTypeId);
 
     // Child things
     m_connectedStateTypeIds.insert(sunspecStorageThingClassId, sunspecStorageConnectedStateTypeId);
@@ -173,7 +168,6 @@ void IntegrationPluginSunSpec::discoverThings(ThingDiscoveryInfo *info)
                 }
             } else {
                 // Generic or not discoverable sunspec connection, show all network results
-                // - Kostal does not provide any usefull information for filtering in the discovery
                 if (networkDeviceInfo.hostName().isEmpty()) {
                     title += networkDeviceInfo.address().toString();
                 } else {
@@ -218,8 +212,7 @@ void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
     qCDebug(dcSunSpec()) << thing->params();
 
     if (thing->thingClassId() == sunspecConnectionThingClassId
-            || thing->thingClassId() == solarEdgeConnectionThingClassId
-            || thing->thingClassId() == kostalConnectionThingClassId) {
+            || thing->thingClassId() == solarEdgeConnectionThingClassId) {
         setupConnection(info);
 
     } else if (thing->thingClassId() == sunspecThreePhaseInverterThingClassId
@@ -455,46 +448,8 @@ void IntegrationPluginSunSpec::processDiscoveryResult(Thing *thing, SunSpecConne
 {
     qCDebug(dcSunSpec()) << "Processing discovery result from" << thing->name() << connection;
 
-    // Note: from kostal devices is known, that they add inverter
-    // as normal and float version, but we need only one.
-    // Lets filter the duplicated information for kostal connections
-    if (thing->thingClassId() == kostalConnectionThingClassId) {
-        QHash<quint16, SunSpecModel *> filteredModels;
-        foreach (SunSpecModel *model, connection->models()) {
-            switch (model->modelId()) {
-            case SunSpecModelFactory::ModelIdInverterSinglePhaseFloat:
-                if (filteredModels.contains(SunSpecModelFactory::ModelIdInverterSinglePhase)) {
-                    qCDebug(dcSunSpec()) << "Kostal: Filter out" << model;
-                } else {
-                    filteredModels.insert(model->modelId(), model);
-                }
-                break;
-            case SunSpecModelFactory::ModelIdInverterSplitPhaseFloat:
-                if (filteredModels.contains(SunSpecModelFactory::ModelIdInverterSplitPhase)) {
-                    qCDebug(dcSunSpec()) << "Kostal: Filter out" << model;
-                } else {
-                    filteredModels.insert(model->modelId(), model);
-                }
-                break;
-            case SunSpecModelFactory::ModelIdInverterThreePhaseFloat:
-                if (filteredModels.contains(SunSpecModelFactory::ModelIdInverterThreePhase)) {
-                    qCDebug(dcSunSpec()) << "Kostal: Filter out" << model;
-                } else {
-                    filteredModels.insert(model->modelId(), model);
-                }
-                break;
-            default:
-                filteredModels.insert(model->modelId(), model);
-                break;
-            }
-        }
-
-        // Process the filtered list
-        checkAutoSetupModels(thing, filteredModels.values());
-    } else {
-        // Process all models
-        checkAutoSetupModels(thing, connection->models());
-    }
+    // Process all models
+    checkAutoSetupModels(thing, connection->models());
 }
 
 void IntegrationPluginSunSpec::checkAutoSetupModels(Thing *connectionThing, QList<SunSpecModel *> models)
