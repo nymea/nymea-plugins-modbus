@@ -231,7 +231,7 @@ void IntegrationPluginStiebelEltron::setupThing(ThingSetupInfo *info) {
 
         connect(connection, &StiebelEltronModbusConnection::sgReadyStateChanged, thing,
                 [thing](StiebelEltronModbusConnection::SmartGridState smartGridState) {
-                    qCDebug(dcStiebelEltron()) << thing << "SG Ready activation changed" << smartGridState;
+                    qCDebug(dcStiebelEltron()) << thing << "SG Ready mode changed" << smartGridState;
                     switch (smartGridState) {
                         case StiebelEltronModbusConnection::SmartGridStateModeOne:
                             thing->setStateValue(stiebelEltronSgReadyModeStateTypeId, "Off");
