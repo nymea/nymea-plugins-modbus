@@ -346,14 +346,19 @@ void IntegrationPluginStiebelEltron::executeAction(ThingActionInfo *info) {
         qCDebug(dcStiebelEltron()) << "Execute action" << info->action().actionTypeId().toString()
                                    << info->action().params();
         StiebelEltronModbusConnection::SmartGridState sgReadyState;
-        if (sgReadyModeString == "Mode 1") {
+        if (sgReadyModeString == "Off") {
             sgReadyState = StiebelEltronModbusConnection::SmartGridStateModeOne;
-        } else if (sgReadyModeString == "Mode 2") {
+        } else if (sgReadyModeString == "Low") {
             sgReadyState = StiebelEltronModbusConnection::SmartGridStateModeTwo;
-        } else if (sgReadyModeString == "Mode 3") {
+        } else if (sgReadyModeString == "Standard") {
             sgReadyState = StiebelEltronModbusConnection::SmartGridStateModeThree;
-        } else {
+        } else if (sgReadyModeString == "High") {
             sgReadyState = StiebelEltronModbusConnection::SmartGridStateModeFour;
+        } else {
+            qCWarning(dcStiebelEltron())
+                << "Failed to set SG Ready mode. An unknown SG Ready mode was passed: " << sgReadyModeString;
+            info->finish(Thing::ThingErrorHardwareFailure);  // TODO better matching error type?
+            return;
         }
 
         QModbusReply *reply = connection->setSgReadyState(sgReadyState);
