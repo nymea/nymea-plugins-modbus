@@ -40,6 +40,7 @@
                     "displayName": "SunSpec Generic",
                     "id": "f51853f3-8815-4cf3-b337-45cda1f3e6d5",
                     "createMethods": [ "User", "Discovery" ],
+                    "discoveryType": "weak",
                     "interfaces": ["gateway"],
                     "providedInterfaces": [ "solarinverter", "energymeter", "energystorage"],
                     "paramTypes": [
