@@ -84,9 +84,12 @@ void SolarEdgeBattery::readBlockData()
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
             connect(reply, &QModbusReply::finished, this, [=]() {
-
                 if (reply->error() != QModbusDevice::NoError) {
                     qCWarning(dcSunSpec()) << "SolarEdgeBattery: Read response error:" << reply->error();
+                    if (!m_initFinishedSuccess) {
+                        m_timer.stop();
+                        emit initFinished(false);
+                    }
                     return;
                 }
 
@@ -101,10 +104,21 @@ void SolarEdgeBattery::readBlockData()
                 m_batteryData.serialNumber = SunSpecDataPoint::convertToString(values.mid(SerialNumber, 16));
                 m_batteryData.batteryDeviceId = values[BatteryDeviceId];
 
+                // Check if there is a battery connected, if so, one of the string must contain vaild data...
+                if (m_batteryData.manufacturerName.isEmpty() && m_batteryData.model.isEmpty() && m_batteryData.serialNumber.isEmpty() && m_batteryData.firmwareVersion.isEmpty()) {
+                    qCWarning(dcSunSpec()) << "SolarEdgeBattery: No valid information detected about the battery. Probably no battery connected at register" << m_modbusStartRegister;
+                    if (!m_initFinishedSuccess) {
+                        m_timer.stop();
+                        emit initFinished(false);
+                    }
+                    return;
+                }
+
+
                 // 8192 17945 536888857 536888857 1.08652e-19
                 // 0x2000 0x4619
 
-                qCDebug(dcSunSpec()) << "SolarEdgeBattery: " << m_batteryData.batteryDeviceId << m_batteryData.manufacturerName << m_batteryData.model << m_batteryData.firmwareVersion << m_batteryData.serialNumber;
+                qCDebug(dcSunSpec()) << "SolarEdgeBattery:" << m_batteryData.batteryDeviceId << m_batteryData.manufacturerName << m_batteryData.model << m_batteryData.firmwareVersion << m_batteryData.serialNumber;
                 m_batteryData.ratedEnergy = SunSpecDataPoint::convertToFloat32(values.mid(RatedEnergy, 2));
                 m_batteryData.maxChargeContinuesPower = SunSpecDataPoint::convertToFloat32(values.mid(MaxChargeContinuesPower, 2));
                 m_batteryData.maxDischargeContinuesPower = SunSpecDataPoint::convertToFloat32(values.mid(MaxDischargeContinuesPower, 2));
@@ -120,6 +134,10 @@ void SolarEdgeBattery::readBlockData()
                         connect(reply, &QModbusReply::finished, this, [=]() {
                             if (reply->error() != QModbusDevice::NoError) {
                                 qCWarning(dcSunSpec()) << "SolarEdgeBattery: Read response error:" << reply->error();
+                                if (!m_initFinishedSuccess) {
+                                    m_timer.stop();
+                                    emit initFinished(false);
+                                }
                                 return;
                             }
 
@@ -164,6 +182,10 @@ void SolarEdgeBattery::readBlockData()
                     } else {
                         qCWarning(dcSunSpec()) << "SolarEdgeBattery: Read error: " << m_connection->modbusTcpClient()->errorString();
                         delete reply; // broadcast replies return immediately
+                        if (!m_initFinishedSuccess) {
+                            m_timer.stop();
+                            emit initFinished(false);
+                        }
                         return;
                     }
                 } else {
@@ -179,6 +201,10 @@ void SolarEdgeBattery::readBlockData()
         } else {
             qCWarning(dcSunSpec()) << "SolarEdgeBattery: Read error: " << m_connection->modbusTcpClient()->errorString();
             delete reply; // broadcast replies return immediately
+            if (!m_initFinishedSuccess) {
+                m_timer.stop();
+                emit initFinished(false);
+            }
             return;
         }
     } else {
