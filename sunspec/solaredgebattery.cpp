@@ -96,7 +96,7 @@ void SolarEdgeBattery::readBlockData()
                 const QModbusDataUnit unit = reply->result();
                 QVector<quint16> values = unit.values();
                 qCDebug(dcSunSpec()) << "SolarEdgeBattery: Received first block data" << m_modbusStartRegister << values.count();
-                qCDebug(dcSunSpec()) << SunSpecDataPoint::registersToString(values);
+                qCDebug(dcSunSpec()) << "SolarEdgeBattery:" << SunSpecDataPoint::registersToString(values);
 
                 m_batteryData.manufacturerName = SunSpecDataPoint::convertToString(values.mid(ManufacturerName, 16));
                 m_batteryData.model = SunSpecDataPoint::convertToString(values.mid(Model, 16));
@@ -145,7 +145,7 @@ void SolarEdgeBattery::readBlockData()
                             QVector<quint16> values = unit.values();
 
                             qCDebug(dcSunSpec()) << "SolarEdgeBattery: Received second block data" << m_modbusStartRegister + offset << values.count();
-                            qCDebug(dcSunSpec()) << SunSpecDataPoint::registersToString(values);
+                            qCDebug(dcSunSpec()) << "SolarEdgeBattery:" << SunSpecDataPoint::registersToString(values);
                             QVector<quint16> valueRegisters;
 
                             valueRegisters = values.mid(BatteryAverageTemperature - offset, 2);
