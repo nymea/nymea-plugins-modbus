@@ -25,12 +25,54 @@
                     "type": "uint16",
                     "registerType": "holdingRegister",
                     "readSchedule": "update",
+                    "description": "Maximum charging current",
+                    "unit": "A",
+                    "defaultValue": 32,
+                    "access": "R"
+                },
+                {
+                    "id": "maxChargingCurrentCableE3",
+                    "address": 128,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
                     "description": "Maximum charging current of connected cable",
                     "unit": "A",
                     "defaultValue": 32,
                     "access": "R"
                 }
             ]
+        },
+        {
+            "id": "durations",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "chargingDuration",
+                    "address": 151,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Charging duration",
+                    "unit": "ms",
+                    "defaultValue": 0,
+                    "access": "R"
+                },
+                {
+                    "id": "pluggedInDuration",
+                    "address": 153,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Plugged in duration",
+                    "unit": "ms",
+                    "defaultValue": 0,
+                    "access": "R"
+                }
+            ]   
         }
     ],
     "registers": [
@@ -52,7 +94,7 @@
             "type": "uint16",
             "registerType": "holdingRegister",
             "readSchedule": "update",
-            "description": "Allowed charging current",
+            "description": "Charging current setpoint",
             "unit": "A",
             "defaultValue": 6,
             "access": "RW"
@@ -64,32 +106,8 @@
             "type": "uint16",
             "registerType": "holdingRegister",
             "readSchedule": "update",
-            "description": "Maximum charging current",
+            "description": "Status bits",
             "defaultValue": 0,
-            "access": "R"
-        },
-        {
-            "id": "chargingDuration",
-            "address": 151,
-            "size": 2,
-            "type": "uint32",
-            "registerType": "holdingRegister",
-            "readSchedule": "update",
-            "description": "Charging duration",
-            "unit": "ms",
-            "defaultValue": 6,
-            "access": "R"
-        },
-        {
-            "id": "pluggedInDuration",
-            "address": 153,
-            "size": 2,
-            "type": "uint32",
-            "registerType": "holdingRegister",
-            "readSchedule": "update",
-            "description": "Plugged in duration",
-            "unit": "ms",
-            "defaultValue": 6,
             "access": "R"
         },
         {
@@ -100,6 +118,7 @@
             "registerType": "holdingRegister",
             "readSchedule": "update",
             "description": "U1 voltage",
+            "staticScaleFactor": -2,
             "unit": "V",
             "defaultValue": 32,
             "access": "R"
@@ -112,6 +131,7 @@
             "registerType": "holdingRegister",
             "readSchedule": "update",
             "description": "Voltage of the power supply grid",
+            "staticScaleFactor": -2,
             "unit": "V",
             "defaultValue": 0,
             "access": "R"
@@ -125,7 +145,7 @@
             "readSchedule": "update",
             "description": "Minimum charging current",
             "unit": "A",
-            "defaultValue": 6,
+            "defaultValue": 13,
             "access": "R"
         }
     ]
