@@ -37,24 +37,7 @@ IntegrationPluginSchrack::IntegrationPluginSchrack()
 
 void IntegrationPluginSchrack::init()
 {
-//    connect(hardwareManager()->modbusRtuResource(), &ModbusRtuHardwareResource::modbusRtuMasterRemoved, this, [=] (const QUuid &modbusUuid){
-//        qCDebug(dcEnergyMeters()) << "Modbus RTU master has been removed" << modbusUuid.toString();
 
-//        foreach (Thing *thing, myThings()) {
-//            if (m_modbusUuidParamTypeIds.contains(thing->thingClassId())) {
-//                if (thing->paramValue(m_modbusUuidParamTypeIds.value(thing->thingClassId())) == modbusUuid) {
-//                    qCWarning(dcEnergyMeters()) << "Modbus RTU hardware resource removed for" << thing << ". The thing will not be functional any more until a new resource has been configured for it.";
-//                    thing->setStateValue(m_connectionStateTypeIds[thing->thingClassId()], false);
-
-//                    if (thing->thingClassId() == sdm630ThingClassId) {
-//                        delete m_sdmConnections.take(thing);
-//                    } else if (thing->thingClassId() == pro380ThingClassId) {
-//                        delete m_ineproConnections.take(thing);
-//                    }
-//                }
-//            }
-//        }
-//    });
 }
 
 void IntegrationPluginSchrack::discoverThings(ThingDiscoveryInfo *info)
@@ -118,6 +101,8 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
         } else {
             qCWarning(dcSchrack()) << "Modbus RTU resource disconnected" << thing << cionConnection->modbusRtuMaster()->serialPort();
         }
+
+        thing->setStateValue(cionConnectedStateTypeId, connected);
     });
 
     connect(cionConnection, &CionModbusRtuConnection::chargingEnabledChanged, thing, [=](quint16 charging){
@@ -141,7 +126,6 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
     connect(cionConnection, &CionModbusRtuConnection::currentChargingCurrentE3Changed, thing, [=](quint16 currentChargingCurrentE3){
         qCDebug(dcSchrack()) << "Current charging current E3 current changed:" << currentChargingCurrentE3;
         thing->setStateValue(cionMaxChargingCurrentStateTypeId, currentChargingCurrentE3);
-        thing->setStateValue(cionConnectedStateTypeId, true);
         finishAction(cionMaxChargingCurrentStateTypeId);
     });
 
@@ -151,42 +135,37 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
         qCDebug(dcSchrack()) << "Maximum charging current E3 current changed:" << maxChargingCurrentE3;
         if (maxChargingCurrentE3 != 0) {
             thing->setStateMaxValue(cionMaxChargingCurrentStateTypeId, maxChargingCurrentE3);
-            thing->setStateValue(cionConnectedStateTypeId, true);
         }
     });
 
     connect(cionConnection, &CionModbusRtuConnection::statusBitsChanged, thing, [=](quint16 statusBits){
         qCDebug(dcSchrack()) << "Status bits changed:" << statusBits;
-        thing->setStateValue(cionConnectedStateTypeId, true);
     });
 
     connect(cionConnection, &CionModbusRtuConnection::minChargingCurrentChanged, thing, [=](quint16 minChargingCurrent){
         qCDebug(dcSchrack()) << "Minimum charging current changed:" << minChargingCurrent;
         thing->setStateMinValue(cionMaxChargingCurrentStateTypeId, minChargingCurrent);
-        thing->setStateValue(cionConnectedStateTypeId, true);
     });
 
-    connect(cionConnection, &CionModbusRtuConnection::gridVoltageChanged, thing, [=](quint16 gridVoltage){
-        qCDebug(dcSchrack()) << "Grid voltage changed:" << 1.0 * gridVoltage / 100;
-        thing->setStateValue(cionConnectedStateTypeId, true);
+    connect(cionConnection, &CionModbusRtuConnection::gridVoltageChanged, thing, [=](float gridVoltage){
+        qCDebug(dcSchrack()) << "Grid voltage changed:" << gridVoltage;
 //        updateCurrentPower(thing);
     });
-    connect(cionConnection, &CionModbusRtuConnection::u1VoltageChanged, thing, [=](quint16 gridVoltage){
-        qCDebug(dcSchrack()) << "U1 voltage changed:" << 1.0 * gridVoltage / 100;
-        thing->setStateValue(cionConnectedStateTypeId, true);
+
+    connect(cionConnection, &CionModbusRtuConnection::u1VoltageChanged, thing, [=](float u1Voltage){
+        qCDebug(dcSchrack()) << "U1 voltage changed:" << u1Voltage;
         updateCurrentPower(thing);
     });
+
     connect(cionConnection, &CionModbusRtuConnection::pluggedInDurationChanged, thing, [=](quint32 pluggedInDuration){
         qCDebug(dcSchrack()) << "Plugged in duration changed:" << pluggedInDuration;
         thing->setStateValue(cionPluggedInStateTypeId, pluggedInDuration > 0);
-        thing->setStateValue(cionConnectedStateTypeId, true);
     });
+
     connect(cionConnection, &CionModbusRtuConnection::chargingDurationChanged, thing, [=](quint32 chargingDuration){
         qCDebug(dcSchrack()) << "Charging duration changed:" << chargingDuration;
         thing->setStateValue(cionChargingStateTypeId, chargingDuration > 0);
-        thing->setStateValue(cionConnectedStateTypeId, true);
     });
-
 
     cionConnection->update();
 

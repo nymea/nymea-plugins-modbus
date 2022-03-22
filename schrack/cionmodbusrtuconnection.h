@@ -46,6 +46,7 @@ public:
         RegisterStatusBits = 121,
         RegisterCurrentChargingCurrentE3 = 126,
         RegisterMaxChargingCurrentE3 = 127,
+        RegisterMaxChargingCurrentCableE3 = 128,
         RegisterChargingDuration = 151,
         RegisterPluggedInDuration = 153,
         RegisterU1Voltage = 167,
@@ -64,24 +65,18 @@ public:
     quint16 chargingEnabled() const;
     ModbusRtuReply *setChargingEnabled(quint16 chargingEnabled);
 
-    /* Allowed charging current [A] - Address: 101, Size: 1 */
+    /* Charging current setpoint [A] - Address: 101, Size: 1 */
     quint16 chargingCurrentSetpoint() const;
     ModbusRtuReply *setChargingCurrentSetpoint(quint16 chargingCurrentSetpoint);
 
-    /* Maximum charging current - Address: 121, Size: 1 */
+    /* Status bits - Address: 121, Size: 1 */
     quint16 statusBits() const;
 
-    /* Charging duration [ms] - Address: 151, Size: 2 */
-    quint32 chargingDuration() const;
-
-    /* Plugged in duration [ms] - Address: 153, Size: 2 */
-    quint32 pluggedInDuration() const;
-
     /* U1 voltage [V] - Address: 167, Size: 1 */
-    quint16 u1Voltage() const;
+    float u1Voltage() const;
 
     /* Voltage of the power supply grid [V] - Address: 302, Size: 1 */
-    quint16 gridVoltage() const;
+    float gridVoltage() const;
 
     /* Minimum charging current [A] - Address: 507, Size: 1 */
     quint16 minChargingCurrent() const;
@@ -89,20 +84,33 @@ public:
     /* Current charging Ampere [A] - Address: 126, Size: 1 */
     quint16 currentChargingCurrentE3() const;
 
-    /* Maximum charging current of connected cable [A] - Address: 127, Size: 1 */
+    /* Maximum charging current [A] - Address: 127, Size: 1 */
     quint16 maxChargingCurrentE3() const;
 
-    /* Read block from start addess 126 with size of 2 registers containing following 2 properties:
+    /* Maximum charging current of connected cable [A] - Address: 128, Size: 1 */
+    quint16 maxChargingCurrentCableE3() const;
+
+    /* Read block from start addess 126 with size of 3 registers containing following 3 properties:
       - Current charging Ampere [A] - Address: 126, Size: 1
-      - Maximum charging current of connected cable [A] - Address: 127, Size: 1
+      - Maximum charging current [A] - Address: 127, Size: 1
+      - Maximum charging current of connected cable [A] - Address: 128, Size: 1
     */ 
     void updateE3Block();
+    /* Charging duration [ms] - Address: 151, Size: 2 */
+    quint32 chargingDuration() const;
+
+    /* Plugged in duration [ms] - Address: 153, Size: 2 */
+    quint32 pluggedInDuration() const;
+
+    /* Read block from start addess 151 with size of 4 registers containing following 2 properties:
+      - Charging duration [ms] - Address: 151, Size: 2
+      - Plugged in duration [ms] - Address: 153, Size: 2
+    */ 
+    void updateDurationsBlock();
 
     void updateChargingEnabled();
     void updateChargingCurrentSetpoint();
     void updateStatusBits();
-    void updateChargingDuration();
-    void updatePluggedInDuration();
     void updateU1Voltage();
     void updateGridVoltage();
     void updateMinChargingCurrent();
@@ -116,20 +124,19 @@ signals:
     void chargingEnabledChanged(quint16 chargingEnabled);
     void chargingCurrentSetpointChanged(quint16 chargingCurrentSetpoint);
     void statusBitsChanged(quint16 statusBits);
-    void chargingDurationChanged(quint32 chargingDuration);
-    void pluggedInDurationChanged(quint32 pluggedInDuration);
-    void u1VoltageChanged(quint16 u1Voltage);
-    void gridVoltageChanged(quint16 gridVoltage);
+    void u1VoltageChanged(float u1Voltage);
+    void gridVoltageChanged(float gridVoltage);
     void minChargingCurrentChanged(quint16 minChargingCurrent);
     void currentChargingCurrentE3Changed(quint16 currentChargingCurrentE3);
     void maxChargingCurrentE3Changed(quint16 maxChargingCurrentE3);
+    void maxChargingCurrentCableE3Changed(quint16 maxChargingCurrentCableE3);
+    void chargingDurationChanged(quint32 chargingDuration);
+    void pluggedInDurationChanged(quint32 pluggedInDuration);
 
 protected:
     ModbusRtuReply *readChargingEnabled();
     ModbusRtuReply *readChargingCurrentSetpoint();
     ModbusRtuReply *readStatusBits();
-    ModbusRtuReply *readChargingDuration();
-    ModbusRtuReply *readPluggedInDuration();
     ModbusRtuReply *readU1Voltage();
     ModbusRtuReply *readGridVoltage();
     ModbusRtuReply *readMinChargingCurrent();
@@ -137,13 +144,14 @@ protected:
     quint16 m_chargingEnabled = 0;
     quint16 m_chargingCurrentSetpoint = 6;
     quint16 m_statusBits = 0;
-    quint32 m_chargingDuration = 6;
-    quint32 m_pluggedInDuration = 6;
-    quint16 m_u1Voltage = 32;
-    quint16 m_gridVoltage = 0;
-    quint16 m_minChargingCurrent = 6;
+    float m_u1Voltage = 32;
+    float m_gridVoltage = 0;
+    quint16 m_minChargingCurrent = 13;
     quint16 m_currentChargingCurrentE3 = 6;
     quint16 m_maxChargingCurrentE3 = 32;
+    quint16 m_maxChargingCurrentCableE3 = 32;
+    quint32 m_chargingDuration = 0;
+    quint32 m_pluggedInDuration = 0;
 
 private:
     ModbusRtuMaster *m_modbusRtuMaster = nullptr;

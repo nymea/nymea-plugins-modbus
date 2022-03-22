@@ -69,7 +69,7 @@ quint16 CionModbusRtuConnection::chargingCurrentSetpoint() const
 ModbusRtuReply *CionModbusRtuConnection::setChargingCurrentSetpoint(quint16 chargingCurrentSetpoint)
 {
     QVector<quint16> values = ModbusDataUtils::convertFromUInt16(chargingCurrentSetpoint);
-    qCDebug(dcCionModbusRtuConnection()) << "--> Write \"Allowed charging current\" register:" << 101 << "size:" << 1 << values;
+    qCDebug(dcCionModbusRtuConnection()) << "--> Write \"Charging current setpoint\" register:" << 101 << "size:" << 1 << values;
     return m_modbusRtuMaster->writeHoldingRegisters(m_slaveId, 101, values);
 }
 
@@ -78,22 +78,12 @@ quint16 CionModbusRtuConnection::statusBits() const
     return m_statusBits;
 }
 
-quint32 CionModbusRtuConnection::chargingDuration() const
-{
-    return m_chargingDuration;
-}
-
-quint32 CionModbusRtuConnection::pluggedInDuration() const
-{
-    return m_pluggedInDuration;
-}
-
-quint16 CionModbusRtuConnection::u1Voltage() const
+float CionModbusRtuConnection::u1Voltage() const
 {
     return m_u1Voltage;
 }
 
-quint16 CionModbusRtuConnection::gridVoltage() const
+float CionModbusRtuConnection::gridVoltage() const
 {
     return m_gridVoltage;
 }
@@ -113,6 +103,21 @@ quint16 CionModbusRtuConnection::maxChargingCurrentE3() const
     return m_maxChargingCurrentE3;
 }
 
+quint16 CionModbusRtuConnection::maxChargingCurrentCableE3() const
+{
+    return m_maxChargingCurrentCableE3;
+}
+
+quint32 CionModbusRtuConnection::chargingDuration() const
+{
+    return m_chargingDuration;
+}
+
+quint32 CionModbusRtuConnection::pluggedInDuration() const
+{
+    return m_pluggedInDuration;
+}
+
 void CionModbusRtuConnection::initialize()
 {
     // No init registers defined. Nothing to be done and we are finished.
@@ -124,12 +129,11 @@ void CionModbusRtuConnection::update()
     updateChargingEnabled();
     updateChargingCurrentSetpoint();
     updateStatusBits();
-    updateChargingDuration();
-    updatePluggedInDuration();
     updateU1Voltage();
     updateGridVoltage();
     updateMinChargingCurrent();
     updateE3Block();
+    updateDurationsBlock();
 }
 
 void CionModbusRtuConnection::updateChargingEnabled()
@@ -163,15 +167,15 @@ void CionModbusRtuConnection::updateChargingEnabled()
 
 void CionModbusRtuConnection::updateChargingCurrentSetpoint()
 {
-    // Update registers from Allowed charging current
-    qCDebug(dcCionModbusRtuConnection()) << "--> Read \"Allowed charging current\" register:" << 101 << "size:" << 1;
+    // Update registers from Charging current setpoint
+    qCDebug(dcCionModbusRtuConnection()) << "--> Read \"Charging current setpoint\" register:" << 101 << "size:" << 1;
     ModbusRtuReply *reply = readChargingCurrentSetpoint();
     if (reply) {
         if (!reply->isFinished()) {
             connect(reply, &ModbusRtuReply::finished, this, [this, reply](){
                 if (reply->error() == ModbusRtuReply::NoError) {
                     QVector<quint16> values = reply->result();
-                    qCDebug(dcCionModbusRtuConnection()) << "<-- Response from \"Allowed charging current\" register" << 101 << "size:" << 1 << values;
+                    qCDebug(dcCionModbusRtuConnection()) << "<-- Response from \"Charging current setpoint\" register" << 101 << "size:" << 1 << values;
                     quint16 receivedChargingCurrentSetpoint = ModbusDataUtils::convertToUInt16(values);
                     if (m_chargingCurrentSetpoint != receivedChargingCurrentSetpoint) {
                         m_chargingCurrentSetpoint = receivedChargingCurrentSetpoint;
@@ -181,26 +185,26 @@ void CionModbusRtuConnection::updateChargingCurrentSetpoint()
             });
 
             connect(reply, &ModbusRtuReply::errorOccurred, this, [reply] (ModbusRtuReply::Error error){
-                qCWarning(dcCionModbusRtuConnection()) << "ModbusRtu reply error occurred while updating \"Allowed charging current\" registers" << error << reply->errorString();
+                qCWarning(dcCionModbusRtuConnection()) << "ModbusRtu reply error occurred while updating \"Charging current setpoint\" registers" << error << reply->errorString();
                 emit reply->finished();
             });
         }
     } else {
-        qCWarning(dcCionModbusRtuConnection()) << "Error occurred while reading \"Allowed charging current\" registers";
+        qCWarning(dcCionModbusRtuConnection()) << "Error occurred while reading \"Charging current setpoint\" registers";
     }
 }
 
 void CionModbusRtuConnection::updateStatusBits()
 {
-    // Update registers from Maximum charging current
-    qCDebug(dcCionModbusRtuConnection()) << "--> Read \"Maximum charging current\" register:" << 121 << "size:" << 1;
+    // Update registers from Status bits
+    qCDebug(dcCionModbusRtuConnection()) << "--> Read \"Status bits\" register:" << 121 << "size:" << 1;
     ModbusRtuReply *reply = readStatusBits();
     if (reply) {
         if (!reply->isFinished()) {
             connect(reply, &ModbusRtuReply::finished, this, [this, reply](){
                 if (reply->error() == ModbusRtuReply::NoError) {
                     QVector<quint16> values = reply->result();
-                    qCDebug(dcCionModbusRtuConnection()) << "<-- Response from \"Maximum charging current\" register" << 121 << "size:" << 1 << values;
+                    qCDebug(dcCionModbusRtuConnection()) << "<-- Response from \"Status bits\" register" << 121 << "size:" << 1 << values;
                     quint16 receivedStatusBits = ModbusDataUtils::convertToUInt16(values);
                     if (m_statusBits != receivedStatusBits) {
                         m_statusBits = receivedStatusBits;
@@ -210,70 +214,12 @@ void CionModbusRtuConnection::updateStatusBits()
             });
 
             connect(reply, &ModbusRtuReply::errorOccurred, this, [reply] (ModbusRtuReply::Error error){
-                qCWarning(dcCionModbusRtuConnection()) << "ModbusRtu reply error occurred while updating \"Maximum charging current\" registers" << error << reply->errorString();
+                qCWarning(dcCionModbusRtuConnection()) << "ModbusRtu reply error occurred while updating \"Status bits\" registers" << error << reply->errorString();
                 emit reply->finished();
             });
         }
     } else {
-        qCWarning(dcCionModbusRtuConnection()) << "Error occurred while reading \"Maximum charging current\" registers";
-    }
-}
-
-void CionModbusRtuConnection::updateChargingDuration()
-{
-    // Update registers from Charging duration
-    qCDebug(dcCionModbusRtuConnection()) << "--> Read \"Charging duration\" register:" << 151 << "size:" << 2;
-    ModbusRtuReply *reply = readChargingDuration();
-    if (reply) {
-        if (!reply->isFinished()) {
-            connect(reply, &ModbusRtuReply::finished, this, [this, reply](){
-                if (reply->error() == ModbusRtuReply::NoError) {
-                    QVector<quint16> values = reply->result();
-                    qCDebug(dcCionModbusRtuConnection()) << "<-- Response from \"Charging duration\" register" << 151 << "size:" << 2 << values;
-                    quint32 receivedChargingDuration = ModbusDataUtils::convertToUInt32(values, ModbusDataUtils::ByteOrderBigEndian);
-                    if (m_chargingDuration != receivedChargingDuration) {
-                        m_chargingDuration = receivedChargingDuration;
-                        emit chargingDurationChanged(m_chargingDuration);
-                    }
-                }
-            });
-
-            connect(reply, &ModbusRtuReply::errorOccurred, this, [reply] (ModbusRtuReply::Error error){
-                qCWarning(dcCionModbusRtuConnection()) << "ModbusRtu reply error occurred while updating \"Charging duration\" registers" << error << reply->errorString();
-                emit reply->finished();
-            });
-        }
-    } else {
-        qCWarning(dcCionModbusRtuConnection()) << "Error occurred while reading \"Charging duration\" registers";
-    }
-}
-
-void CionModbusRtuConnection::updatePluggedInDuration()
-{
-    // Update registers from Plugged in duration
-    qCDebug(dcCionModbusRtuConnection()) << "--> Read \"Plugged in duration\" register:" << 153 << "size:" << 2;
-    ModbusRtuReply *reply = readPluggedInDuration();
-    if (reply) {
-        if (!reply->isFinished()) {
-            connect(reply, &ModbusRtuReply::finished, this, [this, reply](){
-                if (reply->error() == ModbusRtuReply::NoError) {
-                    QVector<quint16> values = reply->result();
-                    qCDebug(dcCionModbusRtuConnection()) << "<-- Response from \"Plugged in duration\" register" << 153 << "size:" << 2 << values;
-                    quint32 receivedPluggedInDuration = ModbusDataUtils::convertToUInt32(values, ModbusDataUtils::ByteOrderBigEndian);
-                    if (m_pluggedInDuration != receivedPluggedInDuration) {
-                        m_pluggedInDuration = receivedPluggedInDuration;
-                        emit pluggedInDurationChanged(m_pluggedInDuration);
-                    }
-                }
-            });
-
-            connect(reply, &ModbusRtuReply::errorOccurred, this, [reply] (ModbusRtuReply::Error error){
-                qCWarning(dcCionModbusRtuConnection()) << "ModbusRtu reply error occurred while updating \"Plugged in duration\" registers" << error << reply->errorString();
-                emit reply->finished();
-            });
-        }
-    } else {
-        qCWarning(dcCionModbusRtuConnection()) << "Error occurred while reading \"Plugged in duration\" registers";
+        qCWarning(dcCionModbusRtuConnection()) << "Error occurred while reading \"Status bits\" registers";
     }
 }
 
@@ -288,7 +234,7 @@ void CionModbusRtuConnection::updateU1Voltage()
                 if (reply->error() == ModbusRtuReply::NoError) {
                     QVector<quint16> values = reply->result();
                     qCDebug(dcCionModbusRtuConnection()) << "<-- Response from \"U1 voltage\" register" << 167 << "size:" << 1 << values;
-                    quint16 receivedU1Voltage = ModbusDataUtils::convertToUInt16(values);
+                    float receivedU1Voltage = ModbusDataUtils::convertToUInt16(values) * 1.0 * pow(10, -2);
                     if (m_u1Voltage != receivedU1Voltage) {
                         m_u1Voltage = receivedU1Voltage;
                         emit u1VoltageChanged(m_u1Voltage);
@@ -317,7 +263,7 @@ void CionModbusRtuConnection::updateGridVoltage()
                 if (reply->error() == ModbusRtuReply::NoError) {
                     QVector<quint16> values = reply->result();
                     qCDebug(dcCionModbusRtuConnection()) << "<-- Response from \"Voltage of the power supply grid\" register" << 302 << "size:" << 1 << values;
-                    quint16 receivedGridVoltage = ModbusDataUtils::convertToUInt16(values);
+                    float receivedGridVoltage = ModbusDataUtils::convertToUInt16(values) * 1.0 * pow(10, -2);
                     if (m_gridVoltage != receivedGridVoltage) {
                         m_gridVoltage = receivedGridVoltage;
                         emit gridVoltageChanged(m_gridVoltage);
@@ -367,15 +313,15 @@ void CionModbusRtuConnection::updateMinChargingCurrent()
 void CionModbusRtuConnection::updateE3Block()
 {
     // Update register block "e3"
-    qCDebug(dcCionModbusRtuConnection()) << "--> Read block \"e3\" registers from:" << 126 << "size:" << 2;
-    ModbusRtuReply *reply = m_modbusRtuMaster->readHoldingRegister(m_slaveId, 126, 2);
+    qCDebug(dcCionModbusRtuConnection()) << "--> Read block \"e3\" registers from:" << 126 << "size:" << 3;
+    ModbusRtuReply *reply = m_modbusRtuMaster->readHoldingRegister(m_slaveId, 126, 3);
     if (reply) {
         if (!reply->isFinished()) {
             connect(reply, &ModbusRtuReply::finished, this, [this, reply](){
                 if (reply->error() == ModbusRtuReply::NoError) {
                     QVector<quint16> blockValues = reply->result();
                     QVector<quint16> values;
-                    qCDebug(dcCionModbusRtuConnection()) << "<-- Response from reading block \"e3\" register" << 126 << "size:" << 2 << blockValues;
+                    qCDebug(dcCionModbusRtuConnection()) << "<-- Response from reading block \"e3\" register" << 126 << "size:" << 3 << blockValues;
                     values = blockValues.mid(0, 1);
                     quint16 receivedCurrentChargingCurrentE3 = ModbusDataUtils::convertToUInt16(values);
                     if (m_currentChargingCurrentE3 != receivedCurrentChargingCurrentE3) {
@@ -390,6 +336,13 @@ void CionModbusRtuConnection::updateE3Block()
                         emit maxChargingCurrentE3Changed(m_maxChargingCurrentE3);
                     }
 
+                    values = blockValues.mid(2, 1);
+                    quint16 receivedMaxChargingCurrentCableE3 = ModbusDataUtils::convertToUInt16(values);
+                    if (m_maxChargingCurrentCableE3 != receivedMaxChargingCurrentCableE3) {
+                        m_maxChargingCurrentCableE3 = receivedMaxChargingCurrentCableE3;
+                        emit maxChargingCurrentCableE3Changed(m_maxChargingCurrentCableE3);
+                    }
+
                 }
             });
 
@@ -400,6 +353,45 @@ void CionModbusRtuConnection::updateE3Block()
         }
     } else {
         qCWarning(dcCionModbusRtuConnection()) << "Error occurred while reading block \"e3\" registers";
+    }
+}
+
+void CionModbusRtuConnection::updateDurationsBlock()
+{
+    // Update register block "durations"
+    qCDebug(dcCionModbusRtuConnection()) << "--> Read block \"durations\" registers from:" << 151 << "size:" << 4;
+    ModbusRtuReply *reply = m_modbusRtuMaster->readHoldingRegister(m_slaveId, 151, 4);
+    if (reply) {
+        if (!reply->isFinished()) {
+            connect(reply, &ModbusRtuReply::finished, this, [this, reply](){
+                if (reply->error() == ModbusRtuReply::NoError) {
+                    QVector<quint16> blockValues = reply->result();
+                    QVector<quint16> values;
+                    qCDebug(dcCionModbusRtuConnection()) << "<-- Response from reading block \"durations\" register" << 151 << "size:" << 4 << blockValues;
+                    values = blockValues.mid(0, 2);
+                    quint32 receivedChargingDuration = ModbusDataUtils::convertToUInt32(values, ModbusDataUtils::ByteOrderBigEndian);
+                    if (m_chargingDuration != receivedChargingDuration) {
+                        m_chargingDuration = receivedChargingDuration;
+                        emit chargingDurationChanged(m_chargingDuration);
+                    }
+
+                    values = blockValues.mid(2, 2);
+                    quint32 receivedPluggedInDuration = ModbusDataUtils::convertToUInt32(values, ModbusDataUtils::ByteOrderBigEndian);
+                    if (m_pluggedInDuration != receivedPluggedInDuration) {
+                        m_pluggedInDuration = receivedPluggedInDuration;
+                        emit pluggedInDurationChanged(m_pluggedInDuration);
+                    }
+
+                }
+            });
+
+            connect(reply, &ModbusRtuReply::errorOccurred, this, [reply] (ModbusRtuReply::Error error){
+                qCWarning(dcCionModbusRtuConnection()) << "ModbusRtu reply error occurred while updating block \"durations\" registers" << error << reply->errorString();
+                emit reply->finished();
+            });
+        }
+    } else {
+        qCWarning(dcCionModbusRtuConnection()) << "Error occurred while reading block \"durations\" registers";
     }
 }
 
@@ -416,16 +408,6 @@ ModbusRtuReply *CionModbusRtuConnection::readChargingCurrentSetpoint()
 ModbusRtuReply *CionModbusRtuConnection::readStatusBits()
 {
     return m_modbusRtuMaster->readHoldingRegister(m_slaveId, 121, 1);
-}
-
-ModbusRtuReply *CionModbusRtuConnection::readChargingDuration()
-{
-    return m_modbusRtuMaster->readHoldingRegister(m_slaveId, 151, 2);
-}
-
-ModbusRtuReply *CionModbusRtuConnection::readPluggedInDuration()
-{
-    return m_modbusRtuMaster->readHoldingRegister(m_slaveId, 153, 2);
 }
 
 ModbusRtuReply *CionModbusRtuConnection::readU1Voltage()
@@ -455,15 +437,16 @@ QDebug operator<<(QDebug debug, CionModbusRtuConnection *cionModbusRtuConnection
 {
     debug.nospace().noquote() << "CionModbusRtuConnection(" << cionModbusRtuConnection->modbusRtuMaster()->modbusUuid().toString() << ", " << cionModbusRtuConnection->modbusRtuMaster()->serialPort() << ", slave ID:" << cionModbusRtuConnection->slaveId() << ")" << "\n";
     debug.nospace().noquote() << "    - Charging enabled:" << cionModbusRtuConnection->chargingEnabled() << "\n";
-    debug.nospace().noquote() << "    - Allowed charging current:" << cionModbusRtuConnection->chargingCurrentSetpoint() << " [A]" << "\n";
-    debug.nospace().noquote() << "    - Maximum charging current:" << cionModbusRtuConnection->statusBits() << "\n";
-    debug.nospace().noquote() << "    - Charging duration:" << cionModbusRtuConnection->chargingDuration() << " [ms]" << "\n";
-    debug.nospace().noquote() << "    - Plugged in duration:" << cionModbusRtuConnection->pluggedInDuration() << " [ms]" << "\n";
+    debug.nospace().noquote() << "    - Charging current setpoint:" << cionModbusRtuConnection->chargingCurrentSetpoint() << " [A]" << "\n";
+    debug.nospace().noquote() << "    - Status bits:" << cionModbusRtuConnection->statusBits() << "\n";
     debug.nospace().noquote() << "    - U1 voltage:" << cionModbusRtuConnection->u1Voltage() << " [V]" << "\n";
     debug.nospace().noquote() << "    - Voltage of the power supply grid:" << cionModbusRtuConnection->gridVoltage() << " [V]" << "\n";
     debug.nospace().noquote() << "    - Minimum charging current:" << cionModbusRtuConnection->minChargingCurrent() << " [A]" << "\n";
     debug.nospace().noquote() << "    - Current charging Ampere:" << cionModbusRtuConnection->currentChargingCurrentE3() << " [A]" << "\n";
-    debug.nospace().noquote() << "    - Maximum charging current of connected cable:" << cionModbusRtuConnection->maxChargingCurrentE3() << " [A]" << "\n";
+    debug.nospace().noquote() << "    - Maximum charging current:" << cionModbusRtuConnection->maxChargingCurrentE3() << " [A]" << "\n";
+    debug.nospace().noquote() << "    - Maximum charging current of connected cable:" << cionModbusRtuConnection->maxChargingCurrentCableE3() << " [A]" << "\n";
+    debug.nospace().noquote() << "    - Charging duration:" << cionModbusRtuConnection->chargingDuration() << " [ms]" << "\n";
+    debug.nospace().noquote() << "    - Plugged in duration:" << cionModbusRtuConnection->pluggedInDuration() << " [ms]" << "\n";
     return debug.quote().space();
 }
 
