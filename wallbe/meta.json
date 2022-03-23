@@ -1,14 +1,14 @@
 {
-    "title": "Wall-Be",
-    "tagline": "Integrate Wall-Be EV-Charger into nymea.",
-    "icon": "wallbe.png",
-    "stability": "community",
+    "title": "Wallbe",
+    "tagline": "Control and monitor the Wallbe smart wallbox for electric vehicles.",
+    "icon": "wallbe-gmbh-vector-logo.svg",
+    "stability": "consumer",
     "offline": true,
     "technologies": [
         "network",
         "modbus"
     ],
     "categories": [
-        "tool"
+        "energy"
     ]
 }
