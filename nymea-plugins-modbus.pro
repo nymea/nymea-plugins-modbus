@@ -7,7 +7,8 @@ SUBDIRS += libnymea-sunspec
 PLUGIN_DIRS = \
     alphainnotec            \
     drexelundweiss          \
-    energymeters            \ 
+    energymeters            \
+    huawei                  \
     modbuscommander         \
     mtec                    \
     mypv                    \

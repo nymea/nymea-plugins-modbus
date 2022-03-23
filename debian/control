@@ -1,7 +1,7 @@
 Source: nymea-plugins-modbus
 Section: utils
 Priority: options
-Maintainer: Bernhard Trinnes <bernhard.trinnes@nymea.io>
+Maintainer: nymea GmbH <developer@nymea.io>
 Build-depends: debhelper (>= 9.0.0),
                libnymea-dev (>= 0.17),
                libnymea-gpio-dev,
@@ -20,13 +20,7 @@ Section: libs
 Depends: ${shlibs:Depends},
          ${misc:Depends}
 Description: nymea.io sunspec library
- The nymea daemon is a plugin based IoT (Internet of Things) server. The
- server works like a translator for devices, things and services and
- allows them to interact.
- With the powerful rule engine you are able to connect any device available
- in the system and create individual scenes and behaviors for your environment.
- .
- This package will install the nymea.io sunspec library
+ This package contains the nymea sunspec library.
 
 Package: libnymea-sunspec-dev
 Section: libdevel
@@ -38,28 +32,15 @@ Depends: ${shlibs:Depends},
          pkg-config,
          qtbase5-dev,
 Description: The main libraries and header files for developing with nymea sunspec.
- The nymea daemon is a plugin based IoT (Internet of Things) server. The
- server works like a translator for devices, things and services and
- allows them to interact.
- With the powerful rule engine you are able to connect any device available
- in the system and create individual scenes and behaviors for your environment.
- .
- This package will install the development files for nymea sunspec.
+ This package contains the nymea sunspec library - development files.
 
 Package: nymea-plugin-alphainnotec
 Architecture: any
 Section: libs
 Depends: ${shlibs:Depends},
          ${misc:Depends},
-         nymea-plugins-modbus-translations
-Description: nymea.io plugin for alpha innotec heat pumps
- The nymea daemon is a plugin based IoT (Internet of Things) server. The
- server works like a translator for devices, things and services and
- allows them to interact.
- With the powerful rule engine you are able to connect any device available
- in the system and create individual scenes and behaviors for your environment.
- .
- This package will install the nymea.io plugin for alpha innotec heat pumps
+Description: nymea integration plugin for alpha innotec heat pumps
+ This package contains the nymea integration plugin for alpha innotec head pumps.
 
 
 Package: nymea-plugin-drexelundweiss
@@ -67,15 +48,8 @@ Architecture: any
 Section: libs
 Depends: ${shlibs:Depends},
          ${misc:Depends},
-         nymea-plugins-modbus-translations
-Description: nymea.io plugin for Drexel & Weiss heat pumps
- The nymea daemon is a plugin based IoT (Internet of Things) server. The
- server works like a translator for devices, things and services and
- allows them to interact.
- With the powerful rule engine you are able to connect any device available
- in the system and create individual scenes and behaviors for your environment.
- .
- This package will install the nymea.io plugin for Drexel & Weiss heat pumps
+Description: nymea integration plugin for Drexel & Weiss heat pumps
+ This package contains the nymea integration plugin for Drexel & Weiss heat pumps.
 
 
 Package: nymea-plugin-idm
@@ -83,15 +57,8 @@ Architecture: any
 Section: libs
 Depends: ${shlibs:Depends},
          ${misc:Depends},
-         nymea-plugins-modbus-translations,
-Description: nymea.io plugin for iDM heat pumps
- The nymea daemon is a plugin based IoT (Internet of Things) server. The
- server works like a translator for devices, things and services and
- allows them to interact.
- With the powerful rule engine you are able to connect any device available
- in the system and create individual scenes and behaviors for your environment.
- .
- This package will install the nymea.io plugin for iDM heat pumps
+Description: nymea integration plugin for iDM heat pumps
+ This package contains the nymea integration plugin for iDM heat pumps.
 
 
 Package: nymea-plugin-energymeters
@@ -100,15 +67,19 @@ Multi-Arch: same
 Section: libs
 Depends: ${shlibs:Depends},
          ${misc:Depends},
-         nymea-plugins-modbus-translations
-Description: nymea.io plugin for Modbus based energy meters
- The nymea daemon is a plugin based IoT (Internet of Things) server. The
- server works like a translator for devices, things and services and
- allows them to interact.
- With the powerful rule engine you are able to connect any device available
- in the system and create individual scenes and behaviors for your environment.
- .
- This package will install the nymea.io plugin for energy meters
+Description: nymea integration plugin for Modbus based energy meters
+ This package contains a collection of energy meters.
+
+
+Package: nymea-plugin-huawei      
+Architecture: any
+Multi-Arch: same 
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends}   
+Description: nymea integration plugin for Huawei FusionSolar energy devices
+ This package contains the nymea integration plugin for Huawei FusionSolar devices
+ based on Modbus TCP.
 
 
 Package: nymea-plugin-modbuscommander
@@ -116,15 +87,9 @@ Architecture: any
 Section: libs
 Depends: ${shlibs:Depends},
          ${misc:Depends},
-         nymea-plugins-modbus-translations
-Description: nymea.io plugin to send and receive generic modbus commands
- The nymea daemon is a plugin based IoT (Internet of Things) server. The
- server works like a translator for devices, things and services and
- allows them to interact.
- With the powerful rule engine you are able to connect any device available
- in the system and create individual scenes and behaviors for your environment.
- .
- This package will install the nymea.io modbus commander plug-in
+Description: nymea integration plugin to send and receive generic modbus commands
+ This package contains a nymea integration plugin which allows to send and receive
+ generic Modbus commands to/from a Modbus device.
  
 
 Package: nymea-plugin-mypv
@@ -132,15 +97,8 @@ Architecture: any
 Section: libs
 Depends: ${shlibs:Depends},
          ${misc:Depends},
-         nymea-plugins-modbus-translations
-Description: nymea.io plugin for my-pv heating rods
- The nymea daemon is a plugin based IoT (Internet of Things) server. The
- server works like a translator for devices, things and services and
- allows them to interact.
- With the powerful rule engine you are able to connect any device available
- in the system and create individual scenes and behaviors for your environment.
- .
- This package will install the nymea.io plugin for my-pv
+Description: nymea integration plugin for my-pv heating rods
+ This package contains the nymea integration plugin for my-pv solar inverters.
 
 
 Package: nymea-plugin-mtec
@@ -148,30 +106,16 @@ Architecture: any
 Section: libs
 Depends: ${shlibs:Depends},
          ${misc:Depends},
-         nymea-plugins-modbus-translations
-Description: nymea.io plugin for M-TEC heat pumps
- The nymea daemon is a plugin based IoT (Internet of Things) server. The
- server works like a translator for devices, things and services and
- allows them to interact.
- With the powerful rule engine you are able to connect any device available
- in the system and create individual scenes and behaviors for your environment.
- .
- This package will install the nymea.io plugin for M-TEC heat pumps
+Description: nymea integration plugin for M-TEC heat pumps
+ This package contains the nymea integration plugin for M-TEC heat pumps.
 
 
 Package: nymea-plugin-sunspec
 Architecture: any
 Depends: ${shlibs:Depends},
          ${misc:Depends},
-         nymea-plugins-modbus-translations
-Description: nymea.io plugin for SunSpec Modbus devices.
- The nymea daemon is a plugin based IoT (Internet of Things) server. The
- server works like a translator for devices, things and services and
- allows them to interact.
- With the powerful rule engine you are able to connect any device available
- in the system and create individual scenes and behaviors for your environment.
- .
- This package will install the nymea.io plugin for SunSpec.
+Description: nymea integration plugin for SunSpec Modbus devices
+ This package contains the nymea integration plugin for SunSpec compatible solar inverters.
 
 
 Package: nymea-plugin-unipi2
@@ -181,16 +125,9 @@ Section: libs
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          wiringpi,
-         nymea-plugins-modbus-translations
 Replaces: nymea-plugin-unipi
-Description: nymea.io plugin for UniPi devices
- The nymea daemon is a plugin based IoT (Internet of Things) server. The
- server works like a translator for devices, things and services and
- allows them to interact.
- With the powerful rule engine you are able to connect any device available
- in the system and create individual scenes and behaviors for your environment.
- .
- This package will install the nymea.io plugin for unipi devices
+Description: nymea integration plugin for UniPi devices
+ This package contains the nymea integration plugin for UniPi devices.
 
 
 Package: nymea-plugin-wallbe
@@ -198,41 +135,15 @@ Architecture: any
 Section: libs
 Depends: ${shlibs:Depends},
          ${misc:Depends},
-         nymea-plugins-modbus-translations
-Description: nymea.io plugin for wallbe ev charging stations
- The nymea daemon is a plugin based IoT (Internet of Things) server. The
- server works like a translator for devices, things and services and
- allows them to interact.
- With the powerful rule engine you are able to connect any device available
- in the system and create individual scenes and behaviors for your environment.
- .
- This package will install the nymea.io plugin for wallbe
+Description: nymea integration plugin for Wallbe wallboxes
+ This package contains the nymea integration plugin for wallboxes made
+ by wallbe.
 
 Package: nymea-plugin-webasto
 Architecture: any
 Section: libs
 Depends: ${shlibs:Depends},
          ${misc:Depends},
-         nymea-plugins-modbus-translations
-Description: nymea.io plugin for Webasto Live EV charging stations
- The nymea daemon is a plugin based IoT (Internet of Things) server. The
- server works like a translator for devices, things and services and
- allows them to interact.
- With the powerful rule engine you are able to connect any device available
- in the system and create individual scenes and behaviors for your environment.
- .
- This package will install the nymea.io plugin for webasto
-
-
-Package: nymea-plugins-modbus-translations
-Section: misc
-Architecture: all
-Depends: ${misc:Depends}
-Description: Translation files for nymea modbus plugins - translations
- The nymea daemon is a plugin based IoT (Internet of Things) server. The
- server works like a translator for devices, things and services and
- allows them to interact.
- With the powerful rule engine you are able to connect any device available
- in the system and create individual scenes and behaviors for your environment.
- .
- This package provides the translation files for all nymea modbus plugins.
+Description: nymea integration plugin for Webasto Live wallboxes
+ This package contains the nymea integration plugin for wallboxes made
+ by Webasto.
