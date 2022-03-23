@@ -1,3 +1,28 @@
+nymea-plugins-modbus (1.0.0) xenial; urgency=medium
+
+  [ Simon Stürz ]
+  * Update modbus connection generate tool
+
+  [ Michael Zanetti ]
+  * Wallbe: Update plugin metadata
+  * Packaging: Split translations and consolidate package descriptions
+  * Split energymeters into separate inepro Metering and B+G E-Tech
+    plugins
+  * Wallbe: Fix eventTypeId -> actionParamTypeId typo
+
+  [ Simon Stürz ]
+  * SunSpec: Remove Kostal sunspec connection in favor of custom modbus
+    implementation
+
+  [ Michael Zanetti ]
+  * Sunspec: Set weak discovery type
+
+  [ Simon Stürz ]
+  * SunSpec: Fix solar edge battery detection
+
+  [ Jenkins ]
+
+ -- Jenkins <jenkins@nymea.io>  Wed, 23 Mar 2022 13:25:41 +0100
 
 nymea-plugins-modbus (0.30.0) xenial; urgency=medium
 
