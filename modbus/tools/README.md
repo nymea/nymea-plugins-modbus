@@ -23,6 +23,7 @@ The basic structure of the modbus register JSON looks like following example:
 
 ```
 {
+    "protocol": "TCP",
     "endianness": "BigEndian",
     "enums": [
         {
@@ -71,7 +72,7 @@ The basic structure of the modbus register JSON looks like following example:
 
 ## Endianness
 
-When converting multiple registers to one data type (i.e. 2 registers uint16 values to one uint32), the order of the registers are important to align with the endiness of the data receiving. 
+When converting multiple registers to one data type (i.e. 2 registers uint16 values to one uint32), the order of the registers are important to align with the endianness of the data receiving. 
 
 There are 2 possibilities:
 
@@ -133,9 +134,9 @@ Earch register will be defined as a property in the resulting class modbus TCP c
 
 On many device it is possible to read multiple registers in one modbus call. This can improve speed significantly when reading many register addresses which are in a row. 
 
-> Important: all registers within the block must exist, be in a row with no gaps inbetween!
+> Important: all registers within the block must exist, be in a row with no gaps inbetween and from the same function type!
 
-A block sequence looks like this and will define a read method for reading the entwire block. Writing multiple blocks is currently not supported since not needed so far, but could be added to. In any case, all registers must be read or written, never have combinations.
+A block sequence looks like this and will define a read method for reading the entwire block. Writing multiple blocks is currently not supported since not needed so far, but could be added too. In any case, all registers must be read or written, never have combinations.
 
 * `id`: Mandatory. The id defines the name of the block used in the resulting class.
 * `readSchedule`: Optional. Defines when the register needs to be fetched. If no read schedule has been defined, the class will provide only the update methods, but will not read the value during `initialize()` or `update()` calls. Possible values are:
