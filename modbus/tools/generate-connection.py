@@ -91,6 +91,16 @@ def writeTcpHeaderFile():
 
     writeLine(headerFile)
 
+    writeInternalPropertyReadMethodDeclarationsTcp(headerFile, registerJson['registers'])
+    if 'blocks' in registerJson:
+        for blockDefinition in registerJson['blocks']:
+            writeInternalPropertyReadMethodDeclarationsTcp(headerFile, blockDefinition['registers'])
+
+        writeLine(headerFile)
+        writeInternalBlockReadMethodDeclarationsTcp(headerFile, registerJson['blocks'])
+
+    writeLine(headerFile)
+
     # Write registers value changed signals
     writeLine(headerFile, 'signals:')
     writeLine(headerFile, '    void initializationFinished();')
@@ -106,14 +116,6 @@ def writeTcpHeaderFile():
 
     # Protected members
     writeLine(headerFile, 'protected:')
-    writeInternalPropertyReadMethodDeclarationsTcp(headerFile, registerJson['registers'])
-    if 'blocks' in registerJson:
-        for blockDefinition in registerJson['blocks']:
-            writeInternalPropertyReadMethodDeclarationsTcp(headerFile, blockDefinition['registers'])
-
-        writeLine(headerFile)
-        writeInternalBlockReadMethodDeclarationsTcp(headerFile, registerJson['blocks'])
-
 
     writeLine(headerFile)
     writeProtectedPropertyMembers(headerFile, registerJson['registers'])
