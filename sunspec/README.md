@@ -19,7 +19,6 @@ Connect nymea to SunSpec devices over Modbus TCP
 ## Tested connections
 
 * SolarEdge (with custom battery)
-* Kostal [Documentation](
 
 ## Requirements
 
