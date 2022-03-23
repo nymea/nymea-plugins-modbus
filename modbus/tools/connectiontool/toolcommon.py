@@ -417,10 +417,10 @@ def writeBlocksUpdateMethodDeclarations(fileDescriptor, blockDefinitions):
             if 'unit' in registerDefinition and registerDefinition['unit'] != '':
                 writeLine(fileDescriptor, '      - %s [%s] - Address: %s, Size: %s' % (registerDefinition['description'], registerDefinition['unit'], registerDefinition['address'], registerDefinition['size']))
             else:
-                writeLine(fileDescriptor, '    -- %s - Address: %s, Size: %s' % (registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
+                writeLine(fileDescriptor, '      - %s - Address: %s, Size: %s' % (registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
         writeLine(fileDescriptor, '    */ ' )
         writeLine(fileDescriptor, '    void update%sBlock();' % (blockName[0].upper() + blockName[1:]))
-    writeLine(fileDescriptor)
+        writeLine(fileDescriptor)
 
 
 def writeRegistersDebugLine(fileDescriptor, debugObjectParamName, registerDefinitions):
@@ -444,7 +444,8 @@ def writeUpdateMethod(fileDescriptor, className, registerDefinitions, blockDefin
     # Add the update block methods
     for blockDefinition in blockDefinitions:
         blockName = blockDefinition['id']
-        writeLine(fileDescriptor, '    update%sBlock();' % (blockName[0].upper() + blockName[1:]))
+        if 'readSchedule' in blockDefinition and blockDefinition['readSchedule'] == 'update':
+            writeLine(fileDescriptor, '    update%sBlock();' % (blockName[0].upper() + blockName[1:]))
 
     writeLine(fileDescriptor, '}')
     writeLine(fileDescriptor)

@@ -215,9 +215,9 @@ def writeInternalBlockReadMethodDeclarationsTcp(fileDescriptor, blockDefinitions
         writeLine(fileDescriptor, '    /* Read block from start addess %s with size of %s registers containing following %s properties:' % (blockStartAddress, blockSize, registerCount))
         for i, registerDefinition in enumerate(blockRegisters):
             if 'unit' in registerDefinition and registerDefinition['unit'] != '':
-                writeLine(fileDescriptor, '      - %s [%s] - Address: %s, Size: %s' % (registerDefinition['description'], registerDefinition['unit'], registerDefinition['address'], registerDefinition['size']))
+                writeLine(fileDescriptor, '     - %s [%s] - Address: %s, Size: %s' % (registerDefinition['description'], registerDefinition['unit'], registerDefinition['address'], registerDefinition['size']))
             else:
-                writeLine(fileDescriptor, '    -- %s - Address: %s, Size: %s' % (registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
+                writeLine(fileDescriptor, '     - %s - Address: %s, Size: %s' % (registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
         writeLine(fileDescriptor, '    */ ' )
         writeLine(fileDescriptor, '    QModbusReply *readBlock%s();' % (blockName[0].upper() + blockName[1:]))
         writeLine(fileDescriptor)
