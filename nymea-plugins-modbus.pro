@@ -6,15 +6,16 @@ SUBDIRS += libnymea-sunspec
 
 PLUGIN_DIRS = \
     alphainnotec            \
+    bgetech                 \
     drexelundweiss          \
-    energymeters            \
     huawei                  \
+    idm                     \
+    inepro                  \
     modbuscommander         \
     mtec                    \
     mypv                    \
     sunspec                 \
     unipi                   \
-    idm                     \
     wallbe                  \
     webasto                 \
 

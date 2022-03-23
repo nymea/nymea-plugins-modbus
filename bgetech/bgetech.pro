@@ -3,14 +3,12 @@ include(../plugins.pri)
 QT += serialport serialbus
 
 HEADERS += \
-    integrationpluginenergymeters.h \
+    integrationpluginbgetech.h \
     sdm630modbusrtuconnection.h \
-    pro380modbusrtuconnection.h \
     ../modbus/modbusdatautils.h
 
 SOURCES += \
-    integrationpluginenergymeters.cpp \
+    integrationpluginbgetech.cpp \
     sdm630modbusrtuconnection.cpp \
-    pro380modbusrtuconnection.cpp \
     ../modbus/modbusdatautils.cpp
 
