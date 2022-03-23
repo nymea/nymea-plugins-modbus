@@ -663,7 +663,7 @@ void IntegrationPluginSunSpec::setupSolarEdgeBattery(ThingSetupInfo *info)
         connect(battery, &SolarEdgeBattery::blockDataUpdated, this, &IntegrationPluginSunSpec::onSolarEdgeBatteryBlockUpdated);
         info->finish(Thing::ThingErrorNoError);
         // Set up successfully, init done, we are connected for sure
-        thing->setSettingValue(solarEdgeBatteryConnectedStateTypeId, true);
+        thing->setStateValue(solarEdgeBatteryConnectedStateTypeId, true);
     });
 
     // Start initializing battery data
@@ -689,70 +689,41 @@ void IntegrationPluginSunSpec::searchSolarEdgeBatteries(SunSpecConnection *conne
 
 void IntegrationPluginSunSpec::searchSolarEdgeBattery(SunSpecConnection *connection, const ThingId &parentThingId, quint16 startRegister)
 {
-    // Read the battery device id to verify if the battery is connected.
-    // Example: start register 0xE100, device id register 0xE140
+    // Read the battery data, if init failed there is no battery connected,
+    // otherwise there is a battery and we should check if we need to setup the battery thing
 
-    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, startRegister + 0x40, 1);
-    if (QModbusReply *reply = connection->modbusTcpClient()->sendReadRequest(request, connection->slaveId())) {
-        if (!reply->isFinished()) {
-            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
-            connect(reply, &QModbusReply::finished, this, [=]() {
+    // Create a temporary battery object without thing for init
+    qCDebug(dcSunSpec()) << "Checking presence of SolarEdge battery on modbus register" << startRegister;
+    SolarEdgeBattery *battery = new SolarEdgeBattery(nullptr, connection, startRegister, connection);
+    connect(battery, &SolarEdgeBattery::initFinished, connection, [=](bool success) {
+        // Delete this object since we used it only for set up
+        battery->deleteLater();
 
-                if (reply->error() != QModbusDevice::NoError) {
-                    qCDebug(dcSunSpec()) << "SolarEdge battery seems not to be connected on" << startRegister;
-                    return;
-                }
-
-                const QModbusDataUnit unit = reply->result();
-                if (unit.values().isEmpty()) {
-                    return;
-                }
-
-                quint16 batteryDeviceId = unit.value(0);
-                if (batteryDeviceId == 255) {
-                    qCDebug(dcSunSpec()) << "No SolarEdge battery connected on" << startRegister;
-                    return;
-                }
-
-                // Create a temporary battery object without thing
-                qCDebug(dcSunSpec()) << "Found SolarEdge battery on modbus register" << startRegister;
-                SolarEdgeBattery *battery = new SolarEdgeBattery(nullptr, connection, startRegister, connection);
-                connect(battery, &SolarEdgeBattery::initFinished, connection, [=](bool success) {
-
-                    // Delete this object since we used it only for set up
-                    battery->deleteLater();
-
-                    if (!success) {
-                        qCWarning(dcSunSpec()) << "Failed to initialize SolarEdge battery on register" << battery->modbusStartRegister();
-                        return;
-                    }
-
-                    qCDebug(dcSunSpec()) << "Battery initialized successfully." << battery->batteryData().manufacturerName << battery->batteryData().model;
-                    // Check if we already created this battery
-                    if (!myThings().filterByParam(solarEdgeBatteryThingSerialNumberParamTypeId, battery->batteryData().serialNumber).isEmpty()) {
-                        qCDebug(dcSunSpec()) << "Battery already set up" << battery->batteryData().serialNumber;
-                    } else {
-                        // Create new battery device in the system
-                        ThingDescriptor descriptor(solarEdgeBatteryThingClassId, battery->batteryData().manufacturerName + " - " + battery->batteryData().model, QString(), parentThingId);
-                        ParamList params;
-                        params.append(Param(solarEdgeBatteryThingModbusAddressParamTypeId, startRegister));
-                        params.append(Param(solarEdgeBatteryThingManufacturerParamTypeId, battery->batteryData().manufacturerName));
-                        params.append(Param(solarEdgeBatteryThingDeviceModelParamTypeId, battery->batteryData().model));
-                        params.append(Param(solarEdgeBatteryThingSerialNumberParamTypeId, battery->batteryData().serialNumber));
-                        descriptor.setParams(params);
-                        emit autoThingsAppeared({descriptor});
-                    }
-
-                });
-
-                // Start initializing battery data
-                battery->init();
-            });
-        } else {
-            delete reply; // broadcast replies return immediately
+        // If init failed, no battery connected
+        if (!success) {
+            qCWarning(dcSunSpec()) << "No SolarEdge battery connected on register" << startRegister << ". Not creating battery device.";
             return;
         }
-    }
+
+        qCDebug(dcSunSpec()) << "Battery initialized successfully." << battery->batteryData().manufacturerName << battery->batteryData().model;
+        // Check if we already created this battery
+        if (!myThings().filterByParam(solarEdgeBatteryThingSerialNumberParamTypeId, battery->batteryData().serialNumber).isEmpty()) {
+            qCDebug(dcSunSpec()) << "Battery already set up" << battery->batteryData().serialNumber;
+        } else {
+            // Create new battery device in the system
+            ThingDescriptor descriptor(solarEdgeBatteryThingClassId, battery->batteryData().manufacturerName + " - " + battery->batteryData().model, QString(), parentThingId);
+            ParamList params;
+            params.append(Param(solarEdgeBatteryThingModbusAddressParamTypeId, startRegister));
+            params.append(Param(solarEdgeBatteryThingManufacturerParamTypeId, battery->batteryData().manufacturerName));
+            params.append(Param(solarEdgeBatteryThingDeviceModelParamTypeId, battery->batteryData().model));
+            params.append(Param(solarEdgeBatteryThingSerialNumberParamTypeId, battery->batteryData().serialNumber));
+            descriptor.setParams(params);
+            emit autoThingsAppeared({descriptor});
+        }
+    });
+
+    // Try to initialize battery data
+    battery->init();
 }
 
 double IntegrationPluginSunSpec::calculateSolarEdgePvProduction(Thing *thing, double acPower, double dcPower)
@@ -781,7 +752,7 @@ double IntegrationPluginSunSpec::calculateSolarEdgePvProduction(Thing *thing, do
             }
         }
 
-        // This is a solar edge, let's see if we have a batter for this connection
+        // This is a solar edge, let's see if we have a battery for this connection
         if (battery) {
             double meterCurrentPower = meterThing ? meterThing->stateValue("currentPower").toDouble() : 0;
             qCDebug(dcSunSpec()) << "SolarEdge: found battery for inverter: calculate actual PV power from battery DC power and inverter DC power...";
@@ -1273,7 +1244,7 @@ void IntegrationPluginSunSpec::onMeterBlockUpdated()
         thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseCStateTypeId, meter->ampsPhaseC());
         thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseAStateTypeId, meter->phaseVoltageAn());
         thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseBStateTypeId, meter->phaseVoltageBn());
-        thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseBStateTypeId, meter->phaseVoltageCn());
+        thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseCStateTypeId, meter->phaseVoltageCn());
         thing->setStateValue(sunspecThreePhaseMeterFrequencyStateTypeId, meter->hz());
         thing->setStateValue(sunspecThreePhaseMeterVersionStateTypeId, model->commonModelInfo().versionString);
         break;
@@ -1299,7 +1270,7 @@ void IntegrationPluginSunSpec::onMeterBlockUpdated()
         thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseCStateTypeId, meter->ampsPhaseC());
         thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseAStateTypeId, meter->phaseVoltageAn());
         thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseBStateTypeId, meter->phaseVoltageBn());
-        thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseBStateTypeId, meter->phaseVoltageCn());
+        thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseCStateTypeId, meter->phaseVoltageCn());
         thing->setStateValue(sunspecThreePhaseMeterFrequencyStateTypeId, meter->hz());
         thing->setStateValue(sunspecThreePhaseMeterVersionStateTypeId, model->commonModelInfo().versionString);
         break;
@@ -1325,7 +1296,7 @@ void IntegrationPluginSunSpec::onMeterBlockUpdated()
         thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseCStateTypeId, meter->ampsPhaseC());
         thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseAStateTypeId, meter->phaseVoltageAn());
         thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseBStateTypeId, meter->phaseVoltageBn());
-        thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseBStateTypeId, meter->phaseVoltageCn());
+        thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseCStateTypeId, meter->phaseVoltageCn());
         thing->setStateValue(sunspecThreePhaseMeterFrequencyStateTypeId, meter->hz());
         thing->setStateValue(sunspecThreePhaseMeterVersionStateTypeId, model->commonModelInfo().versionString);
         break;
@@ -1351,7 +1322,7 @@ void IntegrationPluginSunSpec::onMeterBlockUpdated()
         thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseCStateTypeId, meter->ampsPhaseC());
         thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseAStateTypeId, meter->phaseVoltageAn());
         thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseBStateTypeId, meter->phaseVoltageBn());
-        thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseBStateTypeId, meter->phaseVoltageCn());
+        thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseCStateTypeId, meter->phaseVoltageCn());
         thing->setStateValue(sunspecThreePhaseMeterFrequencyStateTypeId, meter->hz());
         thing->setStateValue(sunspecThreePhaseMeterVersionStateTypeId, model->commonModelInfo().versionString);
         break;
