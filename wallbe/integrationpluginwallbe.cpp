@@ -224,7 +224,7 @@ void IntegrationPluginWallbe::executeAction(ThingActionInfo *info)
 
         } else if(action.actionTypeId() == wallbeEcoMaxChargingCurrentActionTypeId){
 
-            uint16_t current = action.param(wallbeEcoMaxChargingCurrentEventMaxChargingCurrentParamTypeId).value().toUInt();
+            uint16_t current = action.param(wallbeEcoMaxChargingCurrentActionMaxChargingCurrentParamTypeId).value().toUInt();
             qCDebug(dcWallbe) << "Charging power set to" << current;
             QUuid requestId = modbusTcpMaster->writeHoldingRegister(m_slaveAddress, WallbeRegisterAddress::ChargingCurrent, current);
             m_asyncActions.insert(requestId, info);

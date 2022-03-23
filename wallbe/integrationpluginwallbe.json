@@ -48,7 +48,8 @@
                             "unit": "Minutes",
                             "type": "int",
                             "defaultValue": 0,
-                            "displayNameEvent": "Charging time changed"
+                            "displayNameEvent": "Charging time changed",
+                            "cached": false
                         },
                         {
                             "id": "2a95c4fb-9a15-4788-ae09-d34e71314da6",
@@ -114,7 +115,7 @@
                             "type": "double",
                             "unit": "Watt",
                             "defaultValue": 0,
-                            "filter": "adaptive"
+                            "cached": false
                         }
                     ]
                 }
