@@ -93,6 +93,13 @@ void SolarEdgeBattery::readBlockData()
                     return;
                 }
 
+                // Example data:
+                //  "(0x3438, 0x565f, 0x4c47, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x4c47, 0x4320, 0x5245, 0x5355, 0x2031, 0x3000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x00ff, 0x0000, 0xffff, 0xff7f, 0xffff, 0xff7f, 0xffff, 0xff7f, 0xffff, 0xff7f, 0xffff, 0xff7f)"
+                //  255 "48V_LG" "LGC RESU 10" "" ""
+                //  "(0x3438, 0x565f, 0x4c47, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x4c47, 0x4320, 0x5245, 0x5355, 0x2031, 0x3000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x3438, 0x5620, 0x4443, 0x4443, 0x2032, 0x2e32, 0x2e39, 0x3120, 0x424d, 0x5320, 0x302e, 0x302e, 0x3000, 0x0000, 0x0000, 0x0000, 0x3745, 0x3034, 0x3432, 0x4543, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0070, 0x0000, 0x2000, 0x4619, 0x4000, 0x459c, 0x4000, 0x459c, 0x4000, 0x44ce, 0x4000, 0x459c)"
+                //  112 "48V_LG" "LGC RESU 10" "48V DCDC 2.2.91 BMS 0.0.0" "7E0442EC"
+
+
                 const QModbusDataUnit unit = reply->result();
                 QVector<quint16> values = unit.values();
                 qCDebug(dcSunSpec()) << "SolarEdgeBattery: Received first block data" << m_modbusStartRegister << values.count();
@@ -103,6 +110,7 @@ void SolarEdgeBattery::readBlockData()
                 m_batteryData.firmwareVersion = SunSpecDataPoint::convertToString(values.mid(FirmwareVersion, 16));
                 m_batteryData.serialNumber = SunSpecDataPoint::convertToString(values.mid(SerialNumber, 16));
                 m_batteryData.batteryDeviceId = values[BatteryDeviceId];
+                qCDebug(dcSunSpec()) << "SolarEdgeBattery:" << m_batteryData.batteryDeviceId << m_batteryData.manufacturerName << m_batteryData.model << m_batteryData.firmwareVersion << m_batteryData.serialNumber;
 
                 // Check if there is a battery connected, if so, one of the string must contain vaild data...
                 if (m_batteryData.manufacturerName.isEmpty() && m_batteryData.model.isEmpty() && m_batteryData.serialNumber.isEmpty() && m_batteryData.firmwareVersion.isEmpty()) {
@@ -114,16 +122,31 @@ void SolarEdgeBattery::readBlockData()
                     return;
                 }
 
+                // For some reason, there might be even data in there but no battery connected, let's check if there are invalid registers
 
-                // 8192 17945 536888857 536888857 1.08652e-19
-                // 0x2000 0x4619
+                // Check if there is a battery connected, if so, one of the string must contain vaild data...
+                const QVector<quint16> invalidRegisters = { 0xffff, 0xff7f };
+                if (values.mid(RatedEnergy, 2) == invalidRegisters && values.mid(MaxChargeContinuesPower, 2) == invalidRegisters &&
+                        values.mid(MaxDischargeContinuesPower, 2) == invalidRegisters && values.mid(MaxChargePeakPower, 2) == invalidRegisters &&
+                        values.mid(MaxDischargePeakPower, 2) == invalidRegisters) {
+                    qCWarning(dcSunSpec()) << "SolarEdgeBattery: No valid information detected about the battery. Probably no battery connected at register" << m_modbusStartRegister;
+                    if (!m_initFinishedSuccess) {
+                        m_timer.stop();
+                        emit initFinished(false);
+                    }
+                    return;
+                }
 
-                qCDebug(dcSunSpec()) << "SolarEdgeBattery:" << m_batteryData.batteryDeviceId << m_batteryData.manufacturerName << m_batteryData.model << m_batteryData.firmwareVersion << m_batteryData.serialNumber;
                 m_batteryData.ratedEnergy = SunSpecDataPoint::convertToFloat32(values.mid(RatedEnergy, 2));
                 m_batteryData.maxChargeContinuesPower = SunSpecDataPoint::convertToFloat32(values.mid(MaxChargeContinuesPower, 2));
                 m_batteryData.maxDischargeContinuesPower = SunSpecDataPoint::convertToFloat32(values.mid(MaxDischargeContinuesPower, 2));
                 m_batteryData.maxChargePeakPower = SunSpecDataPoint::convertToFloat32(values.mid(MaxChargePeakPower, 2));
                 m_batteryData.maxDischargePeakPower = SunSpecDataPoint::convertToFloat32(values.mid(MaxDischargePeakPower, 2));
+
+                // First block looks good, continue with second block
+
+                // 8192 17945 536888857 536888857 1.08652e-19
+                // 0x2000 0x4619
 
                 // Read from 0x6c to 0x86
                 int offset = 0x6c;

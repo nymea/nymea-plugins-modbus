@@ -663,7 +663,7 @@ void IntegrationPluginSunSpec::setupSolarEdgeBattery(ThingSetupInfo *info)
         connect(battery, &SolarEdgeBattery::blockDataUpdated, this, &IntegrationPluginSunSpec::onSolarEdgeBatteryBlockUpdated);
         info->finish(Thing::ThingErrorNoError);
         // Set up successfully, init done, we are connected for sure
-        thing->setSettingValue(solarEdgeBatteryConnectedStateTypeId, true);
+        thing->setStateValue(solarEdgeBatteryConnectedStateTypeId, true);
     });
 
     // Start initializing battery data
@@ -752,7 +752,7 @@ double IntegrationPluginSunSpec::calculateSolarEdgePvProduction(Thing *thing, do
             }
         }
 
-        // This is a solar edge, let's see if we have a batter for this connection
+        // This is a solar edge, let's see if we have a battery for this connection
         if (battery) {
             double meterCurrentPower = meterThing ? meterThing->stateValue("currentPower").toDouble() : 0;
             qCDebug(dcSunSpec()) << "SolarEdge: found battery for inverter: calculate actual PV power from battery DC power and inverter DC power...";
