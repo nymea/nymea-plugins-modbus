@@ -31,6 +31,8 @@
 #include "cionmodbusrtuconnection.h"
 #include "loggingcategories.h"
 
+#include <qmath.h>
+
 NYMEA_LOGGING_CATEGORY(dcCionModbusRtuConnection, "CionModbusRtuConnection")
 
 CionModbusRtuConnection::CionModbusRtuConnection(ModbusRtuMaster *modbusRtuMaster, quint16 slaveId, QObject *parent) :
@@ -234,7 +236,7 @@ void CionModbusRtuConnection::updateU1Voltage()
                 if (reply->error() == ModbusRtuReply::NoError) {
                     QVector<quint16> values = reply->result();
                     qCDebug(dcCionModbusRtuConnection()) << "<-- Response from \"U1 voltage\" register" << 167 << "size:" << 1 << values;
-                    float receivedU1Voltage = ModbusDataUtils::convertToUInt16(values) * 1.0 * pow(10, -2);
+                    float receivedU1Voltage = ModbusDataUtils::convertToUInt16(values) * 1.0 * qPow(10, -2);
                     if (m_u1Voltage != receivedU1Voltage) {
                         m_u1Voltage = receivedU1Voltage;
                         emit u1VoltageChanged(m_u1Voltage);
