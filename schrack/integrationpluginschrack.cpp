@@ -122,6 +122,14 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
 //        finishAction(cionMaxChargingCurrentStateTypeId);
     });
 
+    connect(cionConnection, &CionModbusRtuConnection::cpSignalStateChanged, thing, [=](quint16 cpSignalState){
+        qCDebug(dcSchrack()) << "CP Signal state changed:" << cpSignalState;
+        thing->setStateValue(cionPluggedInStateTypeId, cpSignalState >= 66);
+//        thing->setStateValue(cionMaxChargingCurrentStateTypeId, chargingCurrentSetpoint);
+//        thing->setStateValue(cionConnectedStateTypeId, true);
+//        finishAction(cionMaxChargingCurrentStateTypeId);
+    });
+
     //
     connect(cionConnection, &CionModbusRtuConnection::currentChargingCurrentE3Changed, thing, [=](quint16 currentChargingCurrentE3){
         qCDebug(dcSchrack()) << "Current charging current E3 current changed:" << currentChargingCurrentE3;
@@ -139,6 +147,7 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
     });
 
     connect(cionConnection, &CionModbusRtuConnection::statusBitsChanged, thing, [=](quint16 statusBits){
+        thing->setStateValue(cionConnectedStateTypeId, true);
         qCDebug(dcSchrack()) << "Status bits changed:" << statusBits;
     });
 
@@ -155,11 +164,13 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
     connect(cionConnection, &CionModbusRtuConnection::u1VoltageChanged, thing, [=](float u1Voltage){
         qCDebug(dcSchrack()) << "U1 voltage changed:" << u1Voltage;
         updateCurrentPower(thing);
+        qCDebug(dcSchrack()) << "******** Charging duration:" << cionConnection->chargingDuration();
     });
 
     connect(cionConnection, &CionModbusRtuConnection::pluggedInDurationChanged, thing, [=](quint32 pluggedInDuration){
         qCDebug(dcSchrack()) << "Plugged in duration changed:" << pluggedInDuration;
-        thing->setStateValue(cionPluggedInStateTypeId, pluggedInDuration > 0);
+        // Not reliable to determine if plugged in!
+//        thing->setStateValue(cionPluggedInStateTypeId, pluggedInDuration > 0);
     });
 
     connect(cionConnection, &CionModbusRtuConnection::chargingDurationChanged, thing, [=](quint32 chargingDuration){
@@ -187,6 +198,8 @@ void IntegrationPluginSchrack::postSetupThing(Thing *thing)
             foreach (Thing *thing, myThings()) {
 
                 m_cionConnections.value(thing)->update();
+                thing->setStateValue(cionChargingStateTypeId, m_cionConnections.value(thing)->chargingDuration() != m_lastChargingDuration);
+                m_lastChargingDuration = m_cionConnections.value(thing)->chargingDuration();
             }
         });
 
@@ -213,6 +226,7 @@ void IntegrationPluginSchrack::executeAction(ThingActionInfo *info)
 {
     CionModbusRtuConnection *cionConnection = m_cionConnections.value(info->thing());
     if (info->action().actionTypeId() == cionPowerActionTypeId) {
+        qCDebug(dcSchrack()) << "Setting charging enabled:" << (info->action().paramValue(cionPowerActionPowerParamTypeId).toBool() ? 1 : 0);
         ModbusRtuReply *reply = cionConnection->setChargingEnabled(info->action().paramValue(cionPowerActionPowerParamTypeId).toBool() ? 1 : 0);
         waitForActionFinish(info, reply, cionPowerStateTypeId);
     } else if (info->action().actionTypeId() == cionMaxChargingCurrentActionTypeId) {
@@ -233,6 +247,7 @@ void IntegrationPluginSchrack::waitForActionFinish(ThingActionInfo *info, Modbus
 
     connect(reply, &ModbusRtuReply::finished, info, [=](){
         if (reply->error() != ModbusRtuReply::NoError) {
+            m_pendingActions.remove(info);
             info->finish(Thing::ThingErrorHardwareFailure);
         }
     });
@@ -262,7 +277,7 @@ void IntegrationPluginSchrack::updateCurrentPower(Thing *thing)
     thing->setProperty("lastUpdate", now);
 
     if (cionConnection->chargingDuration() > 0) {
-        thing->setStateValue(cionCurrentPowerStateTypeId, 1.0 * cionConnection->u1Voltage() / 100 * cionConnection->currentChargingCurrentE3());
+        thing->setStateValue(cionCurrentPowerStateTypeId, 1.0 * cionConnection->u1Voltage() * cionConnection->currentChargingCurrentE3());
     } else {
         thing->setStateValue(cionCurrentPowerStateTypeId, 0);
     }

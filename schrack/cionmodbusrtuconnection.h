@@ -47,6 +47,7 @@ public:
         RegisterCurrentChargingCurrentE3 = 126,
         RegisterMaxChargingCurrentE3 = 127,
         RegisterMaxChargingCurrentCableE3 = 128,
+        RegisterCpSignalState = 139,
         RegisterChargingDuration = 151,
         RegisterPluggedInDuration = 153,
         RegisterU1Voltage = 167,
@@ -69,8 +70,11 @@ public:
     quint16 chargingCurrentSetpoint() const;
     ModbusRtuReply *setChargingCurrentSetpoint(quint16 chargingCurrentSetpoint);
 
-    /* Status bits - Address: 121, Size: 1 */
+    /* Mode3-State A, B, C, D, U - Address: 121, Size: 1 */
     quint16 statusBits() const;
+
+    /* Status bits - Address: 139, Size: 1 */
+    quint16 cpSignalState() const;
 
     /* U1 voltage [V] - Address: 167, Size: 1 */
     float u1Voltage() const;
@@ -111,6 +115,7 @@ public:
     void updateChargingEnabled();
     void updateChargingCurrentSetpoint();
     void updateStatusBits();
+    void updateCpSignalState();
     void updateU1Voltage();
     void updateGridVoltage();
     void updateMinChargingCurrent();
@@ -124,6 +129,7 @@ signals:
     void chargingEnabledChanged(quint16 chargingEnabled);
     void chargingCurrentSetpointChanged(quint16 chargingCurrentSetpoint);
     void statusBitsChanged(quint16 statusBits);
+    void cpSignalStateChanged(quint16 cpSignalState);
     void u1VoltageChanged(float u1Voltage);
     void gridVoltageChanged(float gridVoltage);
     void minChargingCurrentChanged(quint16 minChargingCurrent);
@@ -137,13 +143,15 @@ protected:
     ModbusRtuReply *readChargingEnabled();
     ModbusRtuReply *readChargingCurrentSetpoint();
     ModbusRtuReply *readStatusBits();
+    ModbusRtuReply *readCpSignalState();
     ModbusRtuReply *readU1Voltage();
     ModbusRtuReply *readGridVoltage();
     ModbusRtuReply *readMinChargingCurrent();
 
     quint16 m_chargingEnabled = 0;
     quint16 m_chargingCurrentSetpoint = 6;
-    quint16 m_statusBits = 0;
+    quint16 m_statusBits = 85;
+    quint16 m_cpSignalState = 0;
     float m_u1Voltage = 32;
     float m_gridVoltage = 0;
     quint16 m_minChargingCurrent = 13;
