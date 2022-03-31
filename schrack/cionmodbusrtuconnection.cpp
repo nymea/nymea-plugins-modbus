@@ -30,9 +30,7 @@
 
 #include "cionmodbusrtuconnection.h"
 #include "loggingcategories.h"
-
-#include <qmath.h>
-
+#include <math.h>
 NYMEA_LOGGING_CATEGORY(dcCionModbusRtuConnection, "CionModbusRtuConnection")
 
 CionModbusRtuConnection::CionModbusRtuConnection(ModbusRtuMaster *modbusRtuMaster, quint16 slaveId, QObject *parent) :
@@ -78,6 +76,11 @@ ModbusRtuReply *CionModbusRtuConnection::setChargingCurrentSetpoint(quint16 char
 quint16 CionModbusRtuConnection::statusBits() const
 {
     return m_statusBits;
+}
+
+quint16 CionModbusRtuConnection::cpSignalState() const
+{
+    return m_cpSignalState;
 }
 
 float CionModbusRtuConnection::u1Voltage() const
@@ -131,6 +134,7 @@ void CionModbusRtuConnection::update()
     updateChargingEnabled();
     updateChargingCurrentSetpoint();
     updateStatusBits();
+    updateCpSignalState();
     updateU1Voltage();
     updateGridVoltage();
     updateMinChargingCurrent();
@@ -198,19 +202,48 @@ void CionModbusRtuConnection::updateChargingCurrentSetpoint()
 
 void CionModbusRtuConnection::updateStatusBits()
 {
-    // Update registers from Status bits
-    qCDebug(dcCionModbusRtuConnection()) << "--> Read \"Status bits\" register:" << 121 << "size:" << 1;
+    // Update registers from Mode3-State A, B, C, D, U
+    qCDebug(dcCionModbusRtuConnection()) << "--> Read \"Mode3-State A, B, C, D, U\" register:" << 121 << "size:" << 1;
     ModbusRtuReply *reply = readStatusBits();
     if (reply) {
         if (!reply->isFinished()) {
             connect(reply, &ModbusRtuReply::finished, this, [this, reply](){
                 if (reply->error() == ModbusRtuReply::NoError) {
                     QVector<quint16> values = reply->result();
-                    qCDebug(dcCionModbusRtuConnection()) << "<-- Response from \"Status bits\" register" << 121 << "size:" << 1 << values;
+                    qCDebug(dcCionModbusRtuConnection()) << "<-- Response from \"Mode3-State A, B, C, D, U\" register" << 121 << "size:" << 1 << values;
                     quint16 receivedStatusBits = ModbusDataUtils::convertToUInt16(values);
                     if (m_statusBits != receivedStatusBits) {
                         m_statusBits = receivedStatusBits;
                         emit statusBitsChanged(m_statusBits);
+                    }
+                }
+            });
+
+            connect(reply, &ModbusRtuReply::errorOccurred, this, [reply] (ModbusRtuReply::Error error){
+                qCWarning(dcCionModbusRtuConnection()) << "ModbusRtu reply error occurred while updating \"Mode3-State A, B, C, D, U\" registers" << error << reply->errorString();
+                emit reply->finished();
+            });
+        }
+    } else {
+        qCWarning(dcCionModbusRtuConnection()) << "Error occurred while reading \"Mode3-State A, B, C, D, U\" registers";
+    }
+}
+
+void CionModbusRtuConnection::updateCpSignalState()
+{
+    // Update registers from Status bits
+    qCDebug(dcCionModbusRtuConnection()) << "--> Read \"Status bits\" register:" << 139 << "size:" << 1;
+    ModbusRtuReply *reply = readCpSignalState();
+    if (reply) {
+        if (!reply->isFinished()) {
+            connect(reply, &ModbusRtuReply::finished, this, [this, reply](){
+                if (reply->error() == ModbusRtuReply::NoError) {
+                    QVector<quint16> values = reply->result();
+                    qCDebug(dcCionModbusRtuConnection()) << "<-- Response from \"Status bits\" register" << 139 << "size:" << 1 << values;
+                    quint16 receivedCpSignalState = ModbusDataUtils::convertToUInt16(values);
+                    if (m_cpSignalState != receivedCpSignalState) {
+                        m_cpSignalState = receivedCpSignalState;
+                        emit cpSignalStateChanged(m_cpSignalState);
                     }
                 }
             });
@@ -236,7 +269,7 @@ void CionModbusRtuConnection::updateU1Voltage()
                 if (reply->error() == ModbusRtuReply::NoError) {
                     QVector<quint16> values = reply->result();
                     qCDebug(dcCionModbusRtuConnection()) << "<-- Response from \"U1 voltage\" register" << 167 << "size:" << 1 << values;
-                    float receivedU1Voltage = ModbusDataUtils::convertToUInt16(values) * 1.0 * qPow(10, -2);
+                    float receivedU1Voltage = ModbusDataUtils::convertToUInt16(values) * 1.0 * pow(10, -2);
                     if (m_u1Voltage != receivedU1Voltage) {
                         m_u1Voltage = receivedU1Voltage;
                         emit u1VoltageChanged(m_u1Voltage);
@@ -412,6 +445,11 @@ ModbusRtuReply *CionModbusRtuConnection::readStatusBits()
     return m_modbusRtuMaster->readHoldingRegister(m_slaveId, 121, 1);
 }
 
+ModbusRtuReply *CionModbusRtuConnection::readCpSignalState()
+{
+    return m_modbusRtuMaster->readHoldingRegister(m_slaveId, 139, 1);
+}
+
 ModbusRtuReply *CionModbusRtuConnection::readU1Voltage()
 {
     return m_modbusRtuMaster->readHoldingRegister(m_slaveId, 167, 1);
@@ -440,7 +478,8 @@ QDebug operator<<(QDebug debug, CionModbusRtuConnection *cionModbusRtuConnection
     debug.nospace().noquote() << "CionModbusRtuConnection(" << cionModbusRtuConnection->modbusRtuMaster()->modbusUuid().toString() << ", " << cionModbusRtuConnection->modbusRtuMaster()->serialPort() << ", slave ID:" << cionModbusRtuConnection->slaveId() << ")" << "\n";
     debug.nospace().noquote() << "    - Charging enabled:" << cionModbusRtuConnection->chargingEnabled() << "\n";
     debug.nospace().noquote() << "    - Charging current setpoint:" << cionModbusRtuConnection->chargingCurrentSetpoint() << " [A]" << "\n";
-    debug.nospace().noquote() << "    - Status bits:" << cionModbusRtuConnection->statusBits() << "\n";
+    debug.nospace().noquote() << "    - Mode3-State A, B, C, D, U:" << cionModbusRtuConnection->statusBits() << "\n";
+    debug.nospace().noquote() << "    - Status bits:" << cionModbusRtuConnection->cpSignalState() << "\n";
     debug.nospace().noquote() << "    - U1 voltage:" << cionModbusRtuConnection->u1Voltage() << " [V]" << "\n";
     debug.nospace().noquote() << "    - Voltage of the power supply grid:" << cionModbusRtuConnection->gridVoltage() << " [V]" << "\n";
     debug.nospace().noquote() << "    - Minimum charging current:" << cionModbusRtuConnection->minChargingCurrent() << " [A]" << "\n";

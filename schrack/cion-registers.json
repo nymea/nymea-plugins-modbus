@@ -72,7 +72,7 @@
                     "defaultValue": 0,
                     "access": "R"
                 }
-            ]   
+            ]
         }
     ],
     "registers": [
@@ -102,6 +102,17 @@
         {
             "id": "statusBits",
             "address": 121,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "Mode3-State A, B, C, D, U",
+            "defaultValue": 85,
+            "access": "R"
+        },
+        {
+            "id": "cpSignalState",
+            "address": 139,
             "size": 1,
             "type": "uint16",
             "registerType": "holdingRegister",
