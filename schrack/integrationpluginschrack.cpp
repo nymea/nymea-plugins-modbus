@@ -163,8 +163,6 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
 
     connect(cionConnection, &CionModbusRtuConnection::u1VoltageChanged, thing, [=](float u1Voltage){
         qCDebug(dcSchrack()) << "U1 voltage changed:" << u1Voltage;
-        updateCurrentPower(thing);
-        qCDebug(dcSchrack()) << "******** Charging duration:" << cionConnection->chargingDuration();
     });
 
     connect(cionConnection, &CionModbusRtuConnection::pluggedInDurationChanged, thing, [=](quint32 pluggedInDuration){
@@ -257,29 +255,6 @@ void IntegrationPluginSchrack::finishAction(const StateTypeId &stateTypeId)
 {
     foreach (ThingActionInfo *info, m_pendingActions.keys(stateTypeId)) {
         info->finish(Thing::ThingErrorNoError);
-    }
-}
-
-void IntegrationPluginSchrack::updateCurrentPower(Thing *thing)
-{
-    CionModbusRtuConnection *cionConnection = m_cionConnections.value(thing);
-
-    QDateTime lastUpdate = thing->property("lastUpdate").toDateTime();
-    QDateTime now = QDateTime::currentDateTime();
-    if (lastUpdate.isValid()) {
-        double lastCurrentPower = thing->stateValue(cionCurrentPowerStateTypeId).toDouble();
-        double lastTotal = thing->stateValue(cionTotalEnergyConsumedStateTypeId).toDouble();
-        qlonglong msecsSinceLast = lastUpdate.msecsTo(now);
-        double wattMs = lastCurrentPower * msecsSinceLast;
-        double kWh = wattMs / 60 / 60;
-        thing->setStateValue(cionTotalEnergyConsumedStateTypeId, lastTotal + kWh);
-    }
-    thing->setProperty("lastUpdate", now);
-
-    if (cionConnection->chargingDuration() > 0) {
-        thing->setStateValue(cionCurrentPowerStateTypeId, 1.0 * cionConnection->u1Voltage() * cionConnection->currentChargingCurrentE3());
-    } else {
-        thing->setStateValue(cionCurrentPowerStateTypeId, 0);
     }
 }
 

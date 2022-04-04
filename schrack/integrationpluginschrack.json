@@ -75,24 +75,6 @@
                             "writable": true
                         },
                         {
-                            "id": "db5c951f-47e0-4cdc-8b8b-285f7ed95285",
-                            "name": "currentPower",
-                            "displayName": "Current power consumption",
-                            "displayNameEvent": "Current power consumption changed",
-                            "type": "double",
-                            "unit": "Watt",
-                            "defaultValue": 0
-                        },
-                        {
-                            "id": "8390c005-a8ba-4db6-bb94-8f765ddcc784",
-                            "name": "totalEnergyConsumed",
-                            "displayName": "Total consumed energy",
-                            "displayNameEvent": "Total consumed energy changed",
-                            "type": "double",
-                            "unit": "KiloWattHour",
-                            "defaultValue": 0
-                        },
-                        {
                             "id": "13423618-4314-49be-b48c-42d9415199a8",
                             "name": "pluggedIn",
                             "displayName": "Plugged in",
