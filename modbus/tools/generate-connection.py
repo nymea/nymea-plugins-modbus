@@ -313,6 +313,15 @@ def writeRtuHeaderFile():
 
     writeLine(headerFile)
 
+    writeInternalPropertyReadMethodDeclarationsRtu(headerFile, registerJson['registers'])
+    if 'blocks' in registerJson:
+        for blockDefinition in registerJson['blocks']:
+            writeInternalPropertyReadMethodDeclarationsRtu(headerFile, blockDefinition['registers'])
+
+        writeLine(headerFile)
+        writeInternalBlockReadMethodDeclarationsRtu(headerFile, registerJson['blocks'])
+
+
     # Write registers value changed signals
     writeLine(headerFile, 'signals:')
     writeLine(headerFile, '    void initializationFinished();')
@@ -327,14 +336,6 @@ def writeRtuHeaderFile():
 
     # Protected members
     writeLine(headerFile, 'protected:')
-    writeInternalPropertyReadMethodDeclarationsRtu(headerFile, registerJson['registers'])
-    if 'blocks' in registerJson:
-        for blockDefinition in registerJson['blocks']:
-            writeInternalPropertyReadMethodDeclarationsRtu(headerFile, blockDefinition['registers'])
-
-        writeLine(headerFile)
-        writeInternalBlockReadMethodDeclarationsRtu(headerFile, registerJson['blocks'])
-
 
     writeProtectedPropertyMembers(headerFile, registerJson['registers'])
     if 'blocks' in registerJson:
@@ -378,6 +379,7 @@ def writeRtuSourceFile():
 
     writeLine(sourceFile, '#include "%s"' % headerFileName)
     writeLine(sourceFile, '#include "loggingcategories.h"')
+    writeLine(sourceFile, '#include "math.h"')
     writeLine(sourceFile)
     writeLine(sourceFile, 'NYMEA_LOGGING_CATEGORY(dc%s, "%s")' % (className, className))
     writeLine(sourceFile)
