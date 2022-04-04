@@ -61,8 +61,6 @@ public:
 private:
     void waitForActionFinish(ThingActionInfo *info, ModbusRtuReply *reply, const StateTypeId &stateTypeId);
     void finishAction(const StateTypeId &stateTypeId);
-
-    void updateCurrentPower(Thing *thing);
 private:
     PluginTimer *m_refreshTimer = nullptr;
 
