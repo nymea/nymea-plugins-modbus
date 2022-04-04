@@ -379,7 +379,7 @@ def writeRtuSourceFile():
 
     writeLine(sourceFile, '#include "%s"' % headerFileName)
     writeLine(sourceFile, '#include "loggingcategories.h"')
-    writeLine(sourceFile, '#include "math.h"')
+    writeLine(sourceFile, '#include <math.h>')
     writeLine(sourceFile)
     writeLine(sourceFile, 'NYMEA_LOGGING_CATEGORY(dc%s, "%s")' % (className, className))
     writeLine(sourceFile)
