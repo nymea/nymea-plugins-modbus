@@ -95,15 +95,15 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
     }
 
     CionModbusRtuConnection *cionConnection = new CionModbusRtuConnection(hardwareManager()->modbusRtuResource()->getModbusRtuMaster(uuid), address, this);
-    connect(cionConnection->modbusRtuMaster(), &ModbusRtuMaster::connectedChanged, thing, [=](bool connected){
-        if (connected) {
-            qCDebug(dcSchrack()) << "Modbus RTU resource connected" << thing << cionConnection->modbusRtuMaster()->serialPort();
-        } else {
-            qCWarning(dcSchrack()) << "Modbus RTU resource disconnected" << thing << cionConnection->modbusRtuMaster()->serialPort();
-        }
+//    connect(cionConnection->modbusRtuMaster(), &ModbusRtuMaster::connectedChanged, thing, [=](bool connected){
+//        if (connected) {
+//            qCDebug(dcSchrack()) << "Modbus RTU resource connected" << thing << cionConnection->modbusRtuMaster()->serialPort();
+//        } else {
+//            qCWarning(dcSchrack()) << "Modbus RTU resource disconnected" << thing << cionConnection->modbusRtuMaster()->serialPort();
+//            thing->setStateValue(cionConnectedStateTypeId, false);
+//        }
 
-        thing->setStateValue(cionConnectedStateTypeId, connected);
-    });
+//    });
 
     connect(cionConnection, &CionModbusRtuConnection::chargingEnabledChanged, thing, [=](quint16 charging){
         qCDebug(dcSchrack()) << "Charging enabled changed:" << charging;
@@ -158,7 +158,6 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
 
     connect(cionConnection, &CionModbusRtuConnection::gridVoltageChanged, thing, [=](float gridVoltage){
         qCDebug(dcSchrack()) << "Grid voltage changed:" << gridVoltage;
-//        updateCurrentPower(thing);
     });
 
     connect(cionConnection, &CionModbusRtuConnection::u1VoltageChanged, thing, [=](float u1Voltage){
@@ -195,9 +194,24 @@ void IntegrationPluginSchrack::postSetupThing(Thing *thing)
         connect(m_refreshTimer, &PluginTimer::timeout, this, [this] {
             foreach (Thing *thing, myThings()) {
 
-                m_cionConnections.value(thing)->update();
-                thing->setStateValue(cionChargingStateTypeId, m_cionConnections.value(thing)->chargingDuration() != m_lastChargingDuration);
-                m_lastChargingDuration = m_cionConnections.value(thing)->chargingDuration();
+                CionModbusRtuConnection *connection = m_cionConnections.value(thing);
+                connection->update();
+
+                // The only apparent way to know whether it is charging, is to compare if lastChargingDuration has changed
+                // If it didn't change in the last cycle
+                qulonglong lastChargingDuration = connection->property("lastChargingDuration").toULongLong();
+                thing->setStateValue(cionChargingStateTypeId, connection->chargingDuration() != lastChargingDuration);
+                connection->setProperty("lastChargingDuration", connection->chargingDuration());
+
+                // Reading the CP signal state to know if the wallbox is reachable.
+                // Note that this is also an "update" register, hence being read twice.
+                // We'll not actually evaluate the actual results in here because
+                // this piece of code should be replaced with the modbus tool internal connected detection when it's ready
+                ModbusRtuReply *reply = connection->readCpSignalState();
+                connect(reply, &ModbusRtuReply::finished, [reply, thing](){
+                    qCDebug(dcSchrack) << "CP signal state reply finished" << reply->error();
+                    thing->setStateValue(cionConnectedStateTypeId, reply->error() == ModbusRtuReply::NoError);
+                });
             }
         });
 

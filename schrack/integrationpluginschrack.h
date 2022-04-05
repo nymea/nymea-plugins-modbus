@@ -66,8 +66,6 @@ private:
 
     QHash<Thing *, CionModbusRtuConnection *> m_cionConnections;
     QHash<ThingActionInfo*, StateTypeId> m_pendingActions;
-
-    qulonglong m_lastChargingDuration = 0;
 };
 
 #endif // INTEGRATIONPLUGINSCHRACK_H
