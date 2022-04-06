@@ -208,7 +208,7 @@ void IntegrationPluginSchrack::postSetupThing(Thing *thing)
                 // We'll not actually evaluate the actual results in here because
                 // this piece of code should be replaced with the modbus tool internal connected detection when it's ready
                 ModbusRtuReply *reply = connection->readCpSignalState();
-                connect(reply, &ModbusRtuReply::finished, [reply, thing](){
+                connect(reply, &ModbusRtuReply::finished, thing, [reply, thing](){
                     qCDebug(dcSchrack) << "CP signal state reply finished" << reply->error();
                     thing->setStateValue(cionConnectedStateTypeId, reply->error() == ModbusRtuReply::NoError);
                 });
