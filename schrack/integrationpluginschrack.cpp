@@ -107,8 +107,6 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
     // Setting this to 0 will pause charging, anything else will control the charging (and return the actual value in currentChargingCurrentE3)
     connect(cionConnection, &CionModbusRtuConnection::chargingCurrentSetpointChanged, thing, [=](quint16 chargingCurrentSetpoint){
         qCDebug(dcSchrack()) << "Charging current setpoint changed:" << chargingCurrentSetpoint;
-        thing->setStateValue(cionPowerStateTypeId, chargingCurrentSetpoint > 0);
-        finishAction(cionPowerStateTypeId);
     });
 
     connect(cionConnection, &CionModbusRtuConnection::cpSignalStateChanged, thing, [=](quint16 cpSignalState){
@@ -121,7 +119,6 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
         if (cionConnection->chargingCurrentSetpoint() > 0) {
             thing->setStateValue(cionMaxChargingCurrentStateTypeId, currentChargingCurrentE3);
         }
-        finishAction(cionMaxChargingCurrentStateTypeId);
     });
 
     // The maxChargingCurrentE3 takes into account the DIP switches and connected cable, so this is effectively
@@ -195,9 +192,15 @@ void IntegrationPluginSchrack::postSetupThing(Thing *thing)
                 // We'll not actually evaluate the actual results in here because
                 // this piece of code should be replaced with the modbus tool internal connected detection when it's ready
                 ModbusRtuReply *reply = connection->readCpSignalState();
-                connect(reply, &ModbusRtuReply::finished, thing, [reply, thing](){
-                    qCDebug(dcSchrack) << "CP signal state reply finished" << reply->error();
+                connect(reply, &ModbusRtuReply::finished, thing, [reply, thing, this](){
+//                    qCDebug(dcSchrack) << "CP signal state reply finished" << reply->error();
                     thing->setStateValue(cionConnectedStateTypeId, reply->error() == ModbusRtuReply::NoError);
+
+                    // The Cion seems to crap out rather often and needs to be reconnected :/
+                    if (reply->error() == ModbusRtuReply::TimeoutError) {
+                        QUuid uuid = thing->paramValue(cionThingModbusMasterUuidParamTypeId).toUuid();
+                        hardwareManager()->modbusRtuResource()->getModbusRtuMaster(uuid)->requestReconnect();
+                    }
                 });
             }
         });
@@ -230,17 +233,18 @@ void IntegrationPluginSchrack::executeAction(ThingActionInfo *info)
         // If user enables it, we'll write the maxChargingPower value
         if (info->action().paramValue(cionPowerActionPowerParamTypeId).toBool()) {
             ModbusRtuReply *reply = cionConnection->setChargingCurrentSetpoint(maxSetPoint);
-            waitForActionFinish(info, reply, cionPowerStateTypeId);
+            waitForActionFinish(info, reply, cionPowerStateTypeId, true);
         } else { // we'll write 0 to the max charging power
             ModbusRtuReply *reply = cionConnection->setChargingCurrentSetpoint(0);
-            waitForActionFinish(info, reply, cionPowerStateTypeId);
+            waitForActionFinish(info, reply, cionPowerStateTypeId, false);
         }
 
     } else if (info->action().actionTypeId() == cionMaxChargingCurrentActionTypeId) {
         // If charging is set to enabled, we'll write the value to the wallbox
         if (info->thing()->stateValue(cionPowerStateTypeId).toBool()) {
-            ModbusRtuReply *reply = cionConnection->setChargingCurrentSetpoint(info->action().paramValue(cionMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toUInt());
-            waitForActionFinish(info, reply, cionMaxChargingCurrentStateTypeId);
+            int maxChargingCurrent = info->action().paramValue(cionMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toUInt();
+            ModbusRtuReply *reply = cionConnection->setChargingCurrentSetpoint(maxChargingCurrent);
+            waitForActionFinish(info, reply, cionMaxChargingCurrentStateTypeId, maxChargingCurrent);
 
         } else { // we'll just memorize what the user wants in our state and write it when enabled is set to true
             info->thing()->setStateValue(cionMaxChargingCurrentStateTypeId, info->action().paramValue(cionMaxChargingCurrentActionMaxChargingCurrentParamTypeId));
@@ -252,25 +256,12 @@ void IntegrationPluginSchrack::executeAction(ThingActionInfo *info)
     Q_ASSERT_X(false, "IntegrationPluginSchrack::executeAction", QString("Unhandled action: %1").arg(info->action().actionTypeId().toString()).toLocal8Bit());
 }
 
-void IntegrationPluginSchrack::waitForActionFinish(ThingActionInfo *info, ModbusRtuReply *reply, const StateTypeId &stateTypeId)
+void IntegrationPluginSchrack::waitForActionFinish(ThingActionInfo *info, ModbusRtuReply *reply, const StateTypeId &stateTypeId, const QVariant &value)
 {
-    m_pendingActions.insert(info, stateTypeId);
-    connect(info, &ThingActionInfo::destroyed, this, [=](){
-        m_pendingActions.remove(info);
-    });
-
     connect(reply, &ModbusRtuReply::finished, info, [=](){
-        if (reply->error() != ModbusRtuReply::NoError) {
-            m_pendingActions.remove(info);
-            info->finish(Thing::ThingErrorHardwareFailure);
+        info->finish(reply->error() == ModbusRtuReply::NoError ? Thing::ThingErrorNoError : Thing::ThingErrorHardwareFailure);
+        if (reply->error() == ModbusRtuReply::NoError) {
+            info->thing()->setStateValue(stateTypeId, value);
         }
     });
 }
-
-void IntegrationPluginSchrack::finishAction(const StateTypeId &stateTypeId)
-{
-    foreach (ThingActionInfo *info, m_pendingActions.keys(stateTypeId)) {
-        info->finish(Thing::ThingErrorNoError);
-    }
-}
-
