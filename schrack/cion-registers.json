@@ -1,6 +1,6 @@
 {
     "protocol": "RTU",
-    "endianness": "BigEndian",
+    "endianness": "LittleEndian",
     "blocks": [
         {
             "id": "e3",
