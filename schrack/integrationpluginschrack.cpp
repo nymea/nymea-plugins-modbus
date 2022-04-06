@@ -133,9 +133,9 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
         }
     });
 
-    connect(cionConnection, &CionModbusRtuConnection::statusBitsChanged, thing, [=](quint16 statusBits){
+    connect(cionConnection, &CionModbusRtuConnection::statusBitsChanged, thing, [=](quint16 /*statusBits*/){
         thing->setStateValue(cionConnectedStateTypeId, true);
-        qCDebug(dcSchrack()) << "Status bits changed:" << statusBits;
+//        qCDebug(dcSchrack()) << "Status bits changed:" << statusBits;
     });
 
     connect(cionConnection, &CionModbusRtuConnection::minChargingCurrentChanged, thing, [=](quint16 minChargingCurrent){
@@ -143,22 +143,22 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
         thing->setStateMinValue(cionMaxChargingCurrentStateTypeId, minChargingCurrent);
     });
 
-    connect(cionConnection, &CionModbusRtuConnection::gridVoltageChanged, thing, [=](float gridVoltage){
-        qCDebug(dcSchrack()) << "Grid voltage changed:" << gridVoltage;
+    connect(cionConnection, &CionModbusRtuConnection::gridVoltageChanged, thing, [=](float /*gridVoltage*/){
+//        qCDebug(dcSchrack()) << "Grid voltage changed:" << gridVoltage;
     });
 
-    connect(cionConnection, &CionModbusRtuConnection::u1VoltageChanged, thing, [=](float u1Voltage){
-        qCDebug(dcSchrack()) << "U1 voltage changed:" << u1Voltage;
+    connect(cionConnection, &CionModbusRtuConnection::u1VoltageChanged, thing, [=](float /*u1Voltage*/){
+//        qCDebug(dcSchrack()) << "U1 voltage changed:" << u1Voltage;
     });
 
-    connect(cionConnection, &CionModbusRtuConnection::pluggedInDurationChanged, thing, [=](quint32 pluggedInDuration){
-        qCDebug(dcSchrack()) << "Plugged in duration changed:" << pluggedInDuration;
+    connect(cionConnection, &CionModbusRtuConnection::pluggedInDurationChanged, thing, [=](quint32 /*pluggedInDuration*/){
+//        qCDebug(dcSchrack()) << "Plugged in duration changed:" << pluggedInDuration;
         // Not reliable to determine if plugged in!
 //        thing->setStateValue(cionPluggedInStateTypeId, pluggedInDuration > 0);
     });
 
     connect(cionConnection, &CionModbusRtuConnection::chargingDurationChanged, thing, [=](quint32 chargingDuration){
-        qCDebug(dcSchrack()) << "Charging duration changed:" << chargingDuration;
+//        qCDebug(dcSchrack()) << "Charging duration changed:" << chargingDuration;
         thing->setStateValue(cionChargingStateTypeId, chargingDuration > 0);
     });
 
