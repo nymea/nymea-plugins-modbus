@@ -59,13 +59,11 @@ public:
     void executeAction(ThingActionInfo *info) override;
 
 private:
-    void waitForActionFinish(ThingActionInfo *info, ModbusRtuReply *reply, const StateTypeId &stateTypeId);
-    void finishAction(const StateTypeId &stateTypeId);
+    void waitForActionFinish(ThingActionInfo *info, ModbusRtuReply *reply, const StateTypeId &stateTypeId, const QVariant &value);
 private:
     PluginTimer *m_refreshTimer = nullptr;
 
     QHash<Thing *, CionModbusRtuConnection *> m_cionConnections;
-    QHash<ThingActionInfo*, StateTypeId> m_pendingActions;
 };
 
 #endif // INTEGRATIONPLUGINSCHRACK_H
