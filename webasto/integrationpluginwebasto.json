@@ -13,7 +13,7 @@
                     "displayName": "Live Wallbox",
                     "name": "liveWallbox",
                     "createMethods": ["discovery"],
-                    "interfaces": ["evcharger", "connectable"],
+                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable"],
                     "paramTypes": [
                         {
                             "id": "51fa3ea8-e819-46ca-b975-1bee6285441c",
