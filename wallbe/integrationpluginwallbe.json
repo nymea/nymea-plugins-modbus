@@ -13,7 +13,7 @@
                     "displayName": "Wallbe eco 2.0",
                     "name": "wallbeEco",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": ["evcharger", "connectable"],
+                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable"],
                     "paramTypes": [
                         {
                             "id": "95f297a7-56a5-4789-9b14-6735717344b5",
