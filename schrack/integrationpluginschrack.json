@@ -1,0 +1,98 @@
+{
+    "name": "schrack",
+    "displayName": "Schrack",
+    "id": "600beeb5-5c34-49fc-b2af-8f83c1b11eab",
+    "paramTypes":[ ],
+    "vendors": [
+    	{
+            "name": "schrack",
+            "displayName": "Schrack  GmbH",
+            "id": "cadbbbc5-216f-4d25-a8ad-ccf653d1518f",
+            "thingClasses": [
+                {
+                    "name": "cion",
+                    "displayName": "i-CHARGE CION",
+                    "id": "075d389d-3330-4d0b-9649-9f085120ca40",
+                    "createMethods": ["discovery"],
+                    "interfaces": ["evcharger", "connectable"],
+                    "discoveryParamTypes": [
+                        {
+                            "id": "8004705f-0e13-4713-b75e-49d115cd9517",
+                            "name": "slaveAddress",
+                            "displayName": "Slave address",
+                            "type": "int",
+                            "defaultValue": 1
+                        }
+                    ],
+                    "paramTypes": [
+                        {
+                            "id": "dac10e08-734c-4e71-a5d6-0d2a1f416ca6",
+                            "name": "slaveAddress",
+                            "displayName": "Modbus slave address",
+                            "type": "uint",
+                            "defaultValue": 1
+                        },
+                        {
+                            "id": "636241a9-4838-48ae-bcc8-3427ac3fc102",
+                            "name": "modbusMasterUuid",
+                            "displayName": "Modbus RTU master",
+                            "type": "QUuid",
+                            "defaultValue": "",
+                            "readOnly": true
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "b7aa8e49-a6c0-4b48-b65e-47259686185f",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "cached": false,
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "61aea53a-bf8d-4fe6-859a-f1687e15d190",
+                            "name": "power",
+                            "displayName": "Charging enabled",
+                            "displayNameEvent": "Charging enabled or disabled",
+                            "displayNameAction": "Enable or disable charging",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "writable": true
+                        },
+                        {
+                            "id": "221af869-a796-46c2-a5e0-27c8972a0bf2",
+                            "name": "maxChargingCurrent",
+                            "displayName": "Maximum charging current",
+                            "displayNameEvent": "Maximum charging current changed",
+                            "displayNameAction": "Set maximum charging current",
+                            "type": "uint",
+                            "unit": "Ampere",
+                            "defaultValue": 6,
+                            "minValue": 1,
+                            "maxValue": 32,
+                            "writable": true
+                        },
+                        {
+                            "id": "13423618-4314-49be-b48c-42d9415199a8",
+                            "name": "pluggedIn",
+                            "displayName": "Plugged in",
+                            "displayNameEvent": "Plugged or unplugged",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "b59b4b4d-2cdb-4534-bf86-90123ae9bb1a",
+                            "name": "charging",
+                            "displayName": "Charging",
+                            "displayNameEvent": "Charging started or stopped",
+                            "type": "bool",
+                            "defaultValue": false
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

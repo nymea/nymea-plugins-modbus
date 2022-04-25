@@ -122,6 +122,14 @@ Description: nymea integration plugin for M-TEC heat pumps
  This package contains the nymea integration plugin for M-TEC heat pumps.
 
 
+Package: nymea-plugin-schrack
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for Schrack wallboxes
+ This package contains the nymea integration plugin for Schrack wallboxes.
+
+
 Package: nymea-plugin-sunspec
 Architecture: any
 Depends: ${shlibs:Depends},
