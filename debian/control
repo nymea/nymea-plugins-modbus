@@ -2,6 +2,7 @@ Source: nymea-plugins-modbus
 Section: utils
 Priority: options
 Maintainer: nymea GmbH <developer@nymea.io>
+Standards-Version: 3.9.3
 Build-depends: debhelper (>= 9.0.0),
                libnymea-dev (>= 0.17),
                libnymea-gpio-dev,
@@ -10,8 +11,8 @@ Build-depends: debhelper (>= 9.0.0),
                nymea-dev-tools:native,
                pkg-config,
                qtbase5-dev,
-               libi2c-dev
-Standards-Version: 3.9.3
+               libi2c-dev,
+               python3:native
 
 
 Package: libnymea-sunspec1
@@ -21,6 +22,7 @@ Depends: ${shlibs:Depends},
          ${misc:Depends}
 Description: nymea.io sunspec library
  This package contains the nymea sunspec library.
+
 
 Package: libnymea-sunspec-dev
 Section: libdevel
@@ -33,6 +35,30 @@ Depends: ${shlibs:Depends},
          qtbase5-dev,
 Description: The main libraries and header files for developing with nymea sunspec.
  This package contains the nymea sunspec library - development files.
+
+
+Package: libnymea-modbus
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
+Description: nymea modbus integration plugins library
+ This package contains the nymea modbus library for integration plugins.
+
+
+Package: libnymea-modbus-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         libnymea-modbus (= ${binary:Version}),
+         pkg-config,
+         qtbase5-dev,
+         python3,
+Description: The main libraries and header files for developing with modbus based nymea integration plugins.
+ This package contains the nymea modbus integration plugin library - development files.
+
 
 Package: nymea-plugin-alphainnotec
 Architecture: any

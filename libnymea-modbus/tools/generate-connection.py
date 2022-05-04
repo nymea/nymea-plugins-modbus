@@ -25,13 +25,14 @@ import json
 import shutil
 import argparse
 import datetime
+import logging
 
 from connectiontool.toolcommon import * 
 from connectiontool.modbusrtu import * 
 from connectiontool.modbustcp import * 
 
 def writeTcpHeaderFile():
-    print('Writing modbus TCP hader file %s' % headerFilePath)
+    logger.info('Writing modbus TCP header file %s' % headerFilePath)
     headerFile = open(headerFilePath, 'w')
 
     writeLicenseHeader(headerFile)
@@ -40,8 +41,8 @@ def writeTcpHeaderFile():
     writeLine(headerFile)
     writeLine(headerFile, '#include <QObject>')
     writeLine(headerFile)
-    writeLine(headerFile, '#include "../modbus/modbusdatautils.h"')
-    writeLine(headerFile, '#include "../modbus/modbustcpmaster.h"')
+    writeLine(headerFile, '#include <modbusdatautils.h>')
+    writeLine(headerFile, '#include <modbustcpmaster.h>')
 
     writeLine(headerFile)
 
@@ -153,12 +154,12 @@ def writeTcpHeaderFile():
 
 
 def writeTcpSourceFile():
-    print('Writing modbus TCP source file %s' % sourceFilePath)
+    logger.info('Writing modbus TCP source file %s' % sourceFilePath)
     sourceFile = open(sourceFilePath, 'w')
     writeLicenseHeader(sourceFile)
     writeLine(sourceFile)
     writeLine(sourceFile, '#include "%s"' % headerFileName)
-    writeLine(sourceFile, '#include "loggingcategories.h"')
+    writeLine(sourceFile, '#include <loggingcategories.h>')
     writeLine(sourceFile)
     writeLine(sourceFile, 'NYMEA_LOGGING_CATEGORY(dc%s, "%s")' % (className, className))
     writeLine(sourceFile)
@@ -249,7 +250,7 @@ def writeTcpSourceFile():
 
 ##########################################################################################################
 def writeRtuHeaderFile():
-    print('Writing modbus TCP hader file %s' % headerFilePath)
+    logger.info('Writing modbus RTU header file %s' % headerFilePath)
     headerFile = open(headerFilePath, 'w')
 
     writeLicenseHeader(headerFile)
@@ -258,7 +259,7 @@ def writeRtuHeaderFile():
     writeLine(headerFile)
     writeLine(headerFile, '#include <QObject>')
     writeLine(headerFile)
-    writeLine(headerFile, '#include "../modbus/modbusdatautils.h"')
+    writeLine(headerFile, '#include <modbusdatautils.h>')
     writeLine(headerFile, '#include <hardware/modbus/modbusrtumaster.h>')
 
     writeLine(headerFile)
@@ -373,12 +374,12 @@ def writeRtuHeaderFile():
 
 
 def writeRtuSourceFile():
-    print('Writing modbus RTU source file %s' % sourceFilePath)
+    logger.info('Writing modbus RTU source file %s' % sourceFilePath)
     sourceFile = open(sourceFilePath, 'w')
     writeLicenseHeader(sourceFile)
 
     writeLine(sourceFile, '#include "%s"' % headerFileName)
-    writeLine(sourceFile, '#include "loggingcategories.h"')
+    writeLine(sourceFile, '#include <loggingcategories.h>')
     writeLine(sourceFile, '#include <math.h>')
     writeLine(sourceFile)
     writeLine(sourceFile, 'NYMEA_LOGGING_CATEGORY(dc%s, "%s")' % (className, className))
@@ -466,7 +467,6 @@ def writeRtuSourceFile():
     writeLine(sourceFile, '{')
     writeLine(sourceFile, '    debug.nospace().noquote() << "%s(" << %s->modbusRtuMaster()->modbusUuid().toString() << ", " << %s->modbusRtuMaster()->serialPort() << ", slave ID:" << %s->slaveId() << ")" << "\\n";' % (className, debugObjectParamName, debugObjectParamName, debugObjectParamName))
     writeRegistersDebugLine(sourceFile, debugObjectParamName, registerJson['registers'])
-
     if 'blocks' in registerJson:
         for blockDefinition in registerJson['blocks']:
             writeRegistersDebugLine(sourceFile, debugObjectParamName, blockDefinition['registers'])
@@ -482,34 +482,48 @@ def writeRtuSourceFile():
 # Main
 ############################################################################################
 
+logger = logging.getLogger('modbus-tools')
+logger.setLevel(logging.INFO)
+ch = logging.StreamHandler(sys.stdout)
+ch.setLevel(logging.INFO)
+formatter = logging.Formatter('%(name)s: %(message)s')
+ch.setFormatter(formatter)
+logger.addHandler(ch)
+
 parser = argparse.ArgumentParser(description='Generate modbus tcp connection class from JSON register definitions file.')
 parser.add_argument('-j', '--json', metavar='<file>', help='The JSON file containing the register definitions.')
 parser.add_argument('-o', '--output-directory', metavar='<directory>', help='The output directory for the resulting class.')
-parser.add_argument('-c', '--class-name', metavar='<name>', help='The name of the resulting class.')
+parser.add_argument('-v', '--verbose', dest='verboseOutput', action='store_true', help='More verbose output.')
 args = parser.parse_args()
 
 registerJson = loadJsonFile(args.json)
 scriptPath = os.path.dirname(os.path.realpath(sys.argv[0]))
 outputDirectory = os.path.realpath(args.output_directory)
-className = args.class_name
 
-headerFileName = className.lower() + '.h'
-sourceFileName = className.lower() + '.cpp'
+if not os.path.exists(outputDirectory):
+    logger.debug("Output directory does not exist. Creating directory %s", outputDirectory)
+    os.makedirs(outputDirectory)
 
-headerFilePath = os.path.join(outputDirectory, headerFileName)
-sourceFilePath = os.path.join(outputDirectory, sourceFileName)
+if args.verboseOutput:
+    logger.setLevel(logging.DEBUG)
+    ch.setLevel(logging.DEBUG)
 
-print('Scrip path: %s' % scriptPath)
-print('Output directory: %s' % outputDirectory)
-print('Class name: %s' % className)
-print('Header file: %s' % headerFileName)
-print('Source file: %s' % sourceFileName)
-print('Header file path: %s' % headerFilePath)
-print('Source file path: %s' % sourceFilePath)
+logger.debug("Verbose output enabled")
+
+if not 'className' in registerJson:
+    logger.warning('Classname missing. Please specify the classname in the json file or pass it to the generatori using -c .')
+    exit(1)
+
+classNamePrefix = registerJson['className']
 
 endianness = 'BigEndian'
 if 'endianness' in registerJson:
     endianness = registerJson['endianness']
+
+logger.debug('Scrip path: %s' % scriptPath)
+logger.debug('Output directory: %s' % outputDirectory)
+logger.debug('Class name prefix: %s' % classNamePrefix)
+logger.debug('Endianness: %s' % endianness)
 
 protocol = 'TCP'
 if 'protocol' in registerJson:
@@ -518,12 +532,77 @@ if 'protocol' in registerJson:
 if 'blocks' in registerJson:
     validateBlocks(registerJson['blocks'])
 
+# Create classes depending on the protocol
+writeTcp = True
+writeRtu = False
+
 if protocol == 'TCP':
+    writeTcp = True
+    writeRtu = False
+elif protocol == 'RTU':
+    writeTcp = False
+    writeRtu = True
+else:
+    # Any other value generates both classes
+    writeTcp = True
+    writeRtu = True
+
+headerFiles = []
+sourceFiles = []
+
+if writeTcp:
+    className = classNamePrefix + 'ModbusTcpConnection'
+    headerFileName = className.lower() + '.h'
+    headerFiles.append(headerFileName)
+    sourceFileName = className.lower() + '.cpp'
+    sourceFiles.append(sourceFileName)
+
+    headerFilePath = os.path.join(outputDirectory, headerFileName)
+    sourceFilePath = os.path.join(outputDirectory, sourceFileName)
+    logger.debug('=======================================================')
+    logger.debug('Class name: %s' % className)
+    logger.debug('Header file: %s' % headerFileName)
+    logger.debug('Source file: %s' % sourceFileName)
+    logger.debug('Header file path: %s' % headerFilePath)
+    logger.debug('Source file path: %s' % sourceFilePath)
     writeTcpHeaderFile()
     writeTcpSourceFile()
-else:
+
+if writeRtu:
+    className = classNamePrefix + 'ModbusRtuConnection'
+    headerFileName = className.lower() + '.h'
+    headerFiles.append(headerFileName)
+    sourceFileName = className.lower() + '.cpp'
+    sourceFiles.append(sourceFileName)
+    headerFilePath = os.path.join(outputDirectory, headerFileName)
+    sourceFilePath = os.path.join(outputDirectory, sourceFileName)
+    logger.debug('=======================================================')
+    logger.debug('Class name: %s' % className)
+    logger.debug('Header file: %s' % headerFileName)
+    logger.debug('Source file: %s' % sourceFileName)
+    logger.debug('Header file path: %s' % headerFilePath)
+    logger.debug('Source file path: %s' % sourceFilePath)
     writeRtuHeaderFile()
     writeRtuSourceFile()
 
+# Write pri file
+projectIncludeFileName = classNamePrefix.lower() + '.pri'
+projectIncludeFilePath = os.path.join(outputDirectory, projectIncludeFileName)
 
-
+logger.info('Writing connection project include file %s' % projectIncludeFileName)
+projectIncludeFile = open(projectIncludeFilePath, 'w')
+writeLine(projectIncludeFile, '# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #')
+writeLine(projectIncludeFile, '#')
+writeLine(projectIncludeFile, '# This file has been autogenerated.')
+writeLine(projectIncludeFile, '# Any changes in this file may be overwritten from qmake.')
+writeLine(projectIncludeFile, '#')
+writeLine(projectIncludeFile, '# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #')
+writeLine(projectIncludeFile)
+writeLine(projectIncludeFile, 'HEADERS = \\')
+for generatedHeaderFileName in headerFiles:
+    writeLine(projectIncludeFile, '    $${PWD}/%s \\' % generatedHeaderFileName)
+    
+writeLine(projectIncludeFile)
+writeLine(projectIncludeFile, "SOURCES = \\")
+for generatedSourceFileName in sourceFiles:
+    writeLine(projectIncludeFile, '    $${PWD}/%s \\' % generatedSourceFileName)
