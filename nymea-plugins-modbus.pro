@@ -2,7 +2,7 @@ TEMPLATE = subdirs
 
 # Note keep it ordered so the lib will be built first
 CONFIG += ordered
-SUBDIRS += libnymea-sunspec
+SUBDIRS += libnymea-modbus libnymea-sunspec
 
 PLUGIN_DIRS = \
     alphainnotec            \

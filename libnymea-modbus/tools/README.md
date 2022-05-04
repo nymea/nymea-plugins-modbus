@@ -14,7 +14,7 @@ The class will provide 2 main methods for fetching information from the modbus d
 * `initialize()` will read all registers with `"readSchedule": "init"` and emits the signal `initializationFinished()` once all replies returned.
 * `update()` can be used to update all registers with `"readSchedule": "update"`. The class will then fetch each register and update the specified value internally. If the value has changed, the `<propertyName>Changed()` signal will be emitted.
 
-The reulting class will inhert from the `ModbusTCPMaster` class, providing easy access to all possible modbus operations and inform about the connected state.
+The resulting class will inhert from the `ModbusTCPMaster` class, providing easy access to all possible modbus operations and inform about the connected state.
 
 
 # JSON format
@@ -23,7 +23,8 @@ The basic structure of the modbus register JSON looks like following example:
 
 ```
 {
-    "protocol": "TCP",
+    "className": "MyConnection",
+    "protocols": [ "TCP" ],
     "endianness": "BigEndian",
     "enums": [
         {
@@ -65,10 +66,64 @@ The basic structure of the modbus register JSON looks like following example:
             "access": "RO"
         },
         ...
+    ],
+    "blocks": [
+        {
+            "id": "blockName",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "registerOne",
+                    "address": 0,
+                    "size": 2,
+                    ...
+                },
+                {
+                    "id": "registerOne",
+                    "address": 0,
+                    "size": 2,
+                    ...
+                },
+                ...
+            ]
+        }
     ]
 }   
 
 ```
+
+## Class name
+
+If no name class name has been passed to the generator script, the classname defined in the JSON file will be used. 
+
+The naming convention for the classname and the resulting source code files looks like this:
+    
+The class will be defined as
+    
+    * `<ClassName><Protocol>Connection`.
+
+The source code files will be calld:
+
+    * `classnameprotocolconnection.h`
+    * `classnameprotocolconnection.cpp`
+
+
+
+## Protocol
+
+Depending on the communication protocol, a different base class will be used for the resulting output class.
+
+There are 2 protocol types:
+
+* `RTU`: a communication based on the RS485 serial RTU transport protocol
+* `TCP`: a communication based on the TCP transport protocol
+
+If the modbus device supports both protocols and you want to generate a class for each protocol you can set the protocol to `BOTH` and a class for `RTU` and one for `TCP` will be generated.  
+
+    ...
+    "protocol": "TCP",
+    ...
+
 
 ## Endianness
 
@@ -78,15 +133,6 @@ There are 2 possibilities:
 
 * `BigEndian`: default if not specified: register bytes come in following order `[0, 1, 2, 3]`: `ABCD`
 * `LittleEndian`: register bytes come in following order `[0, 1, 2, 3]`: `CDAB`
-
-## Protocol
-
-Depending on the communication protocol, a different base class will be used for the resulting output class.
-
-There are 2 possibilities:
-
-* `RTU`: a communication based on the RS485 serial RTU transport protocol
-* `TCP`: a communication based on the TCP transport protocol
 
 ## Enums
 
@@ -179,12 +225,12 @@ Example block:
 Change into your plugin sub directory.
 Assuming you wrote the registers.json file you can run now following command to generate your modbus class:
 
-`$ python3 ../modbus/tools/generate-connection.py -j registers.json -o . -c MyModbusConnection`
+`$ python3 ../modbus/tools/generate-connection.py -j registers.json -o . -c MyModbus`
 
 You the result will be a header and a source file called:
 
-* `mymodbusconnection.h`
-* `mymodbusconnection.cpp`
+* `mymodbustcpconnection.h`
+* `mymodbustcpconnection.cpp`
 
 You can include this class in your project and provide one connection per thing.
 

@@ -1,0 +1,114 @@
+{
+    "className": "Example",
+    "protocol": "BOTH",
+    "endianness": "BigEndian",
+    "enums": [
+        {
+            "name": "NameOfEnum",
+            "values": [
+                {
+                    "key": "EnumValue1",
+                    "value": 0
+                },
+                {
+                    "key": "EnumValue2",
+                    "value": 1
+                }
+            ]
+        }
+    ],
+    "registers": [
+        {
+            "id": "foo",
+            "address": 10,
+            "size": 2,
+            "type": "float",
+            "registerType": "inputRegister",
+            "readSchedule": "update",
+            "description": "Foo register",
+            "unit": "ValueUnit",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "bar",
+            "address": 20,
+            "size": 2,
+            "type": "float",
+            "registerType": "inputRegister",
+            "readSchedule": "update",
+            "description": "Bar register",
+            "unit": "ValueUnit",
+            "defaultValue": "0",
+            "access": "RO"
+        }
+    ],
+    "blocks": [
+        {
+            "id": "testBlock",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "A",
+                    "address": 0,
+                    "size": 2,
+                    "type": "float",
+                    "registerType": "inputRegister",
+                    "readSchedule": "update",
+                    "description": "A register",
+                    "unit": "X",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "B",
+                    "address": 2,
+                    "size": 2,
+                    "type": "float",
+                    "registerType": "inputRegister",
+                    "readSchedule": "update",
+                    "description": "B register",
+                    "unit": "X",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "C",
+                    "address": 4,
+                    "size": 2,
+                    "type": "float",
+                    "registerType": "inputRegister",
+                    "readSchedule": "update",
+                    "description": "C register",
+                    "unit": "X",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "D",
+                    "address": 6,
+                    "size": 2,
+                    "type": "float",
+                    "registerType": "inputRegister",
+                    "readSchedule": "update",
+                    "description": "D register",
+                    "unit": "X",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "E",
+                    "address": 8,
+                    "size": 2,
+                    "type": "float",
+                    "registerType": "inputRegister",
+                    "readSchedule": "update",
+                    "description": "E register",
+                    "unit": "X",
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        }
+    ]
+}

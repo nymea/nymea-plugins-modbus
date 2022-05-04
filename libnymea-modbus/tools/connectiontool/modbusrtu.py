@@ -14,6 +14,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+import logging
+
 from .toolcommon import * 
 
 ##############################################################
@@ -63,7 +65,7 @@ def writePropertyGetSetMethodImplementationsRtu(fileDescriptor, className, regis
             elif registerDefinition['registerType'] == 'coils':
                 writeLine(fileDescriptor, '    return m_modbusRtuMaster->writeCoils(m_slaveId, %s, values);' % (registerDefinition['address']))
             else:
-                print('Error: invalid register type for writing.')
+                logger.warning('Error: invalid register type for writing.')
                 exit(1)
 
             writeLine(fileDescriptor, '}')
@@ -222,7 +224,7 @@ def writeInternalBlockReadMethodDeclarationsRtu(fileDescriptor, blockDefinitions
                 writeLine(fileDescriptor, '      - %s [%s] - Address: %s, Size: %s' % (registerDefinition['description'], registerDefinition['unit'], registerDefinition['address'], registerDefinition['size']))
             else:
                 writeLine(fileDescriptor, '    -- %s - Address: %s, Size: %s' % (registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
-        writeLine(fileDescriptor, '    */ ' )
+        writeLine(fileDescriptor, '    */' )
         writeLine(fileDescriptor, '    ModbusRtuReply *readBlock%s();' % (blockName[0].upper() + blockName[1:]))
         writeLine(fileDescriptor)
 

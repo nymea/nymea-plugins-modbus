@@ -19,8 +19,10 @@ import re
 import sys
 import json
 import shutil
-import argparse
 import datetime
+import logging
+
+logger = logging.getLogger('modbus-tools')
 
 def convertToAlphaNumeric(text):
     finalText = ''
@@ -40,7 +42,7 @@ def convertToCamelCase(text, capitalize = False):
     s = convertToAlphaNumeric(text)
     s = s.replace("-", " ").replace("_", " ")
     words = s.split()
-    #print('--> words', words)
+    logger.debug('--> words', words)
     finalWords = []
 
     for i in range(len(words)):
@@ -48,7 +50,7 @@ def convertToCamelCase(text, capitalize = False):
         if len(camelCaseSplit) == 0:
             finalWords.append(words[i])  
         else:
-            #print('--> camel split words', camelCaseSplit)
+            logging.debug('Camel calse split words', camelCaseSplit)
             for j in range(len(camelCaseSplit)):
                 finalWords.append(camelCaseSplit[j])  
 
@@ -60,12 +62,12 @@ def convertToCamelCase(text, capitalize = False):
         finalText = finalWords[0].capitalize() + ''.join(i.capitalize() for i in finalWords[1:])
     else:
         finalText = finalWords[0].lower() + ''.join(i.capitalize() for i in finalWords[1:])
-    #print('Convert camel case:', text, '-->', finalText)
+    logging.debug('Convert camel case:', text, '-->', finalText)
     return finalText
 
 
 def loadJsonFile(filePath):
-    print('--> Loading JSON file', filePath)
+    logger.info('Loading JSON file %s', filePath)
     jsonFile = open(filePath, 'r')
     return json.load(jsonFile)
 
@@ -117,7 +119,7 @@ def writeLicenseHeader(fileDescriptor):
 
 
 def writeRegistersEnum(fileDescriptor, registerJson):
-    print('Writing enum for all registers')
+    logger.debug('Writing enum for all registers')
 
     registerEnums = {}
 
@@ -141,9 +143,9 @@ def writeRegistersEnum(fileDescriptor, registerJson):
     sortedRegistersKeys = sorted(registersKeys)
     sortedRegisterEnumList = []
 
-    print('Sorted registers')
+    logger.debug('Sorted registers')
     for registerAddress in sortedRegistersKeys:
-        print('--> %s : %s' % (registerAddress, registerEnums[registerAddress]))
+        logger.debug('--> %s : %s' % (registerAddress, registerEnums[registerAddress]))
         enumData = {}
         enumData['key'] = registerEnums[registerAddress]
         enumData['value'] = registerAddress
@@ -165,7 +167,7 @@ def writeRegistersEnum(fileDescriptor, registerJson):
 
 
 def writeEnumDefinition(fileDescriptor, enumDefinition):
-    print('Writing enum', enumDefinition)
+    logger.debug('Writing enum %s', enumDefinition)
     enumName = enumDefinition['name']
     enumValues = enumDefinition['values']
     writeLine(fileDescriptor, '    enum %s {' % enumName)
@@ -379,21 +381,21 @@ def validateBlocks(blockDefinitions):
                 previouseRegisterSize = blockRegisters[i - 1]['size']
                 previouseRegisterType = blockRegisters[i - 1]['registerType']
                 if previouseRegisterAddress + previouseRegisterSize != blockRegister['address']:
-                    print('Error: block %s has invalid register order in register %s. There seems to be a gap between the registers.' % (blockName, blockRegister['id']))
+                    logger.warning('Error: block %s has invalid register order in register %s. There seems to be a gap between the registers.' % (blockName, blockRegister['id']))
                     exit(1)
 
                 if blockRegister['access'] != registerAccess:
-                    print('Error: block %s has inconsistent register access in register %s. The block registers dont seem to have the same access rights.' % (blockName, blockRegister['id']))
+                    logger.warning('Error: block %s has inconsistent register access in register %s. The block registers dont seem to have the same access rights.' % (blockName, blockRegister['id']))
                     exit(1)
 
                 if blockRegister['registerType'] != registerType:
-                    print('Error: block %s has inconsistent register type in register %s. The block registers dont seem to be from the same type.' % (blockName, blockRegister['id']))
+                    logger.warning('Error: block %s has inconsistent register type in register %s. The block registers dont seem to be from the same type.' % (blockName, blockRegister['id']))
                     exit(1)
 
             registerCount += 1
             blockSize += blockRegister['size']
 
-        print('Define valid block \"%s\" starting at %s with length %s containing %s properties to read.' % (blockName, blockStartAddress, blockSize, registerCount))
+        logger.debug('Define valid block \"%s\" starting at %s with length %s containing %s properties to read.' % (blockName, blockStartAddress, blockSize, registerCount))
 
 
 def writeBlocksUpdateMethodDeclarations(fileDescriptor, blockDefinitions):
@@ -418,7 +420,7 @@ def writeBlocksUpdateMethodDeclarations(fileDescriptor, blockDefinitions):
                 writeLine(fileDescriptor, '      - %s [%s] - Address: %s, Size: %s' % (registerDefinition['description'], registerDefinition['unit'], registerDefinition['address'], registerDefinition['size']))
             else:
                 writeLine(fileDescriptor, '      - %s - Address: %s, Size: %s' % (registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
-        writeLine(fileDescriptor, '    */ ' )
+        writeLine(fileDescriptor, '    */' )
         writeLine(fileDescriptor, '    void update%sBlock();' % (blockName[0].upper() + blockName[1:]))
         writeLine(fileDescriptor)
 

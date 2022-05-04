@@ -63,7 +63,7 @@ def writePropertyGetSetMethodImplementationsTcp(fileDescriptor, className, regis
             elif registerDefinition['registerType'] == 'coils':
                 writeLine(fileDescriptor, '    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, %s, values.count());' % (registerDefinition['address']))
             else:
-                print('Error: invalid register type for writing.')
+                logger.warning('Error: invalid register type for writing.')
                 exit(1)
 
             writeLine(fileDescriptor, '    request.setValues(values);')
@@ -218,7 +218,7 @@ def writeInternalBlockReadMethodDeclarationsTcp(fileDescriptor, blockDefinitions
                 writeLine(fileDescriptor, '     - %s [%s] - Address: %s, Size: %s' % (registerDefinition['description'], registerDefinition['unit'], registerDefinition['address'], registerDefinition['size']))
             else:
                 writeLine(fileDescriptor, '     - %s - Address: %s, Size: %s' % (registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
-        writeLine(fileDescriptor, '    */ ' )
+        writeLine(fileDescriptor, '    */' )
         writeLine(fileDescriptor, '    QModbusReply *readBlock%s();' % (blockName[0].upper() + blockName[1:]))
         writeLine(fileDescriptor)
 
