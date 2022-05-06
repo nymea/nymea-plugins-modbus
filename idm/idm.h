@@ -33,7 +33,7 @@
 
 #include <QObject>
 
-#include "../modbus/modbustcpmaster.h"
+#include <modbustcpmaster.h>
 
 #include "idminfo.h"
 

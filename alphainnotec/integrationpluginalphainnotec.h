@@ -31,9 +31,10 @@
 #ifndef INTEGRATIONPLUGINALPHAINNOTEC_H
 #define INTEGRATIONPLUGINALPHAINNOTEC_H
 
-#include "plugintimer.h"
+#include <plugintimer.h>
+#include <integrations/integrationplugin.h>
+
 #include "alphainnotecmodbustcpconnection.h"
-#include "integrations/integrationplugin.h"
 
 class IntegrationPluginAlphaInnotec: public IntegrationPlugin
 {
