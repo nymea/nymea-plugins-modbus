@@ -31,14 +31,15 @@
 #ifndef INTEGRATIONPLUGINMODBUSCOMMANDER_H
 #define INTEGRATIONPLUGINMODBUSCOMMANDER_H
 
-#include "plugintimer.h"
-#include "integrations/integrationplugin.h"
-#include "hardware/modbus/modbusrtumaster.h"
+#include <plugintimer.h>
+#include <integrations/integrationplugin.h>
+#include <hardware/modbus/modbusrtumaster.h>
 
-#include "../modbus/modbustcpmaster.h"
+#include <modbustcpmaster.h>
 
-#include <QSerialPortInfo>
 #include <QUuid>
+#include <QSerialPort>
+#include <QSerialPortInfo>
 
 class IntegrationPluginModbusCommander: public IntegrationPlugin
 {
@@ -60,7 +61,6 @@ public:
 private:
     PluginTimer *m_refreshTimer = nullptr;
 
-    //QHash<Thing*, ModbusRTUMaster*> m_modbusRTUMasters;
     QHash<Thing*, ModbusTCPMaster*> m_modbusTCPMasters;
     QHash<Thing *, ModbusRtuMaster *> m_modbusRtuMasters;
     QHash<QUuid, ThingActionInfo*> m_asyncActions;
