@@ -32,7 +32,7 @@
 #define INTEGRATIONPLUGINALPHAINNOTEC_H
 
 #include "plugintimer.h"
-#include "alphaconnectmodbustcpconnection.h"
+#include "alphainnotecmodbustcpconnection.h"
 #include "integrations/integrationplugin.h"
 
 class IntegrationPluginAlphaInnotec: public IntegrationPlugin
@@ -54,7 +54,7 @@ public:
 
 private:
     PluginTimer *m_pluginTimer = nullptr;
-    QHash<Thing *, AlphaConnectModbusTcpConnection *> m_alpaConnectTcpThings;
+    QHash<Thing *, AlphaInnotecModbusTcpConnection *> m_connections;
 };
 
 #endif // INTEGRATIONPLUGINALPHAINNOTEC_H
