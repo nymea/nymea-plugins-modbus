@@ -30,7 +30,7 @@
 
 #include "idm.h"
 #include "extern-plugininfo.h"
-#include "../modbus/modbushelpers.h"
+#include "modbushelpers.h"
 
 #include <QTimer>
 
