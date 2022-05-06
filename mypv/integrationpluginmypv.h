@@ -31,10 +31,10 @@
 #ifndef INTEGRATIONPLUGINMYPV_H
 #define INTEGRATIONPLUGINMYPV_H
 
-#include "integrations/integrationplugin.h"
-#include "plugintimer.h"
+#include <integrations/integrationplugin.h>
+#include <plugintimer.h>
 
-#include "../modbus/modbustcpmaster.h"
+#include <modbustcpmaster.h>
 
 #include <QUdpSocket>
 #include <QUuid>
