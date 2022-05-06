@@ -1,14 +1,13 @@
 include(../plugins.pri)
 
-QT += serialport serialbus
+# Generate modbus connection
+MODBUS_CONNECTIONS += pro380-registers.json
+#MODBUS_TOOLS_CONFIG += VERBOSE
+include(../modbus.pri)
 
 HEADERS += \
-    integrationplugininepro.h \
-    pro380modbusrtuconnection.h \
-    ../modbus/modbusdatautils.h
+    integrationplugininepro.h
 
 SOURCES += \
-    integrationplugininepro.cpp \
-    pro380modbusrtuconnection.cpp \
-    ../modbus/modbusdatautils.cpp
+    integrationplugininepro.cpp
 

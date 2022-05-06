@@ -37,8 +37,6 @@
 
 #include "pro380modbusrtuconnection.h"
 
-#include "extern-plugininfo.h"
-
 #include <QObject>
 #include <QTimer>
 
@@ -59,8 +57,8 @@ public:
 
 private:
     PluginTimer *m_refreshTimer = nullptr;
+    QHash<Thing *, Pro380ModbusRtuConnection *> m_connections;
 
-    QHash<Thing *, Pro380ModbusRtuConnection *> m_pro380Connections;
 };
 
 #endif // INTEGRATIONPLUGININEPRO_H

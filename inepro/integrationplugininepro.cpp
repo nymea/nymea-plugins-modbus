@@ -45,7 +45,7 @@ void IntegrationPluginInepro::init()
                 qCWarning(dcInepro()) << "Modbus RTU hardware resource removed for" << thing << ". The thing will not be functional any more until a new resource has been configured for it.";
                 thing->setStateValue(pro380ConnectedStateTypeId, false);
 
-                delete m_pro380Connections.take(thing);
+                delete m_connections.take(thing);
             }
         }
     });
@@ -101,9 +101,9 @@ void IntegrationPluginInepro::setupThing(ThingSetupInfo *info)
         return;
     }
 
-    if (m_pro380Connections.contains(thing)) {
+    if (m_connections.contains(thing)) {
         qCDebug(dcInepro()) << "Setup after rediscovery, cleaning up ...";
-        m_pro380Connections.take(thing)->deleteLater();
+        m_connections.take(thing)->deleteLater();
     }
 
     Pro380ModbusRtuConnection *proConnection = new Pro380ModbusRtuConnection(hardwareManager()->modbusRtuResource()->getModbusRtuMaster(uuid), address, this);
@@ -194,7 +194,7 @@ void IntegrationPluginInepro::setupThing(ThingSetupInfo *info)
 
 
     // FIXME: try to read before setup success
-    m_pro380Connections.insert(thing, proConnection);
+    m_connections.insert(thing, proConnection);
     info->finish(Thing::ThingErrorNoError);
 }
 
@@ -205,7 +205,7 @@ void IntegrationPluginInepro::postSetupThing(Thing *thing)
         m_refreshTimer = hardwareManager()->pluginTimerManager()->registerTimer(2);
         connect(m_refreshTimer, &PluginTimer::timeout, this, [this] {
             foreach (Thing *thing, myThings()) {
-                m_pro380Connections.value(thing)->update();
+                m_connections.value(thing)->update();
             }
         });
 
@@ -218,8 +218,8 @@ void IntegrationPluginInepro::thingRemoved(Thing *thing)
 {
     qCDebug(dcInepro()) << "Thing removed" << thing->name();
 
-    if (m_pro380Connections.contains(thing))
-        m_pro380Connections.take(thing)->deleteLater();
+    if (m_connections.contains(thing))
+        m_connections.take(thing)->deleteLater();
 
     if (myThings().isEmpty() && m_refreshTimer) {
         qCDebug(dcInepro()) << "Stopping reconnect timer";
