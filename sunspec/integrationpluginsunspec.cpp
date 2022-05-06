@@ -28,9 +28,10 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "plugininfo.h"
 #include "integrationpluginsunspec.h"
-#include "network/networkdevicediscovery.h"
+#include "plugininfo.h"
+
+#include <network/networkdevicediscovery.h>
 
 #include <sunspecmodel.h>
 #include <models/sunspecmodelfactory.h>

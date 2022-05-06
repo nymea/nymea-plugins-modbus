@@ -31,8 +31,8 @@
 #ifndef INTEGRATIONPLUGINSUNSPEC_H
 #define INTEGRATIONPLUGINSUNSPEC_H
 
-#include "integrations/integrationplugin.h"
-#include "plugintimer.h"
+#include <integrations/integrationplugin.h>
+#include <plugintimer.h>
 
 #include <sunspecconnection.h>
 #include <models/sunspecmodelfactory.h>

@@ -31,9 +31,9 @@
 #include "integrationplugindrexelundweiss.h"
 #include "plugininfo.h"
 
-#include "hardwaremanager.h"
-#include "hardware/modbus/modbusrtumaster.h"
-#include "hardware/modbus/modbusrtuhardwareresource.h"
+#include <hardwaremanager.h>
+#include <hardware/modbus/modbusrtumaster.h>
+#include <hardware/modbus/modbusrtuhardwareresource.h>
 
 IntegrationPluginDrexelUndWeiss::IntegrationPluginDrexelUndWeiss()
 {
