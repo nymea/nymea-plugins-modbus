@@ -31,8 +31,9 @@
 #ifndef INTEGRATIONPLUGINIDM_H
 #define INTEGRATIONPLUGINIDM_H
 
-#include "integrations/integrationplugin.h"
-#include "plugintimer.h"
+#include <integrations/integrationplugin.h>
+#include <plugintimer.h>
+
 #include "idm.h"
 
 #include <QUuid>
