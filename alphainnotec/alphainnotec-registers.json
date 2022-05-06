@@ -1,4 +1,6 @@
 {
+    "className": "AlphaInnotec",
+    "protocol": "TCP",
     "endianness": "BigEndian",
     "enums": [
         {
@@ -397,5 +399,6 @@
             "defaultValue": "SmartGridStateStandard",
             "access": "RW"
         }
-    ]
+    ],
+    "blocks": [ ]
 }
