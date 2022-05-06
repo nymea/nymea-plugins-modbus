@@ -28,7 +28,8 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "network/networkdevicediscovery.h"
+#include <network/networkdevicediscovery.h>
+
 #include "integrationpluginmtec.h"
 #include "plugininfo.h"
 
