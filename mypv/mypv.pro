@@ -1,13 +1,8 @@
 include(../plugins.pri)
-
-QT += \
-    network \
-    serialbus \
+include(../modbus.pri)
 
 SOURCES += \
-    integrationpluginmypv.cpp \
-    ../modbus/modbustcpmaster.cpp \
+    integrationpluginmypv.cpp
 
 HEADERS += \
-    integrationpluginmypv.h \
-    ../modbus/modbustcpmaster.h \
+    integrationpluginmypv.h
