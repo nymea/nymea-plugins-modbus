@@ -30,8 +30,8 @@
 #ifndef INTEGRATIONPLUGINMTEC_H
 #define INTEGRATIONPLUGINMTEC_H
 
-#include "integrations/integrationplugin.h"
-#include "plugintimer.h"
+#include <integrations/integrationplugin.h>
+#include <plugintimer.h>
 
 #include "mtec.h"
 
