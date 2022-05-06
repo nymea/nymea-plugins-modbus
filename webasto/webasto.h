@@ -36,7 +36,7 @@
 #include <QTimer>
 #include <QUuid>
 
-#include "../modbus/modbustcpmaster.h"
+#include <modbustcpmaster.h>
 
 class Webasto : public QObject
 {
