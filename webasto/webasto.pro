@@ -1,13 +1,10 @@
 include(../plugins.pri)
-
-QT += serialbus network
+include(../modbus.pri)
 
 SOURCES += \
     integrationpluginwebasto.cpp \
-    webasto.cpp \
-    ../modbus/modbustcpmaster.cpp
+    webasto.cpp
 
 HEADERS += \
     integrationpluginwebasto.h \
-    webasto.h \
-    ../modbus/modbustcpmaster.h
+    webasto.h
