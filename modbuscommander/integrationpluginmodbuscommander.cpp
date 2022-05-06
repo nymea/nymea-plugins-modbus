@@ -31,12 +31,10 @@
 #include "integrationpluginmodbuscommander.h"
 #include "plugininfo.h"
 
-#include "hardwaremanager.h"
-#include "network/networkdevicediscovery.h"
-#include "hardware/modbus/modbusrtumaster.h"
-#include "hardware/modbus/modbusrtuhardwareresource.h"
-
-#include <QSerialPort>
+#include <hardwaremanager.h>
+#include <network/networkdevicediscovery.h>
+#include <hardware/modbus/modbusrtumaster.h>
+#include <hardware/modbus/modbusrtuhardwareresource.h>
 
 IntegrationPluginModbusCommander::IntegrationPluginModbusCommander()
 {
