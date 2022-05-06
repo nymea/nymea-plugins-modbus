@@ -31,10 +31,10 @@
 #ifndef INTEGRATIONPLUGINWALLBE_H
 #define INTEGRATIONPLUGINWALLBE_H
 
-#include "integrations/integrationplugin.h"
-#include "plugintimer.h"
+#include <integrations/integrationplugin.h>
+#include <plugintimer.h>
 
-#include "../modbus/modbustcpmaster.h"
+#include <modbustcpmaster.h>
 
 #include <QObject>
 #include <QHostAddress>

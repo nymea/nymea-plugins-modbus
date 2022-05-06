@@ -1,13 +1,8 @@
 include(../plugins.pri)
-
-QT += \ 
-    network \
-    serialbus \
+include(../modbus.pri)
 
 SOURCES += \
-    integrationpluginwallbe.cpp \
-    ../modbus/modbustcpmaster.cpp
+    integrationpluginwallbe.cpp
 
 HEADERS += \
-    integrationpluginwallbe.h \
-    ../modbus/modbustcpmaster.h
+    integrationpluginwallbe.h
