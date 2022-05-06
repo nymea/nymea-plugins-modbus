@@ -1,14 +1,13 @@
 include(../plugins.pri)
 
-QT += serialport serialbus
+# Generate modbus connection
+MODBUS_CONNECTIONS += sdm630-registers.json
+#MODBUS_TOOLS_CONFIG += VERBOSE
+include(../modbus.pri)
 
 HEADERS += \
-    integrationpluginbgetech.h \
-    sdm630modbusrtuconnection.h \
-    ../modbus/modbusdatautils.h
+    integrationpluginbgetech.h
 
 SOURCES += \
-    integrationpluginbgetech.cpp \
-    sdm630modbusrtuconnection.cpp \
-    ../modbus/modbusdatautils.cpp
+    integrationpluginbgetech.cpp
 
