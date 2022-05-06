@@ -34,7 +34,7 @@
 #include <QDateTime>
 #include <QObject>
 
-#include "../modbus/modbustcpmaster.h"
+#include <modbustcpmaster.h>
 
 class MTec : public QObject
 {
