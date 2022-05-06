@@ -1,17 +1,14 @@
 include(../plugins.pri)
 
-QT += network serialbus
+# Generate modbus connection
+MODBUS_CONNECTIONS += huawei-registers.json
+#MODBUS_TOOLS_CONFIG += VERBOSE
+include(../modbus.pri)
 
 HEADERS += \
     huaweifusionsolar.h \
-    huaweimodbustcpconnection.h \
-    integrationpluginhuawei.h \
-    ../modbus/modbustcpmaster.h \
-    ../modbus/modbusdatautils.h
+    integrationpluginhuawei.h
 
 SOURCES += \
     huaweifusionsolar.cpp \
-    huaweimodbustcpconnection.cpp \
-    integrationpluginhuawei.cpp \
-    ../modbus/modbustcpmaster.cpp \
-    ../modbus/modbusdatautils.cpp
+    integrationpluginhuawei.cpp

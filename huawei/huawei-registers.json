@@ -1,4 +1,5 @@
 {
+    "className": "Huawei",
     "protocol": "TCP",
     "endianness": "BigEndian",
     "enums": [
