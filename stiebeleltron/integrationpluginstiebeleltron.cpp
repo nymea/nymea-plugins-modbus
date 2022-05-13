@@ -29,10 +29,10 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "integrationpluginstiebeleltron.h"
-
-#include "hardwaremanager.h"
-#include "network/networkdevicediscovery.h"
 #include "plugininfo.h"
+
+#include <hardwaremanager.h>
+#include <network/networkdevicediscovery.h>
 
 IntegrationPluginStiebelEltron::IntegrationPluginStiebelEltron() {}
 
@@ -98,10 +98,10 @@ void IntegrationPluginStiebelEltron::setupThing(ThingSetupInfo *info) {
         quint16 port = thing->paramValue(stiebelEltronThingPortParamTypeId).toUInt();
         quint16 slaveId = thing->paramValue(stiebelEltronThingSlaveIdParamTypeId).toUInt();
 
-        StiebelEltronModbusConnection *connection =
-            new StiebelEltronModbusConnection(address, port, slaveId, this);
+        StiebelEltronModbusTcpConnection *connection =
+            new StiebelEltronModbusTcpConnection(address, port, slaveId, this);
 
-        connect(connection, &StiebelEltronModbusConnection::connectionStateChanged, thing,
+        connect(connection, &StiebelEltronModbusTcpConnection::connectionStateChanged, thing,
                 [thing, connection](bool status) {
                     qCDebug(dcStiebelEltron()) << "Connected changed to" << status << "for" << thing;
                     if (status) {
@@ -111,28 +111,28 @@ void IntegrationPluginStiebelEltron::setupThing(ThingSetupInfo *info) {
                     thing->setStateValue(stiebelEltronConnectedStateTypeId, status);
                 });
 
-        connect(connection, &StiebelEltronModbusConnection::outdoorTemperatureChanged, thing,
+        connect(connection, &StiebelEltronModbusTcpConnection::outdoorTemperatureChanged, thing,
                 [thing](float outdoorTemperature) {
                     qCDebug(dcStiebelEltron())
                         << thing << "outdoor temperature changed" << outdoorTemperature << "°C";
                     thing->setStateValue(stiebelEltronOutdoorTemperatureStateTypeId, outdoorTemperature);
                 });
 
-        connect(connection, &StiebelEltronModbusConnection::flowTemperatureChanged, thing,
+        connect(connection, &StiebelEltronModbusTcpConnection::flowTemperatureChanged, thing,
                 [thing](float flowTemperature) {
                     qCDebug(dcStiebelEltron())
                         << thing << "flow temperature changed" << flowTemperature << "°C";
                     thing->setStateValue(stiebelEltronFlowTemperatureStateTypeId, flowTemperature);
                 });
 
-        connect(connection, &StiebelEltronModbusConnection::hotWaterTemperatureChanged, thing,
+        connect(connection, &StiebelEltronModbusTcpConnection::hotWaterTemperatureChanged, thing,
                 [thing](float hotWaterTemperature) {
                     qCDebug(dcStiebelEltron())
                         << thing << "hot water temperature changed" << hotWaterTemperature << "°C";
                     thing->setStateValue(stiebelEltronHotWaterTemperatureStateTypeId, hotWaterTemperature);
                 });
 
-        connect(connection, &StiebelEltronModbusConnection::storageTankTemperatureChanged, thing,
+        connect(connection, &StiebelEltronModbusTcpConnection::storageTankTemperatureChanged, thing,
                 [thing](float storageTankTemperature) {
                     qCDebug(dcStiebelEltron())
                         << thing << "Storage tank temperature changed" << storageTankTemperature << "°C";
@@ -140,14 +140,14 @@ void IntegrationPluginStiebelEltron::setupThing(ThingSetupInfo *info) {
                                          storageTankTemperature);
                 });
 
-        connect(connection, &StiebelEltronModbusConnection::returnTemperatureChanged, thing,
+        connect(connection, &StiebelEltronModbusTcpConnection::returnTemperatureChanged, thing,
                 [thing](float returnTemperature) {
                     qCDebug(dcStiebelEltron())
                         << thing << "return temperature changed" << returnTemperature << "°C";
                     thing->setStateValue(stiebelEltronReturnTemperatureStateTypeId, returnTemperature);
                 });
 
-        connect(connection, &StiebelEltronModbusConnection::heatingEnergyChanged, thing,
+        connect(connection, &StiebelEltronModbusTcpConnection::heatingEnergyChanged, thing,
                 [thing](quint32 heatingEnergy) {
                     // kWh and MWh of energy are stored in two registers an read as
                     // an uint32. The following arithmetic splits the uint32 into
@@ -158,7 +158,7 @@ void IntegrationPluginStiebelEltron::setupThing(ThingSetupInfo *info) {
                     thing->setStateValue(stiebelEltronHeatingEnergyStateTypeId, correctedEnergy);
                 });
 
-        connect(connection, &StiebelEltronModbusConnection::hotWaterEnergyChanged, thing,
+        connect(connection, &StiebelEltronModbusTcpConnection::hotWaterEnergyChanged, thing,
                 [thing](quint32 hotWaterEnergy) {
                     // see comment in heatingEnergyChanged
                     quint32 correctedEnergy = (hotWaterEnergy >> 16) + (hotWaterEnergy & 0xFFFF) * 1000;
@@ -167,7 +167,7 @@ void IntegrationPluginStiebelEltron::setupThing(ThingSetupInfo *info) {
                     thing->setStateValue(stiebelEltronHotWaterEnergyStateTypeId, correctedEnergy);
                 });
 
-        connect(connection, &StiebelEltronModbusConnection::consumedEnergyHeatingChanged, thing,
+        connect(connection, &StiebelEltronModbusTcpConnection::consumedEnergyHeatingChanged, thing,
                 [thing](quint32 consumedEnergyHeatingEnergy) {
                     // see comment in heatingEnergyChanged
                     quint32 correctedEnergy =
@@ -177,7 +177,7 @@ void IntegrationPluginStiebelEltron::setupThing(ThingSetupInfo *info) {
                     thing->setStateValue(stiebelEltronConsumedEnergyHeatingStateTypeId, correctedEnergy);
                 });
 
-        connect(connection, &StiebelEltronModbusConnection::consumedEnergyHotWaterChanged, thing,
+        connect(connection, &StiebelEltronModbusTcpConnection::consumedEnergyHotWaterChanged, thing,
                 [thing](quint32 consumedEnergyHotWaterEnergy) {
                     // see comment in heatingEnergyChanged
                     quint32 correctedEnergy =
@@ -187,32 +187,32 @@ void IntegrationPluginStiebelEltron::setupThing(ThingSetupInfo *info) {
                     thing->setStateValue(stiebelEltronConsumedEnergyHotWaterStateTypeId, correctedEnergy);
                 });
 
-        connect(connection, &StiebelEltronModbusConnection::operatingModeChanged, thing,
-                [thing](StiebelEltronModbusConnection::OperatingMode operatingMode) {
+        connect(connection, &StiebelEltronModbusTcpConnection::operatingModeChanged, thing,
+                [thing](StiebelEltronModbusTcpConnection::OperatingMode operatingMode) {
                     qCDebug(dcStiebelEltron()) << thing << "operating mode changed " << operatingMode;
                     switch (operatingMode) {
-                        case StiebelEltronModbusConnection::OperatingModeEmergency:
+                        case StiebelEltronModbusTcpConnection::OperatingModeEmergency:
                             thing->setStateValue(stiebelEltronOperatingModeStateTypeId, "Emergency");
                             break;
-                        case StiebelEltronModbusConnection::OperatingModeStandby:
+                        case StiebelEltronModbusTcpConnection::OperatingModeStandby:
                             thing->setStateValue(stiebelEltronOperatingModeStateTypeId, "Standby");
                             break;
-                        case StiebelEltronModbusConnection::OperatingModeProgram:
+                        case StiebelEltronModbusTcpConnection::OperatingModeProgram:
                             thing->setStateValue(stiebelEltronOperatingModeStateTypeId, "Program");
                             break;
-                        case StiebelEltronModbusConnection::OperatingModeComfort:
+                        case StiebelEltronModbusTcpConnection::OperatingModeComfort:
                             thing->setStateValue(stiebelEltronOperatingModeStateTypeId, "Comfort");
                             break;
-                        case StiebelEltronModbusConnection::OperatingModeEco:
+                        case StiebelEltronModbusTcpConnection::OperatingModeEco:
                             thing->setStateValue(stiebelEltronOperatingModeStateTypeId, "Eco");
                             break;
-                        case StiebelEltronModbusConnection::OperatingModeHotWater:
+                        case StiebelEltronModbusTcpConnection::OperatingModeHotWater:
                             thing->setStateValue(stiebelEltronOperatingModeStateTypeId, "Hot water");
                             break;
                     }
                 });
 
-        connect(connection, &StiebelEltronModbusConnection::systemStatusChanged, thing,
+        connect(connection, &StiebelEltronModbusTcpConnection::systemStatusChanged, thing,
                 [thing](uint16_t systemStatus) {
                     qCDebug(dcStiebelEltron()) << thing << "System status changed " << systemStatus;
                     thing->setStateValue(stiebelEltronPumpOneStateTypeId, systemStatus & (1 << 0));
@@ -229,25 +229,25 @@ void IntegrationPluginStiebelEltron::setupThing(ThingSetupInfo *info) {
                     thing->setStateValue(stiebelEltronSilentMode2StateTypeId, systemStatus & (1 << 11));
                 });
 
-        connect(connection, &StiebelEltronModbusConnection::sgReadyStateChanged, thing,
-                [thing](StiebelEltronModbusConnection::SmartGridState smartGridState) {
+        connect(connection, &StiebelEltronModbusTcpConnection::sgReadyStateChanged, thing,
+                [thing](StiebelEltronModbusTcpConnection::SmartGridState smartGridState) {
                     qCDebug(dcStiebelEltron()) << thing << "SG Ready mode changed" << smartGridState;
                     switch (smartGridState) {
-                        case StiebelEltronModbusConnection::SmartGridStateModeOne:
+                        case StiebelEltronModbusTcpConnection::SmartGridStateModeOne:
                             thing->setStateValue(stiebelEltronSgReadyModeStateTypeId, "Off");
                             break;
-                        case StiebelEltronModbusConnection::SmartGridStateModeTwo:
+                        case StiebelEltronModbusTcpConnection::SmartGridStateModeTwo:
                             thing->setStateValue(stiebelEltronSgReadyModeStateTypeId, "Low");
                             break;
-                        case StiebelEltronModbusConnection::SmartGridStateModeThree:
+                        case StiebelEltronModbusTcpConnection::SmartGridStateModeThree:
                             thing->setStateValue(stiebelEltronSgReadyModeStateTypeId, "Standard");
                             break;
-                        case StiebelEltronModbusConnection::SmartGridStateModeFour:
+                        case StiebelEltronModbusTcpConnection::SmartGridStateModeFour:
                             thing->setStateValue(stiebelEltronSgReadyModeStateTypeId, "High");
                             break;
                     }
                 });
-        connect(connection, &StiebelEltronModbusConnection::sgReadyActiveChanged, thing,
+        connect(connection, &StiebelEltronModbusTcpConnection::sgReadyActiveChanged, thing,
                 [thing](bool smartGridActive) {
                     qCDebug(dcStiebelEltron()) << thing << "SG Ready activation changed" << smartGridActive;
                     thing->setStateValue(stiebelEltronSgReadyActiveStateTypeId, smartGridActive);
@@ -266,7 +266,7 @@ void IntegrationPluginStiebelEltron::postSetupThing(Thing *thing) {
             qCDebug(dcStiebelEltron()) << "Starting plugin timer...";
             m_pluginTimer = hardwareManager()->pluginTimerManager()->registerTimer(10);
             connect(m_pluginTimer, &PluginTimer::timeout, this, [this] {
-                foreach (StiebelEltronModbusConnection *connection, m_connections) {
+                foreach (StiebelEltronModbusTcpConnection *connection, m_connections) {
                     if (connection->connected()) {
                         connection->update();
                     }
@@ -291,7 +291,7 @@ void IntegrationPluginStiebelEltron::thingRemoved(Thing *thing) {
 
 void IntegrationPluginStiebelEltron::executeAction(ThingActionInfo *info) {
     Thing *thing = info->thing();
-    StiebelEltronModbusConnection *connection = m_connections.value(thing);
+    StiebelEltronModbusTcpConnection *connection = m_connections.value(thing);
 
     if (!connection->connected()) {
         qCWarning(dcStiebelEltron()) << "Could not execute action. The modbus connection is currently "
@@ -345,15 +345,15 @@ void IntegrationPluginStiebelEltron::executeAction(ThingActionInfo *info) {
             info->action().paramValue(stiebelEltronSgReadyModeActionSgReadyModeParamTypeId).toString();
         qCDebug(dcStiebelEltron()) << "Execute action" << info->action().actionTypeId().toString()
                                    << info->action().params();
-        StiebelEltronModbusConnection::SmartGridState sgReadyState;
+        StiebelEltronModbusTcpConnection::SmartGridState sgReadyState;
         if (sgReadyModeString == "Off") {
-            sgReadyState = StiebelEltronModbusConnection::SmartGridStateModeOne;
+            sgReadyState = StiebelEltronModbusTcpConnection::SmartGridStateModeOne;
         } else if (sgReadyModeString == "Low") {
-            sgReadyState = StiebelEltronModbusConnection::SmartGridStateModeTwo;
+            sgReadyState = StiebelEltronModbusTcpConnection::SmartGridStateModeTwo;
         } else if (sgReadyModeString == "Standard") {
-            sgReadyState = StiebelEltronModbusConnection::SmartGridStateModeThree;
+            sgReadyState = StiebelEltronModbusTcpConnection::SmartGridStateModeThree;
         } else if (sgReadyModeString == "High") {
-            sgReadyState = StiebelEltronModbusConnection::SmartGridStateModeFour;
+            sgReadyState = StiebelEltronModbusTcpConnection::SmartGridStateModeFour;
         } else {
             qCWarning(dcStiebelEltron())
                 << "Failed to set SG Ready mode. An unknown SG Ready mode was passed: " << sgReadyModeString;

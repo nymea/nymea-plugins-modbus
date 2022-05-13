@@ -1,16 +1,13 @@
 include(../plugins.pri)
 
-QT += network serialbus
+# Generate modbus connection
+MODBUS_CONNECTIONS += stiebel-eltron-registers.json
+#MODBUS_TOOLS_CONFIG += VERBOSE
+include(../modbus.pri)
 
 HEADERS += \
-    integrationpluginstiebeleltron.h \
-    stiebeleltronmodbusconnection.h \
-    ../modbus/modbustcpmaster.h \
-    ../modbus/modbusdatautils.h
+    integrationpluginstiebeleltron.h
 
 SOURCES += \
-    integrationpluginstiebeleltron.cpp \
-    stiebeleltronmodbusconnection.cpp \
-    ../modbus/modbustcpmaster.cpp \
-    ../modbus/modbusdatautils.cpp
+    integrationpluginstiebeleltron.cpp
 

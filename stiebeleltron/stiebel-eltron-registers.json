@@ -1,4 +1,5 @@
 {
+    "className": "StiebelEltron",
     "protocol": "TCP",
     "endianness": "BigEndian",
     "enums": [
@@ -319,5 +320,6 @@
             "defaultValue": "SmartGridStateModeThree",
             "access": "RW" 
         }
-    ]
+    ],
+    "blocks": [ ]
 }

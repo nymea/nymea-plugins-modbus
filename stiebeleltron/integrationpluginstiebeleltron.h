@@ -31,9 +31,10 @@
 #ifndef INTEGRATIONPLUGINSTIEBELELTRON_H
 #define INTEGRATIONPLUGINSTIEBELELTRON_H
 
-#include "plugintimer.h"
-#include "integrations/integrationplugin.h"
-#include "stiebeleltronmodbusconnection.h"
+#include <plugintimer.h>
+#include <integrations/integrationplugin.h>
+
+#include "stiebeleltronmodbustcpconnection.h"
 
 class IntegrationPluginStiebelEltron: public IntegrationPlugin
 {
@@ -55,7 +56,7 @@ public:
 private:
     PluginTimer *m_pluginTimer = nullptr;
 
-    QHash<Thing *, StiebelEltronModbusConnection *> m_connections;
+    QHash<Thing *, StiebelEltronModbusTcpConnection *> m_connections;
 
 
 };
