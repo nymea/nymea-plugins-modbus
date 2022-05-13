@@ -1,4 +1,5 @@
 {
+    "className": "Cion",
     "protocol": "RTU",
     "endianness": "LittleEndian",
     "blocks": [
