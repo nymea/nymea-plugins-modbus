@@ -105,10 +105,9 @@ void HuaweiFusionSolar::readNextRegister()
 
                 connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
                     qCWarning(dcHuaweiFusionSolar()) << "Modbus reply error occurred while updating \"Inverter active power\" registers from" << hostAddress().toString() << error << reply->errorString();
-                    emit reply->finished(); // To make sure it will be deleted
                 });
             } else {
-                delete reply; // Broadcast reply returns immediatly
+                reply->deleteLater(); // Broadcast reply returns immediatly
                 finishRequest();
             }
         } else {
@@ -137,10 +136,9 @@ void HuaweiFusionSolar::readNextRegister()
 
                 connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
                     qCWarning(dcHuaweiFusionSolar()) << "Modbus reply error occurred while updating \"Inverter device status\" registers from" << hostAddress().toString() << error << reply->errorString();
-                    emit reply->finished(); // To make sure it will be deleted
                 });
             } else {
-                delete reply; // Broadcast reply returns immediatly
+                reply->deleteLater(); // Broadcast reply returns immediatly
                 finishRequest();
             }
         } else {
@@ -168,10 +166,9 @@ void HuaweiFusionSolar::readNextRegister()
 
                 connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
                     qCWarning(dcHuaweiFusionSolar()) << "Modbus reply error occurred while updating \"Inverter energy produced\" registers from" << hostAddress().toString() << error << reply->errorString();
-                    emit reply->finished(); // To make sure it will be deleted
                 });
             } else {
-                delete reply; // Broadcast reply returns immediatly
+                reply->deleteLater(); // Broadcast reply returns immediatly
                 finishRequest();
             }
         } else {
@@ -205,10 +202,9 @@ void HuaweiFusionSolar::readNextRegister()
 
                 connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
                     qCWarning(dcHuaweiFusionSolar()) << "Modbus reply error occurred while updating \"Luna 2000 Battery 1 status\" registers from" << hostAddress().toString() << error << reply->errorString();
-                    emit reply->finished(); // To make sure it will be deleted
                 });
             } else {
-                delete reply; // Broadcast reply returns immediatly
+                reply->deleteLater(); // Broadcast reply returns immediatly
                 finishRequest();
             }
         } else {
@@ -236,10 +232,9 @@ void HuaweiFusionSolar::readNextRegister()
 
                 connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
                     qCWarning(dcHuaweiFusionSolar()) << "Modbus reply error occurred while updating \"Luna 2000 Battery 1 power\" registers from" << hostAddress().toString() << error << reply->errorString();
-                    emit reply->finished(); // To make sure it will be deleted
                 });
             } else {
-                delete reply; // Broadcast reply returns immediatly
+                reply->deleteLater(); // Broadcast reply returns immediatly
                 finishRequest();
             }
         } else {
@@ -267,10 +262,9 @@ void HuaweiFusionSolar::readNextRegister()
 
                 connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
                     qCWarning(dcHuaweiFusionSolar()) << "Modbus reply error occurred while updating \"Luna 2000 Battery 1 state of charge\" registers from" << hostAddress().toString() << error << reply->errorString();
-                    emit reply->finished(); // To make sure it will be deleted
                 });
             } else {
-                delete reply; // Broadcast reply returns immediatly
+                reply->deleteLater(); // Broadcast reply returns immediatly
                 finishRequest();
             }
         } else {
@@ -298,10 +292,9 @@ void HuaweiFusionSolar::readNextRegister()
 
                 connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
                     qCWarning(dcHuaweiFusionSolar()) << "Modbus reply error occurred while updating \"Power meter active power\" registers from" << hostAddress().toString() << error << reply->errorString();
-                    emit reply->finished(); // To make sure it will be deleted
                 });
             } else {
-                delete reply; // Broadcast reply returns immediatly
+                reply->deleteLater(); // Broadcast reply returns immediatly
                 finishRequest();
             }
         } else {
@@ -335,10 +328,9 @@ void HuaweiFusionSolar::readNextRegister()
 
                 connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
                     qCWarning(dcHuaweiFusionSolar()) << "Modbus reply error occurred while updating \"Luna 2000 Battery 2 status\" registers from" << hostAddress().toString() << error << reply->errorString();
-                    emit reply->finished(); // To make sure it will be deleted
                 });
             } else {
-                delete reply; // Broadcast reply returns immediatly
+                reply->deleteLater(); // Broadcast reply returns immediatly
                 finishRequest();
             }
         } else {
@@ -366,10 +358,9 @@ void HuaweiFusionSolar::readNextRegister()
 
                 connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
                     qCWarning(dcHuaweiFusionSolar()) << "Modbus reply error occurred while updating \"Luna 2000 Battery 2 power\" registers from" << hostAddress().toString() << error << reply->errorString();
-                    emit reply->finished(); // To make sure it will be deleted
                 });
             } else {
-                delete reply; // Broadcast reply returns immediatly
+                reply->deleteLater(); // Broadcast reply returns immediatly
                 finishRequest();
             }
         } else {
@@ -397,10 +388,9 @@ void HuaweiFusionSolar::readNextRegister()
 
                 connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
                     qCWarning(dcHuaweiFusionSolar()) << "Modbus reply error occurred while updating \"Luna 2000 Battery 2 state of charge\" registers from" << hostAddress().toString() << error << reply->errorString();
-                    emit reply->finished(); // To make sure it will be deleted
                 });
             } else {
-                delete reply; // Broadcast reply returns immediatly
+                reply->deleteLater(); // Broadcast reply returns immediatly
                 finishRequest();
             }
         } else {
