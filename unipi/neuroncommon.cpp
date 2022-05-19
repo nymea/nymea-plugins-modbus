@@ -430,7 +430,7 @@ bool NeuronCommon::modbusWriteRequest(const Request &request)
             });
             QTimer::singleShot(m_responseTimeoutTime, reply, &QModbusReply::deleteLater);
         } else {
-            delete reply; // broadcast replies return immediately
+            reply->deleteLater(); // broadcast replies return immediately
             return false;
         }
     } else {
@@ -541,7 +541,7 @@ bool NeuronCommon::modbusReadRequest(const QModbusDataUnit &request)
             });
             QTimer::singleShot(m_responseTimeoutTime, reply, &QModbusReply::deleteLater);
         } else {
-            delete reply; // broadcast replies return immediately
+            reply->deleteLater(); // broadcast replies return immediately
             return false;
         }
     } else {
