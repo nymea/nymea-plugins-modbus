@@ -198,13 +198,12 @@ void SolarEdgeBattery::readBlockData()
                             emit blockDataUpdated();
                         });
 
-                        connect(reply, &QModbusReply::errorOccurred, this, [reply] (QModbusDevice::Error error) {
+                        connect(reply, &QModbusReply::errorOccurred, this, [] (QModbusDevice::Error error) {
                             qCWarning(dcSunSpec()) << "SolarEdgeBattery: Modbus reply error:" << error;
-                            emit reply->finished(); // To make sure it will be deleted
                         });
                     } else {
                         qCWarning(dcSunSpec()) << "SolarEdgeBattery: Read error: " << m_connection->modbusTcpClient()->errorString();
-                        delete reply; // broadcast replies return immediately
+                        reply->deleteLater(); // broadcast replies return immediately
                         if (!m_initFinishedSuccess) {
                             m_timer.stop();
                             emit initFinished(false);
@@ -217,13 +216,12 @@ void SolarEdgeBattery::readBlockData()
                 }
             });
 
-            connect(reply, &QModbusReply::errorOccurred, this, [reply] (QModbusDevice::Error error) {
+            connect(reply, &QModbusReply::errorOccurred, this, [] (QModbusDevice::Error error) {
                 qCWarning(dcSunSpec()) << "SolarEdgeBattery: Modbus reply error:" << error;
-                emit reply->finished(); // To make sure it will be deleted
             });
         } else {
             qCWarning(dcSunSpec()) << "SolarEdgeBattery: Read error: " << m_connection->modbusTcpClient()->errorString();
-            delete reply; // broadcast replies return immediately
+            reply->deleteLater(); // broadcast replies return immediately
             if (!m_initFinishedSuccess) {
                 m_timer.stop();
                 emit initFinished(false);

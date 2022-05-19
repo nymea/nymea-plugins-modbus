@@ -347,7 +347,7 @@ bool SunSpecConnection::scanSunspecBaseRegister(quint16 baseRegister)
     }
 
     if (reply->isFinished()) {
-        delete reply; // broadcast replies return immediately
+        reply->deleteLater(); // broadcast replies return immediately
         return false;
     }
 
@@ -406,7 +406,7 @@ void SunSpecConnection::scanModelsOnBaseRegister(quint16 offset)
     }
 
     if (reply->isFinished()) {
-        delete reply; // broadcast replies return immediately
+        reply->deleteLater(); // broadcast replies return immediately
         return;
     }
 
