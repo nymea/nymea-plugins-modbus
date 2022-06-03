@@ -533,19 +533,11 @@ if 'blocks' in registerJson:
     validateBlocks(registerJson['blocks'])
 
 # Create classes depending on the protocol
-writeTcp = True
-writeRtu = False
-
-if protocol == 'TCP':
-    writeTcp = True
-    writeRtu = False
-elif protocol == 'RTU':
-    writeTcp = False
-    writeRtu = True
-else:
-    # Any other value generates both classes
-    writeTcp = True
-    writeRtu = True
+writeTcp = protocol in ["TCP", "BOTH"]
+writeRtu = protocol in ["RTU", "BOTH"]
+if not writeTcp and not writeRtu:
+    logger.warning('Invalid protocol definition. Please use TCP, RTU or BOTH.')
+    exit(1)
 
 headerFiles = []
 sourceFiles = []
