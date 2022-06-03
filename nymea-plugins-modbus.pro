@@ -1,7 +1,7 @@
 TEMPLATE = subdirs
 
-# Note keep it ordered so the lib will be built first
-CONFIG += ordered
+# Note: In the loop at the end of this file the plugin
+# dependency on the libs will be defined
 SUBDIRS += libnymea-modbus libnymea-sunspec
 
 PLUGIN_DIRS = \
@@ -63,6 +63,12 @@ for(plugin, PLUGINS) {
     exists($${plugin}) {
         SUBDIRS*= $${plugin}
         message("- $${plugin}")
+        # Make sure the libs will be built before the plugins
+        equals(plugin, "sunspec") {
+            $${plugin}.depends += libnymea-sunspec
+        } else {
+            $${plugin}.depends += libnymea-modbus
+        }
     } else {
         error("Invalid plugin \"$${plugin}\".")
     }
