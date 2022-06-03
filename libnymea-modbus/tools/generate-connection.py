@@ -22,6 +22,7 @@ import os
 import re
 import sys
 import json
+import time
 import shutil
 import argparse
 import datetime
@@ -496,7 +497,8 @@ parser.add_argument('-o', '--output-directory', metavar='<directory>', help='The
 parser.add_argument('-v', '--verbose', dest='verboseOutput', action='store_true', help='More verbose output.')
 args = parser.parse_args()
 
-registerJson = loadJsonFile(args.json)
+registerJsonFilePath = os.path.realpath(args.json)
+registerJson = loadJsonFile(registerJsonFilePath)
 scriptPath = os.path.dirname(os.path.realpath(sys.argv[0]))
 outputDirectory = os.path.realpath(args.output_directory)
 
@@ -580,6 +582,22 @@ if writeRtu:
 # Write pri file
 projectIncludeFileName = classNamePrefix.lower() + '.pri'
 projectIncludeFilePath = os.path.join(outputDirectory, projectIncludeFileName)
+
+# Note: we write the project file only if the registers
+# file has been modified since the project has been modified the last time.
+# This prevents qt-creator to retrigger qmake runs on it's own by changing the
+# project file which retriggers a qmake run and so on...
+if os.path.exists(projectIncludeFilePath):
+    timestampRegistersJson = os.path.getmtime(registerJsonFilePath)
+    timestampProjectInclude = os.path.getmtime(projectIncludeFilePath)
+    if timestampRegistersJson > timestampProjectInclude:
+        logger.debug('Registers modified %s' % time.ctime(timestampRegistersJson))
+        logger.debug('Project file modified %s' % time.ctime(timestampProjectInclude))
+        logger.debug('Register JSON file has changed since last project file update. %s' % time.ctime(timestampRegistersJson))
+        logger.debug('Regenerating project file %s ...' % projectIncludeFileName)
+    else:
+        logger.debug('The register JSON file has not changed since the last run. Skip writing the project file %s ...' % projectIncludeFileName)
+        exit(0)
 
 logger.info('Writing connection project include file %s' % projectIncludeFileName)
 projectIncludeFile = open(projectIncludeFilePath, 'w')
