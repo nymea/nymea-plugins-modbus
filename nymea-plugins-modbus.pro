@@ -14,11 +14,11 @@ PLUGIN_DIRS = \
     modbuscommander         \
     mtec                    \
     mypv                    \
+    phoenixconnect          \
     schrack                 \
     stiebeleltron           \
     sunspec                 \
     unipi                   \
-    wallbe                  \
     webasto                 \
 
 gcc {

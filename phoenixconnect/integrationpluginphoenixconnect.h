@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2020, nymea GmbH
+* Copyright 2013 - 2022, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -28,63 +28,41 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef INTEGRATIONPLUGINWALLBE_H
-#define INTEGRATIONPLUGINWALLBE_H
+#ifndef INTEGRATIONPLUGINPHOENIXCONNECT_H
+#define INTEGRATIONPLUGINPHOENIXCONNECT_H
 
 #include <integrations/integrationplugin.h>
-#include <plugintimer.h>
-
-#include <modbustcpmaster.h>
+#include "extern-plugininfo.h"
 
 #include <QObject>
 #include <QHostAddress>
 
-class IntegrationPluginWallbe : public IntegrationPlugin
+class PhoenixModbusTcpConnection;
+class NetworkDeviceMonitor;
+class PluginTimer;
+
+class IntegrationPluginPhoenixConnect : public IntegrationPlugin
 {
     Q_OBJECT
 
-    Q_PLUGIN_METADATA(IID "io.nymea.IntegrationPlugin" FILE "integrationpluginwallbe.json")
+    Q_PLUGIN_METADATA(IID "io.nymea.IntegrationPlugin" FILE "integrationpluginphoenixconnect.json")
     Q_INTERFACES(IntegrationPlugin)
 
 public:
-    enum WallbeRegisterAddress {
-        EVStatus        = 100,
-        ChargingTime    = 102,
-        FirmwareVersion = 105,
-        ErrorCode       = 107,
-        ChargingCurrent = 300,
-        EnableCharging  = 400,
-        Output1         = 405,
-        Output2         = 406,
-        Output3         = 407,
-        Output4         = 408
-    };
-    Q_ENUM(WallbeRegisterAddress)
-
-    explicit IntegrationPluginWallbe();
-    void init() override;
+    explicit IntegrationPluginPhoenixConnect();
     void discoverThings(ThingDiscoveryInfo *info) override;
     void setupThing(ThingSetupInfo *info) override;
     void postSetupThing(Thing *thing) override;
     void executeAction(ThingActionInfo *info) override;
     void thingRemoved(Thing *thing) override;
 
-private:
-    QHash<Thing *, ModbusTCPMaster *> m_connections;
-    PluginTimer *m_pluginTimer = nullptr;
-    QHash<QUuid, ThingActionInfo *> m_asyncActions;
-    int m_slaveAddress = 180;
-
-    void update(Thing *thing);
-
 private slots:
-    void onConnectionStateChanged(bool status);
-    void onReceivedInputRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value);
-    void onReceivedCoil(int slaveAddress, int modbusRegister, const QVector<quint16> &value);
-    void onReceivedHoldingRegister(int slaveAddress, int modbusRegister, const QVector<quint16> &value);
+    void updatePhaseCount(Thing *thing);
 
-    void onWriteRequestExecuted(const QUuid &requestId, bool success);
-    void onWriteRequestError(const QUuid &requestId, const QString &error);
+private:
+    QHash<Thing*, PhoenixModbusTcpConnection*> m_connections;
+    QHash<Thing*, NetworkDeviceMonitor*> m_monitors;
+    PluginTimer *m_pluginTimer = nullptr;
 };
 
-#endif // INTEGRATIONPLUGINWALLBE_H
+#endif // INTEGRATIONPLUGINPHOENIXCONNECT_H
