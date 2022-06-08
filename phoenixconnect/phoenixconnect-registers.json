@@ -1,0 +1,260 @@
+{
+    "className": "Phoenix",
+    "protocol": "TCP",
+    "endianness": "LittleEndian",
+    "enums": [
+        {
+            "name": "ErrorCode",
+            "values": [
+                {
+                    "key": "NoError",
+                    "value": 0
+                },
+                {
+                    "key": "CableRejected13or20A",
+                    "value": 1
+                },
+                {
+                    "key": "CableRejected13A",
+                    "value": 2
+                },
+                {
+                    "key": "InvalidPPValue",
+                    "value": 3
+                },
+                {
+                    "key": "InvalidCPValue",
+                    "value": 4
+                },
+                {
+                    "key": "ChargingUnavailable",
+                    "value": 5
+                },
+                {
+                    "key": "Lock",
+                    "value": 6
+                },
+                {
+                    "key": "Unlock",
+                    "value": 7
+                },
+                {
+                    "key": "ErrorDuringLocking",
+                    "value": 8
+                },
+                {
+                    "key": "OverloadProtection",
+                    "value": 9
+                },
+                {
+                    "key": "MeterCommunicationError",
+                    "value": 10
+                },
+                {
+                    "key": "VehicleRejected",
+                    "value": 11
+                },
+                {
+                    "key": "ContactorFault",
+                    "value": 12
+                },
+                {
+                    "key": "VehicleCPDiodeMissing",
+                    "value": 13
+                },
+                {
+                    "key": "Unkown",
+                    "value": 14
+                },
+                {
+                    "key": "DCErrorCurrent",
+                    "value": 15
+                }
+            ]
+        }
+    ],
+    "blocks": [
+        {
+            "id": "phaseVoltageAndCurrent",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "voltageI1",
+                    "address": 108,
+                    "size": 2,
+                    "type": "uint32",
+                    "readSchedule": "update",
+                    "registerType": "inputRegister",
+                    "description": "Voltage I1",
+                    "unit": "V",
+                    "defaultValue": 0,
+                    "access": "R"
+                },
+                {
+                    "id": "voltageI2",
+                    "address": 110,
+                    "size": 2,
+                    "type": "uint32",
+                    "readSchedule": "update",
+                    "registerType": "inputRegister",
+                    "description": "Voltage I2",
+                    "unit": "V",
+                    "defaultValue": 0,
+                    "access": "R"
+                },
+                {
+                    "id": "voltageI3",
+                    "address": 112,
+                    "size": 2,
+                    "type": "uint32",
+                    "readSchedule": "update",
+                    "registerType": "inputRegister",
+                    "description": "Voltage I3",
+                    "unit": "V",
+                    "defaultValue": 0,
+                    "access": "R"
+                },
+                {
+                    "id": "currentI1",
+                    "address": 114,
+                    "size": 2,
+                    "type": "uint32",
+                    "readSchedule": "update",
+                    "registerType": "inputRegister",
+                    "description": "Current I1",
+                    "unit": "A",
+                    "defaultValue": 0,
+                    "access": "R"
+                },
+                {
+                    "id": "currentI2",
+                    "address": 116,
+                    "size": 2,
+                    "type": "uint32",
+                    "readSchedule": "update",
+                    "registerType": "inputRegister",
+                    "description": "Current I2",
+                    "unit": "A",
+                    "defaultValue": 0,
+                    "access": "R"
+                },
+                {
+                    "id": "currentI3",
+                    "address": 118,
+                    "size": 2,
+                    "type": "uint32",
+                    "readSchedule": "update",
+                    "registerType": "inputRegister",
+                    "description": "Current I3",
+                    "unit": "A",
+                    "defaultValue": 0,
+                    "access": "R"
+                },
+                {
+                    "id": "activePower",
+                    "address": 120,
+                    "size": 2,
+                    "type": "uint32",
+                    "readSchedule": "update",
+                    "registerType": "inputRegister",
+                    "description": "Active power",
+                    "defaultValue": 0,
+                    "access": "R"
+                }
+            ]
+        }
+    ],
+    "registers": [
+        {
+            "id": "cpStatus",
+            "address": 100,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "inputRegister",
+            "description": "ChargePilot status",
+            "defaultValue": 85,
+            "access": "R"
+        },
+        {
+            "id": "chargingTime",
+            "address": 102,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "update",
+            "registerType": "inputRegister",
+            "description": "Charging Time",
+            "defaultValue": "0",
+            "access": "R"
+        },
+        {
+            "id": "firmwareVersion",
+            "address": 105,
+            "size": 2,
+            "type": "string",
+            "readSchedule": "init",
+            "registerType": "inputRegister",
+            "description": "Firmware version",
+            "access": "R"
+        },
+        {
+            "id": "errorCode",
+            "address": 107,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "inputRegister",
+            "description": "Error codes",
+            "defaultValue": "ErrorCodeNoError",
+            "enum": "ErrorCode",
+            "access": "R"
+        },
+        {
+            "id": "chargingCurrent",
+            "address": 300,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Charging current",
+            "unit": "1/10 A",
+            "defaultValue": "0",
+            "access": "R"
+        },
+        {
+            "id": "chargingEnabled",
+            "address": 400,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "coils",
+            "description": "Charging enabled",
+            "defaultValue": "0",
+            "access": "RW"
+        },
+        {
+            "id": "maximumChargingCurrent",
+            "address": 528,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Maximum charging current",
+            "unit": "1/10 A",
+            "defaultValue": 6,
+            "access": "RW"
+        },
+        {
+            "id": "totalEnergy",
+            "address": 904,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Total energy consumption",
+            "unit": "Wh",
+            "defaultValue": 0,
+            "access": "R"
+        }
+    ]
+}
