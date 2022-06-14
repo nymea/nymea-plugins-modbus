@@ -1,3 +1,16 @@
+nymea-plugins-modbus (1.2.0) jammy; urgency=medium
+
+  [ Simon Stürz ]
+  * Huawei: Update state cache behaviour
+  * New plugin: Stiebel Eltron heatpumps
+  * Restructure modbus connection tool
+  * Introduce libnymea-modbus
+  * Update plugins to new libnymea-modbus and autogenerate connection
+    classes
+  * Update overall modbus reply handling in generated classes and source
+
+ -- jenkins <developer@nymea.io>  Tue, 14 Jun 2022 14:54:47 +0200
+
 nymea-plugins-modbus (1.1.0) jammy; urgency=medium
 
   [ Michael Zanetti ]
