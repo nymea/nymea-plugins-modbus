@@ -15,5 +15,3 @@ isEmpty(PLUGIN_PRI) {
 #  message("Using $$PLUGIN_PRI")
   include($$PLUGIN_PRI)
 }
-
-top_srcdir=$${PWD}
