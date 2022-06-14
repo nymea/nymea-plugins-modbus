@@ -1,4 +1,5 @@
 {
+    "className": "Sdm630",
     "protocol": "RTU",
     "endianness": "BigEndian",
     "registers": [

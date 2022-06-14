@@ -31,10 +31,10 @@
 #ifndef INTEGRATIONPLUGINWEBASTO_H
 #define INTEGRATIONPLUGINWEBASTO_H
 
-#include "integrations/integrationplugin.h"
-#include "plugintimer.h"
+#include <integrations/integrationplugin.h>
+#include <plugintimer.h>
+
 #include "webasto.h"
-#include "../modbus/modbustcpmaster.h"
 
 #include <QObject>
 #include <QHostAddress>

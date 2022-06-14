@@ -31,8 +31,9 @@
 #ifndef INTEGRATIONPLUGINHUAWEI_H
 #define INTEGRATIONPLUGINHUAWEI_H
 
-#include "plugintimer.h"
-#include "integrations/integrationplugin.h"
+#include <plugintimer.h>
+#include <integrations/integrationplugin.h>
+
 #include "huaweifusionsolar.h"
 
 class IntegrationPluginHuawei: public IntegrationPlugin

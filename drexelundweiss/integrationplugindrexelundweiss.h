@@ -31,9 +31,10 @@
 #ifndef INTEGRATIONPLUGINDREXELUNDWEISS_H
 #define INTEGRATIONPLUGINDREXELUNDWEISS_H
 
-#include "integrations/integrationplugin.h"
-#include "hardware/modbus/modbusrtumaster.h"
-#include "plugintimer.h"
+#include <integrations/integrationplugin.h>
+#include <hardware/modbus/modbusrtumaster.h>
+#include <plugintimer.h>
+
 #include "modbusregisterdefinition.h"
 
 #include <QDateTime>

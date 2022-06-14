@@ -29,10 +29,10 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "integrationpluginhuawei.h"
-
-#include "network/networkdevicediscovery.h"
-#include "hardwaremanager.h"
 #include "plugininfo.h"
+
+#include <network/networkdevicediscovery.h>
+#include <hardwaremanager.h>
 
 IntegrationPluginHuawei::IntegrationPluginHuawei()
 {

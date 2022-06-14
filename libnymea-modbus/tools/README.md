@@ -14,7 +14,7 @@ The class will provide 2 main methods for fetching information from the modbus d
 * `initialize()` will read all registers with `"readSchedule": "init"` and emits the signal `initializationFinished()` once all replies returned.
 * `update()` can be used to update all registers with `"readSchedule": "update"`. The class will then fetch each register and update the specified value internally. If the value has changed, the `<propertyName>Changed()` signal will be emitted.
 
-The reulting class will inhert from the `ModbusTCPMaster` class, providing easy access to all possible modbus operations and inform about the connected state.
+The resulting class will inhert from the `ModbusTCPMaster` class, providing easy access to all possible modbus operations and inform about the connected state.
 
 
 # JSON format
@@ -23,6 +23,8 @@ The basic structure of the modbus register JSON looks like following example:
 
 ```
 {
+    "className": "MyConnection",
+    "protocol": "BOTH",
     "endianness": "BigEndian",
     "enums": [
         {
@@ -64,28 +66,72 @@ The basic structure of the modbus register JSON looks like following example:
             "access": "RO"
         },
         ...
+    ],
+    "blocks": [
+        {
+            "id": "blockName",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "registerOne",
+                    "address": 0,
+                    "size": 2,
+                    ...
+                },
+                {
+                    "id": "registerOne",
+                    "address": 0,
+                    "size": 2,
+                    ...
+                },
+                ...
+            ]
+        }
     ]
 }   
 
 ```
 
-## Endianness
+## Class name
 
-When converting multiple registers to one data type (i.e. 2 registers uint16 values to one uint32), the order of the registers are important to align with the endiness of the data receiving. 
+If no name class name has been passed to the generator script, the classname defined in the JSON file will be used. 
 
-There are 2 possibilities:
+The naming convention for the classname and the resulting source code files looks like this:
+    
+The class will be defined as
+    
+    * `<ClassName><Protocol>Connection`.
 
-* `BigEndian`: default if not specified: register bytes come in following order `[0, 1, 2, 3]`: `ABCD`
-* `LittleEndian`: register bytes come in following order `[0, 1, 2, 3]`: `CDAB`
+The source code files will be calld:
+
+    * `classnameprotocolconnection.h`
+    * `classnameprotocolconnection.cpp`
+
 
 ## Protocol
 
 Depending on the communication protocol, a different base class will be used for the resulting output class.
 
-There are 2 possibilities:
+There are 2 protocol types:
 
 * `RTU`: a communication based on the RS485 serial RTU transport protocol
 * `TCP`: a communication based on the TCP transport protocol
+
+If the modbus device supports both protocols and you want to generate a class for each protocol you can set the protocol to `BOTH` and a class for `RTU` and one for `TCP` will be generated.  
+
+    ...
+    "protocol": "TCP",
+    ...
+
+
+## Endianness
+
+When converting multiple registers to one data type (i.e. 2 registers uint16 values to one uint32), the order of the registers are important to align with the endianness of the data receiving. 
+
+There are 2 possibilities:
+
+* `BigEndian`: default if not specified: register bytes come in following order `[0, 1, 2, 3]`: `ABCD`
+* `LittleEndian`: register bytes come in following order `[0, 1, 2, 3]`: `CDAB`
 
 ## Enums
 
@@ -133,9 +179,9 @@ Earch register will be defined as a property in the resulting class modbus TCP c
 
 On many device it is possible to read multiple registers in one modbus call. This can improve speed significantly when reading many register addresses which are in a row. 
 
-> Important: all registers within the block must exist, be in a row with no gaps inbetween!
+> Important: all registers within the block must exist, be in a row with no gaps inbetween and from the same function type!
 
-A block sequence looks like this and will define a read method for reading the entwire block. Writing multiple blocks is currently not supported since not needed so far, but could be added to. In any case, all registers must be read or written, never have combinations.
+A block sequence looks like this and will define a read method for reading the entwire block. Writing multiple blocks is currently not supported since not needed so far, but could be added too. In any case, all registers must be read or written, never have combinations.
 
 * `id`: Mandatory. The id defines the name of the block used in the resulting class.
 * `readSchedule`: Optional. Defines when the register needs to be fetched. If no read schedule has been defined, the class will provide only the update methods, but will not read the value during `initialize()` or `update()` calls. Possible values are:
@@ -173,20 +219,16 @@ Example block:
     ]
 
 
-# Example
+# Autogenerate modbus classes
 
-Change into your plugin sub directory.
-Assuming you wrote the registers.json file you can run now following command to generate your modbus class:
+In order to get always the latest generated code from this tool, the entire process can be automated.
 
-`$ python3 ../modbus/tools/generate-connection.py -j registers.json -o . -c MyModbusConnection`
+Assuming you have defined the registers in the `my-registers.json` within your plugin directory, and following lines to your plugin project file and run `qmake`.
 
-You the result will be a header and a source file called:
+    # Generate modbus connection
+    MODBUS_CONNECTIONS += my-registers.json
+    include(../modbus.pri)
 
-* `mymodbusconnection.h`
-* `mymodbusconnection.cpp`
+If you want to get information about the autogenerating class process, you can add `MODBUS_TOOLS_CONFIG += VERBOSE` in order to get much more information of the process. 
 
-You can include this class in your project and provide one connection per thing.
-
-
-
-
+Once you run qmake, in the build directory the autogenerated classes can be found. Also in your project you can find the generated classes for inspection.

@@ -1,19 +1,14 @@
 include(../plugins.pri)
-
-QT += \
-    network \
-    serialbus \
+include(../modbus.pri)
 
 SOURCES += \
     idm.cpp \
     integrationpluginidm.cpp \
-    ../modbus/modbustcpmaster.cpp \
-    ../modbus/modbushelpers.cpp \
+    modbushelpers.cpp
 
 HEADERS += \
     idm.h \
     idminfo.h \
     integrationpluginidm.h \
-    ../modbus/modbustcpmaster.h \
-    ../modbus/modbushelpers.h \
+    modbushelpers.h
 

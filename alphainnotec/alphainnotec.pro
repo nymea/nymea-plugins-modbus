@@ -1,15 +1,12 @@
 include(../plugins.pri)
 
-QT += network serialbus
+# Generate modbus connection
+MODBUS_CONNECTIONS += alphainnotec-registers.json
+#MODBUS_TOOLS_CONFIG += VERBOSE
+include(../modbus.pri)
 
 SOURCES += \
-    integrationpluginalphainnotec.cpp \
-    alphaconnectmodbustcpconnection.cpp \
-    ../modbus/modbustcpmaster.cpp \
-    ../modbus/modbusdatautils.cpp
+    integrationpluginalphainnotec.cpp
 
 HEADERS += \
-    integrationpluginalphainnotec.h \
-    alphaconnectmodbustcpconnection.h \
-    ../modbus/modbustcpmaster.h \
-    ../modbus/modbusdatautils.h
+    integrationpluginalphainnotec.h

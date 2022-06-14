@@ -1,0 +1,325 @@
+{
+    "className": "StiebelEltron",
+    "protocol": "TCP",
+    "endianness": "BigEndian",
+    "enums": [
+        {
+            "name": "OperatingMode",
+            "values": [
+                {
+                    "key": "Emergency",
+                    "value": 0
+                },
+                {
+                    "key": "Standby",
+                    "value": 1
+                },
+                {
+                    "key": "Program",
+                    "value": 2
+                },
+                {
+                    "key": "Comfort",
+                    "value": 3
+                },
+                {
+                    "key": "Eco",
+                    "value": 4
+                },
+                {
+                    "key": "HotWater",
+                    "value": 5
+                }
+            ]
+        },
+        {
+            "name": "SmartGridState",
+            "values": [
+                {
+                    "key": "ModeOne",
+                    "value": 1,
+                    "comment": "0x00000001"
+                },
+                {
+                    "key": "ModeTwo",
+                    "value": 0,
+                    "comment": "0x00000000"
+                },
+                {
+                    "key": "ModeThree",
+                    "value": 65536,
+                    "comment": "0x00010000"
+                },
+                {
+                    "key": "ModeFour",
+                    "value": 65537,
+                    "comment": "0x00010001"
+                }
+            ]
+        }
+    ],
+    "registers": [
+        {
+            "id": "outdoorTemperature",
+            "address": 506,
+            "size": 1,
+            "type": "int16",
+            "registerType": "inputRegister",
+            "readSchedule": "update",
+            "description": "Outdoor temperature",
+            "staticScaleFactor": -1,
+            "defaultValue": 0,
+            "unit": "°C",
+            "access": "RO"
+        },
+        {
+            "id": "flowTemperature",
+            "address": 514,
+            "size": 1,
+            "type": "int16",
+            "registerType": "inputRegister",
+            "readSchedule": "update",
+            "description": "Flow temperature",
+            "staticScaleFactor": -1,
+            "defaultValue": 0,
+            "unit": "°C",
+            "access": "RO"
+        },
+        {
+            "id": "hotWaterTemperature",
+            "address": 521,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "inputRegister",
+            "readSchedule": "update",
+            "description": "Hot water temperature",
+            "staticScaleFactor": -1,
+            "defaultValue": "0",
+            "unit": "°C",
+            "access": "RO"
+        },
+        {
+            "id": "hotGasTemperature1",
+            "address": 543,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "inputRegister",
+            "readSchedule": "update",
+            "description": "Hot gas temperature HP 1",
+            "staticScaleFactor": -1,
+            "defaultValue": "0",
+            "unit": "°C",
+            "access": "RO"
+        },
+        {
+            "id": "hotGasTemperature2",
+            "address": 550,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "inputRegister",
+            "readSchedule": "update",
+            "description": "Hot gas temperature HP 2",
+            "staticScaleFactor": -1,
+            "defaultValue": "0",
+            "unit": "°C",
+            "access": "RO"
+        },
+        {
+            "id": "SourceTemperature",
+            "address": 562,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "inputRegister",
+            "readSchedule": "update",
+            "description": "Source temperature",
+            "staticScaleFactor": -1,
+            "defaultValue": "0",
+            "unit": "°C",
+            "access": "RO"
+        },
+        {
+            "id": "roomTemperatureFEK",
+            "address": 502,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "inputRegister",
+            "readSchedule": "update",
+            "description": "Room temperature FEK",
+            "staticScaleFactor": -1,
+            "defaultValue": "0",
+            "unit": "°C",
+            "access": "RO"
+        },
+        {
+            "id": "returnTemperature",
+            "address": 515,
+            "size": 1,
+            "type": "int16",
+            "registerType": "inputRegister",
+            "readSchedule": "update",
+            "description": "Return temperature",
+            "staticScaleFactor": -1,
+            "defaultValue": 0,
+            "unit": "°C",
+            "access": "RO"
+        },
+        {
+            "id": "solarCollectorTemperature",
+            "address": 527,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "inputRegister",
+            "readSchedule": "update",
+            "description": "Solar collector temperature",
+            "staticScaleFactor": -1,
+            "defaultValue": "0",
+            "unit": "°C",
+            "access": "RO"
+        },
+        {
+            "id": "solarStorageTankTemperature",
+            "address": 528,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "inputRegister",
+            "readSchedule": "update",
+            "description": "Solar storage tank temperature",
+            "staticScaleFactor": -1,
+            "defaultValue": "0",
+            "unit": "°C",
+            "access": "RO"
+        },
+        {
+            "id": "storageTankTemperature",
+            "address": 517,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "inputRegister",
+            "readSchedule": "update",
+            "description": "Storage tank temperature",
+            "staticScaleFactor": -1,
+            "defaultValue": "0",
+            "unit": "°C",
+            "access": "RO"
+        },
+        {
+            "id": "externalHeatSourceTemperature",
+            "address": 530,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "inputRegister",
+            "readSchedule": "update",
+            "description": "External heat source temperature",
+            "staticScaleFactor": -1,
+            "defaultValue": "0",
+            "unit": "°C",
+            "access": "RO"
+        },
+        {
+            "id": "heatingEnergy",
+            "address": 3501,
+            "size": 2,
+            "type": "uint32",
+            "registerType": "inputRegister",
+            "readSchedule": "update",
+            "defaultValue": "0",
+            "unit": "kWh",
+            "description": "Heating energy",
+            "access": "RO"
+        },
+        {
+            "id": "hotWaterEnergy",
+            "address": 3504,
+            "size": 2,
+            "type": "uint32",
+            "registerType": "inputRegister",
+            "readSchedule": "update",
+            "defaultValue": "0",
+            "unit": "kWh",
+            "description": "Hot water energy",
+            "access": "RO"
+        },
+        {
+            "id": "consumedEnergyHeating",
+            "address": 3511,
+            "size": 2,
+            "type": "uint32",
+            "registerType": "inputRegister",
+            "readSchedule": "update",
+            "defaultValue": "0",
+            "unit": "kWh",
+            "description": "Consumed energy heating",
+            "access": "RO"
+        },
+        {
+            "id": "consumedEnergyHotWater",
+            "address": 3514,
+            "size": 2,
+            "type": "uint32",
+            "registerType": "inputRegister",
+            "readSchedule": "update",
+            "defaultValue": "0",
+            "unit": "kWh",
+            "description": "Consumed energy hot water",
+            "access": "RO"
+        },
+        {
+            "id": "operatingMode",
+            "address": 1500,
+            "size": 1,
+            "type": "uint16",
+            "enum": "OperatingMode",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "Operating mode",
+            "defaultValue": "OperatingModeStandby",
+            "access": "RO"
+        },
+        {
+            "id": "systemStatus",
+            "address": 2500,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "inputRegister",
+            "readSchedule": "update",
+            "description": "System status",
+            "defaultValue": 0,
+            "access": "RO"
+        },
+        {
+            "id": "sgReadyStateRO",
+            "address": 5000,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "inputRegister",
+            "readSchedule": "update",
+            "description": "Smart grid status",
+            "defaultValue": 3,
+            "access": "RO" 
+        },
+        {
+            "id": "sgReadyActive",
+            "address": 4000,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "SG ready active",
+            "defaultValue": 0,
+            "access": "RW" 
+        },
+        {
+            "id": "sgReadyState",
+            "address": 4001,
+            "size": 2,
+            "type": "uint32",
+            "registerType": "holdingRegister",
+            "enum": "SmartGridState",
+            "readSchedule": "update",
+            "description": "SG Ready mode",
+            "defaultValue": "SmartGridStateModeThree",
+            "access": "RW" 
+        }
+    ],
+    "blocks": [ ]
+}

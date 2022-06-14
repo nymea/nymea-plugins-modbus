@@ -34,7 +34,8 @@
 #include <QObject>
 
 #include "extern-plugininfo.h"
-#include "integrations/integrationplugin.h"
+
+#include <integrations/integrationplugin.h>
 
 #include <sunspecmodel.h>
 #include <sunspecconnection.h>

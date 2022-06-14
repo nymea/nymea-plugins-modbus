@@ -1,4 +1,5 @@
 {
+    "className": "Pro380",
     "protocol": "RTU",
     "endianness": "BigEndian",
     "blocks": [

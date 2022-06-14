@@ -28,9 +28,10 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "network/networkdevicediscovery.h"
 #include "integrationpluginidm.h"
 #include "plugininfo.h"
+
+#include <network/networkdevicediscovery.h>
 
 IntegrationPluginIdm::IntegrationPluginIdm()
 {

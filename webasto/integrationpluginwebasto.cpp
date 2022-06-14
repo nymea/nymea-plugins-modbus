@@ -28,11 +28,11 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "network/networkdevicediscovery.h"
 #include "integrationpluginwebasto.h"
 #include "plugininfo.h"
 
-#include "types/param.h"
+#include <network/networkdevicediscovery.h>
+#include <types/param.h>
 
 #include <QDebug>
 #include <QStringList>

@@ -1,0 +1,14 @@
+{
+    "title": "Stiebel Eltron",
+    "tagline": "Integrate Stiebel Eltron heat pumps into nymea.",
+    "icon": "stiebel-eltron.png",
+    "stability": "community",
+    "offline": true,
+    "technologies": [
+        "network",
+        "modbus"
+    ],
+    "categories": [
+        "heating"
+    ]
+}

@@ -1,6 +1,6 @@
 ﻿/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2021, nymea GmbH
+* Copyright 2013 - 2022, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -31,11 +31,14 @@
 #ifndef MODBUSTCPMASTER_H
 #define MODBUSTCPMASTER_H
 
+#include <QUuid>
+#include <QTimer>
 #include <QObject>
 #include <QHostAddress>
 #include <QtSerialBus>
-#include <QTimer>
-#include <QUuid>
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(dcModbusTcpMaster)
 
 class ModbusTCPMaster : public QObject
 {
@@ -112,6 +115,7 @@ signals:
     void receivedDiscreteInput(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values);
     void receivedHoldingRegister(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values);
     void receivedInputRegister(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values);
+
 };
 
 #endif // MODBUSTCPMASTER_H
