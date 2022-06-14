@@ -144,12 +144,11 @@ void SunSpecModel::readBlockData()
 
             connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error) {
                 qCWarning(dcSunSpecModelData())  << name() << description() << "Modbus reply while reading block data. Error:" << error;
-                emit reply->finished(); // To make sure it will be deleted
             });
 
         } else {
             qCWarning(dcSunSpecModelData()) << "Read block data error: " << m_connection->modbusTcpClient()->errorString();
-            delete reply; // broadcast replies return immediately
+            reply->deleteLater(); // broadcast replies return immediately
             return;
         }
     } else {

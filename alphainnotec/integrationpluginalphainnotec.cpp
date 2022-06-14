@@ -370,7 +370,6 @@ void IntegrationPluginAlphaInnotec::executeAction(ThingActionInfo *info)
 
             connect(reply, &QModbusReply::errorOccurred, this, [reply] (QModbusDevice::Error error){
                 qCWarning(dcAlphaInnotec()) << "Modbus reply error occurred while execute action" << error << reply->errorString();
-                emit reply->finished(); // To make sure it will be deleted
             });
         } else */
         if (info->action().actionTypeId() == alphaConnectHotWaterSetpointTemperatureActionTypeId) {
@@ -398,7 +397,6 @@ void IntegrationPluginAlphaInnotec::executeAction(ThingActionInfo *info)
 
             connect(reply, &QModbusReply::errorOccurred, this, [reply] (QModbusDevice::Error error){
                 qCWarning(dcAlphaInnotec()) << "Modbus reply error occurred while execute action" << error << reply->errorString();
-                emit reply->finished(); // To make sure it will be deleted
             });
         } else if (info->action().actionTypeId() == alphaConnectReturnSetpointTemperatureActionTypeId) {
             double temperature = info->action().paramValue(alphaConnectReturnSetpointTemperatureActionReturnSetpointTemperatureParamTypeId).toDouble();
@@ -425,7 +423,6 @@ void IntegrationPluginAlphaInnotec::executeAction(ThingActionInfo *info)
 
             connect(reply, &QModbusReply::errorOccurred, this, [reply] (QModbusDevice::Error error){
                 qCWarning(dcAlphaInnotec()) << "Modbus reply error occurred while execute action" << error << reply->errorString();
-                emit reply->finished(); // To make sure it will be deleted
             });
         } else if (info->action().actionTypeId() == alphaConnectSgReadyModeActionTypeId) {
             QString sgReadyModeString = info->action().paramValue(alphaConnectSgReadyModeActionSgReadyModeParamTypeId).toString();
@@ -463,7 +460,6 @@ void IntegrationPluginAlphaInnotec::executeAction(ThingActionInfo *info)
 
             connect(reply, &QModbusReply::errorOccurred, this, [reply] (QModbusDevice::Error error){
                 qCWarning(dcAlphaInnotec()) << "Modbus reply error occurred while execute action" << error << reply->errorString();
-                emit reply->finished(); // To make sure it will be deleted
             });
         }
     }
