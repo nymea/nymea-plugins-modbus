@@ -608,11 +608,11 @@ writeLine(projectIncludeFile, '# Any changes in this file may be overwritten fro
 writeLine(projectIncludeFile, '#')
 writeLine(projectIncludeFile, '# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #')
 writeLine(projectIncludeFile)
-writeLine(projectIncludeFile, 'HEADERS = \\')
+writeLine(projectIncludeFile, 'HEADERS += \\')
 for generatedHeaderFileName in headerFiles:
     writeLine(projectIncludeFile, '    $${PWD}/%s \\' % generatedHeaderFileName)
     
 writeLine(projectIncludeFile)
-writeLine(projectIncludeFile, "SOURCES = \\")
+writeLine(projectIncludeFile, "SOURCES += \\")
 for generatedSourceFileName in sourceFiles:
     writeLine(projectIncludeFile, '    $${PWD}/%s \\' % generatedSourceFileName)
