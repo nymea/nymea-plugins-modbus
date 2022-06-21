@@ -197,8 +197,12 @@ def writeTcpSourceFile():
             writePropertyGetSetMethodImplementationsTcp(sourceFile, className, blockDefinition['registers'])
 
     # Write init and update method implementation
-    writeInitMethodImplementationTcp(sourceFile, className, registerJson['registers'], registerJson['blocks'])
-    writeUpdateMethod(sourceFile, className, registerJson['registers'], registerJson['blocks'])
+    blocks = []
+    if 'blocks' in registerJson:
+        blocks = registerJson['blocks']
+
+    writeInitMethodImplementationTcp(sourceFile, className, registerJson['registers'], blocks)
+    writeUpdateMethod(sourceFile, className, registerJson['registers'], blocks)
 
     # Write update methods
     writePropertyUpdateMethodImplementationsTcp(sourceFile, className, registerJson['registers'])
@@ -427,8 +431,12 @@ def writeRtuSourceFile():
             writePropertyGetSetMethodImplementationsRtu(sourceFile, className, blockDefinition['registers'])
 
     # Write init and update method implementation
-    writeInitMethodImplementationRtu(sourceFile, className, registerJson['registers'], registerJson['blocks'])
-    writeUpdateMethod(sourceFile, className, registerJson['registers'], registerJson['blocks'])
+    blocks = []
+    if 'blocks' in registerJson:
+        blocks = registerJson['blocks']
+
+    writeInitMethodImplementationRtu(sourceFile, className, registerJson['registers'], blocks)
+    writeUpdateMethod(sourceFile, className, registerJson['registers'], blocks)
 
     # Write update methods
     writePropertyUpdateMethodImplementationsRtu(sourceFile, className, registerJson['registers'])
