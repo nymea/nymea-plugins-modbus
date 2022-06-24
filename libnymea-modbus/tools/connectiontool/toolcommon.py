@@ -459,8 +459,10 @@ def writePropertyChangedSignals(fileDescriptor, registerDefinitions):
         propertyTyp = getCppDataType(registerDefinition)
         if propertyTyp == 'QString':
             writeLine(fileDescriptor, '    void %sChanged(const %s &%s);' % (propertyName, propertyTyp, propertyName))
+            writeLine(fileDescriptor, '    void %sRead(const %s &%s);' % (propertyName, propertyTyp, propertyName))
         else:
             writeLine(fileDescriptor, '    void %sChanged(%s %s);' % (propertyName, propertyTyp, propertyName))
+            writeLine(fileDescriptor, '    void %sRead(%s %s);' % (propertyName, propertyTyp, propertyName))
 
 
 def writeProtectedPropertyMembers(fileDescriptor, registerDefinitions):
@@ -491,6 +493,7 @@ def writePropertyProcessMethodImplementations(fileDescriptor, className, registe
         writeLine(fileDescriptor, 'void %s::process%sRegisterValues(const QVector<quint16> values)' % (className, propertyName[0].upper() + propertyName[1:]))
         writeLine(fileDescriptor, '{')
         writeLine(fileDescriptor, '    %s received%s = %s;' % (propertyTyp, propertyName[0].upper() + propertyName[1:], getValueConversionMethod(registerDefinition)))
+        writeLine(fileDescriptor, '    emit %sRead(received%s);' % (propertyName, propertyName[0].upper() + propertyName[1:]))
         writeLine(fileDescriptor, '    if (m_%s != received%s) {' % (propertyName, propertyName[0].upper() + propertyName[1:]))
         writeLine(fileDescriptor, '        m_%s = received%s;' % (propertyName, propertyName[0].upper() + propertyName[1:]))
         writeLine(fileDescriptor, '        emit %sChanged(m_%s);' % (propertyName, propertyName))
