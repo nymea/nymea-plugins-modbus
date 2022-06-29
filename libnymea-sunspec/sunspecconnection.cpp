@@ -41,6 +41,7 @@ SunSpecConnection::SunSpecConnection(const QHostAddress &hostAddress, uint port,
     m_port(port),
     m_slaveId(slaveId)
 {
+    qCDebug(dcSunSpec()) << "Creating connection for" << QString("%1:%2").arg(m_hostAddress.toString()).arg(m_port);
     createConnection();
 }
 
@@ -51,6 +52,7 @@ SunSpecConnection::SunSpecConnection(const QHostAddress &hostAddress, uint port,
     m_slaveId(slaveId),
     m_byteOrder(byteOrder)
 {
+    qCDebug(dcSunSpec()) << "Creating connection for" << QString("%1:%2").arg(m_hostAddress.toString()).arg(m_port);
     createConnection();
 }
 
@@ -68,8 +70,6 @@ void SunSpecConnection::setHostAddress(const QHostAddress &hostAddress)
 {
     m_hostAddress = hostAddress;
     m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkAddressParameter, m_hostAddress.toString());
-
-    // TODO: reconnect if different
 }
 
 uint SunSpecConnection::port() const
@@ -81,9 +81,6 @@ void SunSpecConnection::setPort(uint port)
 {
     m_port = port;
     m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkPortParameter, m_port);
-
-    // TODO: reconnect if different
-
 }
 
 uint SunSpecConnection::slaveId() const
@@ -123,7 +120,7 @@ void SunSpecConnection::setNumberOfRetries(uint retries)
 
 bool SunSpecConnection::connected() const
 {
-    return m_modbusTcpClient->state() == QModbusDevice::ConnectedState;
+    return m_connected;
 }
 
 bool SunSpecConnection::discoveryRunning() const
@@ -143,6 +140,20 @@ void SunSpecConnection::disconnectDevice()
     m_modbusTcpClient->disconnectDevice();
 }
 
+bool SunSpecConnection::reconnectDevice()
+{
+    // Recreate the entire connection so we clean up also any pending replies
+    qCDebug(dcSunSpec()) << "Reconnecting" << this << "...";
+    if (m_modbusTcpClient) {
+        m_modbusTcpClient->disconnectDevice();
+        delete  m_modbusTcpClient;
+        m_modbusTcpClient = nullptr;
+    }
+
+    createConnection();
+    return connectDevice();
+}
+
 quint16 SunSpecConnection::baseRegister() const
 {
     return m_baseRegister;
@@ -151,6 +162,36 @@ quint16 SunSpecConnection::baseRegister() const
 QList<SunSpecModel *> SunSpecConnection::models() const
 {
     return m_models;
+}
+
+QModbusReply *SunSpecConnection::sendReadRequest(const QModbusDataUnit &read, int serverAddress)
+{
+    if (!m_modbusTcpClient)
+        return nullptr;
+
+    QModbusReply *reply = m_modbusTcpClient->sendReadRequest(read, serverAddress);
+    monitorTimoutErrors(reply);
+    return reply;
+}
+
+QModbusReply *SunSpecConnection::sendWriteRequest(const QModbusDataUnit &write, int serverAddress)
+{
+    if (!m_modbusTcpClient)
+        return nullptr;
+
+    QModbusReply *reply = m_modbusTcpClient->sendWriteRequest(write, serverAddress);
+    monitorTimoutErrors(reply);
+    return reply;
+}
+
+QModbusReply *SunSpecConnection::sendRawRequest(const QModbusRequest &request, int serverAddress)
+{
+    if (!m_modbusTcpClient)
+        return nullptr;
+
+    QModbusReply *reply = m_modbusTcpClient->sendRawRequest(request, serverAddress);
+    monitorTimoutErrors(reply);
+    return reply;
 }
 
 bool SunSpecConnection::startDiscovery()
@@ -186,7 +227,6 @@ bool SunSpecConnection::startDiscovery()
 
 void SunSpecConnection::createConnection()
 {
-    qCDebug(dcSunSpec()) << "Creating connection for" << QString("%1:%2").arg(m_hostAddress.toString()).arg(m_port);
     m_modbusTcpClient = new QModbusTcpClient(this);
     m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkPortParameter, m_port);
     m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkAddressParameter, m_hostAddress.toString());
@@ -207,19 +247,20 @@ void SunSpecConnection::createConnection()
     });
 
     connect(m_modbusTcpClient, &QModbusTcpClient::stateChanged, this, [this](QModbusDevice::State state){
-        bool connected = (state == QModbusDevice::ConnectedState);
-        bool disconnected = (state == QModbusDevice::UnconnectedState);
-
-        if (connected) {
+        qCDebug(dcSunSpec()) << this << "client state changed" << state;
+        if (!m_connected && state == QModbusDevice::ConnectedState) {
             m_reconnectTimer.stop();
-            emit connectedChanged(true);
+            m_timoutReplyCounter = 0;
+            m_connected = true;
+            emit connectedChanged(m_connected);
             return;
         }
 
-        if (disconnected) {
+        if (m_connected && state == QModbusDevice::UnconnectedState) {
             // Try to reconnect in 10 seconds
             m_reconnectTimer.start();
-            emit connectedChanged(false);
+            m_connected = false;
+            emit connectedChanged(m_connected);
             return;
         }
     });
@@ -436,15 +477,45 @@ void SunSpecConnection::scanModelsOnBaseRegister(quint16 offset)
             // Scan next model block, current offset + 2 header bytes + model length
             scanModelsOnBaseRegister(offset + 2 + modelLength);
         } else {
-            qCWarning(dcSunSpec()) << "Error occured while reading model header from" << this << "using offset" << offset << m_modbusTcpClient->errorString();
+            qCWarning(dcSunSpec()) << "Error occurred while reading model header from" << this << "using offset" << offset << m_modbusTcpClient->errorString();
             if (!m_modelDiscoveryResult.isEmpty()) {
-                qCWarning(dcSunSpec()) << "Error occured but already discovered" << m_modelDiscoveryResult.count() << "models. Continue with the discovered models, but the discovery may be incomplete due to header reading errors.";
+                qCWarning(dcSunSpec()) << "Error occurred but already discovered" << m_modelDiscoveryResult.count() << "models. Continue with the discovered models, but the discovery may be incomplete due to header reading errors.";
                 qCDebug(dcSunSpec()) << "Scan for SunSpec models on" << this << m_baseRegister << "finished successfully";
                 processDiscoveryResult();
             } else {
                 setDiscoveryRunning(false);
                 emit discoveryFinished(false);
             }
+        }
+    });
+}
+
+void SunSpecConnection::monitorTimoutErrors(QModbusReply *reply)
+{
+    // Some modbus device over time seem to stop responding randomly but keep the connection up.
+    // All replies finish repeatedly with the timeout error. Normally a reconnect will fix this behaviour.
+    // In order to minimize the downtime and having proper logs when this happens, we monitor every
+    // reply sent to the sunspec connection from the models and trigger a reconnect if to many timouts occurred in a row.
+
+    if (!reply) return;
+
+    connect(reply, &QModbusReply::errorOccurred, this, [this](QModbusDevice::Error error){
+        // Note: we handle
+        switch (error) {
+        case QModbusDevice::NoError:
+            // If any reply finished succssfully, we can reset the counter since the device
+            // is responding somehow and the workaround is not required
+            m_timoutReplyCounter = 0;
+            break;
+        case QModbusDevice::TimeoutError:
+            m_timoutReplyCounter++;
+            if (m_timoutReplyCounter > m_timoutReplyCounterLimit) {
+                qCWarning(dcSunSpec()) << "More than" << m_timoutReplyCounterLimit << "modbus replies finished with timeout error on" << this << "Triggering a reconnect...";
+                reconnectDevice();
+            }
+            break;
+        default:
+            break;
         }
     });
 }

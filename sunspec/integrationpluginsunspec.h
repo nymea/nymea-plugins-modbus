@@ -59,9 +59,6 @@ public:
     void executeAction(ThingActionInfo *info) override;
 
 private:
-    // Connected state for all things
-    QHash<ThingClassId, StateTypeId> m_connectedStateTypeIds;
-
     // SunSpec Connection params map
     QHash<ThingClassId, ParamTypeId> m_connectionIpParamTypeIds;
     QHash<ThingClassId, ParamTypeId> m_connectionPortParamTypeIds;
