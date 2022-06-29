@@ -81,20 +81,6 @@ void IntegrationPluginSunSpec::init()
     m_connectionSlaveIdParamTypeIds.insert(sunspecConnectionThingClassId, sunspecConnectionThingSlaveIdParamTypeId);
     m_connectionSlaveIdParamTypeIds.insert(solarEdgeConnectionThingClassId, solarEdgeConnectionThingSlaveIdParamTypeId);
 
-    // Connected state for all things
-    m_connectedStateTypeIds.insert(sunspecConnectionThingClassId, sunspecConnectionConnectedStateTypeId);
-    m_connectedStateTypeIds.insert(solarEdgeConnectionThingClassId, solarEdgeConnectionConnectedStateTypeId);
-    m_connectedStateTypeIds.insert(solarEdgeBatteryThingClassId, solarEdgeBatteryConnectedStateTypeId);
-
-    // Child things
-    m_connectedStateTypeIds.insert(sunspecStorageThingClassId, sunspecStorageConnectedStateTypeId);
-    m_connectedStateTypeIds.insert(sunspecSinglePhaseInverterThingClassId, sunspecSinglePhaseInverterConnectedStateTypeId);
-    m_connectedStateTypeIds.insert(sunspecSplitPhaseInverterThingClassId, sunspecSplitPhaseInverterConnectedStateTypeId);
-    m_connectedStateTypeIds.insert(sunspecThreePhaseInverterThingClassId, sunspecThreePhaseInverterConnectedStateTypeId);
-    m_connectedStateTypeIds.insert(sunspecSinglePhaseMeterThingClassId, sunspecSinglePhaseMeterConnectedStateTypeId);
-    m_connectedStateTypeIds.insert(sunspecSplitPhaseMeterThingClassId, sunspecSplitPhaseMeterConnectedStateTypeId);
-    m_connectedStateTypeIds.insert(sunspecThreePhaseMeterThingClassId, sunspecThreePhaseMeterConnectedStateTypeId);
-
     // Params for sunspec things
     m_modelIdParamTypeIds.insert(sunspecSinglePhaseInverterThingClassId, sunspecSinglePhaseInverterThingModelIdParamTypeId);
     m_modelIdParamTypeIds.insert(sunspecSplitPhaseInverterThingClassId, sunspecSplitPhaseInverterThingModelIdParamTypeId);
@@ -528,12 +514,17 @@ void IntegrationPluginSunSpec::setupConnection(ThingSetupInfo *info)
 
     // Update all child things connected states for this connection
     connect(connection, &SunSpecConnection::connectedChanged, thing, [this, connection, thing] (bool connected) {
-        qCDebug(dcSunSpec()) << connection << (connected ? "connected" : "disconnected");
-        thing->setStateValue(m_connectedStateTypeIds.value(thing->thingClassId()), connected);
+        if (connected) {
+            qCDebug(dcSunSpec()) << connection << "connected";
+        } else {
+            qCWarning(dcSunSpec()) << connection << "disconnected";
+        }
+
+        thing->setStateValue("connected", connected);
 
         // Update connected state of child things
         foreach (Thing *child, myThings().filterByParentId(thing->id())) {
-            child->setStateValue(m_connectedStateTypeIds.value(child->thingClassId()), connected);
+            child->setStateValue("connected", connected);
 
             // Refresh childs if connected successfully
             if (connected && m_sunSpecThings.contains(child)) {
@@ -702,7 +693,7 @@ void IntegrationPluginSunSpec::searchSolarEdgeBattery(SunSpecConnection *connect
 
         // If init failed, no battery connected
         if (!success) {
-            qCWarning(dcSunSpec()) << "No SolarEdge battery connected on register" << startRegister << ". Not creating battery device.";
+            qCDebug(dcSunSpec()) << "No SolarEdge battery connected on register" << startRegister << "- not creating thing.";
             return;
         }
 
