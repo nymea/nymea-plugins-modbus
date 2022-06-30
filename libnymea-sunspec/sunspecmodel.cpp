@@ -106,55 +106,55 @@ void SunSpecModel::readBlockData()
 {
     // Read the block data, start register + 2 header reisters (id, length)
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, m_modbusStartRegister, m_modelLength + 2);
-    if (QModbusReply *reply = m_connection->modbusTcpClient()->sendReadRequest(request, m_connection->slaveId())) {
-        if (!reply->isFinished()) {
-            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
-            connect(reply, &QModbusReply::finished, this, [=]() {
-                if (reply->error() != QModbusDevice::NoError) {
-                    qCWarning(dcSunSpec()) << name() << description() << "Read block data response error:" << reply->error();
-                    return;
-                }
-
-                const QModbusDataUnit unit = reply->result();
-                qCDebug(dcSunSpecModelData()) << "-->" << "Received block data" << this << unit.values().count() << SunSpecDataPoint::registersToString(unit.values());
-                m_blockData = unit.values();
-                emit blockDataChanged(m_blockData);
-
-                if (m_blockData.count() != m_modelLength + 2) {
-                    qCWarning(dcSunSpecModelData()) << "Received invalid block data count from read block data request. Model lenght:" << m_modelLength << "Response block count:" << m_blockData.count();
-                    return;
-                }
-
-                // Fill the data points
-                foreach (const QString &dataPointName, m_dataPoints.keys()) {
-                    QVector<quint16> rawData = m_blockData.mid(m_dataPoints[dataPointName].addressOffset(), m_dataPoints[dataPointName].size());
-                    m_dataPoints[dataPointName].setRawData(rawData);
-                    qCDebug(dcSunSpecModelData()) << "Set raw data:" << m_dataPoints[dataPointName] << SunSpecDataPoint::registersToString(rawData) << (m_dataPoints[dataPointName].isValid() ? "Valid" : "Invalid");
-                }
-
-                // Fill the private member data using the data points
-                processBlockData();
-
-                // Make sure initialized gets called
-                setInitializedFinished();
-
-                // Inform about the new block data
-                emit blockUpdated();
-            });
-
-            connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error) {
-                qCWarning(dcSunSpecModelData())  << name() << description() << "Modbus reply while reading block data. Error:" << error;
-            });
-
-        } else {
-            qCWarning(dcSunSpecModelData()) << "Read block data error: " << m_connection->modbusTcpClient()->errorString();
-            reply->deleteLater(); // broadcast replies return immediately
-            return;
-        }
-    } else {
-        qCWarning(dcSunSpecModelData()) << "Read block data error: " << m_connection->modbusTcpClient()->errorString();
+    QModbusReply *reply = m_connection->sendReadRequest(request, m_connection->slaveId());
+    if (!reply) {
+        qCDebug(dcSunSpecModelData()) << "Read block data error: " << m_connection->modbusTcpClient()->errorString();
         return;
     }
+
+    if (reply->isFinished()) {
+        qCWarning(dcSunSpecModelData()) << "Read block data error: " << m_connection->modbusTcpClient()->errorString();
+        reply->deleteLater(); // broadcast replies return immediately
+        return;
+    }
+
+    connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+    connect(reply, &QModbusReply::finished, this, [=]() {
+        if (reply->error() != QModbusDevice::NoError) {
+            qCWarning(dcSunSpec()) << name() << description() << "Read block data response error:" << reply->error();
+            return;
+        }
+
+        const QModbusDataUnit unit = reply->result();
+        qCDebug(dcSunSpecModelData()) << "-->" << "Received block data" << this << unit.values().count() << SunSpecDataPoint::registersToString(unit.values());
+        m_blockData = unit.values();
+        emit blockDataChanged(m_blockData);
+
+        if (m_blockData.count() != m_modelLength + 2) {
+            qCWarning(dcSunSpecModelData()) << "Received invalid block data count from read block data request. Model lenght:" << m_modelLength << "Response block count:" << m_blockData.count();
+            return;
+        }
+
+        // Fill the data points
+        foreach (const QString &dataPointName, m_dataPoints.keys()) {
+            QVector<quint16> rawData = m_blockData.mid(m_dataPoints[dataPointName].addressOffset(), m_dataPoints[dataPointName].size());
+            m_dataPoints[dataPointName].setRawData(rawData);
+            qCDebug(dcSunSpecModelData()) << "Set raw data:" << m_dataPoints[dataPointName] << SunSpecDataPoint::registersToString(rawData) << (m_dataPoints[dataPointName].isValid() ? "Valid" : "Invalid");
+        }
+
+        // Fill the private member data using the data points
+        processBlockData();
+
+        // Make sure initialized gets called
+        setInitializedFinished();
+
+        // Inform about the new block data
+        emit blockUpdated();
+    });
+
+    connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error) {
+        qCWarning(dcSunSpecModelData())  << name() << description() << "Modbus reply while reading block data. Error:" << error << reply->errorString();
+    });
 }
 
 bool SunSpecModel::operator ==(const SunSpecModel &other) const

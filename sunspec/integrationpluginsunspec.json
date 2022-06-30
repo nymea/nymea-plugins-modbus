@@ -17,7 +17,7 @@
             "displayName": "Timout",
             "type": "uint",
             "unit": "MilliSeconds",
-            "defaultValue": 500
+            "defaultValue": 1000
         },
         {
             "id": "9a4bfe01-315f-4ee7-98a9-f16b08ba12ad",

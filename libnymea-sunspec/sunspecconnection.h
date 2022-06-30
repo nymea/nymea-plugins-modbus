@@ -73,15 +73,20 @@ public:
     bool connected() const;
     bool discoveryRunning() const;
 
-    bool connectDevice();
-    void disconnectDevice();
-
     quint16 baseRegister() const;
 
     QList<SunSpecModel *> models() const;
 
+    // Helper methods for internal queue handling if enabled
+    QModbusReply *sendReadRequest(const QModbusDataUnit &read, int serverAddress);
+    QModbusReply *sendWriteRequest(const QModbusDataUnit &write, int serverAddress);
+    QModbusReply *sendRawRequest(const QModbusRequest &request, int serverAddress);
+
 public slots:
     bool startDiscovery();
+    bool connectDevice();
+    void disconnectDevice();
+    bool reconnectDevice();
 
 signals:
     void connectedChanged(bool connected);
@@ -95,6 +100,7 @@ private:
     uint m_port;
     int m_slaveId = 1;
     QTimer m_reconnectTimer;
+    bool m_connected = false;
 
     quint16 m_baseRegister = 40000;
     QQueue<quint16> m_baseRegisterQueue;
@@ -112,6 +118,9 @@ private:
     QList<SunSpecModel *> m_uninitializedModels;
     SunSpecDataPoint::ByteOrder m_byteOrder = SunSpecDataPoint::ByteOrderLittleEndian;
 
+    int m_timoutReplyCounter = 0;
+    int m_timoutReplyCounterLimit = 16;
+
     void createConnection();
 
     void processDiscoveryResult();
@@ -124,6 +133,7 @@ private:
 
     void scanModelsOnBaseRegister(quint16 offset = 2);
 
+    void monitorTimoutErrors(QModbusReply *reply);
 };
 
 QDebug operator<<(QDebug debug, SunSpecConnection *connection);
