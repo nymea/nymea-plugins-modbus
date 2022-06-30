@@ -1,3 +1,17 @@
+nymea-plugins-modbus (1.3.0) jammy; urgency=medium
+
+  [ Michael Zanetti ]
+  * PhoenixConnect: Rename wallbe plugin and add support for Compleo and
+    Scapo wallboxes
+
+  [ Simon Stürz ]
+  * modbus-tool: Fix issue #69 : make json without blocks work again
+  * modbus-tool: Add register read finished signal
+  * SunSpec: Introduce reconnect on to many timeout errors and update
+    connected state handling
+
+ -- jenkins <developer@nymea.io>  Thu, 30 Jun 2022 15:05:32 +0200
+
 nymea-plugins-modbus (1.2.0) jammy; urgency=medium
 
   [ Simon Stürz ]
