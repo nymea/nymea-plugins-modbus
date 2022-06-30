@@ -1,6 +1,6 @@
 {
-    "title": "Wallbe",
-    "tagline": "Control and monitor the Wallbe smart wallbox for electric vehicles.",
+    "title": "PhoenixConnect",
+    "tagline": "Control and monitor Wallbe, Compleo and Scapo wallboxes.",
     "icon": "wallbe-gmbh-vector-logo.svg",
     "stability": "consumer",
     "offline": true,

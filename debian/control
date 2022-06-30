@@ -185,14 +185,16 @@ Description: nymea integration plugin for UniPi devices
  This package contains the nymea integration plugin for UniPi devices.
 
 
-Package: nymea-plugin-wallbe
+Package: nymea-plugin-phoenixconnect
 Architecture: any
 Section: libs
 Depends: ${shlibs:Depends},
          ${misc:Depends},
-Description: nymea integration plugin for Wallbe wallboxes
+Conflicts: nymea-plugin-wallbe
+Replaces: nymea-plugin-wallbe
+Description: nymea integration plugin for PhoenixConnect wallboxes
  This package contains the nymea integration plugin for wallboxes made
- by wallbe.
+ by PhonenixConnect and rebranded as Wallbe, Compleo and Scapo.
 
 Package: nymea-plugin-webasto
 Architecture: any
