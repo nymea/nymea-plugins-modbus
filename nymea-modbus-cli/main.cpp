@@ -169,6 +169,8 @@ int main(int argc, char *argv[])
                     quint16 registerNumber = unit.startAddress() + i;
                     qInfo() << "-->" << registerNumber << ":" << QString("0x%1").arg(registerValue, 4, 16, QLatin1Char('0')) << registerValue;
                 }
+
+                exit(EXIT_SUCCESS);
             });
 
             QObject::connect(reply, &QModbusReply::errorOccurred, client, [=] (QModbusDevice::Error error){
