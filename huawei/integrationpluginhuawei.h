@@ -33,8 +33,11 @@
 
 #include <plugintimer.h>
 #include <integrations/integrationplugin.h>
+#include <network/networkdevicediscovery.h>
 
+#include "extern-plugininfo.h"
 #include "huaweifusionsolar.h"
+#include "huaweimodbusrtuconnection.h"
 
 class IntegrationPluginHuawei: public IntegrationPlugin
 {
@@ -47,16 +50,18 @@ public:
     explicit IntegrationPluginHuawei();
 
     void discoverThings(ThingDiscoveryInfo *info) override;
-    void startMonitoringAutoThings() override;
     void setupThing(ThingSetupInfo *info) override;
     void postSetupThing(Thing *thing) override;
     void thingRemoved(Thing *thing) override;
-    void executeAction(ThingActionInfo *info) override;
 
 private:
     PluginTimer *m_pluginTimer = nullptr;
+    QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
     QHash<Thing *, HuaweiFusionSolar *> m_connections;
+    QHash<Thing *, HuaweiModbusRtuConnection *> m_rtuConnections;
 
+
+    void setupFusionSolar(ThingSetupInfo *info);
 };
 
 #endif // INTEGRATIONPLUGINHUAWEI_H

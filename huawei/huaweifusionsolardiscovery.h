@@ -3,7 +3,7 @@
 * Copyright 2013 - 2022, nymea GmbH
 * Contact: contact@nymea.io
 *
-* This fileDescriptor is part of nymea.
+* This file is part of nymea.
 * This project including source code and documentation is protected by
 * copyright law, and remains the property of nymea GmbH. All rights, including
 * reproduction, publication, editing and translation, are reserved. The use of
@@ -28,39 +28,48 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef HUAWEIFUSIONSOLAR_H
-#define HUAWEIFUSIONSOLAR_H
+#ifndef HUAWEIFUSIONSOLARDISCOVERY_H
+#define HUAWEIFUSIONSOLARDISCOVERY_H
 
 #include <QObject>
-#include <QQueue>
 
-#include "huaweifusionmodbustcpconnection.h"
+#include <network/networkdevicediscovery.h>
 
-class HuaweiFusionSolar : public HuaweiFusionModbusTcpConnection
+#include "huaweifusionsolar.h"
+
+class HuaweiFusionSolarDiscovery : public QObject
 {
     Q_OBJECT
 public:
-    explicit HuaweiFusionSolar(const QHostAddress &hostAddress, uint port, quint16 slaveId, QObject *parent = nullptr);
-    ~HuaweiFusionSolar() = default;
+    explicit HuaweiFusionSolarDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint16 port = 502, quint16 modbusAddress = 1, QObject *parent = nullptr);
 
-    bool initialize() override;
-    virtual bool update() override;
+    void startDiscovery();
+
+    NetworkDeviceInfos discoveryResults() const;
+
+signals:
+    void discoveryFinished();
 
 private:
-    QQueue<HuaweiFusionModbusTcpConnection::Registers> m_registersQueue;
-    QModbusReply *m_initReply = nullptr;
+    NetworkDeviceDiscovery *m_networkDeviceDiscovery = nullptr;
+    quint16 m_port;
+    quint16 m_modbusAddress;
 
-    int m_currentRegisterRequest = -1;
-    void finishRequest();
+    QTimer m_gracePeriodTimer;
+    QDateTime m_startDateTime;
 
-    bool m_battery1Available = true;
-    bool m_battery2Available = true;
+    NetworkDeviceInfos m_networkDeviceInfos;
+    NetworkDeviceInfos m_verifiedNetworkDeviceInfos;
 
-    QString exceptionToString(QModbusPdu::ExceptionCode exception);
+    QList<HuaweiFusionSolar *> m_connections;
 
-private slots:
-    void readNextRegister();
+    NetworkDeviceInfos m_discoveryResults;
+
+    void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
+    void cleanupConnection(HuaweiFusionSolar *connection);
+
+    void finishDiscovery();
 
 };
 
-#endif // HUAWEIFUSIONSOLAR_H
+#endif // HUAWEIFUSIONSOLARDISCOVERY_H
