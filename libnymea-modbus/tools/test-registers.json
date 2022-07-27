@@ -1,0 +1,117 @@
+{
+    "className": "Test",
+    "protocol": "BOTH",
+    "endianness": "BigEndian",
+    "enums": [
+        {
+            "name": "TestEnum",
+            "values": [
+                {
+                    "key": "Zero",
+                    "value": 0
+                },
+                {
+                    "key": "One",
+                    "value": 1
+                }
+            ]
+        }
+    ],
+    "blocks": [
+        {
+            "id": "blockNameInit",
+            "readSchedule": "init",
+            "registers": [
+                {
+                    "id": "initBlockRegisterOne",
+                    "address": 100,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Block register one",
+                    "staticScaleFactor": -3,
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "initBlockRegisterTwo",
+                    "address": 102,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Block register two",
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "blockNameUpdate",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "blockRegisterOne",
+                    "address": 200,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Block register one",
+                    "staticScaleFactor": -3,
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "blockRegisterTwo",
+                    "address": 202,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Block register two",
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        }
+    ],
+    "registers": [
+        {
+            "id": "nameRegister",
+            "address": 30,
+            "size": 10,
+            "type": "string",
+            "registerType": "holdingRegister",
+            "readSchedule": "init",
+            "description": "Name string register",
+            "access": "RO"
+        },
+        {
+            "id": "unsignedLongWord",
+            "address": 1,
+            "size": 2,
+            "type": "int32",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "Unsigned long word register",
+            "unit": "kW",
+            "staticScaleFactor": -3,
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "unsignedWord",
+            "address": 3,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "Unsigned word register",
+            "unit": "s",
+            "defaultValue": "0",
+            "access": "RO"
+        }
+    ]
+}

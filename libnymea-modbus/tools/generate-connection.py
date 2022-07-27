@@ -44,7 +44,6 @@ def writeTcpHeaderFile():
     writeLine(headerFile)
     writeLine(headerFile, '#include <modbusdatautils.h>')
     writeLine(headerFile, '#include <modbustcpmaster.h>')
-
     writeLine(headerFile)
 
     # Begin of class
@@ -80,11 +79,6 @@ def writeTcpHeaderFile():
         # Write block get/set method declarations
         writeBlocksUpdateMethodDeclarations(headerFile, registerJson['blocks'])
 
-    # Write init and update method declarations
-    writeLine(headerFile, '    virtual void initialize();')
-    writeLine(headerFile, '    virtual void update();')
-    writeLine(headerFile)
-
     writePropertyUpdateMethodDeclarations(headerFile, registerJson['registers'])
     writeLine(headerFile)
     if 'blocks' in registerJson:
@@ -103,9 +97,16 @@ def writeTcpHeaderFile():
 
     writeLine(headerFile)
 
+    # Write init and update method declarations
+    writeLine(headerFile, '    virtual bool initialize();')
+    writeLine(headerFile, '    virtual bool update();')
+    writeLine(headerFile)
+
     # Write registers value changed signals
     writeLine(headerFile, 'signals:')
-    writeLine(headerFile, '    void initializationFinished();')
+    writeLine(headerFile, '    void initializationFinished(bool success);')
+    writeLine(headerFile, '    void updateFinished();')
+    writeLine(headerFile)
     writeLine(headerFile, '    void endiannessChanged(ModbusDataUtils::ByteOrder endianness);')
     writeLine(headerFile)
     writePropertyChangedSignals(headerFile, registerJson['registers'])
@@ -114,34 +115,35 @@ def writeTcpHeaderFile():
         for blockDefinition in registerJson['blocks']:
             writePropertyChangedSignals(headerFile, blockDefinition['registers'])
 
-    writeLine(headerFile)
+        writeLine(headerFile)
 
     # Protected members
     writeLine(headerFile, 'protected:')
-
-    writeLine(headerFile)
     writeProtectedPropertyMembers(headerFile, registerJson['registers'])
     if 'blocks' in registerJson:
         for blockDefinition in registerJson['blocks']:
             writeProtectedPropertyMembers(headerFile, blockDefinition['registers'])
 
-    writeLine(headerFile)
+        writeLine(headerFile)
 
     writePropertyProcessMethodDeclaration(headerFile, registerJson['registers'])
     if 'blocks' in registerJson:
         for blockDefinition in registerJson['blocks']:
             writePropertyProcessMethodDeclaration(headerFile, blockDefinition['registers'])
 
-    writeLine(headerFile)
-
     # Private members
     writeLine(headerFile, 'private:')
-    writeLine(headerFile, '    quint16 m_slaveId = 1;')
-    writeLine(headerFile, '    QVector<QModbusReply *> m_pendingInitReplies;')
     writeLine(headerFile, '    ModbusDataUtils::ByteOrder m_endianness = ModbusDataUtils::ByteOrder%s;' % endianness)
+    writeLine(headerFile, '    quint16 m_slaveId = 1;')
     writeLine(headerFile)
+    writeLine(headerFile, '    QVector<QModbusReply *> m_pendingInitReplies;')
+    writeLine(headerFile, '    QVector<QModbusReply *> m_pendingUpdateReplies;')
+    writeLine(headerFile)
+    writeLine(headerFile, '    QObject *m_initObject = nullptr;')
     writeLine(headerFile, '    void verifyInitFinished();')
+    writeLine(headerFile, '    void finishInitialization(bool success);')
     writeLine(headerFile)
+    writeLine(headerFile, '    void verifyUpdateFinished();')
 
     # End of class
     writeLine(headerFile)
@@ -170,7 +172,7 @@ def writeTcpSourceFile():
     writeLine(sourceFile, '    ModbusTCPMaster(hostAddress, port, parent),')
     writeLine(sourceFile, '    m_slaveId(slaveId)')
     writeLine(sourceFile, '{')
-    writeLine(sourceFile, '    ')
+    writeLine(sourceFile)
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
@@ -184,7 +186,7 @@ def writeTcpSourceFile():
     writeLine(sourceFile, '{')
     writeLine(sourceFile, '    if (m_endianness == endianness)')
     writeLine(sourceFile, '        return;')
-    writeLine(sourceFile,)
+    writeLine(sourceFile)
     writeLine(sourceFile, '    m_endianness = endianness;')
     writeLine(sourceFile, '    emit endiannessChanged(m_endianness);')
     writeLine(sourceFile, '}')
@@ -230,9 +232,30 @@ def writeTcpSourceFile():
     writeLine(sourceFile, 'void %s::verifyInitFinished()' % (className))
     writeLine(sourceFile, '{')
     writeLine(sourceFile, '    if (m_pendingInitReplies.isEmpty()) {')
-    writeLine(sourceFile, '        qCDebug(dc%s()) << "Initialization finished of %s" << hostAddress().toString();' % (className, className))
-    writeLine(sourceFile, '        emit initializationFinished();')
+    writeLine(sourceFile, '        finishInitialization(true);')
     writeLine(sourceFile, '    }')
+    writeLine(sourceFile, '}')
+    writeLine(sourceFile)
+
+    writeLine(sourceFile, 'void %s::finishInitialization(bool success)' % (className))
+    writeLine(sourceFile, '{')
+    writeLine(sourceFile, '    if (success) {')
+    writeLine(sourceFile, '        qCDebug(dc%s()) << "Initialization finished of %s" << hostAddress().toString() << "finished successfully";' % (className, className))
+    writeLine(sourceFile, '    } else {')
+    writeLine(sourceFile, '        qCWarning(dc%s()) << "Initialization finished of %s" << hostAddress().toString() << "failed.";' % (className, className))
+    writeLine(sourceFile, '    }')
+    writeLine(sourceFile)
+    writeLine(sourceFile, '    // Cleanup init')
+    writeLine(sourceFile, '    delete m_initObject;')
+    writeLine(sourceFile, '    m_initObject = nullptr;')
+    writeLine(sourceFile, '    m_pendingInitReplies.clear();')
+    writeLine(sourceFile)
+    writeLine(sourceFile, '    emit initializationFinished(success);')
+    writeLine(sourceFile, '}')
+    writeLine(sourceFile)
+
+    writeLine(sourceFile, 'void %s::verifyUpdateFinished()' % (className))
+    writeLine(sourceFile, '{')
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
@@ -289,7 +312,6 @@ def writeRtuHeaderFile():
     writeLine(headerFile, '    explicit %s(ModbusRtuMaster *modbusRtuMaster, quint16 slaveId, QObject *parent = nullptr);' % className)
     writeLine(headerFile, '    ~%s() = default;' % className)
     writeLine(headerFile)
-
     writeLine(headerFile, '    ModbusRtuMaster *modbusRtuMaster() const;')
     writeLine(headerFile, '    quint16 slaveId() const;')
     writeLine(headerFile)
@@ -305,11 +327,6 @@ def writeRtuHeaderFile():
 
         # Write block get/set method declarations
         writeBlocksUpdateMethodDeclarations(headerFile, registerJson['blocks'])
-
-    # Write init and update method declarations
-    writeLine(headerFile, '    virtual void initialize();')
-    writeLine(headerFile, '    virtual void update();')
-    writeLine(headerFile)
 
     writePropertyUpdateMethodDeclarations(headerFile, registerJson['registers'])
     writeLine(headerFile)
@@ -327,10 +344,16 @@ def writeRtuHeaderFile():
         writeLine(headerFile)
         writeInternalBlockReadMethodDeclarationsRtu(headerFile, registerJson['blocks'])
 
+    # Write init and update method declarations
+    writeLine(headerFile, '    virtual bool initialize();')
+    writeLine(headerFile, '    virtual bool update();')
+    writeLine(headerFile)
 
     # Write registers value changed signals
     writeLine(headerFile, 'signals:')
-    writeLine(headerFile, '    void initializationFinished();')
+    writeLine(headerFile, '    void initializationFinished(bool success);')
+    writeLine(headerFile, '    void updateFinished();')
+    writeLine(headerFile)
     writeLine(headerFile, '    void endiannessChanged(ModbusDataUtils::ByteOrder endianness);')
     writeLine(headerFile)
     writePropertyChangedSignals(headerFile, registerJson['registers'])
@@ -342,7 +365,6 @@ def writeRtuHeaderFile():
 
     # Protected members
     writeLine(headerFile, 'protected:')
-
     writeProtectedPropertyMembers(headerFile, registerJson['registers'])
     if 'blocks' in registerJson:
         for blockDefinition in registerJson['blocks']:
@@ -355,17 +377,22 @@ def writeRtuHeaderFile():
         for blockDefinition in registerJson['blocks']:
             writePropertyProcessMethodDeclaration(headerFile, blockDefinition['registers'])
 
-    writeLine(headerFile)
+        writeLine(headerFile)
 
     # Private members
     writeLine(headerFile, 'private:')
     writeLine(headerFile, '    ModbusRtuMaster *m_modbusRtuMaster = nullptr;')
-    writeLine(headerFile, '    quint16 m_slaveId = 1;')
-    writeLine(headerFile, '    QVector<ModbusRtuReply *> m_pendingInitReplies;')
     writeLine(headerFile, '    ModbusDataUtils::ByteOrder m_endianness = ModbusDataUtils::ByteOrder%s;' % endianness)
+    writeLine(headerFile, '    quint16 m_slaveId = 1;')
     writeLine(headerFile)
+    writeLine(headerFile, '    QVector<ModbusRtuReply *> m_pendingInitReplies;')
+    writeLine(headerFile, '    QVector<ModbusRtuReply *> m_pendingUpdateReplies;')
+    writeLine(headerFile)
+    writeLine(headerFile, '    QObject *m_initObject = nullptr;')
     writeLine(headerFile, '    void verifyInitFinished();')
+    writeLine(headerFile, '    void finishInitialization(bool success);')
     writeLine(headerFile)
+    writeLine(headerFile, '    void verifyUpdateFinished();')
     
     # End of class
     writeLine(headerFile)
@@ -396,7 +423,7 @@ def writeRtuSourceFile():
     writeLine(sourceFile, '    m_modbusRtuMaster(modbusRtuMaster),')
     writeLine(sourceFile, '    m_slaveId(slaveId)')
     writeLine(sourceFile, '{')
-    writeLine(sourceFile, '    ')
+    writeLine(sourceFile, '')
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
@@ -409,11 +436,13 @@ def writeRtuSourceFile():
     writeLine(sourceFile, '{')
     writeLine(sourceFile, '    return m_slaveId;')
     writeLine(sourceFile, '}')
+    writeLine(sourceFile)
 
     writeLine(sourceFile, 'ModbusDataUtils::ByteOrder %s::endianness() const' % (className))
     writeLine(sourceFile, '{')
     writeLine(sourceFile, '    return m_endianness;')
     writeLine(sourceFile, '}')
+    writeLine(sourceFile)
 
     writeLine(sourceFile, 'void %s::setEndianness(ModbusDataUtils::ByteOrder endianness)' % (className))
     writeLine(sourceFile, '{')
@@ -423,6 +452,7 @@ def writeRtuSourceFile():
     writeLine(sourceFile, '    m_endianness = endianness;')
     writeLine(sourceFile, '    emit endiannessChanged(m_endianness);')
     writeLine(sourceFile, '}')
+    writeLine(sourceFile)
 
     # Property get methods
     writePropertyGetSetMethodImplementationsRtu(sourceFile, className, registerJson['registers'])
@@ -464,9 +494,30 @@ def writeRtuSourceFile():
     writeLine(sourceFile, 'void %s::verifyInitFinished()' % (className))
     writeLine(sourceFile, '{')
     writeLine(sourceFile, '    if (m_pendingInitReplies.isEmpty()) {')
-    writeLine(sourceFile, '        qCDebug(dc%s()) << "Initialization finished of %s";' % (className, className))
-    writeLine(sourceFile, '        emit initializationFinished();')
+    writeLine(sourceFile, '        finishInitialization(true);')
     writeLine(sourceFile, '    }')
+    writeLine(sourceFile, '}')
+    writeLine(sourceFile)
+
+    writeLine(sourceFile, 'void %s::finishInitialization(bool success)' % (className))
+    writeLine(sourceFile, '{')
+    writeLine(sourceFile, '    if (success) {')
+    writeLine(sourceFile, '        qCDebug(dc%s()) << "Initialization finished of %s finished successfully";' % (className, className))
+    writeLine(sourceFile, '    } else {')
+    writeLine(sourceFile, '        qCWarning(dc%s()) << "Initialization finished of %s failed.";' % (className, className))
+    writeLine(sourceFile, '    }')
+    writeLine(sourceFile)
+    writeLine(sourceFile, '    // Cleanup init')
+    writeLine(sourceFile, '    delete m_initObject;')
+    writeLine(sourceFile, '    m_initObject = nullptr;')
+    writeLine(sourceFile, '    m_pendingInitReplies.clear();')
+    writeLine(sourceFile)
+    writeLine(sourceFile, '    emit initializationFinished(success);')
+    writeLine(sourceFile, '}')
+    writeLine(sourceFile)
+
+    writeLine(sourceFile, 'void %s::verifyUpdateFinished()' % (className))
+    writeLine(sourceFile, '{')
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
