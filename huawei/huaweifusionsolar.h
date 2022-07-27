@@ -42,8 +42,8 @@ class HuaweiFusionSolar : public HuaweiModbusTcpConnection
 public:
     explicit HuaweiFusionSolar(const QHostAddress &hostAddress, uint port, quint16 slaveId, QObject *parent = nullptr);
 
-    virtual void initialize() override;
-    virtual void update() override;
+    virtual bool initialize() override;
+    virtual bool update() override;
 
 
 private:

@@ -436,7 +436,7 @@ def writeRegistersDebugLine(fileDescriptor, debugObjectParamName, registerDefini
 
 
 def writeUpdateMethod(fileDescriptor, className, registerDefinitions, blockDefinitions):
-    writeLine(fileDescriptor, 'void %s::update()' % (className))
+    writeLine(fileDescriptor, 'bool %s::update()' % (className))
     writeLine(fileDescriptor, '{')
     for registerDefinition in registerDefinitions:
         propertyName = registerDefinition['id']
@@ -449,6 +449,7 @@ def writeUpdateMethod(fileDescriptor, className, registerDefinitions, blockDefin
         if 'readSchedule' in blockDefinition and blockDefinition['readSchedule'] == 'update':
             writeLine(fileDescriptor, '    update%sBlock();' % (blockName[0].upper() + blockName[1:]))
 
+    writeLine(fileDescriptor, '    return true;')
     writeLine(fileDescriptor, '}')
     writeLine(fileDescriptor)
 

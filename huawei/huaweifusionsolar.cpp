@@ -40,17 +40,18 @@ HuaweiFusionSolar::HuaweiFusionSolar(const QHostAddress &hostAddress, uint port,
 
 }
 
-void HuaweiFusionSolar::initialize()
+bool HuaweiFusionSolar::initialize()
 {
     // No init registers defined. Nothing to be done and we are finished.
-    emit initializationFinished();
+    emit initializationFinished(true);
+    return true;
 }
 
-void HuaweiFusionSolar::update()
+bool HuaweiFusionSolar::update()
 {
     // Make sure there is not an update still running
     if (!m_registersQueue.isEmpty())
-        return;
+        return true;
 
     // Add the requests
     m_registersQueue.enqueue(HuaweiModbusTcpConnection::RegisterInverterActivePower);
@@ -72,6 +73,7 @@ void HuaweiFusionSolar::update()
 
     m_currentRegisterRequest = -1;
     readNextRegister();
+    return true;
 }
 
 void HuaweiFusionSolar::readNextRegister()
