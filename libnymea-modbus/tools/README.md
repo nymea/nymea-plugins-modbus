@@ -1,21 +1,15 @@
 # Generate a modbus read class
 
-In order to make the plugin development for modbus TCP devices much easier and faster, a small tool has been developed to generate a modbus TCP master based class providing get and set methods for the registers and property changed signals.
+In order to make the plugin development for modbus TCP devices much easier and faster, a small tool has been developed to generate a modbus TCP master based class providing get and set methods for the registers and property changed signals. The entire connection handling and modbus parsing will be covered by the resulting connection class ready to use.
 
-The workflow looks like this:
+The basic workflow looks like this:
 
-* Write the `registers.json` file containing all register information you are interested to.
-* Run the script and provide the class name, output directory and the path to the JSON file
-* Include the generated class in your plugin, connect the `<propertyName>Changed()` signal and update the thing state within the plugin.
+* Write the `my-registers.json` file containing all register information you are interested to according to this documentation.
+* Include the register files into your plugin project file using: `MODBUS_CONNECTIONS += my-registers.json`
+* Include the modbus library project include file *after* the connections definition: `include(../modbus.pri)`
+* Run qmake on your project. The generated connection classes can be found in the build directory and will be included automatically into your project.
 
-
-The class will provide 2 main methods for fetching information from the modbus device:
-
-* `initialize()` will read all registers with `"readSchedule": "init"` and emits the signal `initializationFinished()` once all replies returned.
-* `update()` can be used to update all registers with `"readSchedule": "update"`. The class will then fetch each register and update the specified value internally. If the value has changed, the `<propertyName>Changed()` signal will be emitted.
-
-The resulting class will inhert from the `ModbusTCPMaster` class, providing easy access to all possible modbus operations and inform about the connected state.
-
+The easiest way to see how to use the generated connection classes is to look at existing implemntations.
 
 # JSON format
 
@@ -26,6 +20,7 @@ The basic structure of the modbus register JSON looks like following example:
     "className": "MyConnection",
     "protocol": "BOTH",
     "endianness": "BigEndian",
+    "errorLimitUntilNotReachable": 10,
     "enums": [
         {
             "name": "NameOfEnum",
@@ -123,6 +118,11 @@ If the modbus device supports both protocols and you want to generate a class fo
     "protocol": "TCP",
     ...
 
+# RTU reachable
+
+For modbus RTU it can be the case that the hardware resource is connected, but the target device is not connected on the serial line or does not respond. For those situations a mechanis has been introduce which will mark a device as not reachable if a certain amount of error occurred in a row without any successfull communication. Both, the RTU hardware resource `connected` state and the communication working state get represented by the `reachable` property of the RTU connection class.
+
+Depending on your device the amount of errors in a row can vary and can be specified using the `errorLimitUntilNotReachable` property. If not specified, a default of `10` will be assumend.
 
 ## Endianness
 
@@ -138,6 +138,22 @@ There are 2 possibilities:
 Many modbus devices provide inforation using `Enums`, indicating a special state trough a defined list of values. If a register implements an enum, you can define it in the `enums` section. The `name` property defines the name of the enum, and the script will generate a c++ enum definition from this section. Each enum value will then be generated using `<EnumName><EnumValueName> = <value>`.
 
 If a register represets an enum, you simply add the property `"enum": "NameOfEnum"` in the register map and the property will be defined using the resulting enum type. All convertion between enum and resulting modbus register value will be done automatically.
+
+
+## Read schedules
+
+### init
+
+In most plugins you have the situation where you need to read some registers only once like serialnumbers or product identifiers right after beeing connected or even before you set up the thing in the plugin. 
+
+For this purpose the `initialize()` method has been provided. If you call `initialize()` the connection will start reading all registers and blocks with `"readSchedule": "init"` defined and emits the signal `initializationFinished(bool success)` once all registers and blocks have been read successfully or on the first occured error. If the `success` parameter is `false`, something went wrong during intialization. Since any error will make the initialization process fail, it is important that the `init` registers are *mandatory* on the device.
+
+This method can also be used to identify the device if implemented properly, or to check if the device has the expected registers available with the given datatype.
+
+### update
+
+In order to make the poll process as easy as possible, you can define the `readSchedule` as `update` for all registers and blocks you requier a preiodical update. If you call the `update()` method the connection will start reading all registers and blocks with `"readSchedule": "update"` and the properties will be updated internally. If a property value has changed, the `<propertyName>Changed()` signal will be emitted. If the property has been read (independet if changed or not) the `<propertyName>ReadFinished()` signal will be emitted.
+
 
 ## Registers
 
@@ -156,8 +172,8 @@ Earch register will be defined as a property in the resulting class modbus TCP c
     * `float`: will be converted to `float`
     * `float64`: will be converted to `double`
     * `string` : will be converted to `QString`
-* `readSchedule`: Optional. Defines when the register needs to be fetched. If no read schedule has been defined, the class will provide only the update methods, but will not read the value during `initialize()` or `update()` calls. Possible values are:
-    * `init`: The register will be fetched during initialization. Once all `init `registers have been fetched, the `initializationFinished()` signal will be emitted.
+* `readSchedule`: Optional. Defines when the register needs to be fetched. If no read schedule has been defined, the class will provide only the default access methods, but will not read the value during `initialize()` or `update()` calls. See [#read-schedules](Read schedules) for more information. Possible values are:
+    * `init`: The register will be fetched during initialization.
     * `update`: The register will be feched each time the `update()` method will be called.
 * `enum`: Optional: If the given data type represents an enum value, this propery can be set to the name of the used enum from the `enum` definition. The class will take care internally about the data convertion from and to the enum values.
 * `description`: Mandatory. A clear description of the register.

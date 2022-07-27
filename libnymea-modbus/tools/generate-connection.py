@@ -390,7 +390,7 @@ def writeRtuHeaderFile():
     writeLine(headerFile, '    quint16 m_slaveId = 1;')
     writeLine(headerFile, '    bool m_reachable = false;')
     writeLine(headerFile, '    bool m_communicationWorking = false;')
-    writeLine(headerFile, '    quint8 m_communicationFailedMax = 10;')
+    writeLine(headerFile, '    quint8 m_communicationFailedMax = %s;' % (errorLimitUntilNotReachable))
     writeLine(headerFile, '    quint8 m_communicationFailedCounter = 0;')
     writeLine(headerFile)
     writeLine(headerFile, '    QVector<ModbusRtuReply *> m_pendingInitReplies;')
@@ -641,10 +641,15 @@ endianness = 'BigEndian'
 if 'endianness' in registerJson:
     endianness = registerJson['endianness']
 
+errorLimitUntilNotReachable = 10
+if 'errorLimitUntilNotReachable' in registerJson:
+    errorLimitUntilNotReachable = registerJson['errorLimitUntilNotReachable']
+
 logger.debug('Scrip path: %s' % scriptPath)
 logger.debug('Output directory: %s' % outputDirectory)
 logger.debug('Class name prefix: %s' % classNamePrefix)
 logger.debug('Endianness: %s' % endianness)
+logger.debug('Error limit until not reachable: %s' % errorLimitUntilNotReachable)
 
 protocol = 'TCP'
 if 'protocol' in registerJson:
