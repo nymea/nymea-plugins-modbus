@@ -28,41 +28,57 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef INTEGRATIONPLUGINKOSTAL_H
-#define INTEGRATIONPLUGINKOSTAL_H
+#ifndef KOSTALDISCOVERY_H
+#define KOSTALDISCOVERY_H
 
-#include <plugintimer.h>
-#include <integrations/integrationplugin.h>
-#include <network/networkdevicemonitor.h>
+#include <QObject>
+#include <QTimer>
 
-#include "extern-plugininfo.h"
+#include <network/networkdevicediscovery.h>
 
 #include "kostalmodbustcpconnection.h"
 
-class IntegrationPluginKostal: public IntegrationPlugin
+class KostalDiscovery : public QObject
 {
     Q_OBJECT
-
-    Q_PLUGIN_METADATA(IID "io.nymea.IntegrationPlugin" FILE "integrationpluginkostal.json")
-    Q_INTERFACES(IntegrationPlugin)
-
 public:
-    explicit IntegrationPluginKostal();
+    explicit KostalDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint16 port = 1502, quint16 modbusAddress = 71, QObject *parent = nullptr);
+    typedef struct KostalDiscoveryResult {
+        QString productName;
+        QString manufacturerName;
+        QString serialNumber;
+        QString articleNumber;
+        QString softwareVersionMainController;
+        QString softwareVersionIoController;
+        NetworkDeviceInfo networkDeviceInfo;
+    } KostalDiscoveryResult;
 
-    void discoverThings(ThingDiscoveryInfo *info) override;
-    void setupThing(ThingSetupInfo *info) override;
-    void postSetupThing(Thing *thing) override;
-    void thingRemoved(Thing *thing) override;
+    void startDiscovery();
+
+    QList<KostalDiscoveryResult> discoveryResults() const;
+
+signals:
+    void discoveryFinished();
 
 private:
-    PluginTimer *m_pluginTimer = nullptr;
-    QHash<Thing *, KostalModbusTcpConnection *> m_kostalConnections;
-    QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
+    NetworkDeviceDiscovery *m_networkDeviceDiscovery = nullptr;
+    quint16 m_port;
+    quint16 m_modbusAddress;
 
-    void setupKostalConnection(ThingSetupInfo *info);
+    QTimer m_gracePeriodTimer;
+    QDateTime m_startDateTime;
 
+    NetworkDeviceInfos m_networkDeviceInfos;
+    NetworkDeviceInfos m_verifiedNetworkDeviceInfos;
+
+    QList<KostalModbusTcpConnection *> m_connections;
+
+    QList<KostalDiscoveryResult> m_discoveryResults;
+
+    void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
+    void cleanupConnection(KostalModbusTcpConnection *connection);
+
+    void finishDiscovery();
 };
 
-#endif // INTEGRATIONPLUGINKOSTAL_H
-
-
+#endif // KOSTALDISCOVERY_H

@@ -17,14 +17,6 @@
                     "providedInterfaces": [ "energymeter", "energystorage"],
                     "paramTypes": [
                         {
-                            "id": "f1c43b1e-cffe-4d30-bda0-c23ed648dd71",
-                            "name": "ipAddress",
-                            "displayName": "IP address",
-                            "type": "QString",
-                            "inputType": "IPv4Address",
-                            "defaultValue": "127.0.0.1"
-                        },
-                        {
                             "id": "906f6099-d0e1-4297-a2b3-f8ec4482c578",
                             "name":"macAddress",
                             "displayName": "MAC address",

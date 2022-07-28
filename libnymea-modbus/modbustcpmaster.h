@@ -104,6 +104,7 @@ private slots:
 
 signals:
     void connectionStateChanged(bool status);
+    void connectionErrorOccurred(QModbusDevice::Error error);
 
     void writeRequestExecuted(const QUuid &requestId, bool success);
     void writeRequestError(const QUuid &requestId, const QString &error);

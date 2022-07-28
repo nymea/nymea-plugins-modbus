@@ -6,7 +6,9 @@ MODBUS_CONNECTIONS += kostal-registers.json
 include(../modbus.pri)
 
 HEADERS += \
-    integrationpluginkostal.h
+    integrationpluginkostal.h \
+    kostaldiscovery.h
 
 SOURCES += \
-    integrationpluginkostal.cpp
+    integrationpluginkostal.cpp \
+    kostaldiscovery.cpp
