@@ -172,7 +172,13 @@ def writeTcpSourceFile():
     writeLine(sourceFile, '    ModbusTCPMaster(hostAddress, port, parent),')
     writeLine(sourceFile, '    m_slaveId(slaveId)')
     writeLine(sourceFile, '{')
-    writeLine(sourceFile)
+    writeLine(sourceFile, '    connect(this, &ModbusTCPMaster::connectionStateChanged, this, [this](bool status){')
+    writeLine(sourceFile, '        if (status) {')
+    writeLine(sourceFile, '            // Cleanup before starting to initialize')
+    writeLine(sourceFile, '            m_pendingInitReplies.clear();')
+    writeLine(sourceFile, '            m_pendingUpdateReplies.clear();')
+    writeLine(sourceFile, '        }')
+    writeLine(sourceFile, '    });')
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
@@ -204,7 +210,7 @@ def writeTcpSourceFile():
         blocks = registerJson['blocks']
 
     writeInitMethodImplementationTcp(sourceFile, className, registerJson['registers'], blocks)
-    writeUpdateMethod(sourceFile, className, registerJson['registers'], blocks)
+    writeUpdateMethodTcp(sourceFile, className, registerJson['registers'], blocks)
 
     # Write update methods
     writePropertyUpdateMethodImplementationsTcp(sourceFile, className, registerJson['registers'])
@@ -256,6 +262,9 @@ def writeTcpSourceFile():
 
     writeLine(sourceFile, 'void %s::verifyUpdateFinished()' % (className))
     writeLine(sourceFile, '{')
+    writeLine(sourceFile, '    if (m_pendingUpdateReplies.isEmpty()) {')
+    writeLine(sourceFile, '        emit updateFinished();')
+    writeLine(sourceFile, '    }')
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
