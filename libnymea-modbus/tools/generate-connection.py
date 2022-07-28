@@ -437,7 +437,11 @@ def writeRtuSourceFile():
     writeLine(sourceFile, '{')
     writeLine(sourceFile, '    connect(m_modbusRtuMaster, &ModbusRtuMaster::connectedChanged, this, [=](bool connected){')
     writeLine(sourceFile, '        if (connected) {')
-    writeLine(sourceFile, '            qCDebug(dc%s()) << "Modbus RTU resource" << m_modbusRtuMaster->serialPort() << "connected again. Test if the connection is reachable...";' % (className))
+    writeLine(sourceFile, '            qCDebug(dc%s()) << "Modbus RTU resource" << m_modbusRtuMaster->serialPort() << "connected again. TODO: Test if the connection is reachable...";' % (className))
+    writeLine(sourceFile, '            m_pendingInitReplies.clear();')
+    writeLine(sourceFile, '            m_pendingUpdateReplies.clear();')
+    writeLine(sourceFile, '            m_communicationWorking = false;')
+    writeLine(sourceFile, '            m_communicationFailedCounter = 0;')
     writeLine(sourceFile, '        } else {')
     writeLine(sourceFile, '            qCWarning(dc%s()) << "Modbus RTU resource" << m_modbusRtuMaster->serialPort() << "disconnected. The connection is not reachable any more.";' % (className))
     writeLine(sourceFile, '            m_communicationWorking = false;')
@@ -494,7 +498,7 @@ def writeRtuSourceFile():
         blocks = registerJson['blocks']
 
     writeInitMethodImplementationRtu(sourceFile, className, registerJson['registers'], blocks)
-    writeUpdateMethod(sourceFile, className, registerJson['registers'], blocks)
+    writeUpdateMethodRtu(sourceFile, className, registerJson['registers'], blocks)
 
     # Write update methods
     writePropertyUpdateMethodImplementationsRtu(sourceFile, className, registerJson['registers'])
@@ -546,6 +550,9 @@ def writeRtuSourceFile():
 
     writeLine(sourceFile, 'void %s::verifyUpdateFinished()' % (className))
     writeLine(sourceFile, '{')
+    writeLine(sourceFile, '    if (m_pendingUpdateReplies.isEmpty()) {')
+    writeLine(sourceFile, '        emit updateFinished();')
+    writeLine(sourceFile, '    }')
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
