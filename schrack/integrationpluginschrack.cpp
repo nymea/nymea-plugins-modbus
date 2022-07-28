@@ -137,6 +137,11 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
 
     connect(cionConnection, &CionModbusRtuConnection::minChargingCurrentChanged, thing, [=](quint16 minChargingCurrent){
         qCDebug(dcSchrack()) << "Minimum charging current changed:" << minChargingCurrent;
+        if (minChargingCurrent > 32) {
+            // Apparently this register occationally holds random values... As a quick'n dirty workaround we'll ignore everything > 32
+            qCWarning(dcSchrack()) << "Detected a bogus min charging current register value (reg. 507) of" << minChargingCurrent << ". Ignoring it...";
+            return;
+        }
         thing->setStateMinValue(cionMaxChargingCurrentStateTypeId, minChargingCurrent);
     });
 
