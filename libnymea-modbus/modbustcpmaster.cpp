@@ -454,6 +454,7 @@ QUuid ModbusTCPMaster::writeHoldingRegister(uint slaveAddress, uint registerAddr
 void ModbusTCPMaster::onModbusErrorOccurred(QModbusDevice::Error error)
 {
     qCWarning(dcModbusTcpMaster()) << "An error occurred" << error;
+    emit connectionErrorOccurred(error);
 }
 
 void ModbusTCPMaster::onModbusStateChanged(QModbusDevice::State state)
