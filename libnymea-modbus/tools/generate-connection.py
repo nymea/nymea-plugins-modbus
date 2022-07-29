@@ -413,6 +413,7 @@ def writeRtuHeaderFile():
     writeLine(headerFile)
     writeLine(headerFile, '    void handleModbusError(ModbusRtuReply::Error error);')
     writeLine(headerFile, '    void evaluateReachableState();')
+    writeLine(headerFile, '    void verifyReachability();')
 
     
     # End of class
@@ -446,11 +447,12 @@ def writeRtuSourceFile():
     writeLine(sourceFile, '{')
     writeLine(sourceFile, '    connect(m_modbusRtuMaster, &ModbusRtuMaster::connectedChanged, this, [=](bool connected){')
     writeLine(sourceFile, '        if (connected) {')
-    writeLine(sourceFile, '            qCDebug(dc%s()) << "Modbus RTU resource" << m_modbusRtuMaster->serialPort() << "connected again. TODO: Test if the connection is reachable...";' % (className))
+    writeLine(sourceFile, '            qCDebug(dc%s()) << "Modbus RTU resource" << m_modbusRtuMaster->serialPort() << "connected again. Start testing if the connection is reachable...";' % (className))
     writeLine(sourceFile, '            m_pendingInitReplies.clear();')
     writeLine(sourceFile, '            m_pendingUpdateReplies.clear();')
     writeLine(sourceFile, '            m_communicationWorking = false;')
     writeLine(sourceFile, '            m_communicationFailedCounter = 0;')
+    writeLine(sourceFile, '            verifyReachability();')
     writeLine(sourceFile, '        } else {')
     writeLine(sourceFile, '            qCWarning(dc%s()) << "Modbus RTU resource" << m_modbusRtuMaster->serialPort() << "disconnected. The connection is not reachable any more.";' % (className))
     writeLine(sourceFile, '            m_communicationWorking = false;')
@@ -597,6 +599,8 @@ def writeRtuSourceFile():
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
+    writeVerifyReachabilityImplementationsRtu(sourceFile, className, registerJson['registers'], checkReachableRegister)
+
     # Write the debug print
     debugObjectParamName = className[0].lower() + className[1:]
     writeLine(sourceFile, 'QDebug operator<<(QDebug debug, %s *%s)' % (className, debugObjectParamName))
@@ -648,7 +652,7 @@ if args.verboseOutput:
 logger.debug("Verbose output enabled")
 
 if not 'className' in registerJson:
-    logger.warning('Classname missing. Please specify the classname in the json file or pass it to the generatori using -c .')
+    logger.warning('Error: Class name property missing. Please specify the \"classname\" property in the json file.')
     exit(1)
 
 classNamePrefix = registerJson['className']
@@ -661,11 +665,39 @@ errorLimitUntilNotReachable = 10
 if 'errorLimitUntilNotReachable' in registerJson:
     errorLimitUntilNotReachable = registerJson['errorLimitUntilNotReachable']
 
-logger.debug('Scrip path: %s' % scriptPath)
+# Check if the developer has specified an
+checkReachableRegister = {}
+if not 'checkReachableRegister' in registerJson:
+    logger.warning('Error: There is no checkReachableRegister specified. Please specify the \"checkReachableRegister\" property in the register JSON and set it to the \"id\" of a mandatory readable register which should be used for testing the communication.')
+    exit(1)
+
+checkReachableRegister = registerJson['checkReachableRegister']
+registerExists = False
+# Make sure this is an existing and readable register
+for registerDefinition in registerJson['registers']:
+    if registerDefinition['id'] == checkReachableRegister:
+        if not 'R' in registerDefinition['access']:
+            logger.warning('Error: The specified \"checkReachableRegister\" is not readable. Please select a manadtory readable register as checkReachableRegister.')
+            exit(1)
+
+        checkReachableRegister = registerDefinition
+        registerExists = True
+        break
+
+if not registerExists:
+    logger.warning('Error: Could not find the given \"checkReachableRegister\". Please make sure the specified register matches the \"id\" of a defined register.')
+    exit(1)
+else:
+    logger.debug('Verified successfully checkReachableRegister: %s' % checkReachableRegister['id'])
+
+
+# Inform about parsed and validated configs if debugging enabled
+logger.debug('Script path: %s' % scriptPath)
 logger.debug('Output directory: %s' % outputDirectory)
 logger.debug('Class name prefix: %s' % classNamePrefix)
 logger.debug('Endianness: %s' % endianness)
 logger.debug('Error limit until not reachable: %s' % errorLimitUntilNotReachable)
+logger.debug('Check reachable register: %s' % checkReachableRegister['id'])
 
 protocol = 'TCP'
 if 'protocol' in registerJson:
@@ -678,7 +710,7 @@ if 'blocks' in registerJson:
 writeTcp = protocol in ["TCP", "BOTH"]
 writeRtu = protocol in ["RTU", "BOTH"]
 if not writeTcp and not writeRtu:
-    logger.warning('Invalid protocol definition. Please use TCP, RTU or BOTH.')
+    logger.warning('Error: Invalid protocol definition. Please use TCP, RTU or BOTH in the register JSON file.')
     exit(1)
 
 headerFiles = []
@@ -725,8 +757,8 @@ projectIncludeFilePath = os.path.join(outputDirectory, projectIncludeFileName)
 
 # Note: we write the project file only if the registers
 # file has been modified since the project has been modified the last time.
-# This prevents qt-creator to retrigger qmake runs on it's own by changing the
-# project file which retriggers a qmake run and so on...
+# This prevents qt-creator to retrigger qmake runs on it's own if the pri file is open
+# by changing the project file which retriggers a qmake run and so on...
 if os.path.exists(projectIncludeFilePath):
     timestampRegistersJson = os.path.getmtime(registerJsonFilePath)
     timestampProjectInclude = os.path.getmtime(projectIncludeFilePath)

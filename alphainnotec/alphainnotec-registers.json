@@ -2,6 +2,8 @@
     "className": "AlphaInnotec",
     "protocol": "TCP",
     "endianness": "BigEndian",
+    "errorLimitUntilNotReachable": 30,
+    "checkReachableRegister": "smartGrid",
     "enums": [
         {
             "name": "SystemStatus",

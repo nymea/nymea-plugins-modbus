@@ -21,6 +21,7 @@ The basic structure of the modbus register JSON looks like following example:
     "protocol": "BOTH",
     "endianness": "BigEndian",
     "errorLimitUntilNotReachable": 10,
+    "checkReachableRegister": "registerPropertyName",
     "enums": [
         {
             "name": "NameOfEnum",
@@ -123,6 +124,10 @@ If the modbus device supports both protocols and you want to generate a class fo
 For modbus RTU it can be the case that the hardware resource is connected, but the target device is not connected on the serial line or does not respond. For those situations a mechanis has been introduce which will mark a device as not reachable if a certain amount of error occurred in a row without any successfull communication. Both, the RTU hardware resource `connected` state and the communication working state get represented by the `reachable` property of the RTU connection class.
 
 Depending on your device the amount of errors in a row can vary and can be specified using the `errorLimitUntilNotReachable` property. If not specified, a default of `10` will be assumend.
+
+In order to check if the device is reachable, a register can be defined by the developer as a test register.
+For this purpose the `checkReachableRegister` property has been introduced. The property describes the `id` of the register which will be used for testing the communication. The register should be mandatory on the device
+and only one register in size to speed up things. During the check the response data will be ignored, only the communication will be tested. The register must be *readable* and be defined in the `registers` section of your JSON file.
 
 ## Endianness
 

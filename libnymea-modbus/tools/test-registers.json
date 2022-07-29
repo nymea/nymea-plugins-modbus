@@ -2,6 +2,8 @@
     "className": "Test",
     "protocol": "BOTH",
     "endianness": "BigEndian",
+    "checkReachableRegister": "unsignedLongWord",
+    "errorLimitUntilNotReachable": 10,
     "enums": [
         {
             "name": "TestEnum",

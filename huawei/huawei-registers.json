@@ -2,6 +2,8 @@
     "className": "Huawei",
     "protocol": "TCP",
     "endianness": "BigEndian",
+    "errorLimitUntilNotReachable": 15,
+    "checkReachableRegister": "inverterActivePower",
     "enums": [
         {
             "name": "InverterDeviceStatus",
