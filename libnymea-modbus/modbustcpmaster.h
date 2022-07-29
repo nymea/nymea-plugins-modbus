@@ -88,7 +88,7 @@ public slots:
     void disconnectDevice();
     bool reconnectDevice();
 
-private:
+protected:
     QTimer *m_reconnectTimer = nullptr;
     QModbusTcpClient *m_modbusTcpClient = nullptr;
 
