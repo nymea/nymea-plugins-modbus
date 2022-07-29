@@ -2,6 +2,8 @@
     "className": "Phoenix",
     "protocol": "TCP",
     "endianness": "LittleEndian",
+    "errorLimitUntilNotReachable": 20,
+    "checkReachableRegister": "chargingCurrent",
     "enums": [
         {
             "name": "ErrorCode",

@@ -128,11 +128,17 @@ void IntegrationPluginPhoenixConnect::setupThing(ThingSetupInfo *info)
         }
     });
 
-    connect(connection, &PhoenixModbusTcpConnection::initializationFinished, info, [this, thing, connection, monitor, info]{
-        qCDebug(dcPhoenixContact()) << "Phoenix wallbox initialized. Firmware version:" << connection->firmwareVersion();
-        m_connections.insert(thing, connection);
-        m_monitors.insert(thing, monitor);
-        info->finish(Thing::ThingErrorNoError);
+    connect(connection, &PhoenixModbusTcpConnection::initializationFinished, info, [this, thing, connection, monitor, info](bool success){
+        if (success) {
+            qCDebug(dcPhoenixContact()) << "Phoenix wallbox initialized. Firmware version:" << connection->firmwareVersion();
+            m_connections.insert(thing, connection);
+            m_monitors.insert(thing, monitor);
+            info->finish(Thing::ThingErrorNoError);
+        } else {
+            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(monitor);
+            connection->deleteLater();
+            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Could not initialize the communication with the wallbox."));
+        }
     });
 
     connect(connection, &PhoenixModbusTcpConnection::initializationFinished, thing, [thing, connection]{

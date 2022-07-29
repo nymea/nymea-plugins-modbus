@@ -73,7 +73,6 @@ def writePropertyGetSetMethodImplementationsRtu(fileDescriptor, className, regis
 
 ##############################################################
 
-
 def writePropertyUpdateMethodImplementationsRtu(fileDescriptor, className, registerDefinitions):
     for registerDefinition in registerDefinitions:
         if 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'init':
@@ -268,6 +267,38 @@ def writeInternalBlockReadMethodImplementationsRtu(fileDescriptor, className, bl
 
 ##############################################################
 
+def writeVerifyReachabilityImplementationsRtu(fileDescriptor, className, registerDefinitions, checkReachableRegister):
+
+    propertyName = checkReachableRegister['id']
+    propertyTyp = getCppDataType(checkReachableRegister)
+
+    writeLine(fileDescriptor, 'void %s::verifyReachability()' % (className))
+    writeLine(fileDescriptor, '{')
+    writeLine(fileDescriptor, '    // Try to read the check reachability register %s in order to verify if the communication is working or not.' % checkReachableRegister['id'])
+    writeLine(fileDescriptor, '    qCDebug(dc%s()) << "--> Verify reachability by reading \\"%s\\" register:" << %s << "size:" << %s;' % (className, checkReachableRegister['description'], checkReachableRegister['address'], checkReachableRegister['size']))
+    writeLine(fileDescriptor, '    ModbusRtuReply *reply = read%s();' % (propertyName[0].upper() + propertyName[1:]))
+    writeLine(fileDescriptor, '    if (!reply) {')
+    writeLine(fileDescriptor, '        qCDebug(dc%s()) << "Error occurred verifying reachability by reading \\"%s\\" register";' % (className, checkReachableRegister['description']))
+    writeLine(fileDescriptor, '        return;')
+    writeLine(fileDescriptor, '    }')
+    writeLine(fileDescriptor)
+    writeLine(fileDescriptor, '    if (reply->isFinished()) {')
+    writeLine(fileDescriptor, '        return;')
+    writeLine(fileDescriptor, '    }')
+    writeLine(fileDescriptor)
+    writeLine(fileDescriptor, '    connect(reply, &ModbusRtuReply::finished, this, [this, reply](){')
+    writeLine(fileDescriptor, '        // Note: we don\'t care about the result here, only the error')
+    writeLine(fileDescriptor, '        handleModbusError(reply->error());')
+    writeLine(fileDescriptor, '    });')
+    writeLine(fileDescriptor)
+    writeLine(fileDescriptor, '    connect(reply, &ModbusRtuReply::errorOccurred, this, [reply] (ModbusRtuReply::Error error){')
+    writeLine(fileDescriptor, '        qCDebug(dc%s()) << "ModbusRtu reply error occurred while verifying reachability by reading \\"%s\\" register" << error << reply->errorString();' % (className, checkReachableRegister['description']))
+    writeLine(fileDescriptor, '    });')
+    writeLine(fileDescriptor, '}')
+    writeLine(fileDescriptor)
+
+##############################################################
+
 def writeInitMethodImplementationRtu(fileDescriptor, className, registerDefinitions, blockDefinitions):
     writeLine(fileDescriptor, 'bool %s::initialize()' % (className))
     writeLine(fileDescriptor, '{')
@@ -303,6 +334,7 @@ def writeInitMethodImplementationRtu(fileDescriptor, className, registerDefiniti
             if 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'init':
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '    // Read %s' % registerDefinition['description'])
+                writeLine(fileDescriptor, '    qCDebug(dc%s()) << "--> Read init \\"%s\\" register:" << %s << "size:" << %s;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
                 writeLine(fileDescriptor, '    reply = read%s();' % (propertyName[0].upper() + propertyName[1:]))
                 writeLine(fileDescriptor, '    if (!reply) {')
                 writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Error occurred while reading \\"%s\\" registers";' % (className, registerDefinition['description']))
@@ -326,7 +358,7 @@ def writeInitMethodImplementationRtu(fileDescriptor, className, registerDefiniti
                 writeLine(fileDescriptor, '        }')
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '        QVector<quint16> values = reply->result();')
-                writeLine(fileDescriptor, '        qCDebug(dc%s()) << "<-- Response from \\"%s\\" register" << %s << "size:" << %s << values;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
+                writeLine(fileDescriptor, '        qCDebug(dc%s()) << "<-- Response from \\"%s\\" init register" << %s << "size:" << %s << values;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
                 writeLine(fileDescriptor, '        process%sRegisterValues(values);' % (propertyName[0].upper() + propertyName[1:]))
                 writeLine(fileDescriptor, '        verifyInitFinished();')
                 writeLine(fileDescriptor, '    });')
@@ -356,6 +388,7 @@ def writeInitMethodImplementationRtu(fileDescriptor, className, registerDefiniti
 
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '    // Read %s' % blockName)
+                writeLine(fileDescriptor, '    qCDebug(dc%s()) << "--> Read init block \\"%s\\" registers from:" << %s << "size:" << %s;' % (className, blockName, blockStartAddress, blockSize))
                 writeLine(fileDescriptor, '    reply = readBlock%s();' % (blockName[0].upper() + blockName[1:]))
                 writeLine(fileDescriptor, '    if (!reply) {')
                 writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Error occurred while reading block \\"%s\\" registers";' % (className, blockName))
@@ -379,7 +412,7 @@ def writeInitMethodImplementationRtu(fileDescriptor, className, registerDefiniti
                 writeLine(fileDescriptor, '        }')
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '        QVector<quint16> blockValues = reply->result();')
-                writeLine(fileDescriptor, '        qCDebug(dc%s()) << "<-- Response from reading block \\"%s\\" register" << %s << "size:" << %s << blockValues;' % (className, blockName, blockStartAddress, blockSize))
+                writeLine(fileDescriptor, '        qCDebug(dc%s()) << "<-- Response from reading init block \\"%s\\" register" << %s << "size:" << %s << blockValues;' % (className, blockName, blockStartAddress, blockSize))
 
                 # Start parsing the registers using offsets
                 offset = 0
@@ -423,16 +456,25 @@ def writeUpdateMethodRtu(fileDescriptor, className, registerDefinitions, blockDe
             break
 
     if updateRequired:
-        writeLine(fileDescriptor, '    if (!m_reachable) {')
-        writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Tried to update but the connection is not reachable.";' % className)
+        writeLine(fileDescriptor, '    if (!m_modbusRtuMaster->connected()) {')
+        writeLine(fileDescriptor, '        qCDebug(dc%s()) << "Tried to update the registers but the hardware resource seems not to be connected.";' % className)
         writeLine(fileDescriptor, '        return false;')
         writeLine(fileDescriptor, '    }')
         writeLine(fileDescriptor)
         writeLine(fileDescriptor, '    if (!m_pendingUpdateReplies.isEmpty()) {')
-        writeLine(fileDescriptor, '        qCDebug(dc%s()) << "Tried to update but there are still some update replies pending. Waiting for them to be finished...";' % className)
+        writeLine(fileDescriptor, '        qCDebug(dc%s()) << "Tried to update the registers but there are still some update replies pending. Waiting for them to be finished...";' % className)
         writeLine(fileDescriptor, '        return true;')
         writeLine(fileDescriptor, '    }')
         writeLine(fileDescriptor)
+
+        writeLine(fileDescriptor, '    // Hardware resource available but communication not working. ')
+        writeLine(fileDescriptor, '    // Try to read the check reachability register to re-evaluatoe the communication... ')
+        writeLine(fileDescriptor, '    if (m_modbusRtuMaster->connected() && !m_communicationWorking) {')
+        writeLine(fileDescriptor, '        verifyReachability();')
+        writeLine(fileDescriptor, '        return false;')
+        writeLine(fileDescriptor, '    }')
+        writeLine(fileDescriptor)
+
         writeLine(fileDescriptor, '    ModbusRtuReply *reply = nullptr;')
 
         # Read individual registers
@@ -443,6 +485,7 @@ def writeUpdateMethodRtu(fileDescriptor, className, registerDefinitions, blockDe
             if 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'update':
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '    // Read %s' % registerDefinition['description'])
+                writeLine(fileDescriptor, '    qCDebug(dc%s()) << "--> Read \\"%s\\" register:" << %s << "size:" << %s;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
                 writeLine(fileDescriptor, '    reply = read%s();' % (propertyName[0].upper() + propertyName[1:]))
                 writeLine(fileDescriptor, '    if (!reply) {')
                 writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Error occurred while reading \\"%s\\" registers";' % (className, registerDefinition['description']))
@@ -494,6 +537,7 @@ def writeUpdateMethodRtu(fileDescriptor, className, registerDefinitions, blockDe
 
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '    // Read %s' % blockName)
+                writeLine(fileDescriptor, '    qCDebug(dc%s()) << "--> Read block \\"%s\\" registers from:" << %s << "size:" << %s;' % (className, blockName, blockStartAddress, blockSize))
                 writeLine(fileDescriptor, '    reply = readBlock%s();' % (blockName[0].upper() + blockName[1:]))
                 writeLine(fileDescriptor, '    if (!reply) {')
                 writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Error occurred while reading block \\"%s\\" registers";' % (className, blockName))

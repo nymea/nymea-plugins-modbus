@@ -2,6 +2,8 @@
     "className": "Cion",
     "protocol": "RTU",
     "endianness": "LittleEndian",
+    "errorLimitUntilNotReachable": 10,
+    "checkReachableRegister": "chargingEnabled",
     "blocks": [
         {
             "id": "e3",

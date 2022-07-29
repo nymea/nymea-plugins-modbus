@@ -440,6 +440,7 @@ def writeUpdateMethodTcp(fileDescriptor, className, registerDefinitions, blockDe
             if 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'update':
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '    // Read %s' % registerDefinition['description'])
+                writeLine(fileDescriptor, '    qCDebug(dc%s()) << "--> Read \\"%s\\" register:" << %s << "size:" << %s;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
                 writeLine(fileDescriptor, '    reply = read%s();' % (propertyName[0].upper() + propertyName[1:]))
                 writeLine(fileDescriptor, '    if (!reply) {')
                 writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Error occurred while reading \\"%s\\" registers from" << hostAddress().toString() << errorString();' % (className, registerDefinition['description']))
@@ -461,7 +462,7 @@ def writeUpdateMethodTcp(fileDescriptor, className, registerDefinitions, blockDe
                 writeLine(fileDescriptor, '        }')
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '        const QModbusDataUnit unit = reply->result();')
-                writeLine(fileDescriptor, '        qCDebug(dc%s()) << "<-- Response from init \\"%s\\" register" << %s << "size:" << %s << unit.values();' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
+                writeLine(fileDescriptor, '        qCDebug(dc%s()) << "<-- Response from \\"%s\\" register" << %s << "size:" << %s << unit.values();' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
                 writeLine(fileDescriptor, '        process%sRegisterValues(unit.values());' % (propertyName[0].upper() + propertyName[1:]))
                 writeLine(fileDescriptor, '        verifyUpdateFinished();')
                 writeLine(fileDescriptor, '    });')
@@ -492,6 +493,7 @@ def writeUpdateMethodTcp(fileDescriptor, className, registerDefinitions, blockDe
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '    // Read %s' % blockName)
                 writeLine(fileDescriptor, '    reply = readBlock%s();' % (blockName[0].upper() + blockName[1:]))
+                writeLine(fileDescriptor, '    qCDebug(dc%s()) << "--> Read block \\"%s\\" registers from:" << %s << "size:" << %s;' % (className, blockName, blockStartAddress, blockSize))
                 writeLine(fileDescriptor, '    if (!reply) {')
                 writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Error occurred while reading block \\"%s\\" registers";' % (className, blockName))
                 writeLine(fileDescriptor, '        return false;')
@@ -513,7 +515,7 @@ def writeUpdateMethodTcp(fileDescriptor, className, registerDefinitions, blockDe
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '        const QModbusDataUnit unit = reply->result();')
                 writeLine(fileDescriptor, '        const QVector<quint16> blockValues = unit.values();')
-                writeLine(fileDescriptor, '        qCDebug(dc%s()) << "<-- Response from reading init block \\"%s\\" register" << %s << "size:" << %s << blockValues;' % (className, blockName, blockStartAddress, blockSize))
+                writeLine(fileDescriptor, '        qCDebug(dc%s()) << "<-- Response from reading block \\"%s\\" register" << %s << "size:" << %s << blockValues;' % (className, blockName, blockStartAddress, blockSize))
 
                 # Start parsing the registers using offsets
                 offset = 0
