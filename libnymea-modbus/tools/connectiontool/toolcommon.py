@@ -429,29 +429,10 @@ def writeRegistersDebugLine(fileDescriptor, debugObjectParamName, registerDefini
     for registerDefinition in registerDefinitions:
         propertyName = registerDefinition['id']
         propertyTyp = getCppDataType(registerDefinition)
-        line = ('"    - %s:" << %s->%s()' % (registerDefinition['description'], debugObjectParamName, propertyName))
+        line = ('"    - %s: " << %s->%s()' % (registerDefinition['description'], debugObjectParamName, propertyName))
         if 'unit' in registerDefinition and registerDefinition['unit'] != '':
             line += (' << " [%s]"' % registerDefinition['unit'])
         writeLine(fileDescriptor, '    debug.nospace().noquote() << %s << "\\n";' % (line))
-
-
-# def writeUpdateMethod(fileDescriptor, className, registerDefinitions, blockDefinitions):
-#     writeLine(fileDescriptor, 'bool %s::update()' % (className))
-#     writeLine(fileDescriptor, '{')
-#     for registerDefinition in registerDefinitions:
-#         propertyName = registerDefinition['id']
-#         if 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'update':
-#             writeLine(fileDescriptor, '    update%s();' % (propertyName[0].upper() + propertyName[1:]))
-
-#     # Add the update block methods
-#     for blockDefinition in blockDefinitions:
-#         blockName = blockDefinition['id']
-#         if 'readSchedule' in blockDefinition and blockDefinition['readSchedule'] == 'update':
-#             writeLine(fileDescriptor, '    update%sBlock();' % (blockName[0].upper() + blockName[1:]))
-
-#     writeLine(fileDescriptor, '    return true;')
-#     writeLine(fileDescriptor, '}')
-#     writeLine(fileDescriptor)
 
 
 def writePropertyChangedSignals(fileDescriptor, registerDefinitions):

@@ -96,6 +96,15 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
 
     CionModbusRtuConnection *cionConnection = new CionModbusRtuConnection(hardwareManager()->modbusRtuResource()->getModbusRtuMaster(uuid), address, this);
 
+    connect(cionConnection, &CionModbusRtuConnection::updateFinished, thing, [cionConnection, thing](){
+        qCDebug(dcSchrack()) << "Update finished:" << thing->name() << cionConnection;
+    });
+
+    connect(cionConnection, &CionModbusRtuConnection::reachableChanged, thing, [thing](bool reachable){
+        qCDebug(dcSchrack()) << "Reachable changed:" << thing->name() << reachable;
+    });
+
+
     // Note: This register really only tells us if we can control anything... i.e. if the wallbox is unlocked via RFID
     connect(cionConnection, &CionModbusRtuConnection::chargingEnabledChanged, thing, [=](quint16 charging){
         qCDebug(dcSchrack()) << "Charging enabled changed:" << charging;
