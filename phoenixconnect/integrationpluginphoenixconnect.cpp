@@ -128,6 +128,10 @@ void IntegrationPluginPhoenixConnect::setupThing(ThingSetupInfo *info)
         }
     });
 
+    connect(connection, &PhoenixModbusTcpConnection::updateFinished, thing, [connection, thing](){
+        qCDebug(dcPhoenixContact()) << "Update finished:" << thing->name() << connection;
+    });
+
     connect(connection, &PhoenixModbusTcpConnection::initializationFinished, info, [this, thing, connection, monitor, info](bool success){
         if (success) {
             qCDebug(dcPhoenixContact()) << "Phoenix wallbox initialized. Firmware version:" << connection->firmwareVersion();
@@ -141,11 +145,15 @@ void IntegrationPluginPhoenixConnect::setupThing(ThingSetupInfo *info)
         }
     });
 
-    connect(connection, &PhoenixModbusTcpConnection::initializationFinished, thing, [thing, connection]{
-        thing->setStateValue("connected", true);
-        thing->setStateValue("firmwareVersion", connection->firmwareVersion());
+    connect(connection, &PhoenixModbusTcpConnection::initializationFinished, thing, [thing, connection](bool success){
+        if (success) {
+            thing->setStateValue("connected", true);
+            thing->setStateValue("firmwareVersion", connection->firmwareVersion());
+        }
     });
 
+
+    // Handle property changed signals
     connect(connection, &PhoenixModbusTcpConnection::cpStatusChanged, thing, [thing, connection](quint16 cpStatus){
         qCDebug(dcPhoenixContact()) << "CP Signal state changed:" << (char)cpStatus;
         thing->setStateValue("pluggedIn", cpStatus >= 66);
