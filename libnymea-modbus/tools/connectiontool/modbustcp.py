@@ -97,6 +97,7 @@ def writePropertyUpdateMethodImplementationsTcp(fileDescriptor, className, regis
         writeLine(fileDescriptor)
         writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);')
         writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, this, [this, reply](){')
+        writeLine(fileDescriptor, '        handleModbusError(reply->error());')
         writeLine(fileDescriptor, '        if (reply->error() == QModbusDevice::NoError) {')
         writeLine(fileDescriptor, '            const QModbusDataUnit unit = reply->result();')
         writeLine(fileDescriptor, '            qCDebug(dc%s()) << "<-- Response from \\"%s\\" register" << %s << "size:" << %s << unit.values();' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
@@ -144,7 +145,9 @@ def writeBlockUpdateMethodImplementationsTcp(fileDescriptor, className, blockDef
         writeLine(fileDescriptor, '        return;')
         writeLine(fileDescriptor, '    }')
         writeLine(fileDescriptor)
+        writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);')
         writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, this, [this, reply](){')
+        writeLine(fileDescriptor, '        handleModbusError(reply->error());')
         writeLine(fileDescriptor, '        if (reply->error() == QModbusDevice::NoError) {')
         writeLine(fileDescriptor, '            const QModbusDataUnit unit = reply->result();')
         writeLine(fileDescriptor, '            const QVector<quint16> blockValues = unit.values();')
@@ -266,6 +269,39 @@ def writeInternalBlockReadMethodImplementationsTcp(fileDescriptor, className, bl
 
 ##############################################################
 
+def writeVerifyReachabilityImplementationsTcp(fileDescriptor, className, registerDefinitions, checkReachableRegister):
+
+    propertyName = checkReachableRegister['id']
+    propertyTyp = getCppDataType(checkReachableRegister)
+
+    writeLine(fileDescriptor, 'void %s::verifyReachability()' % (className))
+    writeLine(fileDescriptor, '{')
+    writeLine(fileDescriptor, '    // Try to read the check reachability register %s in order to verify if the communication is working or not.' % checkReachableRegister['id'])
+    writeLine(fileDescriptor, '    qCDebug(dc%s()) << "--> Verify reachability by reading \\"%s\\" register:" << %s << "size:" << %s;' % (className, checkReachableRegister['description'], checkReachableRegister['address'], checkReachableRegister['size']))
+    writeLine(fileDescriptor, '    QModbusReply *reply = read%s();' % (propertyName[0].upper() + propertyName[1:]))
+    writeLine(fileDescriptor, '    if (!reply) {')
+    writeLine(fileDescriptor, '        qCDebug(dc%s()) << "Error occurred verifying reachability by reading \\"%s\\" register";' % (className, checkReachableRegister['description']))
+    writeLine(fileDescriptor, '        return;')
+    writeLine(fileDescriptor, '    }')
+    writeLine(fileDescriptor)
+    writeLine(fileDescriptor, '    if (reply->isFinished()) {')
+    writeLine(fileDescriptor, '        reply->deleteLater(); // Broadcast reply returns immediatly')
+    writeLine(fileDescriptor, '        return;')
+    writeLine(fileDescriptor, '    }')
+    writeLine(fileDescriptor)
+    writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, this, [this, reply](){')
+    writeLine(fileDescriptor, '        // Note: we don\'t care about the result here, only the error')
+    writeLine(fileDescriptor, '        handleModbusError(reply->error());')
+    writeLine(fileDescriptor, '    });')
+    writeLine(fileDescriptor)
+    writeLine(fileDescriptor, '    connect(reply, &QModbusReply::errorOccurred, this, [reply] (QModbusDevice::Error error){')
+    writeLine(fileDescriptor, '        qCDebug(dc%s()) << "ModbusRtu reply error occurred while verifying reachability by reading \\"%s\\" register" << error << reply->errorString();' % (className, checkReachableRegister['description']))
+    writeLine(fileDescriptor, '    });')
+    writeLine(fileDescriptor, '}')
+    writeLine(fileDescriptor)
+
+##############################################################
+
 def writeInitMethodImplementationTcp(fileDescriptor, className, registerDefinitions, blockDefinitions):
     writeLine(fileDescriptor, 'bool %s::initialize()' % (className))
     writeLine(fileDescriptor, '{')
@@ -317,6 +353,7 @@ def writeInitMethodImplementationTcp(fileDescriptor, className, registerDefiniti
                 writeLine(fileDescriptor, '    m_pendingInitReplies.append(reply);')
                 writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);')
                 writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, m_initObject, [this, reply](){')
+                writeLine(fileDescriptor, '        handleModbusError(reply->error());')
                 writeLine(fileDescriptor, '        m_pendingInitReplies.removeAll(reply);')
                 writeLine(fileDescriptor, '        if (reply->error() != QModbusDevice::NoError) {')
                 writeLine(fileDescriptor, '            finishInitialization(false);')
@@ -371,11 +408,12 @@ def writeInitMethodImplementationTcp(fileDescriptor, className, registerDefiniti
                 writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);')
                 writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, m_initObject, [this, reply](){')
                 writeLine(fileDescriptor, '        m_pendingInitReplies.removeAll(reply);')
+                writeLine(fileDescriptor, '        handleModbusError(reply->error());')
                 writeLine(fileDescriptor, '        if (reply->error() != QModbusDevice::NoError) {')
                 writeLine(fileDescriptor, '            finishInitialization(false);')
                 writeLine(fileDescriptor, '            return;')
                 writeLine(fileDescriptor, '        }')
-
+                writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '        const QModbusDataUnit unit = reply->result();')
                 writeLine(fileDescriptor, '        const QVector<quint16> blockValues = unit.values();')
                 writeLine(fileDescriptor, '        qCDebug(dc%s()) << "<-- Response from reading init block \\"%s\\" register" << %s << "size:" << %s << blockValues;' % (className, blockName, blockStartAddress, blockSize))
@@ -456,6 +494,7 @@ def writeUpdateMethodTcp(fileDescriptor, className, registerDefinitions, blockDe
                 writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);')
                 writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, this, [this, reply](){')
                 writeLine(fileDescriptor, '        m_pendingUpdateReplies.removeAll(reply);')
+                writeLine(fileDescriptor, '        handleModbusError(reply->error());')
                 writeLine(fileDescriptor, '        if (reply->error() != QModbusDevice::NoError) {')
                 writeLine(fileDescriptor, '            verifyUpdateFinished();')
                 writeLine(fileDescriptor, '            return;')
@@ -508,6 +547,7 @@ def writeUpdateMethodTcp(fileDescriptor, className, registerDefinitions, blockDe
                 writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);')
                 writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, this, [this, reply](){')
                 writeLine(fileDescriptor, '        m_pendingUpdateReplies.removeAll(reply);')
+                writeLine(fileDescriptor, '        handleModbusError(reply->error());')
                 writeLine(fileDescriptor, '        if (reply->error() != QModbusDevice::NoError) {')
                 writeLine(fileDescriptor, '            verifyUpdateFinished();')
                 writeLine(fileDescriptor, '            return;')
