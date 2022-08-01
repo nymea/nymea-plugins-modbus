@@ -157,7 +157,7 @@
                     "enum": "ByteOrder",
                     "registerType": "holdingRegister",
                     "description": "MODBUS Byte Order Note",
-                    "defaultValue": "ByteOrderLittleEndian",
+                    "defaultValue": "ByteOrderBigEndian",
                     "access": "RO"
                 },
                 {
