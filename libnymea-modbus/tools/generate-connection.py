@@ -107,12 +107,14 @@ def writeTcpHeaderFile():
     # Write registers value changed signals
     writeLine(headerFile, 'signals:')
     writeLine(headerFile, '    void reachableChanged(bool reachable);')
+    writeLine(headerFile, '    void checkReachabilityFailed();')
     writeLine(headerFile)
     writeLine(headerFile, '    void initializationFinished(bool success);')
     writeLine(headerFile, '    void updateFinished();')
     writeLine(headerFile)
     writeLine(headerFile, '    void endiannessChanged(ModbusDataUtils::ByteOrder endianness);')
     writeLine(headerFile)
+
     writePropertyChangedSignals(headerFile, registerJson['registers'])
     writeLine(headerFile)
     if 'blocks' in registerJson:
@@ -427,6 +429,7 @@ def writeRtuHeaderFile():
     # Write registers value changed signals
     writeLine(headerFile, 'signals:')
     writeLine(headerFile, '    void reachableChanged(bool reachable);')
+    writeLine(headerFile, '    void checkReachabilityFailed();')
     writeLine(headerFile)
     writeLine(headerFile, '    void initializationFinished(bool success);')
     writeLine(headerFile, '    void updateFinished();')
