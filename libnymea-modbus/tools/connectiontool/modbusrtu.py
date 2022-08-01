@@ -267,32 +267,37 @@ def writeInternalBlockReadMethodImplementationsRtu(fileDescriptor, className, bl
 
 ##############################################################
 
-def writeVerifyReachabilityImplementationsRtu(fileDescriptor, className, registerDefinitions, checkReachableRegister):
+def writeTestReachabilityImplementationsRtu(fileDescriptor, className, registerDefinitions, checkReachableRegister):
 
     propertyName = checkReachableRegister['id']
     propertyTyp = getCppDataType(checkReachableRegister)
 
-    writeLine(fileDescriptor, 'void %s::verifyReachability()' % (className))
+    writeLine(fileDescriptor, 'void %s::testReachability()' % (className))
     writeLine(fileDescriptor, '{')
+    writeLine(fileDescriptor, '    if (m_testRechableReply)')
+    writeLine(fileDescriptor, '        return;')
+    writeLine(fileDescriptor)
     writeLine(fileDescriptor, '    // Try to read the check reachability register %s in order to verify if the communication is working or not.' % checkReachableRegister['id'])
-    writeLine(fileDescriptor, '    qCDebug(dc%s()) << "--> Verify reachability by reading \\"%s\\" register:" << %s << "size:" << %s;' % (className, checkReachableRegister['description'], checkReachableRegister['address'], checkReachableRegister['size']))
-    writeLine(fileDescriptor, '    ModbusRtuReply *reply = read%s();' % (propertyName[0].upper() + propertyName[1:]))
-    writeLine(fileDescriptor, '    if (!reply) {')
+    writeLine(fileDescriptor, '    qCDebug(dc%s()) << "--> Test reachability by reading \\"%s\\" register:" << %s << "size:" << %s;' % (className, checkReachableRegister['description'], checkReachableRegister['address'], checkReachableRegister['size']))
+    writeLine(fileDescriptor, '    m_testRechableReply = read%s();' % (propertyName[0].upper() + propertyName[1:]))
+    writeLine(fileDescriptor, '    if (!m_testRechableReply) {')
     writeLine(fileDescriptor, '        qCDebug(dc%s()) << "Error occurred verifying reachability by reading \\"%s\\" register";' % (className, checkReachableRegister['description']))
     writeLine(fileDescriptor, '        return;')
     writeLine(fileDescriptor, '    }')
     writeLine(fileDescriptor)
-    writeLine(fileDescriptor, '    if (reply->isFinished()) {')
+    writeLine(fileDescriptor, '    if (m_testRechableReply->isFinished()) {')
+    writeLine(fileDescriptor, '        m_testRechableReply = nullptr;')
     writeLine(fileDescriptor, '        return;')
     writeLine(fileDescriptor, '    }')
     writeLine(fileDescriptor)
-    writeLine(fileDescriptor, '    connect(reply, &ModbusRtuReply::finished, this, [this, reply](){')
+    writeLine(fileDescriptor, '    connect(m_testRechableReply, &ModbusRtuReply::finished, this, [this, m_testRechableReply](){')
     writeLine(fileDescriptor, '        // Note: we don\'t care about the result here, only the error')
-    writeLine(fileDescriptor, '        handleModbusError(reply->error());')
+    writeLine(fileDescriptor, '        handleModbusError(m_testRechableReply->error());')
+    writeLine(fileDescriptor, '        m_testRechableReply = nullptr;')
     writeLine(fileDescriptor, '    });')
     writeLine(fileDescriptor)
-    writeLine(fileDescriptor, '    connect(reply, &ModbusRtuReply::errorOccurred, this, [reply] (ModbusRtuReply::Error error){')
-    writeLine(fileDescriptor, '        qCDebug(dc%s()) << "ModbusRtu reply error occurred while verifying reachability by reading \\"%s\\" register" << error << reply->errorString();' % (className, checkReachableRegister['description']))
+    writeLine(fileDescriptor, '    connect(m_testRechableReply, &ModbusRtuReply::errorOccurred, this, [this] (ModbusRtuReply::Error error){')
+    writeLine(fileDescriptor, '        qCDebug(dc%s()) << "ModbusRtu reply error occurred while verifying reachability by reading \\"%s\\" register" << error << m_testRechableReply->errorString();' % (className, checkReachableRegister['description']))
     writeLine(fileDescriptor, '    });')
     writeLine(fileDescriptor, '}')
     writeLine(fileDescriptor)
@@ -302,6 +307,10 @@ def writeVerifyReachabilityImplementationsRtu(fileDescriptor, className, registe
 def writeInitMethodImplementationRtu(fileDescriptor, className, registerDefinitions, blockDefinitions):
     writeLine(fileDescriptor, 'bool %s::initialize()' % (className))
     writeLine(fileDescriptor, '{')
+    writeLine(fileDescriptor, '    if (!m_reachable) {')
+    writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Tried to initialize but the device is not to be reachable.";' % className)
+    writeLine(fileDescriptor, '        return false;')
+    writeLine(fileDescriptor, '    }')
 
     # First check if there are any init registers
     initRequired = False
@@ -470,7 +479,7 @@ def writeUpdateMethodRtu(fileDescriptor, className, registerDefinitions, blockDe
         writeLine(fileDescriptor, '    // Hardware resource available but communication not working. ')
         writeLine(fileDescriptor, '    // Try to read the check reachability register to re-evaluatoe the communication... ')
         writeLine(fileDescriptor, '    if (m_modbusRtuMaster->connected() && !m_communicationWorking) {')
-        writeLine(fileDescriptor, '        verifyReachability();')
+        writeLine(fileDescriptor, '        testReachability();')
         writeLine(fileDescriptor, '        return false;')
         writeLine(fileDescriptor, '    }')
         writeLine(fileDescriptor)
