@@ -153,9 +153,10 @@ def writeTcpHeaderFile():
     writeLine(headerFile)
     writeLine(headerFile, '    void verifyUpdateFinished();')
     writeLine(headerFile)
+    writeLine(headerFile, '    QModbusReply *m_testRechableReply = nullptr;')
     writeLine(headerFile, '    void handleModbusError(QModbusDevice::Error error);')
     writeLine(headerFile, '    void evaluateReachableState();')
-    writeLine(headerFile, '    void verifyReachability();')
+    writeLine(headerFile, '    void testReachability();')
 
     # End of class
     writeLine(headerFile)
@@ -192,7 +193,7 @@ def writeTcpSourceFile():
     writeLine(sourceFile, '            m_pendingUpdateReplies.clear();')
     writeLine(sourceFile, '            m_communicationWorking = false;')
     writeLine(sourceFile, '            m_communicationFailedCounter = 0;')
-    writeLine(sourceFile, '            verifyReachability();')
+    writeLine(sourceFile, '            testReachability();')
     writeLine(sourceFile, '        } else {')
     writeLine(sourceFile, '            qCWarning(dc%s()) << "Modbus TCP connection diconnected from" << m_hostAddress.toString() << ". The connection is not reachable any more.";' % (className))
     writeLine(sourceFile, '            m_communicationWorking = false;')
@@ -328,7 +329,7 @@ def writeTcpSourceFile():
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
-    writeVerifyReachabilityImplementationsTcp(sourceFile, className, registerJson['registers'], checkReachableRegister)
+    writeTestReachabilityImplementationsTcp(sourceFile, className, registerJson['registers'], checkReachableRegister)
 
 
     # Write the debug print
@@ -474,9 +475,10 @@ def writeRtuHeaderFile():
     writeLine(headerFile)
     writeLine(headerFile, '    void verifyUpdateFinished();')
     writeLine(headerFile)
+    writeLine(headerFile, '    ModbusRtuReply *m_testRechableReply = nullptr;')
     writeLine(headerFile, '    void handleModbusError(ModbusRtuReply::Error error);')
     writeLine(headerFile, '    void evaluateReachableState();')
-    writeLine(headerFile, '    void verifyReachability();')
+    writeLine(headerFile, '    void testReachability();')
 
     
     # End of class
@@ -515,7 +517,7 @@ def writeRtuSourceFile():
     writeLine(sourceFile, '            m_pendingUpdateReplies.clear();')
     writeLine(sourceFile, '            m_communicationWorking = false;')
     writeLine(sourceFile, '            m_communicationFailedCounter = 0;')
-    writeLine(sourceFile, '            verifyReachability();')
+    writeLine(sourceFile, '            testReachability();')
     writeLine(sourceFile, '        } else {')
     writeLine(sourceFile, '            qCWarning(dc%s()) << "Modbus RTU resource" << m_modbusRtuMaster->serialPort() << "disconnected. The connection is not reachable any more.";' % (className))
     writeLine(sourceFile, '            m_communicationWorking = false;')
@@ -662,7 +664,7 @@ def writeRtuSourceFile():
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
-    writeVerifyReachabilityImplementationsRtu(sourceFile, className, registerJson['registers'], checkReachableRegister)
+    writeTestReachabilityImplementationsRtu(sourceFile, className, registerJson['registers'], checkReachableRegister)
 
     # Write the debug print
     debugObjectParamName = className[0].lower() + className[1:]
