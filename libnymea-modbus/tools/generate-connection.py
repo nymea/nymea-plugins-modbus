@@ -137,6 +137,9 @@ def writeTcpHeaderFile():
         for blockDefinition in registerJson['blocks']:
             writePropertyProcessMethodDeclaration(headerFile, blockDefinition['registers'])
 
+    writeLine(headerFile, '    void handleModbusError(QModbusDevice::Error error);')
+    writeLine(headerFile, '    void testReachability();')
+
     # Private members
     writeLine(headerFile, 'private:')
     writeLine(headerFile, '    ModbusDataUtils::ByteOrder m_endianness = ModbusDataUtils::ByteOrder%s;' % endianness)
@@ -156,9 +159,7 @@ def writeTcpHeaderFile():
     writeLine(headerFile, '    void verifyUpdateFinished();')
     writeLine(headerFile)
     writeLine(headerFile, '    QModbusReply *m_testRechableReply = nullptr;')
-    writeLine(headerFile, '    void handleModbusError(QModbusDevice::Error error);')
     writeLine(headerFile, '    void evaluateReachableState();')
-    writeLine(headerFile, '    void testReachability();')
 
     # End of class
     writeLine(headerFile)
@@ -266,6 +267,29 @@ def writeTcpSourceFile():
         for blockDefinition in registerJson['blocks']:
             writePropertyProcessMethodImplementations(sourceFile, className, blockDefinition['registers'])
 
+    writeLine(sourceFile, 'void %s::handleModbusError(QModbusDevice::Error error)' % (className))
+    writeLine(sourceFile, '{')
+    writeLine(sourceFile, '    if (error == QModbusDevice::NoError) {')
+    writeLine(sourceFile, '        // Reset the communication counter and we know we can reach the device')
+    writeLine(sourceFile, '        m_communicationFailedCounter = 0;')
+    writeLine(sourceFile, '        if (!m_communicationWorking)')
+    writeLine(sourceFile, '            qCDebug(dc%s()) << "Received a reply without any errors. The communication with the device seems to work now.";' % (className))
+    writeLine(sourceFile)
+    writeLine(sourceFile, '        m_communicationWorking = true;')
+    writeLine(sourceFile, '        evaluateReachableState();')
+    writeLine(sourceFile, '    } else {')
+    writeLine(sourceFile, '        m_communicationFailedCounter++;')
+    writeLine(sourceFile, '        if (m_communicationWorking && m_communicationFailedCounter >= m_communicationFailedMax) {')
+    writeLine(sourceFile, '            m_communicationWorking = false;')
+    writeLine(sourceFile, '            qCWarning(dc%s()) << "Received" << m_communicationFailedCounter << "errors while communicating with the RTU master. Mark as not reachable until the communication works again.";' % (className))
+    writeLine(sourceFile, '            evaluateReachableState();')
+    writeLine(sourceFile, '        }')
+    writeLine(sourceFile, '    }')
+    writeLine(sourceFile, '}')
+    writeLine(sourceFile)
+
+    writeTestReachabilityImplementationsTcp(sourceFile, className, registerJson['registers'], checkReachableRegister)
+
     writeLine(sourceFile, 'void %s::verifyInitFinished()' % (className))
     writeLine(sourceFile, '{')
     writeLine(sourceFile, '    if (m_pendingInitReplies.isEmpty()) {')
@@ -299,27 +323,6 @@ def writeTcpSourceFile():
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
-    writeLine(sourceFile, 'void %s::handleModbusError(QModbusDevice::Error error)' % (className))
-    writeLine(sourceFile, '{')
-    writeLine(sourceFile, '    if (error == QModbusDevice::NoError) {')
-    writeLine(sourceFile, '        // Reset the communication counter and we know we can reach the device')
-    writeLine(sourceFile, '        m_communicationFailedCounter = 0;')
-    writeLine(sourceFile, '        if (!m_communicationWorking)')
-    writeLine(sourceFile, '            qCDebug(dc%s()) << "Received a reply without any errors. The communication with the device seems to work now.";' % (className))
-    writeLine(sourceFile)
-    writeLine(sourceFile, '        m_communicationWorking = true;')
-    writeLine(sourceFile, '        evaluateReachableState();')
-    writeLine(sourceFile, '    } else {')
-    writeLine(sourceFile, '        m_communicationFailedCounter++;')
-    writeLine(sourceFile, '        if (m_communicationWorking && m_communicationFailedCounter >= m_communicationFailedMax) {')
-    writeLine(sourceFile, '            m_communicationWorking = false;')
-    writeLine(sourceFile, '            qCWarning(dc%s()) << "Received" << m_communicationFailedCounter << "errors while communicating with the RTU master. Mark as not reachable until the communication works again.";' % (className))
-    writeLine(sourceFile, '            evaluateReachableState();')
-    writeLine(sourceFile, '        }')
-    writeLine(sourceFile, '    }')
-    writeLine(sourceFile, '}')
-    writeLine(sourceFile)
-
     writeLine(sourceFile, 'void %s::evaluateReachableState()' % (className))
     writeLine(sourceFile, '{')
     writeLine(sourceFile, '    bool reachable = m_communicationWorking && connected();')
@@ -331,7 +334,6 @@ def writeTcpSourceFile():
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
-    writeTestReachabilityImplementationsTcp(sourceFile, className, registerJson['registers'], checkReachableRegister)
 
 
     # Write the debug print
@@ -459,6 +461,9 @@ def writeRtuHeaderFile():
 
         writeLine(headerFile)
 
+    writeLine(headerFile, '    void handleModbusError(ModbusRtuReply::Error error);')
+    writeLine(headerFile, '    void testReachability();')
+
     # Private members
     writeLine(headerFile, 'private:')
     writeLine(headerFile, '    ModbusRtuMaster *m_modbusRtuMaster = nullptr;')
@@ -479,9 +484,7 @@ def writeRtuHeaderFile():
     writeLine(headerFile, '    void verifyUpdateFinished();')
     writeLine(headerFile)
     writeLine(headerFile, '    ModbusRtuReply *m_testRechableReply = nullptr;')
-    writeLine(headerFile, '    void handleModbusError(ModbusRtuReply::Error error);')
     writeLine(headerFile, '    void evaluateReachableState();')
-    writeLine(headerFile, '    void testReachability();')
 
     
     # End of class
@@ -602,6 +605,30 @@ def writeRtuSourceFile():
         for blockDefinition in registerJson['blocks']:
             writePropertyProcessMethodImplementations(sourceFile, className, blockDefinition['registers'])
 
+
+    writeLine(sourceFile, 'void %s::handleModbusError(ModbusRtuReply::Error error)' % (className))
+    writeLine(sourceFile, '{')
+    writeLine(sourceFile, '    if (error == ModbusRtuReply::NoError) {')
+    writeLine(sourceFile, '        // Reset the communication counter and we know we can reach the device')
+    writeLine(sourceFile, '        m_communicationFailedCounter = 0;')
+    writeLine(sourceFile, '        if (!m_communicationWorking)')
+    writeLine(sourceFile, '            qCDebug(dc%s()) << "Received a reply without any errors. The communication with the device seems to work now.";' % (className))
+    writeLine(sourceFile)
+    writeLine(sourceFile, '        m_communicationWorking = true;')
+    writeLine(sourceFile, '        evaluateReachableState();')
+    writeLine(sourceFile, '    } else {')
+    writeLine(sourceFile, '        m_communicationFailedCounter++;')
+    writeLine(sourceFile, '        if (m_communicationWorking && m_communicationFailedCounter >= m_communicationFailedMax) {')
+    writeLine(sourceFile, '            m_communicationWorking = false;')
+    writeLine(sourceFile, '            qCWarning(dc%s()) << "Received" << m_communicationFailedCounter << "errors while communicating with the RTU master. Mark as not reachable until the communication works again.";' % (className))
+    writeLine(sourceFile, '            evaluateReachableState();')
+    writeLine(sourceFile, '        }')
+    writeLine(sourceFile, '    }')
+    writeLine(sourceFile, '}')
+    writeLine(sourceFile)
+
+    writeTestReachabilityImplementationsRtu(sourceFile, className, registerJson['registers'], checkReachableRegister)
+
     writeLine(sourceFile, 'void %s::verifyInitFinished()' % (className))
     writeLine(sourceFile, '{')
     writeLine(sourceFile, '    if (m_pendingInitReplies.isEmpty()) {')
@@ -635,27 +662,6 @@ def writeRtuSourceFile():
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
-    writeLine(sourceFile, 'void %s::handleModbusError(ModbusRtuReply::Error error)' % (className))
-    writeLine(sourceFile, '{')
-    writeLine(sourceFile, '    if (error == ModbusRtuReply::NoError) {')
-    writeLine(sourceFile, '        // Reset the communication counter and we know we can reach the device')
-    writeLine(sourceFile, '        m_communicationFailedCounter = 0;')
-    writeLine(sourceFile, '        if (!m_communicationWorking)')
-    writeLine(sourceFile, '            qCDebug(dc%s()) << "Received a reply without any errors. The communication with the device seems to work now.";' % (className))
-    writeLine(sourceFile)
-    writeLine(sourceFile, '        m_communicationWorking = true;')
-    writeLine(sourceFile, '        evaluateReachableState();')
-    writeLine(sourceFile, '    } else {')
-    writeLine(sourceFile, '        m_communicationFailedCounter++;')
-    writeLine(sourceFile, '        if (m_communicationWorking && m_communicationFailedCounter >= m_communicationFailedMax) {')
-    writeLine(sourceFile, '            m_communicationWorking = false;')
-    writeLine(sourceFile, '            qCWarning(dc%s()) << "Received" << m_communicationFailedCounter << "errors while communicating with the RTU master. Mark as not reachable until the communication works again.";' % (className))
-    writeLine(sourceFile, '            evaluateReachableState();')
-    writeLine(sourceFile, '        }')
-    writeLine(sourceFile, '    }')
-    writeLine(sourceFile, '}')
-    writeLine(sourceFile)
-
     writeLine(sourceFile, 'void %s::evaluateReachableState()' % (className))
     writeLine(sourceFile, '{')
     writeLine(sourceFile, '    bool reachable = m_communicationWorking && m_modbusRtuMaster->connected();')
@@ -666,8 +672,6 @@ def writeRtuSourceFile():
     writeLine(sourceFile, '    emit reachableChanged(m_reachable);')
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
-
-    writeTestReachabilityImplementationsRtu(sourceFile, className, registerJson['registers'], checkReachableRegister)
 
     # Write the debug print
     debugObjectParamName = className[0].lower() + className[1:]
