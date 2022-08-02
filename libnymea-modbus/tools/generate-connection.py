@@ -139,6 +139,7 @@ def writeTcpHeaderFile():
 
     writeLine(headerFile, '    void handleModbusError(QModbusDevice::Error error);')
     writeLine(headerFile, '    void testReachability();')
+    writeLine(headerFile)
 
     # Private members
     writeLine(headerFile, 'private:')
@@ -463,6 +464,7 @@ def writeRtuHeaderFile():
 
     writeLine(headerFile, '    void handleModbusError(ModbusRtuReply::Error error);')
     writeLine(headerFile, '    void testReachability();')
+    writeLine(headerFile)
 
     # Private members
     writeLine(headerFile, 'private:')
