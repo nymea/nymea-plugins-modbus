@@ -98,7 +98,7 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
 
     // Note: This register really only tells us if we can control anything... i.e. if the wallbox is unlocked via RFID
     connect(cionConnection, &CionModbusRtuConnection::chargingEnabledChanged, thing, [=](quint16 charging){
-        qCInfo(dcSchrack()) << "Charge control enabled changed:" << charging;
+        qCDebug(dcSchrack()) << "Charge control enabled changed:" << charging;
     });
 
     // We can write chargingCurrentSetpoint to the preferred charging we want, and the wallbox will take it,
@@ -106,16 +106,16 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
     // We'll use that for setting our state, just monitoring this one on the logs
     // Setting this to 0 will pause charging, anything else will control the charging (and return the actual value in currentChargingCurrentE3)
     connect(cionConnection, &CionModbusRtuConnection::chargingCurrentSetpointChanged, thing, [=](quint16 chargingCurrentSetpoint){
-        qCInfo(dcSchrack()) << "Charging current setpoint changed:" << chargingCurrentSetpoint;
+        qCDebug(dcSchrack()) << "Charging current setpoint changed:" << chargingCurrentSetpoint;
     });
 
     connect(cionConnection, &CionModbusRtuConnection::cpSignalStateChanged, thing, [=](quint16 cpSignalState){
-        qCInfo(dcSchrack()) << "CP Signal state changed:" << (char)cpSignalState;
+        qCDebug(dcSchrack()) << "CP Signal state changed:" << (char)cpSignalState;
         thing->setStateValue(cionPluggedInStateTypeId, cpSignalState >= 66);
     });
 
     connect(cionConnection, &CionModbusRtuConnection::currentChargingCurrentE3Changed, thing, [=](quint16 currentChargingCurrentE3){
-        qCInfo(dcSchrack()) << "Current charging current E3 current changed:" << currentChargingCurrentE3;
+        qCDebug(dcSchrack()) << "Current charging current E3 current changed:" << currentChargingCurrentE3;
         if (cionConnection->chargingCurrentSetpoint() > 0) {
             thing->setStateValue(cionMaxChargingCurrentStateTypeId, currentChargingCurrentE3);
         }
@@ -124,7 +124,7 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
     // The maxChargingCurrentE3 takes into account the DIP switches and connected cable, so this is effectively
     // our maximum. However, it will go to 0 when unplugged, which is odd, so we'll ignore 0 values.
     connect(cionConnection, &CionModbusRtuConnection::maxChargingCurrentE3Changed, thing, [=](quint16 maxChargingCurrentE3){
-        qCInfo(dcSchrack()) << "Maximum charging current E3 current changed:" << maxChargingCurrentE3;
+        qCDebug(dcSchrack()) << "Maximum charging current E3 current changed:" << maxChargingCurrentE3;
         if (maxChargingCurrentE3 != 0) {
             thing->setStateMaxValue(cionMaxChargingCurrentStateTypeId, maxChargingCurrentE3);
         }
@@ -134,11 +134,11 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
         thing->setStateValue(cionConnectedStateTypeId, true);
         StatusBits status = static_cast<StatusBits>(statusBits);
         // TODO: Verify if the statusBit for PluggedIn is reliable and if so, use that instead of the plugged in time for the plugged in state.
-        qCInfo(dcSchrack()) << "Status bits changed:" << status;
+        qCDebug(dcSchrack()) << "Status bits changed:" << status;
     });
 
     connect(cionConnection, &CionModbusRtuConnection::minChargingCurrentChanged, thing, [=](quint16 minChargingCurrent){
-        qCInfo(dcSchrack()) << "Minimum charging current changed:" << minChargingCurrent;
+        qCDebug(dcSchrack()) << "Minimum charging current changed:" << minChargingCurrent;
         if (minChargingCurrent > 32) {
             // Apparently this register occationally holds random values... As a quick'n dirty workaround we'll ignore everything > 32
             qCWarning(dcSchrack()) << "Detected a bogus min charging current register value (reg. 507) of" << minChargingCurrent << ". Ignoring it...";
@@ -237,11 +237,27 @@ void IntegrationPluginSchrack::executeAction(ThingActionInfo *info)
     if (info->action().actionTypeId() == cionPowerActionTypeId) {
         qCDebug(dcSchrack()) << "Setting charging enabled:" << (info->action().paramValue(cionPowerActionPowerParamTypeId).toBool() ? 1 : 0);
         int maxSetPoint = info->thing()->stateValue(cionMaxChargingCurrentStateTypeId).toUInt();
-        // If user enables it, we'll write the maxChargingPower value
+
+        // Note: If the wallbox has an RFID reader connected, writing register 100 (chargingEnabled) won't work as the RFID
+        // reader takes control over it. However, if there's no RFID reader connected, we'll have to set it ourselves.
+        // So summarizing:
+        // * In setups with RFID reader, we can only control this with register 101 (maxChargingCurrent) by setting it to 0
+        //   to stop charging, or something >= 6 to allow charging.
+        // * In setups without RFID reader, we set 100 to true/false. Note that DIP switches 1 & 2 need to be OFF for register
+        //   100 to be writable.
+
         if (info->action().paramValue(cionPowerActionPowerParamTypeId).toBool()) {
+            // In case there's no RFID reader
+            cionConnection->setChargingEnabled(1);
+
+            // And restore the charging current in case setting the above fails
             ModbusRtuReply *reply = cionConnection->setChargingCurrentSetpoint(maxSetPoint);
             waitForActionFinish(info, reply, cionPowerStateTypeId, true);
-        } else { // we'll write 0 to the max charging power
+        } else {
+            // In case there's no RFID reader
+            cionConnection->setChargingEnabled(0);
+
+            // And set the maxChargingCurrent to 0 in case the above fails
             ModbusRtuReply *reply = cionConnection->setChargingCurrentSetpoint(0);
             waitForActionFinish(info, reply, cionPowerStateTypeId, false);
         }
