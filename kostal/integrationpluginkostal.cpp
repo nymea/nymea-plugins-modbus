@@ -429,7 +429,7 @@ void IntegrationPluginKostal::setupKostalConnection(ThingSetupInfo *info)
             qCWarning(dcKostal()) << "Connection init finished with errors" << thing->name() << kostalConnection->hostAddress().toString();
             hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(monitor);
             kostalConnection->deleteLater();
-            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Could not initialize the communication with the wallbox."));
+            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Could not initialize the communication with the inverter."));
             return;
         }
 
