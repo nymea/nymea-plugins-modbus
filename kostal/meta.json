@@ -1,0 +1,13 @@
+{
+    "title": "KOSTAL Solar Electric",
+    "tagline": "Connect to Kostal Solar Electric inverters.",
+    "icon": "kostal.png",
+    "stability": "consumer",
+    "offline": true,
+    "technologies": [
+        "network"
+    ],
+    "categories": [
+        "energy"
+    ]
+}
