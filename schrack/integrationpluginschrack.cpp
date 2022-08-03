@@ -98,7 +98,7 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
 
     // Note: This register really only tells us if we can control anything... i.e. if the wallbox is unlocked via RFID
     connect(cionConnection, &CionModbusRtuConnection::chargingEnabledChanged, thing, [=](quint16 charging){
-        qCDebug(dcSchrack()) << "Charging enabled changed:" << charging;
+        qCInfo(dcSchrack()) << "Charge control enabled changed:" << charging;
     });
 
     // We can write chargingCurrentSetpoint to the preferred charging we want, and the wallbox will take it,
@@ -106,16 +106,16 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
     // We'll use that for setting our state, just monitoring this one on the logs
     // Setting this to 0 will pause charging, anything else will control the charging (and return the actual value in currentChargingCurrentE3)
     connect(cionConnection, &CionModbusRtuConnection::chargingCurrentSetpointChanged, thing, [=](quint16 chargingCurrentSetpoint){
-        qCDebug(dcSchrack()) << "Charging current setpoint changed:" << chargingCurrentSetpoint;
+        qCInfo(dcSchrack()) << "Charging current setpoint changed:" << chargingCurrentSetpoint;
     });
 
     connect(cionConnection, &CionModbusRtuConnection::cpSignalStateChanged, thing, [=](quint16 cpSignalState){
-        qCDebug(dcSchrack()) << "CP Signal state changed:" << (char)cpSignalState;
+        qCInfo(dcSchrack()) << "CP Signal state changed:" << (char)cpSignalState;
         thing->setStateValue(cionPluggedInStateTypeId, cpSignalState >= 66);
     });
 
     connect(cionConnection, &CionModbusRtuConnection::currentChargingCurrentE3Changed, thing, [=](quint16 currentChargingCurrentE3){
-        qCDebug(dcSchrack()) << "Current charging current E3 current changed:" << currentChargingCurrentE3;
+        qCInfo(dcSchrack()) << "Current charging current E3 current changed:" << currentChargingCurrentE3;
         if (cionConnection->chargingCurrentSetpoint() > 0) {
             thing->setStateValue(cionMaxChargingCurrentStateTypeId, currentChargingCurrentE3);
         }
@@ -124,19 +124,21 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
     // The maxChargingCurrentE3 takes into account the DIP switches and connected cable, so this is effectively
     // our maximum. However, it will go to 0 when unplugged, which is odd, so we'll ignore 0 values.
     connect(cionConnection, &CionModbusRtuConnection::maxChargingCurrentE3Changed, thing, [=](quint16 maxChargingCurrentE3){
-        qCDebug(dcSchrack()) << "Maximum charging current E3 current changed:" << maxChargingCurrentE3;
+        qCInfo(dcSchrack()) << "Maximum charging current E3 current changed:" << maxChargingCurrentE3;
         if (maxChargingCurrentE3 != 0) {
             thing->setStateMaxValue(cionMaxChargingCurrentStateTypeId, maxChargingCurrentE3);
         }
     });
 
-    connect(cionConnection, &CionModbusRtuConnection::statusBitsChanged, thing, [=](quint16 /*statusBits*/){
+    connect(cionConnection, &CionModbusRtuConnection::statusBitsChanged, thing, [=](quint16 statusBits){
         thing->setStateValue(cionConnectedStateTypeId, true);
-//        qCDebug(dcSchrack()) << "Status bits changed:" << statusBits;
+        StatusBits status = static_cast<StatusBits>(statusBits);
+        // TODO: Verify if the statusBit for PluggedIn is reliable and if so, use that instead of the plugged in time for the plugged in state.
+        qCInfo(dcSchrack()) << "Status bits changed:" << status;
     });
 
     connect(cionConnection, &CionModbusRtuConnection::minChargingCurrentChanged, thing, [=](quint16 minChargingCurrent){
-        qCDebug(dcSchrack()) << "Minimum charging current changed:" << minChargingCurrent;
+        qCInfo(dcSchrack()) << "Minimum charging current changed:" << minChargingCurrent;
         if (minChargingCurrent > 32) {
             // Apparently this register occationally holds random values... As a quick'n dirty workaround we'll ignore everything > 32
             qCWarning(dcSchrack()) << "Detected a bogus min charging current register value (reg. 507) of" << minChargingCurrent << ". Ignoring it...";
