@@ -95,23 +95,27 @@ bool HuaweiFusionSolar::update()
     if (!m_registersQueue.isEmpty())
         return true;
 
-    // Add the requests
+    // Add the requests to queue, begin with power values, since they are most important
     m_registersQueue.enqueue(HuaweiFusionModbusTcpConnection::RegisterInverterActivePower);
-    m_registersQueue.enqueue(HuaweiFusionModbusTcpConnection::RegisterInverterDeviceStatus);
-    m_registersQueue.enqueue(HuaweiFusionModbusTcpConnection::RegisterInverterEnergyProduced);
-    m_registersQueue.enqueue(HuaweiFusionModbusTcpConnection::RegisterLunaBattery1Status);
-    if (m_battery1Available) {
-        m_registersQueue.enqueue(HuaweiFusionModbusTcpConnection::RegisterLunaBattery1Power);
-        m_registersQueue.enqueue(HuaweiFusionModbusTcpConnection::RegisterLunaBattery1Soc);
-    }
     m_registersQueue.enqueue(HuaweiFusionModbusTcpConnection::RegisterPowerMeterActivePower);
-    m_registersQueue.enqueue(HuaweiFusionModbusTcpConnection::RegisterLunaBattery2Status);
-    if (m_battery2Available) {
-        m_registersQueue.enqueue(HuaweiFusionModbusTcpConnection::RegisterLunaBattery2Power);
-        m_registersQueue.enqueue(HuaweiFusionModbusTcpConnection::RegisterLunaBattery2Soc);
-    }
+    if (m_battery1Available)
+        m_registersQueue.enqueue(HuaweiFusionModbusTcpConnection::RegisterLunaBattery1Power);
 
-    // Note: since huawei can only process one request at the time, we need to queue the requests
+    if (m_battery2Available)
+        m_registersQueue.enqueue(HuaweiFusionModbusTcpConnection::RegisterLunaBattery2Power);
+
+    m_registersQueue.enqueue(HuaweiFusionModbusTcpConnection::RegisterInverterEnergyProduced);
+    m_registersQueue.enqueue(HuaweiFusionModbusTcpConnection::RegisterInverterDeviceStatus);
+    m_registersQueue.enqueue(HuaweiFusionModbusTcpConnection::RegisterLunaBattery1Status);
+    m_registersQueue.enqueue(HuaweiFusionModbusTcpConnection::RegisterLunaBattery2Status);
+
+    if (m_battery1Available)
+        m_registersQueue.enqueue(HuaweiFusionModbusTcpConnection::RegisterLunaBattery1Soc);
+
+    if (m_battery2Available)
+        m_registersQueue.enqueue(HuaweiFusionModbusTcpConnection::RegisterLunaBattery2Soc);
+
+    // Note: since huawei can only process one request at the time, we need to queue the requests and have some time between requests...
 
     m_currentRegisterRequest = -1;
     readNextRegister();
@@ -152,8 +156,12 @@ void HuaweiFusionSolar::readNextRegister()
             handleModbusError(reply->error());
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Inverter active power\" register" << 32080 << "size:" << 2 << unit.values();
-                processInverterActivePowerRegisterValues(unit.values());
+                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Inverter active power\" register" << 32080 << "size:" << 2 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().count();
+                if (unit.values().count() != 2) {
+                    qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values count. Requested" << 2 << "but received" << unit.values().count();
+                } else {
+                    processInverterActivePowerRegisterValues(unit.values());
+                }
             }
 
             finishRequest();
@@ -193,8 +201,12 @@ void HuaweiFusionSolar::readNextRegister()
             handleModbusError(reply->error());
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Inverter device status\" register" << 32089 << "size:" << 1 << unit.values();
-                processInverterDeviceStatusRegisterValues(unit.values());
+                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Inverter device status\" register" << 32089 << "size:" << 1 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().count();
+                if (unit.values().count() != 1) {
+                    qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values count. Requested" << 1 << "but received" << unit.values().count();
+                } else {
+                    processInverterDeviceStatusRegisterValues(unit.values());
+                }
             }
             finishRequest();
         });
@@ -233,8 +245,12 @@ void HuaweiFusionSolar::readNextRegister()
             handleModbusError(reply->error());
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Inverter energy produced\" register" << 32106 << "size:" << 2 << unit.values();
-                processInverterEnergyProducedRegisterValues(unit.values());
+                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Inverter energy produced\" register" << 32106 << "size:" << 2 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().count();
+                if (unit.values().count() != 2) {
+                    qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values count. Requested" << 2 << "but received" << unit.values().count();
+                } else {
+                    processInverterEnergyProducedRegisterValues(unit.values());
+                }
             }
             finishRequest();
         });
@@ -272,8 +288,13 @@ void HuaweiFusionSolar::readNextRegister()
             handleModbusError(reply->error());
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Power meter active power\" register" << 37113 << "size:" << 2 << unit.values();
-                processPowerMeterActivePowerRegisterValues(unit.values());
+
+                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Power meter active power\" register" << 37113 << "size:" << 2 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().count();
+                if (unit.values().count() != 2) {
+                    qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values count. Requested" << 2 << "but received" << unit.values().count();
+                } else {
+                    processPowerMeterActivePowerRegisterValues(unit.values());
+                }
             }
             finishRequest();
         });
@@ -312,8 +333,12 @@ void HuaweiFusionSolar::readNextRegister()
             handleModbusError(reply->error());
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 1 status\" register" << 37000 << "size:" << 1 << unit.values();
-                processLunaBattery1StatusRegisterValues(unit.values());
+                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 1 status\" register" << 37000 << "size:" << 1 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().count();
+                if (unit.values().count() != 1) {
+                    qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values count. Requested" << 1 << "but received" << unit.values().count();
+                } else {
+                    processLunaBattery1StatusRegisterValues(unit.values());
+                }
             }
             finishRequest();
         });
@@ -351,8 +376,12 @@ void HuaweiFusionSolar::readNextRegister()
             handleModbusError(reply->error());
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 1 power\" register" << 37001 << "size:" << 2 << unit.values();
-                processLunaBattery1PowerRegisterValues(unit.values());
+                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 1 power\" register" << 37001 << "size:" << 2 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().count();
+                if (unit.values().count() != 2) {
+                    qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values count. Requested" << 2 << "but received" << unit.values().count();
+                } else {
+                    processLunaBattery1PowerRegisterValues(unit.values());
+                }
             }
             finishRequest();
         });
@@ -390,8 +419,12 @@ void HuaweiFusionSolar::readNextRegister()
             handleModbusError(reply->error());
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 1 state of charge\" register" << 37004 << "size:" << 1 << unit.values();
-                processLunaBattery1SocRegisterValues(unit.values());
+                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 1 state of charge\" register" << 37004 << "size:" << 1 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().count();
+                if (unit.values().count() != 1) {
+                    qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values count. Requested" << 1 << "but received" << unit.values().count();
+                } else {
+                    processLunaBattery1SocRegisterValues(unit.values());
+                }
             }
             finishRequest();
         });
@@ -430,8 +463,12 @@ void HuaweiFusionSolar::readNextRegister()
             handleModbusError(reply->error());
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 2 status\" register" << 37741 << "size:" << 1 << unit.values();
-                processLunaBattery2StatusRegisterValues(unit.values());
+                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 2 status\" register" << 37741 << "size:" << 1 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().count();
+                if (unit.values().count() != 1) {
+                    qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values count. Requested" << 1 << "but received" << unit.values().count();
+                } else {
+                    processLunaBattery2StatusRegisterValues(unit.values());
+                }
             }
             finishRequest();
         });
@@ -469,8 +506,12 @@ void HuaweiFusionSolar::readNextRegister()
             handleModbusError(reply->error());
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 2 power\" register" << 37743 << "size:" << 2 << unit.values();
-                processLunaBattery2PowerRegisterValues(unit.values());
+                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 2 power\" register" << 37743 << "size:" << 2 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().count();
+                if (unit.values().count() != 2) {
+                    qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values count. Requested" << 2 << "but received" << unit.values().count();
+                } else {
+                    processLunaBattery2PowerRegisterValues(unit.values());
+                }
             }
             finishRequest();
         });
@@ -508,8 +549,12 @@ void HuaweiFusionSolar::readNextRegister()
             handleModbusError(reply->error());
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 2 state of charge\" register" << 37738 << "size:" << 1 << unit.values();
-                processLunaBattery2SocRegisterValues(unit.values());
+                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 2 state of charge\" register" << 37738 << "size:" << 1 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().count();
+                if (unit.values().count() != 1) {
+                    qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values count. Requested" << 1 << "but received" << unit.values().count();
+                } else {
+                    processLunaBattery2SocRegisterValues(unit.values());
+                }
             }
             finishRequest();
         });
