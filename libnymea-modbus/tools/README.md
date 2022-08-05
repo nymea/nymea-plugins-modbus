@@ -127,7 +127,7 @@ Depending on your device the amount of errors in a row can vary and can be speci
 
 In order to check if the device is reachable, a register can be defined by the developer as a test register.
 For this purpose the `checkReachableRegister` property has been introduced. The property describes the `id` of the register which will be used for testing the communication. The register should be mandatory on the device
-and only one register in size to speed up things. During the check the response data will be ignored, only the communication will be tested. The register must be *readable* and be defined in the `registers` section of your JSON file.
+and only one register in size to speed up things. During the check the response data will be ignored, only the communication will be tested. The register must be *readable* and be defined in the `registers` section of your JSON file or in a block.
 
 ## Endianness
 
