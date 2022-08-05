@@ -352,7 +352,7 @@ def writeBlockGetMethodDeclarations(fileDescriptor, registerDefinitions):
 
 def writePropertyUpdateMethodDeclarations(fileDescriptor, registerDefinitions):
     for registerDefinition in registerDefinitions:
-        if 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'init':
+        if 'readSchedule' not in registerDefinition or registerDefinition['readSchedule'] == 'init':
             continue
 
         propertyName = registerDefinition['id']
@@ -427,6 +427,9 @@ def writeBlocksUpdateMethodDeclarations(fileDescriptor, blockDefinitions):
 
 def writeRegistersDebugLine(fileDescriptor, debugObjectParamName, registerDefinitions):
     for registerDefinition in registerDefinitions:
+        if registerDefinition['access'] == 'WO':
+            continue
+
         propertyName = registerDefinition['id']
         propertyTyp = getCppDataType(registerDefinition)
         line = ('"    - %s: " << %s->%s()' % (registerDefinition['description'], debugObjectParamName, propertyName))
