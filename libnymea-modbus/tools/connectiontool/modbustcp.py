@@ -27,9 +27,11 @@ def writePropertyGetSetMethodDeclarationsTcp(fileDescriptor, registerDefinitions
         else:
             writeLine(fileDescriptor, '    /* %s - Address: %s, Size: %s */' % (registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
 
-        writeLine(fileDescriptor, '    %s %s() const;' % (propertyTyp, propertyName))
+        # Check if we require a read method
+        if registerDefinition['access'] == 'RW' or registerDefinition['access'] == 'RO':
+            writeLine(fileDescriptor, '    %s %s() const;' % (propertyTyp, propertyName))
 
-        # Check if we require a set method
+        # Check if we require a write method
         if registerDefinition['access'] == 'RW' or registerDefinition['access'] == 'WO':
             writeLine(fileDescriptor, '    QModbusReply *set%s(%s %s);' % (propertyName[0].upper() + propertyName[1:], propertyTyp, propertyName))
 
@@ -40,18 +42,20 @@ def writePropertyGetSetMethodImplementationsTcp(fileDescriptor, className, regis
     for registerDefinition in registerDefinitions:
         propertyName = registerDefinition['id']
         propertyTyp = getCppDataType(registerDefinition)
-        # Get
-        if 'enum' in registerDefinition:
-            writeLine(fileDescriptor, '%s::%s %s::%s() const' % (className, propertyTyp, className, propertyName))
-        else:
-            writeLine(fileDescriptor, '%s %s::%s() const' % (propertyTyp, className, propertyName))
-    
-        writeLine(fileDescriptor, '{')
-        writeLine(fileDescriptor, '    return m_%s;' % propertyName)
-        writeLine(fileDescriptor, '}')
-        writeLine(fileDescriptor)
 
-        # Check if we require a set method
+        # Check if we require a read method
+        if registerDefinition['access'] == 'RW' or registerDefinition['access'] == 'RO':
+            if 'enum' in registerDefinition:
+                writeLine(fileDescriptor, '%s::%s %s::%s() const' % (className, propertyTyp, className, propertyName))
+            else:
+                writeLine(fileDescriptor, '%s %s::%s() const' % (propertyTyp, className, propertyName))
+
+            writeLine(fileDescriptor, '{')
+            writeLine(fileDescriptor, '    return m_%s;' % propertyName)
+            writeLine(fileDescriptor, '}')
+            writeLine(fileDescriptor)
+
+        # Check if we require a write method
         if registerDefinition['access'] == 'RW' or registerDefinition['access'] == 'WO':
             writeLine(fileDescriptor, 'QModbusReply *%s::set%s(%s %s)' % (className, propertyName[0].upper() + propertyName[1:], propertyTyp, propertyName))
             writeLine(fileDescriptor, '{')
@@ -75,7 +79,7 @@ def writePropertyGetSetMethodImplementationsTcp(fileDescriptor, className, regis
 
 def writePropertyUpdateMethodImplementationsTcp(fileDescriptor, className, registerDefinitions):
     for registerDefinition in registerDefinitions:
-        if 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'init':
+        if 'readSchedule' not in registerDefinition or registerDefinition['readSchedule'] == 'init':
             continue
 
         propertyName = registerDefinition['id']
