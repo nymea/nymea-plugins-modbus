@@ -758,6 +758,18 @@ for registerDefinition in registerJson['registers']:
         registerExists = True
         break
 
+if 'blocks' in registerJson:
+    for blockDefinition in registerJson['blocks']:
+        for registerDefinition in blockDefinition['registers']:
+            if registerDefinition['id'] == checkReachableRegister:
+                if not 'R' in registerDefinition['access']:
+                    logger.warning('Error: The specified \"checkReachableRegister\" is not readable. Please select a manadtory readable register as checkReachableRegister.')
+                    exit(1)
+
+                checkReachableRegister = registerDefinition
+                registerExists = True
+                break
+
 if not registerExists:
     logger.warning('Error: Could not find the given \"checkReachableRegister\". Please make sure the specified register matches the \"id\" of a defined register.')
     exit(1)
