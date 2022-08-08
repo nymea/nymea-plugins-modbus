@@ -59,23 +59,17 @@ void KostalDiscovery::startDiscovery()
         m_networkDeviceInfos = discoveryReply->networkDeviceInfos();
 
         // Send a report request to nework device info not sent already...
-        bool networkdevicesLeft = false;
         foreach (const NetworkDeviceInfo &networkDeviceInfo, m_networkDeviceInfos) {
             if (!m_verifiedNetworkDeviceInfos.contains(networkDeviceInfo)) {
-                networkdevicesLeft = true;
                 checkNetworkDevice(networkDeviceInfo);
             }
         }
 
-        if (networkdevicesLeft) {
-            // Give the last connections added right before the network discovery finished a chance to check the device...
-            QTimer::singleShot(3000, this, [this](){
-                qCDebug(dcKostal()) << "Discovery: Grace period timer triggered.";
-                finishDiscovery();
-            });
-        } else {
+        // Give the last connections added right before the network discovery finished a chance to check the device...
+        QTimer::singleShot(3000, this, [this](){
+            qCDebug(dcKostal()) << "Discovery: Grace period timer triggered.";
             finishDiscovery();
-        }
+        });
     });
 }
 
