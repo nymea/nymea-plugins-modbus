@@ -352,7 +352,7 @@ def writeBlockGetMethodDeclarations(fileDescriptor, registerDefinitions):
 
 def writePropertyUpdateMethodDeclarations(fileDescriptor, registerDefinitions):
     for registerDefinition in registerDefinitions:
-        if 'readSchedule' not in registerDefinition or registerDefinition['readSchedule'] == 'init':
+        if 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'init':
             continue
 
         propertyName = registerDefinition['id']
