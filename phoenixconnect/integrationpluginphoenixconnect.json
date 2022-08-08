@@ -89,7 +89,7 @@
                             "type": "uint",
                             "unit": "Ampere",
                             "minValue": 6,
-                            "maxValue": 48,
+                            "maxValue": 16,
                             "defaultValue": 6,
                             "writable": true
                         },
@@ -184,7 +184,7 @@
                             "type": "uint",
                             "unit": "Ampere",
                             "minValue": 6,
-                            "maxValue": 96,
+                            "maxValue": 32,
                             "defaultValue": 6,
                             "writable": true
                         },
@@ -315,7 +315,7 @@
                             "type": "uint",
                             "unit": "Ampere",
                             "minValue": 6,
-                            "maxValue": 48,
+                            "maxValue": 16,
                             "defaultValue": 6,
                             "writable": true
                         },
@@ -410,7 +410,7 @@
                             "type": "uint",
                             "unit": "Ampere",
                             "minValue": 6,
-                            "maxValue": 96,
+                            "maxValue": 32,
                             "defaultValue": 6,
                             "writable": true
                         },
@@ -541,7 +541,7 @@
                             "type": "uint",
                             "unit": "Ampere",
                             "minValue": 6,
-                            "maxValue": 48,
+                            "maxValue": 16,
                             "defaultValue": 6,
                             "writable": true
                         },
@@ -626,7 +626,7 @@
                             "type": "uint",
                             "unit": "Ampere",
                             "minValue": 6,
-                            "maxValue": 96,
+                            "maxValue": 32,
                             "defaultValue": 6,
                             "writable": true
                         },
