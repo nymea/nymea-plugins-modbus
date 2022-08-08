@@ -119,9 +119,9 @@ void IntegrationPluginPhoenixConnect::setupThing(ThingSetupInfo *info)
         }
     });
 
-    connect(connection, &PhoenixModbusTcpConnection::connectionStateChanged, thing, [connection, thing](bool status){
-        qCDebug(dcPhoenixContact()) << "Connection state changed" << status;
-        if (status) {
+    connect(connection, &PhoenixModbusTcpConnection::reachableChanged, thing, [connection, thing](bool reachable){
+        qCDebug(dcPhoenixContact()) << "Reachable state changed" << reachable;
+        if (reachable) {
             connection->initialize();
         } else {
             thing->setStateValue("connected", false);
