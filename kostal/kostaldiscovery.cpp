@@ -37,12 +37,7 @@ KostalDiscovery::KostalDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery,
     m_port{port},
     m_modbusAddress{modbusAddress}
 {
-    m_gracePeriodTimer.setSingleShot(true);
-    m_gracePeriodTimer.setInterval(3000);
-    connect(&m_gracePeriodTimer, &QTimer::timeout, this, [this](){
-        qCDebug(dcKostal()) << "Discovery: SunnyWebBox: Grace period timer triggered.";
-        finishDiscovery();
-    });
+
 }
 
 void KostalDiscovery::startDiscovery()
@@ -51,9 +46,9 @@ void KostalDiscovery::startDiscovery()
     NetworkDeviceDiscoveryReply *discoveryReply = m_networkDeviceDiscovery->discover();
 
     // Check any already discovered infos..
-    foreach (const NetworkDeviceInfo &networkDeviceInfo, discoveryReply->networkDeviceInfos()) {
+    // FIXME: this is not required any more once each discovery request receives it's own object getting the added signal for every info
+    foreach (const NetworkDeviceInfo &networkDeviceInfo, discoveryReply->networkDeviceInfos())
         checkNetworkDevice(networkDeviceInfo);
-    }
 
     // Imedialty check any new device gets discovered
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::networkDeviceInfoAdded, this, &KostalDiscovery::checkNetworkDevice);
@@ -62,15 +57,25 @@ void KostalDiscovery::startDiscovery()
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
         qCDebug(dcKostal()) << "Discovery: Network discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "network devices";
         m_networkDeviceInfos = discoveryReply->networkDeviceInfos();
-        qCDebug(dcKostal()) << "Discovery: Network discovery finished. Start finishing discovery...";
+
         // Send a report request to nework device info not sent already...
+        bool networkdevicesLeft = false;
         foreach (const NetworkDeviceInfo &networkDeviceInfo, m_networkDeviceInfos) {
             if (!m_verifiedNetworkDeviceInfos.contains(networkDeviceInfo)) {
+                networkdevicesLeft = true;
                 checkNetworkDevice(networkDeviceInfo);
             }
         }
 
-        m_gracePeriodTimer.start();
+        if (networkdevicesLeft) {
+            // Give the last connections added right before the network discovery finished a chance to check the device...
+            QTimer::singleShot(3000, this, [this](){
+                qCDebug(dcKostal()) << "Discovery: Grace period timer triggered.";
+                finishDiscovery();
+            });
+        } else {
+            finishDiscovery();
+        }
     });
 }
 
@@ -107,6 +112,7 @@ void KostalDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceI
                 cleanupConnection(connection);
                 return;
             }
+
             KostalDiscoveryResult result;
             result.productName = connection->productName();
             result.manufacturerName = connection->inverterManufacturer();
@@ -129,12 +135,11 @@ void KostalDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceI
             cleanupConnection(connection);
         });
 
+        // Initializing...
         if (!connection->initialize()) {
             qCDebug(dcKostal()) << "Discovery: Unable to initialize connection on" << networkDeviceInfo.address().toString() << "Continue...";;
             cleanupConnection(connection);
         }
-
-        // Initializing...
     });
 
     // If we get any error...skip this host...
@@ -170,9 +175,7 @@ void KostalDiscovery::finishDiscovery()
     foreach (KostalModbusTcpConnection *connection, m_connections)
         cleanupConnection(connection);
 
-    qCInfo(dcKostal()) << "Discovery: Finished the discovery process. Found" << m_discoveryResults.count()
-                       << "Kostal Inverters in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
-    m_gracePeriodTimer.stop();
+    qCInfo(dcKostal()) << "Discovery: Finished the discovery process. Found" << m_discoveryResults.count() << "Kostal Inverters in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
 
     emit discoveryFinished();
 }

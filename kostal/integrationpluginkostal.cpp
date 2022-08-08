@@ -164,7 +164,7 @@ void IntegrationPluginKostal::setupThing(ThingSetupInfo *info)
             thing->setStateValue(kostalMeterCurrentPowerStateTypeId, powerMeterTotalActivePower);
         });
 
-        // TODO: set toal energy consumed/produced
+        // TODO: set total energy consumed/produced
 
         connect(kostalConnection, &KostalModbusTcpConnection::powerMeterTotalActivePowerChanged, this, [thing](float powerMeterTotalActivePower){
             thing->setStateValue(kostalMeterCurrentPowerStateTypeId, powerMeterTotalActivePower);
