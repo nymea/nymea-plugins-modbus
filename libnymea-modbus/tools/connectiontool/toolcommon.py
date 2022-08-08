@@ -427,7 +427,7 @@ def writeBlocksUpdateMethodDeclarations(fileDescriptor, blockDefinitions):
 
 def writeRegistersDebugLine(fileDescriptor, debugObjectParamName, registerDefinitions):
     for registerDefinition in registerDefinitions:
-        if registerDefinition['access'] == 'WO':
+        if not 'R' in registerDefinition['access']:
             continue
 
         propertyName = registerDefinition['id']
@@ -440,6 +440,9 @@ def writeRegistersDebugLine(fileDescriptor, debugObjectParamName, registerDefini
 
 def writePropertyChangedSignals(fileDescriptor, registerDefinitions):
     for registerDefinition in registerDefinitions:
+        if not 'R' in registerDefinition['access']:
+            continue
+
         propertyName = registerDefinition['id']
         propertyTyp = getCppDataType(registerDefinition)
         if propertyTyp == 'QString':
@@ -452,6 +455,9 @@ def writePropertyChangedSignals(fileDescriptor, registerDefinitions):
 
 def writeProtectedPropertyMembers(fileDescriptor, registerDefinitions):
     for registerDefinition in registerDefinitions:
+        if not 'R' in registerDefinition['access']:
+            continue
+
         propertyName = registerDefinition['id']
         propertyTyp = getCppDataType(registerDefinition)
         if 'defaultValue' in registerDefinition:
@@ -463,6 +469,9 @@ def writeProtectedPropertyMembers(fileDescriptor, registerDefinitions):
 def writePropertyProcessMethodDeclaration(fileDescriptor, registerDefinitions):
     propertyVariables = []
     for registerDefinition in registerDefinitions:
+        if not 'R' in registerDefinition['access']:
+            continue
+
         propertyName = registerDefinition['id']
         writeLine(fileDescriptor, '    void process%sRegisterValues(const QVector<quint16> values);' % (propertyName[0].upper() + propertyName[1:]))
 
@@ -472,6 +481,9 @@ def writePropertyProcessMethodDeclaration(fileDescriptor, registerDefinitions):
 def writePropertyProcessMethodImplementations(fileDescriptor, className, registerDefinitions):
     propertyVariables = []
     for registerDefinition in registerDefinitions:
+        if not 'R' in registerDefinition['access']:
+            continue
+
         propertyName = registerDefinition['id']
         propertyTyp = getCppDataType(registerDefinition)
 
