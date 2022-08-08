@@ -156,62 +156,7 @@ void IntegrationPluginKostal::setupThing(ThingSetupInfo *info)
             return;
         }
 
-        // Note: The connected state will be handled in the parent inverter thing
-
-        // Update the meter data from the kostal connection containing all information
-
-        connect(kostalConnection, &KostalModbusTcpConnection::powerMeterTotalActivePowerChanged, this, [thing](float powerMeterTotalActivePower){
-            thing->setStateValue(kostalMeterCurrentPowerStateTypeId, powerMeterTotalActivePower);
-        });
-
-        // TODO: set total energy consumed/produced
-
-        connect(kostalConnection, &KostalModbusTcpConnection::powerMeterTotalActivePowerChanged, this, [thing](float powerMeterTotalActivePower){
-            thing->setStateValue(kostalMeterCurrentPowerStateTypeId, powerMeterTotalActivePower);
-        });
-
-        // Current
-        connect(kostalConnection, &KostalModbusTcpConnection::powerMeterCurrentPhase1Changed, this, [thing](float powerMeterCurrentPhase1){
-            thing->setStateValue(kostalMeterCurrentPhaseAStateTypeId, powerMeterCurrentPhase1);
-        });
-
-        connect(kostalConnection, &KostalModbusTcpConnection::powerMeterCurrentPhase2Changed, this, [thing](float powerMeterCurrentPhase2){
-            thing->setStateValue(kostalMeterCurrentPhaseBStateTypeId, powerMeterCurrentPhase2);
-        });
-
-        connect(kostalConnection, &KostalModbusTcpConnection::powerMeterCurrentPhase3Changed, this, [thing](float powerMeterCurrentPhase3){
-            thing->setStateValue(kostalMeterCurrentPhaseCStateTypeId, powerMeterCurrentPhase3);
-        });
-
-        // Voltage
-        connect(kostalConnection, &KostalModbusTcpConnection::powerMeterVoltagePhase1Changed, this, [thing](float powerMeterVoltagePhase1){
-            thing->setStateValue(kostalMeterVoltagePhaseAStateTypeId, powerMeterVoltagePhase1);
-        });
-
-        connect(kostalConnection, &KostalModbusTcpConnection::powerMeterVoltagePhase2Changed, this, [thing](float powerMeterVoltagePhase2){
-            thing->setStateValue(kostalMeterVoltagePhaseBStateTypeId, powerMeterVoltagePhase2);
-        });
-
-        connect(kostalConnection, &KostalModbusTcpConnection::powerMeterVoltagePhase3Changed, this, [thing](float powerMeterVoltagePhase3){
-            thing->setStateValue(kostalMeterVoltagePhaseCStateTypeId, powerMeterVoltagePhase3);
-        });
-
-        // Power
-        connect(kostalConnection, &KostalModbusTcpConnection::powerMeterActivePowerPhase1Changed, this, [thing](float powerMeterActivePowerPhase1){
-            thing->setStateValue(kostalMeterCurrentPowerPhaseAStateTypeId, powerMeterActivePowerPhase1);
-        });
-
-        connect(kostalConnection, &KostalModbusTcpConnection::powerMeterActivePowerPhase2Changed, this, [thing](float powerMeterActivePowerPhase2){
-            thing->setStateValue(kostalMeterCurrentPowerPhaseBStateTypeId, powerMeterActivePowerPhase2);
-        });
-
-        connect(kostalConnection, &KostalModbusTcpConnection::powerMeterActivePowerPhase3Changed, this, [thing](float powerMeterActivePowerPhase3){
-            thing->setStateValue(kostalMeterCurrentPowerPhaseCStateTypeId, powerMeterActivePowerPhase3);
-        });
-
-        connect(kostalConnection, &KostalModbusTcpConnection::gridFrequencyPowerMeterChanged, this, [thing](float gridFrequency){
-            thing->setStateValue(kostalMeterFrequencyStateTypeId, gridFrequency);
-        });
+        // Note: The states will be handled in the parent inverter thing on updated
 
         info->finish(Thing::ThingErrorNoError);
         return;
@@ -233,27 +178,7 @@ void IntegrationPluginKostal::setupThing(ThingSetupInfo *info)
             return;
         }
 
-        // Note: The connected state will be handled in the parent inverter thing
-
-        connect(kostalConnection, &KostalModbusTcpConnection::batteryStateOfChargeChanged, this, [thing](quint16 batteryStateOfCharge){
-            thing->setStateValue(kostalBatteryBatteryLevelStateTypeId, batteryStateOfCharge);
-            thing->setStateValue(kostalBatteryBatteryCriticalStateTypeId, batteryStateOfCharge < 5);
-        });
-
-        connect(kostalConnection, &KostalModbusTcpConnection::batteryActualPowerChanged, this, [thing](float batteryActualPower){
-            thing->setStateValue(kostalBatteryCurrentPowerStateTypeId, batteryActualPower);
-            if (batteryActualPower == 0) {
-                thing->setStateValue(kostalBatteryChargingStateStateTypeId, "idle");
-            } else if (batteryActualPower > 0) {
-                thing->setStateValue(kostalBatteryChargingStateStateTypeId, "discharging");
-            } else if (batteryActualPower < 0) {
-                thing->setStateValue(kostalBatteryChargingStateStateTypeId, "charging");
-            }
-        });
-
-        connect(kostalConnection, &KostalModbusTcpConnection::batteryWorkCapacityChanged, this, [thing](quint32 batteryWorkCapacity){
-            thing->setStateValue(kostalBatteryCapacityStateTypeId, batteryWorkCapacity / 1000.0); // kWh
-        });
+        // Note: The states will be handled in the parent inverter thing on updated
 
         info->finish(Thing::ThingErrorNoError);
         return;
@@ -455,57 +380,76 @@ void IntegrationPluginKostal::setupKostalConnection(ThingSetupInfo *info)
 
         connect(kostalConnection, &KostalModbusTcpConnection::updateFinished, thing, [=](){
             qCDebug(dcKostal()) << "Updated" << kostalConnection;
-        });
 
-        connect(kostalConnection, &KostalModbusTcpConnection::totalAcPowerChanged, thing, [thing](float totalAcPower){
-            thing->setStateValue(kostalInverterCurrentPowerStateTypeId, - totalAcPower);
-        });
+            // Current
+            thing->setStateValue(kostalInverterPhaseACurrentStateTypeId, kostalConnection->currentPhase1());
+            thing->setStateValue(kostalInverterPhaseBCurrentStateTypeId, kostalConnection->currentPhase2());
+            thing->setStateValue(kostalInverterPhaseCCurrentStateTypeId, kostalConnection->currentPhase3());
 
-        connect(kostalConnection, &KostalModbusTcpConnection::totalYieldChanged, thing, [thing](float totalYield){
-            thing->setStateValue(kostalInverterTotalEnergyProducedStateTypeId, totalYield / 1000.0); // kWh
-        });
+            // Voltage
+            thing->setStateValue(kostalInverterVoltagePhaseAStateTypeId, kostalConnection->voltagePhase1());
+            thing->setStateValue(kostalInverterVoltagePhaseBStateTypeId, kostalConnection->voltagePhase2());
+            thing->setStateValue(kostalInverterVoltagePhaseCStateTypeId, kostalConnection->voltagePhase3());
 
-        // Current
-        connect(kostalConnection, &KostalModbusTcpConnection::currentPhase1Changed, thing, [thing](float currentPhase1){
-            thing->setStateValue(kostalInverterPhaseACurrentStateTypeId, currentPhase1); // A
-        });
+            // Phase power
+            thing->setStateValue(kostalInverterCurrentPowerPhaseAStateTypeId, kostalConnection->activePowerPhase1());
+            thing->setStateValue(kostalInverterCurrentPowerPhaseBStateTypeId, kostalConnection->activePowerPhase2());
+            thing->setStateValue(kostalInverterCurrentPowerPhaseCStateTypeId, kostalConnection->activePowerPhase3());
 
-        connect(kostalConnection, &KostalModbusTcpConnection::currentPhase2Changed, thing, [thing](float currentPhase2){
-            thing->setStateValue(kostalInverterPhaseBCurrentStateTypeId, currentPhase2); // A
-        });
+            // Others
+            thing->setStateValue(kostalInverterFrequencyStateTypeId, kostalConnection->gridFrequencyInverter());
+            thing->setStateValue(kostalInverterTotalEnergyProducedStateTypeId, kostalConnection->totalYield() / 1000.0); // kWh
 
-        connect(kostalConnection, &KostalModbusTcpConnection::currentPhase3Changed, thing, [thing](float currentPhase3){
-            thing->setStateValue(kostalInverterPhaseCCurrentStateTypeId, currentPhase3); // A
-        });
+            // Power
+            thing->setStateValue(kostalInverterCurrentPowerStateTypeId, - kostalConnection->totalAcPower());
 
-        // Voltage
-        connect(kostalConnection, &KostalModbusTcpConnection::voltagePhase1Changed, thing, [thing](float voltagePhase1){
-            thing->setStateValue(kostalInverterVoltagePhaseAStateTypeId, voltagePhase1);
-        });
+            // Update the battery if available
+            Things batteryThings = myThings().filterByParentId(thing->id()).filterByThingClassId(kostalBatteryThingClassId);
+            if (batteryThings.count() == 1) {
+                Thing *batteryThing = batteryThings.first();
 
-        connect(kostalConnection, &KostalModbusTcpConnection::voltagePhase2Changed, thing, [thing](float voltagePhase2){
-            thing->setStateValue(kostalInverterVoltagePhaseBStateTypeId, voltagePhase2);
-        });
+                batteryThing->setStateValue(kostalBatteryBatteryLevelStateTypeId, kostalConnection->batteryStateOfCharge());
+                batteryThing->setStateValue(kostalBatteryBatteryCriticalStateTypeId, kostalConnection->batteryStateOfCharge() < 5);
+                batteryThing->setStateValue(kostalBatteryCapacityStateTypeId, kostalConnection->batteryWorkCapacity() / 1000.0); // kWh
 
-        connect(kostalConnection, &KostalModbusTcpConnection::voltagePhase3Changed, thing, [thing](float voltagePhase3){
-            thing->setStateValue(kostalInverterVoltagePhaseCStateTypeId, voltagePhase3);
-        });
+                batteryThing->setStateValue(kostalBatteryCurrentPowerStateTypeId, kostalConnection->batteryActualPower());
+                if (kostalConnection->batteryActualPower() == 0) {
+                    batteryThing->setStateValue(kostalBatteryChargingStateStateTypeId, "idle");
+                } else if (kostalConnection->batteryActualPower() > 0) {
+                    batteryThing->setStateValue(kostalBatteryChargingStateStateTypeId, "discharging");
+                } else if (kostalConnection->batteryActualPower() < 0) {
+                    batteryThing->setStateValue(kostalBatteryChargingStateStateTypeId, "charging");
+                }
+            }
 
-        // Current power
-        connect(kostalConnection, &KostalModbusTcpConnection::activePowerPhase1Changed, thing, [thing](float activePowerPhase1){
-            thing->setStateValue(kostalInverterCurrentPowerPhaseAStateTypeId, activePowerPhase1);
-        });
 
-        connect(kostalConnection, &KostalModbusTcpConnection::activePowerPhase2Changed, thing, [thing](float activePowerPhase2){
-            thing->setStateValue(kostalInverterCurrentPowerPhaseBStateTypeId, activePowerPhase2);
-        });
+            // Update the meter if available
+            Things meterThings = myThings().filterByParentId(thing->id()).filterByThingClassId(kostalMeterThingClassId);
+            if (meterThings.count() == 1) {
+                Thing *meterThing = meterThings.first();
 
-        connect(kostalConnection, &KostalModbusTcpConnection::activePowerPhase3Changed, thing, [thing](float activePowerPhase3){
-            thing->setStateValue(kostalInverterCurrentPowerPhaseCStateTypeId, activePowerPhase3);
-        });
+                // TODO: set total energy consumed/produced
 
-        connect(kostalConnection, &KostalModbusTcpConnection::gridFrequencyInverterChanged, thing, [thing](float gridFrequencyInverter){
-            thing->setStateValue(kostalInverterFrequencyStateTypeId, gridFrequencyInverter);
+                // Power
+                meterThing->setStateValue(kostalMeterCurrentPhaseAStateTypeId, kostalConnection->powerMeterCurrentPhase1());
+                meterThing->setStateValue(kostalMeterCurrentPhaseBStateTypeId, kostalConnection->powerMeterCurrentPhase2());
+                meterThing->setStateValue(kostalMeterCurrentPhaseCStateTypeId, kostalConnection->powerMeterCurrentPhase3());
+
+                // Voltage
+                meterThing->setStateValue(kostalMeterVoltagePhaseAStateTypeId, kostalConnection->powerMeterVoltagePhase1());
+                meterThing->setStateValue(kostalMeterVoltagePhaseBStateTypeId, kostalConnection->powerMeterVoltagePhase2());
+                meterThing->setStateValue(kostalMeterVoltagePhaseCStateTypeId, kostalConnection->powerMeterVoltagePhase3());
+
+                // Current
+                meterThing->setStateValue(kostalMeterCurrentPowerPhaseAStateTypeId, kostalConnection->powerMeterActivePowerPhase1());
+                meterThing->setStateValue(kostalMeterCurrentPowerPhaseBStateTypeId, kostalConnection->powerMeterActivePowerPhase2());
+                meterThing->setStateValue(kostalMeterCurrentPowerPhaseCStateTypeId, kostalConnection->powerMeterActivePowerPhase3());
+
+                meterThing->setStateValue(kostalMeterFrequencyStateTypeId, kostalConnection->gridFrequencyPowerMeter());
+
+                // Set the power as last value
+                meterThing->setStateValue(kostalMeterCurrentPowerStateTypeId, kostalConnection->powerMeterTotalActivePower());
+            }
         });
 
         // Update registers
