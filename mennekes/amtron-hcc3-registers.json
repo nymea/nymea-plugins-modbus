@@ -1,0 +1,368 @@
+{
+    "className": "AmtronHCC3",
+    "protocol": "TCP",
+    "endianness": "LittleEndian",
+    "errorLimitUntilNotReachable": 20,
+    "checkReachableRegister": "customerCurrentLimitation",
+    "enums": [
+        {
+            "name": "CPSignalState",
+            "values": [
+                {
+                    "key": "A1",
+                    "value": 1
+                },
+                {
+                    "key": "A2",
+                    "value": 2
+                },
+                {
+                    "key": "B1",
+                    "value": 3
+                },
+                {
+                    "key": "B2",
+                    "value": 4
+                },
+                {
+                    "key": "C1",
+                    "value": 5
+                },
+                {
+                    "key": "C2",
+                    "value": 6
+                },
+                {
+                    "key": "D1",
+                    "value": 7
+                },
+                {
+                    "key": "D2",
+                    "value": 8
+                }
+            ]
+        },
+        {
+            "name": "PPState",
+            "values": [
+                {
+                    "key": "Illegal",
+                    "value": 0
+                },
+                {
+                    "key": "Open",
+                    "value": 1
+                },
+                {
+                    "key": "13A",
+                    "value": 2
+                },
+                {
+                    "key": "20A",
+                    "value": 3
+                },
+                {
+                    "key": "32A",
+                    "value": 4
+                }
+            ]
+        },
+        {
+            "name": "ChargeState",
+            "values": [
+                {
+                    "key": "Pause",
+                    "value": 1
+                },
+                {
+                    "key": "Continue",
+                    "value": 2
+                },
+                {
+                    "key": "Terminate",
+                    "value": 3
+                },
+                {
+                    "key": "Start",
+                    "value": 4
+                }
+            ]
+        },
+        {
+            "name": "HCC3ErrorCode",
+            "values": [
+                {
+                    "key": "NoError",
+                    "value": 0
+                },
+                {
+                    "key": "InstallationFault",
+                    "value": 10
+                },
+                {
+                    "key": "ControllerFault",
+                    "value": 11
+                },
+                {
+                    "key": "Misconfiguration",
+                    "value": 12
+                },
+                {
+                    "key": "Overtemperature",
+                    "value": 13
+                },
+                {
+                    "key": "MirrorContactorError",
+                    "value": 14
+                },
+                {
+                    "key": "InvalidDeviceTime",
+                    "value": 15
+                },
+                {
+                    "key": "EnergyManagerConnectionError",
+                    "value": 16
+                },
+                {
+                    "key": "DeviceStartup",
+                    "value": 30
+                },
+                {
+                    "key": "InternalTestNotPassed",
+                    "value": 31
+                },
+                {
+                    "key": "HMINoConnection",
+                    "value": 32
+                },
+                {
+                    "key": "BadlyPluggedCable",
+                    "value": 50
+                },
+                {
+                    "key": "WrongCable",
+                    "value": 51
+                },
+                {
+                    "key": "DefectCable",
+                    "value": 52
+                },
+                {
+                    "key": "ACUCommunicationError",
+                    "value": 100
+                },
+                {
+                    "key": "NotPolledByACU",
+                    "value": 101
+                },
+                {
+                    "key": "Maintenance",
+                    "value": 102
+                },
+                {
+                    "key": "Disabled",
+                    "value": 103
+                },
+                {
+                    "key": "UnknownError",
+                    "value": 255
+                }            
+            ]
+        },
+        {
+            "name": "AmtronState",
+            "values": [
+                {
+                    "key": "Idle",
+                    "value": 0
+                },
+                {
+                    "key": "StandByAuthorize",
+                    "value": 1
+                },
+                {
+                    "key": "StandbyConnect",
+                    "value": 2
+                },
+                {
+                    "key": "Charging",
+                    "value": 3
+                },
+                {
+                    "key": "Paused",
+                    "value": 4
+                },
+                {
+                    "key": "Terminated",
+                    "value": 5
+                },
+                {
+                    "key": "Error",
+                    "value": 6
+                }
+            ]
+        }
+    ],
+    "blocks": [
+        {
+            "id": "states",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "cpSignalState",
+                    "address": 770,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "CP signal state",
+                    "enum": "CPSignalState",
+                    "defaultValue": "CPSignalStateA1",
+                    "access": "RO"
+                },
+                {
+                    "id": "ppState",
+                    "address": 771,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "PP state",
+                    "enum": "PPState",
+                    "defaultValue": "PPStateIllegal",
+                    "access": "RO"
+                },
+                {
+                    "id": "hcc3ErrorCode",
+                    "address": 772,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "HCC3 Error Code",
+                    "enum": "HCC3ErrorCode",
+                    "defaultValue": "HCC3ErrorCodeNoError",
+                    "access": "RO"
+                },
+                {
+                    "id": "amtronState",
+                    "address": 773,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "AMTRON state",
+                    "enum": "AmtronState",
+                    "defaultValue": "AmtronStateIdle",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "maxValues",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "phaseCount",
+                    "address": 776,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Phase count",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "ratedCurrent",
+                    "address": 777,
+                    "size": 1,
+                    "type": "uint16",
+                    "unit": "A",
+                    "registerType": "inputRegister",
+                    "description": "Rated Current",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "installationCurrent",
+                    "address": 778,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Installation current",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "consumptions",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "chargingSessionMeter",
+                    "address": 781,
+                    "size": 2,
+                    "type": "uint32",
+                    "unut": "Wh",
+                    "registerType": "inputRegister",
+                    "description": "Charging session meter count",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "actualPowerConsumption",
+                    "address": 783,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Actual power consumption",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        }
+    ],
+    "registers": [
+        {
+            "id": "serialNumber",
+            "address": 779,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "init",
+            "registerType": "inputRegister",
+            "description": "Serial number",
+            "unit": "",
+            "defaultValue": 0,
+            "access": "RO"
+        },
+        {
+            "id": "name",
+            "address": 785,
+            "size": 11,
+            "type": "string",
+            "readSchedule": "init",
+            "registerType": "inputRegister",
+            "description": "Wallbox name",
+            "access": "RO"
+        },
+        {
+            "id": "customerCurrentLimitation",
+            "address": 1024,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Customer Current Limitation",
+            "unit": "A",
+            "defaultValue": "0",
+            "access": "RW"
+        },
+        {
+            "id": "changeChargeState",
+            "address": 1025,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "description": "Change charge state",
+            "enum": "ChargeState",
+            "access": "WO"
+        }
+   ]
+}

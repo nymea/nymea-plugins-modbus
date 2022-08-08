@@ -1,0 +1,13 @@
+{
+    "title": "MENNEKES",
+    "tagline": "Connect MENNEKES wallboxes to nymea.",
+    "icon": "mennekes.svg",
+    "stability": "consumer",
+    "offline": true,
+    "technologies": [
+        "network"
+    ],
+    "categories": [
+        "energy"
+    ]
+}

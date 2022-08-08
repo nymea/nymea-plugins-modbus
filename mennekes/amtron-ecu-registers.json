@@ -1,0 +1,302 @@
+{
+    "className": "AmtronECU",
+    "protocol": "TCP",
+    "endianness": "BigEndian",
+    "errorLimitUntilNotReachable": 20,
+    "checkReachableRegister": "cpSignalState",
+    "enums": [
+        {
+            "name": "CPSignalState",
+            "values": [
+                {
+                    "key": "A",
+                    "value": 1
+                },
+                {
+                    "key": "B",
+                    "value": 2
+                },
+                {
+                    "key": "C",
+                    "value": 3
+                },
+                {
+                    "key": "D",
+                    "value": 4
+                },
+                {
+                    "key": "E",
+                    "value": 5
+                }
+            ]
+        }
+    ],
+    "blocks": [
+        {
+            "id": "consumptions",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "meterEnergyL1",
+                    "address": 200,
+                    "size": 2,
+                    "type": "uint32",
+                    "unit": "Wh",
+                    "registerType": "holdingRegister",
+                    "description": "Meter energy L1",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterEnergyL2",
+                    "address": 202,
+                    "size": 2,
+                    "type": "uint32",
+                    "unit": "Wh",
+                    "registerType": "holdingRegister",
+                    "description": "Meter energy L2",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterEnergyL3",
+                    "address": 204,
+                    "size": 2,
+                    "type": "uint32",
+                    "unit": "Wh",
+                    "registerType": "holdingRegister",
+                    "description": "Meter energy L3",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterPowerL1",
+                    "address": 206,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Meter power L1",
+                    "unit": "W",
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "meterPowerL2",
+                    "address": 208,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Meter power L2",
+                    "unit": "W",
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "meterPowerL3",
+                    "address": 210,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Meter power L3",
+                    "unit": "W",
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "meterCurrentL1",
+                    "address": 212,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Meter current L1",
+                    "unit": "mA",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterCurrentL2",
+                    "address": 214,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Meter current L2",
+                    "unit": "mA",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterCurrentL3",
+                    "address": 216,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Meter current L3",
+                    "unit": "mA",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterTotoalEnergy",
+                    "address": 218,
+                    "size": 2,
+                    "type": "uint32",
+                    "unit": "Wh",
+                    "registerType": "holdingRegister",
+                    "description": "Meter total energy",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterTotalPower",
+                    "address": 220,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Meter totoal power",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterVoltageL1",
+                    "address": 222,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Meter voltage L1",
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterVoltageL2",
+                    "address": 224,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Meter voltage L2",
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterVoltageL3",
+                    "address": 226,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Meter voltage L3",
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        }
+    ],
+    "registers": [
+        {
+            "id": "firmwareVersion",
+            "address": 100,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "init",
+            "registerType": "holdingRegister",
+            "description": "Firmware version",
+            "defaultValue": 0,
+            "access": "RO"
+        },
+        {
+            "id": "cpSignalState",
+            "address": 122,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "CP signal state",
+            "enum": "CPSignalState",
+            "defaultValue": "CPSignalStateA",
+            "access": "RO"
+        },
+        {
+            "id": "cpAvailability",
+            "address": 124,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Charge Point availability",
+            "defaultValue": 0,
+            "access": "RW"
+        },
+        {
+            "id": "model",
+            "address": 142,
+            "size": 10,
+            "type": "string",
+            "readSchedule": "init",
+            "registerType": "holdingRegister",
+            "description": "Device model",
+            "access": "RO"
+        },
+        {
+            "id": "signalledCurrent",
+            "address": 706,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Signalled current to EV",
+            "unit": "A",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "minCurrentLimit",
+            "address": 712,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Minimum current limit",
+            "unit": "A",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "maxCurrentLimit",
+            "address": 715,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Maximum current limit",
+            "unit": "A",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "chargedEnergy",
+            "address": 716,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Charged energy for current session",
+            "unit": "Wh",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "hemsCurrentLimit",
+            "address": 1000,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "HEMS current limit",
+            "unit": "A",
+            "defaultValue": "0",
+            "access": "RW"
+        }
+    ]
+}
