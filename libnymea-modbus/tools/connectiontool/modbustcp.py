@@ -28,11 +28,11 @@ def writePropertyGetSetMethodDeclarationsTcp(fileDescriptor, registerDefinitions
             writeLine(fileDescriptor, '    /* %s - Address: %s, Size: %s */' % (registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
 
         # Check if we require a read method
-        if registerDefinition['access'] == 'RW' or registerDefinition['access'] == 'RO':
+        if 'R' in registerDefinition['access']:
             writeLine(fileDescriptor, '    %s %s() const;' % (propertyTyp, propertyName))
 
         # Check if we require a write method
-        if registerDefinition['access'] == 'RW' or registerDefinition['access'] == 'WO':
+        if 'W' in registerDefinition['access']:
             writeLine(fileDescriptor, '    QModbusReply *set%s(%s %s);' % (propertyName[0].upper() + propertyName[1:], propertyTyp, propertyName))
 
         writeLine(fileDescriptor)
@@ -44,7 +44,7 @@ def writePropertyGetSetMethodImplementationsTcp(fileDescriptor, className, regis
         propertyTyp = getCppDataType(registerDefinition)
 
         # Check if we require a read method
-        if registerDefinition['access'] == 'RW' or registerDefinition['access'] == 'RO':
+        if 'R' in registerDefinition['access']:
             if 'enum' in registerDefinition:
                 writeLine(fileDescriptor, '%s::%s %s::%s() const' % (className, propertyTyp, className, propertyName))
             else:
@@ -56,7 +56,7 @@ def writePropertyGetSetMethodImplementationsTcp(fileDescriptor, className, regis
             writeLine(fileDescriptor)
 
         # Check if we require a write method
-        if registerDefinition['access'] == 'RW' or registerDefinition['access'] == 'WO':
+        if 'W' in registerDefinition['access']:
             writeLine(fileDescriptor, 'QModbusReply *%s::set%s(%s %s)' % (className, propertyName[0].upper() + propertyName[1:], propertyTyp, propertyName))
             writeLine(fileDescriptor, '{')
 
@@ -288,7 +288,7 @@ def writeTestReachabilityImplementationsTcp(fileDescriptor, className, registerD
     writeLine(fileDescriptor, '    m_testRechableReply = read%s();' % (propertyName[0].upper() + propertyName[1:]))
     writeLine(fileDescriptor, '    if (!m_testRechableReply) {')
     writeLine(fileDescriptor, '        qCDebug(dc%s()) << "Error occurred verifying reachability by reading \\"%s\\" register";' % (className, checkReachableRegister['description']))
-    writeLine(fileDescriptor, '       emit checkReachabilityFailed();')
+    writeLine(fileDescriptor, '        emit checkReachabilityFailed();')
     writeLine(fileDescriptor, '        return;')
     writeLine(fileDescriptor, '    }')
     writeLine(fileDescriptor)
