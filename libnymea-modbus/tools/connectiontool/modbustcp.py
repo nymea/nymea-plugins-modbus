@@ -79,7 +79,7 @@ def writePropertyGetSetMethodImplementationsTcp(fileDescriptor, className, regis
 
 def writePropertyUpdateMethodImplementationsTcp(fileDescriptor, className, registerDefinitions):
     for registerDefinition in registerDefinitions:
-        if 'readSchedule' not in registerDefinition or registerDefinition['readSchedule'] == 'init':
+        if 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'init':
             continue
 
         propertyName = registerDefinition['id']
