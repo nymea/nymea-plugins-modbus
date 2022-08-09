@@ -55,7 +55,6 @@ private:
     quint16 m_port;
     quint16 m_modbusAddress;
 
-    QTimer m_gracePeriodTimer;
     QDateTime m_startDateTime;
 
     NetworkDeviceInfos m_networkDeviceInfos;

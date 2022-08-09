@@ -46,6 +46,13 @@ public:
     bool initialize() override;
     virtual bool update() override;
 
+    // The inverter shows the pv power AND the power of the connected batteries if they discharge.
+    // This power values represents the power taking the batteries into account.
+    double actualInverterPower() const;
+
+signals:
+    void actualInverterPowerChanged(double actualInverterPower);
+
 private:
     QQueue<HuaweiFusionModbusTcpConnection::Registers> m_registersQueue;
     QModbusReply *m_initReply = nullptr;
@@ -56,10 +63,14 @@ private:
     bool m_battery1Available = true;
     bool m_battery2Available = true;
 
+    double m_actualInverterPower = 0;
+
     QString exceptionToString(QModbusPdu::ExceptionCode exception);
 
 private slots:
     void readNextRegister();
+    bool valuesAreVaild(const QVector<quint16> &values, int readSize);
+    void calculatActualInverterPower();
 
 };
 
