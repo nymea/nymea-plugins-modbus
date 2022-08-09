@@ -135,15 +135,15 @@
                 },
                 {
                     "key": "Running",
-                    "value": 1
+                    "value": 2
                 },
                 {
                     "key": "Fault",
-                    "value": 1
+                    "value": 3
                 },
                 {
                     "key": "SleepMode",
-                    "value": 1
+                    "value": 4
                 }
             ]
         }
