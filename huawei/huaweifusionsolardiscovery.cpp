@@ -37,12 +37,7 @@ HuaweiFusionSolarDiscovery::HuaweiFusionSolarDiscovery(NetworkDeviceDiscovery *n
     m_port(port),
     m_modbusAddress(modbusAddress)
 {
-    m_gracePeriodTimer.setSingleShot(true);
-    m_gracePeriodTimer.setInterval(3000);
-    connect(&m_gracePeriodTimer, &QTimer::timeout, this, [this](){
-        qCDebug(dcHuawei()) << "Discovery: Grace period timer triggered.";
-        finishDiscovery();
-    });
+
 }
 
 
@@ -71,7 +66,11 @@ void HuaweiFusionSolarDiscovery::startDiscovery()
             }
         }
 
-        m_gracePeriodTimer.start();
+        // Finish with some delay so the last added network device information objects still can be checked.
+        QTimer::singleShot(3000, this, [this](){
+            qCDebug(dcHuawei()) << "Discovery: Grace period timer triggered.";
+            finishDiscovery();
+        });
     });
 }
 
@@ -108,20 +107,18 @@ void HuaweiFusionSolarDiscovery::checkNetworkDevice(const NetworkDeviceInfo &net
                 return;
             }
 
-            m_discoveryResults.append(networkDeviceInfo);
-
             qCDebug(dcHuawei()) << "Discovery: --> Found" << networkDeviceInfo;
+            m_discoveryResults.append(networkDeviceInfo);
 
             // Done with this connection
             cleanupConnection(connection);
         });
 
+        // Initializing...
         if (!connection->initialize()) {
             qCDebug(dcHuawei()) << "Discovery: Unable to initialize connection on" << networkDeviceInfo.address().toString() << "Continue...";;
             cleanupConnection(connection);
         }
-
-        // Initializing...
     });
 
     // If we get any error...skip this host...
@@ -138,9 +135,12 @@ void HuaweiFusionSolarDiscovery::checkNetworkDevice(const NetworkDeviceInfo &net
         cleanupConnection(connection);
     });
 
+    // Try to connect, maybe it works, maybe not,
+    // but retry only once to communicate with the device for reachability check...
+    connection->setCheckReachableRetries(1);
+
     // Try to connect, maybe it works, maybe not...
     connection->connectDevice();
-
 }
 
 void HuaweiFusionSolarDiscovery::cleanupConnection(HuaweiFusionSolar *connection)
@@ -160,7 +160,6 @@ void HuaweiFusionSolarDiscovery::finishDiscovery()
 
     qCInfo(dcHuawei()) << "Discovery: Finished the discovery process. Found" << m_discoveryResults.count()
                        << "inverters in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
-    m_gracePeriodTimer.stop();
 
     emit discoveryFinished();
 }
