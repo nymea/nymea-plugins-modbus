@@ -56,10 +56,10 @@ public:
 
 private:
     PluginTimer *m_pluginTimer = nullptr;
+
     QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
     QHash<Thing *, HuaweiFusionSolar *> m_connections;
     QHash<Thing *, HuaweiModbusRtuConnection *> m_rtuConnections;
-
 
     void setupFusionSolar(ThingSetupInfo *info);
 };

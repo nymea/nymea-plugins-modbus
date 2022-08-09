@@ -99,26 +99,8 @@ void HuaweiFusionSolarDiscovery::checkNetworkDevice(const NetworkDeviceInfo &net
             return;
         }
 
-        // Modbus TCP connected...ok, let's try to initialize it!
-        connect(connection, &HuaweiFusionSolar::initializationFinished, this, [=](bool success){
-            if (!success) {
-                qCDebug(dcHuawei()) << "Discovery: Initialization failed on" << networkDeviceInfo.address().toString() << "Continue...";;
-                cleanupConnection(connection);
-                return;
-            }
-
-            qCDebug(dcHuawei()) << "Discovery: --> Found" << networkDeviceInfo;
-            m_discoveryResults.append(networkDeviceInfo);
-
-            // Done with this connection
-            cleanupConnection(connection);
-        });
-
-        // Initializing...
-        if (!connection->initialize()) {
-            qCDebug(dcHuawei()) << "Discovery: Unable to initialize connection on" << networkDeviceInfo.address().toString() << "Continue...";;
-            cleanupConnection(connection);
-        }
+        qCDebug(dcHuawei()) << "Discovery: --> Found" << networkDeviceInfo;
+        m_discoveryResults.append(networkDeviceInfo);
     });
 
     // If we get any error...skip this host...
@@ -145,9 +127,11 @@ void HuaweiFusionSolarDiscovery::checkNetworkDevice(const NetworkDeviceInfo &net
 
 void HuaweiFusionSolarDiscovery::cleanupConnection(HuaweiFusionSolar *connection)
 {
-    m_connections.removeAll(connection);
-    connection->disconnectDevice();
-    connection->deleteLater();
+    if (m_connections.contains(connection)) {
+        m_connections.removeAll(connection);
+        connection->disconnectDevice();
+        connection->deleteLater();
+    }
 }
 
 void HuaweiFusionSolarDiscovery::finishDiscovery()
