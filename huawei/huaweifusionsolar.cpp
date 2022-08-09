@@ -518,7 +518,7 @@ void HuaweiFusionSolar::readNextRegister()
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
                 qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 2 power\" register" << 37743 << "size:" << 2 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().count();
-                if (!valuesAreVaild(unit.values(), 1)) {
+                if (!valuesAreVaild(unit.values(), 2)) {
                     qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values count. Requested" << 2 << "but received" << unit.values();
                 } else {
                     processLunaBattery2PowerRegisterValues(unit.values());
@@ -588,8 +588,10 @@ void HuaweiFusionSolar::readNextRegister()
 
 bool HuaweiFusionSolar::valuesAreVaild(const QVector<quint16> &values, int readSize)
 {
-    if (values.count() != readSize)
+    if (values.count() != readSize) {
+        qCDebug(dcHuaweiFusionSolar()) << "Invalid values. The received values count does not match the requested" << readSize << "registers.";
         return false;
+    }
 
     // According to the documentation:
     // 0x7FFF: invalid value of the floating point type returned by one register
@@ -598,7 +600,13 @@ bool HuaweiFusionSolar::valuesAreVaild(const QVector<quint16> &values, int readS
 
     if (values.count() == 2) {
         bool floatingPointValid = (values.at(0) != 0x7fff && values.at(1) != 0xffff);
+        if (!floatingPointValid)
+            qCDebug(dcHuaweiFusionSolar()) << "Invalid values. The received values match the invalid for floating pointer:" << values;
+
         bool otherTypesValid = (values.at(0) != 0xffff && values.at(1) != 0xffff);
+        if (!otherTypesValid)
+            qCDebug(dcHuaweiFusionSolar()) << "Invalid values. The received values match the invalid registers values:" << values;
+
         return floatingPointValid && otherTypesValid;
     }
 
@@ -618,7 +626,7 @@ void HuaweiFusionSolar::calculatActualInverterPower()
         actualPower += m_lunaBattery2Power;
 
     qCDebug(dcHuaweiFusionSolar()) << "Inverter power:" << m_inverterActivePower << "W Battery 1:" << m_lunaBattery1Power << "W Battery 2:" << m_lunaBattery2Power << "W -->" << "Actual inverter power:" << actualPower << "W";
-    if (m_actualInverterPower != actualPower)
+    if (m_actualInverterPower == actualPower)
         return;
 
     m_actualInverterPower = actualPower;

@@ -134,6 +134,9 @@ void IntegrationPluginHuawei::setupThing(ThingSetupInfo *info)
         // Create a monitor so we always get the correct IP in the network and see if the device is reachable without polling on our own
         NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(macAddress);
         m_monitors.insert(thing, monitor);
+        connect(info, &ThingSetupInfo::aborted, monitor, [=](){
+            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+        });
 
         // Continue with setup only if we know that the network device is reachable
         if (monitor->reachable()) {
@@ -176,7 +179,7 @@ void IntegrationPluginHuawei::setupThing(ThingSetupInfo *info)
         ModbusRtuMaster *rtuMaster = hardwareManager()->modbusRtuResource()->getModbusRtuMaster(uuid);
         HuaweiModbusRtuConnection *connection = new HuaweiModbusRtuConnection(rtuMaster, address, this);
 
-        connect(connection, &HuaweiModbusRtuConnection::reachableChanged, this, [this, thing, connection](bool reachable){
+        connect(connection, &HuaweiModbusRtuConnection::reachableChanged, thing, [this, thing, connection](bool reachable){
             qCDebug(dcHuawei()) << thing->name() << "reachable changed" << reachable;
             if (reachable) {
                 // Connected true will be set after successfull init
@@ -189,7 +192,7 @@ void IntegrationPluginHuawei::setupThing(ThingSetupInfo *info)
             }
         });
 
-        connect(connection, &HuaweiModbusRtuConnection::initializationFinished, this, [this, thing, connection](bool success){
+        connect(connection, &HuaweiModbusRtuConnection::initializationFinished, thing, [this, thing, connection](bool success){
             if (success) {
                 thing->setStateValue("connected", true);
                 foreach (Thing *childThing, myThings().filterByParentId(thing->id())) {
@@ -200,23 +203,23 @@ void IntegrationPluginHuawei::setupThing(ThingSetupInfo *info)
             }
         });
 
-        connect(connection, &HuaweiModbusRtuConnection::inverterActivePowerChanged, this, [thing](float inverterActivePower){
+        connect(connection, &HuaweiModbusRtuConnection::inverterActivePowerChanged, thing, [thing](float inverterActivePower){
             qCDebug(dcHuawei()) << "Inverter power changed" << inverterActivePower * -1000.0 << "W";
             thing->setStateValue(huaweiRtuInverterCurrentPowerStateTypeId, inverterActivePower * -1000.0);
         });
 
-        connect(connection, &HuaweiModbusRtuConnection::inverterDeviceStatusChanged, this, [thing](HuaweiModbusRtuConnection::InverterDeviceStatus inverterDeviceStatus){
+        connect(connection, &HuaweiModbusRtuConnection::inverterDeviceStatusChanged, thing, [thing](HuaweiModbusRtuConnection::InverterDeviceStatus inverterDeviceStatus){
             qCDebug(dcHuawei()) << "Inverter device status changed" << inverterDeviceStatus;
             Q_UNUSED(thing)
         });
 
-        connect(connection, &HuaweiModbusRtuConnection::inverterEnergyProducedChanged, this, [thing](float inverterEnergyProduced){
+        connect(connection, &HuaweiModbusRtuConnection::inverterEnergyProducedChanged, thing, [thing](float inverterEnergyProduced){
             qCDebug(dcHuawei()) << "Inverter total energy produced changed" << inverterEnergyProduced << "kWh";
             thing->setStateValue(huaweiRtuInverterTotalEnergyProducedStateTypeId, inverterEnergyProduced);
         });
 
         // Meter
-        connect(connection, &HuaweiModbusRtuConnection::powerMeterActivePowerChanged, this, [this, thing](qint32 powerMeterActivePower){
+        connect(connection, &HuaweiModbusRtuConnection::powerMeterActivePowerChanged, thing, [this, thing](qint32 powerMeterActivePower){
             Things meterThings = myThings().filterByParentId(thing->id()).filterByThingClassId(huaweiMeterThingClassId);
             if (!meterThings.isEmpty()) {
                 qCDebug(dcHuawei()) << "Meter power changed" << powerMeterActivePower << "W";
@@ -226,7 +229,7 @@ void IntegrationPluginHuawei::setupThing(ThingSetupInfo *info)
         });
 
         // Battery 1
-        connect(connection, &HuaweiModbusRtuConnection::lunaBattery1StatusChanged, this, [this, thing](HuaweiModbusRtuConnection::BatteryDeviceStatus lunaBattery1Status){
+        connect(connection, &HuaweiModbusRtuConnection::lunaBattery1StatusChanged, thing, [this, thing](HuaweiModbusRtuConnection::BatteryDeviceStatus lunaBattery1Status){
             qCDebug(dcHuawei()) << "Battery 1 status changed" << lunaBattery1Status;
             if (lunaBattery1Status != HuaweiModbusRtuConnection::BatteryDeviceStatusOffline) {
                 // Check if w have to create the energy storage
@@ -249,7 +252,7 @@ void IntegrationPluginHuawei::setupThing(ThingSetupInfo *info)
             }
         });
 
-        connect(connection, &HuaweiModbusRtuConnection::lunaBattery1PowerChanged, this, [this, thing](qint32 lunaBattery1Power){
+        connect(connection, &HuaweiModbusRtuConnection::lunaBattery1PowerChanged, thing, [this, thing](qint32 lunaBattery1Power){
             qCDebug(dcHuawei()) << "Battery 1 power changed" << lunaBattery1Power << "W";
             Things batteryThings = myThings().filterByParentId(thing->id()).filterByThingClassId(huaweiBatteryThingClassId).filterByParam(huaweiBatteryThingUnitParamTypeId, 1);
             if (!batteryThings.isEmpty()) {
@@ -264,7 +267,7 @@ void IntegrationPluginHuawei::setupThing(ThingSetupInfo *info)
             }
         });
 
-        connect(connection, &HuaweiModbusRtuConnection::lunaBattery1SocChanged, this, [this, thing](float lunaBattery1Soc){
+        connect(connection, &HuaweiModbusRtuConnection::lunaBattery1SocChanged, thing, [this, thing](float lunaBattery1Soc){
             qCDebug(dcHuawei()) << "Battery 1 SOC changed" << lunaBattery1Soc << "%";
             Things batteryThings = myThings().filterByParentId(thing->id()).filterByThingClassId(huaweiBatteryThingClassId).filterByParam(huaweiBatteryThingUnitParamTypeId, 1);
             if (!batteryThings.isEmpty()) {
@@ -274,7 +277,7 @@ void IntegrationPluginHuawei::setupThing(ThingSetupInfo *info)
         });
 
         // Battery 2
-        connect(connection, &HuaweiModbusRtuConnection::lunaBattery2StatusChanged, this, [this, thing](HuaweiModbusRtuConnection::BatteryDeviceStatus lunaBattery1Status){
+        connect(connection, &HuaweiModbusRtuConnection::lunaBattery2StatusChanged, thing, [this, thing](HuaweiModbusRtuConnection::BatteryDeviceStatus lunaBattery1Status){
             qCDebug(dcHuawei()) << "Battery 2 status changed" << lunaBattery1Status;
             if (lunaBattery1Status != HuaweiModbusRtuConnection::BatteryDeviceStatusOffline) {
                 // Check if w have to create the energy storage
@@ -297,7 +300,7 @@ void IntegrationPluginHuawei::setupThing(ThingSetupInfo *info)
             }
         });
 
-        connect(connection, &HuaweiModbusRtuConnection::lunaBattery2PowerChanged, this, [this, thing](qint32 lunaBattery2Power){
+        connect(connection, &HuaweiModbusRtuConnection::lunaBattery2PowerChanged, thing, [this, thing](qint32 lunaBattery2Power){
             qCDebug(dcHuawei()) << "Battery 2 power changed" << lunaBattery2Power << "W";
             Things batteryThings = myThings().filterByParentId(thing->id()).filterByThingClassId(huaweiBatteryThingClassId).filterByParam(huaweiBatteryThingUnitParamTypeId, 2);
             if (!batteryThings.isEmpty()) {
@@ -313,7 +316,7 @@ void IntegrationPluginHuawei::setupThing(ThingSetupInfo *info)
             }
         });
 
-        connect(connection, &HuaweiModbusRtuConnection::lunaBattery2SocChanged, this, [this, thing](float lunaBattery2Soc){
+        connect(connection, &HuaweiModbusRtuConnection::lunaBattery2SocChanged, thing, [this, thing](float lunaBattery2Soc){
             qCDebug(dcHuawei()) << "Battery 2 SOC changed" << lunaBattery2Soc << "%";
             Things batteryThings = myThings().filterByParentId(thing->id()).filterByThingClassId(huaweiBatteryThingClassId).filterByParam(huaweiBatteryThingUnitParamTypeId, 2);
             if (!batteryThings.isEmpty()) {
@@ -356,7 +359,7 @@ void IntegrationPluginHuawei::postSetupThing(Thing *thing)
     if (thing->thingClassId() == huaweiFusionSolarInverterThingClassId || thing->thingClassId() == huaweiRtuInverterThingClassId) {
         if (!m_pluginTimer) {
             qCDebug(dcHuawei()) << "Starting plugin timer...";
-            m_pluginTimer = hardwareManager()->pluginTimerManager()->registerTimer(5);
+            m_pluginTimer = hardwareManager()->pluginTimerManager()->registerTimer(2);
             connect(m_pluginTimer, &PluginTimer::timeout, this, [this] {
                 foreach(HuaweiFusionSolar *connection, m_connections) {
                     if (connection->connected()) {
@@ -411,55 +414,52 @@ void IntegrationPluginHuawei::setupFusionSolar(ThingSetupInfo *info)
 
     qCDebug(dcHuawei()) << "Finish setup huawei fusion solar dongle" << monitor->networkDeviceInfo().address().toString() << port << slaveId;
 
-    connect(monitor, &NetworkDeviceMonitor::reachableChanged, thing, [=](bool reachable){
-        if (!thing->setupComplete())
-            return;
-
-        qCDebug(dcHuawei()) << "Network device monitor for" << thing->name() << (reachable ? "is now reachable" : "is not reachable any more" );
-        if (reachable) {
-            // Update address and refresh
-            thing->setStateValue("hostAddress", monitor->networkDeviceInfo().address().toString());
-            connection->setHostAddress(monitor->networkDeviceInfo().address());
-            connection->update();
-        }
-    });
-
-    connect(connection, &HuaweiFusionSolar::reachableChanged, this, [this, thing, connection](bool reachable){
+    connect(connection, &HuaweiFusionSolar::reachableChanged, thing, [=](bool reachable){
         qCDebug(dcHuawei()) << "Reachable changed to" << reachable << "for" << thing;
-        if (reachable) {
-            // Connected true will be set after successfull init
-            connection->initialize();
-            thing->setStateValue("connected", true);
-        } else {
-            thing->setStateValue("connected", false);
-        }
-
+        thing->setStateValue("connected", reachable);
         foreach (Thing *childThing, myThings().filterByParentId(thing->id())) {
             childThing->setStateValue("connected", reachable);
         }
     });
 
-    connect(connection, &HuaweiFusionSolar::inverterActivePowerChanged, this, [](float inverterActivePower){
-        qCDebug(dcHuawei()) << "Inverter power changed" << inverterActivePower * -1000.0 << "W";
+    connect(monitor, &NetworkDeviceMonitor::reachableChanged, thing, [=](bool reachable){
+        if (!thing->setupComplete())
+            return;
+
+        qCDebug(dcHuawei()) << "Network device monitor for" << thing->name() << (reachable ? "is now reachable" : "is not reachable any more" );
+
+        if (reachable && !thing->stateValue("connected").toBool()) {
+             connection->setHostAddress(monitor->networkDeviceInfo().address());
+             connection->connectDevice();
+         } else if (!reachable) {
+             // Note: We disable autoreconnect explicitly and we will
+             // connect the device once the monitor says it is reachable again
+             connection->disconnectDevice();
+         }
     });
 
-    connect(connection, &HuaweiFusionSolar::actualInverterPowerChanged, this, [thing](float actualInverterPower){
+    connect(connection, &HuaweiFusionSolar::inverterActivePowerChanged, thing, [](float inverterActivePower){
+        qCDebug(dcHuawei()) << "Inverter power changed" << inverterActivePower * -1000.0 << "W";
+        //thing->setStateValue(huaweiFusionSolarInverterCurrentPowerStateTypeId, inverterActivePower * -1000.0);
+    });
+
+    connect(connection, &HuaweiFusionSolar::actualInverterPowerChanged, thing, [thing](float actualInverterPower){
         qCDebug(dcHuawei()) << "Inverter actual power changed" << actualInverterPower << "W";
         thing->setStateValue(huaweiFusionSolarInverterCurrentPowerStateTypeId, actualInverterPower);
     });
 
-    connect(connection, &HuaweiFusionSolar::inverterDeviceStatusChanged, this, [thing](HuaweiFusionSolar::InverterDeviceStatus inverterDeviceStatus){
+    connect(connection, &HuaweiFusionSolar::inverterDeviceStatusChanged, thing, [thing](HuaweiFusionSolar::InverterDeviceStatus inverterDeviceStatus){
         qCDebug(dcHuawei()) << "Inverter device status changed" << inverterDeviceStatus;
         Q_UNUSED(thing)
     });
 
-    connect(connection, &HuaweiFusionSolar::inverterEnergyProducedChanged, this, [thing](float inverterEnergyProduced){
+    connect(connection, &HuaweiFusionSolar::inverterEnergyProducedChanged, thing, [thing](float inverterEnergyProduced){
         qCDebug(dcHuawei()) << "Inverter total energy produced changed" << inverterEnergyProduced << "kWh";
         thing->setStateValue(huaweiFusionSolarInverterTotalEnergyProducedStateTypeId, inverterEnergyProduced);
     });
 
     // Meter
-    connect(connection, &HuaweiFusionSolar::powerMeterActivePowerChanged, this, [this, thing](qint32 powerMeterActivePower){
+    connect(connection, &HuaweiFusionSolar::powerMeterActivePowerChanged, thing, [this, thing](qint32 powerMeterActivePower){
         Things meterThings = myThings().filterByParentId(thing->id()).filterByThingClassId(huaweiMeterThingClassId);
         if (!meterThings.isEmpty()) {
             qCDebug(dcHuawei()) << "Meter power changed" << powerMeterActivePower << "W";
@@ -469,7 +469,7 @@ void IntegrationPluginHuawei::setupFusionSolar(ThingSetupInfo *info)
     });
 
     // Battery 1
-    connect(connection, &HuaweiFusionSolar::lunaBattery1StatusChanged, this, [this, thing](HuaweiFusionSolar::BatteryDeviceStatus lunaBattery1Status){
+    connect(connection, &HuaweiFusionSolar::lunaBattery1StatusChanged, thing, [this, thing](HuaweiFusionSolar::BatteryDeviceStatus lunaBattery1Status){
         qCDebug(dcHuawei()) << "Battery 1 status changed" << lunaBattery1Status;
         if (lunaBattery1Status != HuaweiFusionSolar::BatteryDeviceStatusOffline) {
             // Check if w have to create the energy storage
@@ -492,7 +492,7 @@ void IntegrationPluginHuawei::setupFusionSolar(ThingSetupInfo *info)
         }
     });
 
-    connect(connection, &HuaweiFusionSolar::lunaBattery1PowerChanged, this, [this, thing](qint32 lunaBattery1Power){
+    connect(connection, &HuaweiFusionSolar::lunaBattery1PowerChanged, thing, [this, thing](qint32 lunaBattery1Power){
         qCDebug(dcHuawei()) << "Battery 1 power changed" << lunaBattery1Power << "W";
         Things batteryThings = myThings().filterByParentId(thing->id()).filterByThingClassId(huaweiBatteryThingClassId).filterByParam(huaweiBatteryThingUnitParamTypeId, 1);
         if (!batteryThings.isEmpty()) {
@@ -507,7 +507,7 @@ void IntegrationPluginHuawei::setupFusionSolar(ThingSetupInfo *info)
         }
     });
 
-    connect(connection, &HuaweiFusionSolar::lunaBattery1SocChanged, this, [this, thing](float lunaBattery1Soc){
+    connect(connection, &HuaweiFusionSolar::lunaBattery1SocChanged, thing, [this, thing](float lunaBattery1Soc){
         qCDebug(dcHuawei()) << "Battery 1 SOC changed" << lunaBattery1Soc << "%";
         Things batteryThings = myThings().filterByParentId(thing->id()).filterByThingClassId(huaweiBatteryThingClassId).filterByParam(huaweiBatteryThingUnitParamTypeId, 1);
         if (!batteryThings.isEmpty()) {
@@ -517,7 +517,7 @@ void IntegrationPluginHuawei::setupFusionSolar(ThingSetupInfo *info)
     });
 
     // Battery 2
-    connect(connection, &HuaweiFusionSolar::lunaBattery2StatusChanged, this, [this, thing](HuaweiFusionSolar::BatteryDeviceStatus lunaBattery1Status){
+    connect(connection, &HuaweiFusionSolar::lunaBattery2StatusChanged, thing, [this, thing](HuaweiFusionSolar::BatteryDeviceStatus lunaBattery1Status){
         qCDebug(dcHuawei()) << "Battery 2 status changed" << lunaBattery1Status;
         if (lunaBattery1Status != HuaweiFusionSolar::BatteryDeviceStatusOffline) {
             // Check if w have to create the energy storage
@@ -540,7 +540,7 @@ void IntegrationPluginHuawei::setupFusionSolar(ThingSetupInfo *info)
         }
     });
 
-    connect(connection, &HuaweiFusionSolar::lunaBattery2PowerChanged, this, [this, thing](qint32 lunaBattery2Power){
+    connect(connection, &HuaweiFusionSolar::lunaBattery2PowerChanged, thing, [this, thing](qint32 lunaBattery2Power){
         qCDebug(dcHuawei()) << "Battery 2 power changed" << lunaBattery2Power << "W";
         Things batteryThings = myThings().filterByParentId(thing->id()).filterByThingClassId(huaweiBatteryThingClassId).filterByParam(huaweiBatteryThingUnitParamTypeId, 2);
         if (!batteryThings.isEmpty()) {
@@ -556,7 +556,7 @@ void IntegrationPluginHuawei::setupFusionSolar(ThingSetupInfo *info)
         }
     });
 
-    connect(connection, &HuaweiFusionSolar::lunaBattery2SocChanged, this, [this, thing](float lunaBattery2Soc){
+    connect(connection, &HuaweiFusionSolar::lunaBattery2SocChanged, thing, [this, thing](float lunaBattery2Soc){
         qCDebug(dcHuawei()) << "Battery 2 SOC changed" << lunaBattery2Soc << "%";
         Things batteryThings = myThings().filterByParentId(thing->id()).filterByThingClassId(huaweiBatteryThingClassId).filterByParam(huaweiBatteryThingUnitParamTypeId, 2);
         if (!batteryThings.isEmpty()) {

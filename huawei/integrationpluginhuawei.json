@@ -10,7 +10,7 @@
             "thingClasses": [
                 {
                     "name": "huaweiFusionSolarInverter",
-                    "displayName": "Huawei FusionSolar Inverter",
+                    "displayName": "Huawei FusionSolar Inverter (SmartDongle)",
                     "id": "87e75ee0-d544-457b-add3-bd4e58160fcd",
                     "createMethods": ["discovery", "user"],
                     "interfaces": ["solarinverter", "connectable"],
@@ -57,7 +57,7 @@
                             "type": "double",
                             "unit": "Watt",
                             "defaultValue": 0,
-                            "cached": false
+                            "cached": true
                         },
                         {
                             "id": "e97fe328-6ca4-4fe4-86f7-fee6e9e406a5",
@@ -66,14 +66,15 @@
                             "displayNameEvent": "AC energy changed",
                             "type": "double",
                             "unit": "KiloWattHour",
-                            "defaultValue": 0.00
+                            "defaultValue": 0.00,
+                            "cached": true
                         }
                     ],
                     "actionTypes": [ ]
                 },
                 {
                     "name": "huaweiRtuInverter",
-                    "displayName": "Huawei Inverter",
+                    "displayName": "Huawei FusionSolar Inverter ((Modbus RTU)",
                     "id": "77558007-5076-4ca6-bd46-169f215c3e29",
                     "createMethods": ["discovery"],
                     "interfaces": ["solarinverter", "connectable"],
@@ -122,7 +123,7 @@
                             "type": "double",
                             "unit": "Watt",
                             "defaultValue": 0,
-                            "cached": false
+                            "cached": true
                         },
                         {
                             "id": "49b92919-301c-4ff7-ae63-0c1a2184e3f4",
@@ -131,7 +132,8 @@
                             "displayNameEvent": "AC energy changed",
                             "type": "double",
                             "unit": "KiloWattHour",
-                            "defaultValue": 0.00
+                            "defaultValue": 0.00,
+                            "cached": true
                         }
                     ],
                     "actionTypes": [ ]
@@ -162,7 +164,7 @@
                             "type": "double",
                             "unit": "Watt",
                             "defaultValue": 0.00,
-                            "cached": false
+                            "cached": true
                         },
                         {
                             "id": "759554dd-74c5-4836-9792-96e02eb816f0",
@@ -171,7 +173,8 @@
                             "displayNameEvent": "AC energy changed",
                             "type": "double",
                             "unit": "KiloWattHour",
-                            "defaultValue": 0.00
+                            "defaultValue": 0.00,
+                            "cached": true
                         },
                         {
                             "id": "2cf8d885-37f7-478f-819e-c4e20f2dbe01",
@@ -337,7 +340,7 @@
                             "type": "double",
                             "unit": "Watt",
                             "defaultValue": 0.00,
-                            "cached": false
+                            "cached": true
                         },
                         {
                             "id": "3eed974a-0acb-4e38-bcb8-0e3f6fbfd51a",
