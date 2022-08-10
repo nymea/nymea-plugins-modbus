@@ -593,17 +593,17 @@ bool HuaweiFusionSolar::valuesAreVaild(const QVector<quint16> &values, int readS
         return false;
     }
 
-    // According to the documentation:
+    // According to the documentation from 2016:
     // 0x7FFF: invalid value of the floating point type returned by one register
     // 0xFFFF: invalid value of a type other than the floating point type returned by one register
     // 0xFFFFFFFF: invalid value returned by two registers
 
     if (values.count() == 2) {
-        bool floatingPointValid = (values.at(0) != 0x7fff && values.at(1) != 0xffff);
+        bool floatingPointValid = (values != QVector<quint16>() << 0x7fff << 0xffff);
         if (!floatingPointValid)
             qCDebug(dcHuaweiFusionSolar()) << "Invalid values. The received values match the invalid for floating pointer:" << values;
 
-        bool otherTypesValid = (values.at(0) != 0xffff && values.at(1) != 0xffff);
+        bool otherTypesValid = (values != QVector<quint16>(2, 0xffff));
         if (!otherTypesValid)
             qCDebug(dcHuaweiFusionSolar()) << "Invalid values. The received values match the invalid registers values:" << values;
 
