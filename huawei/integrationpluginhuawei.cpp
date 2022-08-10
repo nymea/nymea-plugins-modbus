@@ -460,9 +460,8 @@ void IntegrationPluginHuawei::setupFusionSolar(ThingSetupInfo *info)
             }
         });
 
-        connect(connection, &HuaweiFusionSolar::actualInverterPowerChanged, thing, [thing](float actualInverterPower){
-            qCDebug(dcHuawei()) << "Inverter actual power changed" << actualInverterPower << "W";
-            thing->setStateValue(huaweiFusionSolarInverterCurrentPowerStateTypeId, actualInverterPower);
+        connect(connection, &HuaweiFusionSolar::inverterActivePowerChanged, thing, [thing](float inverterActivePower){
+            thing->setStateValue(huaweiFusionSolarInverterCurrentPowerStateTypeId, inverterActivePower * -1000.0);
         });
 
         connect(connection, &HuaweiFusionSolar::inverterDeviceStatusReadFinished, thing, [thing](HuaweiFusionSolar::InverterDeviceStatus inverterDeviceStatus){
