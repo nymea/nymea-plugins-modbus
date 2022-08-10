@@ -108,9 +108,10 @@ bool HuaweiFusionSolar::update()
         m_registersQueue.enqueue(HuaweiFusionModbusTcpConnection::RegisterLunaBattery2Power);
 
     m_registersQueue.enqueue(HuaweiFusionModbusTcpConnection::RegisterPowerMeterActivePower);
-
     m_registersQueue.enqueue(HuaweiFusionModbusTcpConnection::RegisterInverterEnergyProduced);
     m_registersQueue.enqueue(HuaweiFusionModbusTcpConnection::RegisterInverterDeviceStatus);
+
+    // Note: we constantly read the status in any case so we detect if a battery came online
     m_registersQueue.enqueue(HuaweiFusionModbusTcpConnection::RegisterLunaBattery1Status);
     m_registersQueue.enqueue(HuaweiFusionModbusTcpConnection::RegisterLunaBattery2Status);
 
@@ -125,11 +126,6 @@ bool HuaweiFusionSolar::update()
     m_currentRegisterRequest = -1;
     readNextRegister();
     return true;
-}
-
-double HuaweiFusionSolar::actualInverterPower() const
-{
-    return m_actualInverterPower;
 }
 
 void HuaweiFusionSolar::readNextRegister()
@@ -171,7 +167,6 @@ void HuaweiFusionSolar::readNextRegister()
                     qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values. Requested" << 2 << "but received" << unit.values();
                 } else {
                     processInverterActivePowerRegisterValues(unit.values());
-                    calculatActualInverterPower();
                 }
             }
 
@@ -391,7 +386,6 @@ void HuaweiFusionSolar::readNextRegister()
                     qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values. Requested" << 2 << "but received" << unit.values();
                 } else {
                     processLunaBattery1PowerRegisterValues(unit.values());
-                    calculatActualInverterPower();
                 }
             }
             finishRequest();
@@ -522,7 +516,6 @@ void HuaweiFusionSolar::readNextRegister()
                     qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values count. Requested" << 2 << "but received" << unit.values();
                 } else {
                     processLunaBattery2PowerRegisterValues(unit.values());
-                    calculatActualInverterPower();
                 }
             }
             finishRequest();
@@ -614,23 +607,6 @@ bool HuaweiFusionSolar::valuesAreVaild(const QVector<quint16> &values, int readS
         return values.at(0) != 0x7fff && values.at(0) != 0xffff;
 
     return true;
-}
-
-void HuaweiFusionSolar::calculatActualInverterPower()
-{
-    double actualPower = m_inverterActivePower * -1000.0;
-    if (m_battery1Available)
-        actualPower += m_lunaBattery1Power;
-
-    if (m_battery2Available)
-        actualPower += m_lunaBattery2Power;
-
-    qCDebug(dcHuaweiFusionSolar()) << "Inverter power:" << m_inverterActivePower << "W Battery 1:" << m_lunaBattery1Power << "W Battery 2:" << m_lunaBattery2Power << "W -->" << "Actual inverter power:" << actualPower << "W";
-    if (m_actualInverterPower == actualPower)
-        return;
-
-    m_actualInverterPower = actualPower;
-    emit actualInverterPowerChanged(m_actualInverterPower);
 }
 
 void HuaweiFusionSolar::finishRequest()

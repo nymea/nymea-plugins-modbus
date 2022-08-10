@@ -4,13 +4,16 @@ Connects to a Huawei FusionSolar using Modbus RTU or TCP.
 
 ## Huawei FusionSolar
 
-In order to communicate with the Huawei FusionSolar inverter, a working communikation must be provided. This can be done with a Huawei SmartDongle or with a direct modbus RTU connection.
+In order to communicate with the Huawei FusionSolar inverter, a working communication must be provided. This can be done with a Huawei SmartDongle or with a directly with the modbus RTU connection.
 
 Once nymea has connected successfully to the inverter, following devices will be supported:
 
 * Huawei FusionSolar Inverter (all model supported by the SmartDongle)
 * Huawei Meter (connected internally to the Inverter)
 * Luna2000 battery units 1 and 2 if connected
+
+The batteries will be shown in the system as informative things, but will not be considered in the energy view and and energy balance. Since the batteries are connected internally behind the inverter, power coming from the battery will be shown as power coming from the inverter. The inverter power represents power from the PV or from the battery.
+
 
 ### Huawei SmartDongle
 

@@ -293,7 +293,7 @@
                     "displayName": "Huawei Battery",
                     "id": "40104aac-0456-475d-8bd6-18f946597d96",
                     "createMethods": ["auto"],
-                    "interfaces": [ "energystorage", "connectable"],
+                    "interfaces": [ "battery", "connectable"],
                     "paramTypes": [
                         {
                             "id": "019287a6-c593-45a8-9695-2e1ad8e81c32",
