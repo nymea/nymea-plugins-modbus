@@ -236,7 +236,7 @@ void IntegrationPluginKostal::postSetupThing(Thing *thing)
                         qCDebug(dcKostal()) << "There is a meter connected but not set up yet. Creating a meter...";
                         // No meter thing created for this inverter, lets create one with the inverter as parent
                         ThingClass meterThingClass = thingClass(kostalMeterThingClassId);
-                        ThingDescriptor descriptor(kostalMeterThingClassId, meterThingClass.name(), QString(), thing->id());
+                        ThingDescriptor descriptor(kostalMeterThingClassId, meterThingClass.displayName(), QString(), thing->id());
                         // No params required, all we need is the connection
                         emit autoThingsAppeared(ThingDescriptors() << descriptor);
                     } else {
@@ -428,8 +428,6 @@ void IntegrationPluginKostal::setupKostalConnection(ThingSetupInfo *info)
             if (meterThings.count() == 1) {
                 Thing *meterThing = meterThings.first();
 
-                // TODO: set total energy consumed/produced
-
                 // Power
                 meterThing->setStateValue(kostalMeterCurrentPhaseAStateTypeId, kostalConnection->powerMeterCurrentPhase1());
                 meterThing->setStateValue(kostalMeterCurrentPhaseBStateTypeId, kostalConnection->powerMeterCurrentPhase2());
@@ -446,6 +444,9 @@ void IntegrationPluginKostal::setupKostalConnection(ThingSetupInfo *info)
                 meterThing->setStateValue(kostalMeterCurrentPowerPhaseCStateTypeId, kostalConnection->powerMeterActivePowerPhase3());
 
                 meterThing->setStateValue(kostalMeterFrequencyStateTypeId, kostalConnection->gridFrequencyPowerMeter());
+
+                // TODO: Not sure where to get the exported energy
+                meterThing->setStateValue(kostalMeterTotalEnergyConsumedStateTypeId, kostalConnection->totalHomeConsumptionFromGrid() / 1000.0); // kWh
 
                 // Set the power as last value
                 meterThing->setStateValue(kostalMeterCurrentPowerStateTypeId, kostalConnection->powerMeterTotalActivePower());
