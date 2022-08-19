@@ -258,8 +258,13 @@ void IntegrationPluginKostal::postSetupThing(Thing *thing)
             }
 
             qCDebug(dcKostal()) << "There is a battery connected but not set up yet. Creating a battery" << kostalConnection->batteryType();
+            QString batteryName = kostalConnection->batteryManufacturer();
+            if (kostalConnection->batteryModelId() != 0) {
+                batteryName += " - " + QString::number(kostalConnection->batteryModelId());
+            }
+
             ThingClass batteryThingClass = thingClass(kostalBatteryThingClassId);
-            ThingDescriptor descriptor(kostalBatteryThingClassId, kostalConnection->batteryManufacturer() + " - " + kostalConnection->batteryModelId(), QString(), thing->id());
+            ThingDescriptor descriptor(kostalBatteryThingClassId, batteryName, QString::number(kostalConnection->batterySerialNumber()), thing->id());
             // No params required, all we need is the connection
             emit autoThingsAppeared(ThingDescriptors() << descriptor);
         }
@@ -408,20 +413,24 @@ void IntegrationPluginKostal::setupKostalConnection(ThingSetupInfo *info)
             if (batteryThings.count() == 1) {
                 Thing *batteryThing = batteryThings.first();
 
+                batteryThing->setStateValue(kostalBatteryVoltageStateTypeId, kostalConnection->batteryVoltage());
+                batteryThing->setStateValue(kostalBatteryTemperatureStateTypeId, kostalConnection->batteryTemperature());
                 batteryThing->setStateValue(kostalBatteryBatteryLevelStateTypeId, kostalConnection->batteryStateOfCharge());
                 batteryThing->setStateValue(kostalBatteryBatteryCriticalStateTypeId, kostalConnection->batteryStateOfCharge() < 5);
-                batteryThing->setStateValue(kostalBatteryCapacityStateTypeId, kostalConnection->batteryWorkCapacity() / 1000.0); // kWh
 
-                batteryThing->setStateValue(kostalBatteryCurrentPowerStateTypeId, kostalConnection->batteryActualPower());
-                if (kostalConnection->batteryActualPower() == 0) {
+                // Note: this is the wrong capacity, as of now not known.
+                //batteryThing->setStateValue(kostalBatteryCapacityStateTypeId, kostalConnection->batteryWorkCapacity() / 1000.0); // kWh
+
+                double batteryPower = -kostalConnection->batteryActualPower();
+                batteryThing->setStateValue(kostalBatteryCurrentPowerStateTypeId, batteryPower);
+                if (batteryPower == 0) {
                     batteryThing->setStateValue(kostalBatteryChargingStateStateTypeId, "idle");
-                } else if (kostalConnection->batteryActualPower() > 0) {
+                } else if (batteryPower > 0) {
                     batteryThing->setStateValue(kostalBatteryChargingStateStateTypeId, "discharging");
-                } else if (kostalConnection->batteryActualPower() < 0) {
+                } else if (batteryPower < 0) {
                     batteryThing->setStateValue(kostalBatteryChargingStateStateTypeId, "charging");
                 }
             }
-
 
             // Update the meter if available
             Things meterThings = myThings().filterByParentId(thing->id()).filterByThingClassId(kostalMeterThingClassId);

@@ -371,6 +371,24 @@
                             "cached": false
                         },
                         {
+                            "id": "176420b8-64b6-42e1-beea-9ce2a12f3261",
+                            "name": "voltage",
+                            "displayName": "Voltage",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0.00,
+                            "cached": false
+                        },
+                        {
+                            "id": "47b07030-57eb-4c79-a469-87b2474eb312",
+                            "name": "temperature",
+                            "displayName": "Temperature",
+                            "type": "double",
+                            "unit": "DegreeCelsius",
+                            "defaultValue": 0.00,
+                            "cached": false
+                        },
+                        {
                             "id": "98099dbd-3f66-43b3-8192-f2e3fdcd5d62",
                             "name": "capacity",
                             "displayName": "Capacity",

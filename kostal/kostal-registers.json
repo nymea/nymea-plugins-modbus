@@ -709,6 +709,34 @@
                     "access": "RO"
                 }
             ]
+        },
+        {
+            "id": "battery",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "batteryGrossCapacity",
+                    "address": 512,
+                    "size": 2,
+                    "type": "uint32",
+                    "readSchedule": "update",
+                    "registerType": "holdingRegister",
+                    "description": "Battery gross capacity",
+                    "unit": "Ah",
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryStateOfCharge",
+                    "address": 514,
+                    "size": 1,
+                    "type": "uint16",
+                    "readSchedule": "update",
+                    "registerType": "holdingRegister",
+                    "description": "Battery SoC",
+                    "unit": "%",
+                    "access": "RO"
+                }
+            ]
         }
     ],
     "registers": [
@@ -828,17 +856,6 @@
             "description": "Battery voltage",
             "unit": "V",
             "defaultValue": "0",
-            "access": "RO"
-        },
-        {
-            "id": "batteryStateOfCharge",
-            "address": 514,
-            "size": 1,
-            "type": "uint16",
-            "readSchedule": "update",
-            "registerType": "holdingRegister",
-            "description": "Battery SoC",
-            "unit": "%",
             "access": "RO"
         },
         {
