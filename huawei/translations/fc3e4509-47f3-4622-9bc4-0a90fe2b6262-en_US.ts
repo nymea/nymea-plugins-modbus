@@ -107,7 +107,7 @@ The name of the StateType ({a51f0ceb-bd2c-444f-8b39-77cf8a4e1bc6}) of ThingClass
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/huawei/plugininfo.h" line="124"/>
-        <source>Huawei FusionSolar Inverter (Modbus RTU)</source>
+        <source>Huawei FusionSolar Inverter ((Modbus RTU)</source>
         <extracomment>The name of the ThingClass ({77558007-5076-4ca6-bd46-169f215c3e29})</extracomment>
         <translation type="unfinished"></translation>
     </message>
@@ -240,22 +240,22 @@ The name of the StateType ({f480dc82-68e2-44e2-839c-df38b9c10310}) of ThingClass
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../integrationpluginhuawei.cpp" line="130"/>
+        <location filename="../integrationpluginhuawei.cpp" line="129"/>
         <source>The MAC address is not vaild. Please reconfigure the device to fix this.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../integrationpluginhuawei.cpp" line="164"/>
+        <location filename="../integrationpluginhuawei.cpp" line="162"/>
         <source>The Modbus address not valid. It must be a value between 1 and 254.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../integrationpluginhuawei.cpp" line="171"/>
+        <location filename="../integrationpluginhuawei.cpp" line="169"/>
         <source>The Modbus RTU resource is not available.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../integrationpluginhuawei.cpp" line="426"/>
+        <location filename="../integrationpluginhuawei.cpp" line="424"/>
         <source>Could not initialize the communication with the SmartDongle.</source>
         <translation type="unfinished"></translation>
     </message>
