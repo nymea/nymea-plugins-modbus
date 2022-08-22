@@ -74,7 +74,7 @@
                 },
                 {
                     "name": "huaweiRtuInverter",
-                    "displayName": "Huawei FusionSolar Inverter ((Modbus RTU)",
+                    "displayName": "Huawei FusionSolar Inverter (Modbus RTU)",
                     "id": "77558007-5076-4ca6-bd46-169f215c3e29",
                     "createMethods": ["discovery"],
                     "interfaces": ["solarinverter", "connectable"],
@@ -123,7 +123,7 @@
                             "type": "double",
                             "unit": "Watt",
                             "defaultValue": 0,
-                            "cached": true
+                            "cached": false
                         },
                         {
                             "id": "49b92919-301c-4ff7-ae63-0c1a2184e3f4",
@@ -164,7 +164,7 @@
                             "type": "double",
                             "unit": "Watt",
                             "defaultValue": 0.00,
-                            "cached": true
+                            "cached": false
                         },
                         {
                             "id": "759554dd-74c5-4836-9792-96e02eb816f0",
@@ -183,7 +183,8 @@
                             "displayNameEvent": "Total real energy imported changed",
                             "type": "double",
                             "unit": "KiloWattHour",
-                            "defaultValue": 0.00
+                            "defaultValue": 0.00,
+                            "cached": true
                         },
                         {
                             "id": "af48ff45-11ba-401e-a812-bb1db0896449",

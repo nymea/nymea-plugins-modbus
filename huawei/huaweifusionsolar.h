@@ -43,7 +43,7 @@ public:
     explicit HuaweiFusionSolar(const QHostAddress &hostAddress, uint port, quint16 slaveId, QObject *parent = nullptr);
     ~HuaweiFusionSolar() = default;
 
-    bool initialize() override;
+    virtual bool initialize() override;
     virtual bool update() override;
 
 private:

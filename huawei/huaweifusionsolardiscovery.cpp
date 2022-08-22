@@ -51,7 +51,7 @@ void HuaweiFusionSolarDiscovery::startDiscovery()
         checkNetworkDevice(networkDeviceInfo);
     }
 
-    // Imedialty check any new device gets discovered
+    // Immedialty check any new device gets discovered
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::networkDeviceInfoAdded, this, &HuaweiFusionSolarDiscovery::checkNetworkDevice);
 
     // Check what might be left on finished

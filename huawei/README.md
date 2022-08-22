@@ -4,9 +4,9 @@ Connects to a Huawei FusionSolar using Modbus RTU or TCP.
 
 ## Huawei FusionSolar
 
-In order to communicate with the Huawei FusionSolar inverter, a working communication must be provided. This can be done with a Huawei SmartDongle or with a directly with the modbus RTU connection.
+The Huawei FusionSolar can be connected either via the Huawei SmartDongle or via a Modbus RTU (RS485) connection.
 
-Once nymea has connected successfully to the inverter, following devices will be supported:
+The following devices are supported:
 
 * Huawei FusionSolar Inverter (all model supported by the SmartDongle)
 * Huawei Meter (connected internally to the Inverter)
@@ -27,7 +27,7 @@ with the Huawei Solar Inverter. In order to allow nymea to read from the device 
 
 You can also contact the [official Huawei support](mailto:eu_inverter_support@huawei.com) in order to get the update files and instructions, or get it from [here](https://support.huawei.com/enterprise/en/digital-power/sdongle-pid-23826585/software).
 
-> The SmartDongle provides only access to the registers specified in the Huawei `openAPI`. Full modbus register access requires a modbus RTU connction.
+> The SmartDongle provides only access to the registers specified in the Huawei `openAPI`. Full modbus register access requires a modbus RTU connection.
 
 
 ### Direct modbus RTU connection (RS485).
