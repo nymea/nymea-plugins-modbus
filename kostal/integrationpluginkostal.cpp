@@ -406,7 +406,7 @@ void IntegrationPluginKostal::setupKostalConnection(ThingSetupInfo *info)
             thing->setStateValue(kostalInverterTotalEnergyProducedStateTypeId, kostalConnection->totalYield() / 1000.0); // kWh
 
             // Power
-            thing->setStateValue(kostalInverterCurrentPowerStateTypeId, - kostalConnection->totalAcPower());
+            thing->setStateValue(kostalInverterCurrentPowerStateTypeId, - (kostalConnection->totalAcPower() - kostalConnection->batteryActualPower()));
 
             // Update the battery if available
             Things batteryThings = myThings().filterByParentId(thing->id()).filterByThingClassId(kostalBatteryThingClassId);
@@ -425,9 +425,9 @@ void IntegrationPluginKostal::setupKostalConnection(ThingSetupInfo *info)
                 batteryThing->setStateValue(kostalBatteryCurrentPowerStateTypeId, batteryPower);
                 if (batteryPower == 0) {
                     batteryThing->setStateValue(kostalBatteryChargingStateStateTypeId, "idle");
-                } else if (batteryPower > 0) {
-                    batteryThing->setStateValue(kostalBatteryChargingStateStateTypeId, "discharging");
                 } else if (batteryPower < 0) {
+                    batteryThing->setStateValue(kostalBatteryChargingStateStateTypeId, "discharging");
+                } else if (batteryPower > 0) {
                     batteryThing->setStateValue(kostalBatteryChargingStateStateTypeId, "charging");
                 }
             }
