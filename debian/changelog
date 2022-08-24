@@ -1,3 +1,23 @@
+nymea-plugins-modbus (1.4.0) jammy; urgency=medium
+
+  [ Simon Stürz ]
+  * New plugin: KOSTAL Solar Electric
+  * nymea-modbus-cli: Add nymea modbus tool for testing purposes
+  * modbus-tool: Improve initialize and update mechanism of generated
+    connection classes
+
+  [ Michael Zanetti ]
+  * Schrack: Support wallboxes without RFID reader
+
+  [ Simon Stürz ]
+  * Huawei: Adding modbus RTU functionality and update FusionSolar
+    discovery
+
+  [ Michael Zanetti ]
+  * PhoenixConnect: Update maximum values
+
+ -- jenkins <developer@nymea.io>  Wed, 24 Aug 2022 17:19:28 +0200
+
 nymea-plugins-modbus (1.3.1) jammy; urgency=medium
 
 
