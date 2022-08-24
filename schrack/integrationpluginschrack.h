@@ -50,6 +50,22 @@ class IntegrationPluginSchrack : public IntegrationPlugin
     Q_INTERFACES(IntegrationPlugin)
 
 public:
+    enum StatusBit {
+        StatusBitPluggedIn = 0x0001,
+        StatusBitChargeContactor1Active = 0x0002,
+        StatusBitChargeContactor2Active = 0x0004,
+        StatusBitVentilationRequired = 0x0008,
+        StatusBitPlugLockController = 0x0010,
+        StatusBitPlugLockReturn = 0x0020,
+        StatusBitCollectiveDisorder = 0x0040,
+        StatusBitDisorderFiLs = 0x0080,
+        StatusBitCableDisorder = 0x0100,
+        StatusBitCableRejected = 0x0200,
+        StatusBitContactorError = 0x0400
+    };
+    Q_ENUM(StatusBit);
+    Q_DECLARE_FLAGS(StatusBits, StatusBit)
+
     explicit IntegrationPluginSchrack();
     void init() override;
     void discoverThings(ThingDiscoveryInfo *info) override;

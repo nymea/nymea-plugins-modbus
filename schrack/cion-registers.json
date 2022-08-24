@@ -109,7 +109,7 @@
             "type": "uint16",
             "registerType": "holdingRegister",
             "readSchedule": "update",
-            "description": "Mode3-State A, B, C, D, U",
+            "description": "Status bits",
             "defaultValue": 85,
             "access": "R"
         },
@@ -120,7 +120,7 @@
             "type": "uint16",
             "registerType": "holdingRegister",
             "readSchedule": "update",
-            "description": "Status bits",
+            "description": "CP Status bits",
             "defaultValue": 0,
             "access": "R"
         },
