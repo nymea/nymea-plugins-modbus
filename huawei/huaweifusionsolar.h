@@ -34,20 +34,21 @@
 #include <QObject>
 #include <QQueue>
 
-#include "huaweimodbustcpconnection.h"
+#include "huaweifusionmodbustcpconnection.h"
 
-class HuaweiFusionSolar : public HuaweiModbusTcpConnection
+class HuaweiFusionSolar : public HuaweiFusionModbusTcpConnection
 {
     Q_OBJECT
 public:
     explicit HuaweiFusionSolar(const QHostAddress &hostAddress, uint port, quint16 slaveId, QObject *parent = nullptr);
+    ~HuaweiFusionSolar() = default;
 
     virtual bool initialize() override;
     virtual bool update() override;
 
-
 private:
-    QQueue<HuaweiModbusTcpConnection::Registers> m_registersQueue;
+    QQueue<HuaweiFusionModbusTcpConnection::Registers> m_registersQueue;
+    QModbusReply *m_initReply = nullptr;
 
     int m_currentRegisterRequest = -1;
     void finishRequest();
@@ -55,8 +56,13 @@ private:
     bool m_battery1Available = true;
     bool m_battery2Available = true;
 
+    double m_actualInverterPower = 0;
+
+    QString exceptionToString(QModbusPdu::ExceptionCode exception);
+
 private slots:
     void readNextRegister();
+    bool valuesAreVaild(const QVector<quint16> &values, int readSize);
 
 };
 

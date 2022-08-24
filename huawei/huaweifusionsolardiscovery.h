@@ -3,7 +3,7 @@
 * Copyright 2013 - 2022, nymea GmbH
 * Contact: contact@nymea.io
 *
-* This fileDescriptor is part of nymea.
+* This file is part of nymea.
 * This project including source code and documentation is protected by
 * copyright law, and remains the property of nymea GmbH. All rights, including
 * reproduction, publication, editing and translation, are reserved. The use of
@@ -28,41 +28,47 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef INTEGRATIONPLUGINHUAWEI_H
-#define INTEGRATIONPLUGINHUAWEI_H
+#ifndef HUAWEIFUSIONSOLARDISCOVERY_H
+#define HUAWEIFUSIONSOLARDISCOVERY_H
 
-#include <plugintimer.h>
-#include <integrations/integrationplugin.h>
+#include <QObject>
+
 #include <network/networkdevicediscovery.h>
 
-#include "extern-plugininfo.h"
 #include "huaweifusionsolar.h"
-#include "huaweimodbusrtuconnection.h"
 
-class IntegrationPluginHuawei: public IntegrationPlugin
+class HuaweiFusionSolarDiscovery : public QObject
 {
     Q_OBJECT
-
-    Q_PLUGIN_METADATA(IID "io.nymea.IntegrationPlugin" FILE "integrationpluginhuawei.json")
-    Q_INTERFACES(IntegrationPlugin)
-
 public:
-    explicit IntegrationPluginHuawei();
+    explicit HuaweiFusionSolarDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint16 port = 502, quint16 modbusAddress = 1, QObject *parent = nullptr);
 
-    void discoverThings(ThingDiscoveryInfo *info) override;
-    void setupThing(ThingSetupInfo *info) override;
-    void postSetupThing(Thing *thing) override;
-    void thingRemoved(Thing *thing) override;
+    void startDiscovery();
+
+    NetworkDeviceInfos discoveryResults() const;
+
+signals:
+    void discoveryFinished();
 
 private:
-    PluginTimer *m_pluginTimer = nullptr;
+    NetworkDeviceDiscovery *m_networkDeviceDiscovery = nullptr;
+    quint16 m_port;
+    quint16 m_modbusAddress;
 
-    QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
-    QHash<Thing *, HuaweiFusionSolar *> m_connections;
-    QHash<Thing *, HuaweiModbusRtuConnection *> m_rtuConnections;
+    QDateTime m_startDateTime;
 
-    void setupFusionSolar(ThingSetupInfo *info);
+    NetworkDeviceInfos m_networkDeviceInfos;
+    NetworkDeviceInfos m_verifiedNetworkDeviceInfos;
+
+    QList<HuaweiFusionSolar *> m_connections;
+
+    NetworkDeviceInfos m_discoveryResults;
+
+    void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
+    void cleanupConnection(HuaweiFusionSolar *connection);
+
+    void finishDiscovery();
+
 };
 
-#endif // INTEGRATIONPLUGINHUAWEI_H
-
+#endif // HUAWEIFUSIONSOLARDISCOVERY_H
