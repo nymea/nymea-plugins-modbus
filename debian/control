@@ -60,6 +60,15 @@ Description: The main libraries and header files for developing with modbus base
  This package contains the nymea modbus integration plugin library - development files.
 
 
+Package: nymea-modbus-cli
+Architecture: any
+Section: utils
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
+Description: nymea modbus command line tool for testing modbus TCP communication
+ This package contains the nymea modbus command line tool for testing modbus TCP communication.
+
+
 Package: nymea-plugin-alphainnotec
 Architecture: any
 Section: libs
