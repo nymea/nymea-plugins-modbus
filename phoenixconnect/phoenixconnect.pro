@@ -4,7 +4,9 @@ MODBUS_CONNECTIONS=phoenixconnect-registers.json
 include(../modbus.pri)
 
 SOURCES += \
-    integrationpluginphoenixconnect.cpp
+    integrationpluginphoenixconnect.cpp \
+    phoenixdiscovery.cpp
 
 HEADERS += \
-    integrationpluginphoenixconnect.h
+    integrationpluginphoenixconnect.h \
+    phoenixdiscovery.h

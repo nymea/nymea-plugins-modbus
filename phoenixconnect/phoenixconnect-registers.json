@@ -164,6 +164,30 @@
                     "access": "R"
                 }
             ]
+        },
+        {
+            "id": "ids",
+            "readSchedule": "init",
+            "registers": [
+                {
+                    "id": "serial",
+                    "address": 304,
+                    "size": 6,
+                    "type": "string",
+                    "registerType": "holdingRegister",
+                    "description": "Serial number",
+                    "access": "R"
+                },
+                {
+                    "id": "deviceName",
+                    "address": 310,
+                    "size": 5,
+                    "type": "string",
+                    "registerType": "holdingRegister",
+                    "description": "Device name",
+                    "access": "R"
+                }
+            ]
         }
     ],
     "registers": [
@@ -187,6 +211,17 @@
             "registerType": "inputRegister",
             "description": "Charging Time",
             "defaultValue": "0",
+            "access": "R"
+        },
+        {
+            "id": "dipSwitches",
+            "address": 104,
+            "size": 1,
+            "type": "uint16",
+            "note": "The controller may report wrong DIP switches during init, so polling on update",
+            "readSchedule": "update",
+            "registerType": "inputRegister",
+            "description": "DIP switch configuration",
             "access": "R"
         },
         {
@@ -232,6 +267,39 @@
             "registerType": "coils",
             "description": "Charging enabled",
             "defaultValue": "0",
+            "access": "RW"
+        },
+        {
+            "id": "rfidEnabled",
+            "address": 419,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "init",
+            "registerType": "coils",
+            "description": "RFID enabled",
+            "defaultValue": "0",
+            "access": "RW"
+        },
+        {
+            "id": "chargingAllowed",
+            "address": 436,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "coils",
+            "description": "Charging allowed",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "chargingPaused",
+            "address": 468,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "coils",
+            "description": "Charging paused",
+            "defaultValue": "1",
             "access": "RW"
         },
         {
