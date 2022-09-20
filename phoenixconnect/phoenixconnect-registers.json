@@ -77,6 +77,32 @@
     ],
     "blocks": [
         {
+            "id": "configuration",
+            "readSchedule": "init",
+            "registers": [
+                {
+                    "id": "dipSwitches",
+                    "address": 104,
+                    "size": 1,
+                    "type": "uint16",
+                    "readSchedule": "init",
+                    "registerType": "inputRegister",
+                    "description": "DIP switch configuration",
+                    "access": "R"
+                },
+                {
+                    "id": "firmwareVersion",
+                    "address": 105,
+                    "size": 2,
+                    "type": "string",
+                    "readSchedule": "init",
+                    "registerType": "inputRegister",
+                    "description": "Firmware version",
+                    "access": "R"
+                }
+            ]
+        },
+        {
             "id": "phaseVoltageAndCurrent",
             "readSchedule": "update",
             "registers": [
@@ -164,6 +190,30 @@
                     "access": "R"
                 }
             ]
+        },
+        {
+            "id": "ids",
+            "readSchedule": "init",
+            "registers": [
+                {
+                    "id": "serial",
+                    "address": 304,
+                    "size": 6,
+                    "type": "string",
+                    "registerType": "holdingRegister",
+                    "description": "Serial number",
+                    "access": "R"
+                },
+                {
+                    "id": "deviceName",
+                    "address": 310,
+                    "size": 5,
+                    "type": "string",
+                    "registerType": "holdingRegister",
+                    "description": "Device name",
+                    "access": "R"
+                }
+            ]
         }
     ],
     "registers": [
@@ -187,16 +237,6 @@
             "registerType": "inputRegister",
             "description": "Charging Time",
             "defaultValue": "0",
-            "access": "R"
-        },
-        {
-            "id": "firmwareVersion",
-            "address": 105,
-            "size": 2,
-            "type": "string",
-            "readSchedule": "init",
-            "registerType": "inputRegister",
-            "description": "Firmware version",
             "access": "R"
         },
         {
