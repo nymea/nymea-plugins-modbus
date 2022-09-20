@@ -22,8 +22,7 @@ manual.
 Once the wallbox is connected to the network, it can be added to nymea using the regular
 thing setup wizard.
 
-Depending on the usage, the DIP switches may be configured to all off, which puts the
-wallbox in the plug-and-charge mode, allowing the easiest integration within nymea. If
-there are security concerns, DIP switch 7 can be turned on to enable the lock mode. In
-this mode, the key lock needs to be turned for the wallbox to actually start charging.
-If the model is capable of RFID, DIP switch 10 can be used to enable/diable that feature.
+Depending on the usage, DIP switches may be configured: DIP switch 10 is required to
+be set for nymea to be able to operate the wallbox. DIP switch 7 may be enabled in 
+addition to enable the key lock. In this mode, the key lock needs to be unlocked before
+the wallbox will charge.

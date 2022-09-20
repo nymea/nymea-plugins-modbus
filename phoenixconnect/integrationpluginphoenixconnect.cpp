@@ -32,6 +32,7 @@
 #include "plugininfo.h"
 
 #include "phoenixmodbustcpconnection.h"
+#include "phoenixdiscovery.h"
 
 #include <network/networkdevicediscovery.h>
 #include <types/param.h>
@@ -51,42 +52,36 @@ IntegrationPluginPhoenixConnect::IntegrationPluginPhoenixConnect()
 void IntegrationPluginPhoenixConnect::discoverThings(ThingDiscoveryInfo *info)
 {
     if (!hardwareManager()->networkDeviceDiscovery()->available()) {
-        qCWarning(dcPhoenixContact()) << "Failed to discover network devices. The network device discovery is not available.";
+        qCWarning(dcPhoenixConnect()) << "Failed to discover network devices. The network device discovery is not available.";
         info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("The network cannot be searched."));
         return;
     }
 
-    qCDebug(dcPhoenixContact()) << "Starting network discovery...";
-    NetworkDeviceDiscoveryReply *discoveryReply = hardwareManager()->networkDeviceDiscovery()->discover();
-    connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, info, [=](){
-        ThingDescriptors descriptors;
-        qCDebug(dcPhoenixContact()) << "Discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "devices";
-        foreach (const NetworkDeviceInfo &networkDeviceInfo, discoveryReply->networkDeviceInfos()) {
-            qCDebug(dcPhoenixContact()) << networkDeviceInfo;
+    PhoenixDiscovery *discovery = new PhoenixDiscovery(hardwareManager()->networkDeviceDiscovery(), info);
+    connect(discovery, &PhoenixDiscovery::discoveryFinished, info, [=](){
+        foreach (const PhoenixDiscovery::Result &result, discovery->discoveryResults()) {
 
-            if (networkDeviceInfo.macAddressManufacturer() != "wallbe GmbH" && !networkDeviceInfo.macAddressManufacturer().contains("Phoenix", Qt::CaseSensitivity::CaseInsensitive)) {
-                continue;
+            QString name = supportedThings().findById(info->thingClassId()).displayName();
+            QString description = result.serialNumber;
+            ThingDescriptor descriptor(info->thingClassId(), name, description);
+            qCDebug(dcPhoenixConnect()) << "Discovered:" << descriptor.title() << descriptor.description();
+
+            ParamTypeId macParamTypeId = supportedThings().findById(info->thingClassId()).paramTypes().findByName("mac").id();
+            Things existingThings = myThings().filterByParam(macParamTypeId, result.networkDeviceInfo.macAddress());
+            if (existingThings.count() == 1) {
+                qCDebug(dcPhoenixConnect()) << "This wallbox already exists in the system:" << result.networkDeviceInfo;
+                descriptor.setThingId(existingThings.first()->id());
             }
 
-            ThingClass thingClass = supportedThings().findById(info->thingClassId());
-            ParamTypeId macAddressParamType = thingClass.paramTypes().findByName("mac").id();
-
-            ThingDescriptor descriptor(info->thingClassId(), thingClass.displayName(), networkDeviceInfo.address().toString());
-            descriptor.setParams({Param(macAddressParamType, networkDeviceInfo.macAddress())});
-
-            // Check if we already have set up this device
-            Thing *existingThing = myThings().findByParams(descriptor.params());
-            if (existingThing) {
-                qCDebug(dcPhoenixContact()) << "Found already existing" << thingClass.name() << "wallbox:" << existingThing->name() << networkDeviceInfo;
-                descriptor.setThingId(existingThing->id());
-            } else {
-                qCDebug(dcPhoenixContact()) << "Found new" << thingClass.name() << "wallbox";
-            }
-
+            ParamList params;
+            params << Param(macParamTypeId, result.networkDeviceInfo.macAddress());
+            descriptor.setParams(params);
             info->addThingDescriptor(descriptor);
         }
+
         info->finish(Thing::ThingErrorNoError);
     });
+    discovery->startDiscovery();
 }
 
 
@@ -95,10 +90,10 @@ void IntegrationPluginPhoenixConnect::setupThing(ThingSetupInfo *info)
     Thing *thing = info->thing();
 
     if (m_connections.contains(thing)) {
-        qCDebug(dcPhoenixContact()) << "Reconfiguring existing thing" << thing->name();
+        qCDebug(dcPhoenixConnect()) << "Reconfiguring existing thing" << thing->name();
         m_connections.take(thing)->deleteLater();
     } else {
-        qCDebug(dcPhoenixContact()) << "Setting up a new device:" << thing->params();
+        qCDebug(dcPhoenixConnect()) << "Setting up a new device:" << thing->params();
     }
 
 
@@ -119,8 +114,12 @@ void IntegrationPluginPhoenixConnect::setupThing(ThingSetupInfo *info)
         }
     });
 
+    connect(monitor, &NetworkDeviceMonitor::networkDeviceInfoChanged, this, [=](const NetworkDeviceInfo &networkDeviceInfo){
+        connection->setHostAddress(networkDeviceInfo.address());
+    });
+
     connect(connection, &PhoenixModbusTcpConnection::reachableChanged, thing, [connection, thing](bool reachable){
-        qCDebug(dcPhoenixContact()) << "Reachable state changed" << reachable;
+        qCDebug(dcPhoenixConnect()) << "Reachable state changed" << reachable;
         if (reachable) {
             connection->initialize();
         } else {
@@ -130,20 +129,24 @@ void IntegrationPluginPhoenixConnect::setupThing(ThingSetupInfo *info)
 
     // Only during setup
     connect(connection, &PhoenixModbusTcpConnection::initializationFinished, info, [this, thing, connection, monitor, info](bool success){
-        if (success) {
-            qCDebug(dcPhoenixContact()) << "Phoenix wallbox initialized. Firmware version:" << connection->firmwareVersion();
-            m_connections.insert(thing, connection);
-            m_monitors.insert(thing, monitor);
-            info->finish(Thing::ThingErrorNoError);
-        } else {
+        if (!success) {
+            qCDebug(dcPhoenixConnect()) << "Failed to init modbus connection to" << thing->name();
             hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(monitor);
             connection->deleteLater();
             info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Could not initialize the communication with the wallbox."));
+            return;
         }
+
+        m_connections.insert(thing, connection);
+        m_monitors.insert(thing, monitor);
+        info->finish(Thing::ThingErrorNoError);
     });
 
-    connect(connection, &PhoenixModbusTcpConnection::updateFinished, thing, [connection, thing](){
-        qCDebug(dcPhoenixContact()) << "Update finished:" << thing->name() << connection;
+    connect(connection, &PhoenixModbusTcpConnection::updateFinished, thing, [this, connection, thing](){
+        qCDebug(dcPhoenixConnect()) << "Update finished:" << thing->name() << connection;
+        if (thing->thingClassId() == scapoVisionThingClassId || thing->thingClassId() == wallbeProThingClassId || thing->thingClassId() == compleoProThingClassId) {
+            updatePhaseCount(thing);
+        }
     });
 
     connect(connection, &PhoenixModbusTcpConnection::initializationFinished, thing, [thing, connection](bool success){
@@ -154,66 +157,72 @@ void IntegrationPluginPhoenixConnect::setupThing(ThingSetupInfo *info)
     });
 
     // Handle property changed signals
-    connect(connection, &PhoenixModbusTcpConnection::cpStatusChanged, thing, [thing, connection](quint16 cpStatus){
-        qCDebug(dcPhoenixContact()) << "CP Signal state changed:" << (char)cpStatus;
+    connect(connection, &PhoenixModbusTcpConnection::cpStatusChanged, thing, [thing, this](quint16 cpStatus){
+        qCDebug(dcPhoenixConnect()) << "CP Signal state changed:" << (char)cpStatus;
         thing->setStateValue("pluggedIn", cpStatus >= 66);
-        thing->setStateValue("charging", cpStatus >= 67 && connection->chargingEnabled() > 0);
+        evaluateChargingState(thing);
     });
 
-    connect(connection, &PhoenixModbusTcpConnection::chargingEnabledChanged, this, [thing, connection](quint16 chargingEnabled){
-        qCDebug(dcPhoenixContact()) << "Charging enabled changed:" << chargingEnabled;
-        thing->setStateValue("power", chargingEnabled > 0);
-        thing->setStateValue("charging", chargingEnabled > 0 && connection->cpStatus() >= 67);
+    connect(connection, &PhoenixModbusTcpConnection::chargingEnabledChanged, this, [thing, this](quint16 chargingEnabled){
+        qCDebug(dcPhoenixConnect()) << "Charging enabled changed:" << chargingEnabled;
+        evaluateChargingState(thing);
+    });
+
+    connect(connection, &PhoenixModbusTcpConnection::chargingPausedChanged, this, [thing, this](quint16 chargingPaused){
+        qCDebug(dcPhoenixConnect()) << "Charging paused changed:" << chargingPaused;
+        thing->setStateValue("power", chargingPaused == 0);
+        evaluateChargingState(thing);
+    });
+
+    connect(connection, &PhoenixModbusTcpConnection::chargingAllowedChanged, this, [thing, this](quint16 chargingEnabled){
+        qCDebug(dcPhoenixConnect()) << "Charging enabled changed:" << chargingEnabled;
+        evaluateChargingState(thing);
     });
 
     connect(connection, &PhoenixModbusTcpConnection::chargingCurrentChanged, thing, [/*thing*/](quint16 chargingCurrent) {
-        qCDebug(dcPhoenixContact()) << "Charging current changed" << chargingCurrent / 10;
+        qCDebug(dcPhoenixConnect()) << "Charging current changed" << chargingCurrent / 10;
     });
 
     connect(connection, &PhoenixModbusTcpConnection::maximumChargingCurrentChanged, thing, [thing](quint16 maxChargingCurrent) {
-        qCDebug(dcPhoenixContact()) << "Max charging current changed" << maxChargingCurrent;
+        qCDebug(dcPhoenixConnect()) << "Max charging current changed" << maxChargingCurrent;
         thing->setStateValue("maxChargingCurrent", 1.0 * maxChargingCurrent / 10); // 100mA -> 1A
     });
 
     connect(connection, &PhoenixModbusTcpConnection::activePowerChanged, thing, [thing](quint32 activePower) {
-        qCDebug(dcPhoenixContact()) << "Active power consumption changed" << activePower;
+        qCDebug(dcPhoenixConnect()) << "Active power consumption changed" << activePower;
         if (thing->hasState("currentPower")) {
             thing->setStateValue("currentPower", activePower);
         }
     });
 
     connect(connection, &PhoenixModbusTcpConnection::totalEnergyChanged, thing, [thing](quint32 totalEnergy) {
-        qCDebug(dcPhoenixContact()) << "Total energy consumption changed" << totalEnergy;
+        qCDebug(dcPhoenixConnect()) << "Total energy consumption changed" << totalEnergy;
         if (thing->hasState("totalEnergyConsumed")) {
             thing->setStateValue("totalEnergyConsumed", 1.0 * totalEnergy / 1000);
         }
     });
 
     connect(connection, &PhoenixModbusTcpConnection::errorCodeChanged, thing, [](PhoenixModbusTcpConnection::ErrorCode errorCode){
-        qCDebug(dcPhoenixContact()) << "Error code changed:" << errorCode;
+        qCDebug(dcPhoenixConnect()) << "Error code changed:" << errorCode;
     });
-
-    connect(connection, &PhoenixModbusTcpConnection::voltageI1Changed, thing, [this, thing](){ updatePhaseCount(thing); });
-    connect(connection, &PhoenixModbusTcpConnection::voltageI2Changed, thing, [this, thing](){ updatePhaseCount(thing); });
-    connect(connection, &PhoenixModbusTcpConnection::voltageI3Changed, thing, [this, thing](){ updatePhaseCount(thing); });
 
     connection->connectDevice();
 }
 
 void IntegrationPluginPhoenixConnect::postSetupThing(Thing *thing)
 {
-    qCDebug(dcPhoenixContact()) << "Post setup thing" << thing->name();
+    qCDebug(dcPhoenixConnect()) << "Post setup thing" << thing->name();
 
     if (!m_pluginTimer) {
-        qCDebug(dcPhoenixContact()) << "Starting plugin timer";
+        qCDebug(dcPhoenixConnect()) << "Starting plugin timer";
         m_pluginTimer = hardwareManager()->pluginTimerManager()->registerTimer(10);
         connect(m_pluginTimer, &PluginTimer::timeout, this, [this] {
             foreach (Thing *thing, myThings()) {
-                if (m_monitors.value(thing)->reachable()) {
-                    qCDebug(dcPhoenixContact()) << "Updating" << thing->name();
+                if (thing->setupStatus() == Thing::ThingSetupStatusComplete && m_monitors.value(thing)->reachable()) {
+                    qCDebug(dcPhoenixConnect()) << "Updating" << thing->name() << m_monitors.value(thing)->macAddress() << m_monitors.value(thing)->networkDeviceInfo().address().toString();
                     m_connections.value(thing)->update();
                 } else {
-                    qCDebug(dcPhoenixContact()) << thing->name() << "isn't reachable. Not updating.";
+                    qCDebug(dcPhoenixConnect()) << thing->name() << "isn't reachable. Not updating.";
                 }
             }
         });
@@ -227,7 +236,7 @@ void IntegrationPluginPhoenixConnect::executeAction(ThingActionInfo *info)
 
     PhoenixModbusTcpConnection *connection = m_connections.value(thing);
     if (!connection) {
-        qCWarning(dcPhoenixContact()) << "Modbus connection not available";
+        qCWarning(dcPhoenixConnect()) << "Modbus connection not available";
         info->finish(Thing::ThingErrorHardwareFailure);
         return;
     }
@@ -235,13 +244,14 @@ void IntegrationPluginPhoenixConnect::executeAction(ThingActionInfo *info)
     ActionType actionType = thing->thingClass().actionTypes().findById(info->action().actionTypeId());
     if (actionType.name() == "power") {
         bool enabled = info->action().paramValue(actionType.id()).toBool();
-        QModbusReply *reply = connection->setChargingEnabled(enabled);
+
+        QModbusReply *reply = connection->setChargingPaused(!enabled);
         connect(reply, &QModbusReply::finished, info, [info, thing, reply, enabled](){
             if (reply->error() != QModbusDevice::NoError) {
-                qCWarning(dcPhoenixContact()) << "Error setting charging enabled" << reply->error() << reply->errorString();
+                qCWarning(dcPhoenixConnect()) << "Error" << (enabled ? "starting" : "stopping") << "charging:" << reply->error() << reply->errorString();
                 info->finish(Thing::ThingErrorHardwareFailure);
             } else {
-                qCDebug(dcPhoenixContact()) << "Charging enabled set with success";
+                qCDebug(dcPhoenixConnect()) << "Charging" << (enabled ? "started" : "stopped") << "with success";
                 thing->setStateValue("power", enabled);
                 info->finish(Thing::ThingErrorNoError);
             }
@@ -249,14 +259,14 @@ void IntegrationPluginPhoenixConnect::executeAction(ThingActionInfo *info)
 
     } else if (actionType.name() == "maxChargingCurrent") {
         uint16_t current = action.param(actionType.id()).value().toUInt();
-        qCDebug(dcPhoenixContact()) << "Charging power set to" << current;
+        qCDebug(dcPhoenixConnect()) << "Charging power set to" << current;
         QModbusReply *reply = connection->setMaximumChargingCurrent(current * 10);
         connect(reply, &QModbusReply::finished, info, [info, thing, reply, current](){
             if (reply->error() != QModbusDevice::NoError) {
-                qCWarning(dcPhoenixContact()) << "Error setting charging current" << reply->error() << reply->errorString();
+                qCWarning(dcPhoenixConnect()) << "Error setting charging current" << reply->error() << reply->errorString();
                 info->finish(Thing::ThingErrorHardwareFailure);
             } else {
-                qCDebug(dcPhoenixContact()) << "Max charging current set to" << current;
+                qCDebug(dcPhoenixConnect()) << "Max charging current set to" << current;
                 thing->setStateValue("maxChargingCurrent", current);
                 info->finish(Thing::ThingErrorNoError);
             }
@@ -269,7 +279,7 @@ void IntegrationPluginPhoenixConnect::executeAction(ThingActionInfo *info)
 
 void IntegrationPluginPhoenixConnect::thingRemoved(Thing *thing)
 {
-    qCDebug(dcPhoenixContact()) << "Removing device" << thing->name();
+    qCDebug(dcPhoenixConnect()) << "Removing device" << thing->name();
     if (m_connections.contains(thing)) {
         m_connections.take(thing)->deleteLater();
         hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
@@ -294,5 +304,12 @@ void IntegrationPluginPhoenixConnect::updatePhaseCount(Thing *thing)
     if (connection->voltageI3() > 100) {
         phaseCount++;
     }
-    thing->setStateValue("phaseCount", phaseCount);
+    thing->setStateValue("phaseCount", qMax(1, phaseCount));
+}
+
+void IntegrationPluginPhoenixConnect::evaluateChargingState(Thing *thing)
+{
+    PhoenixModbusTcpConnection *connection = m_connections.value(thing);
+    bool charging = connection->cpStatus() >= 67 && connection->chargingPaused() == 0 && connection->chargingAllowed() == 1;
+    thing->setStateValue("charging", charging);
 }

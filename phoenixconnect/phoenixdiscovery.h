@@ -28,44 +28,49 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef INTEGRATIONPLUGINPHOENIXCONNECT_H
-#define INTEGRATIONPLUGINPHOENIXCONNECT_H
-
-#include <integrations/integrationplugin.h>
-#include "extern-plugininfo.h"
+#ifndef AMTRONECUDISCOVERY_H
+#define AMTRONECUDISCOVERY_H
 
 #include <QObject>
-#include <QHostAddress>
+#include <QTimer>
 
-class PhoenixModbusTcpConnection;
-class NetworkDeviceMonitor;
-class PluginTimer;
+#include <network/networkdevicediscovery.h>
 
-class IntegrationPluginPhoenixConnect : public IntegrationPlugin
+#include "phoenixmodbustcpconnection.h"
+
+class PhoenixDiscovery : public QObject
 {
     Q_OBJECT
-
-    Q_PLUGIN_METADATA(IID "io.nymea.IntegrationPlugin" FILE "integrationpluginphoenixconnect.json")
-    Q_INTERFACES(IntegrationPlugin)
-
 public:
-    explicit IntegrationPluginPhoenixConnect();
-    void discoverThings(ThingDiscoveryInfo *info) override;
-    void setupThing(ThingSetupInfo *info) override;
-    void postSetupThing(Thing *thing) override;
-    void executeAction(ThingActionInfo *info) override;
-    void thingRemoved(Thing *thing) override;
+    explicit PhoenixDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, QObject *parent = nullptr);
+    struct Result {
+        QString firmwareVersion;
+        QString model;
+        QString serialNumber;
+        NetworkDeviceInfo networkDeviceInfo;
+    };
 
-private slots:
-    void updatePhaseCount(Thing *thing);
+    void startDiscovery();
+
+    QList<Result> discoveryResults() const;
+
+signals:
+    void discoveryFinished();
 
 private:
-    void evaluateChargingState(Thing *thing);
+    NetworkDeviceDiscovery *m_networkDeviceDiscovery = nullptr;
 
-private:
-    QHash<Thing*, PhoenixModbusTcpConnection*> m_connections;
-    QHash<Thing*, NetworkDeviceMonitor*> m_monitors;
-    PluginTimer *m_pluginTimer = nullptr;
+    QTimer m_gracePeriodTimer;
+    QDateTime m_startDateTime;
+
+    QList<PhoenixModbusTcpConnection *> m_connections;
+
+    QList<Result> m_discoveryResults;
+
+    void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
+    void cleanupConnection(PhoenixModbusTcpConnection *connection);
+
+    void finishDiscovery();
 };
 
-#endif // INTEGRATIONPLUGINPHOENIXCONNECT_H
+#endif // AMTRONECUDISCOVERY_H
