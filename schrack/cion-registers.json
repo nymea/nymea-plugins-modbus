@@ -161,6 +161,16 @@
             "unit": "A",
             "defaultValue": 13,
             "access": "R"
+        },
+        {
+            "id": "dipSwitches",
+            "address": 700,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "readSchedule": "init",
+            "description": "DIP switch states",
+            "access": "R"
         }
     ]
 }
