@@ -45,15 +45,11 @@ void KostalDiscovery::startDiscovery()
     qCInfo(dcKostal()) << "Discovery: Start searching for Kostal inverters in the network...";
     NetworkDeviceDiscoveryReply *discoveryReply = m_networkDeviceDiscovery->discover();
 
-    // Check any already discovered infos..
-    // FIXME: this is not required any more once each discovery request receives it's own object getting the added signal for every info
-    foreach (const NetworkDeviceInfo &networkDeviceInfo, discoveryReply->networkDeviceInfos())
-        checkNetworkDevice(networkDeviceInfo);
-
     // Imedialty check any new device gets discovered
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::networkDeviceInfoAdded, this, &KostalDiscovery::checkNetworkDevice);
 
     // Check what might be left on finished
+        connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
         qCDebug(dcKostal()) << "Discovery: Network discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "network devices";
         m_networkDeviceInfos = discoveryReply->networkDeviceInfos();
