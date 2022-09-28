@@ -45,6 +45,7 @@ void IntegrationPluginStiebelEltron::discoverThings(ThingDiscoveryInfo *info) {
     }
 
     NetworkDeviceDiscoveryReply *discoveryReply = hardwareManager()->networkDeviceDiscovery()->discover();
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=]() {
         foreach (const NetworkDeviceInfo &networkDeviceInfo, discoveryReply->networkDeviceInfos()) {
             qCDebug(dcStiebelEltron()) << "Found" << networkDeviceInfo;

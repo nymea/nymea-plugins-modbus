@@ -45,27 +45,9 @@ void HuaweiFusionSolarDiscovery::startDiscovery()
 {
     qCInfo(dcHuawei()) << "Discovery: Start searching for Huawei FusionSolar SmartDongle in the network...";
     NetworkDeviceDiscoveryReply *discoveryReply = m_networkDeviceDiscovery->discover();
-
-    // Check any already discovered infos..
-    foreach (const NetworkDeviceInfo &networkDeviceInfo, discoveryReply->networkDeviceInfos()) {
-        checkNetworkDevice(networkDeviceInfo);
-    }
-
-    // Immedialty check any new device gets discovered
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::networkDeviceInfoAdded, this, &HuaweiFusionSolarDiscovery::checkNetworkDevice);
-
-    // Check what might be left on finished
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
-        qCDebug(dcHuawei()) << "Discovery: Network discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "network devices";
-        m_networkDeviceInfos = discoveryReply->networkDeviceInfos();
-        qCDebug(dcHuawei()) << "Discovery: Network discovery finished. Start finishing discovery...";
-        // Send a report request to nework device info not sent already...
-        foreach (const NetworkDeviceInfo &networkDeviceInfo, m_networkDeviceInfos) {
-            if (!m_verifiedNetworkDeviceInfos.contains(networkDeviceInfo)) {
-                checkNetworkDevice(networkDeviceInfo);
-            }
-        }
-
         // Finish with some delay so the last added network device information objects still can be checked.
         QTimer::singleShot(3000, this, [this](){
             qCDebug(dcHuawei()) << "Discovery: Grace period timer triggered.";
@@ -81,17 +63,12 @@ NetworkDeviceInfos HuaweiFusionSolarDiscovery::discoveryResults() const
 
 void HuaweiFusionSolarDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo)
 {
-    if (m_verifiedNetworkDeviceInfos.contains(networkDeviceInfo))
-        return;
-
     // The dongle must have a huawei registered mac address
     if (!networkDeviceInfo.macAddressManufacturer().toLower().contains("huawei"))
         return;
 
     HuaweiFusionSolar *connection = new HuaweiFusionSolar(networkDeviceInfo.address(), m_port, m_modbusAddress, this);
     m_connections.append(connection);
-    m_verifiedNetworkDeviceInfos.append(networkDeviceInfo);
-
     connect(connection, &HuaweiFusionSolar::reachableChanged, this, [=](bool reachable){
         if (!reachable) {
             // Disconnected ... done with this connection

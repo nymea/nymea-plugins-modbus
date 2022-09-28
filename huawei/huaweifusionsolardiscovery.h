@@ -56,12 +56,7 @@ private:
     quint16 m_modbusAddress;
 
     QDateTime m_startDateTime;
-
-    NetworkDeviceInfos m_networkDeviceInfos;
-    NetworkDeviceInfos m_verifiedNetworkDeviceInfos;
-
     QList<HuaweiFusionSolar *> m_connections;
-
     NetworkDeviceInfos m_discoveryResults;
 
     void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
