@@ -454,8 +454,8 @@ void IntegrationPluginKostal::setupKostalConnection(ThingSetupInfo *info)
 
                 meterThing->setStateValue(kostalMeterFrequencyStateTypeId, kostalConnection->gridFrequencyPowerMeter());
 
-                // TODO: Not sure where to get the exported energy
                 meterThing->setStateValue(kostalMeterTotalEnergyConsumedStateTypeId, kostalConnection->totalHomeConsumptionFromGrid() / 1000.0); // kWh
+                meterThing->setStateValue(kostalMeterTotalEnergyProducedStateTypeId, kostalConnection->totalEnergyAcToGrid() / 1000.0); // kWh
 
                 // Set the power as last value
                 meterThing->setStateValue(kostalMeterCurrentPowerStateTypeId, kostalConnection->powerMeterTotalActivePower());
