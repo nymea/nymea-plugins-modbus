@@ -345,10 +345,12 @@ void IntegrationPluginKostal::setupKostalConnection(ThingSetupInfo *info)
         if (!thing->setupComplete())
             return;
 
-        if (success) {
-            thing->setStateValue("connected", true);
-        } else {
-            thing->setStateValue("connected", false);
+        thing->setStateValue("connected", success);
+        foreach (Thing *childThing, myThings().filterByParentId(thing->id())) {
+            childThing->setStateValue("connected", success);
+        }
+
+        if (!success) {
             // Try once to reconnect the device
             kostalConnection->reconnectDevice();
         }
