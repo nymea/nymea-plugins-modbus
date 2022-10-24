@@ -275,6 +275,17 @@
             "access": "RW"
         },
         {
+            "id": "chargingPaused",
+            "address": 468,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "coils",
+            "description": "Charging paused",
+            "defaultValue": "0",
+            "access": "RW"
+        },
+        {
             "id": "maximumChargingCurrent",
             "address": 528,
             "size": 1,

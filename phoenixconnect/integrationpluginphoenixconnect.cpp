@@ -240,13 +240,29 @@ void IntegrationPluginPhoenixConnect::executeAction(ThingActionInfo *info)
     ActionType actionType = thing->thingClass().actionTypes().findById(info->action().actionTypeId());
     if (actionType.name() == "power") {
         bool enabled = info->action().paramValue(actionType.id()).toBool();
-        QModbusReply *reply = connection->setChargingEnabled(enabled);
-        connect(reply, &QModbusReply::finished, info, [info, thing, reply, enabled](){
-            if (reply->error() != QModbusDevice::NoError) {
-                qCWarning(dcPhoenixConnect()) << "Error setting charging enabled" << reply->error() << reply->errorString();
-                info->finish(Thing::ThingErrorHardwareFailure);
+        // Depending on the wallbox configuration we may or may not be able to control the charging enabled register.
+        // It may be handled by an RFID reader, a Key, or via OCCP and we can't control it.
+        // If no other restriction is set, we actively need to enable this in order to actually start charging.
+        QModbusReply *enabledReply = connection->setChargingEnabled(enabled);
+        connect(enabledReply, &QModbusReply::finished, info, [enabledReply](){
+            if (enabledReply->error() != QModbusDevice::NoError) {
+                qCWarning(dcPhoenixConnect()) << "Error setting charging enabled" << enabledReply->error() << enabledReply->errorString();
+//                info->finish(Thing::ThingErrorHardwareFailure);
             } else {
                 qCDebug(dcPhoenixConnect()) << "Charging enabled set with success";
+//                thing->setStateValue("power", enabled);
+//                info->finish(Thing::ThingErrorNoError);
+            }
+        });
+
+        // If we cannot control the charging enabled, we may still start/stop the charging with charging paused.
+        QModbusReply *pausedReply = connection->setChargingPaused(!enabled);
+        connect(pausedReply, &QModbusReply::finished, info, [info, thing, pausedReply, enabled](){
+            if (pausedReply->error() != QModbusDevice::NoError) {
+                qCWarning(dcPhoenixConnect()) << "Error setting charging paused" << pausedReply->error() << pausedReply->errorString();
+                info->finish(Thing::ThingErrorHardwareFailure);
+            } else {
+                qCDebug(dcPhoenixConnect()) << "Charging paused set with success";
                 thing->setStateValue("power", enabled);
                 info->finish(Thing::ThingErrorNoError);
             }
