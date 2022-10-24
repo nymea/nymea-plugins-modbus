@@ -256,7 +256,18 @@ void IntegrationPluginPhoenixConnect::executeAction(ThingActionInfo *info)
             reply = connection->setChargingPaused(!enabled);
         } else {
             qCDebug(dcPhoenixConnect()) << "Plug and charge is enabled, or RFID reader disabled. Using charging enabled register.";
-            reply = connection->setChargingEnabled(enabled);
+            if (enabled && !connection->chargingEnabled()) {
+                QModbusReply *enabledReply = connection->setChargingEnabled(enabled);
+                connect(enabledReply, &QModbusReply::finished, info, [enabledReply](){
+                    if (enabledReply->error() != QModbusDevice::NoError) {
+                        qCWarning(dcPhoenixConnect()) << "Error setting charging enabled:" << enabledReply->error() << enabledReply->errorString();
+                    } else {
+                        qCDebug(dcPhoenixConnect()) << "Charging enabled with success";
+                    }
+                });
+            }
+
+            reply = connection->setChargingPaused(!enabled);
         }
 
         connect(reply, &QModbusReply::finished, info, [info, thing, reply, enabled](){
