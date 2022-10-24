@@ -137,12 +137,12 @@ void IntegrationPluginPhoenixConnect::setupThing(ThingSetupInfo *info)
             return;
         }
 
-        qCDebug(dcPhoenixConnect()) << "Phoenix wallbox initialized. Firmware version:" << connection->firmwareVersion() << "DIP switches:" << QString("0x%1").arg(connection->dipSwitches(), 16, 16, QLatin1Char('0'));
-        if ((connection->dipSwitches() & 0x200) == 0) {
-            qCCritical(dcPhoenixConnect()) << "DIP switch 10 is not enabled. Can't take control over wallbox" << thing->name();
-            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("DIP switch 10 is not enabled in the wallbox. Please enable it, restart the wallbox and try again."));
-            return;
-        }
+//        qCDebug(dcPhoenixConnect()) << "Phoenix wallbox initialized. Firmware version:" << connection->firmwareVersion() << "DIP switches:" << QString("0x%1").arg(connection->dipSwitches(), 16, 16, QLatin1Char('0'));
+//        if ((connection->dipSwitches() & 0x200) == 0) {
+//            qCCritical(dcPhoenixConnect()) << "DIP switch 10 is not enabled. Can't take control over wallbox" << thing->name();
+//            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("DIP switch 10 is not enabled in the wallbox. Please enable it, restart the wallbox and try again."));
+//            return;
+//        }
 
         m_connections.insert(thing, connection);
         m_monitors.insert(thing, monitor);
@@ -170,9 +170,14 @@ void IntegrationPluginPhoenixConnect::setupThing(ThingSetupInfo *info)
         thing->setStateValue("charging", cpStatus >= 67);
     });
 
-    connect(connection, &PhoenixModbusTcpConnection::chargingEnabledChanged, this, [thing](quint16 chargingEnabled){
+    connect(connection, &PhoenixModbusTcpConnection::chargingEnabledChanged, this, [](quint16 chargingEnabled){
         qCDebug(dcPhoenixConnect()) << "Charging enabled changed:" << chargingEnabled;
-        thing->setStateValue("power", chargingEnabled > 0);
+//        thing->setStateValue("power", chargingEnabled > 0);
+    });
+
+    connect(connection, &PhoenixModbusTcpConnection::chargingPausedChanged, this, [thing](quint16 chargingPaused){
+        qCDebug(dcPhoenixConnect()) << "Charging paused changed:" << chargingPaused;
+        thing->setStateValue("power", chargingPaused == 0);
     });
 
     connect(connection, &PhoenixModbusTcpConnection::chargingCurrentChanged, thing, [/*thing*/](quint16 chargingCurrent) {
@@ -240,29 +245,26 @@ void IntegrationPluginPhoenixConnect::executeAction(ThingActionInfo *info)
     ActionType actionType = thing->thingClass().actionTypes().findById(info->action().actionTypeId());
     if (actionType.name() == "power") {
         bool enabled = info->action().paramValue(actionType.id()).toBool();
-        // Depending on the wallbox configuration we may or may not be able to control the charging enabled register.
-        // It may be handled by an RFID reader, a Key, or via OCCP and we can't control it.
-        // If no other restriction is set, we actively need to enable this in order to actually start charging.
-        QModbusReply *enabledReply = connection->setChargingEnabled(enabled);
-        connect(enabledReply, &QModbusReply::finished, info, [enabledReply](){
-            if (enabledReply->error() != QModbusDevice::NoError) {
-                qCWarning(dcPhoenixConnect()) << "Error setting charging enabled" << enabledReply->error() << enabledReply->errorString();
-//                info->finish(Thing::ThingErrorHardwareFailure);
-            } else {
-                qCDebug(dcPhoenixConnect()) << "Charging enabled set with success";
-//                thing->setStateValue("power", enabled);
-//                info->finish(Thing::ThingErrorNoError);
-            }
-        });
 
-        // If we cannot control the charging enabled, we may still start/stop the charging with charging paused.
-        QModbusReply *pausedReply = connection->setChargingPaused(!enabled);
-        connect(pausedReply, &QModbusReply::finished, info, [info, thing, pausedReply, enabled](){
-            if (pausedReply->error() != QModbusDevice::NoError) {
-                qCWarning(dcPhoenixConnect()) << "Error setting charging paused" << pausedReply->error() << pausedReply->errorString();
+        QModbusReply *reply = nullptr;
+        if (connection->dipSwitches() & 64) {
+            qCDebug(dcPhoenixConnect()) << "DIP switch 7 (key lock) enabled at wallbox. Using play/pause register.";
+            reply = connection->setChargingPaused(!enabled);
+
+        } else if ((connection->dipSwitches() & 512) && connection->rfidEnabled()) {
+            qCDebug(dcPhoenixConnect()) << "DIP switch 10 and RFID is enabled at wallbox. Using play/pause register.";
+            reply = connection->setChargingPaused(!enabled);
+        } else {
+            qCDebug(dcPhoenixConnect()) << "Plug and charge is enabled, or RFID reader disabled. Using charging enabled register.";
+            reply = connection->setChargingEnabled(enabled);
+        }
+
+        connect(reply, &QModbusReply::finished, info, [info, thing, reply, enabled](){
+            if (reply->error() != QModbusDevice::NoError) {
+                qCWarning(dcPhoenixConnect()) << "Error" << (enabled ? "starting" : "stopping") << "charging:" << reply->error() << reply->errorString();
                 info->finish(Thing::ThingErrorHardwareFailure);
             } else {
-                qCDebug(dcPhoenixConnect()) << "Charging paused set with success";
+                qCDebug(dcPhoenixConnect()) << "Charging" << (enabled ? "started" : "stopped") << "with success";
                 thing->setStateValue("power", enabled);
                 info->finish(Thing::ThingErrorNoError);
             }
