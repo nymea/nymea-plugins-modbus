@@ -12,6 +12,7 @@ PLUGIN_DIRS = \
     idm                     \
     inepro                  \
     kostal                  \
+    mennekes                \
     modbuscommander         \
     mtec                    \
     mypv                    \

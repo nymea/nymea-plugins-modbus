@@ -1,0 +1,2 @@
+usr/lib/@DEB_HOST_MULTIARCH@/nymea/plugins/libnymea_integrationpluginmennekes.so
+mennekes/translations/*qm usr/share/nymea/translations/
