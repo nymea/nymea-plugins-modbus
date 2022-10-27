@@ -74,6 +74,9 @@ int main(int argc, char *argv[])
     lengthOption.setDefaultValue("1");
     parser.addOption(lengthOption);
 
+    QCommandLineOption writeOption(QStringList() << "w" << "write", QString("The data to be written to the given register."), "data");
+    parser.addOption(writeOption);
+
     QCommandLineOption debugOption(QStringList() << "d" << "debug", QString("Print more information."));
     parser.addOption(debugOption);
 
@@ -121,6 +124,12 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    QByteArray writeData;
+    if (parser.isSet(writeOption)) {
+        writeData = parser.value(writeOption).toLocal8Bit();
+        qDebug() << "Write data:" << writeData;
+    }
+
     // TCP connection
     QHostAddress address = QHostAddress(parser.value(addressOption));
     if (address.isNull()) {
@@ -142,40 +151,82 @@ int main(int argc, char *argv[])
         if (state == QModbusDevice::ConnectedState) {
             qDebug() << "Connected successfully to" << QString("%1:%2").arg(address.toString()).arg(port);
 
-            qDebug() << "Start reading from modbus server address" << modbusServerAddress << registerTypeString << "register:" << registerAddress << "Length:" << length;
-            QModbusDataUnit request = QModbusDataUnit(registerType, registerAddress, length);
-            QModbusReply *reply = client->sendReadRequest(request, modbusServerAddress);
-            if (!reply) {
-                qCritical() << "Failed to read register" << client->errorString();
-                exit(EXIT_FAILURE);
-            }
-
-            if (reply->isFinished()) {
-                reply->deleteLater(); // broadcast replies return immediately
-                qCritical() << "Reply finished immediatly. Something might have gone wrong:" << reply->errorString();
-                exit(EXIT_FAILURE);
-            }
-
-            QObject::connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
-            QObject::connect(reply, &QModbusReply::finished, client, [=]() {
-                if (reply->error() != QModbusDevice::NoError) {
-                    qCritical() << "Reply finished with error:" << reply->errorString();
+            if (writeData.isEmpty()) {
+                qDebug() << "Reading from modbus server address" << modbusServerAddress << registerTypeString << "register:" << registerAddress << "Length:" << length;
+                QModbusDataUnit request = QModbusDataUnit(registerType, registerAddress, length);
+                QModbusReply *reply = client->sendReadRequest(request, modbusServerAddress);
+                if (!reply) {
+                    qCritical() << "Failed to read register" << client->errorString();
                     exit(EXIT_FAILURE);
                 }
 
-                const QModbusDataUnit unit = reply->result();
-                for (uint i = 0; i < unit.valueCount(); i++) {
-                    quint16 registerValue = unit.values().at(i);
-                    quint16 registerNumber = unit.startAddress() + i;
-                    qInfo() << "-->" << registerNumber << ":" << QString("0x%1").arg(registerValue, 4, 16, QLatin1Char('0')) << registerValue;
+                if (reply->isFinished()) {
+                    reply->deleteLater(); // broadcast replies return immediately
+                    qCritical() << "Reply finished immediatly. Something might have gone wrong:" << reply->errorString();
+                    exit(EXIT_FAILURE);
                 }
 
-                exit(EXIT_SUCCESS);
-            });
+                QObject::connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+                QObject::connect(reply, &QModbusReply::finished, client, [=]() {
+                    if (reply->error() != QModbusDevice::NoError) {
+                        qCritical() << "Reply finished with error:" << reply->errorString();
+                        exit(EXIT_FAILURE);
+                    }
 
-            QObject::connect(reply, &QModbusReply::errorOccurred, client, [=] (QModbusDevice::Error error){
-                qCritical() << "Modbus reply error occurred:" << error << reply->errorString();
-            });
+                    const QModbusDataUnit unit = reply->result();
+                    for (uint i = 0; i < unit.valueCount(); i++) {
+                        quint16 registerValue = unit.values().at(i);
+                        quint16 registerNumber = unit.startAddress() + i;
+                        qInfo() << "-->" << registerNumber << ":" << QString("0x%1").arg(registerValue, 4, 16, QLatin1Char('0')) << registerValue;
+                    }
+
+                    exit(EXIT_SUCCESS);
+                });
+
+                QObject::connect(reply, &QModbusReply::errorOccurred, client, [=] (QModbusDevice::Error error){
+                    qCritical() << "Modbus reply error occurred:" << error << reply->errorString();
+                });
+            } else {
+                QModbusDataUnit request = QModbusDataUnit(registerType, registerAddress, length);
+                QDataStream stream(writeData);
+                qDebug() << "Reading write data" << writeData;
+                quint16 data = writeData.toUInt();
+                request.setValues({data});
+
+                qDebug() << "Writing" << request.values();
+                QModbusReply *reply = client->sendWriteRequest(request, modbusServerAddress);
+                if (!reply) {
+                    qCritical() << "Failed to read register" << client->errorString();
+                    exit(EXIT_FAILURE);
+                }
+
+                if (reply->isFinished()) {
+                    reply->deleteLater(); // broadcast replies return immediately
+                    qCritical() << "Reply finished immediatly. Something might have gone wrong:" << reply->errorString();
+                    exit(EXIT_FAILURE);
+                }
+
+                QObject::connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+                QObject::connect(reply, &QModbusReply::finished, client, [=]() {
+                    if (reply->error() != QModbusDevice::NoError) {
+                        qCritical() << "Reply finished with error:" << reply->errorString();
+                        exit(EXIT_FAILURE);
+                    }
+
+                    const QModbusDataUnit unit = reply->result();
+                    for (uint i = 0; i < unit.valueCount(); i++) {
+                        quint16 registerValue = unit.values().at(i);
+                        quint16 registerNumber = unit.startAddress() + i;
+                        qInfo() << "-->" << registerNumber << ":" << QString("0x%1").arg(registerValue, 4, 16, QLatin1Char('0')) << registerValue;
+                    }
+
+                    exit(EXIT_SUCCESS);
+                });
+
+                QObject::connect(reply, &QModbusReply::errorOccurred, client, [=] (QModbusDevice::Error error){
+                    qCritical() << "Modbus reply error occurred:" << error << reply->errorString();
+                });
+            }
         }
     });
 
