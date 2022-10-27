@@ -1,3 +1,20 @@
+nymea-plugins-modbus (1.5.0) jammy; urgency=medium
+
+  [ Michael Zanetti ]
+  * New plugin: Mennekes HCC3 and ECU wallboxes
+  * Add host address to error debug prints
+  * Schrack: Only complete the setup if reading a register actually
+    works
+  * PhoenixConnect: Improve plugin stability
+
+  [ Simon Stürz ]
+  * Clean up network device discovery replies due to mechanism update
+
+  [ Michael Zanetti ]
+  * Add a parameter to write registers to the cli
+
+ -- jenkins <developer@nymea.io>  Thu, 27 Oct 2022 12:03:49 +0200
+
 nymea-plugins-modbus (1.4.1) jammy; urgency=medium
 
   [ Simon Stürz ]
