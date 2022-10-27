@@ -96,6 +96,25 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
 
     CionModbusRtuConnection *cionConnection = new CionModbusRtuConnection(hardwareManager()->modbusRtuResource()->getModbusRtuMaster(uuid), address, this);
 
+    connect(cionConnection, &CionModbusRtuConnection::reachableChanged, thing, [cionConnection, thing](bool reachable){
+        qCDebug(dcSchrack()) << "Reachable state changed" << reachable;
+        if (reachable) {
+            cionConnection->initialize();
+        } else {
+            thing->setStateValue("connected", false);
+        }
+    });
+
+    connect(cionConnection, &CionModbusRtuConnection::initializationFinished, info, [info, cionConnection](bool success){
+        qCDebug(dcSchrack()) << "Initialisation finsihed" << success;
+        if (success) {
+            qCDebug(dcSchrack) << "DIP switche states:" << cionConnection->dipSwitches();
+            info->finish(Thing::ThingErrorNoError);
+        } else {
+            info->finish(Thing::ThingErrorHardwareNotAvailable);
+        }
+    });
+
     connect(cionConnection, &CionModbusRtuConnection::updateFinished, thing, [cionConnection, thing](){
         qCDebug(dcSchrack()) << "Update finished:" << thing->name() << cionConnection;
     });
@@ -183,7 +202,6 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
     thing->setStateMinMaxValues(cionMaxChargingCurrentStateTypeId, 6, 32);
 
     m_cionConnections.insert(thing, cionConnection);
-    info->finish(Thing::ThingErrorNoError);
 }
 
 void IntegrationPluginSchrack::postSetupThing(Thing *thing)
