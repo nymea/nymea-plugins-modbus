@@ -90,6 +90,7 @@ void IntegrationPluginWebasto::discoverThings(ThingDiscoveryInfo *info)
 
         qCDebug(dcWebasto()) << "Discover things";
         NetworkDeviceDiscoveryReply *discoveryReply = hardwareManager()->networkDeviceDiscovery()->discover();
+        connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
         connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
             ThingDescriptors descriptors;
             qCDebug(dcWebasto()) << "Discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "devices";
