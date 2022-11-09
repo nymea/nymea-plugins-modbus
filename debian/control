@@ -177,6 +177,16 @@ Description: nymea integration plugin for M-TEC heat pumps
  This package contains the nymea integration plugin for M-TEC heat pumps.
 
 
+Package: nymea-plugin-schneider-wallbox
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for Schneider EVlink wallboxes
+ This package contains the nymea integration plugin for wallboxes made
+ by Schneider.
+
+
 Package: nymea-plugin-schrack
 Architecture: any
 Depends: ${shlibs:Depends},

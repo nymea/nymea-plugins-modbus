@@ -1,0 +1,206 @@
+{
+    "displayName": "Schneider Electric",
+    "name": "SchneiderElectric",
+    "id": "69d73506-4287-478a-b26e-038f9fe1efcd",
+    "vendors": [
+        {
+            "displayName": "Schneider Electric",
+            "name": "schneiderElectric",
+            "id": "75bc5b91-0983-4db3-a829-04fe04e63531",
+            "thingClasses": [
+                {
+                    "id": "1d8bb49d-9820-4c4d-89d8-8c06889f29c6",
+                    "displayName": "Schneider EVlink Wallbox G4 Smart",
+                    "name": "schneiderEVlink",
+                    "createMethods": ["discovery", "user"],
+                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "e2084ec4-12b2-4403-80dc-26fc4521dedd",
+                            "displayName": "MAC address",
+                            "name": "mac",
+                            "type": "QString",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "aa0115d9-9c1e-4c00-978f-0386460ee6c0",
+                            "name": "port",
+                            "displayName": "Port",
+                            "type": "int",
+                            "defaultValue": 502
+                        },
+                        {
+                            "id": "a149ef19-a17a-4934-b20b-6daeb668f678",
+                            "name": "slaveId",
+                            "displayName": "Modbus slave ID",
+                            "type": "int",
+                            "defaultValue": 255
+                        },
+                        {
+                            "id": "f30c91ba-1b0e-4eed-afb3-52ddccffc4c3",
+                            "name": "minChargeCurrent",
+                            "displayName": "Minimum charge current",
+                            "type": "int",
+                            "minValue": 6,
+                            "maxValue": 32,
+                            "defaultValue": 6
+                        },
+                        {
+                            "id": "131aa124-247f-4fe8-8e84-0e93d4086c46",
+                            "name": "maxChargeCurrent",
+                            "displayName": "Maximum charge current",
+                            "type": "int",
+                            "minValue": 6,
+                            "maxValue": 32,
+                            "defaultValue": 16
+                        }
+                    ],
+                    "stateTypes":[
+                        {
+                            "id": "515231ed-bc7e-4799-b34f-a09fbe5163aa",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "0663400f-b446-4a71-8f48-6596f02a8731",
+                            "name": "power",
+                            "displayName": "Charging enabled",
+                            "displayNameEvent": "Charging status changed",
+                            "displayNameAction": "Set charging enabled",
+                            "type": "bool",
+                            "writable": true,
+                            "defaultValue": false,
+                            "suggestLogging": true,
+                            "cached": false
+                        },
+                        {
+                            "id": "8c3084f1-d41f-4448-97ef-d75ff4467c8f",
+                            "name": "chargeTime",
+                            "displayName": "Charging Time",
+                            "unit": "Minutes",
+                            "type": "uint",
+                            "defaultValue": 0,
+                            "displayNameEvent": "Charging time changed",
+                            "cached": false
+                        },
+                        {
+                            "id": "e709e133-bf84-4160-8b50-5998e3bd84a4",
+                            "name": "cpwState",
+                            "displayName": "CPW State",
+                            "type": "QString",
+                            "possibleValues": [
+                                "EVSE not available",
+                                "EVSE available",
+                                "Plug detected",
+                                "EV connected",
+                                "EV connected 2",
+                                "EV connected ventilation required",
+                                "EVSE ready",
+                                "EV ready",
+                                "Charging",
+                                "EV ready ventilation required",
+                                "Charging ventilation required",
+                                "Stop charging",
+                                "Alarm",
+                                "Short circuit",
+                                "Digital com by EVSE state"
+                            ],
+                            "defaultValue": "EVSE not available",
+                            "displayNameEvent": "CPW state changed",
+                            "cached": false
+                        },
+                        {
+                            "id": "336da4ba-e449-418e-aee9-2c9f57d55632",
+                            "name": "pluggedIn",
+                            "displayName": "Car plugged in",
+                            "displayNameEvent": "Car plugged/unplugged",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "0c78af0d-4775-40d8-be25-a6754ceed0f4",
+                            "name": "charging",
+                            "displayName": "Charging",
+                            "displayNameEvent": "Charging changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "f9c85ef1-d44b-4169-9cd4-96ba91f1d288",
+                            "name": "maxChargingCurrent",
+                            "displayName": "Maximal charging current",
+                            "displayNameEvent": "Maximal charging current changed",
+                            "displayNameAction": "Set maximal charging current",
+                            "type": "uint",
+                            "unit": "Ampere",
+                            "defaultValue": 6,
+                            "minValue": 6,
+                            "maxValue": 32,
+                            "writable": true,
+                            "suggestLogging": true,
+                            "cached": false
+                        },
+                        {
+                            "id": "e7061cb3-27f3-4981-8672-2e4f16e87a43",
+                            "name": "totalEnergyConsumed",
+                            "displayName": "Total energy consumed",
+                            "displayNameEvent": "Total energy consumption changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0,
+                            "suggestLogging": true,
+                            "cached": false
+                        },
+                        {
+                            "id": "fc0e99b7-8d6e-474b-bd41-b7b690e45a27",
+                            "name": "currentPower",
+                            "displayName": "Power consumption",
+                            "displayNameEvent": "Power consumtion changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0.00,
+                            "suggestLogging": true,
+                            "cached": false
+                        },
+                        {
+                            "id": "6495cc9f-b0d0-475d-bfec-81f0ca5f5051",
+                            "name": "phaseCount",
+                            "displayName": "Phase count",
+                            "displayNameEvent": "Phase count changed",
+                            "type": "uint",
+                            "minValue": 1,
+                            "maxValue": 3,
+                            "defaultValue": 1,
+                            "suggestLogging": true,
+                            "cached": false
+                        },
+                        {
+                            "id": "30e02884-8863-40c8-90e3-de8b41d181c7",
+                            "name": "errorMessage",
+                            "displayName": "Error message",
+                            "displayNameEvent": "Error state changed",
+                            "type": "QString",
+                            "defaultValue": "No error",
+                            "cached": false
+                        },
+                        {
+                            "id": "6ffa9e78-e0ed-4359-bf92-470ba54495fb",
+                            "name": "lastChargeStatus",
+                            "displayName": "Last charge status",
+                            "displayNameEvent": "Last charge status changed",
+                            "type": "QString",
+                            "defaultValue": "OK (ended by EV in mode 3)",
+                            "cached": false
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

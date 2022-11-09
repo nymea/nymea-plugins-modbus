@@ -1,0 +1,498 @@
+{
+    "className": "SchneiderWallbox",
+    "protocol": "TCP",
+    "endianness": "BigEndian",
+    "errorLimitUntilNotReachable": 20,
+    "checkReachableRegister": "cpwState",
+    "enums": [
+        {
+            "name": "CPWState",
+            "values": [
+                {
+                    "key": "EvseNotAvailable",
+                    "value": 0
+                },
+                {
+                    "key": "EvseAvailable",
+                    "value": 1
+                },
+                {
+                    "key": "PlugDetected",
+                    "value": 2
+                },
+                {
+                    "key": "EvConnected",
+                    "value": 4
+                },
+                {
+                    "key": "EvConnected2",
+                    "value": 5
+                },
+                {
+                    "key": "EvConnectedVentilationRequired",
+                    "value": 6
+                },
+                {
+                    "key": "EvseReady",
+                    "value": 7
+                },
+                {
+                    "key": "EvReady",
+                    "value": 8
+                },
+                {
+                    "key": "Charging",
+                    "value": 9
+                },
+                {
+                    "key": "EvReadyVentilationRequired",
+                    "value": 10
+                },
+                {
+                    "key": "ChargingVentilationRequired",
+                    "value": 11
+                },
+                {
+                    "key": "StopCharging",
+                    "value": 12
+                },
+                {
+                    "key": "Alarm",
+                    "value": 13
+                },
+                {
+                    "key": "Shortcut",
+                    "value": 14
+                },
+                {
+                    "key": "DigitalComByEvseState",
+                    "value": 15
+                }
+            ]
+        },
+        {
+            "name": "EVCSEError",
+            "values": [
+                {
+                    "key": "LostCommunicationWithRfidReader",
+                    "value": 0
+                },
+                {
+                    "key": "LostCommunicationWithDisplay",
+                    "value": 1
+                },
+                {
+                    "key": "CannotConnectToMasterBoard",
+                    "value": 2
+                },
+                {
+                    "key": "IncorrectPlugLockState",
+                    "value": 3
+                },
+                {
+                    "key": "IncorrectContactorState",
+                    "value": 4
+                },
+                {
+                    "key": "IncorrectSurgeArrestorState",
+                    "value": 5
+                },
+                {
+                    "key": "IncorrectAntiIntrusionState",
+                    "value": 6
+                },
+                {
+                    "key": "CannotConnectToUsDaughterBoard",
+                    "value": 7
+                },
+                {
+                    "key": "ConfigurationFileMissing",
+                    "value": 8
+                },
+                {
+                    "key": "IncorrectShutterLockState",
+                    "value": 9
+                },
+                {
+                    "key": "IncorrectCircuitBreakerState",
+                    "value": 10
+                },
+                {
+                    "key": "LostCommunicationWithPowermeter",
+                    "value": 11
+                },
+                {
+                    "key": "RemoteControllerLost",
+                    "value": 12
+                },
+                {
+                    "key": "IncorrectSocketState",
+                    "value": 13
+                },
+                {
+                    "key": "IncorrectChargingPhaseNumber",
+                    "value": 14
+                },
+                {
+                    "key": "LostCommunicationWithClusterManager",
+                    "value": 15
+                },
+                {
+                    "key": "Mode3CommunicationError",
+                    "value": 16
+                },
+                {
+                    "key": "IncorrectCableState",
+                    "value": 17
+                },
+                {
+                    "key": "DefaultEvChargingCableDisconnection",
+                    "value": 18
+                },
+                {
+                    "key": "ShortCircuitFp1",
+                    "value": 19
+                },
+                {
+                    "key": "Overcurrent",
+                    "value": 20
+                },
+                {
+                    "key": "NoEnergyAvailableForCharging",
+                    "value": 21
+                }
+            ]
+        },
+        {
+            "name": "LastChargeStatus",
+            "values": [
+                {
+                    "key": "CircuitBreakerEnabled",
+                    "value": 0
+                },
+                {
+                    "key": "Ok",
+                    "value": 1
+                },
+                {
+                    "key": "EndedByClusterManagerLoss",
+                    "value": 2
+                },
+                {
+                    "key": "EndOfChargeInSm3",
+                    "value": 3
+                },
+                {
+                    "key": "CommunicationError",
+                    "value": 4
+                },
+                {
+                    "key": "DisconnectionCable",
+                    "value": 5
+                },
+                {
+                    "key": "DisconnectionEv",
+                    "value": 6
+                },
+                {
+                    "key": "Shortcut",
+                    "value": 7
+                },
+                {
+                    "key": "Overload",
+                    "value": 8
+                },
+                {
+                    "key": "CanceledBySupervisor",
+                    "value": 9
+                },
+                {
+                    "key": "VentilationNotAllowed",
+                    "value": 10
+                },
+                {
+                    "key": "UnexpectedContactorOpen",
+                    "value": 11
+                },
+                {
+                    "key": "SimplifiedMode3NotAllowed",
+                    "value": 12
+                },
+                {
+                    "key": "PowerSupplyInternalError",
+                    "value": 13
+                },
+                {
+                    "key": "UnexpectedPlugUnlock",
+                    "value": 14
+                },
+                {
+                    "key": "DefaultNbPhases",
+                    "value": 15
+                },
+                {
+                    "key": "DiDefaultSurgeArrestor",
+                    "value": 69
+                },
+                {
+                    "key": "DiDefaultAntiIntrusion",
+                    "value": 70
+                },
+                {
+                    "key": "DiDefaultShutterUnlock",
+                    "value": 73
+                },
+                {
+                    "key": "DiDefaultFlsi",
+                    "value": 74
+                },
+                {
+                    "key": "DiDefaultEmergencyStop",
+                    "value": 75
+                },
+                {
+                    "key": "DiDefaultUndervoltage",
+                    "value": 76
+                },
+                {
+                    "key": "DiDefaultCi",
+                    "value": 77
+                },
+                {
+                    "key": "Other",
+                    "value": 254
+                },
+                {
+                    "key": "Undefined",
+                    "value": 255
+                }
+            ]
+        },
+        {
+            "name": "RemoteCommand",
+            "values": [
+                {
+                    "key": "AcknowledgeCommand",
+                    "value": 0
+                },
+                {
+                    "key": "ForceStopCharge",
+                    "value": 3
+                },
+                {
+                    "key": "SuspendCharging",
+                    "value": 4
+                },
+                {
+                    "key": "RestartCharging",
+                    "value": 5
+                },
+                {
+                    "key": "SetEvcseUnavailable",
+                    "value": 6
+                },
+                {
+                    "key": "SetEvcseAvailable",
+                    "value": 34
+                }
+            ]
+        }
+    ],
+    "blocks": [
+        {
+            "id": "phaseVoltageAndCurrent",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "stationIntensityPhaseX",
+                    "address": 350,
+                    "size": 2,
+                    "type": "float",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "stationIntensityPhaseX",
+                    "defaultValue": "0",
+                    "unit": "Ampere",
+                    "access": "RO"
+                },
+                {
+                    "id": "stationIntensityPhase2",
+                    "address": 352,
+                    "size": 2,
+                    "type": "float",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "stationIntensityPhase2",
+                    "defaultValue": "0",
+                    "unit": "Ampere",
+                    "access": "RO"
+                },
+                {
+                    "id": "stationIntensityPhase3",
+                    "address": 354,
+                    "size": 2,
+                    "type": "float",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "stationIntensityPhase3",
+                    "defaultValue": "0",
+                    "unit": "Ampere",
+                    "access": "RO"
+                },
+                {
+                    "id": "stationEnergy",
+                    "address": 356,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "stationEnergy",
+                    "defaultValue": "0",
+                    "unit": "WattHour",
+                    "access": "RO"
+                },
+                {
+                    "id": "stationPowerTotal",
+                    "address": 358,
+                    "size": 2,
+                    "type": "float",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "stationPowerTotal",
+                    "defaultValue": "0",
+                    "unit": "KiloWatt",
+                    "access": "RO"
+                }
+            ]
+        }
+    ],
+    "registers": [
+        {
+            "id": "cpwState",
+            "address": 6,
+            "size": 1,
+            "type": "uint16",
+            "enum": "CPWState",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "cpwState",
+            "defaultValue": "CPWStateEvseNotAvailable",
+            "access": "RO"
+        },
+        {
+            "id": "lastChargeStatus",
+            "address": 9,
+            "size": 1,
+            "type": "uint16",
+            "enum": "LastChargeStatus",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "lastChargeStatus",
+            "defaultValue": "LastChargeStatusOk",
+            "access": "RO"
+        },
+        {
+            "id": "remoteCommandStatus",
+            "address": 20,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "remoteCommandStatus",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "errorStatus",
+            "address": 23,
+            "size": 2,
+            "type": "uint32",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "errorStatus",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "chargeTime",
+            "address": 30,
+            "size": 2,
+            "type": "uint32",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "chargeTime",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "remoteCommand",
+            "address": 150,
+            "size": 1,
+            "type": "uint16",
+            "enum": "RemoteCommand",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "remoteCommand",
+            "defaultValue": "RemoteCommandAcknowledgeCommand",
+            "access": "RW"
+        },
+        {
+            "id": "maxIntensitySocket",
+            "address": 301,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "maxIntensitySocket",
+            "defaultValue": "0",
+            "unit": "Ampere",
+            "access": "RW"
+        },
+        {
+            "id": "maxIntensityCluster",
+            "address": 310,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "maxIntensityCluster",
+            "defaultValue": "0",
+            "unit": "Ampere",
+            "access": "RW"
+        },
+        {
+            "id": "remoteControllerLifeBit",
+            "address": 932,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "remoteControllerLifeBit",
+            "defaultValue": "0",
+            "access": "RW"
+        },
+        {
+            "id": "degradedMode",
+            "address": 933,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "degradedMode",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "sessionTime",
+            "address": 2004,
+            "size": 2,
+            "type": "uint32",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "sessionTime",
+            "defaultValue": "0",
+            "unit": "Seconds",
+            "access": "RO"
+        }
+    ]
+}
