@@ -8,6 +8,7 @@ PLUGIN_DIRS = \
     alphainnotec            \
     bgetech                 \
     drexelundweiss          \
+    e3dc		    \
     huawei                  \
     idm                     \
     inepro                  \

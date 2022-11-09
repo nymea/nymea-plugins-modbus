@@ -1,0 +1,14 @@
+{
+    "title": "alpha innotec",
+    "tagline": "Integrate alpha innotec heat pumps into nymea.",
+    "icon": "alpha-innotec.png",
+    "stability": "community",
+    "offline": true,
+    "technologies": [
+        "network",
+        "modbus"
+    ],
+    "categories": [
+        "heating"
+    ]
+}
