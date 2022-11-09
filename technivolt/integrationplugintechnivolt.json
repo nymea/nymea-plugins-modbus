@@ -1,0 +1,182 @@
+{
+    "id": "bc6862d0-a107-40ad-8645-a109af5934bd",
+    "name": "TechnivoltWallbox",
+    "displayName": "Technivolt Wallbox",
+    "vendors": [
+        {
+            "id": "8d0e2c6c-2776-403f-aff8-8b68753794bd",
+            "name": "technivoltWallbox",
+            "displayName": "Technivolt Wallbox",
+            "thingClasses": [
+                {
+                    "id": "ac4fec7d-8c56-434e-96fd-1188551b9fae",
+                    "name": "technivoltWallbox",
+                    "displayName": "Technivolt Wallbox",
+                    "createMethods": ["discovery", "user"],
+                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "8075554e-dd73-4bca-a4fd-270528faa606",
+                            "name": "mac",
+                            "displayName": "MAC address",
+                            "type": "QString",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "98e24199-52f4-4623-9a99-d56181c31ab7",
+                            "name":"port",
+                            "displayName": "Port",
+                            "type": "int",
+                            "defaultValue": 502
+                        },
+                        {
+                            "id": "1f7c2c6f-e69c-438c-9cee-f6f3f7b6f426",
+                            "name":"slaveId",
+                            "displayName": "Modbus slave ID",
+                            "type": "int",
+                            "defaultValue": 255
+                        },
+                        {
+                            "id": "474f59c6-b485-4534-b9fe-c24b99988498",
+                            "name":"maxChargeCurrent",
+                            "displayName": "Maximum charge current",
+                            "type": "int",
+                            "minValue": 6,
+                            "maxValue": 32,
+                            "defaultValue": 32
+                        }
+                    ],
+                    "stateTypes":[
+                        {
+                            "id": "df9fabf0-c9cf-48f0-b907-deb7b1b30d84",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "4137601d-70dd-41f4-9456-e7097b8bbc32",
+                            "name": "power",
+                            "displayName": "Charging enabled",
+                            "displayNameEvent": "Charging status changed",
+                            "displayNameAction": "Set charging enabled",
+                            "type": "bool",
+                            "writable": true,
+                            "defaultValue": false,
+                            "suggestLogging": true,
+                            "cached": false
+                        },
+                        {
+                            "id": "42700a1a-6467-4485-bcc4-dc166a35bb61",
+                            "name": "chargeTime",
+                            "displayName": "Charging Time",
+                            "unit": "Minutes",
+                            "type": "uint",
+                            "defaultValue": 0,
+                            "displayNameEvent": "Charging time changed",
+                            "cached": false
+                        },
+                        {
+                            "id": "abf2dbf7-a4dc-4ff3-b6af-61330b2580a6",
+                            "name": "ocppStatus",
+                            "displayName": "OCPP Status",
+                            "displayNameEvent": "OCPP status changed",
+                            "type": "QString",
+                            "defaultValue": "Available",
+                            "cached": false
+                        },
+                        {
+                            "id": "27215fbe-a7a3-4616-908f-ecf0005fd6db",
+                            "name": "pluggedIn",
+                            "displayName": "Car plugged in",
+                            "displayNameEvent": "Car plugged in changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "45177189-8d3b-4a34-a53e-f003f681b7cf",
+                            "name": "charging",
+                            "displayName": "Charging",
+                            "displayNameEvent": "Charging changed",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "caa2323c-1302-4928-a390-118910efb752",
+                            "name": "maxChargingCurrent",
+                            "displayName": "Maximal charging current",
+                            "displayNameEvent": "Maximal charging current changed",
+                            "displayNameAction": "Set maximal charging current",
+                            "type": "uint",
+                            "unit": "Ampere",
+                            "defaultValue": 6,
+                            "minValue": 0,
+                            "maxValue": 32,
+                            "writable": true,
+                            "suggestLogging": true,
+                            "cached": false
+                        },
+                        {
+                            "id": "76a87358-1c9e-42d6-ab56-99635809f1c9",
+                            "name": "sessionEnergy",
+                            "displayName": "Session energy",
+                            "displayNameEvent": "Session energy changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0,
+                            "suggestLogging": true,
+                            "cached": false
+                        },
+                        {
+                            "id": "4f5cdb98-20a2-4a37-ad44-4ca900e66adb",
+                            "name": "totalEnergyConsumed",
+                            "displayName": "Total energy consumed",
+                            "displayNameEvent": "Total energy consumption changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0,
+                            "suggestLogging": true,
+                            "cached": false
+                        },
+                        {
+                            "id": "13eb2d60-e932-4526-8a98-f753826773dc",
+                            "name": "currentPower",
+                            "displayName": "Power consumption",
+                            "displayNameEvent": "Power consumtion changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0.00,
+                            "suggestLogging": true,
+                            "cached": false
+                        },
+                        {
+                            "id": "a36d1e52-7c68-4eea-b113-71d13c6b89e2",
+                            "name": "phaseCount",
+                            "displayName": "Phase count",
+                            "displayNameEvent": "Phase count changed",
+                            "type": "uint",
+                            "minValue": 1,
+                            "maxValue": 3,
+                            "defaultValue": 1,
+                            "suggestLogging": true,
+                            "cached": false
+                        },
+                        {
+                            "id": "d8d70f04-3834-4d07-9a50-4ec3614fc452",
+                            "name": "errorMessage",
+                            "displayName": "Error message",
+                            "displayNameEvent": "Error state changed",
+                            "type": "QString",
+                            "defaultValue": "No error",
+                            "cached": false
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -202,6 +202,16 @@ Description: nymea integration plugin for SunSpec Modbus devices
  This package contains the nymea integration plugin for SunSpec compatible solar inverters.
 
 
+Package: nymea-plugin-technivolt
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for Technivolt wallboxes 
+  This package contains the nymea integration plugin for wallboxes made
+ by Technivolt.
+
+
 Package: nymea-plugin-unipi2
 Architecture: any
 Multi-Arch: same

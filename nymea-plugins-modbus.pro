@@ -20,6 +20,7 @@ PLUGIN_DIRS = \
     schrack                 \
     stiebeleltron           \
     sunspec                 \
+    technivolt              \
     unipi                   \
     webasto                 \
 
