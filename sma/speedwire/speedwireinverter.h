@@ -34,6 +34,7 @@
 #include <QObject>
 #include <QQueue>
 
+#include "sma.h"
 #include "speedwire.h"
 #include "speedwireinterface.h"
 #include "speedwireinverterreply.h"
@@ -62,7 +63,7 @@ public:
 
     bool reachable() const;
 
-    Speedwire::DeviceClass deviceClass() const;
+    Sma::DeviceClass deviceClass() const;
     QString modelName() const;
 
     double totalAcPower() const;
@@ -131,7 +132,7 @@ private:
     QQueue<SpeedwireInverterReply *> m_replyQueue;
 
     // Properties
-    Speedwire::DeviceClass m_deviceClass = Speedwire::DeviceClassUnknown;
+    Sma::DeviceClass m_deviceClass = Sma::DeviceClassUnknown;
     QString m_modelName;
     QString m_softwareVersion;
 

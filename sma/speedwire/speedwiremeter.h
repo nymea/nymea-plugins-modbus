@@ -74,7 +74,6 @@ public:
 
     QString softwareVersion() const;
 
-
 signals:
     void reachableChanged(bool reachable);
     void valuesUpdated();

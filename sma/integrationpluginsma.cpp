@@ -30,8 +30,11 @@
 
 #include "integrationpluginsma.h"
 #include "plugininfo.h"
-#include "speedwirediscovery.h"
-#include "sunnywebboxdiscovery.h"
+
+#include "sma.h"
+#include "speedwire/speedwirediscovery.h"
+#include "sunnywebbox/sunnywebboxdiscovery.h"
+#include "modbus/smamodbusdiscovery.h"
 
 #include <network/networkdevicediscovery.h>
 
@@ -150,7 +153,7 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
                     if (result.serialNumber == 0)
                         continue;
 
-                    ThingDescriptor descriptor(speedwireInverterThingClassId, "SMA Inverter", "Serial: " + QString::number(result.serialNumber) + " - " + result.address.toString());
+                    ThingDescriptor descriptor(speedwireInverterThingClassId, Sma::getModelName(result.modelId), "Serial: " + QString::number(result.serialNumber) + " - " + result.address.toString());
                     // We found an energy meter, let's check if we already added this one
                     foreach (Thing *existingThing, myThings()) {
                         if (existingThing->paramValue(speedwireInverterThingSerialNumberParamTypeId).toUInt() == result.serialNumber) {
@@ -174,6 +177,42 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
         });
 
         speedwireDiscovery->startDiscovery();
+    } else if (info->thingClassId() == modbusInverterThingClassId) {
+        if (!hardwareManager()->networkDeviceDiscovery()->available()) {
+            qCWarning(dcSma()) << "The network discovery is not available on this platform.";
+            info->finish(Thing::ThingErrorUnsupportedFeature, QT_TR_NOOP("The network device discovery is not available."));
+            return;
+        }
+
+        // Create a discovery with the info as parent for auto deleting the object once the discovery info is done
+        SmaModbusDiscovery *discovery = new SmaModbusDiscovery(hardwareManager()->networkDeviceDiscovery(), 502, 3, info);
+        connect(discovery, &SmaModbusDiscovery::discoveryFinished, info, [=](){
+            foreach (const SmaModbusDiscovery::SmaModbusDiscoveryResult &result, discovery->discoveryResults()) {
+
+                ThingDescriptor descriptor(modbusInverterThingClassId, "SMA inverter " + result.productName, QT_TR_NOOP("Serial: ") + result.serialNumber + " (" + result.networkDeviceInfo.address().toString() + ")");
+                qCDebug(dcSma()) << "Discovered:" << descriptor.title() << descriptor.description();
+
+                // Note: use the serial and not the mac address as identifier because more than one inverter might be behind a network device
+                Things existingThings = myThings().filterByParam(modbusInverterThingSerialNumberParamTypeId, result.serialNumber);
+                if (existingThings.count() == 1) {
+                    qCDebug(dcSma()) << "This SMA inverter already exists in the system:" << result.serialNumber;
+                    descriptor.setThingId(existingThings.first()->id());
+                }
+
+                ParamList params;
+                params << Param(modbusInverterThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
+                params << Param(modbusInverterThingPortParamTypeId, result.port);
+                params << Param(modbusInverterThingSlaveIdParamTypeId, result.modbusAddress);
+                params << Param(modbusInverterThingSerialNumberParamTypeId, result.serialNumber);
+                descriptor.setParams(params);
+                info->addThingDescriptor(descriptor);
+            }
+
+            info->finish(Thing::ThingErrorNoError);
+        });
+
+        // Start the discovery process
+        discovery->startDiscovery();
     }
 }
 
@@ -186,27 +225,29 @@ void IntegrationPluginSma::confirmPairing(ThingPairingInfo *info, const QString 
 {
     Q_UNUSED(username)
 
-    // On speedwire the password length has a maximum of 12 characters
-    if (secret.count() > 12) {
-        info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The password can not be longer than 12 characters."));
-        return;
+    if (info->thingClassId() == speedwireInverterThingClassId) {
+        // On speedwire the password length has a maximum of 12 characters
+        if (secret.count() > 12) {
+            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The password can not be longer than 12 characters."));
+            return;
+        }
+
+        // Init with the default password
+        QString password = "0000";
+        if (!secret.isEmpty()) {
+            qCDebug(dcSma()) << "Pairing: Using password" << secret;
+            password = secret;
+        } else {
+            qCDebug(dcSma()) << "Pairing: The given password is empty. Using default password" << password;
+        }
+
+        // Just store details, we'll test the login in setupDevice
+        pluginStorage()->beginGroup(info->thingId().toString());
+        pluginStorage()->setValue("password", password);
+        pluginStorage()->endGroup();
+
+        info->finish(Thing::ThingErrorNoError);
     }
-
-    // Init with the default password
-    QString password = "0000";
-    if (!secret.isEmpty()) {
-        qCDebug(dcSma()) << "Pairing: Using password" << secret;
-        password = secret;
-    } else {
-        qCDebug(dcSma()) << "Pairing: The given password is empty. Using default password" << password;
-    }
-
-    // Just store details, we'll test the login in setupDevice
-    pluginStorage()->beginGroup(info->thingId().toString());
-    pluginStorage()->setValue("password", password);
-    pluginStorage()->endGroup();
-
-    info->finish(Thing::ThingErrorNoError);
 }
 
 void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
@@ -367,6 +408,59 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
         qCDebug(dcSma()) << "Inverter: Start connecting using password" << password;
         inverter->startConnecting(password);
 
+    } else if (thing->thingClassId() == modbusInverterThingClassId) {
+
+        // Handle reconfigure
+        if (m_modbusInverters.contains(thing)) {
+            qCDebug(dcSma()) << "Reconfiguring existing thing" << thing->name();
+            m_modbusInverters.take(thing)->deleteLater();
+
+            if (m_monitors.contains(thing)) {
+                hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+            }
+        }
+
+        MacAddress macAddress = MacAddress(thing->paramValue(modbusInverterThingMacAddressParamTypeId).toString());
+        if (!macAddress.isValid()) {
+            qCWarning(dcSma()) << "The configured mac address is not valid" << thing->params();
+            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The MAC address is not known. Please reconfigure the thing."));
+            return;
+        }
+
+        // Create the monitor
+        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(macAddress);
+        m_monitors.insert(thing, monitor);
+
+        QHostAddress address = monitor->networkDeviceInfo().address();
+        if (address.isNull()) {
+            qCWarning(dcSma()) << "Cannot set up sma modbus inverter. The host address is not known yet. Maybe it will be available in the next run...";
+            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("The host address is not known yet. Trying again later."));
+            return;
+        }
+
+        // Clean up in case the setup gets aborted
+        connect(info, &ThingSetupInfo::aborted, monitor, [=](){
+            if (m_monitors.contains(thing)) {
+                qCDebug(dcSma()) << "Unregister monitor because setup has been aborted.";
+                hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+            }
+        });
+
+        // Wait for the monitor to be ready
+        if (monitor->reachable()) {
+            // Thing already reachable...let's continue with the setup
+            setupModbusInverterConnection(info);
+        } else {
+            qCDebug(dcSma()) << "Waiting for the network monitor to get reachable before continue to set up the connection" << thing->name() << address.toString() << "...";
+            connect(monitor, &NetworkDeviceMonitor::reachableChanged, info, [=](bool reachable){
+                if (reachable) {
+                    qCDebug(dcSma()) << "The monitor for thing setup" << thing->name() << "is now reachable. Continue setup...";
+                    setupModbusInverterConnection(info);
+                }
+            });
+        }
+
     } else {
         Q_ASSERT_X(false, "setupThing", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
     }
@@ -380,15 +474,26 @@ void IntegrationPluginSma::postSetupThing(Thing *thing)
         if (!sunnyWebBox)
             return;
 
-        setupRefreshTimer();
         sunnyWebBox->getPlantOverview();
-        thing->setStateValue(sunnyWebBoxConnectedStateTypeId, true);
+        thing->setStateValue("connected", true);
+        setupRefreshTimer();
+
     } else if (thing->thingClassId() == speedwireInverterThingClassId) {
         SpeedwireInverter *inverter = m_speedwireInverters.value(thing);
         if (inverter) {
-            thing->setStateValue(speedwireInverterConnectedStateTypeId, inverter->reachable());
+            thing->setStateValue("connected", inverter->reachable());
         } else {
-            thing->setStateValue(speedwireInverterConnectedStateTypeId, false);
+            thing->setStateValue("connected", false);
+        }
+
+        setupRefreshTimer();
+
+    } else if (thing->thingClassId() == modbusInverterThingClassId) {
+        SmaInverterModbusTcpConnection *connection = m_modbusInverters.value(thing);
+        if (connection) {
+            thing->setStateValue("connected", connection->reachable());
+        } else {
+            thing->setStateValue("connected", false);
         }
 
         setupRefreshTimer();
@@ -407,6 +512,14 @@ void IntegrationPluginSma::thingRemoved(Thing *thing)
 
     if (thing->thingClassId() == speedwireInverterThingClassId && m_speedwireInverters.contains(thing)) {
         m_speedwireInverters.take(thing)->deleteLater();
+    }
+
+    if (thing->thingClassId() == modbusInverterThingClassId && m_modbusInverters.contains(thing)) {
+        m_modbusInverters.take(thing)->deleteLater();
+    }
+
+    if (m_monitors.contains(thing)) {
+        hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
     }
 
     if (myThings().isEmpty()) {
@@ -450,7 +563,7 @@ void IntegrationPluginSma::setupRefreshTimer()
     if (m_refreshTimer)
         return;
 
-    m_refreshTimer = hardwareManager()->pluginTimerManager()->registerTimer(2);
+    m_refreshTimer = hardwareManager()->pluginTimerManager()->registerTimer(5);
     connect(m_refreshTimer, &PluginTimer::timeout, this, [=](){
         foreach (Thing *thing, myThings().filterByThingClassId(sunnyWebBoxThingClassId)) {
             SunnyWebBox *sunnyWebBox = m_sunnyWebBoxes.value(thing);
@@ -461,7 +574,158 @@ void IntegrationPluginSma::setupRefreshTimer()
             // Note: refresh will not be triggered if there is already a refresh process running
             inverter->refresh();
         }
+
+        foreach (SmaInverterModbusTcpConnection *connection, m_modbusInverters) {
+            connection->update();
+        }
     });
 
     m_refreshTimer->start();
 }
+
+void IntegrationPluginSma::setupModbusInverterConnection(ThingSetupInfo *info)
+{
+    Thing *thing = info->thing();
+
+    QHostAddress address = m_monitors.value(thing)->networkDeviceInfo().address();
+    uint port = thing->paramValue(modbusInverterThingPortParamTypeId).toUInt();
+    quint16 slaveId = thing->paramValue(modbusInverterThingSlaveIdParamTypeId).toUInt();
+
+    qCDebug(dcSma()) << "Setting up SMA inverter on" << address.toString() << port << "unit ID:" << slaveId;
+    SmaInverterModbusTcpConnection *connection = new SmaInverterModbusTcpConnection(address, port, slaveId, this);
+    connect(info, &ThingSetupInfo::aborted, connection, &SmaInverterModbusTcpConnection::deleteLater);
+
+    // Reconnect on monitor reachable changed
+    NetworkDeviceMonitor *monitor = m_monitors.value(thing);
+    connect(monitor, &NetworkDeviceMonitor::reachableChanged, thing, [=](bool reachable){
+        qCDebug(dcSma()) << "Network device monitor reachable changed for" << thing->name() << reachable;
+        if (!thing->setupComplete())
+            return;
+
+        if (reachable && !thing->stateValue("connected").toBool()) {
+            connection->setHostAddress(monitor->networkDeviceInfo().address());
+            connection->connectDevice();
+        } else if (!reachable) {
+            // Note: We disable autoreconnect explicitly and we will
+            // connect the device once the monitor says it is reachable again
+            connection->disconnectDevice();
+        }
+    });
+
+    connect(connection, &SmaInverterModbusTcpConnection::reachableChanged, thing, [this, thing, connection](bool reachable){
+        qCDebug(dcSma()) << "Reachable changed to" << reachable << "for" << thing;
+        if (reachable) {
+            // Connected true will be set after successfull init
+            connection->initialize();
+        } else {
+            thing->setStateValue("connected", false);
+            foreach (Thing *childThing, myThings().filterByParentId(thing->id())) {
+                childThing->setStateValue("connected", false);
+            }
+        }
+    });
+
+    connect(connection, &SmaInverterModbusTcpConnection::initializationFinished, thing, [=](bool success){
+        if (!thing->setupComplete())
+            return;
+
+        thing->setStateValue("connected", success);
+        foreach (Thing *childThing, myThings().filterByParentId(thing->id())) {
+            childThing->setStateValue("connected", success);
+        }
+
+        if (!success) {
+            // Try once to reconnect the device
+            connection->reconnectDevice();
+        }
+    });
+
+    connect(connection, &SmaInverterModbusTcpConnection::initializationFinished, info, [=](bool success){
+        if (!success) {
+            qCWarning(dcSma()) << "Connection init finished with errors" << thing->name() << connection->hostAddress().toString();
+            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(monitor);
+            connection->deleteLater();
+            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Could not initialize the communication with the inverter."));
+            return;
+        }
+
+        qCDebug(dcSma()) << "Connection init finished successfully" << connection;
+        m_modbusInverters.insert(thing, connection);
+        info->finish(Thing::ThingErrorNoError);
+
+        // Set connected true
+        thing->setStateValue("connected", true);
+        foreach (Thing *childThing, myThings().filterByParentId(thing->id())) {
+            childThing->setStateValue("connected", true);
+        }
+
+        connect(connection, &SmaInverterModbusTcpConnection::updateFinished, thing, [=](){
+            qCDebug(dcSma()) << "Updated" << connection;
+
+            // Grid voltage
+            if (isModbusValueValid(connection->gridVoltagePhaseA()))
+                thing->setStateValue(modbusInverterVoltagePhaseAStateTypeId, connection->gridVoltagePhaseA() / 100.0);
+
+            if (isModbusValueValid(connection->gridVoltagePhaseB()))
+                thing->setStateValue(modbusInverterVoltagePhaseBStateTypeId, connection->gridVoltagePhaseB() / 100.0);
+
+            if (isModbusValueValid(connection->gridVoltagePhaseC()))
+                thing->setStateValue(modbusInverterVoltagePhaseCStateTypeId, connection->gridVoltagePhaseC() / 100.0);
+
+            // Grid current
+            if (isModbusValueValid(connection->gridCurrentPhaseA()))
+                thing->setStateValue(modbusInverterCurrentPhaseAStateTypeId, connection->gridCurrentPhaseA() / 1000.0);
+
+            if (isModbusValueValid(connection->gridCurrentPhaseB()))
+                thing->setStateValue(modbusInverterCurrentPhaseBStateTypeId, connection->gridCurrentPhaseB() / 1000.0);
+
+            if (isModbusValueValid(connection->gridCurrentPhaseC()))
+                thing->setStateValue(modbusInverterCurrentPhaseCStateTypeId, connection->gridCurrentPhaseC() / 1000.0);
+
+            // Phase power
+            if (isModbusValueValid(connection->currentPowerPhaseA()))
+                thing->setStateValue(modbusInverterCurrentPowerPhaseAStateTypeId, connection->currentPowerPhaseA());
+
+            if (isModbusValueValid(connection->currentPowerPhaseB()))
+                thing->setStateValue(modbusInverterCurrentPowerPhaseBStateTypeId, connection->currentPowerPhaseB());
+
+            if (isModbusValueValid(connection->currentPowerPhaseC()))
+                thing->setStateValue(modbusInverterCurrentPowerPhaseCStateTypeId, connection->currentPowerPhaseC());
+
+            // Others
+            if (isModbusValueValid(connection->totalYield()))
+                thing->setStateValue(modbusInverterTotalEnergyProducedStateTypeId, connection->totalYield() / 1000.0); // kWh
+
+            if (isModbusValueValid(connection->dailyYield()))
+                thing->setStateValue(modbusInverterEnergyProducedTodayStateTypeId, connection->dailyYield() / 1000.0); // kWh
+
+            // Power
+            if (isModbusValueValid(connection->currentPower()))
+                thing->setStateValue(modbusInverterCurrentPowerStateTypeId, -connection->currentPower());
+
+            // Version
+            thing->setStateValue(modbusInverterFirmwareVersionStateTypeId, Sma::buildSoftwareVersionString(connection->softwarePackage()));
+        });
+
+        // Update registers
+        connection->update();
+    });
+
+    connection->connectDevice();
+}
+
+bool IntegrationPluginSma::isModbusValueValid(quint32 value)
+{
+    return value != 0xffffffff;
+}
+
+bool IntegrationPluginSma::isModbusValueValid(qint32 value)
+{
+    return value != static_cast<qint32>(0x80000000);
+}
+
+bool IntegrationPluginSma::isModbusValueValid(quint64 value)
+{
+    return value != 0xffffffffffffffff;
+}
+

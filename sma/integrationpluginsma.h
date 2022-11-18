@@ -33,10 +33,15 @@
 
 #include <integrations/integrationplugin.h>
 #include <plugintimer.h>
+#include <network/networkdevicemonitor.h>
 
-#include "sunnywebbox.h"
-#include "speedwiremeter.h"
-#include "speedwireinverter.h"
+#include "extern-plugininfo.h"
+
+#include "sunnywebbox/sunnywebbox.h"
+#include "speedwire/speedwiremeter.h"
+#include "speedwire/speedwireinverter.h"
+
+#include "smainvertermodbustcpconnection.h"
 
 class IntegrationPluginSma: public IntegrationPlugin {
     Q_OBJECT
@@ -62,12 +67,22 @@ private slots:
 
     void setupRefreshTimer();
 
+    void setupModbusInverterConnection(ThingSetupInfo *info);
+
 private:
     PluginTimer *m_refreshTimer = nullptr;
+
+    QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
 
     QHash<Thing *, SunnyWebBox *> m_sunnyWebBoxes;
     QHash<Thing *, SpeedwireMeter *> m_speedwireMeters;
     QHash<Thing *, SpeedwireInverter *> m_speedwireInverters;
+    QHash<Thing *, SmaInverterModbusTcpConnection *> m_modbusInverters;
+
+    // Sma modbus data validation
+    bool isModbusValueValid(quint32 value);
+    bool isModbusValueValid(qint32 value);
+    bool isModbusValueValid(quint64 value);
 };
 
 #endif // INTEGRATIONPLUGINSMA_H

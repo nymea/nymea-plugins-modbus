@@ -31,6 +31,8 @@
 #include "speedwiremeter.h"
 #include "extern-plugininfo.h"
 
+#include "sma.h"
+
 SpeedwireMeter::SpeedwireMeter(const QHostAddress &address, quint16 modelId, quint32 serialNumber, QObject *parent) :
     QObject(parent),
     m_address(address),
@@ -318,16 +320,9 @@ void SpeedwireMeter::processData(const QByteArray &data)
         } if (measurementChannel == 144 && measurementIndex == 0 && measurmentType == 0 && measurmentTariff == 0) {
             // Software version
             // 90000000 01 02 08 52
-            quint8 major, minor, build, revision;
-            stream >> major >> minor >> build >> revision;
-            // Revision types:
-            //  S: Special version
-            //  A: Alpha version
-            //  B: Beta version
-            //  R: Release version
-            //  E: Experimental version
-            //  N: No revision
-            m_softwareVersion = QString("%1.%2.%3-%4").arg(major).arg(minor).arg(build).arg(QChar(revision));
+            quint32 versionData;
+            stream >> versionData;
+            m_softwareVersion = Sma::buildSoftwareVersionString(versionData);
 
             qCDebug(dcSma()) << "Meter: Software version" << m_softwareVersion;
         } else if (measurementChannel == 0 && measurementIndex == 0 && measurmentType == 0 && measurmentTariff == 0) {

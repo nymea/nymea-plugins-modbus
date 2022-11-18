@@ -32,7 +32,6 @@
 #include "extern-plugininfo.h"
 
 #include <QDataStream>
-#include <speedwirediscovery.h>
 
 SpeedwireDiscovery::SpeedwireDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, QObject *parent) :
     QObject(parent),
