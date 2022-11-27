@@ -508,7 +508,12 @@ void IntegrationPluginSunSpec::setupConnection(ThingSetupInfo *info)
         // of little endian as specified in sunspec and even solar edge documentation
         connection = new SunSpecConnection(address, port, slaveId, SunSpecDataPoint::ByteOrderBigEndian, this);
     } else {
-        connection = new SunSpecConnection(address, port, slaveId, this);
+        SunSpecDataPoint::ByteOrder endianness = SunSpecDataPoint::ByteOrderLittleEndian;
+        QString endiannessParam = thing->paramValue("endianness").toString();
+        if (endiannessParam == "Big Endian")
+            endianness = SunSpecDataPoint::ByteOrderBigEndian;
+
+        connection = new SunSpecConnection(address, port, slaveId, endianness, this);
     }
     connection->setTimeout(configValue(sunSpecPluginTimeoutParamTypeId).toUInt());
     connection->setNumberOfRetries(configValue(sunSpecPluginNumberOfRetriesParamTypeId).toUInt());
@@ -1347,31 +1352,31 @@ void IntegrationPluginSunSpec::onStorageBlockUpdated()
 
     switch (storage->chaSt()) {
     case SunSpecStorageModel::ChastOff:
-        thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Off");
+        thing->setStateValue(sunspecStorageStorageStatusStateTypeId, "Off");
         thing->setStateValue(sunspecStorageChargingStateStateTypeId, "idle");
         break;
     case SunSpecStorageModel::ChastEmpty:
-        thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Empty");
+        thing->setStateValue(sunspecStorageStorageStatusStateTypeId, "Empty");
         thing->setStateValue(sunspecStorageChargingStateStateTypeId, "idle");
         break;
     case SunSpecStorageModel::ChastDischarging:
-        thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Discharging");
+        thing->setStateValue(sunspecStorageStorageStatusStateTypeId, "Discharging");
         thing->setStateValue(sunspecStorageChargingStateStateTypeId, "discharging");
         break;
     case SunSpecStorageModel::ChastCharging:
-        thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Charging");
+        thing->setStateValue(sunspecStorageStorageStatusStateTypeId, "Charging");
         thing->setStateValue(sunspecStorageChargingStateStateTypeId, "charging");
         break;
     case SunSpecStorageModel::ChastFull:
-        thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Full");
+        thing->setStateValue(sunspecStorageStorageStatusStateTypeId, "Full");
         thing->setStateValue(sunspecStorageChargingStateStateTypeId, "idle");
         break;
     case SunSpecStorageModel::ChastHolding:
-        thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Holding");
+        thing->setStateValue(sunspecStorageStorageStatusStateTypeId, "Holding");
         thing->setStateValue(sunspecStorageChargingStateStateTypeId, "idle");
         break;
     case SunSpecStorageModel::ChastTesting:
-        thing->setStateValue(sunspecStorageBatteryLevelStateTypeId, "Testing");
+        thing->setStateValue(sunspecStorageStorageStatusStateTypeId, "Testing");
         thing->setStateValue(sunspecStorageChargingStateStateTypeId, "idle");
         break;
     }

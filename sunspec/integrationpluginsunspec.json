@@ -71,6 +71,17 @@
                             "displayName": "Slave ID",
                             "type": "int",
                             "defaultValue": 1
+                        },
+                        {
+                            "id": "38082ecf-23bf-47d1-beba-f816c978c823",
+                            "name":"endianness",
+                            "displayName": "Endianness",
+                            "type": "QString",
+                            "allowedValues": [
+                                "Big Endian",
+                                "Little Endian"
+                            ],
+                            "defaultValue": "Big Endian"
                         }
                     ],
                     "stateTypes":[
