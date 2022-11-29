@@ -11,7 +11,7 @@
                 {
                     "id": "49304127-ce9b-45dd-8511-05030a4ac003",
                     "name": "sunnyWebBox",
-                    "displayName": "Sunny WebBox",
+                    "displayName": "SMA Sunny WebBox",
                     "createMethods": ["discovery", "user"],
                     "interfaces": ["solarinverter"],
                     "paramTypes": [
