@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2020, nymea GmbH
+* Copyright 2013 - 2022, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -32,11 +32,10 @@
 #define INTEGRATIONPLUGINIDM_H
 
 #include <integrations/integrationplugin.h>
+#include <network/networkdevicemonitor.h>
 #include <plugintimer.h>
 
-#include "idm.h"
-
-#include <QUuid>
+#include "idmmodbustcpconnection.h"
 
 class IntegrationPluginIdm: public IntegrationPlugin
 {
@@ -56,16 +55,10 @@ public:
 
 private:
     PluginTimer *m_refreshTimer = nullptr;
-    QHash<Thing *, Idm *> m_idmConnections;
-    QHash<QUuid, ThingActionInfo *> m_asyncActions;
+    QHash<Thing *, IdmModbusTcpConnection *> m_connections;
+    QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
 
-    void update(Thing *thing);
-    void onRefreshTimer();
-
-private slots:
-    void onStatusUpdated(const IdmInfo &info);
-    void onWriteRequestExecuted(const QUuid &requestId, bool success);
-
+    void setupConnection(ThingSetupInfo *info);
 };
 
 #endif // INTEGRATIONPLUGINIDM_H

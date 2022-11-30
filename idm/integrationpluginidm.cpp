@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2021, nymea GmbH
+* Copyright 2013 - 2022, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -32,6 +32,7 @@
 #include "plugininfo.h"
 
 #include <network/networkdevicediscovery.h>
+#include <hardwaremanager.h>
 
 IntegrationPluginIdm::IntegrationPluginIdm()
 {
@@ -79,7 +80,6 @@ void IntegrationPluginIdm::discoverThings(ThingDiscoveryInfo *info)
 
             ParamList params;
             params << Param(navigator2ThingMacAddressParamTypeId, networkDeviceInfo.macAddress());
-            params << Param(navigator2ThingIpAddressParamTypeId, networkDeviceInfo.address().toString());
             descriptor.setParams(params);
             info->addThingDescriptor(descriptor);
         }
@@ -90,77 +90,80 @@ void IntegrationPluginIdm::discoverThings(ThingDiscoveryInfo *info)
 void IntegrationPluginIdm::setupThing(ThingSetupInfo *info)
 {
     Thing *thing = info->thing();
-    qCDebug(dcIdm()) << "setupThing called" << thing->name();
+    qCDebug(dcIdm()) << "Setup" << thing << thing->params();
 
+    // Inverter (connection)
     if (thing->thingClassId() == navigator2ThingClassId) {
-        QHostAddress hostAddress = QHostAddress(thing->paramValue(navigator2ThingIpAddressParamTypeId).toString());
-        if (hostAddress.isNull()) {
-            qCWarning(dcIdm()) << "Setup failed, IP address not valid";
-            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("No IP address given"));
-            return;
-        }
 
-        if (m_idmConnections.contains(thing)) {
-            qCDebug(dcIdm()) << "Cleaning up after reconfiguration";
-            m_idmConnections.take(thing)->deleteLater();
-        }
+        // Handle reconfigure
+        if (m_connections.contains(thing)) {
+            qCDebug(dcIdm()) << "Reconfiguring existing thing" << thing->name();
+            m_connections.take(thing)->deleteLater();
 
-        qCDebug(dcIdm()) << "User entered address: " << hostAddress.toString();
-
-        /* Check, if address is already in use for another device */
-        foreach (Idm *idm, m_idmConnections) {
-            if (hostAddress.isEqual(idm->address())) {
-                qCWarning(dcIdm()) << "Address already in use";
-                info->finish(Thing::ThingErrorSetupFailed, QT_TR_NOOP("IP address already in use"));
-                return;
+            if (m_monitors.contains(thing)) {
+                hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
             }
         }
 
-        qCDebug(dcIdm()) << "Creating Idm object";
-        /* Create new Idm object and store it in hash table */
-        Idm *idm = new Idm(hostAddress, this);
-        if (idm->connectDevice()) {
-            qCWarning(dcIdm()) << "Could not connect to thing";
-            info->finish(Thing::ThingErrorHardwareNotAvailable);
+        MacAddress macAddress = MacAddress(thing->paramValue(navigator2ThingMacAddressParamTypeId).toString());
+        if (!macAddress.isValid()) {
+            qCWarning(dcIdm()) << "The configured mac address is not valid" << thing->params();
+            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The MAC address is not known. Please reconfigure the thing."));
             return;
         }
 
-        connect(idm, &Idm::statusUpdated, info, [info, thing, idm, this] (const IdmInfo &idmInfo) {
-            if (idmInfo.connected) {
-                m_idmConnections.insert(thing, idm);
-                connect(idm, &Idm::statusUpdated, this, &IntegrationPluginIdm::onStatusUpdated);
-                connect(idm, &Idm::writeRequestExecuted, this, &IntegrationPluginIdm::onWriteRequestExecuted);
-                info->finish(Thing::ThingErrorNoError);
+        // Create the monitor
+        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(macAddress);
+        m_monitors.insert(thing, monitor);
+
+        QHostAddress address = monitor->networkDeviceInfo().address();
+        if (address.isNull()) {
+            qCWarning(dcIdm()) << "Cannot set up thing. The host address is not known yet. Maybe it will be available in the next run...";
+            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("The host address is not known yet. Trying later again."));
+            return;
+        }
+
+        // Clean up in case the setup gets aborted
+        connect(info, &ThingSetupInfo::aborted, monitor, [=](){
+            if (m_monitors.contains(thing)) {
+                qCDebug(dcIdm()) << "Unregister monitor because setup has been aborted.";
+                hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
             }
         });
-        connect(idm, &Idm::destroyed, this, [thing, this] {m_idmConnections.remove(thing);});
-        connect(info, &ThingSetupInfo::aborted, idm, &Idm::deleteLater);
 
+        // Wait for the monitor to be ready
+        if (monitor->reachable()) {
+            // Thing already reachable...let's continue with the setup
+            setupConnection(info);
+        } else {
+            qCDebug(dcIdm()) << "Waiting for the network monitor to get reachable before continue to set up the connection" << thing->name() << address.toString() << "...";
+            connect(monitor, &NetworkDeviceMonitor::reachableChanged, info, [=](bool reachable){
+                if (reachable) {
+                    qCDebug(dcIdm()) << "The monitor for thing setup" << thing->name() << "is now reachable. Continue setup...";
+                    setupConnection(info);
+                }
+            });
+        }
 
-    } else {
-        Q_ASSERT_X(false, "setupThing", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
+        return;
     }
 }
 
 void IntegrationPluginIdm::postSetupThing(Thing *thing)
 {
-    qCDebug(dcIdm()) << "postSetupThing called" << thing->name();
+    Q_UNUSED(thing)
 
     if (!m_refreshTimer) {
         qCDebug(dcIdm()) << "Starting refresh timer";
         m_refreshTimer = hardwareManager()->pluginTimerManager()->registerTimer(10);
-        connect(m_refreshTimer, &PluginTimer::timeout, this, &IntegrationPluginIdm::onRefreshTimer);
-    }
+        connect(m_refreshTimer, &PluginTimer::timeout, this, [this](){
+            foreach (IdmModbusTcpConnection *connection, m_connections) {
+                connection->update();
+            }
+        });
 
-    if (thing->thingClassId() == navigator2ThingClassId) {
-        Idm *idm = m_idmConnections.value(thing);
-        if (!idm) {
-            qCWarning(dcIdm()) << "Could not find any iDM connection for" << thing->name();
-            return;
-        }
-
-        thing->setStateValue(navigator2ConnectedStateTypeId, true);
-        update(thing);
+        m_refreshTimer->start();
     }
 }
 
@@ -169,10 +172,14 @@ void IntegrationPluginIdm::thingRemoved(Thing *thing)
     qCDebug(dcIdm()) << "thingRemoved called" << thing->name();
 
     if (thing->thingClassId() == navigator2ThingClassId) {
-        if (m_idmConnections.contains(thing)) {
-            m_idmConnections.take(thing)->deleteLater();
+        if (m_connections.contains(thing)) {
+            m_connections.take(thing)->deleteLater();
         }
     }
+
+    // Unregister related hardware resources
+    if (m_monitors.contains(thing))
+        hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
 
     if (myThings().isEmpty()) {
         qCDebug(dcIdm()) << "Stopping refresh timer";
@@ -187,15 +194,37 @@ void IntegrationPluginIdm::executeAction(ThingActionInfo *info)
     Action action = info->action();
 
     if (thing->thingClassId() == navigator2ThingClassId) {
-        Idm *idm = m_idmConnections.value(thing);
-        if (!idm) {
-            return info->finish(Thing::ThingErrorHardwareFailure);
+        IdmModbusTcpConnection *connection = m_connections.value(thing);
+        if (!connection) {
+            qCWarning(dcIdm()) << "Failed to execute action. Could not find connection for" << thing;
+            info->finish(Thing::ThingErrorHardwareFailure);
+            return;
         }
+
+        if (!connection->connected())
+            info->finish(Thing::ThingErrorHardwareNotAvailable);
+
+
         if (action.actionTypeId() == navigator2TargetTemperatureActionTypeId) {
-            double targetTemperature = thing->stateValue(navigator2TargetTemperatureStateTypeId).toDouble();
-            QUuid requestId = idm->setTargetTemperature(targetTemperature);
-            m_asyncActions.insert(requestId, info);
-            connect(info, &ThingActionInfo::aborted, [requestId, this] (){ m_asyncActions.remove(requestId); });
+            float targetTemperature = action.paramValue(navigator2TargetTemperatureActionTargetTemperatureParamTypeId).toDouble();
+            qCDebug(dcIdm()) << "Setting room target temperature to" << targetTemperature << "°C";
+            QModbusReply *reply = connection->setRoomTemperatureTargetHeatingEco(targetTemperature);
+            if (!reply) {
+                info->finish(Thing::ThingErrorHardwareFailure);
+                return;
+            }
+
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, info, [info, reply, thing, targetTemperature]{
+                if (reply->error() != QModbusDevice::NoError) {
+                    info->finish(Thing::ThingErrorHardwareFailure);
+                    return;
+                }
+
+                qCDebug(dcIdm()) << "Room target temperature set successfully to" << targetTemperature << "°C";
+                thing->setStateValue(navigator2TargetTemperatureStateTypeId, targetTemperature);
+                info->finish(Thing::ThingErrorNoError);
+            });
         } else {
             Q_ASSERT_X(false, "executeAction", QString("Unhandled action: %1").arg(action.actionTypeId().toString()).toUtf8());
         }
@@ -204,55 +233,144 @@ void IntegrationPluginIdm::executeAction(ThingActionInfo *info)
     }
 }
 
-void IntegrationPluginIdm::update(Thing *thing)
+void IntegrationPluginIdm::setupConnection(ThingSetupInfo *info)
 {
-    if (thing->thingClassId() == navigator2ThingClassId) {
-        qCDebug(dcIdm()) << "Updating thing" << thing->name();
-        Idm *idm = m_idmConnections.value(thing);
-        if (!idm) { return; };
-        idm->getStatus();
-    }
-}
+    Thing *thing = info->thing();
 
-void IntegrationPluginIdm::onStatusUpdated(const IdmInfo &info)
-{
-    qCDebug(dcIdm()) << "Received status from heat pump";
-    Idm *idm = qobject_cast<Idm *>(sender());
-    Thing *thing = m_idmConnections.key(idm);
+    QHostAddress address = m_monitors.value(thing)->networkDeviceInfo().address();
 
-    if (!thing)
-        return;
+    qCDebug(dcIdm()) << "Setting up IDM on" << address.toString() << 502 << "unit ID:" << 1;
+    IdmModbusTcpConnection *connection = new IdmModbusTcpConnection(address, 502, 1, this);
+    connect(info, &ThingSetupInfo::aborted, connection, &IdmModbusTcpConnection::deleteLater);
 
-    /* Received a structure holding the status info of the
-     * heat pump. Update the thing states with the individual fields. */
-    thing->setStateValue(navigator2ConnectedStateTypeId, info.connected);
-    thing->setStateValue(navigator2PowerStateTypeId, info.power);
-    thing->setStateValue(navigator2TemperatureStateTypeId, info.roomTemperature);
-    thing->setStateValue(navigator2OutsideAirTemperatureStateTypeId, info.outsideTemperature);
-    thing->setStateValue(navigator2WaterTemperatureStateTypeId, info.waterTemperature);
-    thing->setStateValue(navigator2TargetTemperatureStateTypeId, info.targetRoomTemperature);
-    thing->setStateValue(navigator2TargetWaterTemperatureStateTypeId, info.targetWaterTemperature);
-    thing->setStateValue(navigator2CurrentPowerConsumptionHeatPumpStateTypeId, info.powerConsumptionHeatPump);
-    thing->setStateValue(navigator2ModeStateTypeId, info.mode);
-    thing->setStateValue(navigator2ErrorStateTypeId, info.error);
-}
+    // Reconnect on monitor reachable changed
+    NetworkDeviceMonitor *monitor = m_monitors.value(thing);
+    connect(monitor, &NetworkDeviceMonitor::reachableChanged, thing, [=](bool reachable){
+        qCDebug(dcIdm()) << "Network device monitor reachable changed for" << thing->name() << reachable;
+        if (!thing->setupComplete())
+            return;
 
-void IntegrationPluginIdm::onWriteRequestExecuted(const QUuid &requestId, bool success)
-{
-    if (m_asyncActions.contains(requestId)) {
-        ThingActionInfo *info = m_asyncActions.value(requestId);
-        if (success) {
-            info->finish(Thing::ThingErrorNoError);
-        } else {
-            info->finish(Thing::ThingErrorHardwareNotAvailable);
+        if (reachable && !thing->stateValue("connected").toBool()) {
+            connection->setHostAddress(monitor->networkDeviceInfo().address());
+            connection->connectDevice();
+        } else if (!reachable) {
+            // Note: We disable autoreconnect explicitly and we will
+            // connect the device once the monitor says it is reachable again
+            connection->disconnectDevice();
         }
-    }
+    });
+
+    connect(connection, &IdmModbusTcpConnection::reachableChanged, thing, [this, thing, connection](bool reachable){
+        qCDebug(dcIdm()) << "Reachable changed to" << reachable << "for" << thing;
+        if (reachable) {
+            // Connected true will be set after successfull init
+            connection->initialize();
+        } else {
+            thing->setStateValue("connected", false);
+            foreach (Thing *childThing, myThings().filterByParentId(thing->id())) {
+                childThing->setStateValue("connected", false);
+            }
+        }
+    });
+
+    connect(connection, &IdmModbusTcpConnection::initializationFinished, thing, [=](bool success){
+        if (!thing->setupComplete())
+            return;
+
+        thing->setStateValue("connected", success);
+        foreach (Thing *childThing, myThings().filterByParentId(thing->id())) {
+            childThing->setStateValue("connected", success);
+        }
+
+        if (!success) {
+            // Try once to reconnect the device
+            connection->reconnectDevice();
+        }
+    });
+
+    connect(connection, &IdmModbusTcpConnection::initializationFinished, info, [=](bool success){
+        if (!success) {
+            qCWarning(dcIdm()) << "Connection init finished with errors" << thing->name() << connection->hostAddress().toString();
+            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(monitor);
+            connection->deleteLater();
+            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Could not initialize the communication with the device."));
+            return;
+        }
+
+        qCDebug(dcIdm()) << "Connection init finished successfully" << connection;
+        m_connections.insert(thing, connection);
+        info->finish(Thing::ThingErrorNoError);
+
+        // Set connected true
+        thing->setStateValue("connected", true);
+        foreach (Thing *childThing, myThings().filterByParentId(thing->id())) {
+            childThing->setStateValue("connected", true);
+        }
+
+
+        connect(connection, &IdmModbusTcpConnection::updateFinished, thing, [=](){
+            qCDebug(dcIdm()) << "Updated" << connection;
+
+            thing->setStateValue(navigator2ConnectedStateTypeId, connection->reachable());
+            thing->setStateValue(navigator2TemperatureStateTypeId, connection->roomTemperature());
+            thing->setStateValue(navigator2OutsideTemperatureStateTypeId, connection->outdoorTemperature());
+            thing->setStateValue(navigator2WaterTemperatureStateTypeId, connection->heatStorageTemperature());
+            thing->setStateValue(navigator2TargetTemperatureStateTypeId, connection->roomTemperatureTargetHeatingEco());
+            thing->setStateValue(navigator2TargetWaterTemperatureStateTypeId, connection->targetHotWaterTemperature());
+            thing->setStateValue(navigator2CurrentPowerStateTypeId, connection->currentPowerConsumption() * 1000.0);
+            thing->setStateValue(navigator2EnergyProducedHeatingStateTypeId, connection->energyHeating());
+            thing->setStateValue(navigator2EnergyProducedCoolingStateTypeId, connection->energyCooling());
+            thing->setStateValue(navigator2EnergyProducedHotWaterStateTypeId, connection->energyHotWater());
+
+            switch (connection->heatPumpOperatingMode()) {
+            case IdmModbusTcpConnection::HeatPumpOperationModeOff:
+                thing->setStateValue(navigator2ModeStateTypeId, "Off");
+                break;
+            case IdmModbusTcpConnection::HeatPumpOperationModeHeating:
+                thing->setStateValue(navigator2ModeStateTypeId, "Heating");
+                break;
+            case IdmModbusTcpConnection::HeatPumpOperationModeCooling:
+                thing->setStateValue(navigator2ModeStateTypeId, "Cooling");
+                break;
+            case IdmModbusTcpConnection::HeatPumpOperationModeHotWater:
+                thing->setStateValue(navigator2ModeStateTypeId, "Hot water");
+                break;
+            case IdmModbusTcpConnection::HeatPumpOperationModeDefrost:
+                thing->setStateValue(navigator2ModeStateTypeId, "Defrost");
+                break;
+            }
+
+            thing->setStateValue(navigator2HeatingOnStateTypeId, connection->heatPumpOperatingMode() == IdmModbusTcpConnection::HeatPumpOperationModeHeating);
+            thing->setStateValue(navigator2CoolingOnStateTypeId, connection->heatPumpOperatingMode() == IdmModbusTcpConnection::HeatPumpOperationModeCooling);
+
+            switch (connection->systemOperationMode()) {
+            case IdmModbusTcpConnection::SystemOperationModeStandby:
+                thing->setStateValue(navigator2OperationModeStateTypeId, "Standby");
+                break;
+            case IdmModbusTcpConnection::SystemOperationModeAutomatic:
+                thing->setStateValue(navigator2OperationModeStateTypeId, "Automatic");
+                break;
+            case IdmModbusTcpConnection::SystemOperationModeAbsent:
+                thing->setStateValue(navigator2OperationModeStateTypeId, "Absent");
+                break;
+            case IdmModbusTcpConnection::SystemOperationModeWarmWaterOnly:
+                thing->setStateValue(navigator2OperationModeStateTypeId, "Hot water only");
+                break;
+            case IdmModbusTcpConnection::SystemOperationModeHeatingCoolingOnly:
+                thing->setStateValue(navigator2OperationModeStateTypeId, "Heating cooling only");
+                break;
+            }
+
+            thing->setStateValue(navigator2ErrorStateTypeId, connection->currentFaultNumber());
+
+        });
+
+        // Update registers
+        connection->update();
+    });
+
+    connection->connectDevice();
 }
 
-void IntegrationPluginIdm::onRefreshTimer()
-{
-    foreach (Thing *thing, myThings().filterByThingClassId(navigator2ThingClassId)) {
-        update(thing);
-    }
-}
+
 

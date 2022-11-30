@@ -13,16 +13,8 @@
                     "displayName": "Navigator 2.0",
                     "id": "1c95ac91-4eca-4cbf-b0f4-d60d35d069ed",
                     "createMethods": ["user", "discovery"],
-                    "interfaces": ["thermostat", "connectable"],
+                    "interfaces": ["thermostat", "smartmeterconsumer", "connectable" ],
                     "paramTypes": [
-                        {
-                            "id": "05714e5c-d66a-4095-bbff-a0eb96fb035b",
-                            "name":"ipAddress",
-                            "displayName": "IP address",
-                            "inputType": "IPv4Address",
-                            "type": "QString",
-                            "defaultValue": "0.0.0.0"
-                        },
                         {
                             "id": "d178ca29-41a1-4f56-82ec-76a833c1de50",
                             "name": "macAddress",
@@ -36,42 +28,14 @@
                             "id": "cfd71e64-b666-45ef-8db0-8213acd82c5f",
                             "name": "connected",
                             "displayName": "Connected",
-                            "displayNameEvent": "Connected changed",
                             "type": "bool",
                             "defaultValue": false,
                             "cached": false
                         },
                         {
-                            "id": "33c27167-8e24-4cc5-943c-d17cd03e0f68",
-                            "name": "power",
-                            "displayName": "Power",
-                            "displayNameEvent": "Power changed",
-                            "type": "bool",
-                            "defaultValue": false
-                        },
-                        {
                             "id": "f0f596bf-7e45-43ea-b3d4-767b82dd422a",
                             "name": "temperature",
                             "displayName": "Room temperature",
-                            "displayNameEvent": "Room temperature changed",
-                            "type": "double",
-                            "unit": "DegreeCelsius",
-                            "defaultValue": 0
-                        },
-                        {
-                            "id": "fcf8e97f-a672-407f-94ae-30df15b310f4",
-                            "name": "waterTemperature",
-                            "displayName": "Water temperature",
-                            "displayNameEvent": "Water temperature changed",
-                            "type": "double",
-                            "unit": "DegreeCelsius",
-                            "defaultValue": 0
-                        },
-                        {
-                            "id": "9f3462c2-7c42-4eeb-afc4-092e1e41a25d",
-                            "name": "outsideAirTemperature",
-                            "displayName": "Outside air temperature",
-                            "displayNameEvent": "Outside air temperature changed",
                             "type": "double",
                             "unit": "DegreeCelsius",
                             "defaultValue": 0
@@ -81,39 +45,99 @@
                             "name": "targetTemperature",
                             "displayName": "Target room temperature",
                             "displayNameAction": "Set target room temperature",
-                            "displayNameEvent": "Target room temperature changed",
                             "type": "double",
                             "unit": "DegreeCelsius",
                             "minValue": "18",
                             "maxValue": "28",
-                            "defaultValue": 22.00,
+                            "defaultValue": 21.00,
                             "writable": true
+                        },
+                        {
+                            "id": "fcf8e97f-a672-407f-94ae-30df15b310f4",
+                            "name": "waterTemperature",
+                            "displayName": "Water temperature",
+                            "type": "double",
+                            "unit": "DegreeCelsius",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "22543424-6f4f-4200-9f90-111df28d50c9",
+                            "name": "heatingOn",
+                            "displayName": "Heating",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "5719b9f6-6581-4ea8-b000-4ae6a852bb2d",
+                            "name": "coolingOn",
+                            "displayName": "Heating",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "9f3462c2-7c42-4eeb-afc4-092e1e41a25d",
+                            "name": "outsideTemperature",
+                            "displayName": "Outside temperature",
+                            "type": "double",
+                            "unit": "DegreeCelsius",
+                            "defaultValue": 0,
+                            "cached": false
                         },
                         {
                             "id": "746244d6-dd37-4af8-b2ae-a7d8463e51e2",
                             "name": "targetWaterTemperature",
                             "displayName": "Target water temperature",
-                            "displayNameEvent": "Target water temperature changed",
                             "type": "double",
                             "unit": "DegreeCelsius",
                             "defaultValue": 0.00
                         },
                         {
-
                             "id": "b98fb325-100d-4eae-bf8d-97e8f7e1eb00",
-                            "name": "currentPowerConsumptionHeatPump",
-                            "displayName": "Current power consumption",
-                            "displayNameEvent": "Current power consumption heat pump changed",
-                            "displayNameAction": "Change current power consumption het pump",
+                            "name": "currentPower",
+                            "displayName": "Current power",
                             "type": "double",
-                            "unit": "KiloWatt",
+                            "unit": "Watt",
+                            "defaultValue": 0.00,
+                            "cached": false
+                        },
+                        {
+                            "id": "b457dc5a-920a-4c92-9956-a703e69f6084",
+                            "name": "totalEnergyConsumed",
+                            "displayName": "Total energy consumed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "bfad9bbe-063d-497e-b13e-5de0f4738c91",
+                            "name": "energyProducedHeating",
+                            "displayName": "Total heating energy",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "9bef3a6c-4a6b-4023-a82e-c5263765310d",
+                            "name": "energyProducedCooling",
+                            "displayName": "Total cooling energy",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "0b5114ec-295f-42e6-a058-3e61f6da46b0",
+                            "name": "energyProducedHotWater",
+                            "displayName": "Total hot water energy",
+                            "type": "double",
+                            "unit": "KiloWattHour",
                             "defaultValue": 0.00
                         },
                         {
                             "id": "e539366b-44da-4119-b11b-497bcdb1f522",
                             "name": "mode",
                             "displayName": "Mode",
-                            "displayNameEvent": "Mode changed",
                             "type": "QString",
                             "defaultValue": "Off",
                             "possibleValues": [
@@ -125,12 +149,26 @@
                             ]
                         },
                         {
+                            "id": "fb71c8f1-2b77-403d-b2ad-f3cba9baf237",
+                            "name": "operationMode",
+                            "displayName": "Operation mode",
+                            "type": "QString",
+                            "defaultValue": "Automatic",
+                            "possibleValues": [
+                                "Standby",
+                                "Automatic",
+                                "Absent",
+                                "Hot water only",
+                                "Heating cooling only"
+                            ],
+                            "cached": false
+                        },
+                        {
                             "id": "49fd83ee-ddf3-4477-9ee4-e01c53283b43",
                             "name": "error",
                             "displayName": "Error",
-                            "displayNameEvent": "Error changed",
-                            "type": "bool",
-                            "defaultValue": false
+                            "type": "int",
+                            "defaultValue": 0
                         }
                     ]
                 }
