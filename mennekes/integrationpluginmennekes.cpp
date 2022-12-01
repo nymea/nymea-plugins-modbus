@@ -404,6 +404,10 @@ void IntegrationPluginMennekes::setupAmtronECUConnection(ThingSetupInfo *info)
 
     connect(amtronECUConnection, &AmtronECUModbusTcpConnection::cpSignalStateChanged, thing, [thing](AmtronECUModbusTcpConnection::CPSignalState cpSignalState) {
         qCDebug(dcMennekes()) << "CP signal state changed" << cpSignalState;
+        if (cpSignalState == AmtronECUModbusTcpConnection::CPSignalStateE) {
+            // State E (Off): don't update as the wallbox goes to this state for a few seconds regardless of the actual plugged in state.
+            return;
+        }
         thing->setStateValue(amtronECUPluggedInStateTypeId, cpSignalState >= AmtronECUModbusTcpConnection::CPSignalStateB);
     });
     connect(amtronECUConnection, &AmtronECUModbusTcpConnection::signalledCurrentChanged, thing, [](quint16 signalledCurrent) {
