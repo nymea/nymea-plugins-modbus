@@ -94,8 +94,10 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
         webBoxDiscovery->startDiscovery();
 
     } else if (info->thingClassId() == speedwireMeterThingClassId) {
+
+        // Note: does not require the network device discovery...
         SpeedwireDiscovery *speedwireDiscovery = new SpeedwireDiscovery(hardwareManager()->networkDeviceDiscovery(), info);
-        if (!speedwireDiscovery->initialize()) {
+        if (!speedwireDiscovery->initialize(SpeedwireInterface::DeviceTypeMeter)) {
             qCWarning(dcSma()) << "Could not discovery inverter. The speedwire interface initialization failed.";
             info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Unable to discover the network."));
             return;
@@ -107,27 +109,27 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
 
             ThingDescriptors descriptors;
             foreach (const SpeedwireDiscovery::SpeedwireDiscoveryResult &result, speedwireDiscovery->discoveryResult()) {
-                if (result.deviceType == SpeedwireInterface::DeviceTypeMeter) {
-                    if (result.serialNumber == 0)
-                        continue;
 
-                    ThingDescriptor descriptor(speedwireMeterThingClassId, "SMA Energy Meter", "Serial: " + QString::number(result.serialNumber) + " - " + result.address.toString());
-                    // We found an energy meter, let's check if we already added this one
-                    foreach (Thing *existingThing, myThings()) {
-                        if (existingThing->paramValue(speedwireMeterThingSerialNumberParamTypeId).toUInt() == result.serialNumber) {
-                            descriptor.setThingId(existingThing->id());
-                            break;
-                        }
+                if (result.deviceType != SpeedwireInterface::DeviceTypeMeter)
+                    continue;
+
+                if (result.serialNumber == 0)
+                    continue;
+
+                ThingDescriptor descriptor(speedwireMeterThingClassId, "SMA Energy Meter (" + QString::number(result.serialNumber) + ")" , result.address.toString());
+                // We found an energy meter, let's check if we already added this one
+                foreach (Thing *existingThing, myThings()) {
+                    if (existingThing->paramValue(speedwireMeterThingSerialNumberParamTypeId).toUInt() == result.serialNumber) {
+                        descriptor.setThingId(existingThing->id());
+                        break;
                     }
-
-                    ParamList params;
-                    params << Param(speedwireMeterThingHostParamTypeId, result.address.toString());
-                    params << Param(speedwireMeterThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
-                    params << Param(speedwireMeterThingSerialNumberParamTypeId, result.serialNumber);
-                    params << Param(speedwireMeterThingModelIdParamTypeId, result.modelId);
-                    descriptor.setParams(params);
-                    descriptors.append(descriptor);
                 }
+
+                ParamList params;
+                params << Param(speedwireMeterThingSerialNumberParamTypeId, result.serialNumber);
+                params << Param(speedwireMeterThingModelIdParamTypeId, result.modelId);
+                descriptor.setParams(params);
+                descriptors.append(descriptor);
             }
 
             info->addThingDescriptors(descriptors);
@@ -135,9 +137,16 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
         });
 
         speedwireDiscovery->startDiscovery();
+
     } else if (info->thingClassId() == speedwireInverterThingClassId) {
+        if (!hardwareManager()->networkDeviceDiscovery()->available()) {
+            qCWarning(dcSma()) << "Failed to discover network devices. The network device discovery is not available.";
+            info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("Unable to discover devices in your network."));
+            return;
+        }
+
         SpeedwireDiscovery *speedwireDiscovery = new SpeedwireDiscovery(hardwareManager()->networkDeviceDiscovery(), info);
-        if (!speedwireDiscovery->initialize()) {
+        if (!speedwireDiscovery->initialize(SpeedwireInterface::DeviceTypeInverter)) {
             qCWarning(dcSma()) << "Could not discovery inverter. The speedwire interface initialization failed.";
             info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Unable to discover the network."));
             return;
@@ -149,27 +158,29 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
 
             ThingDescriptors descriptors;
             foreach (const SpeedwireDiscovery::SpeedwireDiscoveryResult &result, speedwireDiscovery->discoveryResult()) {
-                if (result.deviceType == SpeedwireInterface::DeviceTypeInverter) {
-                    if (result.serialNumber == 0)
-                        continue;
 
-                    ThingDescriptor descriptor(speedwireInverterThingClassId, Sma::getModelName(result.modelId), "Serial: " + QString::number(result.serialNumber) + " - " + result.address.toString());
-                    // We found an energy meter, let's check if we already added this one
-                    foreach (Thing *existingThing, myThings()) {
-                        if (existingThing->paramValue(speedwireInverterThingSerialNumberParamTypeId).toUInt() == result.serialNumber) {
-                            descriptor.setThingId(existingThing->id());
-                            break;
-                        }
+                if (result.deviceType != SpeedwireInterface::DeviceTypeInverter)
+                    continue;
+
+                if (result.serialNumber == 0)
+                    continue;
+
+                ThingDescriptor descriptor(speedwireInverterThingClassId, "SMA inverter (" + QString::number(result.serialNumber) + ")", result.address.toString());
+                // We found an inverter, let's check if we already added this one
+                foreach (Thing *existingThing, myThings()) {
+                    if (existingThing->paramValue(speedwireInverterThingSerialNumberParamTypeId).toUInt() == result.serialNumber) {
+                        descriptor.setThingId(existingThing->id());
+                        break;
                     }
-
-                    ParamList params;
-                    params << Param(speedwireInverterThingHostParamTypeId, result.address.toString());
-                    params << Param(speedwireInverterThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
-                    params << Param(speedwireInverterThingSerialNumberParamTypeId, result.serialNumber);
-                    params << Param(speedwireInverterThingModelIdParamTypeId, result.modelId);
-                    descriptor.setParams(params);
-                    descriptors.append(descriptor);
                 }
+
+                ParamList params;
+                params << Param(speedwireInverterThingHostParamTypeId, result.address.toString());
+                params << Param(speedwireInverterThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
+                params << Param(speedwireInverterThingSerialNumberParamTypeId, result.serialNumber);
+                params << Param(speedwireInverterThingModelIdParamTypeId, result.modelId);
+                descriptor.setParams(params);
+                descriptors.append(descriptor);
             }
 
             info->addThingDescriptors(descriptors);
@@ -177,6 +188,7 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
         });
 
         speedwireDiscovery->startDiscovery();
+
     } else if (info->thingClassId() == modbusInverterThingClassId) {
         if (!hardwareManager()->networkDeviceDiscovery()->available()) {
             qCWarning(dcSma()) << "The network discovery is not available on this platform.";
@@ -289,16 +301,20 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
 
     } else if (thing->thingClassId() == speedwireMeterThingClassId) {
 
-        QHostAddress address = QHostAddress(thing->paramValue(speedwireMeterThingHostParamTypeId).toString());
+        // Create the multicast interface if not created already.
+        if (!m_multicastInterface)
+            m_multicastInterface = new SpeedwireInterface(true, this);
+
         quint32 serialNumber = static_cast<quint32>(thing->paramValue(speedwireMeterThingSerialNumberParamTypeId).toUInt());
         quint16 modelId = static_cast<quint16>(thing->paramValue(speedwireMeterThingModelIdParamTypeId).toUInt());
 
-        if (m_speedwireMeters.contains(thing)) {
+        // Handle reconfigure
+        if (m_speedwireMeters.contains(thing))
             m_speedwireMeters.take(thing)->deleteLater();
-        }
 
-        SpeedwireMeter *meter = new SpeedwireMeter(address, modelId, serialNumber, this);
+        SpeedwireMeter *meter = new SpeedwireMeter(m_multicastInterface, modelId, serialNumber, this);
         if (!meter->initialize()) {
+            meter->deleteLater();
             qCWarning(dcSma()) << "Setup failed. Could not initialize meter interface.";
             info->finish(Thing::ThingErrorHardwareFailure);
             return;
@@ -520,6 +536,12 @@ void IntegrationPluginSma::thingRemoved(Thing *thing)
 
     if (m_monitors.contains(thing)) {
         hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+    }
+
+    if (myThings().filterByThingClassId(speedwireMeterThingClassId).isEmpty() && m_multicastInterface) {
+        // Delete shared multicast socket...
+        m_multicastInterface->deleteLater();
+        m_multicastInterface = nullptr;
     }
 
     if (myThings().isEmpty()) {

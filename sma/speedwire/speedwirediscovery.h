@@ -55,7 +55,7 @@ public:
     explicit SpeedwireDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, QObject *parent = nullptr);
     ~SpeedwireDiscovery();
 
-    bool initialize();
+    bool initialize(SpeedwireInterface::DeviceType deviceType = SpeedwireInterface::DeviceTypeUnknown);
     bool initialized() const;
 
     bool startDiscovery();
@@ -68,6 +68,7 @@ signals:
 
 private:
     NetworkDeviceDiscovery *m_networkDeviceDiscovery = nullptr;
+    SpeedwireInterface::DeviceType m_deviceType = SpeedwireInterface::DeviceTypeUnknown;
     QUdpSocket *m_multicastSocket = nullptr;
     QUdpSocket *m_unicastSocket = nullptr;
     QHostAddress m_multicastAddress =  Speedwire::multicastAddress();
@@ -75,12 +76,19 @@ private:
     bool m_initialized = false;
 
     // Discovery
-    QTimer m_discoveryTimer;
-    bool m_discoveryRunning = false;
+    QTimer m_multicastSearchRequestTimer;
     NetworkDeviceInfos m_networkDeviceInfos;
     QHash<QHostAddress, SpeedwireDiscoveryResult> m_results;
 
+    bool m_multicastRunning = false;
+    bool m_unicastRunning = false;
+
+    bool setupMulticastSocket();
     void startMulticastDiscovery();
+
+    bool setupUnicastSocket();
+    void startUnicastDiscovery();
+    ;
     void sendUnicastDiscoveryRequest(const QHostAddress &targetHostAddress);
 
 private slots:
@@ -93,7 +101,9 @@ private slots:
 
     void sendDiscoveryRequest();
 
-    void onDiscoveryProcessFinished();
+    void evaluateDiscoveryFinished();
+
+    void finishDiscovery();
 
 };
 

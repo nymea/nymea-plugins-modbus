@@ -31,13 +31,11 @@
 #include "speedwireinterface.h"
 #include "extern-plugininfo.h"
 
-SpeedwireInterface::SpeedwireInterface(const QHostAddress &address, bool multicast, QObject *parent) :
+SpeedwireInterface::SpeedwireInterface(bool multicast, QObject *parent) :
     QObject(parent),
-    m_address(address),
     m_multicast(multicast)
 {
 
-    qCDebug(dcSma()) << "SpeedwireInterface: Create interface for" << address.toString() << (multicast ? "multicast" : "unicast");
     m_socket = new QUdpSocket(this);
     connect(m_socket, &QUdpSocket::readyRead, this, &SpeedwireInterface::readPendingDatagrams);
     connect(m_socket, &QUdpSocket::stateChanged, this, &SpeedwireInterface::onSocketStateChanged);
@@ -49,8 +47,18 @@ SpeedwireInterface::~SpeedwireInterface()
     deinitialize();
 }
 
-bool SpeedwireInterface::initialize()
+bool SpeedwireInterface::initialize(const QHostAddress &address)
 {
+    if (m_initialized && !m_multicast) {
+        qCWarning(dcSma()) << "Try to initialize an already initialized speed wire interface. Please deinitialize() before calling this method again.";
+        return false;
+    }
+
+    // If already initialized and multicast, nothing could habe changed...done here
+    if (m_initialized && m_multicast)
+        return true;
+
+
     if (!m_socket->bind(QHostAddress::AnyIPv4, m_port, QAbstractSocket::ShareAddress | QAbstractSocket::ReuseAddressHint)) {
         qCWarning(dcSma()) << "SpeedwireInterface: Initialization failed. Could not bind to port" << m_port;
         return false;
@@ -61,7 +69,8 @@ bool SpeedwireInterface::initialize()
         return false;
     }
 
-    qCDebug(dcSma()) << "SpeedwireInterface: Interface initialized successfully.";
+    qCDebug(dcSma()) << "SpeedwireInterface: Interface initialized successfully for" << address.toString() << (m_multicast ? "multicast" : "unicast");
+    m_address = address;
     m_initialized = true;
     return m_initialized;
 }
@@ -75,9 +84,15 @@ void SpeedwireInterface::deinitialize()
             }
         }
 
+        m_address = QHostAddress();
         m_socket->close();
         m_initialized = false;
     }
+}
+
+bool SpeedwireInterface::multicast() const
+{
+    return m_multicast;
 }
 
 bool SpeedwireInterface::initialized() const
@@ -113,13 +128,13 @@ void SpeedwireInterface::readPendingDatagrams()
         datagram.resize(m_socket->pendingDatagramSize());
         m_socket->readDatagram(datagram.data(), datagram.size(), &senderAddress, &senderPort);
 
-        // Process only data coming from our target address
-        if (senderAddress != m_address)
+        // Process only data coming from our target address if there is any
+        if (!m_address.isNull() && senderAddress != m_address)
             continue;
 
         qCDebug(dcSma()) << "SpeedwireInterface: Received data from" << QString("%1:%2").arg(senderAddress.toString()).arg(senderPort);
         //qCDebug(dcSma()) << "SpeedwireInterface: " << datagram.toHex();
-        emit dataReceived(datagram);
+        emit dataReceived(senderAddress, senderPort, datagram);
     }
 }
 

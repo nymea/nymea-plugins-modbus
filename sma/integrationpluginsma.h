@@ -40,6 +40,7 @@
 #include "sunnywebbox/sunnywebbox.h"
 #include "speedwire/speedwiremeter.h"
 #include "speedwire/speedwireinverter.h"
+#include "speedwire/speedwireinterface.h"
 
 #include "smainvertermodbustcpconnection.h"
 
@@ -78,6 +79,9 @@ private:
     QHash<Thing *, SpeedwireMeter *> m_speedwireMeters;
     QHash<Thing *, SpeedwireInverter *> m_speedwireInverters;
     QHash<Thing *, SmaInverterModbusTcpConnection *> m_modbusInverters;
+
+    // Shared interface accross meters
+    SpeedwireInterface *m_multicastInterface = nullptr;
 
     // Sma modbus data validation
     bool isModbusValueValid(quint32 value);

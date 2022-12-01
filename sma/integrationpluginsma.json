@@ -91,23 +91,6 @@
                     "interfaces": [ "energymeter" ],
                     "paramTypes": [
                         {
-                            "id": "d90193e6-a996-4e49-bf6d-564d596d7e74",
-                            "name": "host",
-                            "displayName": "Host address",
-                            "type": "QString",
-                            "inputType": "IPv4Address",
-                            "defaultValue": "192.168.0.168"
-                        },
-                        {
-                            "id": "2780eab7-1f1c-4cc7-a789-a8790329ca9e",
-                            "name": "macAddress",
-                            "displayName": "MAC address",
-                            "type": "QString",
-                            "inputType": "TextLine",
-                            "readOnly": true,
-                            "defaultValue": ""
-                        },
-                        {
                             "id": "7c81a0c5-9bc6-43bb-a01a-4de5fe656bba",
                             "name": "serialNumber",
                             "displayName": "Serial number",

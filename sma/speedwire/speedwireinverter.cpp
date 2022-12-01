@@ -40,13 +40,13 @@ SpeedwireInverter::SpeedwireInverter(const QHostAddress &address, quint16 modelI
     m_serialNumber(serialNumber)
 {
     qCDebug(dcSma()) << "Inverter: setup interface on" << m_address.toString();
-    m_interface = new SpeedwireInterface(m_address, false, this);
+    m_interface = new SpeedwireInterface(false, this);
     connect(m_interface, &SpeedwireInterface::dataReceived, this, &SpeedwireInverter::processData);
 }
 
 bool SpeedwireInverter::initialize()
 {
-    return m_interface->initialize();
+    return m_interface->initialize(m_address);
 }
 
 bool SpeedwireInverter::initialized() const
@@ -976,8 +976,12 @@ void SpeedwireInverter::setReachable(bool reachable)
     emit reachableChanged(m_reachable);
 }
 
-void SpeedwireInverter::processData(const QByteArray &data)
+void SpeedwireInverter::processData(const QHostAddress &senderAddress, quint16 senderPort, const QByteArray &data)
 {
+    // Note: the interface is already filtering out data from other hosts m_address
+    Q_UNUSED(senderAddress)
+    Q_UNUSED(senderPort)
+
     if (data.size() < 18) {
         qCDebug(dcSma()) << "Inverter: The received datagram is to short to be a SMA speedwire message. Ignoring data...";
         return;
