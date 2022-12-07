@@ -63,7 +63,7 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
             webBoxDiscovery->deleteLater();
             ThingDescriptors descriptors;
             foreach (const NetworkDeviceInfo &networkDeviceInfo, webBoxDiscovery->discoveryResults()) {
-                QString title = networkDeviceInfo.hostName() + " (" + networkDeviceInfo.address().toString() + ")";
+                QString title = "SMA Sunny WebBox (" + networkDeviceInfo.address().toString() + ")";
                 QString description;
                 if (networkDeviceInfo.macAddressManufacturer().isEmpty()) {
                     description = networkDeviceInfo.macAddress();
@@ -290,13 +290,12 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
 
         QString requestId = sunnyWebBox->getPlantOverview();
         connect(sunnyWebBox, &SunnyWebBox::plantOverviewReceived, info, [=] (const QString &messageId, SunnyWebBox::Overview overview) {
-            qCDebug(dcSma()) << "Received plant overview" << messageId << "Finish setup";
-            Q_UNUSED(overview)
-
+            qCDebug(dcSma()) << "Received plant overview" << messageId << "finish setup";
             info->finish(Thing::ThingErrorNoError);
             connect(sunnyWebBox, &SunnyWebBox::connectedChanged, this, &IntegrationPluginSma::onConnectedChanged);
             connect(sunnyWebBox, &SunnyWebBox::plantOverviewReceived, this, &IntegrationPluginSma::onPlantOverviewReceived);
             m_sunnyWebBoxes.insert(info->thing(), sunnyWebBox);
+            onPlantOverviewReceived(messageId, overview);
         });
 
     } else if (thing->thingClassId() == speedwireMeterThingClassId) {
@@ -569,7 +568,7 @@ void IntegrationPluginSma::onPlantOverviewReceived(const QString &messageId, Sun
     if (!thing)
         return;
 
-    thing->setStateValue(sunnyWebBoxCurrentPowerStateTypeId, overview.power);
+    thing->setStateValue(sunnyWebBoxCurrentPowerStateTypeId, -overview.power);
     thing->setStateValue(sunnyWebBoxDayEnergyProducedStateTypeId, overview.dailyYield);
     thing->setStateValue(sunnyWebBoxTotalEnergyProducedStateTypeId, overview.totalYield);
     thing->setStateValue(sunnyWebBoxModeStateTypeId, overview.status);
@@ -587,9 +586,9 @@ void IntegrationPluginSma::setupRefreshTimer()
 
     m_refreshTimer = hardwareManager()->pluginTimerManager()->registerTimer(5);
     connect(m_refreshTimer, &PluginTimer::timeout, this, [=](){
-        foreach (Thing *thing, myThings().filterByThingClassId(sunnyWebBoxThingClassId)) {
-            SunnyWebBox *sunnyWebBox = m_sunnyWebBoxes.value(thing);
-            sunnyWebBox->getPlantOverview();
+        foreach (SunnyWebBox *webbox, m_sunnyWebBoxes) {
+            // Max refresh rate according to docs should be 30 seconds, will be handled in the webbox class
+            webbox->getPlantOverview();
         }
 
         foreach (SpeedwireInverter *inverter, m_speedwireInverters) {
