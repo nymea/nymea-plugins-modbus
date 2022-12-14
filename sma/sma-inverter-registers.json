@@ -1,0 +1,269 @@
+{
+    "className": "SmaInverter",
+    "protocol": "TCP",
+    "endianness": "BigEndian",
+    "errorLimitUntilNotReachable": 20,
+    "checkReachableRegister": "totalYield",
+    "enums": [
+        {
+            "name": "Condition",
+            "values": [
+                {
+                    "key": "Fault",
+                    "value": 35
+                },
+                {
+                    "key": "Off",
+                    "value": 303
+                },
+                {
+                    "key": "Ok",
+                    "value": 307
+                },
+                {
+                    "key": "Warning",
+                    "value": 455
+                }
+            ]
+        },
+        {
+            "name": "RecommendedAction",
+            "values": [
+                {
+                    "key": "ContactManufacturer",
+                    "value": 336
+                },
+                {
+                    "key": "ContactInstaller",
+                    "value": 337
+                },
+                {
+                    "key": "Invalid",
+                    "value": 338
+                },
+                {
+                    "key": "None",
+                    "value": 887
+                }
+            ]
+        }
+    ],
+    "blocks": [
+        {
+            "id": "identification",
+            "readSchedule": "init",
+            "registers": [
+                {
+                    "id": "deviceClass",
+                    "address": 30051,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Device class",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "modelIdentifier",
+                    "address": 30053,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Device type (model identifier)",
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "information",
+            "readSchedule": "init",
+            "registers": [
+                {
+                    "id": "serialNumber",
+                    "address": 30057,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Serial number",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "softwarePackage",
+                    "address": 30059,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Firmware version",
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "yield",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "totalYield",
+                    "address": 30513,
+                    "size": 4,
+                    "type": "uint64",
+                    "readSchedule": "update",
+                    "registerType": "holdingRegister",
+                    "description": "Total yield",
+                    "unit": "Wh",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "dailyYield",
+                    "address": 30517,
+                    "size": 4,
+                    "type": "uint64",
+                    "readSccalchedule": "update",
+                    "registerType": "holdingRegister",
+                    "description": "Today yield",
+                    "unit": "Wh",
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "data",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "currentPower",
+                    "address": 30775,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "holdingRegister",
+                    "description": "Current power",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "currentPowerPhaseA",
+                    "address": 30777,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "holdingRegister",
+                    "description": "Current power L1",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "currentPowerPhaseB",
+                    "address": 30779,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "holdingRegister",
+                    "description": "Current power L2",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "currentPowerPhaseC",
+                    "address": 30781,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "holdingRegister",
+                    "description": "Current power L3",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "gridVoltagePhaseA",
+                    "address": 30783,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Grid voltage L1",
+                    "unit": "V",
+                        "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "gridVoltagePhaseB",
+                    "address": 30785,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Grid voltage L2",
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "gridVoltagePhaseC",
+                    "address": 30787,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Grid voltage L3",
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "gridCurrent",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "gridCurrentPhaseA",
+                    "address": 30977,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "holdingRegister",
+                    "description": "Grid current L1",
+                    "unit": "A",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "gridCurrentPhaseB",
+                    "address": 30979,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "holdingRegister",
+                    "description": "Grid current L2",
+                    "unit": "A",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "gridCurrentPhaseC",
+                    "address": 30981,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "holdingRegister",
+                    "description": "Grid current L3",
+                    "unit": "A",
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        }
+    ],
+    "registers": [
+        {
+            "id": "deviceName",
+            "address": 40631,
+            "size": 32,
+            "type": "string",
+            "readSchedule": "init",
+            "registerType": "holdingRegister",
+            "description": "Device name",
+            "access": "RO"
+        }
+    ]
+}

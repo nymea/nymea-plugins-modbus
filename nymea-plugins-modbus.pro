@@ -18,6 +18,7 @@ PLUGIN_DIRS = \
     mypv                    \
     phoenixconnect          \
     schrack                 \
+    sma                     \
     stiebeleltron           \
     sunspec                 \
     unipi                   \
