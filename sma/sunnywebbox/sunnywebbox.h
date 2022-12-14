@@ -38,11 +38,11 @@
 #include <QJsonObject>
 #include <QHostAddress>
 #include <QUdpSocket>
+#include <QDateTime>
 
 class SunnyWebBox : public QObject
 {
     Q_OBJECT
-
 public:
     struct Overview {
         int power;
@@ -96,10 +96,11 @@ public:
     static QString generateRequestId();
 
 private:
+    NetworkAccessManager *m_networkManager = nullptr;
     bool m_connected = false;
     QHostAddress m_hostAddresss;
     QString m_macAddress;
-    NetworkAccessManager *m_networkManager = nullptr;
+    QDateTime m_lastRequest;
 
     QString sendMessage(const QHostAddress &address, const QString &procedure);
     QString sendMessage(const QHostAddress &address, const QString &procedure, const QJsonObject &params);

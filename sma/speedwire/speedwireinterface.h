@@ -48,11 +48,13 @@ public:
     };
     Q_ENUM(DeviceType)
 
-    explicit SpeedwireInterface(const QHostAddress &address, bool multicast, QObject *parent = nullptr);
+    explicit SpeedwireInterface(bool multicast, QObject *parent = nullptr);
     ~SpeedwireInterface();
 
-    bool initialize();
+    bool initialize(const QHostAddress &address = QHostAddress());
     void deinitialize();
+
+    bool multicast() const;
 
     bool initialized() const;
 
@@ -63,7 +65,7 @@ public slots:
     void sendData(const QByteArray &data);
 
 signals:
-    void dataReceived(const QByteArray &data);
+    void dataReceived(const QHostAddress &senderAddress, quint16 senderPort, const QByteArray &data);
 
 private:
     QUdpSocket *m_socket = nullptr;

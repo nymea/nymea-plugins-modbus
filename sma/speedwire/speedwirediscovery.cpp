@@ -39,33 +39,17 @@ SpeedwireDiscovery::SpeedwireDiscovery(NetworkDeviceDiscovery *networkDeviceDisc
 {
     // More details: https://github.com/RalfOGit/libspeedwire/
 
+    // Request: 534d4100000402a00000000100260010 606509a0 ffffffffffff0000 7d0052be283a0000 000000000180 00020000 00000000 00000000 00000000  => command = 0x00000200, first = 0x00000000; last = 0x00000000; trailer = 0x00000000
+    // Response 534d4100000402a000000001004e0010 606513a0 7d0052be283a00c0 7a01842a71b30000 000000000180 01020000 00000000 00000000 00030000 00ff0000 00000000 01007a01 842a71b3 00000a00 0c000000 00000000 00000000 01010000 00000000
 
-
-    //    // Request: 534d4100000402a00000000100260010 606509a0 ffffffffffff0000 7d0052be283a0000 000000000180 00020000 00000000 00000000 00000000  => command = 0x00000200, first = 0x00000000; last = 0x00000000; trailer = 0x00000000
-    //    // Response 534d4100000402a000000001004e0010 606513a0 7d0052be283a00c0 7a01842a71b30000 000000000180 01020000 00000000 00000000 00030000 00ff0000 00000000 01007a01 842a71b3 00000a00 0c000000 00000000 00000000 01010000 00000000
-
-    //    qCDebug(dcSma()) << "SpeedwireDiscovery: Create speed wire interface for multicast" << m_multicastAddress.toString() << "on port" << m_port;
-    //    QByteArray exampleData = QByteArray::fromHex("534d4100000402a000000001024400106069010e714369aee618a41600010400000000000001080000000021391229100002040000004415000208000000001575a137d800030400000000000003080000000003debed0e800040400000017c6000408000000001008c2070000090400000000000009080000000027c77bed20000a04000000481d000a08000000001722823410000d0400000003b00015040000000000001508000000000d1e1e0e3000160400000015120016080000000006c5a2d8b800170400000000000017080000000001bd6f680000180400000007990018080000000004def712b8001d040000000000001d08000000000eeefaafd0001e040000001666001e0800000000074b38bf88001f040000000a300020040000037bcb00210400000003ad0029040000000000002908000000000a9b1afec8002a040000001a81002a08000000000803e62b88002b040000000000002b080000000001511459b8002c0400000006d5002c0800000000052c8455b80031040000000000003108000000000cf83b37100032040000001b5f0032080000000008a6e257f80033040000000c3f003404000003747900350400000003c8003d040000000000003d08000000000a53d0ba08003e040000001482003e080000000007800fd188003f040000000000003f080000000001185820c8004004000000095800400800000000064563b1900045040000000000004508000000000d26d3eae0004604000000168900460800000000082b4fc5a80047040000000a440048040000037ed1004904000000038e900000000102085200000000");
-    //    processDatagram(QHostAddress("127.0.0.1"), m_port, exampleData);
-
-    m_multicastSocket = new QUdpSocket(this);
-    connect(m_multicastSocket, &QUdpSocket::readyRead, this, &SpeedwireDiscovery::readPendingDatagramsMulticast);
-    connect(m_multicastSocket, &QUdpSocket::stateChanged, this, &SpeedwireDiscovery::onSocketStateChanged);
-    connect(m_multicastSocket, SIGNAL(error(QAbstractSocket::SocketError)),this, SLOT(onSocketError(QAbstractSocket::SocketError)));
-
-    m_unicastSocket = new QUdpSocket(this);
-    connect(m_unicastSocket, &QUdpSocket::readyRead, this, &SpeedwireDiscovery::readPendingDatagramsUnicast);
-    connect(m_unicastSocket, &QUdpSocket::stateChanged, this, &SpeedwireDiscovery::onSocketStateChanged);
-    connect(m_unicastSocket, SIGNAL(error(QAbstractSocket::SocketError)),this, SLOT(onSocketError(QAbstractSocket::SocketError)));
-
-    m_discoveryTimer.setInterval(1000);
-    m_discoveryTimer.setSingleShot(false);
-    connect(&m_discoveryTimer, &QTimer::timeout, this, &SpeedwireDiscovery::sendDiscoveryRequest);
+    m_multicastSearchRequestTimer.setInterval(1000);
+    m_multicastSearchRequestTimer.setSingleShot(false);
+    connect(&m_multicastSearchRequestTimer, &QTimer::timeout, this, &SpeedwireDiscovery::sendDiscoveryRequest);
 }
 
 SpeedwireDiscovery::~SpeedwireDiscovery()
 {
-    if (m_initialized) {
+    if (m_initialized && m_multicastSocket) {
         if (!m_multicastSocket->leaveMulticastGroup(m_multicastAddress)) {
             qCWarning(dcSma()) << "SpeedwireDiscovery: Failed to leave multicast group" << m_multicastAddress.toString();
         }
@@ -74,30 +58,24 @@ SpeedwireDiscovery::~SpeedwireDiscovery()
     }
 }
 
-bool SpeedwireDiscovery::initialize()
+bool SpeedwireDiscovery::initialize(SpeedwireInterface::DeviceType deviceType)
 {
-    m_multicastSocket->close();
-    m_initialized = false;
-
-    // Setup multicast socket
-    if (!m_multicastSocket->bind(QHostAddress::AnyIPv4, m_port, QAbstractSocket::ShareAddress | QAbstractSocket::ReuseAddressHint)) {
-        qCWarning(dcSma()) << "SpeedwireDiscovery: Initialization failed. Could not bind multicast socket to port" << m_port << m_multicastSocket->errorString();
-        return false;
+    m_deviceType = deviceType;
+    switch(deviceType) {
+    case SpeedwireInterface::DeviceTypeMeter:
+        m_initialized = setupMulticastSocket();
+        break;
+    case SpeedwireInterface::DeviceTypeInverter:
+        m_initialized = setupUnicastSocket();
+        break;
+    default:
+        m_initialized = setupMulticastSocket() && setupUnicastSocket();
+        break;
     }
 
-    if (!m_multicastSocket->joinMulticastGroup(m_multicastAddress)) {
-        qCWarning(dcSma()) << "SpeedwireDiscovery: Initialization failed. Could not join multicast group" << m_multicastAddress.toString() << m_multicastSocket->errorString();
-        return false;
-    }
+    if (m_initialized)
+        qCDebug(dcSma()) << "SpeedwireDiscovery: Interfaces initialized successfully.";
 
-    // Setup unicast socket
-    if (!m_unicastSocket->bind(QHostAddress::AnyIPv4, m_port, QAbstractSocket::ShareAddress | QAbstractSocket::ReuseAddressHint)) {
-        qCWarning(dcSma()) << "SpeedwireDiscovery: Initialization failed. Could not bind to port" << m_port << m_multicastSocket->errorString();
-        return false;
-    }
-
-    qCDebug(dcSma()) << "SpeedwireDiscovery: Interface initialized successfully.";
-    m_initialized = true;
     return m_initialized;
 }
 
@@ -108,10 +86,7 @@ bool SpeedwireDiscovery::initialized() const
 
 bool SpeedwireDiscovery::startDiscovery()
 {
-    // 1. Discover all network devices
-    // 2. Send upd multicast and unicast messages to verify if it is a SMA speedwire device
-
-    if (m_discoveryRunning)
+    if (discoveryRunning())
         return true;
 
     if (!m_initialized) {
@@ -119,31 +94,31 @@ bool SpeedwireDiscovery::startDiscovery()
         return false;
     }
 
-    // CLean up
+    // Start clean
     m_results.clear();
     m_networkDeviceInfos.clear();
+    m_multicastRunning = false;
+    m_unicastRunning = false;
 
-    qCDebug(dcSma()) << "SpeedwireDiscovery: Start discovering network...";
-    NetworkDeviceDiscoveryReply *discoveryReply = m_networkDeviceDiscovery->discover();
-    connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
-    connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
-        qCDebug(dcSma()) << "Discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "devices";
-        m_networkDeviceInfos = discoveryReply->networkDeviceInfos();
-
-        foreach (const NetworkDeviceInfo &networkDeviceInfo, discoveryReply->networkDeviceInfos()) {
-            // 2. Send unicast to all results and start requesting on multicast address
-            sendUnicastDiscoveryRequest(networkDeviceInfo.address());
-        }
-
+    switch(m_deviceType) {
+    case SpeedwireInterface::DeviceTypeMeter:
         startMulticastDiscovery();
-    });
+        break;
+    case SpeedwireInterface::DeviceTypeInverter:
+        startUnicastDiscovery();
+        break;
+    default:
+        startUnicastDiscovery();
+        startMulticastDiscovery();
+        break;
+    }
 
     return true;
 }
 
 bool SpeedwireDiscovery::discoveryRunning() const
 {
-    return m_discoveryRunning;
+    return m_unicastRunning || m_multicastRunning;
 }
 
 QList<SpeedwireDiscovery::SpeedwireDiscoveryResult> SpeedwireDiscovery::discoveryResult() const
@@ -151,15 +126,92 @@ QList<SpeedwireDiscovery::SpeedwireDiscoveryResult> SpeedwireDiscovery::discover
     return m_results.values();
 }
 
+bool SpeedwireDiscovery::setupMulticastSocket()
+{
+    if (m_multicastSocket)
+        return true;
+
+    m_multicastSocket = new QUdpSocket(this);
+    connect(m_multicastSocket, &QUdpSocket::readyRead, this, &SpeedwireDiscovery::readPendingDatagramsMulticast);
+    connect(m_multicastSocket, &QUdpSocket::stateChanged, this, &SpeedwireDiscovery::onSocketStateChanged);
+    connect(m_multicastSocket, SIGNAL(error(QAbstractSocket::SocketError)),this, SLOT(onSocketError(QAbstractSocket::SocketError)));
+
+    // Setup multicast socket
+    if (!m_multicastSocket->bind(QHostAddress::AnyIPv4, m_port, QAbstractSocket::ShareAddress | QAbstractSocket::ReuseAddressHint)) {
+        qCWarning(dcSma()) << "SpeedwireDiscovery: Initialization failed. Could not bind multicast socket to port" << m_port << m_multicastSocket->errorString();
+        m_multicastSocket->deleteLater();
+        m_multicastSocket = nullptr;
+        return false;
+    }
+
+    if (!m_multicastSocket->joinMulticastGroup(m_multicastAddress)) {
+        qCWarning(dcSma()) << "SpeedwireDiscovery: Initialization failed. Could not join multicast group" << m_multicastAddress.toString() << m_multicastSocket->errorString();
+        m_multicastSocket->deleteLater();
+        m_multicastSocket = nullptr;
+        return false;
+    }
+
+    return true;
+}
+
 void SpeedwireDiscovery::startMulticastDiscovery()
 {
+    qCDebug(dcSma()) << "SpeedwireDiscovery: Start multicast discovery...";
+    m_multicastRunning = true;
+
     // Start sending multicast messages
     sendDiscoveryRequest();
 
-    m_discoveryRunning = true;
-    QTimer::singleShot(5000, this, &SpeedwireDiscovery::onDiscoveryProcessFinished);
+    // Give 5 seconds time, on one of the requests sent in this period the meter would have responded...
+    QTimer::singleShot(5000, this, [this](){
+        m_multicastRunning = false;
+        evaluateDiscoveryFinished();
+    });
 
-    m_discoveryTimer.start();
+    m_multicastSearchRequestTimer.start();
+}
+
+bool SpeedwireDiscovery::setupUnicastSocket()
+{
+    if (m_unicastSocket)
+        return true;
+
+    m_unicastSocket = new QUdpSocket(this);
+    connect(m_unicastSocket, &QUdpSocket::readyRead, this, &SpeedwireDiscovery::readPendingDatagramsUnicast);
+    connect(m_unicastSocket, &QUdpSocket::stateChanged, this, &SpeedwireDiscovery::onSocketStateChanged);
+    connect(m_unicastSocket, SIGNAL(error(QAbstractSocket::SocketError)),this, SLOT(onSocketError(QAbstractSocket::SocketError)));
+
+    // Setup unicast socket
+    if (!m_unicastSocket->bind(QHostAddress::AnyIPv4, m_port, QAbstractSocket::ShareAddress | QAbstractSocket::ReuseAddressHint)) {
+        qCWarning(dcSma()) << "SpeedwireDiscovery: Initialization failed. Could not bind to port" << m_port << m_multicastSocket->errorString();
+        m_unicastSocket->deleteLater();
+        m_unicastSocket = nullptr;
+        return false;
+    }
+
+    return true;
+}
+
+void SpeedwireDiscovery::startUnicastDiscovery()
+{
+    qCDebug(dcSma()) << "SpeedwireDiscovery: Start discovering network...";
+    m_unicastRunning = true;
+
+    NetworkDeviceDiscoveryReply *discoveryReply = m_networkDeviceDiscovery->discover();
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::networkDeviceInfoAdded, this, [this](const NetworkDeviceInfo &networkDeviceInfo){
+        m_networkDeviceInfos.append(networkDeviceInfo);
+        sendUnicastDiscoveryRequest(networkDeviceInfo.address());
+    });
+
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
+        qCDebug(dcSma()) << "Discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "network devices for unicast requests.";
+        // Wait some extra second in otder to give the last hosts joined some time to respond.
+        QTimer::singleShot(3000, this, [this](){
+            m_unicastRunning = false;
+            evaluateDiscoveryFinished();
+        });
+    });
 }
 
 void SpeedwireDiscovery::sendUnicastDiscoveryRequest(const QHostAddress &targetHostAddress)
@@ -206,7 +258,6 @@ void SpeedwireDiscovery::readPendingDatagramsUnicast()
     }
 }
 
-
 void SpeedwireDiscovery::onSocketError(QAbstractSocket::SocketError error)
 {
     qCDebug(dcSma()) << "SpeedwireDiscovery: Socket error" << error;
@@ -252,8 +303,7 @@ void SpeedwireDiscovery::processDatagram(const QHostAddress &senderAddress, quin
         if (!m_results.contains(senderAddress)) {
             qCDebug(dcSma()) << "SpeedwireDiscovery: --> Found SMA device on" << senderAddress.toString();
             if (!m_networkDeviceInfos.hasHostAddress(senderAddress)) {
-                qCWarning(dcSma()) << "SpeedwireDiscovery: Found SMA using UDP discovery but the host is not in the network discovery result list. Not adding to results" << senderAddress.toString();
-                return;
+                qCDebug(dcSma()) << "SpeedwireDiscovery: Found SMA using UDP discovery but the host is not in the network discovery result list. Not adding to results" << senderAddress.toString();
             }
 
             SpeedwireDiscoveryResult result;
@@ -327,22 +377,43 @@ void SpeedwireDiscovery::sendDiscoveryRequest()
     qCDebug(dcSma()) << "SpeedwireDiscovery: Sent successfully the discovery request to multicast address" << m_multicastAddress.toString();
 }
 
-void SpeedwireDiscovery::onDiscoveryProcessFinished()
+void SpeedwireDiscovery::evaluateDiscoveryFinished()
+{
+    if (!m_multicastRunning && !m_unicastRunning) {
+        finishDiscovery();
+    }
+}
+
+void SpeedwireDiscovery::finishDiscovery()
 {
     qCDebug(dcSma()) << "SpeedwireDiscovery: Discovey finished. Found" << m_results.count() << "SMA devices in the network";
-    m_discoveryTimer.stop();
-    m_discoveryRunning = false;
+    m_multicastSearchRequestTimer.stop();
+
+    if (m_multicastSocket) {
+        m_multicastSocket->close();
+        m_multicastSocket->deleteLater();
+        m_multicastSocket = nullptr;
+    }
+
+    if (m_unicastSocket) {
+        m_unicastSocket->close();
+        m_unicastSocket->deleteLater();
+        m_unicastSocket = nullptr;
+    }
 
     foreach (const SpeedwireDiscoveryResult &result, m_results) {
         qCDebug(dcSma()) << "SpeedwireDiscovery: ============================================";
         qCDebug(dcSma()) << "SpeedwireDiscovery: Device type:" << result.deviceType;
         qCDebug(dcSma()) << "SpeedwireDiscovery: Address:" << result.address.toString();
-        qCDebug(dcSma()) << "SpeedwireDiscovery: Hostname:" << result.networkDeviceInfo.hostName();
-        qCDebug(dcSma()) << "SpeedwireDiscovery: MAC:" << result.networkDeviceInfo.macAddress();
-        qCDebug(dcSma()) << "SpeedwireDiscovery: MAC manufacturer:" << result.networkDeviceInfo.macAddressManufacturer();
+        if (result.networkDeviceInfo.isValid()) {
+            qCDebug(dcSma()) << "SpeedwireDiscovery: Hostname:" << result.networkDeviceInfo.hostName();
+            qCDebug(dcSma()) << "SpeedwireDiscovery: MAC:" << result.networkDeviceInfo.macAddress();
+            qCDebug(dcSma()) << "SpeedwireDiscovery: MAC manufacturer:" << result.networkDeviceInfo.macAddressManufacturer();
+        }
         qCDebug(dcSma()) << "SpeedwireDiscovery: Model ID:" << result.modelId;
         qCDebug(dcSma()) << "SpeedwireDiscovery: Serial number:" << result.serialNumber;
     }
 
     emit discoveryFinished();
 }
+

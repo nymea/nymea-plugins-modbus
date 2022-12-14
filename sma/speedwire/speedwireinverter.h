@@ -193,7 +193,7 @@ private:
     void setReachable(bool reachable);
 
 private slots:
-    void processData(const QByteArray &data);
+    void processData(const QHostAddress &senderAddress, quint16 senderPort, const QByteArray &data);
 
     void onReplyTimeout();
     void onReplyFinished();

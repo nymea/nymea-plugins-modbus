@@ -37,8 +37,8 @@
 
 SunnyWebBox::SunnyWebBox(NetworkAccessManager *networkAccessManager, const QHostAddress &hostAddress,  QObject *parrent) :
     QObject(parrent),
-    m_hostAddresss(hostAddress),
-    m_networkManager(networkAccessManager)
+    m_networkManager(networkAccessManager),
+    m_hostAddresss(hostAddress)
 {
     qCDebug(dcSma()) << "SunnyWebBox: Creating Sunny Web Box connection";
 }
@@ -50,6 +50,16 @@ SunnyWebBox::~SunnyWebBox()
 
 QString SunnyWebBox::getPlantOverview()
 {
+    QDateTime currentDateTime = QDateTime::currentDateTime();
+
+    if (!m_lastRequest.isNull()) {
+        // According to the documentation, the interval between 2 requests should not be less than 30 seconds.
+        if (QDateTime::currentDateTime().toMSecsSinceEpoch() - m_lastRequest.toMSecsSinceEpoch() < 30000) {
+            return QString();
+        }
+    }
+
+    m_lastRequest = currentDateTime;
     return sendMessage(m_hostAddresss, "GetPlantOverview");
 }
 
@@ -163,10 +173,10 @@ QNetworkReply *SunnyWebBox::sendRequest(const QHostAddress &address, const QStri
     doc.setObject(obj);
 
     QUrl url;
+    url.setScheme("http");
     url.setHost(address.toString());
     url.setPath("/rpc");
     url.setPort(80);
-    url.setScheme("http");
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::KnownHeaders::ContentTypeHeader, "application/json");
     QByteArray data = doc.toJson(QJsonDocument::JsonFormat::Compact);
@@ -309,6 +319,7 @@ QString SunnyWebBox::sendMessage(const QHostAddress &address, const QString &pro
             setConnectionStatus(false);
             return;
         }
+
         setConnectionStatus(true);
 
         QByteArray data = reply->readAll();

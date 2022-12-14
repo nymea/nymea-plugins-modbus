@@ -93,6 +93,8 @@ public:
         case 5:
             revisionCharacter = 'S';
             break;
+        default:
+            revisionCharacter = QChar(revision);
         }
 
         return QString("%1.%2.%3-%4").arg(major).arg(minor).arg(build).arg(revisionCharacter);
