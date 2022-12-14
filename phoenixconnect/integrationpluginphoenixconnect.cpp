@@ -191,7 +191,10 @@ void IntegrationPluginPhoenixConnect::setupThing(ThingSetupInfo *info)
     connect(connection, &PhoenixModbusTcpConnection::activePowerChanged, thing, [thing](quint32 activePower) {
         qCDebug(dcPhoenixConnect()) << "Active power consumption changed" << activePower;
         if (thing->hasState("currentPower")) {
-            thing->setStateValue("currentPower", activePower);
+            // Note: Explicitly casting to to signed integer as apparently in some setups the meter may
+            // occationally report negative energy flow by some 1 - 3 Watt causing the modbus controller
+            // register to underflow and report values like 0xFFFFFFFE (-2W) etc.
+            thing->setStateValue("currentPower", (qint32)activePower);
         }
     });
 

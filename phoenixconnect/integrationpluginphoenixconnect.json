@@ -13,6 +13,7 @@
                     "displayName": "Wallbe ECO 2.0",
                     "name": "wallbeEco2",
                     "createMethods": ["discovery", "user"],
+                    "discoveryType": "weak",
                     "interfaces": ["evcharger", "connectable"],
                     "paramTypes": [
                         {
@@ -118,6 +119,7 @@
                     "displayName": "Wallbe Pro",
                     "name": "wallbePro",
                     "createMethods": ["discovery", "user"],
+                    "discoveryType": "weak",
                     "interfaces": ["evcharger", "smartmeterconsumer", "connectable"],
                     "paramTypes": [
                         {
@@ -239,6 +241,7 @@
                     "displayName": "Compleo ECO s",
                     "name": "compleoEcoS",
                     "createMethods": ["discovery", "user"],
+                    "discoveryType": "weak",
                     "interfaces": ["evcharger", "connectable"],
                     "paramTypes": [
                         {
@@ -344,6 +347,7 @@
                     "displayName": "Compleo PRO",
                     "name": "compleoPro",
                     "createMethods": ["discovery", "user"],
+                    "discoveryType": "weak",
                     "interfaces": ["evcharger", "smartmeterconsumer", "connectable"],
                     "paramTypes": [
                         {
@@ -465,6 +469,7 @@
                     "displayName": "Scapo Economy",
                     "name": "scapoEco",
                     "createMethods": ["discovery", "user"],
+                    "discoveryType": "weak",
                     "interfaces": ["evcharger", "connectable"],
                     "paramTypes": [
                         {
@@ -570,6 +575,7 @@
                     "displayName": "Scapo Vision",
                     "name": "scapoVision",
                     "createMethods": ["discovery", "user"],
+                    "discoveryType": "weak",
                     "interfaces": ["evcharger", "smartmeterconsumer", "connectable"],
                     "paramTypes": [
                         {
