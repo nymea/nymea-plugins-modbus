@@ -1,0 +1,247 @@
+{
+    "className": "Idm",
+    "protocol": "TCP",
+    "endianness": "LittleEndian",
+    "errorLimitUntilNotReachable": 20,
+    "checkReachableRegister": "outdoorTemperature",
+    "enums": [
+        {
+            "name": "SystemOperationMode",
+            "values": [
+                {
+                    "key": "Standby",
+                    "value": 0
+                },
+                {
+                    "key": "Automatic",
+                    "value": 1
+                },
+                {
+                    "key": "Absent",
+                    "value": 2
+                },
+                {
+                    "key": "WarmWaterOnly",
+                    "value": 4
+                },
+                {
+                    "key": "HeatingCoolingOnly",
+                    "value": 5
+                }
+            ]
+        },
+        {
+            "name": "HeatPumpOperationMode",
+            "values": [
+                {
+                    "key": "Off",
+                    "value": 0
+                },
+                {
+                    "key": "Heating",
+                    "value": 1
+                },
+                {
+                    "key": "Cooling",
+                    "value": 2
+                },
+                {
+                    "key": "HotWater",
+                    "value": 4
+                },
+                {
+                    "key": "Defrost",
+                    "value": 8
+                }
+            ]
+        }
+    ],
+    "blocks": [
+        {
+            "id": "status",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "currentFaultNumber",
+                    "address": 1004,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Current fault number",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "systemOperationMode",
+                    "address": 1005,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Operation mode",
+                    "enum": "SystemOperationMode",
+                    "defaultValue": "SystemOperationModeStandby",
+                    "access": "RO"
+                },
+                {
+                    "id": "smartGridStatus",
+                    "address": 1006,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Smart grid status",
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "energyProduced",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "energyHeating",
+                    "address": 1750,
+                    "size": 2,
+                    "type": "float",
+                    "registerType": "holdingRegister",
+                    "description": "Energy heating",
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "energyCooling",
+                    "address": 1752,
+                    "size": 2,
+                    "type": "float",
+                    "registerType": "holdingRegister",
+                    "description": "Energy cooling",
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "energyHotWater",
+                    "address": 1754,
+                    "size": 2,
+                    "type": "float",
+                    "registerType": "holdingRegister",
+                    "description": "Energy hot water",
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        }
+    ],
+    "registers": [
+        {
+            "id": "currentPvSurplus",
+            "address": 74,
+            "size": 2,
+            "type": "float",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "Current PV surplus ",
+            "unit": "kW",
+            "defaultValue": "0",
+            "access": "RW"
+        },
+        {
+            "id": "currentPvProduction",
+            "address": 78,
+            "size": 2,
+            "type": "float",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "Current PV production ",
+            "unit": "kW",
+            "defaultValue": "0",
+            "access": "RW"
+        },
+        {
+            "id": "outdoorTemperature",
+            "address": 1000,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Outdoor temperature",
+            "unit": "°C",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "heatStorageTemperature",
+            "address": 1008,
+            "size": 2,
+            "type": "float",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "Heat storage temperature",
+            "defaultValue": "0",
+            "unit": "°C",
+            "access": "RO"
+        },
+        {
+            "id": "targetHotWaterTemperature",
+            "address": 1032,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "Target hot water temperature",
+            "defaultValue": "0",
+            "unit": "°C",
+            "access": "RO"
+        },
+        {
+            "id": "roomTemperature",
+            "address": 1364,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Room temperature",
+            "defaultValue": "0",
+            "unit": "°C",
+            "access": "RO"
+        },
+        {
+            "id": "roomTemperatureTargetHeatingEco",
+            "address": 1415,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Room target temperature",
+            "defaultValue": "0",
+            "unit": "°C",
+            "access": "RW"
+        },
+        {
+            "id": "heatPumpOperatingMode",
+            "address": 1090,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "Heat pump operation mode",
+            "enum": "HeatPumpOperationMode",
+            "defaultValue": "HeatPumpOperationModeOff",
+            "access": "RO"
+        },
+        {
+            "id": "currentPowerConsumption",
+            "address": 4122,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Current power consumption",
+            "unit": "kW",
+            "defaultValue": "0",
+            "access": "RO"
+        }
+    ]
+}

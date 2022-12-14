@@ -1,14 +1,12 @@
 include(../plugins.pri)
+
+# Generate modbus connection
+MODBUS_CONNECTIONS += idm-registers.json
+#MODBUS_TOOLS_CONFIG += VERBOSE
 include(../modbus.pri)
 
 SOURCES += \
-    idm.cpp \
-    integrationpluginidm.cpp \
-    modbushelpers.cpp
+    integrationpluginidm.cpp
 
 HEADERS += \
-    idm.h \
-    idminfo.h \
-    integrationpluginidm.h \
-    modbushelpers.h
-
+    integrationpluginidm.h
