@@ -64,10 +64,6 @@ QList<AmtronECUDiscovery::Result> AmtronECUDiscovery::discoveryResults() const
 
 void AmtronECUDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo)
 {
-    if (networkDeviceInfo.macAddressManufacturer() != "GIGA-BYTE TECHNOLOGY CO.,LTD.") {
-        return;
-    }
-
     int port = 502;
     int slaveId = 0xff;
     qCDebug(dcMennekes()) << "Checking network device:" << networkDeviceInfo << "Port:" << port << "Slave ID:" << slaveId;
