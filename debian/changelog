@@ -1,3 +1,26 @@
+nymea-plugins-modbus (1.6.0) jammy; urgency=medium
+
+  [ Michael Zanetti ]
+  * Kostal: Fix state name for total returned energy
+
+  [ Simon Stürz ]
+  * SMA: Import plugin from nymea-plugins and add modbus inverters
+  * SunSpec: Fix storage state and improve overall generic connection
+
+  [ Michael Zanetti ]
+  * Mennekes: Don't filter for MAC address manufacturer during discovery
+
+  [ Simon Stürz ]
+  * iDM: Update to modbus tools and latest interfaces
+  * SMA: Update speedwire discovery
+
+  [ Michael Zanetti ]
+  * Mennekes: Fix CP signal state E handling
+  * Phoenix: Handle emeter register underflow on wallbox and make
+    discovery weak
+
+ -- jenkins <developer@nymea.io>  Wed, 14 Dec 2022 23:59:37 +0100
+
 nymea-plugins-modbus (1.5.1) jammy; urgency=medium
 
 
