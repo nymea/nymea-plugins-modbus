@@ -189,7 +189,7 @@
                         {
                             "id": "902ce047-ef6b-4868-9f7c-61a2ebe61a5b",
                             "name": "totalEnergyProduced",
-                            "displayName": "AC energy",
+                            "displayName": "Total returned energy",
                             "type": "double",
                             "unit": "KiloWattHour",
                             "defaultValue": 0.00,
