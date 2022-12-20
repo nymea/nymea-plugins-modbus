@@ -389,6 +389,16 @@ void IntegrationPluginMennekes::setupAmtronECUConnection(ThingSetupInfo *info)
         }
 
         qCDebug(dcMennekes()) << "Connection init finished successfully" << amtronECUConnection;
+
+        QString minimumVersion = "5.22";
+        if (!ensureAmtronECUVersion(amtronECUConnection, minimumVersion)) {
+            qCWarning(dcMennekes()) << "Firmware version too old:" << QByteArray::fromHex(QByteArray::number(amtronECUConnection->firmwareVersion(), 16)) << "Minimum required:" << minimumVersion;
+            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(monitor);
+            amtronECUConnection->deleteLater();
+            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("The firmware version of this wallbox is too old. Please upgrade the firmware to at least version 5.22."));
+            return;
+        }
+
         m_amtronECUConnections.insert(thing, amtronECUConnection);
         info->finish(Thing::ThingErrorNoError);
 

@@ -9,21 +9,26 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../integrationpluginmennekes.cpp" line="127"/>
-        <location filename="../integrationpluginmennekes.cpp" line="177"/>
+        <location filename="../integrationpluginmennekes.cpp" line="133"/>
+        <location filename="../integrationpluginmennekes.cpp" line="183"/>
         <source>The MAC address is not known. Please reconfigure the thing.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../integrationpluginmennekes.cpp" line="138"/>
-        <location filename="../integrationpluginmennekes.cpp" line="188"/>
+        <location filename="../integrationpluginmennekes.cpp" line="144"/>
+        <location filename="../integrationpluginmennekes.cpp" line="194"/>
         <source>The host address is not known yet. Trying later again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../integrationpluginmennekes.cpp" line="372"/>
-        <location filename="../integrationpluginmennekes.cpp" line="497"/>
+        <location filename="../integrationpluginmennekes.cpp" line="387"/>
+        <location filename="../integrationpluginmennekes.cpp" line="515"/>
         <source>Error communicating with the wallbox.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../integrationpluginmennekes.cpp" line="398"/>
+        <source>The firmware version of this wallbox is too old. Please upgrade the firmware to at least version 5.22.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
