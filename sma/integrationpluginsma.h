@@ -87,6 +87,8 @@ private:
     bool isModbusValueValid(quint32 value);
     bool isModbusValueValid(qint32 value);
     bool isModbusValueValid(quint64 value);
+
+    double roundValue(double value, uint digits = 2);
 };
 
 #endif // INTEGRATIONPLUGINSMA_H

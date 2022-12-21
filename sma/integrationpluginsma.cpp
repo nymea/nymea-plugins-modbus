@@ -332,14 +332,14 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
             thing->setStateValue(speedwireMeterVoltagePhaseAStateTypeId, meter->voltagePhaseA());
             thing->setStateValue(speedwireMeterVoltagePhaseBStateTypeId, meter->voltagePhaseB());
             thing->setStateValue(speedwireMeterVoltagePhaseCStateTypeId, meter->voltagePhaseC());
-            thing->setStateValue(speedwireMeterTotalEnergyConsumedStateTypeId, meter->totalEnergyConsumed());
-            thing->setStateValue(speedwireMeterTotalEnergyProducedStateTypeId, meter->totalEnergyProduced());
-            thing->setStateValue(speedwireMeterEnergyConsumedPhaseAStateTypeId, meter->energyConsumedPhaseA());
-            thing->setStateValue(speedwireMeterEnergyConsumedPhaseBStateTypeId, meter->energyConsumedPhaseB());
-            thing->setStateValue(speedwireMeterEnergyConsumedPhaseCStateTypeId, meter->energyConsumedPhaseC());
-            thing->setStateValue(speedwireMeterEnergyProducedPhaseAStateTypeId, meter->energyProducedPhaseA());
-            thing->setStateValue(speedwireMeterEnergyProducedPhaseBStateTypeId, meter->energyProducedPhaseB());
-            thing->setStateValue(speedwireMeterEnergyProducedPhaseCStateTypeId, meter->energyProducedPhaseC());
+            thing->setStateValue(speedwireMeterTotalEnergyConsumedStateTypeId, roundValue(meter->totalEnergyConsumed()));
+            thing->setStateValue(speedwireMeterTotalEnergyProducedStateTypeId, roundValue(meter->totalEnergyProduced()));
+            thing->setStateValue(speedwireMeterEnergyConsumedPhaseAStateTypeId, roundValue(meter->energyConsumedPhaseA()));
+            thing->setStateValue(speedwireMeterEnergyConsumedPhaseBStateTypeId, roundValue(meter->energyConsumedPhaseB()));
+            thing->setStateValue(speedwireMeterEnergyConsumedPhaseCStateTypeId, roundValue(meter->energyConsumedPhaseC()));
+            thing->setStateValue(speedwireMeterEnergyProducedPhaseAStateTypeId, roundValue(meter->energyProducedPhaseA()));
+            thing->setStateValue(speedwireMeterEnergyProducedPhaseBStateTypeId, roundValue(meter->energyProducedPhaseB()));
+            thing->setStateValue(speedwireMeterEnergyProducedPhaseCStateTypeId, roundValue(meter->energyProducedPhaseC()));
             thing->setStateValue(speedwireMeterCurrentPhaseAStateTypeId, meter->amperePhaseA());
             thing->setStateValue(speedwireMeterCurrentPhaseBStateTypeId, meter->amperePhaseB());
             thing->setStateValue(speedwireMeterCurrentPhaseCStateTypeId, meter->amperePhaseC());
@@ -403,8 +403,8 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
         });
 
         connect(inverter, &SpeedwireInverter::valuesUpdated, thing, [=](){
-            thing->setStateValue(speedwireInverterTotalEnergyProducedStateTypeId, inverter->totalEnergyProduced());
-            thing->setStateValue(speedwireInverterEnergyProducedTodayStateTypeId, inverter->todayEnergyProduced());
+            thing->setStateValue(speedwireInverterTotalEnergyProducedStateTypeId, roundValue(inverter->totalEnergyProduced()));
+            thing->setStateValue(speedwireInverterEnergyProducedTodayStateTypeId, roundValue(inverter->todayEnergyProduced()));
             thing->setStateValue(speedwireInverterCurrentPowerStateTypeId, -inverter->totalAcPower());
             thing->setStateValue(speedwireInverterFrequencyStateTypeId, inverter->gridFrequency());
 
@@ -715,10 +715,10 @@ void IntegrationPluginSma::setupModbusInverterConnection(ThingSetupInfo *info)
 
             // Others
             if (isModbusValueValid(connection->totalYield()))
-                thing->setStateValue(modbusInverterTotalEnergyProducedStateTypeId, connection->totalYield() / 1000.0); // kWh
+                thing->setStateValue(modbusInverterTotalEnergyProducedStateTypeId, roundValue(connection->totalYield() / 1000.0)); // kWh
 
             if (isModbusValueValid(connection->dailyYield()))
-                thing->setStateValue(modbusInverterEnergyProducedTodayStateTypeId, connection->dailyYield() / 1000.0); // kWh
+                thing->setStateValue(modbusInverterEnergyProducedTodayStateTypeId, roundValue(connection->dailyYield() / 1000.0)); // kWh
 
             // Power
             if (isModbusValueValid(connection->currentPower()))
@@ -748,5 +748,11 @@ bool IntegrationPluginSma::isModbusValueValid(qint32 value)
 bool IntegrationPluginSma::isModbusValueValid(quint64 value)
 {
     return value != 0xffffffffffffffff;
+}
+
+double IntegrationPluginSma::roundValue(double value, uint digits)
+{
+    uint factor = pow(10, digits);
+    return qRound(value * factor) * 1.0 / factor;
 }
 
