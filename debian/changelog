@@ -1,3 +1,13 @@
+nymea-plugins-modbus (1.6.1) jammy; urgency=medium
+
+  [ Simon Stürz ]
+  * SMA: Update speedwire discovery
+
+  [ Michael Zanetti ]
+  * Mennekes: Fix CP signal state E handling
+
+ -- jenkins <developer@nymea.io>  Fri, 23 Dec 2022 11:32:54 +0100
+
 nymea-plugins-modbus (1.6.0) jammy; urgency=medium
 
   [ Michael Zanetti ]
