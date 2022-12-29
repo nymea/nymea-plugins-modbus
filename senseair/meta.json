@@ -1,0 +1,13 @@
+{
+    "title": "Senseair",
+    "tagline": "Connect Senseair sensors nymea.",
+    "icon": "senseair.png",
+    "stability": "consumer",
+    "offline": true,
+    "technologies": [
+        "modbus"
+    ],
+    "categories": [
+        "sensor"
+    ]
+}

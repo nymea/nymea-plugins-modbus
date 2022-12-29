@@ -1,0 +1,50 @@
+{
+    "name": "SenseAir",
+    "displayName": "Senseair",
+    "id": "c7c3c65c-a0cc-4ab1-90d8-4ad05bfcdc38",
+    "vendors": [
+        {
+            "name": "senseAir",
+            "displayName": "SenseAir",
+            "id": "f8427109-ada2-4428-9cfe-61631f763f5a",
+            "thingClasses": [
+                {
+                    "name": "s8",
+                    "displayName": "SenseAir S8",
+                    "id": "b7c80f1c-b583-4e81-a161-c7e1a0b13ea0",
+                    "createMethods": ["discovery"],
+                    "interfaces": ["co2sensor", "connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "5de7968f-e433-4143-bd0f-b8c3776782b7",
+                            "name":"rtuMaster",
+                            "displayName": "Modbus RTU master UUID",
+                            "type": "QString",
+                            "defaultValue": ""
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "71d6ba02-ca41-41f6-af87-f6e60d371591",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "7506d7c3-ebf7-408b-9625-03be99736a00",
+                            "name": "co2",
+                            "displayName": "CO2",
+                            "type": "double",
+                            "unit": "PartsPerMillion",
+                            "defaultValue": 0,
+                            "minValue": 0,
+                            "maxValue": 2000
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
