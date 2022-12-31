@@ -105,12 +105,14 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
         }
     });
 
-    connect(cionConnection, &CionModbusRtuConnection::initializationFinished, info, [info, cionConnection](bool success){
+    connect(cionConnection, &CionModbusRtuConnection::initializationFinished, info, [=](bool success){
         qCDebug(dcSchrack()) << "Initialisation finsihed" << success;
         if (success) {
             qCDebug(dcSchrack) << "DIP switche states:" << cionConnection->dipSwitches();
+            m_cionConnections.insert(thing, cionConnection);
             info->finish(Thing::ThingErrorNoError);
         } else {
+            delete cionConnection;
             info->finish(Thing::ThingErrorHardwareNotAvailable);
         }
     });
@@ -201,7 +203,6 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
     // To prevent running out of sync we'll "uncache" min/max values too.
     thing->setStateMinMaxValues(cionMaxChargingCurrentStateTypeId, 6, 32);
 
-    m_cionConnections.insert(thing, cionConnection);
 }
 
 void IntegrationPluginSchrack::postSetupThing(Thing *thing)
