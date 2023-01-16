@@ -61,6 +61,9 @@ void IntegrationPluginMennekes::discoverThings(ThingDiscoveryInfo *info)
                     name = "AMTRON Charge Control";
                 } else if (result.model.startsWith("P")) {
                     name = "AMTRON Professional";
+                } else {
+                    qCWarning(dcMennekes()) << "Unknown Amtron model:" << result.model;
+                    continue;
                 }
                 ThingDescriptor descriptor(amtronECUThingClassId, name, description);
                 qCDebug(dcMennekes()) << "Discovered:" << descriptor.title() << descriptor.description();
@@ -97,6 +100,7 @@ void IntegrationPluginMennekes::discoverThings(ThingDiscoveryInfo *info)
                     qCDebug(dcMennekes()) << "This wallbox already exists in the system:" << result.networkDeviceInfo;
                     descriptor.setThingId(existingThings.first()->id());
                 }
+
 
                 ParamList params;
                 params << Param(amtronHCC3ThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());

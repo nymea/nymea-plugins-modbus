@@ -83,6 +83,11 @@ void AmtronECUDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevi
                 cleanupConnection(connection);
                 return;
             }
+            if (connection->firmwareVersion() == 0 || connection->model().isEmpty()) {
+                qCDebug(dcMennekes()) << "Firmware version or model invalid. Skipping" << networkDeviceInfo.address();
+                cleanupConnection(connection);
+                return;
+            }
             Result result;
             result.firmwareVersion = connection->firmwareVersion();
             result.model = connection->model();
