@@ -386,16 +386,9 @@ void IntegrationPluginModbusCommander::thingRemoved(Thing *thing)
 {
     qCDebug(dcModbusCommander()) << "Removing thing" << thing->name();
     if (thing->thingClassId() == modbusTCPClientThingClassId) {
-        ModbusTCPMaster *modbus = m_modbusTCPMasters.take(thing);
-        if (modbus) {
-            modbus->deleteLater();
-        }
+        m_modbusTCPMasters.take(thing)->deleteLater();
     } else if (thing->thingClassId() == modbusRTUClientThingClassId) {
-        ModbusRtuMaster *modbus = m_modbusRtuMasters.take(thing);
-        modbus->deleteLater();
-        if (modbus) {
-            modbus->deleteLater();
-        }
+        m_modbusRtuMasters.take(thing)->deleteLater();
     }
 
     if (myThings().empty()) {
