@@ -199,7 +199,7 @@ void SunnyWebBox::parseMessage(const QString &messageId, const QString &messageT
             QVariantMap map = value.toMap();
 
             if (map["meta"].toString() == "GriPwr") {
-                overview.power = map["value"].toString().toInt();
+                overview.power = map["value"].toString().toDouble();
                 QString unit = map["unit"].toString();
                 qCDebug(dcSma()) << "SunnyWebBox:       - Power" << overview.power << unit;
             } else if (map["meta"].toString() == "GriEgyTdy") {
