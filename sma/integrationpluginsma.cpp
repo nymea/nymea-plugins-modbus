@@ -562,12 +562,11 @@ void IntegrationPluginSma::onConnectedChanged(bool connected)
 void IntegrationPluginSma::onPlantOverviewReceived(const QString &messageId, SunnyWebBox::Overview overview)
 {
     Q_UNUSED(messageId)
-
-    qCDebug(dcSma()) << "Plant overview received" << overview.status;
     Thing *thing = m_sunnyWebBoxes.key(static_cast<SunnyWebBox *>(sender()));
     if (!thing)
         return;
 
+    qCDebug(dcSma()) << "Plant overview received for" << thing;
     thing->setStateValue(sunnyWebBoxCurrentPowerStateTypeId, -overview.power);
     thing->setStateValue(sunnyWebBoxDayEnergyProducedStateTypeId, overview.dailyYield);
     thing->setStateValue(sunnyWebBoxTotalEnergyProducedStateTypeId, overview.totalYield);

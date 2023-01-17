@@ -45,9 +45,9 @@ class SunnyWebBox : public QObject
     Q_OBJECT
 public:
     struct Overview {
-        int power;
+        double power;
         double dailyYield;
-        int totalYield;
+        double totalYield;
         QString status;
         QString error;
     };
