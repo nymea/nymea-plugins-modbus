@@ -61,6 +61,9 @@ void IntegrationPluginMennekes::discoverThings(ThingDiscoveryInfo *info)
                     name = "AMTRON Charge Control";
                 } else if (result.model.startsWith("P")) {
                     name = "AMTRON Professional";
+                } else {
+                    qCWarning(dcMennekes()) << "Unknown Amtron model:" << result.model;
+                    continue;
                 }
                 ThingDescriptor descriptor(amtronECUThingClassId, name, description);
                 qCDebug(dcMennekes()) << "Discovered:" << descriptor.title() << descriptor.description();
@@ -88,6 +91,11 @@ void IntegrationPluginMennekes::discoverThings(ThingDiscoveryInfo *info)
         connect(discovery, &AmtronHCC3Discovery::discoveryFinished, info, [=](){
             foreach (const AmtronHCC3Discovery::AmtronDiscoveryResult &result, discovery->discoveryResults()) {
 
+                if (result.serialNumber.isEmpty()) {
+                    qCWarning(dcMennekes()) << "Unable to read Amtron serial number:" << result.serialNumber << result.wallboxName;
+                    continue;
+                }
+
                 ThingDescriptor descriptor(amtronHCC3ThingClassId, result.wallboxName, "Serial: " + result.serialNumber + " - " + result.networkDeviceInfo.address().toString());
                 qCDebug(dcMennekes()) << "Discovered:" << descriptor.title() << descriptor.description();
 
@@ -97,6 +105,7 @@ void IntegrationPluginMennekes::discoverThings(ThingDiscoveryInfo *info)
                     qCDebug(dcMennekes()) << "This wallbox already exists in the system:" << result.networkDeviceInfo;
                     descriptor.setThingId(existingThings.first()->id());
                 }
+
 
                 ParamList params;
                 params << Param(amtronHCC3ThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
