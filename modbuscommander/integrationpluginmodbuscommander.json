@@ -62,7 +62,6 @@
                             "id": "725b541a-9e0c-4634-81eb-e415c0b8f012",
                             "name": "connected",
                             "displayName": "Connected",
-                            "displayNameEvent": "Connection status changed",
                             "type": "bool",
                             "defaultValue": false
                         }
@@ -88,7 +87,6 @@
                             "id": "dffc59fe-b230-4345-81d6-0a55f9e16520",
                             "name": "connected",
                             "displayName": "Connected",
-                            "displayNameEvent": "Connection status changed",
                             "type": "bool",
                             "defaultValue": false
                         }
@@ -106,14 +104,14 @@
                             "name": "slaveAddress",
                             "displayName": "Slave address",
                             "type": "uint",
-                            "defaultValue": 180
+                            "defaultValue": 1
                         },
                         {
                             "id": "9d40c4ce-d251-43bb-a55e-a8780567bbac",
                             "name": "registerAddress",
                             "displayName": "Register address",
                             "type": "uint",
-                            "defaultValue": 100
+                            "defaultValue": 0
                         }
                     ],
                     "stateTypes": [
@@ -121,7 +119,6 @@
                             "id": "9b3852ac-1518-4417-8a0a-452fcfec8963",
                             "name": "connected",
                             "displayName": "Connected",
-                            "displayNameEvent": "Connection status changed",
                             "type": "bool",
                             "defaultValue": false
                         },
@@ -130,7 +127,6 @@
                             "name": "value",
                             "displayName": "Value",
                             "displayNameAction": "Write value",
-                            "displayNameEvent": "Value changed",
                             "type": "bool",
                             "writable": true,
                             "defaultValue": false
@@ -149,14 +145,14 @@
                             "name": "slaveAddress",
                             "displayName": "Slave address",
                             "type": "uint",
-                            "defaultValue": 180
+                            "defaultValue": 1
                         },
                         {
                             "id": "d37be0cc-6155-4894-b70f-cbc9adfbe48b",
                             "name": "registerAddress",
                             "displayName": "Register address",
                             "type": "uint",
-                            "defaultValue": 100
+                            "defaultValue": 0
                         }
                     ],
                     "stateTypes": [
@@ -165,16 +161,14 @@
                             "name": "connected",
                             "displayName": "Connected",
                             "type": "bool",
-                            "defaultValue": false,
-                            "displayNameEvent": "connection status changed"
+                            "defaultValue": false
                         },
                         {
                             "id": "c772bd7f-6e51-4b28-b182-3b979c1298ce",
                             "name": "value",
                             "displayName": "Value",
                             "type": "bool",
-                            "defaultValue": false,
-                            "displayNameEvent": "value changed"
+                            "defaultValue": false
                         }
                     ]
                 },
@@ -190,14 +184,14 @@
                             "name": "slaveAddress",
                             "displayName": "Slave address",
                             "type": "uint",
-                            "defaultValue": 180
+                            "defaultValue": 1
                         },
                         {
                             "id": "264e381c-d259-4e11-b4b3-332b518ebba3",
                             "name": "registerAddress",
                             "displayName": "Register address",
                             "type": "uint",
-                            "defaultValue": 100
+                            "defaultValue": 0
                         }
                     ],
                     "stateTypes": [
@@ -206,16 +200,14 @@
                             "name": "connected",
                             "displayName": "Connected",
                             "type": "bool",
-                            "defaultValue": false,
-                            "displayNameEvent": "Connection status changed"
+                            "defaultValue": false
                         },
                         {
                             "id": "eabe2d1b-abe5-4063-adab-3cdd8500b286",
                             "name": "Value",
                             "displayName": "Value",
                             "type": "int",
-                            "defaultValue": 0,
-                            "displayNameEvent": "Value received"
+                            "defaultValue": 0
                         }
                     ]
                 },
@@ -231,14 +223,14 @@
                             "name": "slaveAddress",
                             "displayName": "Slave address",
                             "type": "uint",
-                            "defaultValue": 180
+                            "defaultValue": 1
                         },
                         {
                             "id": "c771e09e-15fe-4ea9-9662-c44e2df556a8",
                             "name": "registerAddress",
                             "displayName": "Register address",
                             "type": "uint",
-                            "defaultValue": 100
+                            "defaultValue": 0
                         }
                     ],
                     "stateTypes": [
@@ -246,7 +238,6 @@
                             "id": "1f55b72a-5d13-4ae1-b136-bfd84fd9761f",
                             "name": "connected",
                             "displayName": "Connected",
-                            "displayNameEvent": "Connection status changed",
                             "type": "bool",
                             "defaultValue": false
                         },
@@ -255,10 +246,9 @@
                             "name": "value",
                             "displayName": "Value",
                             "displayNameAction": "Write value",
-                            "displayNameEvent": "Value changed",
-                            "type": "int",
+                            "type": "uint",
                             "writable": true,
-                            "defaultValue": false
+                            "defaultValue": 0
                         }
                     ]
                 }

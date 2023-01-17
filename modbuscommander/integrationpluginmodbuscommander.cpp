@@ -386,8 +386,9 @@ void IntegrationPluginModbusCommander::thingRemoved(Thing *thing)
 {
     qCDebug(dcModbusCommander()) << "Removing thing" << thing->name();
     if (thing->thingClassId() == modbusTCPClientThingClassId) {
-        ModbusTCPMaster *modbus = m_modbusTCPMasters.take(thing);
-        modbus->deleteLater();
+        m_modbusTCPMasters.take(thing)->deleteLater();
+    } else if (thing->thingClassId() == modbusRTUClientThingClassId) {
+        m_modbusRtuMasters.take(thing)->deleteLater();
     }
 
     if (myThings().empty()) {
@@ -426,12 +427,12 @@ void IntegrationPluginModbusCommander::onRequestExecuted(QUuid requestId, bool s
 {
     if (m_asyncActions.contains(requestId)){
         ThingActionInfo *info = m_asyncActions.take(requestId);
+        info->thing()->setStateValue(m_connectedStateTypeId.value(info->thing()->thingClassId()), success);
         if (success){
             info->finish(Thing::ThingErrorNoError);
         } else {
             info->finish(Thing::ThingErrorHardwareNotAvailable);
         }
-        info->thing()->setStateValue(m_connectedStateTypeId.value(info->thing()->thingClassId()), success);
     }
 
     if (m_readRequests.contains(requestId)){
@@ -689,7 +690,7 @@ void IntegrationPluginModbusCommander::writeRegister(Thing *thing, ThingActionIn
                     info->finish(Thing::ThingErrorHardwareFailure);
                     return;
                 }
-
+                thing->setStateValue("value", action.param(coilValueActionValueParamTypeId).value().toBool());
                 info->finish(Thing::ThingErrorNoError);
             });
         } else if (thing->thingClassId() == holdingRegisterThingClassId) {
@@ -705,6 +706,7 @@ void IntegrationPluginModbusCommander::writeRegister(Thing *thing, ThingActionIn
                     return;
                 }
 
+                thing->setStateValue("value", action.param(holdingRegisterValueActionValueParamTypeId).value().toUInt());
                 info->finish(Thing::ThingErrorNoError);
             });
         }
