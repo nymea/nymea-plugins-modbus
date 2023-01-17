@@ -1,3 +1,16 @@
+nymea-plugins-modbus (1.6.2) jammy; urgency=medium
+
+  [ Michael Zanetti ]
+  * Schrack: Fix connection leak on failed setup
+  * Mennekes: Discard unknown discovery results
+
+  [ Simon Stürz ]
+  * SMA: fix power parsing for SunnyWebBox
+  * modbuscommander: update actions and fix RTU crash on resource
+    removal
+
+ -- jenkins <developer@nymea.io>  Tue, 17 Jan 2023 16:38:07 +0100
+
 nymea-plugins-modbus (1.6.1) jammy; urgency=medium
 
   [ Simon Stürz ]
