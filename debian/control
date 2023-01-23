@@ -78,6 +78,15 @@ Description: nymea integration plugin for alpha innotec heat pumps
  This package contains the nymea integration plugin for alpha innotec head pumps.
 
 
+Package: nymea-plugin-amperfied
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for Amperfeid/Heidelberg wallboxes
+ This package contains the nymea integration plugin for Amperfeid/Heidelberg wallboxes.
+
+
 Package: nymea-plugin-bgetech
 Architecture: any
 Multi-Arch: same
