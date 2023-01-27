@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2021, nymea GmbH
+* Copyright 2013 - 2023, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -70,6 +70,9 @@ private:
     void readHoldingRegister(Thing *thing, ModbusRtuMaster *modbus, uint slaveAddress, uint modbusRegister);
 
     VentilationMode getVentilationModeFromString(const QString &modeString);
+
+    void readX2Energy(Thing *thing, ModbusRtuMaster *modbus, uint slaveAddress);
+    void readX2Power(Thing *thing, ModbusRtuMaster *modbus, uint slaveAddress);
 
 private slots:
     void onRefreshTimer();

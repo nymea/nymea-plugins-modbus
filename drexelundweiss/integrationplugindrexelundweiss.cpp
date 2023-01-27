@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2021, nymea GmbH
+* Copyright 2013 - 2023, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -315,275 +315,317 @@ void IntegrationPluginDrexelUndWeiss::updateStates(Thing *thing)
         readHoldingRegister(thing, modbus, slaveAddress, ModbusRegisterX2::BrauchwasserSolltermperatur);
         readHoldingRegister(thing, modbus, slaveAddress, ModbusRegisterX2::Auszenluft);
         readHoldingRegister(thing, modbus, slaveAddress, ModbusRegisterX2::Summenstoerung);
-        readHoldingRegister(thing, modbus, slaveAddress, ModbusRegisterX2::LeistungKompressor);
-        readHoldingRegister(thing, modbus, slaveAddress, ModbusRegisterX2::LeistungWarmwasser);
-        readHoldingRegister(thing, modbus, slaveAddress, ModbusRegisterX2::LeistungRaumheizung);
-        readHoldingRegister(thing, modbus, slaveAddress, ModbusRegisterX2::LeistungLuftvorwaermung);
-        readHoldingRegister(thing, modbus, slaveAddress, ModbusRegisterX2::EnergieKompressor);
-        readHoldingRegister(thing, modbus, slaveAddress, ModbusRegisterX2::EnergieWarmwasser);
-        readHoldingRegister(thing, modbus, slaveAddress, ModbusRegisterX2::EnergieRaumheizung);
-        readHoldingRegister(thing, modbus, slaveAddress, ModbusRegisterX2::EnergieLuftvorerwarrmung);
+        readX2Power(thing, modbus, slaveAddress);
+        readX2Energy(thing, modbus, slaveAddress);
     }
 }
 
-void IntegrationPluginDrexelUndWeiss::readHoldingRegister(Thing *thing, ModbusRtuMaster *modbus, uint slaveAddress, uint modbusRegister)
+void IntegrationPluginDrexelUndWeiss::readX2Power(Thing *thing, ModbusRtuMaster *modbus, uint slaveAddress)
 {
-    ModbusRtuReply *reply = modbus->readHoldingRegister(slaveAddress, modbusRegister, 2); // min 2 registers must be read
+    ModbusRtuReply *reply = modbus->readHoldingRegister(slaveAddress, ModbusRegisterX2::LeistungKompressor, 8);
     connect(reply, &ModbusRtuReply::finished, reply, &ModbusRtuReply::deleteLater);
-    connect(reply, &ModbusRtuReply::finished, this, [reply, thing, this] {
+    connect(reply, &ModbusRtuReply::finished, this, [reply, thing] {
         if (reply->error() != ModbusRtuReply::Error::NoError) {
             qCWarning(dcDrexelUndWeiss()) << "Modbus error" << reply->errorString();
-            thing->setStateValue(m_connectedStateTypeIds.value(thing->thingClassId()), false);
             return;
         }
-        thing->setStateValue(m_connectedStateTypeIds.value(thing->thingClassId()), true);
-       if (reply->result().length() != 2) {
-           return;
-       }
-        uint32_t value = (static_cast<uint32_t>(reply->result()[0])<<16 | reply->result()[1]);
-
-        if (thing->thingClassId() == x2wpThingClassId) {
-            switch (reply->registerAddress()) {
-            case ModbusRegisterX2::Waermepumpe:
-                thing->setStateValue(x2wpPowerStateTypeId, value);
-                break;
-
-            case ModbusRegisterX2::RaumSoll:
-                thing->setStateValue(x2wpTargetTemperatureStateTypeId, value/1000.00);
-                break;
-
-            case ModbusRegisterX2::Raum:
-                thing->setStateValue(x2wpTemperatureStateTypeId, value/1000.00);
-                break;
-
-            case ModbusRegisterX2::TemperaturWarmwasserspeicherUnten:
-                thing->setStateValue(x2wpWaterTemperatureStateTypeId, value/1000.00);
-                break;
-            case ModbusRegisterX2::BrauchwasserSolltermperatur:
-                thing->setStateValue(x2wpTargetWaterTemperatureStateTypeId, value/1000.00);
-                break;
-            case ModbusRegisterX2::Auszenluft:
-                thing->setStateValue(x2wpOutsideAirTemperatureStateTypeId, value/1000.00);
-                break;
-
-            case ModbusRegisterX2::Summenstoerung:
-                if (value != 0) {
-                    //get actual error
-                } else {
-                    thing->setStateValue(x2wpErrorStateTypeId, "No error");
-                }
-                break;
-
-            case ModbusRegisterX2::StoerungAbluftventilator:
-                if (value != 0)
-                    thing->setStateValue(x2wpErrorStateTypeId, "Exhaust fan");
-                break;
-
-            case ModbusRegisterX2::StoerungBoilerfuehlerElektroheizstab:
-                if (value != 0)
-                    thing->setStateValue(x2wpErrorStateTypeId, "Boiler sensor electric heating element");
-                break;
-
-            case ModbusRegisterX2::StoerungBoilerfuehlerSolar:
-                if (value != 0)
-                    thing->setStateValue(x2wpErrorStateTypeId, "Boiler sensor solar");
-                break;
-
-            case  ModbusRegisterX2::StoerungBoilerfuehlerWaermepumpe:
-                if (value != 0)
-                    thing->setStateValue(x2wpErrorStateTypeId, "Boiler sensor heat pump");
-                break;
-
-            case  ModbusRegisterX2::StoerungBoileruebertemperatur:
-                if (value != 0)
-                    thing->setStateValue(x2wpErrorStateTypeId, "Boiler overtemperature");
-                break;
-
-            case  ModbusRegisterX2::StoerungCO2Sensor:
-                if (value != 0)
-                    thing->setStateValue(x2wpErrorStateTypeId, "CO2-Sensor");
-                break;
-
-            case  ModbusRegisterX2::StoerungDruckverlustAbluftZuGrosz:
-                if (value != 0)
-                    thing->setStateValue(x2wpErrorStateTypeId, "Pressure loss exhaust air too big");
-                break;
-
-            case ModbusRegisterX2::StoerungDruckverlustZuluftZuGrosz:
-                if (value != 0)
-                    thing->setStateValue(x2wpErrorStateTypeId, "Pressure loss supply air too large");
-                break;
-
-            case ModbusRegisterX2::StoerungDurchflussmengeHeizgkreis:
-                if (value != 0)
-                    thing->setStateValue(x2wpErrorStateTypeId, "Flow rate of heating circuit");
-                break;
-
-            case ModbusRegisterX2::StoerungDurchflussmengeSolekreis:
-                if (value != 0)
-                    thing->setStateValue(x2wpErrorStateTypeId, "Flow rate brine circuit");
-                break;
-
-            case ModbusRegisterX2::StoerungTeilnehmerNichtErreichbar:
-                if (value != 0)
-                    thing->setStateValue(x2wpErrorStateTypeId, "Participant not available");
-                break;
-
-            case ModbusRegisterX2::StoerungTemperaturfuehlerAuszenluft:
-                if (value != 0)
-                    thing->setStateValue(x2wpErrorStateTypeId, "Temperature sensor outside air");
-                break;
-
-            case ModbusRegisterX2::StoerungTemperaturfuehlerHeizkreisVorlauf:
-                if (value != 0)
-                    thing->setStateValue(x2wpErrorStateTypeId, "Temperature sensor heating circuit flow");
-                break;
-
-            case ModbusRegisterX2::StoerungTemperaturfuehlerRaum:
-                if (value != 0)
-                    thing->setStateValue(x2wpErrorStateTypeId, "Temperature sensor room");
-                break;
-
-            case ModbusRegisterX2::StoerungTemperaturfuehlerSolarkollektor:
-                if (value != 0)
-                    thing->setStateValue(x2wpErrorStateTypeId, "Temperature sensor solar collector");
-                break;
-
-            case ModbusRegisterX2::StoerungTemperaturfuehlerSole:
-                if (value != 0)
-                    thing->setStateValue(x2wpErrorStateTypeId, "Temperature sensor brine");
-                break;
-
-            case ModbusRegisterX2::StoerungTemperaturfuehlerSoleAuszenluft:
-                if (value != 0)
-                    thing->setStateValue(x2wpErrorStateTypeId, "Temperature sensor brine outside air");
-                break;
-
-            case ModbusRegisterX2::StoerungWaermepumpeHochdruck:
-                if (value != 0)
-                    thing->setStateValue(x2wpErrorStateTypeId, "Heat pump high pressure");
-                break;
-
-            case ModbusRegisterX2::StoerungWaermepumpeNiederdruck:
-                if (value != 0)
-                    thing->setStateValue(x2wpErrorStateTypeId, "Heat pump low pressure");
-                break;
-
-            case ModbusRegisterX2::StoerungWertNichtZulaessig:
-                if (value != 0)
-                    thing->setStateValue(x2wpErrorStateTypeId, "Value not allowed");
-                break;
-
-            case ModbusRegisterX2::StoerungZuluftventilator:
-                if (value != 0)
-                    thing->setStateValue(x2wpErrorStateTypeId, "Supply air fan");
-                break;
-
-            case ModbusRegisterX2::LeistungKompressor:
-                thing->setStateValue(x2wpPowerCompressorStateTypeId, value/1000.00);
-                break;
-            case ModbusRegisterX2::LeistungWarmwasser:
-                thing->setStateValue(x2wpPowerWaterHeatingStateTypeId, value/1000.00);
-                break;
-
-            case ModbusRegisterX2::LeistungRaumheizung:
-                thing->setStateValue(x2wpPowerRoomHeatingStateTypeId, value/1000.00);
-                break;
-
-            case ModbusRegisterX2::LeistungLuftvorwaermung:
-                thing->setStateValue(x2wpPowerAirPreheatingStateTypeId, value/1000.00);
-                break;
-
-            case ModbusRegisterX2::EnergieKompressor:
-                thing->setStateValue(x2wpEnergyCompressorStateTypeId, value/1000.00);
-                break;
-
-            case ModbusRegisterX2::EnergieWarmwasser:
-                thing->setStateValue(x2wpEnergyWaterHeatingStateTypeId, value/1000.00);
-                break;
-
-            case ModbusRegisterX2::EnergieRaumheizung:
-                thing->setStateValue(x2wpEnergyRoomHeatingStateTypeId, value/1000.00);
-                break;
-
-            case ModbusRegisterX2::EnergieLuftvorerwarrmung:
-                thing->setStateValue(x2wpEnergyAirPreheatingStateTypeId, value/1000.00);
-                break;
-            default:
-                break;
-            }
-        } else if (thing->thingClassId() == x2luThingClassId) {
-
-            switch (reply->registerAddress()) {
-            case ModbusRegisterX2::Betriebsart:
-                if (value == VentilationMode::ManuellStufe0) {
-                    thing->setStateValue(x2luVentilationModeStateTypeId, "Manual level 0");
-                } else if (value == VentilationMode::ManuellStufe1) {
-                    thing->setStateValue(x2luVentilationModeStateTypeId, "Manual level 1");
-                } else if (value == VentilationMode::ManuellStufe2) {
-                    thing->setStateValue(x2luVentilationModeStateTypeId, "Manual level 2");
-                } else if (value == VentilationMode::ManuellStufe3) {
-                    thing->setStateValue(x2luVentilationModeStateTypeId, "Manual level 3");
-                } else if (value == VentilationMode::Automatikbetrieb) {
-                    thing->setStateValue(x2luVentilationModeStateTypeId, "Automatic");
-                } else if (value == VentilationMode::Party) {
-                    thing->setStateValue(x2luVentilationModeStateTypeId, "Party");
-                }
-                if (value == VentilationMode::ManuellStufe0) {
-                    thing->setStateValue(x2luPowerStateTypeId, false);
-                } else {
-                    thing->setStateValue(x2luPowerStateTypeId, true);
-                }
-                break;
-            case ModbusRegisterX2::AktiveLuefterstufe:
-                thing->setStateValue(x2luActiveVentilationLevelStateTypeId, value);
-                break;
-            case ModbusRegisterX2::CO2:
-                thing->setStateValue(x2luCo2StateTypeId, value);
-                break;
-            }
+        if (reply->result().length() != 8) {
+            return;
         }
+
+        if (reply->registerAddress() != ModbusRegisterX2::LeistungKompressor) {
+            return;
+        }
+
+        //LeistungKompressor = 4000,
+        float value = (static_cast<uint32_t>(reply->result()[0])<<16 | reply->result()[1])/1000.00;
+        thing->setStateValue(x2wpPowerCompressorStateTypeId, value);
+        float totalPower = value;
+
+        //LeistungRaumheizung = 4002
+        value = (static_cast<uint32_t>(reply->result()[2])<<16 | reply->result()[3])/1000.00;
+        thing->setStateValue(x2wpPowerRoomHeatingStateTypeId, value);
+
+        //LeistungWarmwasser = 4004
+        value = (static_cast<uint32_t>(reply->result()[4])<<16 | reply->result()[5])/1000.00;
+        thing->setStateValue(x2wpPowerWaterHeatingStateTypeId, value);
+
+        //LeistungLuftvorerwarrmung = 4006
+        value = (static_cast<uint32_t>(reply->result()[6])<<16 | reply->result()[7])/1000.00;
+        thing->setStateValue(x2wpPowerAirPreheatingStateTypeId, value);
+
+        totalPower += value; //power compressor plus power air pre-heating
+        thing->setStateValue(x2wpCurrentPowerStateTypeId, totalPower);
     });
 }
 
-VentilationMode IntegrationPluginDrexelUndWeiss::getVentilationModeFromString(const QString &modeString)
+void IntegrationPluginDrexelUndWeiss::readX2Energy(Thing *thing, ModbusRtuMaster *modbus, uint slaveAddress)
 {
-    if (modeString == "Manual level 0") {
-        return VentilationMode::ManuellStufe0;
-    } else if(modeString == "Manual level 1") {
-        return VentilationMode::ManuellStufe1;
-    } else if(modeString == "Manual level 2") {
-        return VentilationMode::ManuellStufe2;
-    }else if(modeString == "Manual level 3") {
-        return VentilationMode::ManuellStufe3;
-    } else if(modeString == "Automatic") {
-        return VentilationMode::Automatikbetrieb;
-    } else if(modeString == "Party") {
-        return VentilationMode::Party;
-    } else {
-        qCWarning(dcDrexelUndWeiss()) << "Unknown ventilation mode string" << modeString;
-    }
-    return VentilationMode::ManuellStufe0;
+    ModbusRtuReply *reply = modbus->readHoldingRegister(slaveAddress, ModbusRegisterX2::EnergieKompressor, 8);
+    connect(reply, &ModbusRtuReply::finished, reply, &ModbusRtuReply::deleteLater);
+    connect(reply, &ModbusRtuReply::finished, this, [reply, thing] {
+        if (reply->error() != ModbusRtuReply::Error::NoError) {
+            qCWarning(dcDrexelUndWeiss()) << "Modbus error" << reply->errorString();
+            return;
+        }
+        if (reply->result().length() != 8) {
+            return;
+        }
+
+        if (reply->registerAddress() != ModbusRegisterX2::EnergieKompressor) {
+            return;
+        }
+
+        //EnergieKompressor = 4500
+        float value = (static_cast<uint32_t>(reply->result()[0])<<16 | reply->result()[1])/1000.00;
+        thing->setStateValue(x2wpEnergyCompressorStateTypeId, value);
+        float totalEnergy = value;
+
+        //EnergieRaumheizung = 4502
+        value = (static_cast<uint32_t>(reply->result()[2])<<16 | reply->result()[3])/1000.00;
+        thing->setStateValue(x2wpEnergyRoomHeatingStateTypeId, value);
+
+        //EnergieWarmwasser = 4504
+        value = (static_cast<uint32_t>(reply->result()[4])<<16 | reply->result()[5])/1000.00;
+        thing->setStateValue(x2wpEnergyWaterHeatingStateTypeId, value);
+
+        //EnergieLuftvorerwarrmung = 4506
+        value = (static_cast<uint32_t>(reply->result()[6])<<16 | reply->result()[7])/1000.00;
+        thing->setStateValue(x2wpEnergyAirPreheatingStateTypeId, value);
+
+        totalEnergy += value; //energy compressor plus energy air pre-heating
+        thing->setStateValue(x2wpTotalEnergyConsumedStateTypeId, totalEnergy);
+    });
 }
 
+    void IntegrationPluginDrexelUndWeiss::readHoldingRegister(Thing *thing, ModbusRtuMaster *modbus, uint slaveAddress, uint modbusRegister)
+    {
+        ModbusRtuReply *reply = modbus->readHoldingRegister(slaveAddress, modbusRegister); // min 2 registers must be read
+        connect(reply, &ModbusRtuReply::finished, reply, &ModbusRtuReply::deleteLater);
+        connect(reply, &ModbusRtuReply::finished, this, [reply, thing, this] {
+            if (reply->error() != ModbusRtuReply::Error::NoError) {
+                qCWarning(dcDrexelUndWeiss()) << "Modbus error" << reply->errorString();
+                thing->setStateValue(m_connectedStateTypeIds.value(thing->thingClassId()), false);
+                return;
+            }
+            thing->setStateValue(m_connectedStateTypeIds.value(thing->thingClassId()), true);
+            if (reply->result().length() != 2) {
+                return;
+            }
+            uint32_t value = (static_cast<uint32_t>(reply->result()[0])<<16 | reply->result()[1]);
 
-void IntegrationPluginDrexelUndWeiss::onPluginConfigurationChanged(const ParamTypeId &paramTypeId, const QVariant &value)
-{
-    // Check refresh schedule
-    if (paramTypeId == drexelUndWeissPluginUpdateIntervalParamTypeId) {
-        if (m_refreshTimer) {
-            int refreshTime = value.toInt();
-            m_refreshTimer->stop();
-            m_refreshTimer->startTimer(refreshTime);
+            if (thing->thingClassId() == x2wpThingClassId) {
+                switch (reply->registerAddress()) {
+                    case ModbusRegisterX2::Waermepumpe:
+                    thing->setStateValue(x2wpPowerStateTypeId, value);
+                    break;
+
+                    case ModbusRegisterX2::RaumSoll:
+                    thing->setStateValue(x2wpTargetTemperatureStateTypeId, value/1000.00);
+                    break;
+
+                    case ModbusRegisterX2::Raum:
+                    thing->setStateValue(x2wpTemperatureStateTypeId, value/1000.00);
+                    break;
+
+                    case ModbusRegisterX2::TemperaturWarmwasserspeicherUnten:
+                    thing->setStateValue(x2wpWaterTemperatureStateTypeId, value/1000.00);
+                    break;
+                    case ModbusRegisterX2::BrauchwasserSolltermperatur:
+                    thing->setStateValue(x2wpTargetWaterTemperatureStateTypeId, value/1000.00);
+                    break;
+                    case ModbusRegisterX2::Auszenluft:
+                    thing->setStateValue(x2wpOutsideAirTemperatureStateTypeId, value/1000.00);
+                    break;
+
+                    case ModbusRegisterX2::Summenstoerung:
+                    if (value != 0) {
+                        //get actual error
+                    } else {
+                        thing->setStateValue(x2wpErrorStateTypeId, "No error");
+                    }
+                    break;
+
+                    case ModbusRegisterX2::StoerungAbluftventilator:
+                    if (value != 0)
+                    thing->setStateValue(x2wpErrorStateTypeId, "Exhaust fan");
+                    break;
+
+                    case ModbusRegisterX2::StoerungBoilerfuehlerElektroheizstab:
+                    if (value != 0)
+                    thing->setStateValue(x2wpErrorStateTypeId, "Boiler sensor electric heating element");
+                    break;
+
+                    case ModbusRegisterX2::StoerungBoilerfuehlerSolar:
+                    if (value != 0)
+                    thing->setStateValue(x2wpErrorStateTypeId, "Boiler sensor solar");
+                    break;
+
+                    case  ModbusRegisterX2::StoerungBoilerfuehlerWaermepumpe:
+                    if (value != 0)
+                    thing->setStateValue(x2wpErrorStateTypeId, "Boiler sensor heat pump");
+                    break;
+
+                    case  ModbusRegisterX2::StoerungBoileruebertemperatur:
+                    if (value != 0)
+                    thing->setStateValue(x2wpErrorStateTypeId, "Boiler overtemperature");
+                    break;
+
+                    case  ModbusRegisterX2::StoerungCO2Sensor:
+                    if (value != 0)
+                    thing->setStateValue(x2wpErrorStateTypeId, "CO2-Sensor");
+                    break;
+
+                    case  ModbusRegisterX2::StoerungDruckverlustAbluftZuGrosz:
+                    if (value != 0)
+                    thing->setStateValue(x2wpErrorStateTypeId, "Pressure loss exhaust air too big");
+                    break;
+
+                    case ModbusRegisterX2::StoerungDruckverlustZuluftZuGrosz:
+                    if (value != 0)
+                    thing->setStateValue(x2wpErrorStateTypeId, "Pressure loss supply air too large");
+                    break;
+
+                    case ModbusRegisterX2::StoerungDurchflussmengeHeizgkreis:
+                    if (value != 0)
+                    thing->setStateValue(x2wpErrorStateTypeId, "Flow rate of heating circuit");
+                    break;
+
+                    case ModbusRegisterX2::StoerungDurchflussmengeSolekreis:
+                    if (value != 0)
+                    thing->setStateValue(x2wpErrorStateTypeId, "Flow rate brine circuit");
+                    break;
+
+                    case ModbusRegisterX2::StoerungTeilnehmerNichtErreichbar:
+                    if (value != 0)
+                    thing->setStateValue(x2wpErrorStateTypeId, "Participant not available");
+                    break;
+
+                    case ModbusRegisterX2::StoerungTemperaturfuehlerAuszenluft:
+                    if (value != 0)
+                    thing->setStateValue(x2wpErrorStateTypeId, "Temperature sensor outside air");
+                    break;
+
+                    case ModbusRegisterX2::StoerungTemperaturfuehlerHeizkreisVorlauf:
+                    if (value != 0)
+                    thing->setStateValue(x2wpErrorStateTypeId, "Temperature sensor heating circuit flow");
+                    break;
+
+                    case ModbusRegisterX2::StoerungTemperaturfuehlerRaum:
+                    if (value != 0)
+                    thing->setStateValue(x2wpErrorStateTypeId, "Temperature sensor room");
+                    break;
+
+                    case ModbusRegisterX2::StoerungTemperaturfuehlerSolarkollektor:
+                    if (value != 0)
+                    thing->setStateValue(x2wpErrorStateTypeId, "Temperature sensor solar collector");
+                    break;
+
+                    case ModbusRegisterX2::StoerungTemperaturfuehlerSole:
+                    if (value != 0)
+                    thing->setStateValue(x2wpErrorStateTypeId, "Temperature sensor brine");
+                    break;
+
+                    case ModbusRegisterX2::StoerungTemperaturfuehlerSoleAuszenluft:
+                    if (value != 0)
+                    thing->setStateValue(x2wpErrorStateTypeId, "Temperature sensor brine outside air");
+                    break;
+
+                    case ModbusRegisterX2::StoerungWaermepumpeHochdruck:
+                    if (value != 0)
+                    thing->setStateValue(x2wpErrorStateTypeId, "Heat pump high pressure");
+                    break;
+
+                    case ModbusRegisterX2::StoerungWaermepumpeNiederdruck:
+                    if (value != 0)
+                    thing->setStateValue(x2wpErrorStateTypeId, "Heat pump low pressure");
+                    break;
+
+                    case ModbusRegisterX2::StoerungWertNichtZulaessig:
+                    if (value != 0)
+                    thing->setStateValue(x2wpErrorStateTypeId, "Value not allowed");
+                    break;
+
+                    case ModbusRegisterX2::StoerungZuluftventilator:
+                    if (value != 0)
+                    thing->setStateValue(x2wpErrorStateTypeId, "Supply air fan");
+                    break;
+
+                    default:
+                    break;
+                }
+            } else if (thing->thingClassId() == x2luThingClassId) {
+
+                switch (reply->registerAddress()) {
+                    case ModbusRegisterX2::Betriebsart:
+                    if (value == VentilationMode::ManuellStufe0) {
+                        thing->setStateValue(x2luVentilationModeStateTypeId, "Manual level 0");
+                    } else if (value == VentilationMode::ManuellStufe1) {
+                        thing->setStateValue(x2luVentilationModeStateTypeId, "Manual level 1");
+                    } else if (value == VentilationMode::ManuellStufe2) {
+                        thing->setStateValue(x2luVentilationModeStateTypeId, "Manual level 2");
+                    } else if (value == VentilationMode::ManuellStufe3) {
+                        thing->setStateValue(x2luVentilationModeStateTypeId, "Manual level 3");
+                    } else if (value == VentilationMode::Automatikbetrieb) {
+                        thing->setStateValue(x2luVentilationModeStateTypeId, "Automatic");
+                    } else if (value == VentilationMode::Party) {
+                        thing->setStateValue(x2luVentilationModeStateTypeId, "Party");
+                    }
+                    if (value == VentilationMode::ManuellStufe0) {
+                        thing->setStateValue(x2luPowerStateTypeId, false);
+                    } else {
+                        thing->setStateValue(x2luPowerStateTypeId, true);
+                    }
+                    break;
+                    case ModbusRegisterX2::AktiveLuefterstufe:
+                    thing->setStateValue(x2luActiveVentilationLevelStateTypeId, value);
+                    break;
+                    case ModbusRegisterX2::CO2:
+                    thing->setStateValue(x2luCo2StateTypeId, value);
+                    break;
+                }
+            }
+        });
+    }
+
+    VentilationMode IntegrationPluginDrexelUndWeiss::getVentilationModeFromString(const QString &modeString)
+    {
+        if (modeString == "Manual level 0") {
+            return VentilationMode::ManuellStufe0;
+        } else if(modeString == "Manual level 1") {
+            return VentilationMode::ManuellStufe1;
+        } else if(modeString == "Manual level 2") {
+            return VentilationMode::ManuellStufe2;
+        }else if(modeString == "Manual level 3") {
+            return VentilationMode::ManuellStufe3;
+        } else if(modeString == "Automatic") {
+            return VentilationMode::Automatikbetrieb;
+        } else if(modeString == "Party") {
+            return VentilationMode::Party;
+        } else {
+            qCWarning(dcDrexelUndWeiss()) << "Unknown ventilation mode string" << modeString;
+        }
+        return VentilationMode::ManuellStufe0;
+    }
+
+
+    void IntegrationPluginDrexelUndWeiss::onPluginConfigurationChanged(const ParamTypeId &paramTypeId, const QVariant &value)
+    {
+        // Check refresh schedule
+        if (paramTypeId == drexelUndWeissPluginUpdateIntervalParamTypeId) {
+            if (m_refreshTimer) {
+                int refreshTime = value.toInt();
+                m_refreshTimer->stop();
+                m_refreshTimer->startTimer(refreshTime);
+            }
         }
     }
-}
 
-void IntegrationPluginDrexelUndWeiss::onConnectionStateChanged(bool status)
-{
-    ModbusRtuMaster *modbusRtuMaster = static_cast<ModbusRtuMaster *>(sender());
-    Thing *thing = m_modbusRtuMasters.key(modbusRtuMaster);
-    if (!thing)
+    void IntegrationPluginDrexelUndWeiss::onConnectionStateChanged(bool status)
+    {
+        ModbusRtuMaster *modbusRtuMaster = static_cast<ModbusRtuMaster *>(sender());
+        Thing *thing = m_modbusRtuMasters.key(modbusRtuMaster);
+        if (!thing)
         return;
-    thing->setStateValue(m_connectedStateTypeIds.value(thing->thingClassId()), status);
-}
+        thing->setStateValue(m_connectedStateTypeIds.value(thing->thingClassId()), status);
+    }
