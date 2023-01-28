@@ -317,7 +317,7 @@
                         {
                             "id": "812d931b-df7d-4e6a-a53a-da84535bfffa",
                             "name": "totalEnergyConsumed",
-                            "displayName": "Total energy",
+                            "displayName": "Total energy consumed",
                             "displayNameEvent": "Total energy changed",
                             "type": "double",
                             "unit": "KiloWattHour",

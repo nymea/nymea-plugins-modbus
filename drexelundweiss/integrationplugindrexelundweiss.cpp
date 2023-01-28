@@ -73,13 +73,13 @@ void IntegrationPluginDrexelUndWeiss::discoverThings(ThingDiscoveryInfo *info)
     qCDebug(dcDrexelUndWeiss()) << "Discover things";
 
     if (hardwareManager()->modbusRtuResource()->modbusRtuMasters().isEmpty()) {
-        info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("No Modbus RTU interface available."));
+        info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("No Modbus RTU interface is available."));
         return;
     }
 
     uint slaveAddress = info->params().paramValue(m_discoverySlaveAddressParamTypeIds.value(info->thingClassId())).toUInt();
     if (slaveAddress > 254 || slaveAddress == 0) {
-        info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("Modbus slave address must be between 1 and 254"));
+        info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The Modbus slave address must be between 1 and 254"));
         return;
     }
     Q_FOREACH(ModbusRtuMaster *modbusMaster, hardwareManager()->modbusRtuResource()->modbusRtuMasters()) {
@@ -117,11 +117,11 @@ void IntegrationPluginDrexelUndWeiss::setupThing(ThingSetupInfo *info)
     uint slaveAddress = thing->paramValue(m_slaveIdParamTypeIds.value(thing->thingClassId())).toUInt();
 
     if (!hardwareManager()->modbusRtuResource()->hasModbusRtuMaster(modbusMasterUuid)) {
-        return info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("Modbus RTU interface not available."));
+        return info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("The Modbus RTU interface is not available."));
     }
     ModbusRtuMaster *modbus = hardwareManager()->modbusRtuResource()->getModbusRtuMaster(modbusMasterUuid);
     if (!modbus->connected()) {
-        return info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("Modbus RTU interface is not connected."));
+        return info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("The Modbus RTU interface is not connected."));
     }
 
     ModbusRtuReply *reply = modbus->readHoldingRegister(slaveAddress, ModbusRegisterX2::Geraetetyp, 2);
@@ -233,13 +233,13 @@ void IntegrationPluginDrexelUndWeiss::sendWriteRequest(ThingActionInfo *info, ui
 
     if (!modbus){
         qCWarning(dcDrexelUndWeiss()) << "Modbus RTU interface available";
-        info->finish(Thing::ThingErrorHardwareFailure, tr("Modbus RTU interface not available."));
+        info->finish(Thing::ThingErrorHardwareFailure, tr("The Modbus RTU interface is not available."));
         return;
     }
 
     if (!modbus->connected()) {
         qCWarning(dcDrexelUndWeiss()) << "Modbus RTU interface not connected";
-        info->finish(Thing::ThingErrorHardwareFailure, tr("Modbus RTU interface not connected."));
+        info->finish(Thing::ThingErrorHardwareFailure, tr("The Modbus RTU interface is not connected."));
         return;
     }
 
