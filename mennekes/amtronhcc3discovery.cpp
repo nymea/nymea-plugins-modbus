@@ -85,6 +85,12 @@ void AmtronHCC3Discovery::checkNetworkDevice(const NetworkDeviceInfo &networkDev
                 cleanupConnection(connection);
                 return;
             }
+            if (connection->serialNumber() == 0 || connection->name().isEmpty()) {
+                qCDebug(dcMennekes()) << "Serial number or name invalid. Skipping" << networkDeviceInfo.address();
+                cleanupConnection(connection);
+                return;
+            }
+
             AmtronDiscoveryResult result;
             result.wallboxName = connection->name();
             result.serialNumber = connection->serialNumber();
