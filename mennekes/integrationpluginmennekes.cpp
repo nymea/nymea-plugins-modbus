@@ -398,6 +398,16 @@ void IntegrationPluginMennekes::setupAmtronECUConnection(ThingSetupInfo *info)
         }
 
         qCDebug(dcMennekes()) << "Connection init finished successfully" << amtronECUConnection;
+
+        QString minimumVersion = "5.22";
+        if (!ensureAmtronECUVersion(amtronECUConnection, minimumVersion)) {
+            qCWarning(dcMennekes()) << "Firmware version too old:" << QByteArray::fromHex(QByteArray::number(amtronECUConnection->firmwareVersion(), 16)) << "Minimum required:" << minimumVersion;
+            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(monitor);
+            amtronECUConnection->deleteLater();
+            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("The firmware version of this wallbox is too old. Please upgrade the firmware to at least version 5.22."));
+            return;
+        }
+
         m_amtronECUConnections.insert(thing, amtronECUConnection);
         info->finish(Thing::ThingErrorNoError);
 
@@ -426,8 +436,13 @@ void IntegrationPluginMennekes::setupAmtronECUConnection(ThingSetupInfo *info)
         qCDebug(dcMennekes()) << "min current limit changed:" << minCurrentLimit;
         thing->setStateMinValue(amtronECUMaxChargingCurrentStateTypeId, minCurrentLimit);
     });
-    connect(amtronECUConnection, &AmtronECUModbusTcpConnection::maxCurrentLimitChanged, thing, [thing](quint16 maxCurrentLimit) {
+    connect(amtronECUConnection, &AmtronECUModbusTcpConnection::maxCurrentLimitChanged, thing, [this, thing](quint16 maxCurrentLimit) {
         qCDebug(dcMennekes()) << "max current limit changed:" << maxCurrentLimit;
+        // If the vehicle or cable are not capable of reporting the maximum, this will be 0
+        // We'll reset to the max defined in the json file in that case
+        if (maxCurrentLimit == 0) {
+            maxCurrentLimit = supportedThings().findById(amtronECUThingClassId).stateTypes().findById(amtronECUMaxChargingCurrentStateTypeId).maxValue().toUInt();
+        }
         thing->setStateMaxValue(amtronECUMaxChargingCurrentStateTypeId, maxCurrentLimit);
     });
     connect(amtronECUConnection, &AmtronECUModbusTcpConnection::hemsCurrentLimitChanged, thing, [thing](quint16 hemsCurrentLimit) {
