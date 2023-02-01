@@ -1,3 +1,12 @@
+nymea-plugins-modbus (1.6.3) jammy; urgency=medium
+
+  [ Michael Zanetti ]
+  * Mennekes: Add firmware version check and workaround erraneously
+    signalled 0A max
+  * Mennekes: Discard unknown discovery results
+
+ -- jenkins <developer@nymea.io>  Wed, 01 Feb 2023 12:18:26 +0100
+
 nymea-plugins-modbus (1.6.2) jammy; urgency=medium
 
   [ Michael Zanetti ]
