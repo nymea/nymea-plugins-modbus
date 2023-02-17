@@ -31,6 +31,7 @@
 #ifndef INTEGRATIONPLUGINHUAWEI_H
 #define INTEGRATIONPLUGINHUAWEI_H
 
+#include <QHash>
 #include <plugintimer.h>
 #include <integrations/integrationplugin.h>
 #include <network/networkdevicediscovery.h>
@@ -62,6 +63,9 @@ private:
     QHash<Thing *, HuaweiModbusRtuConnection *> m_rtuConnections;
 
     void setupFusionSolar(ThingSetupInfo *info);
+
+    QHash<Thing *, QList<float>> m_inverterEnergyProducedHistory;
+    void evaluateEnergyProducedValue(Thing *inverterThing, float energyProduced);
 };
 
 #endif // INTEGRATIONPLUGINHUAWEI_H
