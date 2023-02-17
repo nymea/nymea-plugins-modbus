@@ -121,7 +121,6 @@ void IntegrationPluginHuawei::setupThing(ThingSetupInfo *info)
         if (m_monitors.contains(thing))
             hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
 
-
         // Make sure we have a valid mac address, otherwise no monitor and not auto searching is possible
         MacAddress macAddress = MacAddress(thing->paramValue(huaweiFusionSolarInverterThingMacAddressParamTypeId).toString());
         if (macAddress.isNull()) {
@@ -441,6 +440,21 @@ void IntegrationPluginHuawei::setupFusionSolar(ThingSetupInfo *info)
             thing->setStateValue("connected", reachable);
             foreach (Thing *childThing, myThings().filterByParentId(thing->id())) {
                 childThing->setStateValue("connected", reachable);
+
+                if (!reachable) {
+                    // Set power values to 0 since we don't know what the current value is
+                    if (childThing->thingClassId() == huaweiFusionSolarInverterThingClassId) {
+                        thing->setStateValue(huaweiFusionSolarInverterCurrentPowerStateTypeId, 0);
+                    }
+
+                    if (childThing->thingClassId() == huaweiMeterThingClassId) {
+                        thing->setStateValue(huaweiMeterCurrentPowerStateTypeId, 0);
+                    }
+
+                    if (childThing->thingClassId() == huaweiBatteryThingClassId) {
+                        thing->setStateValue(huaweiBatteryCurrentPowerStateTypeId, 0);
+                    }
+                }
             }
         });
 
