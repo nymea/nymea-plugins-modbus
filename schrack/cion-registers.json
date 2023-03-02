@@ -171,6 +171,16 @@
             "readSchedule": "init",
             "description": "DIP switch states",
             "access": "R"
+        },
+        {
+            "id": "firmwareVersion",
+            "address": 832,
+            "size": 16,
+            "type": "string",
+            "registerType": "holdingRegister",
+            "readSchedule": "init",
+            "description": "Firmware version",
+            "access": "R"
         }
     ]
 }
