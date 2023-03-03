@@ -36,6 +36,7 @@
 #include <plugintimer.h>
 
 #include "sdm630modbusrtuconnection.h"
+#include "sdm72modbusrtuconnection.h"
 
 #include "extern-plugininfo.h"
 
@@ -60,7 +61,8 @@ public:
 private:
     PluginTimer *m_refreshTimer = nullptr;
 
-    QHash<Thing *, Sdm630ModbusRtuConnection *> m_sdmConnections;
+    QHash<Thing *, Sdm630ModbusRtuConnection *> m_sdm630Connections;
+    QHash<Thing *, Sdm72ModbusRtuConnection *> m_sdm72Connections;
 };
 
 #endif // INTEGRATIONPLUGINBGETECH_H
