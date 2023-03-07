@@ -589,6 +589,12 @@ def writeRtuSourceFile():
     writeLine(sourceFile)
     writeLine(sourceFile, '        evaluateReachableState();')
     writeLine(sourceFile, '    });')
+    writeLine(sourceFile)
+    writeLine(sourceFile, '    if (m_modbusRtuMaster->connected()) {')
+    writeLine(sourceFile, '        testReachability();')
+    writeLine(sourceFile, '    } else {')
+    writeLine(sourceFile, '        evaluateReachableState();')
+    writeLine(sourceFile, '    }')
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
