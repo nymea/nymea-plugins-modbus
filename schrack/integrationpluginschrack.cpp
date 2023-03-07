@@ -31,6 +31,8 @@
 #include "integrationpluginschrack.h"
 #include "plugininfo.h"
 
+#include "ciondiscovery.h"
+
 IntegrationPluginSchrack::IntegrationPluginSchrack()
 {
 }
@@ -42,32 +44,36 @@ void IntegrationPluginSchrack::init()
 
 void IntegrationPluginSchrack::discoverThings(ThingDiscoveryInfo *info)
 {
-    qCDebug(dcSchrack()) << "Discovering modbus RTU resources...";
-    if (hardwareManager()->modbusRtuResource()->modbusRtuMasters().isEmpty()) {
-        info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("No Modbus RTU interface available. Please set up a Modbus RTU interface first."));
-        return;
-    }
+    CionDiscovery *discovery = new CionDiscovery(hardwareManager()->modbusRtuResource(), info);
 
-    uint slaveAddress = info->params().paramValue(cionDiscoverySlaveAddressParamTypeId).toUInt();
-    if (slaveAddress > 254 || slaveAddress == 0) {
-        info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The Modbus slave address must be a value between 1 and 254."));
-        return;
-    }
+    connect(discovery, &CionDiscovery::discoveryFinished, info, [this, info, discovery](bool modbusMasterAvailable){
+        if (!modbusMasterAvailable) {
+            info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("No modbus RTU master with appropriate settings found. Please set up a modbus RTU master with a baudrate of 57600, 8 data bis, 1 stop bit and no parity first."));
+            return;
+        }
 
-    foreach (ModbusRtuMaster *modbusMaster, hardwareManager()->modbusRtuResource()->modbusRtuMasters()) {
-        qCDebug(dcSchrack()) << "Found RTU master resource" << modbusMaster << "connected" << modbusMaster->connected();
-        if (!modbusMaster->connected())
-            continue;
+        qCInfo(dcSchrack()) << "Discovery results:" << discovery->discoveryResults().count();
 
-        ThingDescriptor descriptor(info->thingClassId(), "i-CHARGE CION", QString::number(slaveAddress) + " " + modbusMaster->serialPort());
-        ParamList params;
-        params << Param(cionThingSlaveAddressParamTypeId, slaveAddress);
-        params << Param(cionThingModbusMasterUuidParamTypeId, modbusMaster->modbusUuid());
-        descriptor.setParams(params);
-        info->addThingDescriptor(descriptor);
-    }
+        foreach (const CionDiscovery::Result &result, discovery->discoveryResults()) {
+            ThingDescriptor descriptor(cionThingClassId, "Schrack CION", QString("Slave ID: %1, Version: %2").arg(result.slaveId).arg(result.firmwareVersion));
 
-    info->finish(Thing::ThingErrorNoError);
+            ParamList params{
+                {cionThingModbusMasterUuidParamTypeId, result.modbusRtuMasterId},
+                {cionThingSlaveAddressParamTypeId, result.slaveId}
+            };
+            descriptor.setParams(params);
+
+            Thing *existingThing = myThings().findByParams(params);
+            if (existingThing) {
+                descriptor.setThingId(existingThing->id());
+            }
+            info->addThingDescriptor(descriptor);
+        }
+
+        info->finish(Thing::ThingErrorNoError);
+    });
+
+    discovery->startDiscovery();
 }
 
 void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
@@ -130,6 +136,12 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
     // Note: This register really only tells us if we can control anything... i.e. if the wallbox is unlocked via RFID
     connect(cionConnection, &CionModbusRtuConnection::chargingEnabledChanged, thing, [=](quint16 charging){
         qCDebug(dcSchrack()) << "Charge control enabled changed:" << charging;
+        // If this register goes 0->1 it means charging has been started. This could be because of an RFID tag.
+        // As we have may set charging current to 0 ourselves, we'll want to activate it again here
+        uint maxSetPoint = thing->stateValue(cionMaxChargingCurrentStateTypeId).toUInt();
+        if (cionConnection->chargingCurrentSetpoint() != maxSetPoint) {
+            cionConnection->setChargingCurrentSetpoint(maxSetPoint);
+        }
     });
 
     // We can write chargingCurrentSetpoint to the preferred charging we want, and the wallbox will take it,
@@ -147,8 +159,11 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
 
     connect(cionConnection, &CionModbusRtuConnection::currentChargingCurrentE3Changed, thing, [=](quint16 currentChargingCurrentE3){
         qCDebug(dcSchrack()) << "Current charging current E3 current changed:" << currentChargingCurrentE3;
-        if (cionConnection->chargingCurrentSetpoint() > 0) {
+        if (cionConnection->chargingEnabled() == 1 && cionConnection->chargingCurrentSetpoint() > 0) {
             thing->setStateValue(cionMaxChargingCurrentStateTypeId, currentChargingCurrentE3);
+            thing->setStateValue(cionPowerStateTypeId, true);
+        } else {
+            thing->setStateValue(cionPowerStateTypeId, false);
         }
     });
 
