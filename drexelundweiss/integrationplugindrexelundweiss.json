@@ -114,7 +114,7 @@
                     "displayName": "X2 WP",
                     "id": "e548f962-92db-4110-8279-10fbcde35f93",
                     "createMethods": ["discovery"],
-                    "interfaces": ["thermostat", "connectable"],
+                    "interfaces": ["thermostat", "smartmeterconsumer", "connectable"],
                     "discoveryParamTypes": [
                          {
                              "id": "d4923c90-22c8-477e-a37a-341858e59dcb",
@@ -152,6 +152,7 @@
                             "type": "bool",
                             "defaultValue": false
                         },
+
                         {
                             "id": "f2ce8389-c33f-4f10-8484-f2e993841762",
                             "name": "power",
@@ -269,6 +270,15 @@
                             ]
                         },
                         {
+                            "id": "c969ece8-4712-4728-b895-2901dcdb346b",
+                            "name": "currentPower",
+                            "displayName": "Total power consumption",
+                            "displayNameEvent": "Total ower consumption changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0
+                        },
+                        {
                             "id": "7287943a-ea6d-4c92-abbd-f55f6c7ee9e5",
                             "name": "powerCompressor",
                             "displayName": "Power consumption compressor",
@@ -302,6 +312,15 @@
                             "displayNameEvent": "Power consumption water heating changed",
                             "type": "double",
                             "unit": "Watt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "812d931b-df7d-4e6a-a53a-da84535bfffa",
+                            "name": "totalEnergyConsumed",
+                            "displayName": "Total energy consumed",
+                            "displayNameEvent": "Total energy changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
                             "defaultValue": 0
                         },
                         {

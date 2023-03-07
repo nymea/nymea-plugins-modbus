@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2021, nymea GmbH
+* Copyright 2013 - 2023, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -73,13 +73,13 @@ void IntegrationPluginDrexelUndWeiss::discoverThings(ThingDiscoveryInfo *info)
     qCDebug(dcDrexelUndWeiss()) << "Discover things";
 
     if (hardwareManager()->modbusRtuResource()->modbusRtuMasters().isEmpty()) {
-        info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("No Modbus RTU interface available."));
+        info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("No Modbus RTU interface is available."));
         return;
     }
 
     uint slaveAddress = info->params().paramValue(m_discoverySlaveAddressParamTypeIds.value(info->thingClassId())).toUInt();
     if (slaveAddress > 254 || slaveAddress == 0) {
-        info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("Modbus slave address must be between 1 and 254"));
+        info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The Modbus slave address must be between 1 and 254"));
         return;
     }
     Q_FOREACH(ModbusRtuMaster *modbusMaster, hardwareManager()->modbusRtuResource()->modbusRtuMasters()) {
@@ -117,11 +117,11 @@ void IntegrationPluginDrexelUndWeiss::setupThing(ThingSetupInfo *info)
     uint slaveAddress = thing->paramValue(m_slaveIdParamTypeIds.value(thing->thingClassId())).toUInt();
 
     if (!hardwareManager()->modbusRtuResource()->hasModbusRtuMaster(modbusMasterUuid)) {
-        return info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("Modbus RTU interface not available."));
+        return info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("The Modbus RTU interface is not available."));
     }
     ModbusRtuMaster *modbus = hardwareManager()->modbusRtuResource()->getModbusRtuMaster(modbusMasterUuid);
     if (!modbus->connected()) {
-        return info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("Modbus RTU interface is not connected."));
+        return info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("The Modbus RTU interface is not connected."));
     }
 
     ModbusRtuReply *reply = modbus->readHoldingRegister(slaveAddress, ModbusRegisterX2::Geraetetyp, 2);
@@ -233,13 +233,13 @@ void IntegrationPluginDrexelUndWeiss::sendWriteRequest(ThingActionInfo *info, ui
 
     if (!modbus){
         qCWarning(dcDrexelUndWeiss()) << "Modbus RTU interface available";
-        info->finish(Thing::ThingErrorHardwareFailure, tr("Modbus RTU interface not available."));
+        info->finish(Thing::ThingErrorHardwareFailure, tr("The Modbus RTU interface is not available."));
         return;
     }
 
     if (!modbus->connected()) {
         qCWarning(dcDrexelUndWeiss()) << "Modbus RTU interface not connected";
-        info->finish(Thing::ThingErrorHardwareFailure, tr("Modbus RTU interface not connected."));
+        info->finish(Thing::ThingErrorHardwareFailure, tr("The Modbus RTU interface is not connected."));
         return;
     }
 
@@ -326,6 +326,7 @@ void IntegrationPluginDrexelUndWeiss::updateStates(Thing *thing)
     }
 }
 
+
 void IntegrationPluginDrexelUndWeiss::readHoldingRegister(Thing *thing, ModbusRtuMaster *modbus, uint slaveAddress, uint modbusRegister)
 {
     ModbusRtuReply *reply = modbus->readHoldingRegister(slaveAddress, modbusRegister, 2); // min 2 registers must be read
@@ -337,9 +338,9 @@ void IntegrationPluginDrexelUndWeiss::readHoldingRegister(Thing *thing, ModbusRt
             return;
         }
         thing->setStateValue(m_connectedStateTypeIds.value(thing->thingClassId()), true);
-       if (reply->result().length() != 2) {
-           return;
-       }
+        if (reply->result().length() != 2) {
+            return;
+        }
         uint32_t value = (static_cast<uint32_t>(reply->result()[0])<<16 | reply->result()[1]);
 
         if (thing->thingClassId() == x2wpThingClassId) {
@@ -482,6 +483,7 @@ void IntegrationPluginDrexelUndWeiss::readHoldingRegister(Thing *thing, ModbusRt
             case ModbusRegisterX2::LeistungKompressor:
                 thing->setStateValue(x2wpPowerCompressorStateTypeId, value/1000.00);
                 break;
+
             case ModbusRegisterX2::LeistungWarmwasser:
                 thing->setStateValue(x2wpPowerWaterHeatingStateTypeId, value/1000.00);
                 break;
@@ -490,10 +492,13 @@ void IntegrationPluginDrexelUndWeiss::readHoldingRegister(Thing *thing, ModbusRt
                 thing->setStateValue(x2wpPowerRoomHeatingStateTypeId, value/1000.00);
                 break;
 
-            case ModbusRegisterX2::LeistungLuftvorwaermung:
-                thing->setStateValue(x2wpPowerAirPreheatingStateTypeId, value/1000.00);
+            case ModbusRegisterX2::LeistungLuftvorwaermung: {
+                float power = value/1000.00;
+                thing->setStateValue(x2wpPowerAirPreheatingStateTypeId, power);
+                power += thing->stateValue(x2wpPowerCompressorStateTypeId).toFloat();
+                thing->setStateValue(x2wpCurrentPowerStateTypeId, power);
                 break;
-
+            }
             case ModbusRegisterX2::EnergieKompressor:
                 thing->setStateValue(x2wpEnergyCompressorStateTypeId, value/1000.00);
                 break;
@@ -506,9 +511,13 @@ void IntegrationPluginDrexelUndWeiss::readHoldingRegister(Thing *thing, ModbusRt
                 thing->setStateValue(x2wpEnergyRoomHeatingStateTypeId, value/1000.00);
                 break;
 
-            case ModbusRegisterX2::EnergieLuftvorerwarrmung:
-                thing->setStateValue(x2wpEnergyAirPreheatingStateTypeId, value/1000.00);
+            case ModbusRegisterX2::EnergieLuftvorerwarrmung: {
+                float energy = value/1000.00;
+                thing->setStateValue(x2wpEnergyAirPreheatingStateTypeId, energy);
+                energy += thing->stateValue(x2wpEnergyCompressorStateTypeId).toFloat();
+                thing->setStateValue(x2wpTotalEnergyConsumedStateTypeId, energy);
                 break;
+            }
             default:
                 break;
             }

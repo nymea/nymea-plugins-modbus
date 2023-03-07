@@ -5,19 +5,7 @@
     <name>DrexelUndWeiss</name>
     <message>
         <source>CO2</source>
-        <extracomment>The name of the ParamType (ThingClass: x2lu, EventType: co2, ID: {0a6b44c8-e7af-4148-92ff-682ae717f3a8})
-----------
-The name of the StateType ({0a6b44c8-e7af-4148-92ff-682ae717f3a8}) of ThingClass x2lu</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>CO2 changed</source>
-        <extracomment>The name of the EventType ({0a6b44c8-e7af-4148-92ff-682ae717f3a8}) of ThingClass x2lu</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Change power</source>
-        <extracomment>The name of the ActionType ({f2ce8389-c33f-4f10-8484-f2e993841762}) of ThingClass x2wp</extracomment>
+        <extracomment>The name of the StateType ({0a6b44c8-e7af-4148-92ff-682ae717f3a8}) of ThingClass x2lu</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -44,168 +32,71 @@ The name of the plugin DrexelUndWeiss ({68d78ce6-82d0-4a5b-b901-7c3b843ef63c})</
     </message>
     <message>
         <source>Energy air preheating</source>
-        <extracomment>The name of the ParamType (ThingClass: x2wp, EventType: energyAirPreheating, ID: {0816ca6d-a178-4a2a-8183-c26a794fb0ca})
-----------
-The name of the StateType ({0816ca6d-a178-4a2a-8183-c26a794fb0ca}) of ThingClass x2wp</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Energy air preheating changed</source>
-        <extracomment>The name of the EventType ({0816ca6d-a178-4a2a-8183-c26a794fb0ca}) of ThingClass x2wp</extracomment>
+        <extracomment>The name of the StateType ({0816ca6d-a178-4a2a-8183-c26a794fb0ca}) of ThingClass x2wp</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Energy compressor</source>
-        <extracomment>The name of the ParamType (ThingClass: x2wp, EventType: energyCompressor, ID: {b423657b-4e59-41cd-89a3-4f5cb1c3a271})
-----------
-The name of the StateType ({b423657b-4e59-41cd-89a3-4f5cb1c3a271}) of ThingClass x2wp</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Energy compressor changed</source>
-        <extracomment>The name of the EventType ({b423657b-4e59-41cd-89a3-4f5cb1c3a271}) of ThingClass x2wp</extracomment>
+        <extracomment>The name of the StateType ({b423657b-4e59-41cd-89a3-4f5cb1c3a271}) of ThingClass x2wp</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Energy room heating</source>
-        <extracomment>The name of the ParamType (ThingClass: x2wp, EventType: energyRoomHeating, ID: {4495618e-5a43-46ac-9f76-32aae3f3e954})
-----------
-The name of the StateType ({4495618e-5a43-46ac-9f76-32aae3f3e954}) of ThingClass x2wp</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Energy room heating changed</source>
-        <extracomment>The name of the EventType ({4495618e-5a43-46ac-9f76-32aae3f3e954}) of ThingClass x2wp</extracomment>
+        <extracomment>The name of the StateType ({4495618e-5a43-46ac-9f76-32aae3f3e954}) of ThingClass x2wp</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Energy water heating</source>
-        <extracomment>The name of the ParamType (ThingClass: x2wp, EventType: energyWaterHeating, ID: {cb189b75-3634-4674-a847-f29ca322d4be})
-----------
-The name of the StateType ({cb189b75-3634-4674-a847-f29ca322d4be}) of ThingClass x2wp</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Energy water heating changed</source>
-        <extracomment>The name of the EventType ({cb189b75-3634-4674-a847-f29ca322d4be}) of ThingClass x2wp</extracomment>
+        <extracomment>The name of the StateType ({cb189b75-3634-4674-a847-f29ca322d4be}) of ThingClass x2wp</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Error</source>
-        <extracomment>The name of the ParamType (ThingClass: x2wp, EventType: error, ID: {8d6e52ef-992d-47ac-90a8-9dba95ab200e})
-----------
-The name of the StateType ({8d6e52ef-992d-47ac-90a8-9dba95ab200e}) of ThingClass x2wp</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error occured</source>
-        <extracomment>The name of the EventType ({8d6e52ef-992d-47ac-90a8-9dba95ab200e}) of ThingClass x2wp</extracomment>
+        <extracomment>The name of the StateType ({8d6e52ef-992d-47ac-90a8-9dba95ab200e}) of ThingClass x2wp</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Heat pump mode</source>
-        <extracomment>The name of the ParamType (ThingClass: x2wp, EventType: heatPumpMode, ID: {5c125ddd-a0db-40fe-9998-2afea6c727f1})
-----------
-The name of the StateType ({5c125ddd-a0db-40fe-9998-2afea6c727f1}) of ThingClass x2wp</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Heat pump mode changed</source>
-        <extracomment>The name of the EventType ({5c125ddd-a0db-40fe-9998-2afea6c727f1}) of ThingClass x2wp</extracomment>
+        <extracomment>The name of the StateType ({5c125ddd-a0db-40fe-9998-2afea6c727f1}) of ThingClass x2wp</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Outside air temperature</source>
-        <extracomment>The name of the ParamType (ThingClass: x2wp, EventType: outsideAirTemperature, ID: {32378843-5478-4b86-9c0e-ccbf978c02be})
-----------
-The name of the StateType ({32378843-5478-4b86-9c0e-ccbf978c02be}) of ThingClass x2wp</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Outside air temperature changed</source>
-        <extracomment>The name of the EventType ({32378843-5478-4b86-9c0e-ccbf978c02be}) of ThingClass x2wp</extracomment>
+        <extracomment>The name of the StateType ({32378843-5478-4b86-9c0e-ccbf978c02be}) of ThingClass x2wp</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Power</source>
-        <extracomment>The name of the ParamType (ThingClass: x2wp, ActionType: power, ID: {f2ce8389-c33f-4f10-8484-f2e993841762})
-----------
-The name of the ParamType (ThingClass: x2wp, EventType: power, ID: {f2ce8389-c33f-4f10-8484-f2e993841762})
-----------
-The name of the StateType ({f2ce8389-c33f-4f10-8484-f2e993841762}) of ThingClass x2wp
+        <extracomment>The name of the StateType ({f2ce8389-c33f-4f10-8484-f2e993841762}) of ThingClass x2wp
 ----------
 The name of the ParamType (ThingClass: x2lu, ActionType: power, ID: {c9df6349-2bf6-46cc-bce3-d4155836dbe5})
-----------
-The name of the ParamType (ThingClass: x2lu, EventType: power, ID: {c9df6349-2bf6-46cc-bce3-d4155836dbe5})
 ----------
 The name of the StateType ({c9df6349-2bf6-46cc-bce3-d4155836dbe5}) of ThingClass x2lu</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Power changed</source>
-        <extracomment>The name of the EventType ({f2ce8389-c33f-4f10-8484-f2e993841762}) of ThingClass x2wp
-----------
-The name of the EventType ({c9df6349-2bf6-46cc-bce3-d4155836dbe5}) of ThingClass x2lu</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Power consumption air preheating</source>
-        <extracomment>The name of the ParamType (ThingClass: x2wp, EventType: powerAirPreheating, ID: {59beeff5-89c1-4996-9e07-48d53d74684d})
-----------
-The name of the StateType ({59beeff5-89c1-4996-9e07-48d53d74684d}) of ThingClass x2wp</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Power consumption air preheating changed</source>
-        <extracomment>The name of the EventType ({59beeff5-89c1-4996-9e07-48d53d74684d}) of ThingClass x2wp</extracomment>
+        <extracomment>The name of the StateType ({59beeff5-89c1-4996-9e07-48d53d74684d}) of ThingClass x2wp</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Power consumption compressor</source>
-        <extracomment>The name of the ParamType (ThingClass: x2wp, EventType: powerCompressor, ID: {7287943a-ea6d-4c92-abbd-f55f6c7ee9e5})
-----------
-The name of the StateType ({7287943a-ea6d-4c92-abbd-f55f6c7ee9e5}) of ThingClass x2wp</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Power consumption compressor changed</source>
-        <extracomment>The name of the EventType ({7287943a-ea6d-4c92-abbd-f55f6c7ee9e5}) of ThingClass x2wp</extracomment>
+        <extracomment>The name of the StateType ({7287943a-ea6d-4c92-abbd-f55f6c7ee9e5}) of ThingClass x2wp</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Power consumption room heating</source>
-        <extracomment>The name of the ParamType (ThingClass: x2wp, EventType: powerRoomHeating, ID: {c4237da0-0ead-42b8-b192-6a681509dc90})
-----------
-The name of the StateType ({c4237da0-0ead-42b8-b192-6a681509dc90}) of ThingClass x2wp</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Power consumption room heating changed</source>
-        <extracomment>The name of the EventType ({c4237da0-0ead-42b8-b192-6a681509dc90}) of ThingClass x2wp</extracomment>
+        <extracomment>The name of the StateType ({c4237da0-0ead-42b8-b192-6a681509dc90}) of ThingClass x2wp</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Power consumption water heating</source>
-        <extracomment>The name of the ParamType (ThingClass: x2wp, EventType: powerWaterHeating, ID: {21dfc736-f35c-469f-be57-afc1976d8328})
-----------
-The name of the StateType ({21dfc736-f35c-469f-be57-afc1976d8328}) of ThingClass x2wp</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Power consumption water heating changed</source>
-        <extracomment>The name of the EventType ({21dfc736-f35c-469f-be57-afc1976d8328}) of ThingClass x2wp</extracomment>
+        <extracomment>The name of the StateType ({21dfc736-f35c-469f-be57-afc1976d8328}) of ThingClass x2wp</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Room temperature</source>
-        <extracomment>The name of the ParamType (ThingClass: x2wp, EventType: temperature, ID: {3ab2d609-1686-4fd7-84e3-580c8e0537d0})
-----------
-The name of the StateType ({3ab2d609-1686-4fd7-84e3-580c8e0537d0}) of ThingClass x2wp</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Room temperature changed</source>
-        <extracomment>The name of the EventType ({3ab2d609-1686-4fd7-84e3-580c8e0537d0}) of ThingClass x2wp</extracomment>
+        <extracomment>The name of the StateType ({3ab2d609-1686-4fd7-84e3-580c8e0537d0}) of ThingClass x2wp</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -223,28 +114,14 @@ The name of the ParamType (ThingClass: x2lu, Type: thing, ID: {28a72cb7-3cd0-470
         <source>Target room temperature</source>
         <extracomment>The name of the ParamType (ThingClass: x2wp, ActionType: targetTemperature, ID: {fb98754d-0fba-4163-9b74-3e5a07d71421})
 ----------
-The name of the ParamType (ThingClass: x2wp, EventType: targetTemperature, ID: {fb98754d-0fba-4163-9b74-3e5a07d71421})
-----------
 The name of the StateType ({fb98754d-0fba-4163-9b74-3e5a07d71421}) of ThingClass x2wp</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Target room temperature changed</source>
-        <extracomment>The name of the EventType ({fb98754d-0fba-4163-9b74-3e5a07d71421}) of ThingClass x2wp</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Target water temperature</source>
         <extracomment>The name of the ParamType (ThingClass: x2wp, ActionType: targetWaterTemperature, ID: {fb021cac-1236-4324-a45c-8d89ad069052})
 ----------
-The name of the ParamType (ThingClass: x2wp, EventType: targetWaterTemperature, ID: {fb021cac-1236-4324-a45c-8d89ad069052})
-----------
 The name of the StateType ({fb021cac-1236-4324-a45c-8d89ad069052}) of ThingClass x2wp</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Target water temperature changed</source>
-        <extracomment>The name of the EventType ({fb021cac-1236-4324-a45c-8d89ad069052}) of ThingClass x2wp</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -254,40 +131,19 @@ The name of the StateType ({fb021cac-1236-4324-a45c-8d89ad069052}) of ThingClass
     </message>
     <message>
         <source>Ventilation level</source>
-        <extracomment>The name of the ParamType (ThingClass: x2lu, EventType: activeVentilationLevel, ID: {1f26a013-7836-4f3e-b369-7ce07310fc59})
-----------
-The name of the StateType ({1f26a013-7836-4f3e-b369-7ce07310fc59}) of ThingClass x2lu</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Ventilation level changed</source>
-        <extracomment>The name of the EventType ({1f26a013-7836-4f3e-b369-7ce07310fc59}) of ThingClass x2lu</extracomment>
+        <extracomment>The name of the StateType ({1f26a013-7836-4f3e-b369-7ce07310fc59}) of ThingClass x2lu</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Ventilation mode</source>
         <extracomment>The name of the ParamType (ThingClass: x2lu, ActionType: ventilationMode, ID: {4269d9d0-ddff-4e7a-9d7a-bf9a7db50f98})
 ----------
-The name of the ParamType (ThingClass: x2lu, EventType: ventilationMode, ID: {4269d9d0-ddff-4e7a-9d7a-bf9a7db50f98})
-----------
 The name of the StateType ({4269d9d0-ddff-4e7a-9d7a-bf9a7db50f98}) of ThingClass x2lu</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Ventilation mode changed</source>
-        <extracomment>The name of the EventType ({4269d9d0-ddff-4e7a-9d7a-bf9a7db50f98}) of ThingClass x2lu</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Water temperature</source>
-        <extracomment>The name of the ParamType (ThingClass: x2wp, EventType: waterTemperature, ID: {77a96b57-fa0a-4946-af5b-39c3b66d9422})
-----------
-The name of the StateType ({77a96b57-fa0a-4946-af5b-39c3b66d9422}) of ThingClass x2wp</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Water temperature changed</source>
-        <extracomment>The name of the EventType ({77a96b57-fa0a-4946-af5b-39c3b66d9422}) of ThingClass x2wp</extracomment>
+        <extracomment>The name of the StateType ({77a96b57-fa0a-4946-af5b-39c3b66d9422}) of ThingClass x2wp</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -302,20 +158,9 @@ The name of the StateType ({77a96b57-fa0a-4946-af5b-39c3b66d9422}) of ThingClass
     </message>
     <message>
         <source>Connected</source>
-        <extracomment>The name of the ParamType (ThingClass: x2wp, EventType: connected, ID: {baf203be-a391-4bfc-8198-53b4ecbcce80})
-----------
-The name of the StateType ({baf203be-a391-4bfc-8198-53b4ecbcce80}) of ThingClass x2wp
-----------
-The name of the ParamType (ThingClass: x2lu, EventType: connected, ID: {b4c4726f-d3d7-46e8-badb-0d590e7f5fac})
+        <extracomment>The name of the StateType ({baf203be-a391-4bfc-8198-53b4ecbcce80}) of ThingClass x2wp
 ----------
 The name of the StateType ({b4c4726f-d3d7-46e8-badb-0d590e7f5fac}) of ThingClass x2lu</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Connected changed</source>
-        <extracomment>The name of the EventType ({baf203be-a391-4bfc-8198-53b4ecbcce80}) of ThingClass x2wp
-----------
-The name of the EventType ({b4c4726f-d3d7-46e8-badb-0d590e7f5fac}) of ThingClass x2lu</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -330,29 +175,19 @@ The name of the ParamType (ThingClass: x2lu, Type: thing, ID: {d25197d1-b1b9-45a
         <extracomment>The name of the ActionType ({c9df6349-2bf6-46cc-bce3-d4155836dbe5}) of ThingClass x2lu</extracomment>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Total power consumption</source>
+        <extracomment>The name of the StateType ({c969ece8-4712-4728-b895-2901dcdb346b}) of ThingClass x2wp</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Total energy consumed</source>
+        <extracomment>The name of the StateType ({812d931b-df7d-4e6a-a53a-da84535bfffa}) of ThingClass x2wp</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>IntegrationPluginDrexelUndWeiss</name>
-    <message>
-        <source>Modbus RTU interface not available.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Modbus RTU interface is not connected.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Modbus RTU interface not connected.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>No Modbus RTU interface available.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Modbus slave address must be between 1 and 254</source>
-        <translation type="unfinished"></translation>
-    </message>
     <message>
         <source>X2 Heat pump</source>
         <translation type="unfinished"></translation>
@@ -363,6 +198,22 @@ The name of the ParamType (ThingClass: x2lu, Type: thing, ID: {d25197d1-b1b9-45a
     </message>
     <message>
         <source>Slave address </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No Modbus RTU interface is available.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The Modbus slave address must be between 1 and 254</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The Modbus RTU interface is not connected.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The Modbus RTU interface is not available.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
