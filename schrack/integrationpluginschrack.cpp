@@ -31,6 +31,8 @@
 #include "integrationpluginschrack.h"
 #include "plugininfo.h"
 
+#include "ciondiscovery.h"
+
 IntegrationPluginSchrack::IntegrationPluginSchrack()
 {
 }
@@ -42,27 +44,36 @@ void IntegrationPluginSchrack::init()
 
 void IntegrationPluginSchrack::discoverThings(ThingDiscoveryInfo *info)
 {
-    qCDebug(dcSchrack()) << "Discovering modbus RTU resources...";
-    if (hardwareManager()->modbusRtuResource()->modbusRtuMasters().isEmpty()) {
-        info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("No Modbus RTU interface available. Please set up a Modbus RTU interface first."));
-        return;
-    }
+    CionDiscovery *discovery = new CionDiscovery(hardwareManager()->modbusRtuResource(), info);
 
-    foreach (ModbusRtuMaster *modbusMaster, hardwareManager()->modbusRtuResource()->modbusRtuMasters()) {
-        qCDebug(dcSchrack()) << "Found RTU master resource" << modbusMaster << "connected" << modbusMaster->connected();
-        if (!modbusMaster->connected()) {
-            continue;
+    connect(discovery, &CionDiscovery::discoveryFinished, info, [this, info, discovery](bool modbusMasterAvailable){
+        if (!modbusMasterAvailable) {
+            info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("No modbus RTU master with appropriate settings found. Please set up a modbus RTU master with a baudrate of 57600, 8 data bis, 1 stop bit and no parity first."));
+            return;
         }
 
-        ThingDescriptor descriptor(info->thingClassId(), "i-CHARGE CION", QString::number(slaveAddress) + " " + modbusMaster->serialPort());
-        ParamList params;
-        params << Param(cionThingSlaveAddressParamTypeId, slaveAddress);
-        params << Param(cionThingModbusMasterUuidParamTypeId, modbusMaster->modbusUuid());
-        descriptor.setParams(params);
-        info->addThingDescriptor(descriptor);
-    }
+        qCInfo(dcSchrack()) << "Discovery results:" << discovery->discoveryResults().count();
 
-    info->finish(Thing::ThingErrorNoError);
+        foreach (const CionDiscovery::Result &result, discovery->discoveryResults()) {
+            ThingDescriptor descriptor(cionThingClassId, "Schrack CION", QString("Slave ID: %1, Version: %2").arg(result.slaveId).arg(result.firmwareVersion));
+
+            ParamList params{
+                {cionThingModbusMasterUuidParamTypeId, result.modbusRtuMasterId},
+                {cionThingSlaveAddressParamTypeId, result.slaveId}
+            };
+            descriptor.setParams(params);
+
+            Thing *existingThing = myThings().findByParams(params);
+            if (existingThing) {
+                descriptor.setThingId(existingThing->id());
+            }
+            info->addThingDescriptor(descriptor);
+        }
+
+        info->finish(Thing::ThingErrorNoError);
+    });
+
+    discovery->startDiscovery();
 }
 
 void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)

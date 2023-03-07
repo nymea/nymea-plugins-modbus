@@ -41,7 +41,7 @@ public:
     explicit CionDiscovery(ModbusRtuHardwareResource *modbusRtuResource, QObject *parent = nullptr);
     struct Result {
         QUuid modbusRtuMasterId;
-        quint16 firmwareVersion;
+        QString firmwareVersion;
         quint16 slaveId;
     };
 

@@ -2,6 +2,9 @@
 
 #include"extern-plugininfo.h"
 
+#include <modbusdatautils.h>
+
+
 CionDiscovery::CionDiscovery(ModbusRtuHardwareResource *modbusRtuResource, QObject *parent)
     : QObject{parent},
       m_modbusRtuResource{modbusRtuResource}
@@ -44,20 +47,27 @@ void CionDiscovery::tryConnect(ModbusRtuMaster *master, quint16 slaveId)
 {
     qCDebug(dcSchrack()) << "Scanning modbus RTU master" << master->modbusUuid() << "Slave ID:" << slaveId;
 
-    ModbusRtuReply *reply = master->readInputRegister(slaveId, 4);
+    ModbusRtuReply *reply = master->readHoldingRegister(slaveId, 832, 16);
     connect(reply, &ModbusRtuReply::finished, this, [=](){
-        qCDebug(dcSchrack()) << "Test reply finished!" << reply->error() << reply->result();
-        if (reply->error() == ModbusRtuReply::NoError && reply->result().length() > 0) {
-            quint16 version = reply->result().first();
-            if (version >= 0x0100) {
-                qCDebug(dcSchrack()) << QString("Version is 0x%1").arg(version, 0, 16);
-                Result result {master->modbusUuid(), version, slaveId};
+
+        if (reply->error() == ModbusRtuReply::NoError) {
+
+            QString firmwareVersion = ModbusDataUtils::convertToString(reply->result());
+            qCDebug(dcSchrack()) << "Test reply finished!" << reply->error() << firmwareVersion;
+
+            // Version numbers seem to be wild west... We can't really understand what's in there...
+            // So let's assume this is a schrack if reading alone succeeded and it is a valid string and 18 to 32 chars long...
+            // Examples of how this looks like:
+            // EBE 1.2: "V1.2    15.02.2021"
+            // ICC:     "003090056-01          20220913"
+            QRegExp re = QRegExp("[A-Z0-9\\.- ]{18,32}");
+            if (re.exactMatch(firmwareVersion)) {
+                Result result {master->modbusUuid(), firmwareVersion, slaveId};
                 m_discoveryResults.append(result);
-            } else {
-                qCDebug(dcAmperfied()) << "Version must be at least 1.0.0 (0x0100)";
             }
         }
-        if (slaveId < 20) {
+
+        if (slaveId < 10) {
             tryConnect(master, slaveId+1);
         } else {
             emit discoveryFinished(true);
