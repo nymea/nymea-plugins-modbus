@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2022, nymea GmbH
+* Copyright 2013 - 2023, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -82,6 +82,10 @@ private:
 
     // Shared interface accross meters
     SpeedwireInterface *m_multicastInterface = nullptr;
+
+    void markSpeedwireMeterAsDisconnected(Thing *thing);
+    void markSpeedwireInverterAsDisconnected(Thing *thing);
+    void markModbusInverterAsDisconnected(Thing *thing);
 
     // Sma modbus data validation
     bool isModbusValueValid(quint32 value);

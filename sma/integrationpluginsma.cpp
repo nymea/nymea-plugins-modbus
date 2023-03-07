@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2022, nymea GmbH
+* Copyright 2013 - 2023, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -321,6 +321,9 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
 
         connect(meter, &SpeedwireMeter::reachableChanged, thing, [=](bool reachable){
             thing->setStateValue(speedwireMeterConnectedStateTypeId, reachable);
+            if (!reachable) {
+                markSpeedwireMeterAsDisconnected(thing);
+            }
         });
 
         connect(meter, &SpeedwireMeter::valuesUpdated, thing, [=](){
@@ -400,9 +403,13 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
         // Runtime connections
         connect(inverter, &SpeedwireInverter::reachableChanged, thing, [=](bool reachable){
             thing->setStateValue(speedwireInverterConnectedStateTypeId, reachable);
+            if (!reachable) {
+                markSpeedwireInverterAsDisconnected(thing);
+            }
         });
 
         connect(inverter, &SpeedwireInverter::valuesUpdated, thing, [=](){
+            thing->setStateValue(speedwireInverterConnectedStateTypeId, true);
             thing->setStateValue(speedwireInverterTotalEnergyProducedStateTypeId, inverter->totalEnergyProduced());
             thing->setStateValue(speedwireInverterEnergyProducedTodayStateTypeId, inverter->todayEnergyProduced());
             thing->setStateValue(speedwireInverterCurrentPowerStateTypeId, -inverter->totalAcPower());
@@ -497,8 +504,12 @@ void IntegrationPluginSma::postSetupThing(Thing *thing)
         SpeedwireInverter *inverter = m_speedwireInverters.value(thing);
         if (inverter) {
             thing->setStateValue("connected", inverter->reachable());
+            if (!inverter->reachable()) {
+                markSpeedwireInverterAsDisconnected(thing);
+            }
         } else {
             thing->setStateValue("connected", false);
+            markSpeedwireInverterAsDisconnected(thing);
         }
 
         setupRefreshTimer();
@@ -507,8 +518,12 @@ void IntegrationPluginSma::postSetupThing(Thing *thing)
         SmaInverterModbusTcpConnection *connection = m_modbusInverters.value(thing);
         if (connection) {
             thing->setStateValue("connected", connection->reachable());
+            if (!connection->reachable()) {
+                markSpeedwireMeterAsDisconnected(thing);
+            }
         } else {
             thing->setStateValue("connected", false);
+            markSpeedwireMeterAsDisconnected(thing);
         }
 
         setupRefreshTimer();
@@ -555,6 +570,9 @@ void IntegrationPluginSma::onConnectedChanged(bool connected)
     Thing *thing = m_sunnyWebBoxes.key(static_cast<SunnyWebBox *>(sender()));
     if (!thing)
         return;
+
+    if (!connected)
+        thing->setStateValue(sunnyWebBoxCurrentPowerStateTypeId, 0);
 
     thing->setStateValue(sunnyWebBoxConnectedStateTypeId, connected);
 }
@@ -629,6 +647,7 @@ void IntegrationPluginSma::setupModbusInverterConnection(ThingSetupInfo *info)
             // Note: We disable autoreconnect explicitly and we will
             // connect the device once the monitor says it is reachable again
             connection->disconnectDevice();
+            markModbusInverterAsDisconnected(thing);
         }
     });
 
@@ -639,6 +658,7 @@ void IntegrationPluginSma::setupModbusInverterConnection(ThingSetupInfo *info)
             connection->initialize();
         } else {
             thing->setStateValue("connected", false);
+            markModbusInverterAsDisconnected(thing);
             foreach (Thing *childThing, myThings().filterByParentId(thing->id())) {
                 childThing->setStateValue("connected", false);
             }
@@ -657,6 +677,7 @@ void IntegrationPluginSma::setupModbusInverterConnection(ThingSetupInfo *info)
         if (!success) {
             // Try once to reconnect the device
             connection->reconnectDevice();
+            markModbusInverterAsDisconnected(thing);
         }
     });
 
@@ -732,6 +753,47 @@ void IntegrationPluginSma::setupModbusInverterConnection(ThingSetupInfo *info)
     });
 
     connection->connectDevice();
+}
+
+void IntegrationPluginSma::markSpeedwireMeterAsDisconnected(Thing *thing)
+{
+    thing->setStateValue(speedwireMeterCurrentPowerPhaseAStateTypeId, 0);
+    thing->setStateValue(speedwireMeterCurrentPowerPhaseBStateTypeId, 0);
+    thing->setStateValue(speedwireMeterCurrentPowerPhaseCStateTypeId, 0);
+    thing->setStateValue(speedwireMeterVoltagePhaseAStateTypeId, 0);
+    thing->setStateValue(speedwireMeterVoltagePhaseBStateTypeId, 0);
+    thing->setStateValue(speedwireMeterVoltagePhaseCStateTypeId, 0);
+    thing->setStateValue(speedwireMeterCurrentPhaseAStateTypeId, 0);
+    thing->setStateValue(speedwireMeterCurrentPhaseBStateTypeId, 0);
+    thing->setStateValue(speedwireMeterCurrentPhaseCStateTypeId, 0);
+    thing->setStateValue(speedwireMeterCurrentPowerStateTypeId, 0);
+}
+
+void IntegrationPluginSma::markSpeedwireInverterAsDisconnected(Thing *thing)
+{
+    thing->setStateValue(speedwireInverterVoltagePhaseAStateTypeId, 0);
+    thing->setStateValue(speedwireInverterVoltagePhaseBStateTypeId, 0);
+    thing->setStateValue(speedwireInverterVoltagePhaseCStateTypeId, 0);
+    thing->setStateValue(speedwireInverterCurrentPhaseAStateTypeId, 0);
+    thing->setStateValue(speedwireInverterCurrentPhaseBStateTypeId, 0);
+    thing->setStateValue(speedwireInverterCurrentPhaseCStateTypeId, 0);
+    thing->setStateValue(speedwireInverterCurrentPowerMpp1StateTypeId, 0);
+    thing->setStateValue(speedwireInverterCurrentPowerMpp2StateTypeId, 0);
+    thing->setStateValue(speedwireInverterCurrentPowerStateTypeId, 0);
+}
+
+void IntegrationPluginSma::markModbusInverterAsDisconnected(Thing *thing)
+{
+    thing->setStateValue(modbusInverterVoltagePhaseAStateTypeId, 0);
+    thing->setStateValue(modbusInverterVoltagePhaseBStateTypeId, 0);
+    thing->setStateValue(modbusInverterVoltagePhaseCStateTypeId, 0);
+    thing->setStateValue(modbusInverterCurrentPhaseAStateTypeId, 0);
+    thing->setStateValue(modbusInverterCurrentPhaseBStateTypeId, 0);
+    thing->setStateValue(modbusInverterCurrentPhaseCStateTypeId, 0);
+    thing->setStateValue(modbusInverterCurrentPowerPhaseAStateTypeId, 0);
+    thing->setStateValue(modbusInverterCurrentPowerPhaseBStateTypeId, 0);
+    thing->setStateValue(modbusInverterCurrentPowerPhaseCStateTypeId, 0);
+    thing->setStateValue(modbusInverterCurrentPowerStateTypeId, 0);
 }
 
 bool IntegrationPluginSma::isModbusValueValid(quint32 value)
