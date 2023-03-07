@@ -1,0 +1,250 @@
+{
+    "className": "Amperfied",
+    "protocol": "BOTH",
+    "endianness": "BigEndian",
+    "errorLimitUntilNotReachable": 2,
+    "checkReachableRegister": "chargingCurrent",
+    "enums": [
+        {
+            "name": "ChargingState",
+            "values": [
+                {
+                    "key": "Undefined",
+                    "value": 1
+                },
+                {
+                    "key": "A1",
+                    "value": 2
+                },
+                {
+                    "key": "A2",
+                    "value": 3
+                },
+                {
+                    "key": "B1",
+                    "value": 4
+                },
+                {
+                    "key": "B2",
+                    "value": 5
+                },
+                {
+                    "key": "C1",
+                    "value": 6
+                },
+                {
+                    "key": "C2",
+                    "value": 7
+                },
+                {
+                    "key": "Derating",
+                    "value": 8
+                },
+                {
+                    "key": "E",
+                    "value": 9
+                },
+                {
+                    "key": "F",
+                    "value": 10
+                },
+                {
+                    "key": "Error",
+                    "value": 11
+                }
+            ]
+        }
+    ],
+    "blocks": [
+        {
+            "id": "consumptions",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "chargingState",
+                    "address": 5,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "ChargingState",
+                    "enum": "ChargingState",
+                    "defaultValue": "ChargingStateUndefined",
+                    "access": "RO"
+                },
+                {
+                    "id": "currentL1",
+                    "address": 6,
+                    "size": 1,
+                    "type": "uint16",
+                    "unit": "A",
+                    "registerType": "inputRegister",
+                    "description": "Current L1",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "currentL2",
+                    "address": 7,
+                    "size": 1,
+                    "type": "uint16",
+                    "unit": "A",
+                    "registerType": "inputRegister",
+                    "description": "Current L2",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "currentL3",
+                    "address": 8,
+                    "size": 1,
+                    "type": "uint16",
+                    "unit": "A",
+                    "registerType": "inputRegister",
+                    "description": "Current L3",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "pcbTemperature",
+                    "address": 9,
+                    "size": 1,
+                    "type": "uint16",
+                    "unit": "1/10°C",
+                    "registerType": "inputRegister",
+                    "description": "PCB temperature",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "voltageL1",
+                    "address": 10,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Voltage L1",
+                    "unit": "V",
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "voltageL2",
+                    "address": 11,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Voltage L2",
+                    "unit": "V",
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "voltageL3",
+                    "address": 12,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Voltage L3",
+                    "unit": "V",
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "externalLock",
+                    "address": 13,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "External lock",
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "currentPower",
+                    "address": 14,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Power (L1+L2+L3)",
+                    "unit": "VA",
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "sessionEnergy",
+                    "address": 15,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Energy since PowerOn",
+                    "unit": "Wh",
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "totalEnergy",
+                    "address": 17,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Energy since installation",
+                    "unit": "Wh",
+                    "defaultValue": 0,
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "minMaxValues",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "maxChargingCurrent",
+                    "address": 100,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Absolute maximum charging current",
+                    "unit": "A",
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "minChargingCurrent",
+                    "address": 101,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Absolute minimum charging current",
+                    "unit": "A",
+                    "defaultValue": 0,
+                    "access": "RO"
+                }
+            ]
+        }
+    ],
+    "registers": [
+        {
+            "id": "version",
+            "address": 4,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "init",
+            "registerType": "inputRegister",
+            "description": "Version",
+            "defaultValue": 0,
+            "access": "RO"
+        },
+        {
+            "id": "chargingCurrent",
+            "address": 261,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Charging current",
+            "unit": "A",
+            "defaultValue": "0",
+            "access": "RW"
+        }
+    ]
+}

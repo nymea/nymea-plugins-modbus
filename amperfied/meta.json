@@ -1,0 +1,13 @@
+{
+    "title": "Amperfied",
+    "tagline": "Connect Amperfied/Heidelberg wallboxes to nymea.",
+    "icon": "amperfeid.jpg",
+    "stability": "consumer",
+    "offline": true,
+    "technologies": [
+        "network"
+    ],
+    "categories": [
+        "energy"
+    ]
+}
