@@ -77,6 +77,8 @@
                             "displayNameEvent": "CO2 changed",
                             "unit": "PartsPerMillion",
                             "type": "double",
+                            "minValue": 0,
+                            "maxValue": 2000,
                             "defaultValue": 350
                         },
                         {
