@@ -1,3 +1,29 @@
+nymea-plugins-modbus (1.7.0) jammy; urgency=medium
+
+  [ Michael Zanetti ]
+  * New plugin: Senseair S8
+  * Drexel&Weiss: Add min/max values to co2sensor
+
+  [ Simon Stürz ]
+  * ModbusRtu connection: Check reachablility in constructor
+
+  [ Michael Zanetti ]
+  * New plugin: Amperfied/Heidelberg
+
+  [ Bernhard Trinnes ]
+  * Drexel und Weiss: Add smartmeterconsumer interface
+
+  [ Simon Stürz ]
+  * huawei: Set energy states to 0 if not connected and filter invalid
+    energy counter values
+  * SMA: set energy values to 0 on disconnected
+
+  [ Michael Zanetti ]
+  * Schrack: Add firmware version state
+  * Schrack: Rework discovery
+
+ -- jenkins <developer@nymea.io>  Tue, 07 Mar 2023 17:25:40 +0100
+
 nymea-plugins-modbus (1.6.3) jammy; urgency=medium
 
   [ Michael Zanetti ]
