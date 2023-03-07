@@ -136,6 +136,12 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
     // Note: This register really only tells us if we can control anything... i.e. if the wallbox is unlocked via RFID
     connect(cionConnection, &CionModbusRtuConnection::chargingEnabledChanged, thing, [=](quint16 charging){
         qCDebug(dcSchrack()) << "Charge control enabled changed:" << charging;
+        // If this register goes 0->1 it means charging has been started. This could be because of an RFID tag.
+        // As we have may set charging current to 0 ourselves, we'll want to activate it again here
+        uint maxSetPoint = thing->stateValue(cionMaxChargingCurrentStateTypeId).toUInt();
+        if (cionConnection->chargingCurrentSetpoint() != maxSetPoint) {
+            cionConnection->setChargingCurrentSetpoint(maxSetPoint);
+        }
     });
 
     // We can write chargingCurrentSetpoint to the preferred charging we want, and the wallbox will take it,
@@ -153,8 +159,11 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
 
     connect(cionConnection, &CionModbusRtuConnection::currentChargingCurrentE3Changed, thing, [=](quint16 currentChargingCurrentE3){
         qCDebug(dcSchrack()) << "Current charging current E3 current changed:" << currentChargingCurrentE3;
-        if (cionConnection->chargingCurrentSetpoint() > 0) {
+        if (cionConnection->chargingEnabled() == 1 && cionConnection->chargingCurrentSetpoint() > 0) {
             thing->setStateValue(cionMaxChargingCurrentStateTypeId, currentChargingCurrentE3);
+            thing->setStateValue(cionPowerStateTypeId, true);
+        } else {
+            thing->setStateValue(cionPowerStateTypeId, false);
         }
     });
 
