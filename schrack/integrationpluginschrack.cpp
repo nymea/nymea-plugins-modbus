@@ -48,16 +48,11 @@ void IntegrationPluginSchrack::discoverThings(ThingDiscoveryInfo *info)
         return;
     }
 
-    uint slaveAddress = info->params().paramValue(cionDiscoverySlaveAddressParamTypeId).toUInt();
-    if (slaveAddress > 254 || slaveAddress == 0) {
-        info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The Modbus slave address must be a value between 1 and 254."));
-        return;
-    }
-
     foreach (ModbusRtuMaster *modbusMaster, hardwareManager()->modbusRtuResource()->modbusRtuMasters()) {
         qCDebug(dcSchrack()) << "Found RTU master resource" << modbusMaster << "connected" << modbusMaster->connected();
-        if (!modbusMaster->connected())
+        if (!modbusMaster->connected()) {
             continue;
+        }
 
         ThingDescriptor descriptor(info->thingClassId(), "i-CHARGE CION", QString::number(slaveAddress) + " " + modbusMaster->serialPort());
         ParamList params;

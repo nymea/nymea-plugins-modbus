@@ -6,8 +6,10 @@ MODBUS_CONNECTIONS += cion-registers.json
 include(../modbus.pri)
 
 SOURCES += \
+    ciondiscovery.cpp \
     integrationpluginschrack.cpp
 
 HEADERS += \
+    ciondiscovery.h \
     integrationpluginschrack.h
 
