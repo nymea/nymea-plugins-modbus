@@ -121,7 +121,6 @@ void IntegrationPluginHuawei::setupThing(ThingSetupInfo *info)
         if (m_monitors.contains(thing))
             hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
 
-
         // Make sure we have a valid mac address, otherwise no monitor and not auto searching is possible
         MacAddress macAddress = MacAddress(thing->paramValue(huaweiFusionSolarInverterThingMacAddressParamTypeId).toString());
         if (macAddress.isNull()) {
@@ -436,11 +435,32 @@ void IntegrationPluginHuawei::setupFusionSolar(ThingSetupInfo *info)
             childThing->setStateValue("connected", true);
         }
 
+        // Reset history, just incase
+        m_inverterEnergyProducedHistory[thing].clear();
+
+        // Add the current value to the history
+        evaluateEnergyProducedValue(thing, thing->stateValue(huaweiFusionSolarInverterTotalEnergyProducedStateTypeId).toFloat());
+
         connect(connection, &HuaweiFusionSolar::reachableChanged, thing, [=](bool reachable){
             qCDebug(dcHuawei()) << "Reachable changed to" << reachable << "for" << thing;
             thing->setStateValue("connected", reachable);
             foreach (Thing *childThing, myThings().filterByParentId(thing->id())) {
                 childThing->setStateValue("connected", reachable);
+
+                if (!reachable) {
+                    // Set power values to 0 since we don't know what the current value is
+                    if (childThing->thingClassId() == huaweiFusionSolarInverterThingClassId) {
+                        thing->setStateValue(huaweiFusionSolarInverterCurrentPowerStateTypeId, 0);
+                    }
+
+                    if (childThing->thingClassId() == huaweiMeterThingClassId) {
+                        thing->setStateValue(huaweiMeterCurrentPowerStateTypeId, 0);
+                    }
+
+                    if (childThing->thingClassId() == huaweiBatteryThingClassId) {
+                        thing->setStateValue(huaweiBatteryCurrentPowerStateTypeId, 0);
+                    }
+                }
             }
         });
 
@@ -469,9 +489,13 @@ void IntegrationPluginHuawei::setupFusionSolar(ThingSetupInfo *info)
             Q_UNUSED(thing)
         });
 
-        connect(connection, &HuaweiFusionSolar::inverterEnergyProducedReadFinished, thing, [thing](float inverterEnergyProduced){
+        connect(connection, &HuaweiFusionSolar::inverterEnergyProducedReadFinished, thing, [this, thing](float inverterEnergyProduced){
             qCDebug(dcHuawei()) << "Inverter total energy produced changed" << inverterEnergyProduced << "kWh";
-            thing->setStateValue(huaweiFusionSolarInverterTotalEnergyProducedStateTypeId, inverterEnergyProduced);
+
+            // Note: sometimes this value is suddenly 0 or absurd high > 100000000
+            // We try here to filer out such random values. Sadly the values seem to
+            // come like that from the device, without exception or error.
+            evaluateEnergyProducedValue(thing, inverterEnergyProduced);
         });
 
         // Meter
@@ -583,5 +607,86 @@ void IntegrationPluginHuawei::setupFusionSolar(ThingSetupInfo *info)
     });
 
     connection->connectDevice();
+}
+
+void IntegrationPluginHuawei::evaluateEnergyProducedValue(Thing *inverterThing, float energyProduced)
+{
+    // Add the value to our small history
+    m_inverterEnergyProducedHistory[inverterThing].append(energyProduced);
+
+    int historyMaxSize  = 3;
+    int absurdlyHighValueLimit= 25000000;
+    int historySize = m_inverterEnergyProducedHistory.value(inverterThing).count();
+
+    if (historySize > historyMaxSize) {
+        m_inverterEnergyProducedHistory[inverterThing].removeFirst();
+    }
+
+    if (historySize == 1) {
+        // First value add very high, add it to the history, but do not set this value until we get more absurde high value
+        if (energyProduced > absurdlyHighValueLimit) {
+            qCWarning(dcHuawei()) << "Energyfilter: First energy value absurdly high" << energyProduced << "...waiting for more values before accepting such values.";
+            return;
+        }
+
+        // First value, no need to speculate here, we have no history
+        inverterThing->setStateValue(huaweiFusionSolarInverterTotalEnergyProducedStateTypeId, energyProduced);
+        return;
+    }
+
+    // Check if the new value is smaller than the current one, if so, we have either a counter reset or an invalid value we want to filter out
+    float currentEnergyProduced = inverterThing->stateValue(huaweiFusionSolarInverterTotalEnergyProducedStateTypeId).toFloat();
+    if (energyProduced < currentEnergyProduced) {
+        // If more than 3 values arrive which are smaller than the current value,
+        // we are sure this is a meter rest growing again and we assume they are correct
+        // otherwise we just add the value to the history and wait for the next value before
+        // we update the state
+
+        if (historySize < historyMaxSize) {
+            qCWarning(dcHuawei()) << "Energyfilter: Energy value" << energyProduced << "smaller than the last one. Still collecting history data" << m_inverterEnergyProducedHistory.value(inverterThing);
+            return;
+        }
+
+        // Full history available, let's verify against the older values
+        bool allValuesSmaller = true;
+        for (int i = 0; i < historySize - 1; i++) {
+            if (m_inverterEnergyProducedHistory.value(inverterThing).at(i) >= currentEnergyProduced) {
+                allValuesSmaller = false;
+                break;
+            }
+        }
+
+        if (allValuesSmaller) {
+            // We belive it, meter has been resetted
+            qCDebug(dcHuawei()) << "Energyfilter: Energy value" << energyProduced << "seems to be really resetted back. Beliving it... History data:" << m_inverterEnergyProducedHistory.value(inverterThing);
+            inverterThing->setStateValue(huaweiFusionSolarInverterTotalEnergyProducedStateTypeId, energyProduced);
+        }
+
+        return;
+    } else if (energyProduced > absurdlyHighValueLimit) {
+        // First value add very high, add it to the history, but do not set this value until we get more in this hight
+        if (historySize < historyMaxSize) {
+            qCWarning(dcHuawei()) << "Energyfilter: Energy value" << energyProduced << "absurdly high. Still collecting history data" << m_inverterEnergyProducedHistory.value(inverterThing);
+            return;
+        }
+
+        // Full history available, let's verify against the older values
+        bool allValuesAbsurdlyHigh = true;
+        for (int i = 0; i < historySize - 1; i++) {
+            if (m_inverterEnergyProducedHistory.value(inverterThing).at(i) < absurdlyHighValueLimit) {
+                allValuesAbsurdlyHigh = false;
+                break;
+            }
+        }
+
+        if (allValuesAbsurdlyHigh) {
+            // We belive it, they realy seem all absurdly high...
+            qCDebug(dcHuawei()) << "Energyfilter: Energy value" << energyProduced << "seems to be really this absurdly high. Beliving it... History data:" << m_inverterEnergyProducedHistory.value(inverterThing);
+            inverterThing->setStateValue(huaweiFusionSolarInverterTotalEnergyProducedStateTypeId, energyProduced);
+        }
+    } else {
+        // Nothing strange detected, normal state update
+        inverterThing->setStateValue(huaweiFusionSolarInverterTotalEnergyProducedStateTypeId, energyProduced);
+    }
 }
 
