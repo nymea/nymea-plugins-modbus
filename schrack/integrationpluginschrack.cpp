@@ -111,6 +111,7 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
             qCDebug(dcSchrack) << "DIP switche states:" << cionConnection->dipSwitches();
             m_cionConnections.insert(thing, cionConnection);
             info->finish(Thing::ThingErrorNoError);
+            info->thing()->setStateValue(cionCurrentVersionStateTypeId, cionConnection->firmwareVersion());
         } else {
             delete cionConnection;
             info->finish(Thing::ThingErrorHardwareNotAvailable);

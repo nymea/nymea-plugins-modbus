@@ -89,6 +89,13 @@
                             "displayNameEvent": "Charging started or stopped",
                             "type": "bool",
                             "defaultValue": false
+                        },
+                        {
+                            "id": "33780b19-4855-4b5c-bd84-cec8400309be",
+                            "name": "currentVersion",
+                            "displayName": "Firmware version",
+                            "type": "QString",
+                            "defaultValue": ""
                         }
                     ]
                 }
