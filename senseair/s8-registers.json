@@ -1,0 +1,31 @@
+{
+    "className": "SenseAirS8",
+    "protocol": "RTU",
+    "errorLimitUntilNotReachable": 20,
+    "endianness": "BigEndian",
+    "checkReachableRegister": "spaceCo2",
+    "registers": [
+        {
+            "id": "meterStatus",
+            "address": 0,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "init",
+            "registerType": "inputRegister",
+            "description": "Meter status",
+            "defaultValue": 0,
+            "access": "RO"
+        },
+        {
+            "id": "spaceCo2",
+            "address": 3,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "inputRegister",
+            "description": "Space CO2",
+            "defaultValue": 0,
+            "access": "RO"
+        }
+    ]
+}

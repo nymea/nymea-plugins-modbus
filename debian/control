@@ -185,6 +185,14 @@ Description: nymea integration plugin for Schrack wallboxes
  This package contains the nymea integration plugin for Schrack wallboxes.
 
 
+Package: nymea-plugin-senseair
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for Senseair sensors
+ This package contains the nymea integration plugin for Senseair sensors.
+
+
 Package: nymea-plugin-sma
 Architecture: any
 Depends: ${shlibs:Depends},
