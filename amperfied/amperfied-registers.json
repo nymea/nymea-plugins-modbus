@@ -242,7 +242,7 @@
             "readSchedule": "update",
             "registerType": "holdingRegister",
             "description": "Charging current",
-            "unit": "A",
+            "unit": "1/10 A",
             "defaultValue": "0",
             "access": "RW"
         }

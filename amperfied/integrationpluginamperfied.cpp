@@ -203,7 +203,7 @@ void IntegrationPluginAmperfied::executeAction(ThingActionInfo *info)
             ModbusRtuReply *reply = connection->setChargingCurrent(power ? max : 0);
             connect(reply, &ModbusRtuReply::finished, info, [info, reply, max](){
                 if (reply->error() == ModbusRtuReply::NoError) {
-                    info->thing()->setStateValue(energyControlMaxChargingCurrentStateTypeId, max);
+                    info->thing()->setStateValue(energyControlMaxChargingCurrentStateTypeId, max / 10);
                     info->finish(Thing::ThingErrorNoError);
                 } else {
                     qCWarning(dcAmperfied()) << "Error setting power:" << reply->error() << reply->errorString();
@@ -237,7 +237,7 @@ void IntegrationPluginAmperfied::executeAction(ThingActionInfo *info)
             QModbusReply *reply = connection->setChargingCurrent(power ? max : 0);
             connect(reply, &QModbusReply::finished, info, [info, reply, max](){
                 if (reply->error() == QModbusDevice::NoError) {
-                    info->thing()->setStateValue(connectHomeMaxChargingCurrentStateTypeId, max);
+                    info->thing()->setStateValue(connectHomeMaxChargingCurrentStateTypeId, max / 10);
                     info->finish(Thing::ThingErrorNoError);
                 } else {
                     qCWarning(dcAmperfied()) << "Error setting power:" << reply->error() << reply->errorString();
