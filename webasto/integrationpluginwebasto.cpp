@@ -46,42 +46,12 @@ IntegrationPluginWebasto::IntegrationPluginWebasto()
 
 void IntegrationPluginWebasto::init()
 {
-    // FIXME: make use of the internal network discovery if the device gets unavailable. For now, commented out since it has not been used
-    // at the moment of changing this.
 
-//    m_discovery = new Discovery(this);
-//    connect(m_discovery, &Discovery::finished, this, [this](const QList<Host> &hosts) {
-
-//        foreach (const Host &host, hosts) {
-//            if (!host.hostName().contains("webasto", Qt::CaseSensitivity::CaseInsensitive))
-//                continue;
-
-//            foreach (Thing *existingThing, myThings()) {
-//                if (existingThing->paramValue(liveWallboxThingMacAddressParamTypeId).toString().isEmpty()) {
-//                    //This device got probably manually setup, to enable auto rediscovery the MAC address needs to setup
-//                    if (existingThing->paramValue(liveWallboxThingIpAddressParamTypeId).toString() == host.address()) {
-//                        qCDebug(dcWebasto()) << "Wallbox MAC Address has been discovered" << existingThing->name() << host.macAddress();
-//                        existingThing->setParamValue(liveWallboxThingMacAddressParamTypeId, host.macAddress());
-
-//                    }
-//                } else if (existingThing->paramValue(liveWallboxThingMacAddressParamTypeId).toString() == host.macAddress())  {
-//                    if (existingThing->paramValue(liveWallboxThingIpAddressParamTypeId).toString() != host.address()) {
-//                        qCDebug(dcWebasto()) << "Wallbox IP Address has changed, from"  << existingThing->paramValue(liveWallboxThingIpAddressParamTypeId).toString() << "to" << host.address();
-//                        existingThing->setParamValue(liveWallboxThingIpAddressParamTypeId, host.address());
-
-//                    } else {
-//                        qCDebug(dcWebasto()) << "Wallbox" << existingThing->name() << "IP address has not changed" << host.address();
-//                    }
-//                    break;
-//                }
-//            }
-//        }
-//    });
 }
 
 void IntegrationPluginWebasto::discoverThings(ThingDiscoveryInfo *info)
 {
-    if (info->thingClassId() == liveWallboxThingClassId) {
+    if (info->thingClassId() == webastoLiveThingClassId) {
         if (!hardwareManager()->networkDeviceDiscovery()->available()) {
             qCWarning(dcWebasto()) << "Failed to discover network devices. The network device discovery is not available.";
             info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("The discovery is not available."));
@@ -113,18 +83,18 @@ void IntegrationPluginWebasto::discoverThings(ThingDiscoveryInfo *info)
                     description = networkDeviceInfo.macAddress() + " (" + networkDeviceInfo.macAddressManufacturer() + ")";
                 }
 
-                ThingDescriptor descriptor(liveWallboxThingClassId, title, description);
+                ThingDescriptor descriptor(webastoLiveThingClassId, title, description);
 
                 // Check if we already have set up this device
-                Things existingThings = myThings().filterByParam(liveWallboxThingIpAddressParamTypeId, networkDeviceInfo.address().toString());
+                Things existingThings = myThings().filterByParam(webastoLiveThingIpAddressParamTypeId, networkDeviceInfo.address().toString());
                 if (existingThings.count() == 1) {
                     qCDebug(dcWebasto()) << "This thing already exists in the system." << existingThings.first() << networkDeviceInfo;
                     descriptor.setThingId(existingThings.first()->id());
                 }
 
                 ParamList params;
-                params << Param(liveWallboxThingIpAddressParamTypeId, networkDeviceInfo.address().toString());
-                params << Param(liveWallboxThingMacAddressParamTypeId, networkDeviceInfo.macAddress());
+                params << Param(webastoLiveThingIpAddressParamTypeId, networkDeviceInfo.address().toString());
+                params << Param(webastoLiveThingMacAddressParamTypeId, networkDeviceInfo.macAddress());
                 descriptor.setParams(params);
                 info->addThingDescriptor(descriptor);
             }
@@ -140,13 +110,13 @@ void IntegrationPluginWebasto::setupThing(ThingSetupInfo *info)
     Thing *thing = info->thing();
     qCDebug(dcWebasto()) << "Setup thing" << thing->name();
 
-    if (thing->thingClassId() == liveWallboxThingClassId) {
+    if (thing->thingClassId() == webastoLiveThingClassId) {
 
         if (m_webastoConnections.contains(thing)) {
             // Clean up after reconfiguration
             m_webastoConnections.take(thing)->deleteLater();
         }
-        QHostAddress address = QHostAddress(thing->paramValue(liveWallboxThingIpAddressParamTypeId).toString());
+        QHostAddress address = QHostAddress(thing->paramValue(webastoLiveThingIpAddressParamTypeId).toString());
         Webasto *webasto = new Webasto(address, 502, thing);
         m_webastoConnections.insert(thing, webasto);
         connect(webasto, &Webasto::destroyed, this, [thing, this] {m_webastoConnections.remove(thing);});
@@ -180,7 +150,7 @@ void IntegrationPluginWebasto::postSetupThing(Thing *thing)
         });
     }
 
-    if (thing->thingClassId() == liveWallboxThingClassId) {
+    if (thing->thingClassId() == webastoLiveThingClassId) {
         Webasto *connection = m_webastoConnections.value(thing);
         if (!connection) {
             qCWarning(dcWebasto()) << "Can't find connection to thing";
@@ -197,7 +167,7 @@ void IntegrationPluginWebasto::executeAction(ThingActionInfo *info)
     Thing *thing = info->thing();
     Action action = info->action();
 
-    if (thing->thingClassId() == liveWallboxThingClassId) {
+    if (thing->thingClassId() == webastoLiveThingClassId) {
 
         Webasto *connection = m_webastoConnections.value(thing);
         if (!connection) {
@@ -205,12 +175,12 @@ void IntegrationPluginWebasto::executeAction(ThingActionInfo *info)
             return info->finish(Thing::ThingErrorHardwareNotAvailable);
         }
 
-        if (action.actionTypeId() == liveWallboxPowerActionTypeId) {
-            bool enabled = action.paramValue(liveWallboxPowerActionPowerParamTypeId).toBool();
-            thing->setStateValue(liveWallboxPowerActionTypeId, enabled);
+        if (action.actionTypeId() == webastoLivePowerActionTypeId) {
+            bool enabled = action.paramValue(webastoLivePowerActionPowerParamTypeId).toBool();
+            thing->setStateValue(webastoLivePowerActionTypeId, enabled);
             int ampere = 0;
             if (enabled) {
-                ampere = thing->stateValue(liveWallboxMaxChargingCurrentStateTypeId).toUInt();
+                ampere = thing->stateValue(webastoLiveMaxChargingCurrentStateTypeId).toUInt();
             }
             QUuid requestId = connection->setChargeCurrent(ampere);
             if (requestId.isNull()) {
@@ -218,9 +188,9 @@ void IntegrationPluginWebasto::executeAction(ThingActionInfo *info)
             } else {
                 m_asyncActions.insert(requestId, info);
             }
-        } else if (action.actionTypeId() == liveWallboxMaxChargingCurrentActionTypeId) {
-            int ampere = action.paramValue(liveWallboxMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toUInt();
-            thing->setStateValue(liveWallboxMaxChargingCurrentStateTypeId, ampere);
+        } else if (action.actionTypeId() == webastoLiveMaxChargingCurrentActionTypeId) {
+            int ampere = action.paramValue(webastoLiveMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toUInt();
+            thing->setStateValue(webastoLiveMaxChargingCurrentStateTypeId, ampere);
             QUuid requestId = connection->setChargeCurrent(ampere);
             if (requestId.isNull()) {
                 info->finish(Thing::ThingErrorHardwareFailure);
@@ -238,7 +208,7 @@ void IntegrationPluginWebasto::executeAction(ThingActionInfo *info)
 void IntegrationPluginWebasto::thingRemoved(Thing *thing)
 {
     qCDebug(dcWebasto()) << "Delete thing" << thing->name();
-    if (thing->thingClassId() == liveWallboxThingClassId) {
+    if (thing->thingClassId() == webastoLiveThingClassId) {
     }
 
     if (myThings().isEmpty()) {
@@ -269,9 +239,9 @@ void IntegrationPluginWebasto::update(Webasto *webasto)
 
 void IntegrationPluginWebasto::evaluatePhaseCount(Thing *thing)
 {
-    uint amperePhase1 = thing->stateValue(liveWallboxCurrentPhase1StateTypeId).toUInt();
-    uint amperePhase2 = thing->stateValue(liveWallboxCurrentPhase2StateTypeId).toUInt();
-    uint amperePhase3 = thing->stateValue(liveWallboxCurrentPhase3StateTypeId).toUInt();
+    uint amperePhase1 = thing->stateValue(webastoLiveCurrentPhase1StateTypeId).toUInt();
+    uint amperePhase2 = thing->stateValue(webastoLiveCurrentPhase2StateTypeId).toUInt();
+    uint amperePhase3 = thing->stateValue(webastoLiveCurrentPhase3StateTypeId).toUInt();
     // Check how many phases are actually charging, and update the phase count only if something happens on the phases (current or power)
     if (!(amperePhase1 == 0 && amperePhase2 == 0 && amperePhase3 == 0)) {
         uint phaseCount = 0;
@@ -284,7 +254,7 @@ void IntegrationPluginWebasto::evaluatePhaseCount(Thing *thing)
         if (amperePhase3 != 0)
             phaseCount += 1;
 
-        thing->setStateValue(liveWallboxPhaseCountStateTypeId, phaseCount);
+        thing->setStateValue(webastoLivePhaseCountStateTypeId, phaseCount);
     }
 }
 
@@ -296,7 +266,7 @@ void IntegrationPluginWebasto::onConnectionChanged(bool connected)
         qCWarning(dcWebasto()) << "On connection changed, thing not found for connection";
         return;
     }
-    thing->setStateValue(liveWallboxConnectedStateTypeId, connected);
+    thing->setStateValue(webastoLiveConnectedStateTypeId, connected);
 }
 
 void IntegrationPluginWebasto::onWriteRequestExecuted(const QUuid &requestId, bool success)
@@ -325,44 +295,44 @@ void IntegrationPluginWebasto::onReceivedRegister(Webasto::TqModbusRegister modb
         qCWarning(dcWebasto()) << "On basic information received, thing not found for connection";
         return;
     }
-    if (thing->thingClassId() == liveWallboxThingClassId) {
+    if (thing->thingClassId() == webastoLiveThingClassId) {
         switch (modbusRegister) {
         case Webasto::TqChargePointState:
             qCDebug(dcWebasto()) << "   - Charge point state:" << Webasto::ChargePointState(data[0]);
             switch (Webasto::ChargePointState(data[0])) {
             case Webasto::ChargePointStateNoVehicleAttached:
-                thing->setStateValue(liveWallboxChargePointStateStateTypeId, "No vehicle attached");
+                thing->setStateValue(webastoLiveChargePointStateStateTypeId, "No vehicle attached");
                 break;
             case Webasto::ChargePointStateVehicleAttachedNoPermission:
-                thing->setStateValue(liveWallboxChargePointStateStateTypeId, "Vehicle attached, no permission");
+                thing->setStateValue(webastoLiveChargePointStateStateTypeId, "Vehicle attached, no permission");
                 break;
             case Webasto::ChargePointStateChargingAuthorized:
-                thing->setStateValue(liveWallboxChargePointStateStateTypeId, "Charging authorized");
+                thing->setStateValue(webastoLiveChargePointStateStateTypeId, "Charging authorized");
                 break;
             case Webasto::ChargePointStateCharging:
-                thing->setStateValue(liveWallboxChargePointStateStateTypeId, "Charging");
+                thing->setStateValue(webastoLiveChargePointStateStateTypeId, "Charging");
                 break;
             case Webasto::ChargePointStateChargingPaused:
-                thing->setStateValue(liveWallboxChargePointStateStateTypeId, "Charging paused");
+                thing->setStateValue(webastoLiveChargePointStateStateTypeId, "Charging paused");
                 break;
             case Webasto::ChargePointStateChargeSuccessfulCarStillAttached:
-                thing->setStateValue(liveWallboxChargePointStateStateTypeId, "Charge successful (car still attached)");
+                thing->setStateValue(webastoLiveChargePointStateStateTypeId, "Charge successful (car still attached)");
                 break;
             case Webasto::ChargePointStateChargingStoppedByUserCarStillAttached:
-                thing->setStateValue(liveWallboxChargePointStateStateTypeId, "Charging stopped by user (car still attached)");
+                thing->setStateValue(webastoLiveChargePointStateStateTypeId, "Charging stopped by user (car still attached)");
                 break;
             case Webasto::ChargePointStateChargingErrorCarStillAttached:
-                thing->setStateValue(liveWallboxChargePointStateStateTypeId,  "Charging error (car still attached)");
+                thing->setStateValue(webastoLiveChargePointStateStateTypeId,  "Charging error (car still attached)");
                 break;
             case Webasto::ChargePointStateChargingStationReservedNorCarAttached:
-                thing->setStateValue(liveWallboxChargePointStateStateTypeId, "Charging station reserved (No car attached)");
+                thing->setStateValue(webastoLiveChargePointStateStateTypeId, "Charging station reserved (No car attached)");
                 break;
             case Webasto::ChargePointStateUserNotAuthorizedCarAttached:
-                thing->setStateValue(liveWallboxChargePointStateStateTypeId, "User not authorized (car attached)");
+                thing->setStateValue(webastoLiveChargePointStateStateTypeId, "User not authorized (car attached)");
                 break;
             }
 
-            thing->setStateValue(liveWallboxChargingStateTypeId, Webasto::ChargePointState(data[0]) == Webasto::ChargePointStateCharging);
+            thing->setStateValue(webastoLiveChargingStateTypeId, Webasto::ChargePointState(data[0]) == Webasto::ChargePointStateCharging);
             break;
         case Webasto::TqChargeState:
             qCDebug(dcWebasto()) << "   - Charge state:" << data[0];
@@ -374,40 +344,40 @@ void IntegrationPluginWebasto::onReceivedRegister(Webasto::TqModbusRegister modb
             qCDebug(dcWebasto()) << "   - Cable state:" << Webasto::CableState(data[0]);
             switch (Webasto::CableState(data[0])) {
             case Webasto::CableStateNoCableAttached:
-                thing->setStateValue(liveWallboxCableStateStateTypeId, "No cable attached");
-                thing->setStateValue(liveWallboxPluggedInStateTypeId, false);
+                thing->setStateValue(webastoLiveCableStateStateTypeId, "No cable attached");
+                thing->setStateValue(webastoLivePluggedInStateTypeId, false);
                 break;
             case Webasto::CableStateCableAttachedNoCarAttached:
-                thing->setStateValue(liveWallboxCableStateStateTypeId, "Cable attached but no car attached)");
-                thing->setStateValue(liveWallboxPluggedInStateTypeId, false);
+                thing->setStateValue(webastoLiveCableStateStateTypeId, "Cable attached but no car attached)");
+                thing->setStateValue(webastoLivePluggedInStateTypeId, false);
                 break;
             case Webasto::CableStateCableAttachedCarAttached:
-                thing->setStateValue(liveWallboxCableStateStateTypeId, "Cable attached and car attached");
-                thing->setStateValue(liveWallboxPluggedInStateTypeId, true);
+                thing->setStateValue(webastoLiveCableStateStateTypeId, "Cable attached and car attached");
+                thing->setStateValue(webastoLivePluggedInStateTypeId, true);
                 break;
             case Webasto::CableStateCableAttachedCarAttachedLockActive:
-                thing->setStateValue(liveWallboxCableStateStateTypeId, "Cable attached, car attached and lock active");
-                thing->setStateValue(liveWallboxPluggedInStateTypeId, true);
+                thing->setStateValue(webastoLiveCableStateStateTypeId, "Cable attached, car attached and lock active");
+                thing->setStateValue(webastoLivePluggedInStateTypeId, true);
                 break;
             }
             break;
         case Webasto::TqEVSEError:
             qCDebug(dcWebasto()) << "   - EVSE error:" << data[0];
-            thing->setStateValue(liveWallboxErrorStateTypeId, data[0]);
+            thing->setStateValue(webastoLiveErrorStateTypeId, data[0]);
             break;
         case Webasto::TqCurrentL1:
             qCDebug(dcWebasto()) << "   - Current L1:" << data[0];
-            thing->setStateValue(liveWallboxCurrentPhase1StateTypeId, data[0]);
+            thing->setStateValue(webastoLiveCurrentPhase1StateTypeId, data[0]);
             evaluatePhaseCount(thing);
             break;
         case Webasto::TqCurrentL2:
             qCDebug(dcWebasto()) << "   - Current L2:" << data[0];
-            thing->setStateValue(liveWallboxCurrentPhase2StateTypeId, data[0]);
+            thing->setStateValue(webastoLiveCurrentPhase2StateTypeId, data[0]);
             evaluatePhaseCount(thing);
             break;
         case Webasto::TqCurrentL3:
             qCDebug(dcWebasto()) << "   - Current L3:" << data[0];
-            thing->setStateValue(liveWallboxCurrentPhase3StateTypeId, data[0]);
+            thing->setStateValue(webastoLiveCurrentPhase3StateTypeId, data[0]);
             evaluatePhaseCount(thing);
             break;
         case Webasto::TqActivePower: {
@@ -415,18 +385,18 @@ void IntegrationPluginWebasto::onReceivedRegister(Webasto::TqModbusRegister modb
                 return;
             int power = (static_cast<quint32>(data[0])<<16 | data[1]);
             qCDebug(dcWebasto()) << "   - Active power:" << power;
-            thing->setStateValue(liveWallboxCurrentPowerStateTypeId, power);
+            thing->setStateValue(webastoLiveCurrentPowerStateTypeId, power);
         } break;
         case Webasto::TqEnergyMeter: {
             if (data.count() < 2)
                 return;
             int energy = (static_cast<quint32>(data[0])<<16 | data[1]);
             qCDebug(dcWebasto()) << "   - Energy meter:" << energy << "Wh";
-            thing->setStateValue(liveWallboxTotalEnergyConsumedStateTypeId, energy);
+            thing->setStateValue(webastoLiveTotalEnergyConsumedStateTypeId, energy);
         } break;
         case Webasto::TqMaxCurrent:
             qCDebug(dcWebasto()) << "   - Max. Current" << data[0];
-            thing->setStateValue(liveWallboxMaxPossibleChargingCurrentStateTypeId, data[0]);
+            thing->setStateValue(webastoLiveMaxPossibleChargingCurrentStateTypeId, data[0]);
             break;
         case Webasto::TqMinimumCurrentLimit:
             qCDebug(dcWebasto()) << "   - Min. Current" << data[0];
@@ -472,7 +442,7 @@ void IntegrationPluginWebasto::onReceivedRegister(Webasto::TqModbusRegister modb
             break;
         case Webasto::TqChargedEnergy:
             qCDebug(dcWebasto()) << "   - Charged energy" << data[0];
-            thing->setStateValue(liveWallboxSessionEnergyStateTypeId, data[0]/1000.00); // Charged energy in kWh
+            thing->setStateValue(webastoLiveSessionEnergyStateTypeId, data[0]/1000.00); // Charged energy in kWh
             break;
         case Webasto::TqStartTime:
             qCDebug(dcWebasto()) << "   - Start time" << (static_cast<quint32>(data[0])<<16 | data[1]);
@@ -482,7 +452,7 @@ void IntegrationPluginWebasto::onReceivedRegister(Webasto::TqModbusRegister modb
                 return;
             uint seconds = (static_cast<quint32>(data[0])<<16 | data[1]);
             qCDebug(dcWebasto()) << "   - Charging time" << seconds << "s";
-            thing->setStateValue(liveWallboxSessionTimeStateTypeId, seconds/60.00); // Charging time in minutes
+            thing->setStateValue(webastoLiveSessionTimeStateTypeId, seconds/60.00); // Charging time in minutes
         } break;
         case Webasto::TqEndTime: {
             if (data.count() < 2)

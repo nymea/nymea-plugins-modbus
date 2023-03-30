@@ -11,7 +11,7 @@
                 {
                     "id": "48472124-3199-4827-990a-b72069bd5658",
                     "displayName": "Live Wallbox",
-                    "name": "liveWallbox",
+                    "name": "webastoLive",
                     "createMethods": ["discovery"],
                     "interfaces": ["evcharger", "smartmeterconsumer", "connectable"],
                     "paramTypes": [
