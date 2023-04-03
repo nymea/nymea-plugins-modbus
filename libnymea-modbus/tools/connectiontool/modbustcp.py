@@ -335,7 +335,7 @@ def writeInitMethodImplementationTcp(fileDescriptor, className, registerDefiniti
     # First check if there are any init registers
     initRequired = False
     for registerDefinition in registerDefinitions:
-        if registerDefinition['readSchedule'] == 'init':
+        if 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'init':
             initRequired = True
             break
 

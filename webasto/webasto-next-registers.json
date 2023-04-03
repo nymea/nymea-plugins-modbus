@@ -1,0 +1,411 @@
+{
+    "className": "WebastoNext",
+    "protocol": "TCP",
+    "endianness": "BigEndian",
+    "errorLimitUntilNotReachable": 10,
+    "checkReachableRegister": "totalActivePower",
+    "enums": [
+        {
+            "name": "ChargerState",
+            "values": [
+                {
+                    "key": "NoVehicle",
+                    "value": 0
+                },
+                {
+                    "key": "VehicleAttachedNoPermission",
+                    "value": 1
+                },
+                {
+                    "key": "Charging",
+                    "value": 3
+                },
+                {
+                    "key": "ChargingPaused",
+                    "value": 4
+                },
+                {
+                    "key": "ChargingError",
+                    "value": 7
+                },
+                {
+                    "key": "ChargingStationReserved",
+                    "value": 8
+                }
+            ]
+        },
+        {
+            "name": "ChargeState",
+            "values": [
+                {
+                    "key": "Idle",
+                    "value": 0
+                },
+                {
+                    "key": "Charging",
+                    "value": 1
+                }
+            ]
+        },
+        {
+            "name": "EvseState",
+            "values": [
+                {
+                    "key": "Starting",
+                    "value": 0
+                },
+                {
+                    "key": "Running",
+                    "value": 1
+                },
+                {
+                    "key": "Error",
+                    "value": 2
+                }
+            ]
+        },
+        {
+            "name": "CableState",
+            "values": [
+                {
+                    "key": "NoCableAttached",
+                    "value": 0
+                },
+                {
+                    "key": "CableAttachedNoCar",
+                    "value": 1
+                },
+                {
+                    "key": "CableAttachedCarAttached",
+                    "value": 2
+                },
+                {
+                    "key": "CableAttachedCarAttachedLocked",
+                    "value": 3
+                }
+            ]
+        },
+        {
+            "name": "ChargingAction",
+            "values": [
+                {
+                    "key": "NoAction",
+                    "value": 0
+                },
+                {
+                    "key": "StartSession",
+                    "value": 1
+                },
+                {
+                    "key": "CancelSession",
+                    "value": 2
+                }
+            ]
+        }
+    ],
+    "blocks": [
+        {
+            "id": "states",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "chargerState",
+                    "description": "State of the charging device",
+                    "address": 1000,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "enum": "ChargerState",
+                    "readSchedule": "update",
+                    "defaultValue": "ChargerStateNoVehicle",
+                    "access": "RO"
+                },
+                {
+                    "id": "chargeState",
+                    "description": "Charge state",
+                    "address": 1001,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "enum": "ChargeState",
+                    "readSchedule": "update",
+                    "defaultValue": "ChargeStateIdle",
+                    "access": "RO"
+                },
+                {
+                    "id": "evseState",
+                    "description": "EVSE state (state of charging station)",
+                    "address": 1002,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "enum": "EvseState",
+                    "readSchedule": "update",
+                    "defaultValue": "EvseStateStarting",
+                    "access": "RO"
+                }
+            ]
+        }
+    ],
+    "registers": [
+        {
+            "id": "cableState",
+            "description": "Cable state",
+            "address": 1004,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "enum": "CableState",
+            "readSchedule": "update",
+            "defaultValue": "CableStateNoCableAttached",
+            "access": "RO"
+        },
+        {
+            "id": "evseErrorCode",
+            "description": "ESVE Error codes, 0 = No error",
+            "address": 1006,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "defaultValue": "CableStateNoCableAttached",
+            "access": "RO"
+        },
+        {
+            "id": "currentL1",
+            "description": "Charging current L1",
+            "address": 1008,
+            "size": 1,
+            "type": "uint16",
+            "unit": "mA",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "currentL2",
+            "description": "Charging current L2",
+            "address": 1010,
+            "size": 1,
+            "type": "uint16",
+            "unit": "mA",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "currentL3",
+            "description": "Charging current L3",
+            "address": 1012,
+            "size": 1,
+            "type": "uint16",
+            "unit": "mA",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "totalActivePower",
+            "description": "Total active charging power",
+            "address": 1020,
+            "size": 2,
+            "type": "uint32",
+            "unit": "W",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "activePowerL1",
+            "description": "Active power L1",
+            "address": 1024,
+            "size": 2,
+            "type": "uint32",
+            "unit": "W",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "activePowerL2",
+            "description": "Active power L2",
+            "address": 1028,
+            "size": 2,
+            "type": "uint32",
+            "unit": "W",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "activePowerL3",
+            "description": "Active power L3",
+            "address": 1032,
+            "size": 2,
+            "type": "uint32",
+            "unit": "W",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "energyConsumed",
+            "description": "Energy meter reading of the charging station",
+            "address": 1036,
+            "size": 2,
+            "type": "uint32",
+            "unit": "Wh",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "maxChargingCurrent",
+            "description": "The maximal charging current of the hardware (EVSE, Cable, EV)",
+            "address": 1100,
+            "size": 1,
+            "type": "uint16",
+            "unit": "A",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "minChargingCurrent",
+            "description": "The minimal charging current of the hardware (EVSE, Cable, EV)",
+            "address": 1102,
+            "size": 1,
+            "type": "uint16",
+            "unit": "A",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "maxChargingCurrentStation",
+            "description": "The maximal charging current of the station",
+            "address": 1104,
+            "size": 1,
+            "type": "uint16",
+            "unit": "A",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "maxChargingCurrentCable",
+            "description": "The maximal charging current of the cable",
+            "address": 1106,
+            "size": 1,
+            "type": "uint16",
+            "unit": "A",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "maxChargingCurrentEv",
+            "description": "The maximal charging current of the EV",
+            "address": 1108,
+            "size": 1,
+            "type": "uint16",
+            "unit": "A",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "sessionEnergy",
+            "description": "Sum of charged energy for the last session",
+            "address": 1502,
+            "size": 1,
+            "type": "uint16",
+            "unit": "Wh",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "safeCurrent",
+            "description": "Max. charge current under communication failure",
+            "address": 2000,
+            "size": 1,
+            "type": "uint16",
+            "unit": "A",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "defaultValue": "0",
+            "access": "RW"
+        },
+        {
+            "id": "comTimeout",
+            "description": "Communication timeout",
+            "address": 2002,
+            "size": 1,
+            "type": "uint16",
+            "unit": "s",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "defaultValue": "0",
+            "access": "RW"
+        },
+        {
+            "id": "chargePower",
+            "description": "Set the charge power",
+            "address": 5000,
+            "size": 2,
+            "type": "uint32",
+            "unit": "W",
+            "registerType": "holdingRegister",
+            "defaultValue": "0",
+            "access": "WO"
+        },
+        {
+            "id": "chargeCurrent",
+            "description": "Set the charge current",
+            "address": 5004,
+            "size": 1,
+            "type": "uint16",
+            "unit": "A",
+            "registerType": "holdingRegister",
+            "defaultValue": "0",
+            "access": "WO"
+        },
+        {
+            "id": "chargingAction",
+            "description": "Start / Cancel charging session",
+            "address": 5006,
+            "size": 1,
+            "type": "uint16",
+            "enum": "ChargingAction",
+            "registerType": "holdingRegister",
+            "defaultValue": "0",
+            "access": "WO"
+        },
+        {
+            "id": "lifeBit",
+            "description": "Life bit",
+            "address": 6000,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "defaultValue": "0",
+            "access": "RW"
+        }
+    ]
+}

@@ -55,6 +55,8 @@ public:
     uint port() const;
     void setPort(uint port);
 
+    QString connectionUrl() const;
+
     bool connected() const;
 
     int numberOfRetries() const;
