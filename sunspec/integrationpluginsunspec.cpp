@@ -927,6 +927,14 @@ QString IntegrationPluginSunSpec::getInverterErrorString(quint32 flag)
 
 }
 
+double IntegrationPluginSunSpec::fixValueSign(double targetValue, double powerValue)
+{
+    // Some sunspec devices (i.e. SolarEdge return an absolute value on the phase current.
+    // This method makes sure the phase current has the same sign as the phase power value.
+    bool sameSign = ((targetValue < 0) == (powerValue < 0));
+    return (sameSign ? targetValue : -targetValue);
+}
+
 
 void IntegrationPluginSunSpec::onRefreshTimer()
 {
@@ -1156,7 +1164,7 @@ void IntegrationPluginSunSpec::onMeterBlockUpdated()
         thing->setStateValue(sunspecSinglePhaseMeterCurrentPowerStateTypeId, -meter->watts());
         thing->setStateValue(sunspecSinglePhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
         thing->setStateValue(sunspecSinglePhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
-        thing->setStateValue(sunspecSinglePhaseMeterCurrentPhaseAStateTypeId, meter->ampsPhaseA());
+        thing->setStateValue(sunspecSinglePhaseMeterCurrentPhaseAStateTypeId, -meter->ampsPhaseA());
         thing->setStateValue(sunspecSinglePhaseMeterVoltagePhaseAStateTypeId, meter->phaseVoltageAn());
         thing->setStateValue(sunspecSinglePhaseMeterFrequencyStateTypeId, meter->hz());
         thing->setStateValue(sunspecSinglePhaseMeterVersionStateTypeId, model->commonModelInfo().versionString);
@@ -1169,7 +1177,7 @@ void IntegrationPluginSunSpec::onMeterBlockUpdated()
         thing->setStateValue(sunspecSinglePhaseMeterCurrentPowerStateTypeId, -meter->watts());
         thing->setStateValue(sunspecSinglePhaseMeterTotalEnergyProducedStateTypeId, meter->totalWattHoursExported() / 1000.0);
         thing->setStateValue(sunspecSinglePhaseMeterTotalEnergyConsumedStateTypeId, meter->totalWattHoursImported() / 1000.0);
-        thing->setStateValue(sunspecSinglePhaseMeterCurrentPhaseAStateTypeId, meter->ampsPhaseA());
+        thing->setStateValue(sunspecSinglePhaseMeterCurrentPhaseAStateTypeId, fixValueSign(meter->ampsPhaseA(), -meter->watts()));
         thing->setStateValue(sunspecSinglePhaseMeterVoltagePhaseAStateTypeId, meter->phaseVoltageAn());
         thing->setStateValue(sunspecSinglePhaseMeterFrequencyStateTypeId, meter->hz());
         thing->setStateValue(sunspecSinglePhaseMeterVersionStateTypeId, model->commonModelInfo().versionString);
@@ -1186,11 +1194,11 @@ void IntegrationPluginSunSpec::onMeterBlockUpdated()
         thing->setStateValue(sunspecSplitPhaseMeterEnergyProducedPhaseAStateTypeId, meter->totalWattHoursExportedPhaseA() / 1000.0);
         thing->setStateValue(sunspecSplitPhaseMeterEnergyProducedPhaseBStateTypeId, meter->totalWattHoursExportedPhaseB() / 1000.0);
         thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerStateTypeId, -meter->watts());
-        thing->setStateValue(sunspecSplitPhaseMeterTotalCurrentStateTypeId, meter->amps());
-        thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerPhaseAStateTypeId, meter->wattsPhaseA());
-        thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerPhaseBStateTypeId, meter->wattsPhaseB());
-        thing->setStateValue(sunspecSplitPhaseMeterCurrentPhaseAStateTypeId, meter->ampsPhaseA());
-        thing->setStateValue(sunspecSplitPhaseMeterCurrentPhaseBStateTypeId, meter->ampsPhaseB());
+        thing->setStateValue(sunspecSplitPhaseMeterTotalCurrentStateTypeId, fixValueSign(meter->amps(), -meter->watts()));
+        thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerPhaseAStateTypeId, -meter->wattsPhaseA());
+        thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerPhaseBStateTypeId, -meter->wattsPhaseB());
+        thing->setStateValue(sunspecSplitPhaseMeterCurrentPhaseAStateTypeId, fixValueSign(meter->ampsPhaseA(), -meter->wattsPhaseA()));
+        thing->setStateValue(sunspecSplitPhaseMeterCurrentPhaseBStateTypeId, fixValueSign(meter->ampsPhaseB(), -meter->wattsPhaseB()));
         thing->setStateValue(sunspecSplitPhaseMeterLnACVoltageStateTypeId, meter->voltageLn());
         thing->setStateValue(sunspecSplitPhaseMeterVoltagePhaseAStateTypeId, meter->phaseVoltageAn());
         thing->setStateValue(sunspecSplitPhaseMeterVoltagePhaseBStateTypeId, meter->phaseVoltageBn());
@@ -1209,11 +1217,11 @@ void IntegrationPluginSunSpec::onMeterBlockUpdated()
         thing->setStateValue(sunspecSplitPhaseMeterEnergyProducedPhaseAStateTypeId, meter->totalWattHoursExportedPhaseA() / 1000.0);
         thing->setStateValue(sunspecSplitPhaseMeterEnergyProducedPhaseBStateTypeId, meter->totalWattHoursExportedPhaseB() / 1000.0);
         thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerStateTypeId, -meter->watts());
-        thing->setStateValue(sunspecSplitPhaseMeterTotalCurrentStateTypeId, meter->amps());
-        thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerPhaseAStateTypeId, meter->wattsPhaseA());
-        thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerPhaseBStateTypeId, meter->wattsPhaseB());
-        thing->setStateValue(sunspecSplitPhaseMeterCurrentPhaseAStateTypeId, meter->ampsPhaseA());
-        thing->setStateValue(sunspecSplitPhaseMeterCurrentPhaseBStateTypeId, meter->ampsPhaseB());
+        thing->setStateValue(sunspecSplitPhaseMeterTotalCurrentStateTypeId, fixValueSign(meter->amps(), -meter->watts()));
+        thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerPhaseAStateTypeId, -meter->wattsPhaseA());
+        thing->setStateValue(sunspecSplitPhaseMeterCurrentPowerPhaseBStateTypeId, -meter->wattsPhaseB());
+        thing->setStateValue(sunspecSplitPhaseMeterCurrentPhaseAStateTypeId, fixValueSign(meter->ampsPhaseA(), -meter->wattsPhaseA()));
+        thing->setStateValue(sunspecSplitPhaseMeterCurrentPhaseBStateTypeId, fixValueSign(meter->ampsPhaseB(), -meter->wattsPhaseB()));
         thing->setStateValue(sunspecSplitPhaseMeterLnACVoltageStateTypeId, meter->voltageLn());
         thing->setStateValue(sunspecSplitPhaseMeterVoltagePhaseAStateTypeId, meter->phaseVoltageAn());
         thing->setStateValue(sunspecSplitPhaseMeterVoltagePhaseBStateTypeId, meter->phaseVoltageBn());
@@ -1234,12 +1242,12 @@ void IntegrationPluginSunSpec::onMeterBlockUpdated()
         thing->setStateValue(sunspecThreePhaseMeterEnergyProducedPhaseBStateTypeId, meter->totalWattHoursExportedPhaseB() / 1000.0);
         thing->setStateValue(sunspecThreePhaseMeterEnergyProducedPhaseCStateTypeId, meter->totalWattHoursExportedPhaseC() / 1000.0);
         thing->setStateValue(sunspecThreePhaseMeterCurrentPowerStateTypeId, -meter->watts());
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseAStateTypeId, meter->wattsPhaseA());
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseBStateTypeId, meter->wattsPhaseB());
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseCStateTypeId, meter->wattsPhaseC());
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseAStateTypeId, meter->ampsPhaseA());
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseBStateTypeId, meter->ampsPhaseB());
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseCStateTypeId, meter->ampsPhaseC());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseAStateTypeId, -meter->wattsPhaseA());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseBStateTypeId, -meter->wattsPhaseB());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseCStateTypeId, -meter->wattsPhaseC());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseAStateTypeId, fixValueSign(meter->ampsPhaseA(), -meter->wattsPhaseA()));
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseBStateTypeId, fixValueSign(meter->ampsPhaseB(), -meter->wattsPhaseB()));
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseCStateTypeId, fixValueSign(meter->ampsPhaseC(), -meter->wattsPhaseC()));
         thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseAStateTypeId, meter->phaseVoltageAn());
         thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseBStateTypeId, meter->phaseVoltageBn());
         thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseCStateTypeId, meter->phaseVoltageCn());
@@ -1260,12 +1268,12 @@ void IntegrationPluginSunSpec::onMeterBlockUpdated()
         thing->setStateValue(sunspecThreePhaseMeterEnergyProducedPhaseBStateTypeId, meter->totalWattHoursExportedPhaseB() / 1000.0);
         thing->setStateValue(sunspecThreePhaseMeterEnergyProducedPhaseCStateTypeId, meter->totalWattHoursExportedPhaseC() / 1000.0);
         thing->setStateValue(sunspecThreePhaseMeterCurrentPowerStateTypeId, -meter->watts());
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseAStateTypeId, meter->wattsPhaseA());
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseBStateTypeId, meter->wattsPhaseB());
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseCStateTypeId, meter->wattsPhaseC());
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseAStateTypeId, meter->ampsPhaseA());
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseBStateTypeId, meter->ampsPhaseB());
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseCStateTypeId, meter->ampsPhaseC());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseAStateTypeId, -meter->wattsPhaseA());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseBStateTypeId, -meter->wattsPhaseB());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseCStateTypeId, -meter->wattsPhaseC());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseAStateTypeId, fixValueSign(meter->ampsPhaseA(), -meter->wattsPhaseA()));
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseBStateTypeId, fixValueSign(meter->ampsPhaseB(), -meter->wattsPhaseB()));
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseCStateTypeId, fixValueSign(meter->ampsPhaseC(), -meter->wattsPhaseC()));
         thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseAStateTypeId, meter->phaseVoltageAn());
         thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseBStateTypeId, meter->phaseVoltageBn());
         thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseCStateTypeId, meter->phaseVoltageCn());
@@ -1286,12 +1294,12 @@ void IntegrationPluginSunSpec::onMeterBlockUpdated()
         thing->setStateValue(sunspecThreePhaseMeterEnergyProducedPhaseBStateTypeId, meter->totalWattHoursExportedPhaseB() / 1000.0);
         thing->setStateValue(sunspecThreePhaseMeterEnergyProducedPhaseCStateTypeId, meter->totalWattHoursExportedPhaseC() / 1000.0);
         thing->setStateValue(sunspecThreePhaseMeterCurrentPowerStateTypeId, -meter->watts());
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseAStateTypeId, meter->wattsPhaseA());
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseBStateTypeId, meter->wattsPhaseB());
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseCStateTypeId, meter->wattsPhaseC());
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseAStateTypeId, meter->ampsPhaseA());
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseBStateTypeId, meter->ampsPhaseB());
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseCStateTypeId, meter->ampsPhaseC());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseAStateTypeId, -meter->wattsPhaseA());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseBStateTypeId, -meter->wattsPhaseB());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseCStateTypeId, -meter->wattsPhaseC());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseAStateTypeId, fixValueSign(meter->ampsPhaseA(), -meter->wattsPhaseA()));
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseBStateTypeId, fixValueSign(meter->ampsPhaseB(), -meter->wattsPhaseB()));
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseCStateTypeId, fixValueSign(meter->ampsPhaseC(), -meter->wattsPhaseC()));
         thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseAStateTypeId, meter->phaseVoltageAn());
         thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseBStateTypeId, meter->phaseVoltageBn());
         thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseCStateTypeId, meter->phaseVoltageCn());
@@ -1312,12 +1320,12 @@ void IntegrationPluginSunSpec::onMeterBlockUpdated()
         thing->setStateValue(sunspecThreePhaseMeterEnergyProducedPhaseBStateTypeId, meter->totalWattHoursExportedPhaseB() / 1000.0);
         thing->setStateValue(sunspecThreePhaseMeterEnergyProducedPhaseCStateTypeId, meter->totalWattHoursExportedPhaseC() / 1000.0);
         thing->setStateValue(sunspecThreePhaseMeterCurrentPowerStateTypeId, -meter->watts());
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseAStateTypeId, meter->wattsPhaseA());
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseBStateTypeId, meter->wattsPhaseB());
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseCStateTypeId, meter->wattsPhaseC());
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseAStateTypeId, meter->ampsPhaseA());
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseBStateTypeId, meter->ampsPhaseB());
-        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseCStateTypeId, meter->ampsPhaseC());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseAStateTypeId, -meter->wattsPhaseA());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseBStateTypeId, -meter->wattsPhaseB());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPowerPhaseCStateTypeId, -meter->wattsPhaseC());
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseAStateTypeId, fixValueSign(meter->ampsPhaseA(), -meter->wattsPhaseA()));
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseBStateTypeId, fixValueSign(meter->ampsPhaseB(), -meter->wattsPhaseB()));
+        thing->setStateValue(sunspecThreePhaseMeterCurrentPhaseCStateTypeId, fixValueSign(meter->ampsPhaseC(), -meter->wattsPhaseC()));
         thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseAStateTypeId, meter->phaseVoltageAn());
         thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseBStateTypeId, meter->phaseVoltageBn());
         thing->setStateValue(sunspecThreePhaseMeterVoltagePhaseCStateTypeId, meter->phaseVoltageCn());
