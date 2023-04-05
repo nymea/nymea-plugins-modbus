@@ -473,7 +473,7 @@ def writePropertyProcessMethodDeclaration(fileDescriptor, registerDefinitions):
             continue
 
         propertyName = registerDefinition['id']
-        writeLine(fileDescriptor, '    void process%sRegisterValues(const QVector<quint16> values);' % (propertyName[0].upper() + propertyName[1:]))
+        writeLine(fileDescriptor, '    void process%sRegisterValues(const QVector<quint16> &values);' % (propertyName[0].upper() + propertyName[1:]))
 
     writeLine(fileDescriptor)
     
@@ -487,7 +487,7 @@ def writePropertyProcessMethodImplementations(fileDescriptor, className, registe
         propertyName = registerDefinition['id']
         propertyTyp = getCppDataType(registerDefinition)
 
-        writeLine(fileDescriptor, 'void %s::process%sRegisterValues(const QVector<quint16> values)' % (className, propertyName[0].upper() + propertyName[1:]))
+        writeLine(fileDescriptor, 'void %s::process%sRegisterValues(const QVector<quint16> &values)' % (className, propertyName[0].upper() + propertyName[1:]))
         writeLine(fileDescriptor, '{')
         writeLine(fileDescriptor, '    %s received%s = %s;' % (propertyTyp, propertyName[0].upper() + propertyName[1:], getValueConversionMethod(registerDefinition)))
         writeLine(fileDescriptor, '    emit %sReadFinished(received%s);' % (propertyName, propertyName[0].upper() + propertyName[1:]))
