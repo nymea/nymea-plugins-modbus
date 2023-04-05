@@ -71,6 +71,9 @@ def writeTcpHeaderFile():
     writeLine(headerFile, '    ModbusDataUtils::ByteOrder endianness() const;')
     writeLine(headerFile, '    void setEndianness(ModbusDataUtils::ByteOrder endianness);')
     writeLine(headerFile)
+    writeLine(headerFile, '    ModbusDataUtils::ByteOrder stringEndianness() const;')
+    writeLine(headerFile, '    void setStringEndianness(ModbusDataUtils::ByteOrder stringEndianness);')
+    writeLine(headerFile)
     writeLine(headerFile, '    uint checkReachableRetries() const;')
     writeLine(headerFile, '    void setCheckReachableRetries(uint checkReachableRetries);')
     writeLine(headerFile)
@@ -117,6 +120,7 @@ def writeTcpHeaderFile():
     writeLine(headerFile, '    void updateFinished();')
     writeLine(headerFile)
     writeLine(headerFile, '    void endiannessChanged(ModbusDataUtils::ByteOrder endianness);')
+    writeLine(headerFile, '    void stringEndiannessChanged(ModbusDataUtils::ByteOrder stringEndianness);')
     writeLine(headerFile)
 
     writePropertyChangedSignals(headerFile, registerJson['registers'])
@@ -148,6 +152,7 @@ def writeTcpHeaderFile():
     # Private members
     writeLine(headerFile, 'private:')
     writeLine(headerFile, '    ModbusDataUtils::ByteOrder m_endianness = ModbusDataUtils::ByteOrder%s;' % endianness)
+    writeLine(headerFile, '    ModbusDataUtils::ByteOrder m_stringEndianness = ModbusDataUtils::ByteOrder%s;' % stringEndianness)
     writeLine(headerFile, '    quint16 m_slaveId = 1;')
     writeLine(headerFile)
     writeLine(headerFile, '    bool m_reachable = false;')
@@ -256,6 +261,22 @@ def writeTcpSourceFile():
     writeLine(sourceFile)
     writeLine(sourceFile, '    m_endianness = endianness;')
     writeLine(sourceFile, '    emit endiannessChanged(m_endianness);')
+    writeLine(sourceFile, '}')
+    writeLine(sourceFile)
+
+    writeLine(sourceFile, 'ModbusDataUtils::ByteOrder %s::stringEndianness() const' % (className))
+    writeLine(sourceFile, '{')
+    writeLine(sourceFile, '    return m_stringEndianness;')
+    writeLine(sourceFile, '}')
+    writeLine(sourceFile)
+
+    writeLine(sourceFile, 'void %s::setStringEndianness(ModbusDataUtils::ByteOrder stringEndianness)' % (className))
+    writeLine(sourceFile, '{')
+    writeLine(sourceFile, '    if (m_stringEndianness == stringEndianness)')
+    writeLine(sourceFile, '        return;')
+    writeLine(sourceFile,)
+    writeLine(sourceFile, '    m_stringEndianness = stringEndianness;')
+    writeLine(sourceFile, '    emit stringEndiannessChanged(m_stringEndianness);')
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
@@ -445,6 +466,9 @@ def writeRtuHeaderFile():
     writeLine(headerFile, '    ModbusDataUtils::ByteOrder endianness() const;')
     writeLine(headerFile, '    void setEndianness(ModbusDataUtils::ByteOrder endianness);')
     writeLine(headerFile)
+    writeLine(headerFile, '    ModbusDataUtils::ByteOrder stringEndianness() const;')
+    writeLine(headerFile, '    void setStringEndianness(ModbusDataUtils::ByteOrder stringEndianness);')
+    writeLine(headerFile)
 
     # Write registers get method declarations
     writePropertyGetSetMethodDeclarationsRtu(headerFile, registerJson['registers'])
@@ -486,6 +510,7 @@ def writeRtuHeaderFile():
     writeLine(headerFile, '    void updateFinished();')
     writeLine(headerFile)
     writeLine(headerFile, '    void endiannessChanged(ModbusDataUtils::ByteOrder endianness);')
+    writeLine(headerFile, '    void stringEndiannessChanged(ModbusDataUtils::ByteOrder stringEndianness);')
     writeLine(headerFile)
     writePropertyChangedSignals(headerFile, registerJson['registers'])
     if 'blocks' in registerJson:
@@ -518,6 +543,7 @@ def writeRtuHeaderFile():
     writeLine(headerFile, 'private:')
     writeLine(headerFile, '    ModbusRtuMaster *m_modbusRtuMaster = nullptr;')
     writeLine(headerFile, '    ModbusDataUtils::ByteOrder m_endianness = ModbusDataUtils::ByteOrder%s;' % endianness)
+    writeLine(headerFile, '    ModbusDataUtils::ByteOrder m_stringEndianness = ModbusDataUtils::ByteOrder%s;' % stringEndianness)
     writeLine(headerFile, '    quint16 m_slaveId = 1;')
     writeLine(headerFile)
     writeLine(headerFile, '    bool m_reachable = false;')
@@ -644,6 +670,21 @@ def writeRtuSourceFile():
     writeLine(sourceFile,)
     writeLine(sourceFile, '    m_endianness = endianness;')
     writeLine(sourceFile, '    emit endiannessChanged(m_endianness);')
+    writeLine(sourceFile, '}')
+
+    writeLine(sourceFile, 'ModbusDataUtils::ByteOrder %s::stringEndianness() const' % (className))
+    writeLine(sourceFile, '{')
+    writeLine(sourceFile, '    return m_stringEndianness;')
+    writeLine(sourceFile, '}')
+    writeLine(sourceFile)
+
+    writeLine(sourceFile, 'void %s::setStringEndianness(ModbusDataUtils::ByteOrder stringEndianness)' % (className))
+    writeLine(sourceFile, '{')
+    writeLine(sourceFile, '    if (m_stringEndianness == stringEndianness)')
+    writeLine(sourceFile, '        return;')
+    writeLine(sourceFile,)
+    writeLine(sourceFile, '    m_stringEndianness = stringEndianness;')
+    writeLine(sourceFile, '    emit stringEndiannessChanged(m_stringEndianness);')
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
@@ -828,6 +869,11 @@ endianness = 'BigEndian'
 if 'endianness' in registerJson:
     endianness = registerJson['endianness']
 
+stringEndianness = 'BigEndian'
+if 'stringEndianness' in registerJson:
+    stringEndianness = registerJson['stringEndianness']
+
+
 errorLimitUntilNotReachable = 10
 if 'errorLimitUntilNotReachable' in registerJson:
     errorLimitUntilNotReachable = registerJson['errorLimitUntilNotReachable']
@@ -875,6 +921,7 @@ logger.debug('Script path: %s' % scriptPath)
 logger.debug('Output directory: %s' % outputDirectory)
 logger.debug('Class name prefix: %s' % classNamePrefix)
 logger.debug('Endianness: %s' % endianness)
+logger.debug('String endianness: %s' % stringEndianness)
 logger.debug('Error limit until not reachable: %s' % errorLimitUntilNotReachable)
 logger.debug('Check reachable register: %s' % checkReachableRegister['id'])
 

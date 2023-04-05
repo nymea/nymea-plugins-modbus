@@ -20,6 +20,7 @@ The basic structure of the modbus register JSON looks like following example:
     "className": "MyConnection",
     "protocol": "BOTH",
     "endianness": "BigEndian",
+    "stringEndianness": "BigEndian",
     "errorLimitUntilNotReachable": 10,
     "checkReachableRegister": "registerPropertyName",
     "enums": [
@@ -137,6 +138,19 @@ There are 2 possibilities:
 
 * `BigEndian`: default if not specified: register bytes come in following order `[0, 1, 2, 3]`: `ABCD`
 * `LittleEndian`: register bytes come in following order `[0, 1, 2, 3]`: `CDAB`
+
+
+## String endianness
+
+When converting multiple registers to a string, some modbus devices use a different endianess within a register.
+One register contains 2 bytes, miltiple registers in a row build up a string. The string endianess tells the generated class how to parse those strings. 
+
+There are 2 possibilities:
+
+* `BigEndian`: default if not specified: register bytes come in following order `[0, 1], [2, 3]`: `ABCD`
+* `LittleEndian`: register bytes come in following order `[1, 0] [3, 2]`: `BADC`
+
+Please not that the overall endianess of the device does not change the order of the register regarding strings since in modbus a normal register is definded as big endian. Only multiple registers combined to a numeric data type will be taken into account by the `endianess` property.
 
 ## Enums
 

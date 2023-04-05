@@ -277,7 +277,7 @@ def getConversionToValueMethod(registerDefinition):
     elif registerDefinition['type'] == 'float64':
         return ('ModbusDataUtils::convertFromFloat64(%s, m_endianness)' % propertyName)
     elif registerDefinition['type'] == 'string':
-        return ('ModbusDataUtils::convertFromString(%s)' % propertyName)    
+        return ('ModbusDataUtils::convertFromString(%s, m_stringEndianness)' % propertyName)
 
 
 def getValueConversionMethod(registerDefinition):
@@ -334,7 +334,7 @@ def getValueConversionMethod(registerDefinition):
     elif registerDefinition['type'] == 'float64':
         return ('ModbusDataUtils::convertToFloat64(values, m_endianness)')
     elif registerDefinition['type'] == 'string':
-        return ('ModbusDataUtils::convertToString(values)')
+        return ('ModbusDataUtils::convertToString(values, m_stringEndianness)')
 
 
 def writeBlockGetMethodDeclarations(fileDescriptor, registerDefinitions):
