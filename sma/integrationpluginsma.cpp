@@ -96,8 +96,8 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
     } else if (info->thingClassId() == speedwireMeterThingClassId) {
 
         // Note: does not require the network device discovery...
-        SpeedwireDiscovery *speedwireDiscovery = new SpeedwireDiscovery(hardwareManager()->networkDeviceDiscovery(), info);
-        if (!speedwireDiscovery->initialize(SpeedwireInterface::DeviceTypeMeter)) {
+        SpeedwireDiscovery *speedwireDiscovery = new SpeedwireDiscovery(hardwareManager()->networkDeviceDiscovery(), getLocalSerialNumber(), info);
+        if (!speedwireDiscovery->initialize()) {
             qCWarning(dcSma()) << "Could not discovery inverter. The speedwire interface initialization failed.";
             info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Unable to discover the network."));
             return;
@@ -145,8 +145,8 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
             return;
         }
 
-        SpeedwireDiscovery *speedwireDiscovery = new SpeedwireDiscovery(hardwareManager()->networkDeviceDiscovery(), info);
-        if (!speedwireDiscovery->initialize(SpeedwireInterface::DeviceTypeInverter)) {
+        SpeedwireDiscovery *speedwireDiscovery = new SpeedwireDiscovery(hardwareManager()->networkDeviceDiscovery(), getLocalSerialNumber(), info);
+        if (!speedwireDiscovery->initialize()) {
             qCWarning(dcSma()) << "Could not discovery inverter. The speedwire interface initialization failed.";
             info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Unable to discover the network."));
             return;
@@ -302,7 +302,7 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
 
         // Create the multicast interface if not created already.
         if (!m_multicastInterface)
-            m_multicastInterface = new SpeedwireInterface(true, this);
+            m_multicastInterface = new SpeedwireInterface(true, getLocalSerialNumber(), this);
 
         quint32 serialNumber = static_cast<quint32>(thing->paramValue(speedwireMeterThingSerialNumberParamTypeId).toUInt());
         quint16 modelId = static_cast<quint16>(thing->paramValue(speedwireMeterThingModelIdParamTypeId).toUInt());
@@ -541,6 +541,11 @@ void IntegrationPluginSma::thingRemoved(Thing *thing)
     }
 
     if (thing->thingClassId() == speedwireInverterThingClassId && m_speedwireInverters.contains(thing)) {
+        // Remove invalid password from settings
+        pluginStorage()->beginGroup(thing->id().toString());
+        pluginStorage()->remove("");
+        pluginStorage()->endGroup();
+
         m_speedwireInverters.take(thing)->deleteLater();
     }
 
@@ -794,6 +799,28 @@ void IntegrationPluginSma::markModbusInverterAsDisconnected(Thing *thing)
     thing->setStateValue(modbusInverterCurrentPowerPhaseBStateTypeId, 0);
     thing->setStateValue(modbusInverterCurrentPowerPhaseCStateTypeId, 0);
     thing->setStateValue(modbusInverterCurrentPowerStateTypeId, 0);
+}
+
+quint64 IntegrationPluginSma::getLocalSerialNumber()
+{
+    m_localSerialNumber = pluginStorage()->value("localSerialNumber", 0).toUInt();
+
+    if (m_localSerialNumber == 0) {
+        srand(QDateTime::currentMSecsSinceEpoch() / 1000);
+        // Generate one and save it for the next time, each instance should have it's own serial number
+        QByteArray data;
+        QDataStream inStream(&data, QIODevice::ReadWrite);
+        for (int i = 0; i < 4; i++) {
+            inStream << static_cast<quint8>(rand() % 256);
+        }
+
+        QDataStream outStream(data);
+        outStream >> m_localSerialNumber;
+        pluginStorage()->setValue("localSerialNumber", m_localSerialNumber);
+    }
+
+    qCInfo(dcSma()) << "Using local serial number" << m_localSerialNumber;
+    return m_localSerialNumber;
 }
 
 bool IntegrationPluginSma::isModbusValueValid(quint32 value)

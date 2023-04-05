@@ -100,6 +100,7 @@ public:
     SpeedwireInverterReply *sendLogoutRequest();
     SpeedwireInverterReply *sendSoftwareVersionRequest();
     SpeedwireInverterReply *sendDeviceTypeRequest();
+    SpeedwireInverterReply *sendBatteryInfoRequest();
 
     // Start connecting
     void startConnecting(const QString &password = "0000");
@@ -124,7 +125,7 @@ private:
 
     bool m_reachable = false;
     State m_state = StateDisconnected;
-    quint16 m_packetId = 1;
+    quint8 m_packetId = 1;
 
     bool m_deviceInformationFetched = false;
 
@@ -185,6 +186,7 @@ private:
     void processDcVoltageCurrentResponse(const QByteArray &response);
     void processEnergyProductionResponse(const QByteArray &response);
     void processGridFrequencyResponse(const QByteArray &response);
+    void processBatteryInfoResponse(const QByteArray &response);
     void processInverterStatusResponse(const QByteArray &response);
 
     void readUntilEndOfMeasurement(QDataStream &stream);

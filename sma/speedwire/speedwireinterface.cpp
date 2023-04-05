@@ -31,9 +31,10 @@
 #include "speedwireinterface.h"
 #include "extern-plugininfo.h"
 
-SpeedwireInterface::SpeedwireInterface(bool multicast, QObject *parent) :
+SpeedwireInterface::SpeedwireInterface(bool multicast, quint32 sourceSerialNumber, QObject *parent) :
     QObject(parent),
-    m_multicast(multicast)
+    m_multicast(multicast),
+    m_sourceSerialNumber(sourceSerialNumber)
 {
 
     m_socket = new QUdpSocket(this);
@@ -54,18 +55,18 @@ bool SpeedwireInterface::initialize(const QHostAddress &address)
         return false;
     }
 
-    // If already initialized and multicast, nothing could habe changed...done here
+    // If already initialized and multicast, nothing could have changed...done here
     if (m_initialized && m_multicast)
         return true;
 
 
-    if (!m_socket->bind(QHostAddress::AnyIPv4, m_port, QAbstractSocket::ShareAddress | QAbstractSocket::ReuseAddressHint)) {
-        qCWarning(dcSma()) << "SpeedwireInterface: Initialization failed. Could not bind to port" << m_port;
+    if (!m_socket->bind(QHostAddress::AnyIPv4, Speedwire::port(), QAbstractSocket::ShareAddress | QAbstractSocket::ReuseAddressHint)) {
+        qCWarning(dcSma()) << "SpeedwireInterface: Initialization failed. Could not bind to port" << Speedwire::port();
         return false;
     }
 
-    if (m_multicast && !m_socket->joinMulticastGroup(m_multicastAddress)) {
-        qCWarning(dcSma()) << "SpeedwireInterface: Initialization failed. Could not join multicast group" << m_multicastAddress.toString() << m_socket->errorString();
+    if (m_multicast && !m_socket->joinMulticastGroup(Speedwire::multicastAddress())) {
+        qCWarning(dcSma()) << "SpeedwireInterface: Initialization failed. Could not join multicast group" << Speedwire::multicastAddress().toString() << m_socket->errorString();
         return false;
     }
 
@@ -79,8 +80,8 @@ void SpeedwireInterface::deinitialize()
 {
     if (m_initialized) {
         if (m_multicast) {
-            if (!m_socket->leaveMulticastGroup(m_multicastAddress)) {
-                qCWarning(dcSma()) << "SpeedwireInterface: Failed to leave multicast group" << m_multicastAddress.toString();
+            if (!m_socket->leaveMulticastGroup(Speedwire::multicastAddress())) {
+                qCWarning(dcSma()) << "SpeedwireInterface: Failed to leave multicast group" << Speedwire::multicastAddress().toString();
             }
         }
 
@@ -100,11 +101,6 @@ bool SpeedwireInterface::initialized() const
     return m_initialized;
 }
 
-quint16 SpeedwireInterface::sourceModelId() const
-{
-    return m_sourceModelId;
-}
-
 quint32 SpeedwireInterface::sourceSerialNumber() const
 {
     return m_sourceSerialNumber;
@@ -112,8 +108,8 @@ quint32 SpeedwireInterface::sourceSerialNumber() const
 
 void SpeedwireInterface::sendData(const QByteArray &data)
 {
-    qCDebug(dcSma()) << "SpeedwireInterface: -->" << m_address.toString() << m_port << data.toHex();
-    if (m_socket->writeDatagram(data, m_address, m_port) < 0) {
+    qCDebug(dcSma()) << "SpeedwireInterface: -->" << m_address.toString() << Speedwire::port() << data.toHex();
+    if (m_socket->writeDatagram(data, m_address, Speedwire::port()) < 0) {
         qCWarning(dcSma()) << "SpeedwireInterface: failed to send data" << m_socket->errorString();
     }
 }

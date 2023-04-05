@@ -38,6 +38,7 @@
 #include <network/networkdevicediscovery.h>
 
 #include "speedwire.h"
+#include "speedwireinverter.h"
 #include "speedwireinterface.h"
 
 class SpeedwireDiscovery : public QObject
@@ -52,7 +53,7 @@ public:
         quint32 serialNumber = 0;
     } SpeedwireDiscoveryResult;
 
-    explicit SpeedwireDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, QObject *parent = nullptr);
+    explicit SpeedwireDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint32 localSerialNumber, QObject *parent = nullptr);
     ~SpeedwireDiscovery();
 
     bool initialize(SpeedwireInterface::DeviceType deviceType = SpeedwireInterface::DeviceTypeUnknown);
@@ -71,14 +72,17 @@ private:
     SpeedwireInterface::DeviceType m_deviceType = SpeedwireInterface::DeviceTypeUnknown;
     QUdpSocket *m_multicastSocket = nullptr;
     QUdpSocket *m_unicastSocket = nullptr;
-    QHostAddress m_multicastAddress =  Speedwire::multicastAddress();
-    quint16 m_port = Speedwire::port();
+    quint32 m_localSerialNumber = 0;
     bool m_initialized = false;
 
     // Discovery
     QTimer m_multicastSearchRequestTimer;
     NetworkDeviceInfos m_networkDeviceInfos;
-    QHash<QHostAddress, SpeedwireDiscoveryResult> m_results;
+    QList<SpeedwireDiscoveryResult> m_results;
+    QHash<QHostAddress, SpeedwireDiscoveryResult> m_resultMeters;
+    QHash<QHostAddress, SpeedwireDiscoveryResult> m_resultInverters;
+
+    QHash<QHostAddress, SpeedwireInverter *> m_inverters;
 
     bool m_multicastRunning = false;
     bool m_unicastRunning = false;
@@ -88,7 +92,7 @@ private:
 
     bool setupUnicastSocket();
     void startUnicastDiscovery();
-    ;
+
     void sendUnicastDiscoveryRequest(const QHostAddress &targetHostAddress);
 
 private slots:

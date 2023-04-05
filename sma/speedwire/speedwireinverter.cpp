@@ -40,7 +40,7 @@ SpeedwireInverter::SpeedwireInverter(const QHostAddress &address, quint16 modelI
     m_serialNumber(serialNumber)
 {
     qCDebug(dcSma()) << "Inverter: setup interface on" << m_address.toString();
-    m_interface = new SpeedwireInterface(false, this);
+    m_interface = new SpeedwireInterface(false, serialNumber, this);
     connect(m_interface, &SpeedwireInterface::dataReceived, this, &SpeedwireInverter::processData);
 }
 
@@ -153,7 +153,7 @@ SpeedwireInverterReply *SpeedwireInverter::sendIdentifyRequest()
     SpeedwireInverterRequest request;
     request.setPacketId(0x8001);
     request.setCommand(Speedwire::CommandIdentify);
-    request.setRequestData(Speedwire::discoveryDatagramUnicast());
+    request.setRequestData(Speedwire::pingRequest(Speedwire::sourceModelId(), m_serialNumber));
     return createReply(request);
 }
 
@@ -171,9 +171,7 @@ SpeedwireInverterReply *SpeedwireInverter::sendLoginRequest(const QString &passw
     QDataStream stream(&datagram, QIODevice::WriteOnly);
     buildDefaultHeader(stream, 58, 0xa0);
 
-    // Reset the packet id counter, otherwise there will be no response
-    //m_packetId = 0;
-    quint16 packetId = m_packetId++ | 0x8000;
+    quint16 packetId = static_cast<quint16>(m_packetId++) | 0x8000;
     Speedwire::Command command = Speedwire::CommandLogin;
 
     // The payload is little endian encoded
@@ -227,7 +225,7 @@ SpeedwireInverterReply *SpeedwireInverter::sendLogoutRequest()
     buildDefaultHeader(stream, 34);
 
     // Reset the packet id counter, otherwise there will be no response
-    quint16 packetId = m_packetId++ | 0x8000;
+    quint16 packetId = static_cast<quint16>(m_packetId++) | 0x8000;
     Speedwire::Command command = Speedwire::CommandLogout;
 
     // The payload is little endian encoded
@@ -241,7 +239,7 @@ SpeedwireInverterReply *SpeedwireInverter::sendLogoutRequest()
     stream << static_cast<quint16>(0x0300);
 
     // Source
-    stream << m_interface->sourceModelId();
+    stream << Speedwire::sourceModelId();
     stream << m_interface->sourceSerialNumber();
     stream << static_cast<quint16>(0x0300);
 
@@ -275,7 +273,7 @@ SpeedwireInverterReply *SpeedwireInverter::sendSoftwareVersionRequest()
     buildDefaultHeader(stream, 38, 0xa0);
 
     // Reset the packet id counter, otherwise there will be no response
-    quint16 packetId = m_packetId++ | 0x8000;
+    quint16 packetId = static_cast<quint16>(m_packetId++) | 0x8000;
     Speedwire::Command command = Speedwire::CommandQueryDevice;
 
     // The payload is little endian encoded
@@ -305,7 +303,7 @@ SpeedwireInverterReply *SpeedwireInverter::sendDeviceTypeRequest()
     buildDefaultHeader(stream, 38, 0xa0);
 
     // Reset the packet id counter, otherwise there will be no response
-    quint16 packetId = m_packetId++ | 0x8000;
+    quint16 packetId = static_cast<quint16>(m_packetId++) | 0x8000;
     Speedwire::Command command = Speedwire::CommandQueryDevice;
 
     // The payload is little endian encoded
@@ -314,6 +312,36 @@ SpeedwireInverterReply *SpeedwireInverter::sendDeviceTypeRequest()
     // 2 words
     stream << static_cast<quint32>(0x00821e00);
     stream << static_cast<quint32>(0x008220ff);
+
+    // End of data
+    stream << static_cast<quint32>(0);
+
+    // Final datagram
+    SpeedwireInverterRequest request;
+    request.setPacketId(packetId);
+    request.setCommand(command);
+    request.setRequestData(datagram);
+    return createReply(request);
+}
+
+SpeedwireInverterReply *SpeedwireInverter::sendBatteryInfoRequest()
+{
+    qCDebug(dcSma()) << "Inverter: Sending battery info request to" << m_address.toString();
+    // Build the header
+    QByteArray datagram;
+    QDataStream stream(&datagram, QIODevice::WriteOnly);
+    buildDefaultHeader(stream, 38, 0xa0);
+
+    // Reset the packet id counter, otherwise there will be no response
+    quint16 packetId = static_cast<quint16>(m_packetId++) | 0x8000;
+    Speedwire::Command command = Speedwire::CommandQueryAc;
+
+    // The payload is little endian encoded
+    buildPacket(stream, command, packetId);
+
+    // 2 words
+    stream << static_cast<quint32>(0x00491E00);
+    stream << static_cast<quint32>(0x00495DFF);
 
     // End of data
     stream << static_cast<quint32>(0);
@@ -431,7 +459,7 @@ void SpeedwireInverter::buildPacket(QDataStream &stream, quint32 command, quint1
     // Destination Ctrl
     stream << static_cast<quint16>(0x0100);
     // Source
-    stream << m_interface->sourceModelId() << m_interface->sourceSerialNumber();
+    stream << Speedwire::sourceModelId() << m_interface->sourceSerialNumber();
     // Destination Ctrl
     stream << static_cast<quint16>(0x0100);
 
@@ -489,7 +517,7 @@ SpeedwireInverterReply *SpeedwireInverter::sendQueryRequest(Speedwire::Command c
     buildDefaultHeader(stream);
 
     // Reset the packet id counter, otherwise there will be no response
-    quint16 packetId = m_packetId++ | 0x8000;
+    quint16 packetId = static_cast<quint16>(m_packetId++) | 0x8000;
 
     // The payload is little endian encoded
     buildPacket(stream, command, packetId);
@@ -514,20 +542,20 @@ void SpeedwireInverter::processSoftwareVersionResponse(const QByteArray &respons
     // 07000000 07000000 01348200 2ff5b261 00000000 00000000 feffffff feffffff 00055302 00055302 00000000 00000000 00000000
     qCDebug(dcSma()) << "Inverter: Process software version request response" << response.toHex();
     // TODO:
-//    QDataStream stream(response);
-//    stream.setByteOrder(QDataStream::LittleEndian);
+    //    QDataStream stream(response);
+    //    stream.setByteOrder(QDataStream::LittleEndian);
 
-//    // First
-//    quint32 firstWord;
-//    quint32 secondWord;
-//    stream >> firstWord >> secondWord;
-//    quint8 byte1, byte2, byte3, byte4;
-//    stream >> byte1 >> byte2 >> byte3 >> byte4;
+    //    // First
+    //    quint32 firstWord;
+    //    quint32 secondWord;
+    //    stream >> firstWord >> secondWord;
+    //    quint8 byte1, byte2, byte3, byte4;
+    //    stream >> byte1 >> byte2 >> byte3 >> byte4;
 
     // BCD
     // 00 82 34 01 ??
-//    QString softwareVersion = QString("%1.%2.%3.%4").arg(byte1).arg(byte2).arg(byte3).arg(byte4);
-//    qCDebug(dcSma()) << "Inverter: Software version" << softwareVersion;
+    //    QString softwareVersion = QString("%1.%2.%3.%4").arg(byte1).arg(byte2).arg(byte3).arg(byte4);
+    //    qCDebug(dcSma()) << "Inverter: Software version" << softwareVersion;
 
 }
 
@@ -938,6 +966,46 @@ void SpeedwireInverter::processGridFrequencyResponse(const QByteArray &response)
     }
 }
 
+void SpeedwireInverter::processBatteryInfoResponse(const QByteArray &response)
+{
+    // 10000000 10000000
+    // 01574600 c20cbb61 89130000 89130000 89130000 89130000 010000000
+    // 0000000
+    qCDebug(dcSma()) << "Inverter: ################ Process battery info response" << response.toHex();
+    //    QDataStream stream(response);
+    //    stream.setByteOrder(QDataStream::LittleEndian);
+    //    quint32 firstWord, secondWord;
+    //    stream >> firstWord >> secondWord;
+
+    ////    // Each line has 7 words
+    ////    quint32 measurementId;
+    ////    quint32 measurementType; // ?
+
+    //////    while (!stream.atEnd()) {
+    //////        // First row
+    //////        stream >> measurementId;
+
+    //////        // End of data, we are done
+    //////        if (measurementId == 0)
+    //////            return;
+
+    //////        // Unknown
+    //////        stream >> measurementType;
+
+    //////        quint8 measurmentNumber = static_cast<quint8>(measurementId & 0xff);
+    //////        measurementId = measurementId & 0x00ffff00;
+
+    //////        // Read measurent lines
+    //////        if (measurementId == 0x465700 && measurmentNumber == 0x01) {
+    //////            quint32 frequency;
+    //////            stream >> frequency;
+    //////            m_gridFrequency = readValue(frequency, 100.0);
+    //////            qCDebug(dcSma()) << "Inverter: Grid frequency" << m_gridFrequency << "Hz";
+    //////            readUntilEndOfMeasurement(stream);
+    //////        }
+    //////    }
+}
+
 void SpeedwireInverter::processInverterStatusResponse(const QByteArray &response)
 {
     // 00000000 00000000
@@ -1083,43 +1151,88 @@ void SpeedwireInverter::setState(State state)
         setReachable(false);
         break;
     case StateInitializing: {
-        // Try to fetch ac power
-        qCDebug(dcSma()) << "Inverter: Request AC power...";
-        SpeedwireInverterReply *reply = sendQueryRequest(Speedwire::CommandQueryAc, 0x00464000, 0x004642ff);
-        connect(reply, &SpeedwireInverterReply::finished, this, [=](){
-            if (reply->error() != SpeedwireInverterReply::ErrorNoError) {
-                if (reply->error() == SpeedwireInverterReply::ErrorTimeout) {
+
+        if (m_modelId == 372) {
+            // Home manager 2.0, no login, just fetch...testing
+
+            // ############# TESTING ##########
+
+            // Query battery info
+            qCDebug(dcSma()) << "Inverter: Request battery info...";
+            SpeedwireInverterReply *reply = sendQueryRequest(Speedwire::CommandQueryAc, 0x00491e00, 0x00495dff); // Battery infos
+            connect(reply, &SpeedwireInverterReply::finished, this, [=](){
+                if (reply->error() != SpeedwireInverterReply::ErrorNoError) {
                     qCWarning(dcSma()) << "Inverter: Failed to query data from inverter:" << reply->request().command() << reply->error();
-
-                    // TODO: try to send identify request and retry 3 times before giving up,
-                    // still need to figure out why the inverter stops responding sometimes and how we can
-                    // make it communicative again, a reconfugre always fixes this issue...somehow...
-
-                    setState(StateDisconnected);
-                    return;
+                    //                                            setState(StateDisconnected);
+                    //                                            return;
                 }
 
-                // Reachable, but received an inverter error, probably not logged
-                if (reply->error() == SpeedwireInverterReply::ErrorInverterError) {
-                    qCDebug(dcSma()) << "Inverter: Query data request finished with inverter error. Try to login...";
-                    setState(StateLogin);
-                    return;
+                qCDebug(dcSma()) << "Inverter: Query request finished successfully" << reply->request().command();
+                processBatteryInfoResponse(reply->responsePayload());
+
+
+                qCDebug(dcSma()) << "Inverter: Request battery SoC...";
+                SpeedwireInverterReply *reply = sendQueryRequest(Speedwire::CommandQueryAc, 0x00295A00, 0x00295AFF); // SoC
+                connect(reply, &SpeedwireInverterReply::finished, this, [=](){
+                    if (reply->error() != SpeedwireInverterReply::ErrorNoError) {
+                        qCWarning(dcSma()) << "Inverter: Failed to query data from inverter:" << reply->request().command() << reply->error();
+                        //                                            setState(StateDisconnected);
+                        //                                                return;
+                    } else {
+                        processBatteryInfoResponse(reply->responsePayload());
+                    }
+                    qCDebug(dcSma()) << "Inverter: Request battery termperature...";
+                    SpeedwireInverterReply *reply = sendQueryRequest(Speedwire::CommandQueryAc, 0x00491E00, 0x00495DFF); // SoC
+                    connect(reply, &SpeedwireInverterReply::finished, this, [=](){
+                        if (reply->error() != SpeedwireInverterReply::ErrorNoError) {
+                            qCWarning(dcSma()) << "Inverter: Failed to query data from inverter:" << reply->request().command() << reply->error();
+                            //                                            setState(StateDisconnected);
+                            //                                                    return;
+                        } else {
+                            processBatteryInfoResponse(reply->responsePayload());
+                        }
+                    });
+                });
+            });
+
+        } else {
+            // Try to fetch ac power
+            qCDebug(dcSma()) << "Inverter: Request AC power...";
+            SpeedwireInverterReply *reply = sendQueryRequest(Speedwire::CommandQueryAc, 0x00464000, 0x004642ff);
+            connect(reply, &SpeedwireInverterReply::finished, this, [=](){
+                if (reply->error() != SpeedwireInverterReply::ErrorNoError) {
+                    if (reply->error() == SpeedwireInverterReply::ErrorTimeout) {
+                        qCWarning(dcSma()) << "Inverter: Failed to query data from inverter:" << reply->request().command() << reply->error();
+
+                        // TODO: try to send identify request and retry 3 times before giving up,
+                        // still need to figure out why the inverter stops responding sometimes and how we can
+                        // make it communicative again, a reconfugre always fixes this issue...somehow...
+
+                        setState(StateDisconnected);
+                        return;
+                    }
+
+                    // Reachable, but received an inverter error, probably not logged
+                    if (reply->error() == SpeedwireInverterReply::ErrorInverterError) {
+                        qCDebug(dcSma()) << "Inverter: Query data request finished with inverter error. Try to login...";
+                        setState(StateLogin);
+                        return;
+                    }
                 }
-            }
 
-            // We where able to read data...emit the signal for the setup just incase
-            emit loginFinished(true);
+                // We where able to read data...emit the signal for the setup just incase
+                emit loginFinished(true);
 
-            qCDebug(dcSma()) << "Inverter: Query request finished successfully" << reply->request().command();
-            processAcPowerResponse(reply->responseData());
+                qCDebug(dcSma()) << "Inverter: Query request finished successfully" << reply->request().command();
+                processAcPowerResponse(reply->responseData());
 
-
-            if (m_deviceInformationFetched) {
-                setState(StateQueryData);
-            } else {
-                setState(StateGetInformation);
-            }
-        });
+                if (m_deviceInformationFetched) {
+                    setState(StateQueryData);
+                } else {
+                    setState(StateGetInformation);
+                }
+            });
+        }
         break;
     }
     case StateLogin: {
@@ -1247,6 +1360,7 @@ void SpeedwireInverter::setState(State state)
 
                                 qCDebug(dcSma()) << "Inverter: Query request finished successfully" << reply->request().command();
                                 processAcTotalPowerResponse(reply->responsePayload());
+
 
                                 // Query grid frequency
                                 qCDebug(dcSma()) << "Inverter: Request grid frequency...";
