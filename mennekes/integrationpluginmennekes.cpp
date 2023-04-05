@@ -280,6 +280,50 @@ void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
             });
         }
     }
+
+    if (info->thing()->thingClassId() == amtronHCC3ThingClassId) {
+        AmtronHCC3ModbusTcpConnection *amtronHCC3Connection = m_amtronHCC3Connections.value(info->thing());
+
+        if (info->action().actionTypeId() == amtronHCC3PowerActionTypeId) {
+            bool power = info->action().paramValue(amtronHCC3PowerActionPowerParamTypeId).toBool();
+
+            AmtronHCC3ModbusTcpConnection::ChargeState chargeState;
+            if (power) {
+                // When turning on, we'll need to either start or resume, depending on the current state
+                if (amtronHCC3Connection->amtronState() == AmtronHCC3ModbusTcpConnection::AmtronStatePaused) {
+                    chargeState = AmtronHCC3ModbusTcpConnection::ChargeStateContinue;
+                } else {
+                    chargeState = AmtronHCC3ModbusTcpConnection::ChargeStateStart;
+                }
+            } else {
+                // We'll just use Pause as a Terminate command would requre an EV re-plug in order to resume.
+                chargeState = AmtronHCC3ModbusTcpConnection::ChargeStatePause;
+            }
+
+            QModbusReply *reply = amtronHCC3Connection->setChangeChargeState(chargeState);
+            connect(reply, &QModbusReply::finished, info, [info, reply, power](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    info->thing()->setStateValue(amtronHCC3PowerStateTypeId, power);
+                    info->finish(Thing::ThingErrorNoError);
+                } else {
+                    qCWarning(dcMennekes()) << "Error setting charge state:" << reply->error() << reply->errorString();
+                    info->finish(Thing::ThingErrorHardwareFailure);
+                }
+            });
+        }
+        if (info->action().actionTypeId() == amtronHCC3MaxChargingCurrentActionTypeId) {
+            int maxChargingCurrent = info->action().paramValue(amtronHCC3MaxChargingCurrentActionMaxChargingCurrentParamTypeId).toInt();
+            QModbusReply *reply = amtronHCC3Connection->setCustomerCurrentLimitation(maxChargingCurrent);
+            connect(reply, &QModbusReply::finished, info, [info, reply, maxChargingCurrent](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    info->thing()->setStateValue(amtronHCC3MaxChargingCurrentStateTypeId, maxChargingCurrent);
+                    info->finish(Thing::ThingErrorNoError);
+                } else {
+                    info->finish(Thing::ThingErrorHardwareFailure);
+                }
+            });
+        }
+    }
 }
 
 void IntegrationPluginMennekes::thingRemoved(Thing *thing)
@@ -534,9 +578,58 @@ void IntegrationPluginMennekes::setupAmtronHCC3Connection(ThingSetupInfo *info)
         info->finish(Thing::ThingErrorNoError);
 
         thing->setStateValue(amtronHCC3ConnectedStateTypeId, true);
-
         amtronHCC3Connection->update();
     });
+
+    connect(amtronHCC3Connection, &AmtronHCC3ModbusTcpConnection::updateFinished, thing, [amtronHCC3Connection, thing](){
+        qCDebug(dcMennekes()) << "Amtron HCC3 update finished:" << thing->name() << amtronHCC3Connection;
+        thing->setStateMaxValue(amtronHCC3MaxChargingCurrentStateTypeId, amtronHCC3Connection->installationCurrent());
+    });
+
+    connect(amtronHCC3Connection, &AmtronHCC3ModbusTcpConnection::cpSignalStateChanged, thing, [thing](AmtronHCC3ModbusTcpConnection::CPSignalState cpSignalState) {
+        qCInfo(dcMennekes()) << "CP signal state changed" << cpSignalState;
+        thing->setStateValue(amtronHCC3PluggedInStateTypeId, cpSignalState >= AmtronHCC3ModbusTcpConnection::CPSignalStateB1);
+    });
+
+    connect(amtronHCC3Connection, &AmtronHCC3ModbusTcpConnection::phaseCountChanged, thing, [thing](quint16 phaseCount) {
+        qCInfo(dcMennekes()) << "Phase count changed:" << phaseCount;
+        if (phaseCount > 0) {
+            thing->setStateValue(amtronHCC3PhaseCountStateTypeId, phaseCount);
+        }
+    });
+
+    connect(amtronHCC3Connection, &AmtronHCC3ModbusTcpConnection::amtronStateChanged, thing, [thing](AmtronHCC3ModbusTcpConnection::AmtronState amtronState) {
+        qCInfo(dcMennekes()) << "Amtron state changed:" << amtronState;
+        switch (amtronState) {
+        case AmtronHCC3ModbusTcpConnection::AmtronStateIdle:
+        case AmtronHCC3ModbusTcpConnection::AmtronStateStandByAuthorize:
+        case AmtronHCC3ModbusTcpConnection::AmtronStateStandbyConnect:
+        case AmtronHCC3ModbusTcpConnection::AmtronStatePaused:
+        case AmtronHCC3ModbusTcpConnection::AmtronStateTerminated:
+        case AmtronHCC3ModbusTcpConnection::AmtronStateError:
+            thing->setStateValue(amtronHCC3ChargingStateTypeId, false);
+            break;
+        case AmtronHCC3ModbusTcpConnection::AmtronStateCharging:
+            thing->setStateValue(amtronHCC3ChargingStateTypeId, true);
+            break;
+        }
+    });
+
+    connect(amtronHCC3Connection, &AmtronHCC3ModbusTcpConnection::actualPowerConsumptionChanged, thing, [thing](quint32 actualPowerConsumption) {
+        qCInfo(dcMennekes()) << "Actual power consumption changed:" << actualPowerConsumption;
+        thing->setStateValue(amtronHCC3CurrentPowerStateTypeId, actualPowerConsumption);
+    });
+
+    connect(amtronHCC3Connection, &AmtronHCC3ModbusTcpConnection::chargingSessionMeterChanged, thing, [thing](quint32 chargingSessionMeter) {
+        thing->setStateValue(amtronHCC3SessionEnergyStateTypeId, chargingSessionMeter / 1000.0);
+        // Don't have a total... still providing it for the interface, the energy experience will deal with the value resetting frequently
+        thing->setStateValue(amtronHCC3TotalEnergyConsumedStateTypeId, chargingSessionMeter / 1000.0);
+    });
+
+    connect(amtronHCC3Connection, &AmtronHCC3ModbusTcpConnection::customerCurrentLimitationChanged, thing, [thing](quint16 customerCurrentLimitation) {
+        thing->setStateValue(amtronHCC3MaxChargingCurrentStateTypeId, customerCurrentLimitation);
+    });
+
 
     amtronHCC3Connection->connectDevice();
 }

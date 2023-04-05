@@ -2,6 +2,7 @@
     "className": "AmtronHCC3",
     "protocol": "TCP",
     "endianness": "LittleEndian",
+    "stringEndianness": "LittleEndian",
     "errorLimitUntilNotReachable": 20,
     "checkReachableRegister": "customerCurrentLimitation",
     "enums": [
@@ -299,7 +300,7 @@
                     "address": 781,
                     "size": 2,
                     "type": "uint32",
-                    "unut": "Wh",
+                    "unit": "Wh",
                     "registerType": "inputRegister",
                     "description": "Charging session meter count",
                     "defaultValue": "0",
@@ -314,6 +315,34 @@
                     "description": "Actual power consumption",
                     "unit": "W",
                     "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "limits",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "plannedMinimumCurrent",
+                    "address": 805,
+                    "size": 1,
+                    "type": "uint16",
+                    "readSchedule": "update",
+                    "registerType": "inputRegister",
+                    "description": "Planned Minimum Current per Phase",
+                    "unit": "A",
+                    "access": "RO"
+                },
+                {
+                    "id": "plannedMaximumCurrent",
+                    "address": 806,
+                    "size": 1,
+                    "type": "uint16",
+                    "readSchedule": "update",
+                    "registerType": "inputRegister",
+                    "description": "Planned Maximum Current per Phase",
+                    "unit": "A",
                     "access": "RO"
                 }
             ]
