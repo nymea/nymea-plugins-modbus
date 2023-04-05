@@ -1,4 +1,4 @@
-# Copyright (C) 2021 - 2022 nymea GmbH <developer@nymea.io>
+# Copyright (C) 2021 - 2023 nymea GmbH <developer@nymea.io>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -432,7 +432,7 @@ def writeRegistersDebugLine(fileDescriptor, debugObjectParamName, registerDefini
 
         propertyName = registerDefinition['id']
         propertyTyp = getCppDataType(registerDefinition)
-        line = ('"    - %s: " << %s->%s()' % (registerDefinition['description'], debugObjectParamName, propertyName))
+        line = ('"    - %s - %s: " << %s->%s()' % (registerDefinition['address'], registerDefinition['description'], debugObjectParamName, propertyName))
         if 'unit' in registerDefinition and registerDefinition['unit'] != '':
             line += (' << " [%s]"' % registerDefinition['unit'])
         writeLine(fileDescriptor, '    debug.nospace().noquote() << %s << "\\n";' % (line))
