@@ -281,9 +281,12 @@ void IntegrationPluginAmperfied::setupRtuConnection(ThingSetupInfo *info)
             thing->setStateValue(energyControlConnectedStateTypeId, false);
         }
     });
-    connect(connection, &AmperfiedModbusRtuConnection::initializationFinished, thing, [thing](bool success){
+    connect(connection, &AmperfiedModbusRtuConnection::initializationFinished, thing, [connection, thing](bool success){
         if (success) {
             thing->setStateValue(energyControlConnectedStateTypeId, true);
+
+            // Disabling the auto-standby as it will shut down modbus
+            connection->setStandby(AmperfiedModbusRtuConnection::StandbyStandbyDisabled);
         }
     });
 
