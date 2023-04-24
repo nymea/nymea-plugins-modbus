@@ -457,7 +457,8 @@ void IntegrationPluginKostal::setupKostalConnection(ThingSetupInfo *info)
                 meterThing->setStateValue(kostalMeterFrequencyStateTypeId, kostalConnection->gridFrequencyPowerMeter());
 
                 meterThing->setStateValue(kostalMeterTotalEnergyConsumedStateTypeId, kostalConnection->totalHomeConsumptionFromGrid() / 1000.0); // kWh
-                meterThing->setStateValue(kostalMeterTotalEnergyProducedStateTypeId, kostalConnection->totalEnergyAcToGrid() / 1000.0); // kWh
+                // Docs say that totalEnergyAcToGrid is Wh, but it really seems to be mWh, so we'll have to devide by 1000 twice.
+                meterThing->setStateValue(kostalMeterTotalEnergyProducedStateTypeId, kostalConnection->totalEnergyAcToGrid() / 1000.0 / 1000.0); // kWh
 
                 // Set the power as last value
                 meterThing->setStateValue(kostalMeterCurrentPowerStateTypeId, kostalConnection->powerMeterTotalActivePower());
