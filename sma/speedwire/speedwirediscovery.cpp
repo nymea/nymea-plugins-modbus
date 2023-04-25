@@ -101,18 +101,8 @@ bool SpeedwireDiscovery::startDiscovery()
     m_multicastRunning = false;
     m_unicastRunning = false;
 
-    switch(m_deviceType) {
-    case SpeedwireInterface::DeviceTypeMeter:
-        startMulticastDiscovery();
-        break;
-    case SpeedwireInterface::DeviceTypeInverter:
-        startUnicastDiscovery();
-        break;
-    default:
-        startUnicastDiscovery();
-        startMulticastDiscovery();
-        break;
-    }
+    startUnicastDiscovery();
+    startMulticastDiscovery();
 
     return true;
 }
@@ -376,16 +366,14 @@ void SpeedwireDiscovery::processDatagram(const QHostAddress &senderAddress, quin
         SpeedwireInverterReply *reply = inverter->sendIdentifyRequest();
         qCDebug(dcSma()) << "SpeedwireDiscovery: send identify request to" << senderAddress.toString();
         connect(reply, &SpeedwireInverterReply::finished, this, [this, inverter, senderAddress, reply](){
-            qCDebug(dcSma()) << "SpeedwireDiscovery: ############### identify request finished from" << senderAddress.toString() << reply->error();
+            qCDebug(dcSma()) << "SpeedwireDiscovery: identify request finished from" << senderAddress.toString() << reply->error();
 
             SpeedwireInverterReply *loginReply = inverter->sendLoginRequest();
             qCDebug(dcSma()) << "SpeedwireDiscovery: make login attempt using the default password.";
             connect(loginReply, &SpeedwireInverterReply::finished, this, [loginReply, senderAddress](){
-                qCDebug(dcSma()) << "SpeedwireDiscovery: ########################## login attempt finished" << senderAddress.toString() << loginReply->error();
+                qCDebug(dcSma()) << "SpeedwireDiscovery: login attempt finished" << senderAddress.toString() << loginReply->error();
             });
         });
-
-
 
     } else {
         qCWarning(dcSma()) << "SpeedwireDiscovery: Unhandled data received" << datagram.toHex();
@@ -418,7 +406,7 @@ void SpeedwireDiscovery::finishDiscovery()
     m_multicastSearchRequestTimer.stop();
 
     if (m_multicastSocket) {
-        if (!m_multicastSocket->leaveMultic astGroup(Speedwire::multicastAddress())) {
+        if (!m_multicastSocket->leaveMulticastGroup(Speedwire::multicastAddress())) {
             qCWarning(dcSma()) << "SpeedwireDiscovery: Failed to leave multicast group" << Speedwire::multicastAddress().toString();
         }
 

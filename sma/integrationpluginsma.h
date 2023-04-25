@@ -87,6 +87,7 @@ private:
 
     void markSpeedwireMeterAsDisconnected(Thing *thing);
     void markSpeedwireInverterAsDisconnected(Thing *thing);
+    void markSpeedwireBatteryAsDisconnected(Thing *thing);
     void markModbusInverterAsDisconnected(Thing *thing);
 
     quint64 getLocalSerialNumber();
