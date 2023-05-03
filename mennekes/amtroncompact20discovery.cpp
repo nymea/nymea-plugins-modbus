@@ -28,77 +28,71 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "ciondiscovery.h"
-
+#include "amtroncompact20discovery.h"
 #include "extern-plugininfo.h"
 
 #include <modbusdatautils.h>
 
+QList<int> slaveIdCandidates = {50, 11, 12, 13, 14};
 
-CionDiscovery::CionDiscovery(ModbusRtuHardwareResource *modbusRtuResource, QObject *parent)
-    : QObject{parent},
-      m_modbusRtuResource{modbusRtuResource}
+AmtronCompact20Discovery::AmtronCompact20Discovery(ModbusRtuHardwareResource *modbusRtuResource, QObject *parent):
+    QObject{parent},
+    m_modbusRtuResource(modbusRtuResource)
 {
 
 }
 
-void CionDiscovery::startDiscovery()
+void AmtronCompact20Discovery::startDiscovery()
 {
-    qCInfo(dcSchrack()) << "Discovery: Searching for Schrack i-CHARGE wallboxes on modbus RTU...";
+    qCInfo(dcMennekes()()) << "Discovery: Searching for Amtron Compact 2.0 wallboxes on modbus RTU...";
 
     QList<ModbusRtuMaster*> candidateMasters;
     foreach (ModbusRtuMaster *master, m_modbusRtuResource->modbusRtuMasters()) {
-        if (master->baudrate() == 57600 && master->dataBits() == 8 && master->stopBits() == 1 && master->parity() == QSerialPort::NoParity) {
+        if (master->baudrate() == 57600 && master->dataBits() == 8 && master->stopBits() == 2 && master->parity() == QSerialPort::NoParity) {
             candidateMasters.append(master);
         }
     }
 
     if (candidateMasters.isEmpty()) {
-        qCWarning(dcSchrack()) << "No usable modbus RTU master found.";
+        qCWarning(dcMennekes()) << "No usable modbus RTU master found.";
         emit discoveryFinished(false);
         return;
     }
 
     foreach (ModbusRtuMaster *master, candidateMasters) {
         if (master->connected()) {
-            tryConnect(master, 1);
+            tryConnect(master, 0);
         } else {
-            qCWarning(dcSchrack()) << "Modbus RTU master" << master->modbusUuid().toString() << "is not connected.";
+            qCWarning(dcMennekes()) << "Modbus RTU master" << master->modbusUuid().toString() << "is not connected.";
         }
     }
 }
 
-QList<CionDiscovery::Result> CionDiscovery::discoveryResults() const
+QList<AmtronCompact20Discovery::Result> AmtronCompact20Discovery::discoveryResults() const
 {
     return m_discoveryResults;
 }
 
-void CionDiscovery::tryConnect(ModbusRtuMaster *master, quint16 slaveId)
+void AmtronCompact20Discovery::tryConnect(ModbusRtuMaster *master, quint16 slaveIdIndex)
 {
-    qCDebug(dcSchrack()) << "Scanning modbus RTU master" << master->modbusUuid() << "Slave ID:" << slaveId;
+    quint8 slaveId = slaveIdCandidates.at(slaveIdIndex);
+    qCDebug(dcMennekes()) << "Scanning modbus RTU master" << master->modbusUuid() << "Slave ID:" << slaveId;
 
-    ModbusRtuReply *reply = master->readHoldingRegister(slaveId, 832, 16);
+    ModbusRtuReply *reply = master->readInputRegister(slaveId, 0x13, 8);
     connect(reply, &ModbusRtuReply::finished, this, [=](){
 
         if (reply->error() == ModbusRtuReply::NoError) {
 
-            QString firmwareVersion = ModbusDataUtils::convertToString(reply->result());
-            qCDebug(dcSchrack()) << "Test reply finished!" << reply->error() << firmwareVersion;
+            QString serialNumber = ModbusDataUtils::convertToString(reply->result(), ModbusDataUtils::ByteOrderBigEndian).remove(QRegExp("^_*"));
+            qCDebug(dcMennekes()) << "Test reply finished!" << reply->error() << serialNumber;
 
-            // Version numbers seem to be wild west... We can't really understand what's in there...
-            // So let's assume this is a schrack if reading alone succeeded and it is a valid string and 18 to 32 chars long...
-            // Examples of how this looks like:
-            // EBE 1.2: "V1.2    15.02.2021"
-            // ICC:     "003090056-01          20220913"
-            QRegExp re = QRegExp("[A-Z0-9\\.- ]{18,32}");
-            if (re.exactMatch(firmwareVersion)) {
-                Result result {master->modbusUuid(), firmwareVersion, slaveId};
-                m_discoveryResults.append(result);
-            }
+            Result result {master->modbusUuid(), serialNumber, slaveId};
+            m_discoveryResults.append(result);
+
         }
 
-        if (slaveId < 10) {
-            tryConnect(master, slaveId+1);
+        if (slaveIdIndex < slaveIdCandidates.count() - 1) {
+            tryConnect(master, slaveIdIndex+1);
         } else {
             emit discoveryFinished(true);
         }
