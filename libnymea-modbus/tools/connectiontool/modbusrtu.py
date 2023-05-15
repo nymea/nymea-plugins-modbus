@@ -100,7 +100,11 @@ def writePropertyUpdateMethodImplementationsRtu(fileDescriptor, className, regis
         writeLine(fileDescriptor, '            if (reply->error() == ModbusRtuReply::NoError) {')
         writeLine(fileDescriptor, '                QVector<quint16> values = reply->result();')
         writeLine(fileDescriptor, '                qCDebug(dc%s()) << "<-- Response from \\"%s\\" register" << %s << "size:" << %s << values;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
-        writeLine(fileDescriptor, '                process%sRegisterValues(values);' % (propertyName[0].upper() + propertyName[1:]))
+        writeLine(fileDescriptor, '                if (values.size() == %s) {' % (registerDefinition['size']))
+        writeLine(fileDescriptor, '                    process%sRegisterValues(values);' % (propertyName[0].upper() + propertyName[1:]))
+        writeLine(fileDescriptor, '                } else {')
+        writeLine(fileDescriptor, '                    qCWarning(dc%s()) << "Reading from \\"%s\\" registers" << %s << "size:" << %s << "returned different size than requested. Ignoring incomplete data" << values;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
+        writeLine(fileDescriptor, '                }')
         writeLine(fileDescriptor, '            }')
         writeLine(fileDescriptor, '        });')
         writeLine(fileDescriptor)
@@ -158,14 +162,18 @@ def writeBlockUpdateMethodImplementationsRtu(fileDescriptor, className, blockDef
         writeLine(fileDescriptor, '            if (reply->error() == ModbusRtuReply::NoError) {')
         writeLine(fileDescriptor, '                QVector<quint16> blockValues = reply->result();')
         writeLine(fileDescriptor, '                qCDebug(dc%s()) << "<-- Response from reading block \\"%s\\" register" << %s << "size:" << %s << blockValues;' % (className, blockName, blockStartAddress, blockSize))
-        
+        writeLine(fileDescriptor, '                if (blockValues.size() == %s) {' % (blockSize))
+
         # Start parsing the registers using offsets
         offset = 0
         for i, blockRegister in enumerate(blockRegisters):
             propertyName = blockRegister['id']
-            writeLine(fileDescriptor, '                process%sRegisterValues(blockValues.mid(%s, %s));' % (propertyName[0].upper() + propertyName[1:], offset, blockRegister['size']))
+            writeLine(fileDescriptor, '                    process%sRegisterValues(blockValues.mid(%s, %s));' % (propertyName[0].upper() + propertyName[1:], offset, blockSize))
             offset += blockRegister['size']
 
+        writeLine(fileDescriptor, '                } else {')
+        writeLine(fileDescriptor, '                    qCWarning(dc%s()) << "Reading from \\"%s\\" register" << %s << "size:" << %s << "returned different size than requested. Ignoring incomplete data" << blockValues;' % (className, blockName, blockStartAddress, blockSize))
+        writeLine(fileDescriptor, '                }')
         writeLine(fileDescriptor, '            }')
         writeLine(fileDescriptor, '        });')
         writeLine(fileDescriptor)
@@ -377,7 +385,11 @@ def writeInitMethodImplementationRtu(fileDescriptor, className, registerDefiniti
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '        QVector<quint16> values = reply->result();')
                 writeLine(fileDescriptor, '        qCDebug(dc%s()) << "<-- Response from \\"%s\\" init register" << %s << "size:" << %s << values;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
-                writeLine(fileDescriptor, '        process%sRegisterValues(values);' % (propertyName[0].upper() + propertyName[1:]))
+                writeLine(fileDescriptor, '        if (values.size() == %s) {' % (registerDefinition['size']))
+                writeLine(fileDescriptor, '            process%sRegisterValues(values);' % (propertyName[0].upper() + propertyName[1:]))
+                writeLine(fileDescriptor, '        } else {')
+                writeLine(fileDescriptor, '            qCWarning(dc%s()) << "Reading from \\"%s\\" registers" << %s << "size:" << %s << "returned different size than requested. Ignoring incomplete data" << values;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
+                writeLine(fileDescriptor, '        }')
                 writeLine(fileDescriptor, '        verifyInitFinished();')
                 writeLine(fileDescriptor, '    });')
                 writeLine(fileDescriptor)
@@ -431,6 +443,7 @@ def writeInitMethodImplementationRtu(fileDescriptor, className, registerDefiniti
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '        QVector<quint16> blockValues = reply->result();')
                 writeLine(fileDescriptor, '        qCDebug(dc%s()) << "<-- Response from reading init block \\"%s\\" register" << %s << "size:" << %s << blockValues;' % (className, blockName, blockStartAddress, blockSize))
+                writeLine(fileDescriptor, '        if (blockValues.size() == %s) {' % (blockSize))
 
                 # Start parsing the registers using offsets
                 offset = 0
@@ -440,6 +453,9 @@ def writeInitMethodImplementationRtu(fileDescriptor, className, registerDefiniti
                     writeLine(fileDescriptor, '        process%sRegisterValues(blockValues.mid(%s, %s));' % (propertyName[0].upper() + propertyName[1:], offset, blockRegister['size']))
                     offset += blockRegister['size']
 
+                writeLine(fileDescriptor, '        } else {')
+                writeLine(fileDescriptor, '            qCWarning(dc%s()) << "Reading from \\"%s\\" register" << %s << "size:" << %s << "returned different size than requested. Ignoring incomplete data" << blockValues;' % (className, blockName, blockStartAddress, blockSize))
+                writeLine(fileDescriptor, '        }')  
                 writeLine(fileDescriptor, '        verifyInitFinished();')
                 writeLine(fileDescriptor, '    });')
                 writeLine(fileDescriptor)
@@ -526,7 +542,11 @@ def writeUpdateMethodRtu(fileDescriptor, className, registerDefinitions, blockDe
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '        QVector<quint16> values = reply->result();')
                 writeLine(fileDescriptor, '        qCDebug(dc%s()) << "<-- Response from \\"%s\\" register" << %s << "size:" << %s << values;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
-                writeLine(fileDescriptor, '        process%sRegisterValues(values);' % (propertyName[0].upper() + propertyName[1:]))
+                writeLine(fileDescriptor, '        if (values.size() == %s) {' % (registerDefinition['size']))
+                writeLine(fileDescriptor, '            process%sRegisterValues(values);' % (propertyName[0].upper() + propertyName[1:]))
+                writeLine(fileDescriptor, '        } else {')
+                writeLine(fileDescriptor, '            qCWarning(dc%s()) << "Reading from \\"%s\\" registers" << %s << "size:" << %s << "returned different size than requested. Ignoring incomplete data" << values;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
+                writeLine(fileDescriptor, '        }')
                 writeLine(fileDescriptor, '        verifyUpdateFinished();')
                 writeLine(fileDescriptor, '    });')
                 writeLine(fileDescriptor)
@@ -578,6 +598,7 @@ def writeUpdateMethodRtu(fileDescriptor, className, registerDefinitions, blockDe
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '        QVector<quint16> blockValues = reply->result();')
                 writeLine(fileDescriptor, '        qCDebug(dc%s()) << "<-- Response from reading block \\"%s\\" register" << %s << "size:" << %s << blockValues;' % (className, blockName, blockStartAddress, blockSize))
+                writeLine(fileDescriptor, '        if (blockValues.size() == %s) {' % (blockSize))
 
                 # Start parsing the registers using offsets
                 offset = 0
@@ -587,6 +608,9 @@ def writeUpdateMethodRtu(fileDescriptor, className, registerDefinitions, blockDe
                     writeLine(fileDescriptor, '        process%sRegisterValues(blockValues.mid(%s, %s));' % (propertyName[0].upper() + propertyName[1:], offset, blockRegister['size']))
                     offset += blockRegister['size']
 
+                writeLine(fileDescriptor, '        } else {')
+                writeLine(fileDescriptor, '            qCWarning(dc%s()) << "Reading from \\"%s\\" register" << %s << "size:" << %s << "returned different size than requested. Ignoring incomplete data" << blockValues;' % (className, blockName, blockStartAddress, blockSize))
+                writeLine(fileDescriptor, '        }')
                 writeLine(fileDescriptor, '        verifyUpdateFinished();')
                 writeLine(fileDescriptor, '    });')
                 writeLine(fileDescriptor)
