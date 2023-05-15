@@ -455,8 +455,9 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
             // First check if we already set up a battery for this inverter
             Things childThings = myThings().filterByParentId(thing->id()).filterByThingClassId(speedwireBatteryThingClassId);
             if (childThings.isEmpty()) {
+                // FIXME: re-enable autosetup once verified to be working as expected
                 // Autocreate battery
-                emit autoThingsAppeared(ThingDescriptors() << ThingDescriptor(speedwireBatteryThingClassId, "SMA Battery", QString(), thing->id()));
+                // emit autoThingsAppeared(ThingDescriptors() << ThingDescriptor(speedwireBatteryThingClassId, "SMA Battery", QString(), thing->id()));
             } else {
                 // We can only have one battery as a child
                 Thing *batteryThing = childThings.first();
