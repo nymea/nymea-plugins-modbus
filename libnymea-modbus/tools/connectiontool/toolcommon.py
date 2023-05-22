@@ -352,11 +352,11 @@ def writeBlockGetMethodDeclarations(fileDescriptor, registerDefinitions):
 
 def writePropertyUpdateMethodDeclarations(fileDescriptor, registerDefinitions):
     for registerDefinition in registerDefinitions:
-        if 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'init':
-            continue
+        if 'access' in registerDefinition:
+            if not 'R' in registerDefinition['access']:
+                continue
 
         propertyName = registerDefinition['id']
-        propertyTyp = getCppDataType(registerDefinition)
         writeLine(fileDescriptor, '    void update%s();' % (propertyName[0].upper() + propertyName[1:]))
 
 
@@ -427,12 +427,23 @@ def writeBlocksUpdateMethodDeclarations(fileDescriptor, blockDefinitions):
 
 def writeRegistersDebugLine(fileDescriptor, debugObjectParamName, registerDefinitions):
     for registerDefinition in registerDefinitions:
-        if not 'R' in registerDefinition['access']:
-            continue
+        if 'access' in registerDefinition:
+            if not 'R' in registerDefinition['access']:
+                continue
 
         propertyName = registerDefinition['id']
-        propertyTyp = getCppDataType(registerDefinition)
-        line = ('"    - %s - %s: " << %s->%s()' % (registerDefinition['address'], registerDefinition['description'], debugObjectParamName, propertyName))
+        registerType = registerDefinition['registerType']
+        typeString = ''
+        if registerType == 'holdingRegister':
+            typeString = 'holding '
+        elif registerType == 'inputRegister':
+            typeString = 'input   '
+        elif registerType == 'coils':
+            typeString = 'coils   '
+        elif registerType == 'discreteInputs':
+            typeString = 'discrete'
+
+        line = ('"    - %s %s | %s: " << %s->%s()' % (typeString, registerDefinition['address'], registerDefinition['description'], debugObjectParamName, propertyName))
         if 'unit' in registerDefinition and registerDefinition['unit'] != '':
             line += (' << " [%s]"' % registerDefinition['unit'])
         writeLine(fileDescriptor, '    debug.nospace().noquote() << %s << "\\n";' % (line))
@@ -440,8 +451,9 @@ def writeRegistersDebugLine(fileDescriptor, debugObjectParamName, registerDefini
 
 def writePropertyChangedSignals(fileDescriptor, registerDefinitions):
     for registerDefinition in registerDefinitions:
-        if not 'R' in registerDefinition['access']:
-            continue
+        if 'access' in registerDefinition:
+            if not 'R' in registerDefinition['access']:
+                    continue
 
         propertyName = registerDefinition['id']
         propertyTyp = getCppDataType(registerDefinition)
@@ -455,8 +467,9 @@ def writePropertyChangedSignals(fileDescriptor, registerDefinitions):
 
 def writeProtectedPropertyMembers(fileDescriptor, registerDefinitions):
     for registerDefinition in registerDefinitions:
-        if not 'R' in registerDefinition['access']:
-            continue
+        if 'access' in registerDefinition:
+            if not 'R' in registerDefinition['access']:
+                        continue
 
         propertyName = registerDefinition['id']
         propertyTyp = getCppDataType(registerDefinition)
@@ -467,10 +480,10 @@ def writeProtectedPropertyMembers(fileDescriptor, registerDefinitions):
 
 
 def writePropertyProcessMethodDeclaration(fileDescriptor, registerDefinitions):
-    propertyVariables = []
     for registerDefinition in registerDefinitions:
-        if not 'R' in registerDefinition['access']:
-            continue
+        if 'access' in registerDefinition:
+            if not 'R' in registerDefinition['access']:
+                continue
 
         propertyName = registerDefinition['id']
         writeLine(fileDescriptor, '    void process%sRegisterValues(const QVector<quint16> &values);' % (propertyName[0].upper() + propertyName[1:]))
@@ -479,10 +492,10 @@ def writePropertyProcessMethodDeclaration(fileDescriptor, registerDefinitions):
     
 
 def writePropertyProcessMethodImplementations(fileDescriptor, className, registerDefinitions):
-    propertyVariables = []
     for registerDefinition in registerDefinitions:
-        if not 'R' in registerDefinition['access']:
-            continue
+        if 'access' in registerDefinition:
+            if not 'R' in registerDefinition['access']:
+                continue
 
         propertyTyp = getCppDataType(registerDefinition)
         propertyName = registerDefinition['id']
@@ -498,3 +511,55 @@ def writePropertyProcessMethodImplementations(fileDescriptor, className, registe
         writeLine(fileDescriptor, '    }')
         writeLine(fileDescriptor, '}')
         writeLine(fileDescriptor)
+
+
+def writeSendNextQueuedInitRequestMethodImplementation(fileDescriptor, className):
+    writeLine(fileDescriptor, 'void %s::sendNextQueuedInitRequest()' % (className))
+    writeLine(fileDescriptor, '{')
+    writeLine(fileDescriptor, '    if (m_initRequestQueue.isEmpty())')
+    writeLine(fileDescriptor, '        return;')
+    writeLine(fileDescriptor)
+    writeLine(fileDescriptor, '    if (m_currentInitReply)')
+    writeLine(fileDescriptor, '        return;')
+    writeLine(fileDescriptor)
+    writeLine(fileDescriptor, '    %s::Function function = m_initRequestQueue.dequeue();' % (className))
+    writeLine(fileDescriptor, '    (this->*function)();')
+    writeLine(fileDescriptor, '}')
+    writeLine(fileDescriptor)
+
+
+def writeEnqueueInitRequestMethodImplementation(fileDescriptor, className):
+    writeLine(fileDescriptor, 'void %s::enqueueInitRequest(%s::Function function)' % (className, className))
+    writeLine(fileDescriptor, '{')
+    writeLine(fileDescriptor, '    if (m_initRequestQueue.contains(function))')
+    writeLine(fileDescriptor, '        return;')
+    writeLine(fileDescriptor)
+    writeLine(fileDescriptor, '    m_initRequestQueue.enqueue(function);')
+    writeLine(fileDescriptor, '}')
+    writeLine(fileDescriptor)
+
+
+def writeSendNextQueuedRequestMethodImplementation(fileDescriptor, className):
+    writeLine(fileDescriptor, 'void %s::sendNextQueuedRequest()' % (className))
+    writeLine(fileDescriptor, '{')
+    writeLine(fileDescriptor, '    if (m_updateRequestQueue.isEmpty())')
+    writeLine(fileDescriptor, '        return;')
+    writeLine(fileDescriptor)
+    writeLine(fileDescriptor, '    if (m_currentUpdateReply)')
+    writeLine(fileDescriptor, '        return;')
+    writeLine(fileDescriptor)
+    writeLine(fileDescriptor, '    %s::Function function = m_updateRequestQueue.dequeue();' % (className))
+    writeLine(fileDescriptor, '    (this->*function)();')
+    writeLine(fileDescriptor, '}')
+    writeLine(fileDescriptor)
+
+
+def writeEnqueueRequestMethodImplementation(fileDescriptor, className):
+    writeLine(fileDescriptor, 'void %s::enqueueRequest(%s::Function function)' % (className, className))
+    writeLine(fileDescriptor, '{')
+    writeLine(fileDescriptor, '    if (m_updateRequestQueue.contains(function))')
+    writeLine(fileDescriptor, '        return;')
+    writeLine(fileDescriptor)
+    writeLine(fileDescriptor, '    m_updateRequestQueue.enqueue(function);')
+    writeLine(fileDescriptor, '}')
+    writeLine(fileDescriptor)

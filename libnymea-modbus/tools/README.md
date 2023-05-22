@@ -23,6 +23,8 @@ The basic structure of the modbus register JSON looks like following example:
     "stringEndianness": "BigEndian",
     "errorLimitUntilNotReachable": 10,
     "checkReachableRegister": "registerPropertyName",
+    "queuedRequests": false,
+    "queuedRequestsDelay": 0,
     "enums": [
         {
             "name": "NameOfEnum",
@@ -158,6 +160,19 @@ Many modbus devices provide inforation using `Enums`, indicating a special state
 
 If a register represets an enum, you simply add the property `"enum": "NameOfEnum"` in the register map and the property will be defined using the resulting enum type. All convertion between enum and resulting modbus register value will be done automatically.
 
+
+## Queued requests
+
+Some modbus devices can process only one request at the time, and sometimes even require a delay between requests. For this purpose the boolean property `queuedRequests` and integer property `queuedRequestsDelay` (milliseconds) property hase been introdiced. By default, requests are not queued and the delay 0 ms.
+
+```
+{
+    ...
+    "queuedRequests": false,
+    "queuedRequestsDelay": 0,
+    ...
+}
+```
 
 ## Read schedules
 

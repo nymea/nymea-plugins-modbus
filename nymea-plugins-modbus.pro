@@ -21,6 +21,7 @@ PLUGIN_DIRS = \
     schrack                 \
     senseair                \
     sma                     \
+    solax                   \
     stiebeleltron           \
     sunspec                 \
     unipi                   \
