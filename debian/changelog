@@ -1,3 +1,33 @@
+nymea-plugins-modbus (1.8.0) jammy; urgency=medium
+
+  [ Bernhard Trinnes ]
+  * Drexel und Weiss: Add smartmeterconsumer interface
+
+  [ Michael Zanetti ]
+  * Amperfied/Heidelberg: Disable auto-standby and smaller fixes
+
+  [ Simon Stürz ]
+  * SunSpec: Fix meter phase power and phase current signs
+  * modbus-tool: Introduce string endianess
+
+  [ Michael Zanetti ]
+  * Mennekes: Complete HCC3 controller implementation
+
+  [ Simon Stürz ]
+  * nymea-modbus-cli: Add modbus RTU functionality
+  * SunSpec: Do not delete TCP connection upon reconnect
+  * SunSpec: Precise discovery and use network device monitor
+  * SMA: Improve speedwire protocol handling and add SMA battery
+
+  [ Michael Zanetti ]
+  * Mennekes: Add support for the Amtron Compact 2.0
+
+  [ Simon Stürz ]
+  * modbus-tool: process response only if the result register count
+    matches the requested size
+
+ -- jenkins <developer@nymea.io>  Mon, 22 May 2023 17:15:16 +0200
+
 nymea-plugins-modbus (1.7.0) jammy; urgency=medium
 
   [ Michael Zanetti ]
