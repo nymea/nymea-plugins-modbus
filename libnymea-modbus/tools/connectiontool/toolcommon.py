@@ -1,4 +1,4 @@
-# Copyright (C) 2021 - 2022 nymea GmbH <developer@nymea.io>
+# Copyright (C) 2021 - 2023 nymea GmbH <developer@nymea.io>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -277,7 +277,7 @@ def getConversionToValueMethod(registerDefinition):
     elif registerDefinition['type'] == 'float64':
         return ('ModbusDataUtils::convertFromFloat64(%s, m_endianness)' % propertyName)
     elif registerDefinition['type'] == 'string':
-        return ('ModbusDataUtils::convertFromString(%s)' % propertyName)    
+        return ('ModbusDataUtils::convertFromString(%s, m_stringEndianness)' % propertyName)
 
 
 def getValueConversionMethod(registerDefinition):
@@ -334,7 +334,7 @@ def getValueConversionMethod(registerDefinition):
     elif registerDefinition['type'] == 'float64':
         return ('ModbusDataUtils::convertToFloat64(values, m_endianness)')
     elif registerDefinition['type'] == 'string':
-        return ('ModbusDataUtils::convertToString(values)')
+        return ('ModbusDataUtils::convertToString(values, m_stringEndianness)')
 
 
 def writeBlockGetMethodDeclarations(fileDescriptor, registerDefinitions):
@@ -432,7 +432,7 @@ def writeRegistersDebugLine(fileDescriptor, debugObjectParamName, registerDefini
 
         propertyName = registerDefinition['id']
         propertyTyp = getCppDataType(registerDefinition)
-        line = ('"    - %s: " << %s->%s()' % (registerDefinition['description'], debugObjectParamName, propertyName))
+        line = ('"    - %s - %s: " << %s->%s()' % (registerDefinition['address'], registerDefinition['description'], debugObjectParamName, propertyName))
         if 'unit' in registerDefinition and registerDefinition['unit'] != '':
             line += (' << " [%s]"' % registerDefinition['unit'])
         writeLine(fileDescriptor, '    debug.nospace().noquote() << %s << "\\n";' % (line))
@@ -473,7 +473,7 @@ def writePropertyProcessMethodDeclaration(fileDescriptor, registerDefinitions):
             continue
 
         propertyName = registerDefinition['id']
-        writeLine(fileDescriptor, '    void process%sRegisterValues(const QVector<quint16> values);' % (propertyName[0].upper() + propertyName[1:]))
+        writeLine(fileDescriptor, '    void process%sRegisterValues(const QVector<quint16> &values);' % (propertyName[0].upper() + propertyName[1:]))
 
     writeLine(fileDescriptor)
     
@@ -487,7 +487,7 @@ def writePropertyProcessMethodImplementations(fileDescriptor, className, registe
         propertyName = registerDefinition['id']
         propertyTyp = getCppDataType(registerDefinition)
 
-        writeLine(fileDescriptor, 'void %s::process%sRegisterValues(const QVector<quint16> values)' % (className, propertyName[0].upper() + propertyName[1:]))
+        writeLine(fileDescriptor, 'void %s::process%sRegisterValues(const QVector<quint16> &values)' % (className, propertyName[0].upper() + propertyName[1:]))
         writeLine(fileDescriptor, '{')
         writeLine(fileDescriptor, '    %s received%s = %s;' % (propertyTyp, propertyName[0].upper() + propertyName[1:], getValueConversionMethod(registerDefinition)))
         writeLine(fileDescriptor, '    emit %sReadFinished(received%s);' % (propertyName, propertyName[0].upper() + propertyName[1:]))
