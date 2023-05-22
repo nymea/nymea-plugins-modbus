@@ -39,17 +39,16 @@
                     "name": "sunspecConnection",
                     "displayName": "SunSpec Generic",
                     "id": "f51853f3-8815-4cf3-b337-45cda1f3e6d5",
-                    "createMethods": [ "User", "Discovery" ],
-                    "discoveryType": "weak",
+                    "createMethods": [ "Discovery" ],
                     "interfaces": ["gateway"],
                     "providedInterfaces": [ "solarinverter", "energymeter", "energystorage"],
                     "paramTypes": [
                         {
-                            "id": "6be6abc4-e2b2-4687-9343-0e5164ed0ab2",
-                            "name":"ipAddress",
-                            "displayName": "IP address",
+                            "id": "f65d6c36-1672-44cb-b52a-62d71837ae67",
+                            "name":"macAddress",
+                            "displayName": "MAC address",
                             "type": "QString",
-                            "defaultValue": "127.0.0.1"
+                            "defaultValue": "00:00:00:00:00:00"
                         },
                         {
                             "id": "1fa4fc9c-f6be-47c7-928a-bcefc1142eec",
@@ -57,13 +56,6 @@
                             "displayName": "Port",
                             "type": "int",
                             "defaultValue": 502
-                        },
-                        {
-                            "id": "f65d6c36-1672-44cb-b52a-62d71837ae67",
-                            "name":"macAddress",
-                            "displayName": "MAC address",
-                            "type": "QString",
-                            "defaultValue": "00:00:00:00:00:00"
                         },
                         {
                             "id": "953064e0-4675-4538-a9a2-fa22ce2f347c",
@@ -1465,17 +1457,10 @@
                     "name": "solarEdgeConnection",
                     "displayName": "SolarEdge",
                     "id": "7a92bf65-b443-4491-a012-2bec35eb5bf0",
-                    "createMethods": [ "User", "Discovery" ],
+                    "createMethods": [ "Discovery" ],
                     "interfaces": ["gateway"],
                     "providedInterfaces": [ "solarinverter", "energymeter", "energystorage" ],
                     "paramTypes": [
-                        {
-                            "id": "94f6ba3c-6b8b-47a9-a5cb-73a091ae4cf7",
-                            "name":"ipAddress",
-                            "displayName": "IP address",
-                            "type": "QString",
-                            "defaultValue": "127.0.0.1"
-                        },
                         {
                             "id": "bb395c12-54d6-4139-b0a6-e31b28bc4d2e",
                             "name":"macAddress",
