@@ -106,6 +106,7 @@ private:
     QString getInverterStateString(quint16 state);
     QString getInverterErrorString(quint32 flag);
 
+    double fixValueSign(double targetValue, double powerValue);
 
 private slots:
     void onRefreshTimer();
