@@ -96,8 +96,8 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
     } else if (info->thingClassId() == speedwireMeterThingClassId) {
 
         // Note: does not require the network device discovery...
-        SpeedwireDiscovery *speedwireDiscovery = new SpeedwireDiscovery(hardwareManager()->networkDeviceDiscovery(), info);
-        if (!speedwireDiscovery->initialize(SpeedwireInterface::DeviceTypeMeter)) {
+        SpeedwireDiscovery *speedwireDiscovery = new SpeedwireDiscovery(hardwareManager()->networkDeviceDiscovery(), getLocalSerialNumber(), info);
+        if (!speedwireDiscovery->initialize()) {
             qCWarning(dcSma()) << "Could not discovery inverter. The speedwire interface initialization failed.";
             info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Unable to discover the network."));
             return;
@@ -116,7 +116,13 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
                 if (result.serialNumber == 0)
                     continue;
 
-                ThingDescriptor descriptor(speedwireMeterThingClassId, "SMA Energy Meter (" + QString::number(result.serialNumber) + ")" , result.address.toString());
+                QString thingName = "SMA Energy Meter (" + QString::number(result.serialNumber) + ")";
+
+                // Note: the SMA Homemanager 2 identifies it self as inverter / data provider...we filter it out here.
+                if (result.modelId == 372)
+                    thingName = "SMA Home Manager 2.0 (" + QString::number(result.serialNumber) + ")";
+
+                ThingDescriptor descriptor(speedwireMeterThingClassId, thingName, result.address.toString());
                 // We found an energy meter, let's check if we already added this one
                 foreach (Thing *existingThing, myThings()) {
                     if (existingThing->paramValue(speedwireMeterThingSerialNumberParamTypeId).toUInt() == result.serialNumber) {
@@ -145,8 +151,8 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
             return;
         }
 
-        SpeedwireDiscovery *speedwireDiscovery = new SpeedwireDiscovery(hardwareManager()->networkDeviceDiscovery(), info);
-        if (!speedwireDiscovery->initialize(SpeedwireInterface::DeviceTypeInverter)) {
+        SpeedwireDiscovery *speedwireDiscovery = new SpeedwireDiscovery(hardwareManager()->networkDeviceDiscovery(), getLocalSerialNumber(), info);
+        if (!speedwireDiscovery->initialize()) {
             qCWarning(dcSma()) << "Could not discovery inverter. The speedwire interface initialization failed.";
             info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Unable to discover the network."));
             return;
@@ -163,6 +169,11 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
                     continue;
 
                 if (result.serialNumber == 0)
+                    continue;
+
+                // Note: the SMA Homemanager 2 identifies him self as inverter / data provider...
+                // we filter it out here since it is a meter and also should identify as one.
+                if (result.modelId == 372)
                     continue;
 
                 ThingDescriptor descriptor(speedwireInverterThingClassId, "SMA inverter (" + QString::number(result.serialNumber) + ")", result.address.toString());
@@ -302,7 +313,7 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
 
         // Create the multicast interface if not created already.
         if (!m_multicastInterface)
-            m_multicastInterface = new SpeedwireInterface(true, this);
+            m_multicastInterface = new SpeedwireInterface(true, getLocalSerialNumber(), this);
 
         quint32 serialNumber = static_cast<quint32>(thing->paramValue(speedwireMeterThingSerialNumberParamTypeId).toUInt());
         quint16 modelId = static_cast<quint16>(thing->paramValue(speedwireMeterThingModelIdParamTypeId).toUInt());
@@ -327,6 +338,7 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
         });
 
         connect(meter, &SpeedwireMeter::valuesUpdated, thing, [=](){
+            qCDebug(dcSma()) << "Meter values updated for" << thing->name() << meter->currentPower() << "W";
             thing->setStateValue(speedwireMeterConnectedStateTypeId, true);
             thing->setStateValue(speedwireMeterCurrentPowerStateTypeId, meter->currentPower());
             thing->setStateValue(speedwireMeterCurrentPowerPhaseAStateTypeId, meter->currentPowerPhaseA());
@@ -386,7 +398,7 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
                 pluginStorage()->remove("");
                 pluginStorage()->endGroup();
 
-                delete inverter;
+                inverter->deleteLater();
                 info->finish(Thing::ThingErrorAuthenticationFailure, QT_TR_NOOP("Failed to log in with the given password. Please try again."));
                 return;
             }
@@ -406,9 +418,18 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
             if (!reachable) {
                 markSpeedwireInverterAsDisconnected(thing);
             }
+
+            foreach (Thing *batteryThing, myThings().filterByParentId(thing->id()).filterByThingClassId(speedwireBatteryThingClassId)) {
+                if (reachable) {
+                    thing->setStateValue(speedwireBatteryConnectedStateTypeId, true);
+                } else {
+                    markSpeedwireBatteryAsDisconnected(batteryThing);
+                }
+            }
         });
 
         connect(inverter, &SpeedwireInverter::valuesUpdated, thing, [=](){
+            qCDebug(dcSma()) << "Inverter values updated for" << thing->name() << -inverter->totalAcPower() << "W" << inverter->totalEnergyProduced() << "kWh";
             thing->setStateValue(speedwireInverterConnectedStateTypeId, true);
             thing->setStateValue(speedwireInverterTotalEnergyProducedStateTypeId, inverter->totalEnergyProduced());
             thing->setStateValue(speedwireInverterEnergyProducedTodayStateTypeId, inverter->todayEnergyProduced());
@@ -427,8 +448,46 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
             thing->setStateValue(speedwireInverterCurrentPowerMpp2StateTypeId, inverter->powerDcMpp2());
         });
 
+        connect(inverter, &SpeedwireInverter::batteryValuesUpdated, thing, [=](){
+            if (!thing->setupComplete() || !inverter->batteryAvailable())
+                return;
+
+            // First check if we already set up a battery for this inverter
+            Things childThings = myThings().filterByParentId(thing->id()).filterByThingClassId(speedwireBatteryThingClassId);
+            if (childThings.isEmpty()) {
+                // FIXME: re-enable autosetup once verified to be working as expected
+                // Autocreate battery
+                // emit autoThingsAppeared(ThingDescriptors() << ThingDescriptor(speedwireBatteryThingClassId, "SMA Battery", QString(), thing->id()));
+            } else {
+                // We can only have one battery as a child
+                Thing *batteryThing = childThings.first();
+                batteryThing->setStateValue(speedwireBatteryConnectedStateTypeId, true);
+                batteryThing->setStateValue(speedwireBatteryBatteryLevelStateTypeId, inverter->batteryCharge());
+                batteryThing->setStateValue(speedwireBatteryBatteryCriticalStateTypeId, inverter->batteryCharge() < 10);
+                batteryThing->setStateValue(speedwireBatteryTemperatureStateTypeId, inverter->batteryTemperature());
+                batteryThing->setStateValue(speedwireBatteryVoltageStateTypeId, inverter->batteryVoltage());
+                batteryThing->setStateValue(speedwireBatteryCurrentStateTypeId, inverter->batteryCurrent());
+
+                double batteryPower = inverter->batteryVoltage() * inverter->batteryCurrent(); // P = U * I
+                qCDebug(dcSma()) << "Battery values updated for" << batteryThing->name() << batteryPower << "W";
+                batteryThing->setStateValue(speedwireBatteryCurrentPowerStateTypeId, batteryPower);
+                if (batteryPower == 0) {
+                    batteryThing->setStateValue(speedwireBatteryChargingStateStateTypeId, "idle");
+                } else if (batteryPower < 0) {
+                    batteryThing->setStateValue(speedwireBatteryChargingStateStateTypeId, "discharging");
+                } else if (batteryPower > 0) {
+                    batteryThing->setStateValue(speedwireBatteryChargingStateStateTypeId, "charging");
+                }
+            }
+        });
+
         qCDebug(dcSma()) << "Inverter: Start connecting using password" << password;
         inverter->startConnecting(password);
+
+    } else if (thing->thingClassId() == speedwireBatteryThingClassId) {
+
+        qCDebug(dcSma()) << "Battery: Setup SMA battery" << thing;
+        info->finish(Thing::ThingErrorNoError);
 
     } else if (thing->thingClassId() == modbusInverterThingClassId) {
 
@@ -514,6 +573,20 @@ void IntegrationPluginSma::postSetupThing(Thing *thing)
 
         setupRefreshTimer();
 
+    } else if (thing->thingClassId() == speedwireBatteryThingClassId) {
+        SpeedwireInverter *inverter = m_speedwireInverters.value(myThings().findById(thing->parentId()));
+        if (inverter) {
+            if (inverter->reachable()) {
+                thing->setStateValue(speedwireBatteryConnectedStateTypeId, true);
+            } else {
+                markSpeedwireBatteryAsDisconnected(thing);
+            }
+        } else {
+            markSpeedwireBatteryAsDisconnected(thing);
+        }
+
+        setupRefreshTimer();
+
     } else if (thing->thingClassId() == modbusInverterThingClassId) {
         SmaInverterModbusTcpConnection *connection = m_modbusInverters.value(thing);
         if (connection) {
@@ -541,6 +614,11 @@ void IntegrationPluginSma::thingRemoved(Thing *thing)
     }
 
     if (thing->thingClassId() == speedwireInverterThingClassId && m_speedwireInverters.contains(thing)) {
+        // Remove invalid password from settings
+        pluginStorage()->beginGroup(thing->id().toString());
+        pluginStorage()->remove("");
+        pluginStorage()->endGroup();
+
         m_speedwireInverters.take(thing)->deleteLater();
     }
 
@@ -782,6 +860,15 @@ void IntegrationPluginSma::markSpeedwireInverterAsDisconnected(Thing *thing)
     thing->setStateValue(speedwireInverterCurrentPowerStateTypeId, 0);
 }
 
+void IntegrationPluginSma::markSpeedwireBatteryAsDisconnected(Thing *thing)
+{
+    thing->setStateValue(speedwireBatteryConnectedStateTypeId, false);
+    thing->setStateValue(speedwireBatteryVoltageStateTypeId, 0);
+    thing->setStateValue(speedwireBatteryCurrentStateTypeId, 0);
+    thing->setStateValue(speedwireBatteryCurrentPowerStateTypeId, 0);
+    thing->setStateValue(speedwireBatteryChargingStateStateTypeId, "idle");
+}
+
 void IntegrationPluginSma::markModbusInverterAsDisconnected(Thing *thing)
 {
     thing->setStateValue(modbusInverterVoltagePhaseAStateTypeId, 0);
@@ -794,6 +881,28 @@ void IntegrationPluginSma::markModbusInverterAsDisconnected(Thing *thing)
     thing->setStateValue(modbusInverterCurrentPowerPhaseBStateTypeId, 0);
     thing->setStateValue(modbusInverterCurrentPowerPhaseCStateTypeId, 0);
     thing->setStateValue(modbusInverterCurrentPowerStateTypeId, 0);
+}
+
+quint64 IntegrationPluginSma::getLocalSerialNumber()
+{
+    m_localSerialNumber = pluginStorage()->value("localSerialNumber", 0).toUInt();
+
+    if (m_localSerialNumber == 0) {
+        srand(QDateTime::currentMSecsSinceEpoch() / 1000);
+        // Generate one and save it for the next time, each instance should have it's own serial number
+        QByteArray data;
+        QDataStream inStream(&data, QIODevice::ReadWrite);
+        for (int i = 0; i < 4; i++) {
+            inStream << static_cast<quint8>(rand() % 256);
+        }
+
+        QDataStream outStream(data);
+        outStream >> m_localSerialNumber;
+        pluginStorage()->setValue("localSerialNumber", m_localSerialNumber);
+    }
+
+    qCInfo(dcSma()) << "Using local serial number" << m_localSerialNumber;
+    return m_localSerialNumber;
 }
 
 bool IntegrationPluginSma::isModbusValueValid(quint32 value)

@@ -48,7 +48,7 @@ public:
     };
     Q_ENUM(DeviceType)
 
-    explicit SpeedwireInterface(bool multicast, QObject *parent = nullptr);
+    explicit SpeedwireInterface(bool multicast, quint32 sourceSerialNumber, QObject *parent = nullptr);
     ~SpeedwireInterface();
 
     bool initialize(const QHostAddress &address = QHostAddress());
@@ -70,14 +70,11 @@ signals:
 private:
     QUdpSocket *m_socket = nullptr;
     QHostAddress m_address;
-    quint16 m_port = Speedwire::port();
-    QHostAddress m_multicastAddress = Speedwire::multicastAddress();
     bool m_multicast = false;
     bool m_initialized = false;
 
     // Requester
-    quint16 m_sourceModelId = 0x007d;
-    quint32 m_sourceSerialNumber = 0x3a28be52;
+    quint32 m_sourceSerialNumber = 0;
 
 private slots:
     void readPendingDatagrams();

@@ -80,12 +80,17 @@ private:
     QHash<Thing *, SpeedwireInverter *> m_speedwireInverters;
     QHash<Thing *, SmaInverterModbusTcpConnection *> m_modbusInverters;
 
+    quint32 m_localSerialNumber = 0;
+
     // Shared interface accross meters
     SpeedwireInterface *m_multicastInterface = nullptr;
 
     void markSpeedwireMeterAsDisconnected(Thing *thing);
     void markSpeedwireInverterAsDisconnected(Thing *thing);
+    void markSpeedwireBatteryAsDisconnected(Thing *thing);
     void markModbusInverterAsDisconnected(Thing *thing);
+
+    quint64 getLocalSerialNumber();
 
     // Sma modbus data validation
     bool isModbusValueValid(quint32 value);

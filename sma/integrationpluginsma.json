@@ -88,7 +88,7 @@
                     "name": "speedwireMeter",
                     "displayName": "SMA Energy Meter",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": [ "energymeter" ],
+                    "interfaces": [ "energymeter", "connectable"],
                     "paramTypes": [
                         {
                             "id": "7c81a0c5-9bc6-43bb-a01a-4de5fe656bba",
@@ -286,7 +286,7 @@
                     "displayName": "SMA Inverter",
                     "createMethods": ["discovery", "user"],
                     "setupMethod": "EnterPin",
-                    "interfaces": [ "solarinverter" ],
+                    "interfaces": [ "solarinverter", "connectable"],
                     "paramTypes": [
                         {
                             "id": "c8098d53-69eb-4d0b-9f07-e43c4a0ea9a9",
@@ -444,6 +444,91 @@
                             "displayName": "Firmware version",
                             "type": "QString",
                             "defaultValue": ""
+                        }
+                    ]
+                },
+                {
+                    "id": "b459dad2-f78b-4a87-a7f3-22f3147b83d8",
+                    "name": "speedwireBattery",
+                    "displayName": "SMA Battery",
+                    "createMethods": ["auto"],
+                    "setupMethod": "JustAdd",
+                    "interfaces": [ "energystorage", "connectable"],
+                    "paramTypes": [ ],
+                    "stateTypes": [
+                        {
+                            "id": "7f242169-c01a-4c9a-ac71-4f9fa5409875",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "d2144cad-e507-433b-a9d3-2ab9cf0c1014",
+                            "name": "voltage",
+                            "displayName": "Voltage",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "541c110d-2f56-44bb-8f7e-de55759b942d",
+                            "name": "current",
+                            "displayName": "Current",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "6a146a40-84da-4392-8466-4176b21280d2",
+                            "name": "temperature",
+                            "displayName": "Temperature",
+                            "type": "double",
+                            "unit": "DegreeCelsius",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "f0f69109-83a4-4b2a-9e16-66aa33c2e169",
+                            "name": "currentPower",
+                            "displayName": "Current power",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "38a413cd-3d09-482d-8d25-b602db3b6540",
+                            "name": "capacity",
+                            "displayName": "Available energy",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "d815aedf-e836-4274-9b51-2f0128420c46",
+                            "name": "batteryCritical",
+                            "displayName": "Battery critical",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "ec534954-8ee4-46f4-94b6-b48b375b1d7d",
+                            "name": "batteryLevel",
+                            "displayName": "Battery level",
+                            "type": "int",
+                            "unit": "Percentage",
+                            "minValue": 0,
+                            "maxValue": 100,
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "93310fa3-8237-423b-9062-62e0626e8c70",
+                            "name": "chargingState",
+                            "displayName": "Charging state",
+                            "type": "QString",
+                            "possibleValues": ["idle", "charging", "discharging"],
+                            "defaultValue": "idle"
                         }
                     ]
                 },
