@@ -130,6 +130,10 @@ bool SunSpecConnection::discoveryRunning() const
 
 bool SunSpecConnection::connectDevice()
 {
+    m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkPortParameter, m_port);
+    m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkAddressParameter, m_hostAddress.toString());
+    m_modbusTcpClient->setTimeout(2000);
+    m_modbusTcpClient->setNumberOfRetries(3);
     qCDebug(dcSunSpec()) << "Connecting" << this << "...";
     return m_modbusTcpClient->connectDevice();
 }
@@ -142,15 +146,8 @@ void SunSpecConnection::disconnectDevice()
 
 bool SunSpecConnection::reconnectDevice()
 {
-    // Recreate the entire connection so we clean up also any pending replies
-    qCDebug(dcSunSpec()) << "Reconnecting" << this << "...";
-    if (m_modbusTcpClient) {
-        m_modbusTcpClient->disconnectDevice();
-        delete  m_modbusTcpClient;
-        m_modbusTcpClient = nullptr;
-    }
-
-    createConnection();
+    qCWarning(dcSunSpec()) << "Reconnecting" << this << "...";
+    m_modbusTcpClient->disconnectDevice();
     return connectDevice();
 }
 
@@ -166,9 +163,6 @@ QList<SunSpecModel *> SunSpecConnection::models() const
 
 QModbusReply *SunSpecConnection::sendReadRequest(const QModbusDataUnit &read, int serverAddress)
 {
-    if (!m_modbusTcpClient)
-        return nullptr;
-
     QModbusReply *reply = m_modbusTcpClient->sendReadRequest(read, serverAddress);
     monitorTimoutErrors(reply);
     return reply;
@@ -176,9 +170,6 @@ QModbusReply *SunSpecConnection::sendReadRequest(const QModbusDataUnit &read, in
 
 QModbusReply *SunSpecConnection::sendWriteRequest(const QModbusDataUnit &write, int serverAddress)
 {
-    if (!m_modbusTcpClient)
-        return nullptr;
-
     QModbusReply *reply = m_modbusTcpClient->sendWriteRequest(write, serverAddress);
     monitorTimoutErrors(reply);
     return reply;
@@ -186,9 +177,6 @@ QModbusReply *SunSpecConnection::sendWriteRequest(const QModbusDataUnit &write, 
 
 QModbusReply *SunSpecConnection::sendRawRequest(const QModbusRequest &request, int serverAddress)
 {
-    if (!m_modbusTcpClient)
-        return nullptr;
-
     QModbusReply *reply = m_modbusTcpClient->sendRawRequest(request, serverAddress);
     monitorTimoutErrors(reply);
     return reply;
