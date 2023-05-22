@@ -134,6 +134,31 @@
                             "cached": false
                         },
                         {
+                            "id": "fed5a1ba-48f5-41ef-98f7-9356bcae7612",
+                            "name": "pluggedIn",
+                            "displayName": "Plugged in",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "982af18d-dbfb-4dd8-b5b3-4d22c64642a6",
+                            "name": "charging",
+                            "displayName": "Charging",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "05c095b6-2395-4bbf-8d14-a77576ce7717",
+                            "name": "phaseCount",
+                            "displayName": "Connected phases",
+                            "type": "uint",
+                            "minValue": 1,
+                            "maxValue": 3,
+                            "defaultValue": 1
+                        },
+                        {
                             "id": "96b9c121-3caf-44fe-8380-483b9b40dbd9",
                             "name": "currentPower",
                             "displayName": "Active power",
@@ -147,7 +172,15 @@
                             "id": "3d1384fc-8b46-42b0-b043-23279d8c7665",
                             "name": "totalEnergyConsumed",
                             "displayName": "Total consumed energy",
-                            "displayNameEvent": "Total consumed energy changed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0.0,
+                            "cached": true
+                        },
+                        {
+                            "id": "c5882da3-963b-4cb3-ba1a-44d16d219e7e",
+                            "name": "sessionEnergy",
+                            "displayName": "Session energy",
                             "type": "double",
                             "unit": "KiloWattHour",
                             "defaultValue": 0.0,
