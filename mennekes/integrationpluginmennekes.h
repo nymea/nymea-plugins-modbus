@@ -39,6 +39,7 @@
 
 #include "amtronecumodbustcpconnection.h"
 #include "amtronhcc3modbustcpconnection.h"
+#include "amtroncompact20modbusrtuconnection.h"
 
 class IntegrationPluginMennekes: public IntegrationPlugin
 {
@@ -58,16 +59,19 @@ public:
 
 private slots:
     void updateECUPhaseCount(Thing *thing);
+    void updateCompact20PhaseCount(Thing *thing);
 
 private:
     void setupAmtronECUConnection(ThingSetupInfo *info);
     void setupAmtronHCC3Connection(ThingSetupInfo *info);
+    void setupAmtronCompact20Connection(ThingSetupInfo *info);
 
     bool ensureAmtronECUVersion(AmtronECUModbusTcpConnection *connection, const QString &version);
 
     PluginTimer *m_pluginTimer = nullptr;
     QHash<Thing *, AmtronECUModbusTcpConnection *> m_amtronECUConnections;
     QHash<Thing *, AmtronHCC3ModbusTcpConnection *> m_amtronHCC3Connections;
+    QHash<Thing *, AmtronCompact20ModbusRtuConnection *> m_amtronCompact20Connections;
     QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
 
 };
