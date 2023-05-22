@@ -398,7 +398,7 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
                 pluginStorage()->remove("");
                 pluginStorage()->endGroup();
 
-                delete inverter;
+                inverter->deleteLater();
                 info->finish(Thing::ThingErrorAuthenticationFailure, QT_TR_NOOP("Failed to log in with the given password. Please try again."));
                 return;
             }
