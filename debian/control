@@ -258,6 +258,17 @@ Description: nymea integration plugin for PhoenixConnect wallboxes
  This package contains the nymea integration plugin for wallboxes made
  by PhonenixConnect and rebranded as Wallbe, Compleo and Scapo.
 
+
+Package: nymea-plugin-vestel
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for Vestel wallboxes
+ This package contains the nymea integration plugin for wallboxes made
+ by Vestel.
+
+
 Package: nymea-plugin-wattsonic
 Architecture: any
 Section: libs
@@ -266,6 +277,7 @@ Depends: ${shlibs:Depends},
 Description: nymea integration plugin for Wattsonic hybrid inverters
  This package contains the nymea integration plugin for hybrid inverters made
  by Wattsonic.
+
 
 Package: nymea-plugin-webasto
 Architecture: any

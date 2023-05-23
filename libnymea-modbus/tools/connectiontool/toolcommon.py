@@ -219,6 +219,12 @@ def getCppDataType(registerDefinition, rawType = False):
     if registerDefinition['type'] == 'string':
         return 'QString'
 
+    if registerDefinition['type'] == 'bytearray':
+        return 'QByteArray'
+
+    if registerDefinition['type'] == 'raw':
+        return 'QVector<quint16>'
+
 
 def getConversionToValueMethod(registerDefinition):
     # Handle enums
@@ -335,6 +341,10 @@ def getValueConversionMethod(registerDefinition):
         return ('ModbusDataUtils::convertToFloat64(values, m_endianness)')
     elif registerDefinition['type'] == 'string':
         return ('ModbusDataUtils::convertToString(values, m_stringEndianness)')
+    elif registerDefinition['type'] == 'bytearray':
+        return ('ModbusDataUtils::convertToByteArray(values)')
+    elif registerDefinition['type'] == 'raw':
+        return ('values')
 
 
 def writeBlockGetMethodDeclarations(fileDescriptor, registerDefinitions):
