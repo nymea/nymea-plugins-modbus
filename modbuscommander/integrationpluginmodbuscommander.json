@@ -204,7 +204,7 @@
                         },
                         {
                             "id": "eabe2d1b-abe5-4063-adab-3cdd8500b286",
-                            "name": "Value",
+                            "name": "value",
                             "displayName": "Value",
                             "type": "int",
                             "defaultValue": 0
