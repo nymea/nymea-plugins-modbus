@@ -626,12 +626,16 @@ void IntegrationPluginSunSpec::processDiscoveryResult(Thing *thing, SunSpecConne
     //  - Some SunSpec device seem to communicate different model id depending on the startup phase
     //    i.e. they communicate a SinglePhase Meter on register x, few mnutes later it is a 3 phase meter on x
     // This code should handle such weird setups...
+
+    if (connection->models().isEmpty())
+        return;
+
     foreach (Thing *child, myThings().filterByParentId(thing->id())) {
-        if (!m_modelIdParamTypeIds.contains(child->thingClassId()) || connection->models().isEmpty())
+        if (!m_modelIdParamTypeIds.contains(child->thingClassId()) || !m_modbusAddressParamTypeIds.contains(child->thingClassId()))
             continue;
 
-        uint childModelId = child->paramValue(m_modelIdParamTypeIds.value(thing->thingClassId())).toUInt();
-        uint childModbusAddress = child->paramValue(m_modbusAddressParamTypeIds.value(thing->thingClassId())).toUInt();
+        uint childModelId = child->paramValue(m_modelIdParamTypeIds.value(child->thingClassId())).toUInt();
+        uint childModbusAddress = child->paramValue(m_modbusAddressParamTypeIds.value(child->thingClassId())).toUInt();
 
         bool modelFoundForChild = false;
         foreach (SunSpecModel *model, connection->models()) {
