@@ -256,11 +256,12 @@ void IntegrationPluginSma::confirmPairing(ThingPairingInfo *info, const QString 
         }
 
         // Init with the default password
-        QString password = "0000";
+        QString password;
         if (!secret.isEmpty()) {
             qCDebug(dcSma()) << "Pairing: Using password" << secret;
             password = secret;
         } else {
+            //password = "0000";
             qCDebug(dcSma()) << "Pairing: The given password is empty. Using default password" << password;
         }
 
