@@ -133,7 +133,13 @@ void IntegrationPluginSunSpec::discoverThings(ThingDiscoveryInfo *info)
         return;
     }
 
-    SunSpecDiscovery *discovery = new SunSpecDiscovery(hardwareManager()->networkDeviceDiscovery(), 1, info);
+    QList<quint16> slaveIds = {1, 2};
+    SunSpecDataPoint::ByteOrder byteOrder = SunSpecDataPoint::ByteOrderLittleEndian;
+    if (info->thingClassId() == solarEdgeConnectionThingClassId) {
+        byteOrder = SunSpecDataPoint::ByteOrderBigEndian;
+    }
+
+    SunSpecDiscovery *discovery = new SunSpecDiscovery(hardwareManager()->networkDeviceDiscovery(), slaveIds, byteOrder, info);
     // Note: we could add here more
     connect(discovery, &SunSpecDiscovery::discoveryFinished, info, [=](){
         foreach (const SunSpecDiscovery::Result &result, discovery->results()) {
@@ -189,6 +195,7 @@ void IntegrationPluginSunSpec::discoverThings(ThingDiscoveryInfo *info)
             ParamList params;
             params << Param(m_connectionPortParamTypeIds.value(info->thingClassId()), result.port);
             params << Param(m_connectionMacAddressParamTypeIds.value(info->thingClassId()), result.networkDeviceInfo.macAddress());
+            params << Param(m_connectionSlaveIdParamTypeIds.value(info->thingClassId()), result.slaveId);
             descriptor.setParams(params);
             info->addThingDescriptor(descriptor);
         }

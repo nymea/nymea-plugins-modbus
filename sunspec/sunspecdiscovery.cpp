@@ -34,10 +34,11 @@
 #include <models/sunspecmodelfactory.h>
 #include <models/sunspeccommonmodel.h>
 
-SunSpecDiscovery::SunSpecDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint16 modbusAddress, QObject *parent)
+SunSpecDiscovery::SunSpecDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, const QList<quint16> &slaveIds, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent)
     : QObject{parent},
       m_networkDeviceDiscovery{networkDeviceDiscovery},
-      m_modbusAddress{modbusAddress}
+      m_slaveIds{slaveIds},
+      m_byteOrder{byteOrder}
 {
     m_scanPorts.append(502);
     m_scanPorts.append(1502);
@@ -79,74 +80,98 @@ void SunSpecDiscovery::startDiscovery()
     });
 }
 
+void SunSpecDiscovery::testNextConnection(const QHostAddress &address)
+{
+    if (!m_pendingConnectionAttempts.contains(address))
+        return;
+
+    SunSpecConnection *connection = m_pendingConnectionAttempts[address].dequeue();
+    if (m_pendingConnectionAttempts.value(address).isEmpty())
+        m_pendingConnectionAttempts.remove(address);
+
+    qCDebug(dcSunSpec()) << "Discovery: Start searching on" << QString("%1:%2").arg(address.toString()).arg(connection->port()) << "slave ID:" << connection->slaveId();
+    // Try to connect, maybe it works, maybe not...
+    if (!connection->connectDevice()) {
+        qCDebug(dcSunSpec()) << "Discovery: Failed to connect to" << QString("%1:%2").arg(address.toString()).arg(connection->port()) << "slave ID:" << connection->slaveId() << "Continue...";;
+        cleanupConnection(connection);
+    }
+}
+
 void SunSpecDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo)
 {
-    // Create a sunspec connection and try to initialize it (read models).
-    if (m_verifiedNetworkDeviceInfos.contains(networkDeviceInfo))
-        return;
+    // Create a connection queue for this network device
+
+    QQueue<SunSpecConnection *> connectionQueue;
 
     // Check all ports for this host
     foreach (quint16 port, m_scanPorts) {
-        SunSpecConnection *connection = new SunSpecConnection(networkDeviceInfo.address(), port, m_modbusAddress, this);
-        m_connections.append(connection);
-        m_verifiedNetworkDeviceInfos.append(networkDeviceInfo);
 
-        connect(connection, &SunSpecConnection::connectedChanged, this, [=](bool connected){
-            if (!connected) {
-                // Disconnected ... done with this connection
-                cleanupConnection(connection);
-                return;
-            }
+        foreach (quint16 slaveId, m_slaveIds) {
 
-            // Modbus TCP connected, try to discovery sunspec models...
-            connect(connection, &SunSpecConnection::discoveryFinished, this, [=](bool success){
-                if (!success) {
-                    qCDebug(dcSunSpec()) << "Discovery: SunSpec discovery failed on" << networkDeviceInfo.address().toString() << "Continue...";;
+            SunSpecConnection *connection = new SunSpecConnection(networkDeviceInfo.address(), port, slaveId, m_byteOrder, this);
+            connection->setNumberOfRetries(1);
+            connection->setTimeout(500);
+            m_connections.append(connection);
+            connectionQueue.enqueue(connection);
+
+            connect(connection, &SunSpecConnection::connectedChanged, this, [=](bool connected){
+                if (!connected) {
+                    // Disconnected ... done with this connection
                     cleanupConnection(connection);
                     return;
                 }
 
-                // Success, we found some sunspec models here, let's read some infomation from the models
+                // Modbus TCP connected, try to discovery sunspec models...
+                connect(connection, &SunSpecConnection::discoveryFinished, this, [=](bool success){
+                    if (!success) {
+                        qCDebug(dcSunSpec()) << "Discovery: SunSpec discovery failed on" << QString("%1:%2").arg(networkDeviceInfo.address().toString()).arg(port) << "slave ID:" << slaveId << "Continue...";;
+                        cleanupConnection(connection);
+                        return;
+                    }
 
-                Result result;
-                result.networkDeviceInfo = networkDeviceInfo;
-                result.port = connection->port();
+                    // Success, we found some sunspec models here, let's read some infomation from the models
 
-                qCDebug(dcSunSpec()) << "Discovery: --> Found SunSpec devices on" << result.networkDeviceInfo << "port" << result.port;
-                foreach (SunSpecModel *model, connection->models()) {
-                    if (model->modelId() == SunSpecModelFactory::ModelIdCommon) {
-                        SunSpecCommonModel *commonModel = qobject_cast<SunSpecCommonModel *>(model);
-                        QString manufacturer = commonModel->manufacturer();
-                        if (!manufacturer.isEmpty() && !result.modelManufacturers.contains(manufacturer)) {
-                            result.modelManufacturers.append(manufacturer);
+                    Result result;
+                    result.networkDeviceInfo = networkDeviceInfo;
+                    result.port = connection->port();
+                    result.slaveId = connection->slaveId();
+
+                    qCDebug(dcSunSpec()) << "Discovery: --> Found SunSpec devices on" << result.networkDeviceInfo << "port" << result.port << "slave ID:" << result.slaveId;
+                    foreach (SunSpecModel *model, connection->models()) {
+                        if (model->modelId() == SunSpecModelFactory::ModelIdCommon) {
+                            SunSpecCommonModel *commonModel = qobject_cast<SunSpecCommonModel *>(model);
+                            QString manufacturer = commonModel->manufacturer();
+                            if (!manufacturer.isEmpty() && !result.modelManufacturers.contains(manufacturer)) {
+                                result.modelManufacturers.append(manufacturer);
+                            }
                         }
                     }
+
+                    m_results.append(result);
+
+                    // Done with this connection
+                    cleanupConnection(connection);
+                });
+
+                // Run SunSpec discovery on connection...
+                if (!connection->startDiscovery()) {
+                    qCDebug(dcSunSpec()) << "Discovery: Unable to discover SunSpec data on connection" << QString("%1:%2").arg(networkDeviceInfo.address().toString()).arg(port) << "slave ID:" << slaveId << "Continue...";;
+                    cleanupConnection(connection);
                 }
-
-                m_results.append(result);
-
-                // Done with this connection
-                cleanupConnection(connection);
             });
 
-            // Run SunSPec discovery on connection...
-            if (!connection->startDiscovery()) {
-                qCDebug(dcSunSpec()) << "Discovery: Unable to discover SunSpec data on connection" << networkDeviceInfo.address().toString() << "Continue...";;
-                cleanupConnection(connection);
-            }
-        });
-
-        // If we get any error...skip this host...
-        connect(connection->modbusTcpClient(), &QModbusTcpClient::errorOccurred, this, [=](QModbusDevice::Error error){
-            if (error != QModbusDevice::NoError) {
-                qCDebug(dcSunSpec()) << "Discovery: Connection error on" << networkDeviceInfo.address().toString() << "Continue...";;
-                cleanupConnection(connection);
-            }
-        });
-
-        // Try to connect, maybe it works, maybe not...
-        connection->connectDevice();
+            // If we get any error...skip this host...
+            connect(connection->modbusTcpClient(), &QModbusTcpClient::errorOccurred, this, [=](QModbusDevice::Error error){
+                if (error != QModbusDevice::NoError) {
+                    qCDebug(dcSunSpec()) << "Discovery: Connection error on" << QString("%1:%2").arg(networkDeviceInfo.address().toString()).arg(port) << "slave ID:" << slaveId << "Continue...";;
+                    cleanupConnection(connection);
+                }
+            });
+        }
     }
+
+    m_pendingConnectionAttempts[networkDeviceInfo.address()] = connectionQueue;
+    testNextConnection(networkDeviceInfo.address());
 }
 
 void SunSpecDiscovery::cleanupConnection(SunSpecConnection *connection)
@@ -154,6 +179,8 @@ void SunSpecDiscovery::cleanupConnection(SunSpecConnection *connection)
     m_connections.removeAll(connection);
     connection->disconnectDevice();
     connection->deleteLater();
+
+    testNextConnection(connection->hostAddress());
 }
 
 void SunSpecDiscovery::finishDiscovery()
