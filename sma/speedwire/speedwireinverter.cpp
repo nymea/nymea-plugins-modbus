@@ -632,8 +632,15 @@ void SpeedwireInverter::processAcPowerResponse(const QByteArray &response)
     // 01 4246 40 77fbba61 23000000 23000000 23000000 23000000 01000000
     // 00000000
 
+
+    // 0a000000 0c000000
+    // 09 4046 40 ec767864 be050000 be050000 be050000 be050000 01000000
+    // 09 4146 40 ec767864 c6050000 c6050000 c6050000 c6050000 01000000
+    // 09 4246 40 ec767864 c8050000 c8050000 c8050000 c8050000 01000000
+    // 00000000
+
     // 40464001
-    qCDebug(dcSma()) << "Inverter: Process AC power query response"; // << response.toHex();
+    qCDebug(dcSma()) << "Inverter: Process AC power query response" << response.toHex();
     QDataStream stream(response);
     stream.setByteOrder(QDataStream::LittleEndian);
     quint32 firstWord, secondWord;
@@ -654,23 +661,22 @@ void SpeedwireInverter::processAcPowerResponse(const QByteArray &response)
         // Unknown
         stream >> measurementType;
 
-        quint8 measurmentNumber = static_cast<quint8>(measurementId & 0xff);
         measurementId = measurementId & 0x00ffff00;
 
         // Read measurent lines
-        if (measurementId == 0x464000 && measurmentNumber == 0x01) {
+        if (measurementId == 0x464000) {
             quint32 powerAcPhase1;
             stream >> powerAcPhase1;
             m_powerAcPhase1 = readValue(powerAcPhase1, 1000.0);
             qCDebug(dcSma()) << "Inverter: Power AC phase 1" << m_powerAcPhase1 << "W";
             readUntilEndOfMeasurement(stream);
-        } else if (measurementId == 0x464100 && measurmentNumber == 0x01) {
+        } else if (measurementId == 0x464100) {
             quint32 powerAcPhase2;
             stream >> powerAcPhase2;
             m_powerAcPhase2 = readValue(powerAcPhase2, 1000.0);
             qCDebug(dcSma()) << "Inverter: Power AC phase 2" << m_powerAcPhase2 << "W";
             readUntilEndOfMeasurement(stream);
-        } else if (measurementId == 0x464200 && measurmentNumber == 0x01) {
+        } else if (measurementId == 0x464200) {
             quint32 powerAcPhase3;
             stream >> powerAcPhase3;
             m_powerAcPhase3 = readValue(powerAcPhase3, 1000.0);
@@ -703,7 +709,7 @@ void SpeedwireInverter::processAcVoltageCurrentResponse(const QByteArray &respon
     // 01524600 c1f0ba61 00000000 00000000 00000000 00000000 01000000
     // 00000000
 
-    qCDebug(dcSma()) << "Inverter: Process AC voltage/current query response"; // << response.toHex();
+    qCDebug(dcSma()) << "Inverter: Process AC voltage/current query response" << response.toHex();
     QDataStream stream(response);
     stream.setByteOrder(QDataStream::LittleEndian);
     quint32 firstWord, secondWord;
@@ -724,41 +730,40 @@ void SpeedwireInverter::processAcVoltageCurrentResponse(const QByteArray &respon
         // Unknown
         stream >> measurementType;
 
-        quint8 measurmentNumber = static_cast<quint8>(measurementId & 0xff);
         measurementId = measurementId & 0x00ffff00;
 
         // Read measurent lines
-        if (measurementId == 0x464800 && measurmentNumber == 0x01) {
+        if (measurementId == 0x464800) {
             quint32 voltageAcPhase1;
             stream >> voltageAcPhase1;
             m_voltageAcPhase1 = readValue(voltageAcPhase1, 100.0);
             qCDebug(dcSma()) << "Inverter: Voltage AC phase 1" << m_voltageAcPhase1 << "V";
             readUntilEndOfMeasurement(stream);
-        } else if (measurementId == 0x464900 && measurmentNumber == 0x01) {
+        } else if (measurementId == 0x464900) {
             quint32 voltageAcPhase2;
             stream >> voltageAcPhase2;
             m_voltageAcPhase2 = readValue(voltageAcPhase2, 100.0);
             qCDebug(dcSma()) << "Inverter: Voltage AC phase 2" << m_voltageAcPhase2 << "V";
             readUntilEndOfMeasurement(stream);
-        } else if (measurementId == 0x464a00 && measurmentNumber == 0x01) {
+        } else if (measurementId == 0x464a00) {
             quint32 voltageAcPhase3;
             stream >> voltageAcPhase3;
             m_voltageAcPhase3 = readValue(voltageAcPhase3, 100.0);
             qCDebug(dcSma()) << "Inverter: Voltage AC phase 3" << m_voltageAcPhase3 << "V";
             readUntilEndOfMeasurement(stream);
-        } else if (measurementId == 0x465000 && measurmentNumber == 0x01) {
+        } else if (measurementId == 0x465000) {
             quint32 currentAcPhase1;
             stream >> currentAcPhase1;
             m_currentAcPhase1 = readValue(currentAcPhase1, 1000.0);
             qCDebug(dcSma()) << "Inverter: Current AC phase 1" << m_currentAcPhase1 << "A";
             readUntilEndOfMeasurement(stream);
-        } else if (measurementId == 0x465100 && measurmentNumber == 0x01) {
+        } else if (measurementId == 0x465100) {
             quint32 currentAcPhase2;
             stream >> currentAcPhase2;
             m_currentAcPhase2 = readValue(currentAcPhase2, 1000.0);
             qCDebug(dcSma()) << "Inverter: Current AC phase 2" << m_currentAcPhase2 << "A";
             readUntilEndOfMeasurement(stream);
-        } else if (measurementId == 0x465200 && measurmentNumber == 0x01) {
+        } else if (measurementId == 0x465200) {
             quint32 currentAcPhase3;
             stream >> currentAcPhase3;
             m_currentAcPhase3 = readValue(currentAcPhase3, 1000.0);
@@ -794,11 +799,10 @@ void SpeedwireInverter::processAcTotalPowerResponse(const QByteArray &response)
         // Unknown
         stream >> measurementType;
 
-        quint8 measurmentNumber = static_cast<quint8>(measurementId & 0xff);
         measurementId = measurementId & 0x00ffff00;
 
         // Read measurent lines
-        if (measurementId == 0x263f00 && measurmentNumber == 0x01) {
+        if (measurementId == 0x263f00) {
             quint32 totalAcPower;
             stream >> totalAcPower;
             m_totalAcPower = readValue(totalAcPower);
@@ -807,7 +811,6 @@ void SpeedwireInverter::processAcTotalPowerResponse(const QByteArray &response)
         }
     }
 }
-
 
 void SpeedwireInverter::processDcPowerResponse(const QByteArray &response)
 {
@@ -982,11 +985,10 @@ void SpeedwireInverter::processGridFrequencyResponse(const QByteArray &response)
         // Unknown
         stream >> measurementType;
 
-        quint8 measurmentNumber = static_cast<quint8>(measurementId & 0xff);
         measurementId = measurementId & 0x00ffff00;
 
         // Read measurent lines
-        if (measurementId == 0x465700 && measurmentNumber == 0x01) {
+        if (measurementId == 0x465700) {
             quint32 frequency;
             stream >> frequency;
             m_gridFrequency = readValue(frequency, 100.0);
@@ -1059,7 +1061,7 @@ void SpeedwireInverter::processBatteryInfoResponse(const QByteArray &response)
             qint32 batteryCurrent;
             stream >> batteryCurrent;
             m_batteryCurrent = readValue(batteryCurrent, 1000.0);
-            qCDebug(dcSma()) << "Battery: Current" << m_batteryCurrent << "A";
+            qCDebug(dcSma()) << "Battery: Current" << batteryCurrent << m_batteryCurrent << "A";
             readUntilEndOfMeasurement(stream);
         } else {
             quint32 unknwonValue;
@@ -1141,6 +1143,14 @@ void SpeedwireInverter::readUntilEndOfMeasurement(QDataStream &stream)
 double SpeedwireInverter::readValue(quint32 value, double divisor)
 {
     if (value == 0x80000000 || value == 0xffffffff)
+        return 0;
+
+    return value / divisor;
+}
+
+double SpeedwireInverter::readValue(qint32 value, double divisor)
+{
+    if (static_cast<quint32>(value) == 0x80000000 || static_cast<quint32>(value) == 0xffffffff)
         return 0;
 
     return value / divisor;
@@ -1299,7 +1309,7 @@ void SpeedwireInverter::setState(State state)
             emit loginFinished(true);
 
             qCDebug(dcSma()) << "Inverter: Query request finished successfully" << reply->request().command();
-            processAcPowerResponse(reply->responseData());
+            processAcPowerResponse(reply->responsePayload());
 
 
             if (m_deviceInformationFetched) {

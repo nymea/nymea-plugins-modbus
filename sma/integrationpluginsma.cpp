@@ -255,19 +255,9 @@ void IntegrationPluginSma::confirmPairing(ThingPairingInfo *info, const QString 
             return;
         }
 
-        // Init with the default password
-        QString password;
-        if (!secret.isEmpty()) {
-            qCDebug(dcSma()) << "Pairing: Using password" << secret;
-            password = secret;
-        } else {
-            //password = "0000";
-            qCDebug(dcSma()) << "Pairing: The given password is empty. Using default password" << password;
-        }
-
         // Just store details, we'll test the login in setupDevice
         pluginStorage()->beginGroup(info->thingId().toString());
-        pluginStorage()->setValue("password", password);
+        pluginStorage()->setValue("password", secret);
         pluginStorage()->endGroup();
 
         info->finish(Thing::ThingErrorNoError);
@@ -386,7 +376,7 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
 
         QString password;
         pluginStorage()->beginGroup(info->thing()->id().toString());
-        password = pluginStorage()->value("password", "0000").toString();
+        password = pluginStorage()->value("password").toString();
         pluginStorage()->endGroup();
 
         // Connection exists only as long info exists
@@ -456,9 +446,8 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
             // First check if we already set up a battery for this inverter
             Things childThings = myThings().filterByParentId(thing->id()).filterByThingClassId(speedwireBatteryThingClassId);
             if (childThings.isEmpty()) {
-                // FIXME: re-enable autosetup once verified to be working as expected
                 // Autocreate battery
-                // emit autoThingsAppeared(ThingDescriptors() << ThingDescriptor(speedwireBatteryThingClassId, "SMA Battery", QString(), thing->id()));
+                emit autoThingsAppeared(ThingDescriptors() << ThingDescriptor(speedwireBatteryThingClassId, "SMA Battery", QString(), thing->id()));
             } else {
                 // We can only have one battery as a child
                 Thing *batteryThing = childThings.first();
@@ -469,7 +458,7 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
                 batteryThing->setStateValue(speedwireBatteryVoltageStateTypeId, inverter->batteryVoltage());
                 batteryThing->setStateValue(speedwireBatteryCurrentStateTypeId, inverter->batteryCurrent());
 
-                double batteryPower = inverter->batteryVoltage() * inverter->batteryCurrent(); // P = U * I
+                double batteryPower = -1 * inverter->batteryVoltage() * inverter->batteryCurrent(); // P = U * I
                 qCDebug(dcSma()) << "Battery values updated for" << batteryThing->name() << batteryPower << "W";
                 batteryThing->setStateValue(speedwireBatteryCurrentPowerStateTypeId, batteryPower);
                 if (batteryPower == 0) {

@@ -209,6 +209,7 @@ private:
 
     void readUntilEndOfMeasurement(QDataStream &stream);
     double readValue(quint32 value, double divisor = 1.0);
+    double readValue(qint32 value, double divisor = 1.0);
 
     void setReachable(bool reachable);
     void setBatteryAvailable(bool available);
