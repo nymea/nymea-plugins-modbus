@@ -270,3 +270,45 @@ QVector<quint16> ModbusDataUtils::convertFromFloat64(double value, ByteOrder byt
     memcpy(&rawValue, &value, sizeof(double));
     return ModbusDataUtils::convertFromUInt64(rawValue, byteOrder);
 }
+
+QString ModbusDataUtils::exceptionCodeToString(QModbusPdu::ExceptionCode exception)
+{
+    QString exceptionString;
+    switch (exception) {
+    case QModbusPdu::IllegalFunction:
+        exceptionString = "Illegal function";
+        break;
+    case QModbusPdu::IllegalDataAddress:
+        exceptionString = "Illegal data address";
+        break;
+    case QModbusPdu::IllegalDataValue:
+        exceptionString = "Illegal data value";
+        break;
+    case QModbusPdu::ServerDeviceFailure:
+        exceptionString = "Server device failure";
+        break;
+    case QModbusPdu::Acknowledge:
+        exceptionString = "Acknowledge";
+        break;
+    case QModbusPdu::ServerDeviceBusy:
+        exceptionString = "Server device busy";
+        break;
+    case QModbusPdu::NegativeAcknowledge:
+        exceptionString = "Negative acknowledge";
+        break;
+    case QModbusPdu::MemoryParityError:
+        exceptionString = "Memory parity error";
+        break;
+    case QModbusPdu::GatewayPathUnavailable:
+        exceptionString = "Gateway path unavailable";
+        break;
+    case QModbusPdu::GatewayTargetDeviceFailedToRespond:
+        exceptionString = "Gateway target device failed to respond";
+        break;
+    case QModbusPdu::ExtendedException:
+        exceptionString = "Extended exception";
+        break;
+    }
+
+    return exceptionString;
+}

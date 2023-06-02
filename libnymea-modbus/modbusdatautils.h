@@ -33,6 +33,7 @@
 
 #include <QVector>
 #include <QObject>
+#include <QModbusPdu>
 
 class ModbusDataUtils
 {
@@ -102,6 +103,8 @@ public:
     static QVector<quint16> convertFromString(const QString &value, quint16 stringLength, ByteOrder characterByteOrder = ByteOrderLittleEndian);
     static QVector<quint16> convertFromFloat32(float value, ByteOrder byteOrder = ByteOrderLittleEndian);
     static QVector<quint16> convertFromFloat64(double value, ByteOrder byteOrder = ByteOrderLittleEndian);
+
+    static QString exceptionCodeToString(QModbusPdu::ExceptionCode exception);
 };
 
 #endif // MODBUSDATAUTILS_H

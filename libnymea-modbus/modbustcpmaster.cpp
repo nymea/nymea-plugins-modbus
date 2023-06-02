@@ -100,9 +100,9 @@ bool ModbusTcpMaster::connectDevice()
         m_modbusTcpClient->setTimeout(m_timeout);
         m_modbusTcpClient->setNumberOfRetries(m_numberOfRetries);
         return m_modbusTcpClient->connectDevice();
-    } else if (m_modbusTcpClient->state() != QModbusDevice::ConnectedState) {
+    } else if (m_modbusTcpClient->state() != QModbusDevice::ConnectedState && m_modbusTcpClient->state() != QModbusDevice::ConnectingState) {
         // Restart the timer in case of connecting not finished yet or closing
-        qCDebug(dcModbusTcpMaster()) << "Starting the reconnect mechanism timer";
+        qCDebug(dcModbusTcpMaster()) << "Starting the re-connect mechanism timer";
         m_reconnectTimer->start();
     } else {
         qCWarning(dcModbusTcpMaster()) << "Connect modbus TCP device" << connectionUrl() << "called, but the socket is currently in the" << m_modbusTcpClient->state();
