@@ -52,6 +52,16 @@
                         {
                             "id": "f463f36e-69f9-4614-b690-664ce22d76e0",
                             "name": "currentPower",
+                            "displayName": "Current power",
+                            "displayNameEvent": "Current power changed",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0,
+                            "cached": true
+                        },
+                        {
+                            "id": "52a84e06-ff13-4c82-99e2-c8a2691a99d7",
+                            "name": "activePower",
                             "displayName": "Active power",
                             "displayNameEvent": "Active power changed",
                             "type": "double",
@@ -294,7 +304,7 @@
                     "displayName": "Huawei Battery",
                     "id": "40104aac-0456-475d-8bd6-18f946597d96",
                     "createMethods": ["auto"],
-                    "interfaces": [ "battery", "connectable"],
+                    "interfaces": [ "battery", "connectable", "energystorage"],
                     "paramTypes": [
                         {
                             "id": "019287a6-c593-45a8-9695-2e1ad8e81c32",

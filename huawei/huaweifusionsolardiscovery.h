@@ -41,23 +41,33 @@ class HuaweiFusionSolarDiscovery : public QObject
 {
     Q_OBJECT
 public:
-    explicit HuaweiFusionSolarDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint16 port = 502, quint16 modbusAddress = 1, QObject *parent = nullptr);
+    explicit HuaweiFusionSolarDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint16 port, const QList<quint16> &slaveIds, QObject *parent = nullptr);
+
+    typedef struct Result {
+        QString modelName;
+        QString serialNumber;
+        quint16 slaveId;
+        NetworkDeviceInfo networkDeviceInfo;
+    } Result;
 
     void startDiscovery();
 
-    NetworkDeviceInfos discoveryResults() const;
+    QList<Result> results() const;
 
 signals:
     void discoveryFinished();
 
 private:
     NetworkDeviceDiscovery *m_networkDeviceDiscovery = nullptr;
-    quint16 m_port;
-    quint16 m_modbusAddress;
-
+    quint16 m_port = 502;
+    QList<quint16> m_slaveIds;
     QDateTime m_startDateTime;
+
+    QHash<QHostAddress, QQueue<HuaweiFusionSolar *>> m_pendingConnectionAttempts;
     QList<HuaweiFusionSolar *> m_connections;
-    NetworkDeviceInfos m_discoveryResults;
+    QList<Result> m_results;
+
+    void testNextConnection(const QHostAddress &address);
 
     void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
     void cleanupConnection(HuaweiFusionSolar *connection);

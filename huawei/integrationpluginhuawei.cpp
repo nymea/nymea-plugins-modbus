@@ -50,23 +50,33 @@ void IntegrationPluginHuawei::discoverThings(ThingDiscoveryInfo *info)
         }
 
         // Create a discovery with the info as parent for auto deleting the object once the discovery info is done
-        HuaweiFusionSolarDiscovery *discovery = new HuaweiFusionSolarDiscovery(hardwareManager()->networkDeviceDiscovery(), 502, 1, info);
+        QList<quint16> slaveIds = {1, 2, 3};
+        HuaweiFusionSolarDiscovery *discovery = new HuaweiFusionSolarDiscovery(hardwareManager()->networkDeviceDiscovery(), 502, slaveIds, info);
         connect(discovery, &HuaweiFusionSolarDiscovery::discoveryFinished, info, [=](){
-            foreach (const NetworkDeviceInfo &networkDeviceInfo, discovery->discoveryResults()) {
+            foreach (const HuaweiFusionSolarDiscovery::Result &result, discovery->results()) {
 
-                ThingDescriptor descriptor(huaweiFusionSolarInverterThingClassId, QT_TR_NOOP("Huawei Solar Inverter"), networkDeviceInfo.macAddress() + " - " + networkDeviceInfo.address().toString());
+                QString name = QT_TR_NOOP("Huawei Solar Inverter");
+                if (!result.modelName.isEmpty())
+                    name = "Huawei " + result.modelName;
+
+                QString desctiption = result.networkDeviceInfo.macAddress() + " - " + result.networkDeviceInfo.address().toString();
+                if (!result.serialNumber.isEmpty()) {
+                    desctiption = "SN: " + result.serialNumber + " " + result.networkDeviceInfo.macAddress() + " - " + result.networkDeviceInfo.address().toString();
+                }
+
+                ThingDescriptor descriptor(huaweiFusionSolarInverterThingClassId, name, desctiption) ;
                 qCDebug(dcHuawei()) << "Discovered:" << descriptor.title() << descriptor.description();
 
                 // Check if we already have set up this device
-                Things existingThings = myThings().filterByParam(huaweiFusionSolarInverterThingMacAddressParamTypeId, networkDeviceInfo.macAddress());
+                Things existingThings = myThings().filterByParam(huaweiFusionSolarInverterThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
                 if (existingThings.count() == 1) {
-                    qCDebug(dcHuawei()) << "This inverter already exists in the system:" << networkDeviceInfo;
+                    qCDebug(dcHuawei()) << "This inverter already exists in the system:" << result.networkDeviceInfo;
                     descriptor.setThingId(existingThings.first()->id());
                 }
 
                 ParamList params;
-                params << Param(huaweiFusionSolarInverterThingMacAddressParamTypeId, networkDeviceInfo.macAddress());
-                // Note: if we discover also the port and modbusaddress, we must fill them in from the discovery here, for now everywhere the defaults...
+                params << Param(huaweiFusionSolarInverterThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
+                params << Param(huaweiFusionSolarInverterThingSlaveIdParamTypeId, result.slaveId);
                 descriptor.setParams(params);
                 info->addThingDescriptor(descriptor);
             }
@@ -116,7 +126,7 @@ void IntegrationPluginHuawei::setupThing(ThingSetupInfo *info)
 
         // Handle reconfigure
         if (m_connections.contains(thing))
-            delete m_connections.take(thing);
+            m_connections.take(thing)->deleteLater();
 
         if (m_monitors.contains(thing))
             hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
@@ -136,18 +146,23 @@ void IntegrationPluginHuawei::setupThing(ThingSetupInfo *info)
             hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
         });
 
+
         // Continue with setup only if we know that the network device is reachable
-        if (monitor->reachable()) {
-            setupFusionSolar(info);
+        if (info->isInitialSetup()) {
+            if (monitor->reachable()) {
+                setupFusionSolar(info);
+            } else {
+                // otherwise wait until we reach the networkdevice before setting up the device
+                qCDebug(dcHuawei()) << "Network device" << thing->name() << "is not reachable yet. Continue with the setup once reachable.";
+                connect(monitor, &NetworkDeviceMonitor::reachableChanged, info, [=](bool reachable){
+                    if (reachable) {
+                        qCDebug(dcHuawei()) << "Network device" << thing->name() << "is now reachable. Continue with the setup...";
+                        setupFusionSolar(info);
+                    }
+                });
+            }
         } else {
-            // otherwise wait until we reach the networkdevice before setting up the device
-            qCDebug(dcHuawei()) << "Network device" << thing->name() << "is not reachable yet. Continue with the setup once reachable.";
-            connect(monitor, &NetworkDeviceMonitor::reachableChanged, info, [=](bool reachable){
-                if (reachable) {
-                    qCDebug(dcHuawei()) << "Network device" << thing->name() << "is now reachable. Continue with the setup...";
-                    setupFusionSolar(info);
-                }
-            });
+            setupFusionSolar(info);
         }
 
         return;
@@ -356,11 +371,10 @@ void IntegrationPluginHuawei::postSetupThing(Thing *thing)
 {
     if (thing->thingClassId() == huaweiFusionSolarInverterThingClassId || thing->thingClassId() == huaweiRtuInverterThingClassId) {
         if (!m_pluginTimer) {
-            qCDebug(dcHuawei()) << "Starting plugin timer...";
             m_pluginTimer = hardwareManager()->pluginTimerManager()->registerTimer(2);
             connect(m_pluginTimer, &PluginTimer::timeout, this, [this] {
                 foreach(HuaweiFusionSolar *connection, m_connections) {
-                    if (connection->connected()) {
+                    if (connection->reachable()) {
                         connection->update();
                     }
                 }
@@ -370,6 +384,7 @@ void IntegrationPluginHuawei::postSetupThing(Thing *thing)
                 }
             });
 
+            qCDebug(dcHuawei()) << "Starting plugin timer...";
             m_pluginTimer->start();
         }
 
@@ -481,7 +496,11 @@ void IntegrationPluginHuawei::setupFusionSolar(ThingSetupInfo *info)
         });
 
         connect(connection, &HuaweiFusionSolar::inverterActivePowerChanged, thing, [thing](float inverterActivePower){
-            thing->setStateValue(huaweiFusionSolarInverterCurrentPowerStateTypeId, inverterActivePower * -1000.0);
+            thing->setStateValue(huaweiFusionSolarInverterActivePowerStateTypeId, inverterActivePower * -1000.0);
+        });
+
+        connect(connection, &HuaweiFusionSolar::inverterInputPowerChanged, thing, [thing](float inverterInputPower){
+            thing->setStateValue(huaweiFusionSolarInverterCurrentPowerStateTypeId, inverterInputPower * -1000.0);
         });
 
         connect(connection, &HuaweiFusionSolar::inverterDeviceStatusReadFinished, thing, [thing](HuaweiFusionSolar::InverterDeviceStatus inverterDeviceStatus){
@@ -510,25 +529,26 @@ void IntegrationPluginHuawei::setupFusionSolar(ThingSetupInfo *info)
 
         // Battery 1
         connect(connection, &HuaweiFusionSolar::lunaBattery1StatusReadFinished, thing, [this, thing](HuaweiFusionSolar::BatteryDeviceStatus lunaBattery1Status){
-            qCDebug(dcHuawei()) << "Battery 1 status changed" << lunaBattery1Status;
-            if (lunaBattery1Status != HuaweiFusionSolar::BatteryDeviceStatusOffline) {
-                // Check if w have to create the energy storage
-                Things batteryThings = myThings().filterByParentId(thing->id()).filterByThingClassId(huaweiBatteryThingClassId);
-                bool alreadySetUp = false;
-                foreach (Thing *batteryThing, batteryThings) {
-                    if (batteryThing->paramValue(huaweiBatteryThingUnitParamTypeId).toUInt() == 1) {
-                        alreadySetUp = true;
-                    }
+            qCDebug(dcHuawei()) << "Battery 1 status changed of" << thing << lunaBattery1Status;
+            Thing *batteryThing = nullptr;
+            foreach (Thing *bt, myThings().filterByParentId(thing->id()).filterByThingClassId(huaweiBatteryThingClassId)) {
+                if (bt->paramValue(huaweiBatteryThingUnitParamTypeId).toUInt() == 1) {
+                    batteryThing = bt;
+                    break;
                 }
+            }
 
-                if (!alreadySetUp) {
-                    qCDebug(dcHuawei()) << "Set up huawei energy storage 1 for" << thing;
-                    ThingDescriptor descriptor(huaweiBatteryThingClassId, "Luna 2000 Battery", QString(), thing->id());
-                    ParamList params;
-                    params.append(Param(huaweiBatteryThingUnitParamTypeId, 1));
-                    descriptor.setParams(params);
-                    emit autoThingsAppeared(ThingDescriptors() << descriptor);
-                }
+            // Check if w have to create the energy storage
+            if (lunaBattery1Status != HuaweiFusionSolar::BatteryDeviceStatusOffline && !batteryThing) {
+                qCDebug(dcHuawei()) << "Set up huawei energy storage 1 for" << thing;
+                ThingDescriptor descriptor(huaweiBatteryThingClassId, "Luna 2000 Battery 1", QString(), thing->id());
+                ParamList params;
+                params.append(Param(huaweiBatteryThingUnitParamTypeId, 1));
+                descriptor.setParams(params);
+                emit autoThingsAppeared(ThingDescriptors() << descriptor);
+            } else if (lunaBattery1Status == HuaweiFusionSolar::BatteryDeviceStatusOffline && batteryThing) {
+                qCDebug(dcHuawei()) << "Autoremove huawei energy storage 1 for" << thing << "because the battery is offline" << batteryThing;
+                emit autoThingDisappeared(batteryThing->id());
             }
         });
 
@@ -558,25 +578,27 @@ void IntegrationPluginHuawei::setupFusionSolar(ThingSetupInfo *info)
 
         // Battery 2
         connect(connection, &HuaweiFusionSolar::lunaBattery2StatusReadFinished, thing, [this, thing](HuaweiFusionSolar::BatteryDeviceStatus lunaBattery2Status){
-            qCDebug(dcHuawei()) << "Battery 2 status changed" << lunaBattery2Status;
-            if (lunaBattery2Status != HuaweiFusionSolar::BatteryDeviceStatusOffline) {
-                // Check if w have to create the energy storage
-                Things batteryThings = myThings().filterByParentId(thing->id()).filterByThingClassId(huaweiBatteryThingClassId);
-                bool alreadySetUp = false;
-                foreach (Thing *batteryThing, batteryThings) {
-                    if (batteryThing->paramValue(huaweiBatteryThingUnitParamTypeId).toUInt() == 2) {
-                        alreadySetUp = true;
-                    }
-                }
 
-                if (!alreadySetUp) {
-                    qCDebug(dcHuawei()) << "Set up huawei energy storage 2 for" << thing;
-                    ThingDescriptor descriptor(huaweiBatteryThingClassId, "Luna 2000 Battery", QString(), thing->id());
-                    ParamList params;
-                    params.append(Param(huaweiBatteryThingUnitParamTypeId, 2));
-                    descriptor.setParams(params);
-                    emit autoThingsAppeared(ThingDescriptors() << descriptor);
+            qCDebug(dcHuawei()) << "Battery 2 status changed of" << thing << lunaBattery2Status;
+            Thing *batteryThing = nullptr;
+            foreach (Thing *bt, myThings().filterByParentId(thing->id()).filterByThingClassId(huaweiBatteryThingClassId)) {
+                if (bt->paramValue(huaweiBatteryThingUnitParamTypeId).toUInt() == 2) {
+                    batteryThing = bt;
+                    break;
                 }
+            }
+
+            // Check if w have to create the energy storage
+            if (lunaBattery2Status != HuaweiFusionSolar::BatteryDeviceStatusOffline && !batteryThing) {
+                qCDebug(dcHuawei()) << "Set up huawei energy storage 2 for" << thing;
+                ThingDescriptor descriptor(huaweiBatteryThingClassId, "Luna 2000 Battery 2", QString(), thing->id());
+                ParamList params;
+                params.append(Param(huaweiBatteryThingUnitParamTypeId, 2));
+                descriptor.setParams(params);
+                emit autoThingsAppeared(ThingDescriptors() << descriptor);
+            } else if (lunaBattery2Status == HuaweiFusionSolar::BatteryDeviceStatusOffline && batteryThing) {
+                qCDebug(dcHuawei()) << "Autoremove huawei energy storage 2 for" << thing << "because the battery is offline" << batteryThing;
+                emit autoThingDisappeared(batteryThing->id());
             }
         });
 
@@ -606,7 +628,8 @@ void IntegrationPluginHuawei::setupFusionSolar(ThingSetupInfo *info)
         });
     });
 
-    connection->connectDevice();
+    if (monitor->reachable())
+        connection->connectDevice();
 }
 
 void IntegrationPluginHuawei::evaluateEnergyProducedValue(Thing *inverterThing, float energyProduced)

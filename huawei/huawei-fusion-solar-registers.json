@@ -149,8 +149,54 @@
         }
     ],
     "blocks": [
+        {
+            "id": "identifyer",
+            "readSchedule": "init",
+            "registers": [
+                {
+                    "id": "model",
+                    "address": 30000,
+                    "size": 15,
+                    "type": "string",
+                    "registerType": "holdingRegister",
+                    "description": "Model",
+                    "access": "RO"
+                },
+                {
+                    "id": "serialNumber",
+                    "address": 30015,
+                    "size": 10,
+                    "type": "string",
+                    "registerType": "holdingRegister",
+                    "description": "Serial number",
+                    "access": "RO"
+                },
+                {
+                    "id": "productNumber",
+                    "address": 30025,
+                    "size": 10,
+                    "type": "string",
+                    "registerType": "holdingRegister",
+                    "description": "Product number",
+                    "access": "RO"
+                }
+            ]
+        }
     ],
     "registers": [
+        {
+            "id": "inverterInputPower",
+            "address": 32064,
+            "size": 2,
+            "type": "int32",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "Inverter input power",
+            "unit": "kW",
+            "staticScaleFactor": -3,
+            "defaultValue": "0",
+            "access": "RO"
+        },
         {
             "id": "inverterActivePower",
             "address": 32080,
