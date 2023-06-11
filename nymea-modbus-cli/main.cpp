@@ -41,13 +41,14 @@
 #include <QModbusRtuSerialMaster>
 
 void sendRequest(quint16 modbusServerAddress, QModbusDataUnit::RegisterType registerType, quint16 registerAddress, quint16 length, const QByteArray &writeData, QModbusClient *client);
+QString exceptionCodeToString(QModbusPdu::ExceptionCode exception);
 
 int main(int argc, char *argv[])
 {
     QCoreApplication application(argc, argv);
     application.setApplicationName("nymea-modbus-cli");
     application.setOrganizationName("nymea");
-    application.setApplicationVersion("1.1.0");
+    application.setApplicationVersion("1.2.0");
 
     QString description = QString("\nTool for testing and reading Modbus TCP or RTU registers.\n\n");
     description.append(QString("Copyright %1 2016 - 2023 nymea GmbH <contact@nymea.io>\n\n").arg(QChar(0xA9)));
@@ -308,7 +309,6 @@ int main(int argc, char *argv[])
         });
 
         QObject::connect(client, &QModbusRtuSerialMaster::errorOccurred, &application, [=](QModbusDevice::Error error){
-            qWarning() << "Error occurred for modbus RTU master" << error << client->errorString();
             if (error != QModbusDevice::NoError) {
                 exit(EXIT_FAILURE);
             }
@@ -343,7 +343,12 @@ void sendRequest(quint16 modbusServerAddress, QModbusDataUnit::RegisterType regi
         QObject::connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
         QObject::connect(reply, &QModbusReply::finished, client, [=]() {
             if (reply->error() != QModbusDevice::NoError) {
-                qCritical() << "Reply finished with error:" << reply->errorString();
+                QModbusResponse response = reply->rawResult();
+                if (reply->error() == QModbusDevice::ProtocolError && response.isException()) {
+                    qCritical()  << "Modbus reply finished with error" << reply->error() << reply->errorString() << exceptionCodeToString(response.exceptionCode());
+                } else {
+                    qCritical()  << "Modbus reply finished with error" << reply->error() << reply->errorString();
+                }
                 exit(EXIT_FAILURE);
             }
 
@@ -358,7 +363,12 @@ void sendRequest(quint16 modbusServerAddress, QModbusDataUnit::RegisterType regi
         });
 
         QObject::connect(reply, &QModbusReply::errorOccurred, client, [=] (QModbusDevice::Error error){
-            qCritical() << "Modbus reply error occurred:" << error << reply->errorString();
+            QModbusResponse response = reply->rawResult();
+            if (reply->error() == QModbusDevice::ProtocolError && response.isException()) {
+                qCritical()  << "Modbus reply error occurred" << error << reply->errorString() << exceptionCodeToString(response.exceptionCode());
+            } else {
+                qCritical()  << "Modbus reply error occurred" << error << reply->errorString();
+            }
         });
     } else {
         QModbusDataUnit request = QModbusDataUnit(registerType, registerAddress, length);
@@ -383,7 +393,12 @@ void sendRequest(quint16 modbusServerAddress, QModbusDataUnit::RegisterType regi
         QObject::connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
         QObject::connect(reply, &QModbusReply::finished, client, [=]() {
             if (reply->error() != QModbusDevice::NoError) {
-                qCritical() << "Reply finished with error:" << reply->errorString();
+                QModbusResponse response = reply->rawResult();
+                if (reply->error() == QModbusDevice::ProtocolError && response.isException()) {
+                    qCritical()  << "Modbus reply finished with error" << reply->error() << reply->errorString() << exceptionCodeToString(response.exceptionCode());
+                } else {
+                    qCritical()  << "Modbus reply finished with error" << reply->error() << reply->errorString();
+                }
                 exit(EXIT_FAILURE);
             }
 
@@ -398,7 +413,54 @@ void sendRequest(quint16 modbusServerAddress, QModbusDataUnit::RegisterType regi
         });
 
         QObject::connect(reply, &QModbusReply::errorOccurred, client, [=] (QModbusDevice::Error error){
-            qCritical() << "Modbus reply error occurred:" << error << reply->errorString();
+            QModbusResponse response = reply->rawResult();
+            if (reply->error() == QModbusDevice::ProtocolError && response.isException()) {
+                qCritical()  << "Modbus reply error occurred" << error << reply->errorString() << exceptionCodeToString(response.exceptionCode());
+            } else {
+                qCritical()  << "Modbus reply error occurred" << error << reply->errorString();
+            }
         });
     }
+}
+
+QString exceptionCodeToString(QModbusPdu::ExceptionCode exception)
+{
+    QString exceptionString;
+    switch (exception) {
+    case QModbusPdu::IllegalFunction:
+        exceptionString = "Illegal function";
+        break;
+    case QModbusPdu::IllegalDataAddress:
+        exceptionString = "Illegal data address";
+        break;
+    case QModbusPdu::IllegalDataValue:
+        exceptionString = "Illegal data value";
+        break;
+    case QModbusPdu::ServerDeviceFailure:
+        exceptionString = "Server device failure";
+        break;
+    case QModbusPdu::Acknowledge:
+        exceptionString = "Acknowledge";
+        break;
+    case QModbusPdu::ServerDeviceBusy:
+        exceptionString = "Server device busy";
+        break;
+    case QModbusPdu::NegativeAcknowledge:
+        exceptionString = "Negative acknowledge";
+        break;
+    case QModbusPdu::MemoryParityError:
+        exceptionString = "Memory parity error";
+        break;
+    case QModbusPdu::GatewayPathUnavailable:
+        exceptionString = "Gateway path unavailable";
+        break;
+    case QModbusPdu::GatewayTargetDeviceFailedToRespond:
+        exceptionString = "Gateway target device failed to respond";
+        break;
+    case QModbusPdu::ExtendedException:
+        exceptionString = "Extended exception";
+        break;
+    }
+
+    return exceptionString;
 }
