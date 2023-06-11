@@ -133,7 +133,13 @@ void IntegrationPluginSunSpec::discoverThings(ThingDiscoveryInfo *info)
         return;
     }
 
-    SunSpecDiscovery *discovery = new SunSpecDiscovery(hardwareManager()->networkDeviceDiscovery(), 1, info);
+    QList<quint16> slaveIds = {1, 2};
+    SunSpecDataPoint::ByteOrder byteOrder = SunSpecDataPoint::ByteOrderLittleEndian;
+    if (info->thingClassId() == solarEdgeConnectionThingClassId) {
+        byteOrder = SunSpecDataPoint::ByteOrderBigEndian;
+    }
+
+    SunSpecDiscovery *discovery = new SunSpecDiscovery(hardwareManager()->networkDeviceDiscovery(), slaveIds, byteOrder, info);
     // Note: we could add here more
     connect(discovery, &SunSpecDiscovery::discoveryFinished, info, [=](){
         foreach (const SunSpecDiscovery::Result &result, discovery->results()) {
@@ -189,6 +195,7 @@ void IntegrationPluginSunSpec::discoverThings(ThingDiscoveryInfo *info)
             ParamList params;
             params << Param(m_connectionPortParamTypeIds.value(info->thingClassId()), result.port);
             params << Param(m_connectionMacAddressParamTypeIds.value(info->thingClassId()), result.networkDeviceInfo.macAddress());
+            params << Param(m_connectionSlaveIdParamTypeIds.value(info->thingClassId()), result.slaveId);
             descriptor.setParams(params);
             info->addThingDescriptor(descriptor);
         }
@@ -626,12 +633,16 @@ void IntegrationPluginSunSpec::processDiscoveryResult(Thing *thing, SunSpecConne
     //  - Some SunSpec device seem to communicate different model id depending on the startup phase
     //    i.e. they communicate a SinglePhase Meter on register x, few mnutes later it is a 3 phase meter on x
     // This code should handle such weird setups...
+
+    if (connection->models().isEmpty())
+        return;
+
     foreach (Thing *child, myThings().filterByParentId(thing->id())) {
-        if (!m_modelIdParamTypeIds.contains(child->thingClassId()) || connection->models().isEmpty())
+        if (!m_modelIdParamTypeIds.contains(child->thingClassId()) || !m_modbusAddressParamTypeIds.contains(child->thingClassId()))
             continue;
 
-        uint childModelId = child->paramValue(m_modelIdParamTypeIds.value(thing->thingClassId())).toUInt();
-        uint childModbusAddress = child->paramValue(m_modbusAddressParamTypeIds.value(thing->thingClassId())).toUInt();
+        uint childModelId = child->paramValue(m_modelIdParamTypeIds.value(child->thingClassId())).toUInt();
+        uint childModbusAddress = child->paramValue(m_modbusAddressParamTypeIds.value(child->thingClassId())).toUInt();
 
         bool modelFoundForChild = false;
         foreach (SunSpecModel *model, connection->models()) {

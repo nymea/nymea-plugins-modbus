@@ -31,6 +31,7 @@
 #ifndef SUNSPECDISCOVERY_H
 #define SUNSPECDISCOVERY_H
 
+#include <QQueue>
 #include <QObject>
 #include <QDateTime>
 
@@ -41,10 +42,11 @@ class SunSpecDiscovery : public QObject
 {
     Q_OBJECT
 public:
-    explicit SunSpecDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint16 modbusAddress = 1, QObject *parent = nullptr);
+    explicit SunSpecDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, const QList<quint16> &slaveIds, SunSpecDataPoint::ByteOrder byteOrder = SunSpecDataPoint::ByteOrderLittleEndian, QObject *parent = nullptr);
     typedef struct Result {
         NetworkDeviceInfo networkDeviceInfo;
         quint16 port;
+        quint16 slaveId;
         QStringList modelManufacturers;
     } Result;
 
@@ -58,15 +60,17 @@ signals:
 
 private:
     NetworkDeviceDiscovery *m_networkDeviceDiscovery = nullptr;
-    quint16 m_modbusAddress;
     QList<quint16> m_scanPorts;
+    QList<quint16> m_slaveIds;
+    SunSpecDataPoint::ByteOrder m_byteOrder;
 
     QDateTime m_startDateTime;
-
-    NetworkDeviceInfos m_verifiedNetworkDeviceInfos;
+    QHash<QHostAddress, QQueue<SunSpecConnection *>> m_pendingConnectionAttempts;
 
     QList<SunSpecConnection *> m_connections;
     QList<Result> m_results;
+
+    void testNextConnection(const QHostAddress &address);
 
     void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
     void cleanupConnection(SunSpecConnection *connection);
