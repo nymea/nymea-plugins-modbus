@@ -1,3 +1,15 @@
+nymea-plugins-modbus (1.8.1) jammy; urgency=medium
+
+  [ Michael Zanetti ]
+  * ModbusCommander: Fix value state name typo
+
+  [ Simon Stürz ]
+  * SMA: improve inverter value reading and enable battery
+  * SunSpec: Fix autoremove devices if the model does not exist any more
+  * nymea-modbus-cli: Add exception code parsing
+
+ -- jenkins <developer@nymea.io>  Sun, 11 Jun 2023 19:44:25 +0200
+
 nymea-plugins-modbus (1.8.0) jammy; urgency=medium
 
   [ Bernhard Trinnes ]
