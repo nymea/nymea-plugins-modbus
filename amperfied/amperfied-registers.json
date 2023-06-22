@@ -264,11 +264,10 @@
             "address": 258,
             "size": 1,
             "type": "uint16",
-            "readSchedule": "init",
             "registerType": "holdingRegister",
             "description": "Standby function control",
             "defaultValue": 0,
-            "access": "RW"
+            "access": "WO"
         }
     ]
 }
