@@ -305,9 +305,13 @@ void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
     if (info->thing()->thingClassId() == amtronECUThingClassId) {
         AmtronECUModbusTcpConnection *amtronECUConnection = m_amtronECUConnections.value(info->thing());
 
+
         if (info->action().actionTypeId() == amtronECUPowerActionTypeId) {
             bool power = info->action().paramValue(amtronECUPowerActionPowerParamTypeId).toBool();
-            QModbusReply *reply = amtronECUConnection->setHemsCurrentLimit(power ? info->thing()->stateValue(amtronECUMaxChargingCurrentStateTypeId).toUInt() : 0);
+            int maxChargingCurrent = info->thing()->stateValue(amtronECUMaxChargingCurrentStateTypeId).toUInt();
+            int effectiveCurrent = power ? maxChargingCurrent : 0;
+            qCInfo(dcMennekes()) << "Executing power action:" << power << "max current:" << maxChargingCurrent << "-> effective current" << effectiveCurrent;
+            QModbusReply *reply = amtronECUConnection->setHemsCurrentLimit(effectiveCurrent);
             connect(reply, &QModbusReply::finished, info, [info, reply, power](){
                 if (reply->error() == QModbusDevice::NoError) {
                     info->thing()->setStateValue(amtronECUPowerStateTypeId, power);
@@ -319,8 +323,11 @@ void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
             });
         }
         if (info->action().actionTypeId() == amtronECUMaxChargingCurrentActionTypeId) {
+            bool power = info->thing()->stateValue(amtronECUPowerStateTypeId).toBool();
             int maxChargingCurrent = info->action().paramValue(amtronECUMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toInt();
-            QModbusReply *reply = amtronECUConnection->setHemsCurrentLimit(maxChargingCurrent);
+            int effectiveCurrent = power ? maxChargingCurrent : 0;
+            qCInfo(dcMennekes()) << "Executing max current action:" << maxChargingCurrent << "Power is" << power << "-> effective:" << effectiveCurrent;
+            QModbusReply *reply = amtronECUConnection->setHemsCurrentLimit(effectiveCurrent);
             connect(reply, &QModbusReply::finished, info, [info, reply, maxChargingCurrent](){
                 if (reply->error() == QModbusDevice::NoError) {
                     info->thing()->setStateValue(amtronECUMaxChargingCurrentStateTypeId, maxChargingCurrent);
