@@ -1,0 +1,362 @@
+{
+    "className": "Wattsonic",
+    "protocol": "RTU",
+    "endianness": "BigEndian",
+    "errorLimitUntilNotReachable": 20,
+    "checkReachableRegister": "serialNumber",
+    "enums": [
+        {
+            "name": "InverterStatus",
+            "values": [
+                {
+                    "key": "Wait",
+                    "value": 0
+                },
+                {
+                    "key": "Check",
+                    "value": 1
+                },
+                {
+                    "key": "OnGrid",
+                    "value": 2
+                },
+                {
+                    "key": "Fault",
+                    "value": 3
+                },
+                {
+                    "key": "Flash",
+                    "value": 4
+                },
+                {
+                    "key": "OffGrid",
+                    "value": 5
+                }
+            ]
+        },
+        {
+            "name": "BatteryMode",
+            "values": [
+                {
+                    "key": "Discharge",
+                    "value": 0
+                },
+                {
+                    "key": "Charge",
+                    "value": 1
+                }
+            ]
+        }
+    ],
+    "blocks": [
+    ],
+    "registers": [
+        {
+            "id": "serialNumber",
+            "address": 10000,
+            "size": 8,
+            "type": "string",
+            "readSchedule": "init",
+            "registerType": "holdingRegister",
+            "description": "Serial number",
+            "access": "RO"
+        },
+        {
+            "id": "firmwareVersion",
+            "address": 10011,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "init",
+            "registerType": "holdingRegister",
+            "description": "Firmware version",
+            "access": "RO"
+        },
+        {
+            "id": "inverterStatus",
+            "address": 10105,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Inverter status",
+            "enum": "InverterStatus",
+            "defaultValue": "InverterStatusWait",
+            "access": "RO"
+        },
+        {
+            "id": "phaseAPower",
+            "address": 10994,
+            "size": 2,
+            "type": "int32",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Phase A power",
+            "defaultValue": 0,
+            "unit": "1/1000 kW",
+            "access": "RO"
+        },
+        {
+            "id": "phaseBPower",
+            "address": 10996,
+            "size": 2,
+            "type": "int32",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Phase B power",
+            "defaultValue": 0,
+            "unit": "1/1000 kW",
+            "access": "RO"
+        },
+        {
+            "id": "phaseCPower",
+            "address": 10998,
+            "size": 2,
+            "type": "int32",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Phase C power",
+            "defaultValue": 0,
+            "unit": "1/1000 kW",
+            "access": "RO"
+        },
+        {
+            "id": "totalPowerOnMeter",
+            "address": 11000,
+            "size": 2,
+            "type": "int32",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Total power on meter",
+            "defaultValue": 0,
+            "unit": "1/1000 kW",
+            "access": "RO"
+        },
+        {
+            "id": "totalGridInjectionEnergy",
+            "address": 11002,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Total grid injection energy on meter",
+            "defaultValue": 0,
+            "unit": "1/100 kWh",
+            "access": "RO"
+        },
+        {
+            "id": "totalPurchasingEnergyFromGrid",
+            "address": 11004,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Total purchasing energy from grid on meter",
+            "defaultValue": 0,
+            "unit": "1/100 kWh",
+            "access": "RO"
+        },
+        {
+            "id": "gridPhaseAVoltage",
+            "address": 11009,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Grid Phase A Voltage",
+            "defaultValue": 0,
+            "unit": "1/10 V",
+            "access": "RO"
+        },
+        {
+            "id": "gridPhaseACurrent",
+            "address": 11010,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Grid Phase A Current",
+            "defaultValue": 0,
+            "unit": "1/10 A",
+            "access": "RO"
+        },
+        {
+            "id": "gridPhaseBVoltage",
+            "address": 11011,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Grid Phase B Voltage",
+            "defaultValue": 0,
+            "unit": "1/10 V",
+            "access": "RO"
+        },
+        {
+            "id": "gridPhaseBCurrent",
+            "address": 11012,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Grid Phase B Current",
+            "defaultValue": 0,
+            "unit": "1/10 A",
+            "access": "RO"
+        },
+        {
+            "id": "gridPhaseCVoltage",
+            "address": 11013,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Grid Phase C Voltage",
+            "defaultValue": 0,
+            "unit": "1/10 V",
+            "access": "RO"
+        },
+        {
+            "id": "gridPhaseCCurrent",
+            "address": 11014,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Grid Phase C Current",
+            "defaultValue": 0,
+            "unit": "1/10 A",
+            "access": "RO"
+        },
+        {
+            "id": "pAC",
+            "address": 11016,
+            "size": 2,
+            "type": "int32",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "P_AC",
+            "defaultValue": 0,
+            "unit": "1/1000 kW",
+            "access": "RO"
+        },
+        {
+            "id": "totalPVGenerationFromInstallation",
+            "address": 11020,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Total PV Generation from installation",
+            "defaultValue": 0,
+            "unit": "1/10 kWh",
+            "access": "RO"
+        },
+        {
+            "id": "pvInputTotalPower",
+            "address": 11028,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "PV Total Input Power",
+            "defaultValue": 0,
+            "unit": "1/1000 kW",
+            "access": "RO"
+        },
+        {
+            "id": "totalBackupP",
+            "address": 30230,
+            "size": 2,
+            "type": "int32",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Total_Backup_P/AC Active Power",
+            "unit": "1/1000 kW",
+            "defaultValue": 0,
+            "access": "RO"
+        },
+        {
+            "id": "batteryMode",
+            "address": 30256,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Battery mode",
+            "enum": "BatteryMode",
+            "defaultValue": "BatteryModeDischarge",
+            "access": "RO"
+        },
+        {
+            "id": "batteryPower",
+            "address": 30258,
+            "size": 2,
+            "type": "int32",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Battery power",
+            "defaultValue": 0,
+            "unit": "1/1000 kW",
+            "access": "RO"
+        },
+        {
+            "id": "totalEnergyInjectedToGrid",
+            "address": 31102,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Total energy injected to grid",
+            "defaultValue": 0,
+            "unit": "1/10 kWh",
+            "access": "RO"
+        },
+        {
+            "id": "totalEnergyPurchasedFromGrid",
+            "address": 31104,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Total energy purchased from grid",
+            "defaultValue": 0,
+            "unit": "1/10 kWh",
+            "access": "RO"
+        },
+        {
+            "id": "batteryStrings",
+            "address": 32001,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Battery strings",
+            "defaultValue": 0,
+            "access": "RO"
+        },
+        {
+            "id": "SOC",
+            "address": 33000,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "SOC",
+            "defaultValue": 0,
+            "unit": "% * 100",
+            "access": "RO"
+        },
+        {
+            "id": "SOH",
+            "address": 33001,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "SOH",
+            "defaultValue": 0,
+            "unit": "% * 100",
+            "access": "RO"
+        }
+    ]
+}

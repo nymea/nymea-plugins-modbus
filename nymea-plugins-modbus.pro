@@ -25,6 +25,7 @@ PLUGIN_DIRS = \
     stiebeleltron           \
     sunspec                 \
     unipi                   \
+    wattsonic               \
     webasto                 \
 
 gcc {
