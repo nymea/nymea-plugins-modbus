@@ -1,0 +1,97 @@
+{
+    "className": "SmaBatteryInverter",
+    "protocol": "TCP",
+    "endianness": "BigEndian",
+    "errorLimitUntilNotReachable": 20,
+    "checkReachableRegister": "currentPower",
+    "blocks": [
+        {
+            "id": "identification",
+            "readSchedule": "init",
+            "registers": [
+                {
+                    "id": "deviceClass",
+                    "address": 30051,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Device class",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "modelIdentifier",
+                    "address": 30053,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Device type (model identifier)",
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "information",
+            "readSchedule": "init",
+            "registers": [
+                {
+                    "id": "serialNumber",
+                    "address": 30057,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Serial number",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "softwarePackage",
+                    "address": 30059,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Firmware version",
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        }
+    ],
+    "registers": [
+        {
+            "id": "deviceName",
+            "address": 40631,
+            "size": 32,
+            "type": "string",
+            "readSchedule": "init",
+            "registerType": "holdingRegister",
+            "description": "Device name",
+            "access": "RO"
+        },
+        {
+            "id": "currentPower",
+            "address": 30775,
+            "size": 2,
+            "type": "int32",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Current power",
+            "unit": "W",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "batterySOC",
+            "address": 30845,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Battery State Of Charge",
+            "unit": "%",
+            "defaultValue": 0,
+            "access": "RO"
+        }
+    ]
+}

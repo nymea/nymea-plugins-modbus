@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2022, nymea GmbH
+* Copyright 2013 - 2023, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -28,55 +28,54 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef SMAMODBUSDISCOVERY_H
-#define SMAMODBUSDISCOVERY_H
-
-#include <QObject>
-#include <QTimer>
+#ifndef SMAMODBUSBATTERYINVERTERDISCOVERY_H
+#define SMAMODBUSBATTERYINVERTERDISCOVERY_H
 
 #include <network/networkdevicediscovery.h>
 
-#include "smainvertermodbustcpconnection.h"
+#include <QObject>
 
-class SmaModbusDiscovery : public QObject
+#include "smabatteryinvertermodbustcpconnection.h"
+
+class SmaModbusBatteryInverterDiscovery : public QObject
 {
     Q_OBJECT
 public:
-    explicit SmaModbusDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint16 port = 502, quint16 modbusAddress = 3, QObject *parent = nullptr);
-    typedef struct SmaModbusDiscoveryResult {
-        QString productName;
+    explicit SmaModbusBatteryInverterDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint16 port = 502, quint16 modbusAddress = 3, QObject *parent = nullptr);
+
+    struct Result {
         QString deviceName;
         QString serialNumber;
-        quint16 port;
-        quint16 modbusAddress;
+        int port;
+        int modbusAddress;
         QString softwareVersion;
         NetworkDeviceInfo networkDeviceInfo;
-    } SmaModbusDiscoveryResult;
+    };
 
     void startDiscovery();
 
-    QList<SmaModbusDiscoveryResult> discoveryResults() const;
+    QList<Result> discoveryResults() const;
 
 signals:
     void discoveryFinished();
 
 private:
     NetworkDeviceDiscovery *m_networkDeviceDiscovery = nullptr;
-    quint16 m_port;
-    quint16 m_modbusAddress;
+    uint m_port;
+    uint m_modbusAddress;
 
+    QTimer m_gracePeriodTimer;
     QDateTime m_startDateTime;
-    NetworkDeviceInfos m_verifiedNetworkDeviceInfos;
 
-    QList<SmaInverterModbusTcpConnection *> m_connections;
+    QList<SmaBatteryInverterModbusTcpConnection *> m_connections;
 
-    QList<SmaModbusDiscoveryResult> m_discoveryResults;
+    QList<Result> m_discoveryResults;
 
     void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
-    void cleanupConnection(SmaInverterModbusTcpConnection *connection);
+    void cleanupConnection(SmaBatteryInverterModbusTcpConnection *connection);
 
     void finishDiscovery();
 
 };
 
-#endif // SMAMODBUSDISCOVERY_H
+#endif // SMAMODBUSBATTERYINVERTERDISCOVERY_H

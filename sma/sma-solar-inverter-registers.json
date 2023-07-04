@@ -1,5 +1,5 @@
 {
-    "className": "SmaInverter",
+    "className": "SmaSolarInverter",
     "protocol": "TCP",
     "endianness": "BigEndian",
     "errorLimitUntilNotReachable": 20,
