@@ -94,15 +94,15 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
         webBoxDiscovery->startDiscovery();
 
     } else if (info->thingClassId() == speedwireMeterThingClassId) {
-
-        // Note: does not require the network device discovery...
-        SpeedwireDiscovery *speedwireDiscovery = new SpeedwireDiscovery(hardwareManager()->networkDeviceDiscovery(), getLocalSerialNumber(), info);
-        if (!speedwireDiscovery->initialize()) {
+        SpeedwireInterface *speedwireInterface = getSpeedwireInterface();
+        if (!speedwireInterface || !speedwireInterface->available()) {
             qCWarning(dcSma()) << "Could not discovery inverter. The speedwire interface initialization failed.";
             info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Unable to discover the network."));
             return;
         }
 
+        // Note: does not require the network device discovery...
+        SpeedwireDiscovery *speedwireDiscovery = new SpeedwireDiscovery(hardwareManager()->networkDeviceDiscovery(), speedwireInterface, getLocalSerialNumber(), info);
         connect(speedwireDiscovery, &SpeedwireDiscovery::discoveryFinished, this, [=](){
             qCDebug(dcSma()) << "Speed wire discovery finished.";
             speedwireDiscovery->deleteLater();
@@ -110,7 +110,7 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
             ThingDescriptors descriptors;
             foreach (const SpeedwireDiscovery::SpeedwireDiscoveryResult &result, speedwireDiscovery->discoveryResult()) {
 
-                if (result.deviceType != SpeedwireInterface::DeviceTypeMeter)
+                if (result.deviceType != Speedwire::DeviceTypeMeter)
                     continue;
 
                 if (result.serialNumber == 0)
@@ -151,13 +151,14 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
             return;
         }
 
-        SpeedwireDiscovery *speedwireDiscovery = new SpeedwireDiscovery(hardwareManager()->networkDeviceDiscovery(), getLocalSerialNumber(), info);
-        if (!speedwireDiscovery->initialize()) {
+        SpeedwireInterface *speedwireInterface = getSpeedwireInterface();
+        if (!speedwireInterface || !speedwireInterface->available()) {
             qCWarning(dcSma()) << "Could not discovery inverter. The speedwire interface initialization failed.";
             info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Unable to discover the network."));
             return;
         }
 
+        SpeedwireDiscovery *speedwireDiscovery = new SpeedwireDiscovery(hardwareManager()->networkDeviceDiscovery(), speedwireInterface, getLocalSerialNumber(), info);
         connect(speedwireDiscovery, &SpeedwireDiscovery::discoveryFinished, this, [=](){
             qCDebug(dcSma()) << "Speed wire discovery finished.";
             speedwireDiscovery->deleteLater();
@@ -165,7 +166,7 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
             ThingDescriptors descriptors;
             foreach (const SpeedwireDiscovery::SpeedwireDiscoveryResult &result, speedwireDiscovery->discoveryResult()) {
 
-                if (result.deviceType != SpeedwireInterface::DeviceTypeInverter)
+                if (result.deviceType != Speedwire::DeviceTypeInverter)
                     continue;
 
                 if (result.serialNumber == 0)
@@ -302,9 +303,12 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
 
     } else if (thing->thingClassId() == speedwireMeterThingClassId) {
 
-        // Create the multicast interface if not created already.
-        if (!m_multicastInterface)
-            m_multicastInterface = new SpeedwireInterface(true, getLocalSerialNumber(), this);
+        SpeedwireInterface *speedwireInterface = getSpeedwireInterface();
+        if (!speedwireInterface || !speedwireInterface->available()) {
+            qCWarning(dcSma()) << "Could not set up speedwire meter. The speedwire interface is not available.";
+            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Unable to communicate with the meter."));
+            return;
+        }
 
         quint32 serialNumber = static_cast<quint32>(thing->paramValue(speedwireMeterThingSerialNumberParamTypeId).toUInt());
         quint16 modelId = static_cast<quint16>(thing->paramValue(speedwireMeterThingModelIdParamTypeId).toUInt());
@@ -313,14 +317,7 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
         if (m_speedwireMeters.contains(thing))
             m_speedwireMeters.take(thing)->deleteLater();
 
-        SpeedwireMeter *meter = new SpeedwireMeter(m_multicastInterface, modelId, serialNumber, this);
-        if (!meter->initialize()) {
-            meter->deleteLater();
-            qCWarning(dcSma()) << "Setup failed. Could not initialize meter interface.";
-            info->finish(Thing::ThingErrorHardwareFailure);
-            return;
-        }
-
+        SpeedwireMeter *meter = new SpeedwireMeter(speedwireInterface, modelId, serialNumber, this);
         connect(meter, &SpeedwireMeter::reachableChanged, thing, [=](bool reachable){
             thing->setStateValue(speedwireMeterConnectedStateTypeId, reachable);
             if (!reachable) {
@@ -358,6 +355,9 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
     } else if (thing->thingClassId() == speedwireInverterThingClassId) {
 
         QHostAddress address = QHostAddress(thing->paramValue(speedwireInverterThingHostParamTypeId).toString());
+
+        // FIXME: use the monitor here since the IP might change
+
         quint32 serialNumber = static_cast<quint32>(thing->paramValue(speedwireInverterThingSerialNumberParamTypeId).toUInt());
         quint16 modelId = static_cast<quint16>(thing->paramValue(speedwireInverterThingModelIdParamTypeId).toUInt());
 
@@ -365,13 +365,7 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
             m_speedwireInverters.take(thing)->deleteLater();
         }
 
-        SpeedwireInverter *inverter = new SpeedwireInverter(address, modelId, serialNumber, this);
-        if (!inverter->initialize()) {
-            qCWarning(dcSma()) << "Setup failed. Could not initialize inverter interface.";
-            info->finish(Thing::ThingErrorHardwareFailure);
-            return;
-        }
-
+        SpeedwireInverter *inverter = new SpeedwireInverter(getSpeedwireInterface(), address, modelId, serialNumber, this);
         qCDebug(dcSma()) << "Inverter: Interface initialized successfully.";
 
         QString password;
@@ -620,10 +614,12 @@ void IntegrationPluginSma::thingRemoved(Thing *thing)
         hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
     }
 
-    if (myThings().filterByThingClassId(speedwireMeterThingClassId).isEmpty() && m_multicastInterface) {
+    if (myThings().filterByThingClassId(speedwireMeterThingClassId).isEmpty()
+            && myThings().filterByThingClassId(speedwireInverterThingClassId).isEmpty()
+            && myThings().filterByThingClassId(speedwireBatteryThingClassId).isEmpty()) {
         // Delete shared multicast socket...
-        m_multicastInterface->deleteLater();
-        m_multicastInterface = nullptr;
+        m_speedwireInterface->deleteLater();
+        m_speedwireInterface = nullptr;
     }
 
     if (myThings().isEmpty()) {
@@ -821,6 +817,17 @@ void IntegrationPluginSma::setupModbusInverterConnection(ThingSetupInfo *info)
     });
 
     connection->connectDevice();
+}
+
+SpeedwireInterface *IntegrationPluginSma::getSpeedwireInterface()
+{
+    if (!m_speedwireInterface)
+        m_speedwireInterface = new SpeedwireInterface(getLocalSerialNumber(), this);
+
+    if (!m_speedwireInterface->available())
+        m_speedwireInterface->initialize();
+
+    return m_speedwireInterface;
 }
 
 void IntegrationPluginSma::markSpeedwireMeterAsDisconnected(Thing *thing)

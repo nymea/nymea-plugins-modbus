@@ -33,32 +33,18 @@
 
 #include "sma.h"
 
-SpeedwireMeter::SpeedwireMeter(SpeedwireInterface *multicastInterface, quint16 modelId, quint32 serialNumber, QObject *parent) :
+SpeedwireMeter::SpeedwireMeter(SpeedwireInterface *speedwireInterface, quint16 modelId, quint32 serialNumber, QObject *parent) :
     QObject(parent),
-    m_interface(multicastInterface),
+    m_speedwireInterface(speedwireInterface),
     m_modelId(modelId),
     m_serialNumber(serialNumber)
 {
-    connect(m_interface, &SpeedwireInterface::dataReceived, this, &SpeedwireMeter::processData);
+    connect(m_speedwireInterface, &SpeedwireInterface::dataReceived, this, &SpeedwireMeter::processData);
 
     // Reachable timestamp
     m_timer.setInterval(5000);
     m_timer.setSingleShot(false);
     connect(&m_timer, &QTimer::timeout, this, &SpeedwireMeter::evaluateReachable);
-}
-
-bool SpeedwireMeter::initialize()
-{
-    bool initSuccess = m_interface->initialize();
-    if (initSuccess)
-        m_timer.start();
-
-    return initSuccess;
-}
-
-bool SpeedwireMeter::initialized() const
-{
-    return m_interface->initialized();
 }
 
 bool SpeedwireMeter::reachable() const
@@ -186,8 +172,10 @@ void SpeedwireMeter::evaluateReachable()
     }
 }
 
-void SpeedwireMeter::processData(const QHostAddress &senderAddress, quint16 senderPort, const QByteArray &data)
+void SpeedwireMeter::processData(const QHostAddress &senderAddress, quint16 senderPort, const QByteArray &data, bool multicast)
 {
+    Q_UNUSED(multicast)
+
     QDataStream stream(data);
     stream.setByteOrder(QDataStream::BigEndian);
 
@@ -220,7 +208,7 @@ void SpeedwireMeter::processData(const QHostAddress &senderAddress, quint16 send
     qCDebug(dcSma()) << "Meter: ======================= Meter measurements";
     quint32 timestamp;
     stream >> timestamp;
-    qCDebug(dcSma()) << "Meter: Timestamp:" << timestamp << QDateTime::fromMSecsSinceEpoch(timestamp * 1000);
+    qCDebug(dcSma()) << "Meter: Timestamp:" << timestamp << QDateTime::fromMSecsSinceEpoch(static_cast<qulonglong>(timestamp) * 1000);
 
     // Obis data
     //00 01 04 00 00000000 00 01 08 00 0000002139122910 00 02 04 00 00004415 00 02 08 00 0000001575a137d8 00 03 04 00 00000000 00 03 08 00 00000003debed0e8 00040400000017c6000408000000001008c2070000090400000000000009080000000027c77bed20000a04000000481d000a08000000001722823410000d0400000003b00015040000000000001508000000000d1e1e0e3000160400000015120016080000000006c5a2d8b800170400000000000017080000000001bd6f680000180400000007990018080000000004def712b8001d040000000000001d08000000000eeefaafd0001e040000001666001e0800000000074b38bf88001f040000000a300020040000037bcb00210400000003ad0029040000000000002908000000000a9b1afec8002a040000001a81002a08000000000803e62b88002b040000000000002b080000000001511459b8002c0400000006d5002c0800000000052c8455b80031040000000000003108000000000cf83b37100032040000001b5f0032080000000008a6e257f80033040000000c3f003404000003747900350400000003c8003d040000000000003d08000000000a53d0ba08003e040000001482003e080000000007800fd188003f040000000000003f080000000001185820c8004004000000095800400800000000064563b1900045040000000000004508000000000d26d3eae0004604000000168900460800000000082b4fc5a80047040000000a440048040000037ed1004904000000038e90000000 01020852 00000000

@@ -41,10 +41,7 @@ class SpeedwireMeter : public QObject
 {
     Q_OBJECT
 public:
-    explicit SpeedwireMeter(SpeedwireInterface *multicastInterface, quint16 modelId, quint32 serialNumber, QObject *parent = nullptr);
-
-    bool initialize();
-    bool initialized() const;
+    explicit SpeedwireMeter(SpeedwireInterface *speedwireInterface, quint16 modelId, quint32 serialNumber, QObject *parent = nullptr);
 
     bool reachable() const;
 
@@ -79,7 +76,7 @@ signals:
     void valuesUpdated();
 
 private:
-    SpeedwireInterface *m_interface = nullptr;
+    SpeedwireInterface *m_speedwireInterface = nullptr;
     QHostAddress m_address;
     bool m_initialized = false;
     quint16 m_modelId = 0;
@@ -118,7 +115,7 @@ private:
 
 private slots:
     void evaluateReachable();
-    void processData(const QHostAddress &senderAddress, quint16 senderPort, const QByteArray &data);
+    void processData(const QHostAddress &senderAddress, quint16 senderPort, const QByteArray &data, bool multicast);
 
 };
 

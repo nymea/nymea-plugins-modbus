@@ -33,25 +33,15 @@
 
 #include <QDateTime>
 
-SpeedwireInverter::SpeedwireInverter(const QHostAddress &address, quint16 modelId, quint32 serialNumber, QObject *parent) :
+SpeedwireInverter::SpeedwireInverter(SpeedwireInterface *speedwireInterface, const QHostAddress &address, quint16 modelId, quint32 serialNumber, QObject *parent) :
     QObject(parent),
+    m_speedwireInterface(speedwireInterface),
     m_address(address),
     m_modelId(modelId),
     m_serialNumber(serialNumber)
 {
     qCDebug(dcSma()) << "Inverter: setup interface on" << m_address.toString();
-    m_interface = new SpeedwireInterface(false, serialNumber, this);
-    connect(m_interface, &SpeedwireInterface::dataReceived, this, &SpeedwireInverter::processData);
-}
-
-bool SpeedwireInverter::initialize()
-{
-    return m_interface->initialize(m_address);
-}
-
-bool SpeedwireInverter::initialized() const
-{
-    return m_interface->initialized();
+    connect(m_speedwireInterface, &SpeedwireInterface::dataReceived, this, &SpeedwireInverter::processData);
 }
 
 SpeedwireInverter::State SpeedwireInverter::state() const
@@ -270,7 +260,7 @@ SpeedwireInverterReply *SpeedwireInverter::sendLogoutRequest()
 
     // Source
     stream << Speedwire::sourceModelId();
-    stream << m_interface->sourceSerialNumber();
+    stream << m_speedwireInterface->sourceSerialNumber();
     stream << static_cast<quint16>(0x0300);
 
     stream << static_cast<quint16>(0);
@@ -413,7 +403,7 @@ void SpeedwireInverter::sendNextReply()
     // Pick the next reply and send request
     m_currentReply = m_replyQueue.dequeue();
     qCDebug(dcSma()) << "Inverter: --> Sending" << m_currentReply->request().command() << "packet ID:" << m_currentReply->request().packetId();
-    m_interface->sendData(m_currentReply->request().requestData());
+    m_speedwireInterface->sendDataUnicast(m_address, m_currentReply->request().requestData());
     m_currentReply->startWaiting();
 }
 
@@ -489,7 +479,7 @@ void SpeedwireInverter::buildPacket(QDataStream &stream, quint32 command, quint1
     // Destination Ctrl
     stream << static_cast<quint16>(0x0100);
     // Source
-    stream << Speedwire::sourceModelId() << m_interface->sourceSerialNumber();
+    stream << Speedwire::sourceModelId() << m_speedwireInterface->sourceSerialNumber();
     // Destination Ctrl
     stream << static_cast<quint16>(0x0100);
 
@@ -1176,9 +1166,11 @@ void SpeedwireInverter::setBatteryAvailable(bool available)
 
 void SpeedwireInverter::processData(const QHostAddress &senderAddress, quint16 senderPort, const QByteArray &data)
 {
-    // Note: the interface is already filtering out data from other hosts m_address
-    Q_UNUSED(senderAddress)
     Q_UNUSED(senderPort)
+
+    // Process only data coming from our target address if there is any
+    if (!m_address.isNull() && senderAddress != m_address)
+        return;
 
     if (data.size() < 18) {
         qCDebug(dcSma()) << "Inverter: The received datagram is to short to be a SMA speedwire message. Ignoring data...";
@@ -1193,7 +1185,7 @@ void SpeedwireInverter::processData(const QHostAddress &senderAddress, quint16 s
     }
 
     if (header.protocolId != Speedwire::ProtocolIdInverter) {
-        qCWarning(dcSma()) << "Inverter: Received datagram from different protocol" << header.protocolId << "Ignoring data...";
+        //qCWarning(dcSma()) << "Inverter: Received datagram from different protocol" << header.protocolId << "Ignoring data...";
         return;
     }
 
@@ -1478,6 +1470,7 @@ void SpeedwireInverter::setState(State state)
                                             qCDebug(dcSma()) << "Inverter: Failed to query battery info from inverter:" << reply->request().command() << reply->error();
                                             setBatteryAvailable(false);
                                             setState(StateIdle);
+                                            return;
                                         } else {
                                             qCDebug(dcSma()) << "Inverter: Process battery info response" << reply->responsePayload().toHex();
                                             processBatteryInfoResponse(reply->responsePayload());
@@ -1490,6 +1483,7 @@ void SpeedwireInverter::setState(State state)
                                                 qCWarning(dcSma()) << "Inverter: Failed to query battery charge status from inverter:" << reply->request().command() << reply->error();
                                                 setBatteryAvailable(false);
                                                 setState(StateIdle);
+                                                return;
                                             } else {
                                                 qCDebug(dcSma()) << "Inverter: Process battery charge status response" << reply->responsePayload().toHex();
                                                 processBatteryChargeResponse(reply->responsePayload());

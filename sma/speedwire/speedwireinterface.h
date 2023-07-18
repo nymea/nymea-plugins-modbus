@@ -34,6 +34,7 @@
 #include <QObject>
 #include <QUdpSocket>
 #include <QDataStream>
+#include <QTimer>
 
 #include "speedwire.h"
 
@@ -41,46 +42,32 @@ class SpeedwireInterface : public QObject
 {
     Q_OBJECT
 public:
-    enum DeviceType {
-        DeviceTypeUnknown,
-        DeviceTypeMeter,
-        DeviceTypeInverter
-    };
-    Q_ENUM(DeviceType)
 
-    explicit SpeedwireInterface(bool multicast, quint32 sourceSerialNumber, QObject *parent = nullptr);
+    explicit SpeedwireInterface(quint32 sourceSerialNumber, QObject *parent = nullptr);
     ~SpeedwireInterface();
 
-    bool initialize(const QHostAddress &address = QHostAddress());
-    void deinitialize();
+    bool available() const;
 
-    bool multicast() const;
-
-    bool initialized() const;
-
-    quint16 sourceModelId() const;
     quint32 sourceSerialNumber() const;
 
+    bool initialize();
+
 public slots:
-    void sendData(const QByteArray &data);
+    void sendDataUnicast(const QHostAddress &address, const QByteArray &data);
+    void sendDataMulticast(const QByteArray &data);
 
 signals:
-    void dataReceived(const QHostAddress &senderAddress, quint16 senderPort, const QByteArray &data);
-
-private:
-    QUdpSocket *m_socket = nullptr;
-    QHostAddress m_address;
-    bool m_multicast = false;
-    bool m_initialized = false;
-
-    // Requester
-    quint32 m_sourceSerialNumber = 0;
+    void dataReceived(const QHostAddress &senderAddress, quint16 senderPort, const QByteArray &data, bool multicast = false);
 
 private slots:
-    void readPendingDatagrams();
-    void onSocketError(QAbstractSocket::SocketError error);
-    void onSocketStateChanged(QAbstractSocket::SocketState socketState);
+    void reconfigureMulticastGroup();
 
+private:
+    QUdpSocket *m_unicast = nullptr;
+    QUdpSocket *m_multicast = nullptr;
+    quint32 m_sourceSerialNumber = 0;
+    bool m_available = false;
+    QTimer m_multicastReconfigureationTimer;
 };
 
 
