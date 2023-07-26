@@ -41,6 +41,13 @@ class Speedwire
 {
     Q_GADGET
 public:
+    enum DeviceType {
+        DeviceTypeUnknown,
+        DeviceTypeMeter,
+        DeviceTypeInverter
+    };
+    Q_ENUM(DeviceType)
+
     enum Command {
         CommandIdentify = 0x00000201,
         CommandQueryStatus = 0x51800200,

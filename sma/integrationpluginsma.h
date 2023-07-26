@@ -82,8 +82,9 @@ private:
 
     quint32 m_localSerialNumber = 0;
 
-    // Shared interface accross meters
-    SpeedwireInterface *m_multicastInterface = nullptr;
+    // Shared interface accross all speedwire devices
+    SpeedwireInterface *m_speedwireInterface = nullptr;
+    SpeedwireInterface *getSpeedwireInterface();
 
     void markSpeedwireMeterAsDisconnected(Thing *thing);
     void markSpeedwireInverterAsDisconnected(Thing *thing);

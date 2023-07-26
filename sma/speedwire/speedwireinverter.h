@@ -54,10 +54,7 @@ public:
     };
     Q_ENUM(State)
 
-    explicit SpeedwireInverter(const QHostAddress &address, quint16 modelId, quint32 serialNumber, QObject *parent = nullptr);
-
-    bool initialize();
-    bool initialized() const;
+    explicit SpeedwireInverter(SpeedwireInterface *speedwireInterface, const QHostAddress &address, quint16 modelId, quint32 serialNumber, QObject *parent = nullptr);
 
     State state() const;
 
@@ -124,7 +121,7 @@ signals:
     void batteryValuesUpdated();
 
 private:
-    SpeedwireInterface *m_interface = nullptr;
+    SpeedwireInterface *m_speedwireInterface = nullptr;
     QHostAddress m_address;
     QString m_password;
 
