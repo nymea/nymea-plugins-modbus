@@ -482,13 +482,13 @@ void IntegrationPluginMennekes::updateECUPhaseCount(Thing *thing)
     }
     qCDebug(dcMennekes()) << "Actively charging phases:" << phaseCount;
     if (phaseCount == 0) {
-        if (amtronECUConnection->meterCurrentL1() > 0) {
+        if (amtronECUConnection->meterVoltageL1() > 0) {
             phaseCount++;
         }
-        if (amtronECUConnection->meterCurrentL2() > 0) {
+        if (amtronECUConnection->meterVoltageL2() > 0) {
             phaseCount++;
         }
-        if (amtronECUConnection->meterCurrentL3() > 0) {
+        if (amtronECUConnection->meterVoltageL3() > 0) {
             phaseCount++;
         }
         qCDebug(dcMennekes()) << "Connected phases:" << phaseCount;
