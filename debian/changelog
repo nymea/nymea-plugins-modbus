@@ -1,3 +1,18 @@
+nymea-plugins-modbus (1.8.2) jammy; urgency=medium
+
+  [ Simon Stürz ]
+  * Huawei: Extend discovery to scan for multiple modbus servers
+
+  [ Michael Zanetti ]
+  * Amperfied: Fix the standby register being Write-Only in old
+    firmwares
+  * Mennekes: Fix amtron ECU power action handling
+
+  [ Simon Stürz ]
+  * SMA: Improve speedwire interface handling and sharing
+
+ -- jenkins <developer@nymea.io>  Wed, 26 Jul 2023 15:35:08 +0200
+
 nymea-plugins-modbus (1.8.1) jammy; urgency=medium
 
   [ Michael Zanetti ]
