@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2021, nymea GmbH
+* Copyright 2013 - 2023, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -30,6 +30,8 @@
 
 #include "integrationpluginschrack.h"
 #include "plugininfo.h"
+
+#include <hardware/electricity.h>
 
 #include "ciondiscovery.h"
 
@@ -219,6 +221,14 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
     // To prevent running out of sync we'll "uncache" min/max values too.
     thing->setStateMinMaxValues(cionMaxChargingCurrentStateTypeId, 6, 32);
 
+    connect(thing, &Thing::settingChanged, this, [this, thing](const ParamTypeId &paramTypeId, const QVariant &value){
+        if (paramTypeId == cionSettingsPhasesParamTypeId) {
+            qCInfo(dcSchrack()) << "The connected phases setting has changed to" << value.toString();
+            updatePhaseCount(thing, value.toString());
+        }
+    });
+
+    updatePhaseCount(thing, thing->setting(cionSettingsPhasesParamTypeId).toString());
 }
 
 void IntegrationPluginSchrack::postSetupThing(Thing *thing)
@@ -331,4 +341,10 @@ void IntegrationPluginSchrack::waitForActionFinish(ThingActionInfo *info, Modbus
             info->thing()->setStateValue(stateTypeId, value);
         }
     });
+}
+
+void IntegrationPluginSchrack::updatePhaseCount(Thing *thing, const QString &phases)
+{
+    thing->setStateValue(cionUsedPhasesStateTypeId, phases);
+    thing->setStateValue(cionPhaseCountStateTypeId, Electricity::getPhaseCount(Electricity::convertPhasesFromString(phases)));
 }
