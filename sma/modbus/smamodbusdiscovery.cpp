@@ -139,7 +139,7 @@ void SmaModbusDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevi
     });
 
     // If we get any error...skip this host...
-    connect(connection, &SmaInverterModbusTcpConnection::connectionErrorOccurred, this, [=](QModbusDevice::Error error){
+    connect(connection->modbusTcpMaster(), &ModbusTcpMaster::connectionErrorOccurred, this, [=](QModbusDevice::Error error){
         if (error != QModbusDevice::NoError) {
             qCDebug(dcSma()) << "Discovery: Connection error on" << networkDeviceInfo.address().toString() << "Continue...";;
             cleanupConnection(connection);

@@ -484,8 +484,8 @@ def writePropertyProcessMethodImplementations(fileDescriptor, className, registe
         if not 'R' in registerDefinition['access']:
             continue
 
-        propertyName = registerDefinition['id']
         propertyTyp = getCppDataType(registerDefinition)
+        propertyName = registerDefinition['id']
 
         writeLine(fileDescriptor, 'void %s::process%sRegisterValues(const QVector<quint16> &values)' % (className, propertyName[0].upper() + propertyName[1:]))
         writeLine(fileDescriptor, '{')

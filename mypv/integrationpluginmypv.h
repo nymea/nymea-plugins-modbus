@@ -80,7 +80,7 @@ private:
     };
 
     PluginTimer *m_refreshTimer = nullptr;
-    QHash<Thing *, ModbusTCPMaster *> m_modbusTcpMasters;
+    QHash<Thing *, ModbusTcpMaster *> m_modbusTcpMasters;
     QHash<QUuid, ThingActionInfo *> m_asyncActions;
 
     void update(Thing *thing);

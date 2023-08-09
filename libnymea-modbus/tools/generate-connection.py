@@ -47,7 +47,7 @@ def writeTcpHeaderFile():
     writeLine(headerFile)
 
     # Begin of class
-    writeLine(headerFile, 'class %s : public ModbusTCPMaster' % className)
+    writeLine(headerFile, 'class %s : public QObject' % className)
     writeLine(headerFile, '{')
     writeLine(headerFile, '    Q_OBJECT')
 
@@ -64,7 +64,11 @@ def writeTcpHeaderFile():
 
     # Constructor
     writeLine(headerFile, '    explicit %s(const QHostAddress &hostAddress, uint port, quint16 slaveId, QObject *parent = nullptr);' % className)
+    writeLine(headerFile, '    explicit %s(ModbusTcpMaster *modbusTcpMaster, quint16 slaveId, QObject *parent = nullptr);' % className)
     writeLine(headerFile, '    ~%s() = default;' % className)
+    writeLine(headerFile)
+    writeLine(headerFile, '    ModbusTcpMaster *modbusTcpMaster() const;')
+    writeLine(headerFile, '    quint16 slaveId() const;')
     writeLine(headerFile)
     writeLine(headerFile, '    bool reachable() const;')
     writeLine(headerFile)
@@ -110,6 +114,12 @@ def writeTcpHeaderFile():
     writeLine(headerFile, '    virtual bool update();')
     writeLine(headerFile)
 
+    writeLine(headerFile, 'public slots:')
+    writeLine(headerFile, '    bool connectDevice();')
+    writeLine(headerFile, '    void disconnectDevice();')
+    writeLine(headerFile, '    bool reconnectDevice();')
+    writeLine(headerFile)
+
     # Write registers value changed signals
     writeLine(headerFile, 'signals:')
     writeLine(headerFile, '    void reachableChanged(bool reachable);')
@@ -151,6 +161,7 @@ def writeTcpHeaderFile():
 
     # Private members
     writeLine(headerFile, 'private:')
+    writeLine(headerFile, '    ModbusTcpMaster *m_modbusTcpMaster = nullptr;')
     writeLine(headerFile, '    ModbusDataUtils::ByteOrder m_endianness = ModbusDataUtils::ByteOrder%s;' % endianness)
     writeLine(headerFile, '    ModbusDataUtils::ByteOrder m_stringEndianness = ModbusDataUtils::ByteOrder%s;' % stringEndianness)
     writeLine(headerFile, '    quint16 m_slaveId = 1;')
@@ -169,6 +180,8 @@ def writeTcpHeaderFile():
     writeLine(headerFile, '    QObject *m_initObject = nullptr;')
     writeLine(headerFile, '    void verifyInitFinished();')
     writeLine(headerFile, '    void finishInitialization(bool success);')
+    writeLine(headerFile)
+    writeLine(headerFile, '    void setupConnection();')
     writeLine(headerFile)
     writeLine(headerFile, '    void verifyUpdateFinished();')
     writeLine(headerFile)
@@ -201,28 +214,32 @@ def writeTcpSourceFile():
 
     # Constructor
     writeLine(sourceFile, '%s::%s(const QHostAddress &hostAddress, uint port, quint16 slaveId, QObject *parent) :' % (className, className))
-    writeLine(sourceFile, '    ModbusTCPMaster(hostAddress, port, parent),')
+    writeLine(sourceFile, '    QObject(parent),')
+    writeLine(sourceFile, '    m_modbusTcpMaster(new ModbusTcpMaster(hostAddress, port, this)),')
     writeLine(sourceFile, '    m_slaveId(slaveId)')
     writeLine(sourceFile, '{')
-    writeLine(sourceFile, '    connect(this, &ModbusTCPMaster::connectionStateChanged, this, [this](bool status){')
-    writeLine(sourceFile, '        if (status) {')
-    writeLine(sourceFile, '           qCDebug(dc%s()) << "Modbus TCP connection" << m_hostAddress.toString() << "connected. Start testing if the connection is reachable...";' % (className))
-    writeLine(sourceFile, '            // Cleanup before starting to initialize')
-    writeLine(sourceFile, '            m_pendingInitReplies.clear();')
-    writeLine(sourceFile, '            m_pendingUpdateReplies.clear();')
-    writeLine(sourceFile, '            m_communicationWorking = false;')
-    writeLine(sourceFile, '            m_communicationFailedCounter = 0;')
-    writeLine(sourceFile, '            m_checkReachableRetriesCount = 0;')
-    writeLine(sourceFile, '            testReachability();')
-    writeLine(sourceFile, '        } else {')
-    writeLine(sourceFile, '            qCWarning(dc%s()) << "Modbus TCP connection diconnected from" << m_hostAddress.toString() << ". The connection is not reachable any more.";' % (className))
-    writeLine(sourceFile, '            m_communicationWorking = false;')
-    writeLine(sourceFile, '            m_communicationFailedCounter = 0;')
-    writeLine(sourceFile, '            m_checkReachableRetriesCount = 0;')
-    writeLine(sourceFile, '        }')
+    writeLine(sourceFile, '    setupConnection();')
+    writeLine(sourceFile, '}')
     writeLine(sourceFile)
-    writeLine(sourceFile, '        evaluateReachableState();')
-    writeLine(sourceFile, '    });')
+
+    writeLine(sourceFile, '%s::%s(ModbusTcpMaster *modbusTcpMaster, quint16 slaveId, QObject *parent) :' % (className, className))
+    writeLine(sourceFile, '    QObject(parent),')
+    writeLine(sourceFile, '    m_modbusTcpMaster(modbusTcpMaster),')
+    writeLine(sourceFile, '    m_slaveId(slaveId)')
+    writeLine(sourceFile, '{')
+    writeLine(sourceFile, '    setupConnection();')
+    writeLine(sourceFile, '}')
+    writeLine(sourceFile)
+
+    writeLine(sourceFile, 'ModbusTcpMaster *%s::modbusTcpMaster() const' % (className))
+    writeLine(sourceFile, '{')
+    writeLine(sourceFile, '    return m_modbusTcpMaster;')
+    writeLine(sourceFile, '}')
+    writeLine(sourceFile)
+
+    writeLine(sourceFile, 'quint16 %s::slaveId() const' % (className))
+    writeLine(sourceFile, '{')
+    writeLine(sourceFile, '    return m_slaveId;')
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
@@ -294,6 +311,24 @@ def writeTcpSourceFile():
     writeInitMethodImplementationTcp(sourceFile, className, registerJson['registers'], blocks)
     writeUpdateMethodTcp(sourceFile, className, registerJson['registers'], blocks)
 
+    writeLine(sourceFile, 'bool %s::connectDevice()' % (className))
+    writeLine(sourceFile, '{')
+    writeLine(sourceFile, '    return m_modbusTcpMaster->connectDevice();')
+    writeLine(sourceFile, '}')
+    writeLine(sourceFile)
+
+    writeLine(sourceFile, 'void %s::disconnectDevice()' % (className))
+    writeLine(sourceFile, '{')
+    writeLine(sourceFile, '    m_modbusTcpMaster->disconnectDevice();')
+    writeLine(sourceFile, '}')
+    writeLine(sourceFile)
+
+    writeLine(sourceFile, 'bool %s::reconnectDevice()' % (className))
+    writeLine(sourceFile, '{')
+    writeLine(sourceFile, '    return m_modbusTcpMaster->reconnectDevice();')
+    writeLine(sourceFile, '}')
+    writeLine(sourceFile)
+
     # Write update methods
     writePropertyUpdateMethodImplementationsTcp(sourceFile, className, registerJson['registers'])
     if 'blocks' in registerJson:
@@ -351,9 +386,9 @@ def writeTcpSourceFile():
     writeLine(sourceFile, 'void %s::finishInitialization(bool success)' % (className))
     writeLine(sourceFile, '{')
     writeLine(sourceFile, '    if (success) {')
-    writeLine(sourceFile, '        qCDebug(dc%s()) << "Initialization finished of %s" << hostAddress().toString() << "finished successfully";' % (className, className))
+    writeLine(sourceFile, '        qCDebug(dc%s()) << "Initialization finished of %s" << m_modbusTcpMaster->hostAddress().toString() << "finished successfully";' % (className, className))
     writeLine(sourceFile, '    } else {')
-    writeLine(sourceFile, '        qCWarning(dc%s()) << "Initialization finished of %s" << hostAddress().toString() << "failed.";' % (className, className))
+    writeLine(sourceFile, '        qCWarning(dc%s()) << "Initialization finished of %s" << m_modbusTcpMaster->hostAddress().toString() << "failed.";' % (className, className))
     writeLine(sourceFile, '    }')
     writeLine(sourceFile)
     writeLine(sourceFile, '    // Cleanup init')
@@ -362,6 +397,30 @@ def writeTcpSourceFile():
     writeLine(sourceFile, '    m_pendingInitReplies.clear();')
     writeLine(sourceFile)
     writeLine(sourceFile, '    emit initializationFinished(success);')
+    writeLine(sourceFile, '}')
+    writeLine(sourceFile)
+
+    writeLine(sourceFile, 'void %s::setupConnection()' % (className))
+    writeLine(sourceFile, '{')
+    writeLine(sourceFile, '    connect(m_modbusTcpMaster, &ModbusTcpMaster::connectionStateChanged, this, [this](bool status){')
+    writeLine(sourceFile, '        if (status) {')
+    writeLine(sourceFile, '           qCDebug(dc%s()) << "Modbus TCP connection" << m_modbusTcpMaster->hostAddress().toString() << "connected. Start testing if the connection is reachable...";' % (className))
+    writeLine(sourceFile, '            // Cleanup before starting to initialize')
+    writeLine(sourceFile, '            m_pendingInitReplies.clear();')
+    writeLine(sourceFile, '            m_pendingUpdateReplies.clear();')
+    writeLine(sourceFile, '            m_communicationWorking = false;')
+    writeLine(sourceFile, '            m_communicationFailedCounter = 0;')
+    writeLine(sourceFile, '            m_checkReachableRetriesCount = 0;')
+    writeLine(sourceFile, '            testReachability();')
+    writeLine(sourceFile, '        } else {')
+    writeLine(sourceFile, '            qCWarning(dc%s()) << "Modbus TCP connection diconnected from" << m_modbusTcpMaster->hostAddress().toString() << ". The connection is not reachable any more.";' % (className))
+    writeLine(sourceFile, '            m_communicationWorking = false;')
+    writeLine(sourceFile, '            m_communicationFailedCounter = 0;')
+    writeLine(sourceFile, '            m_checkReachableRetriesCount = 0;')
+    writeLine(sourceFile, '        }')
+    writeLine(sourceFile)
+    writeLine(sourceFile, '        evaluateReachableState();')
+    writeLine(sourceFile, '    });')
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
@@ -390,7 +449,7 @@ def writeTcpSourceFile():
 
     writeLine(sourceFile, 'void %s::evaluateReachableState()' % (className))
     writeLine(sourceFile, '{')
-    writeLine(sourceFile, '    bool reachable = m_communicationWorking && connected();')
+    writeLine(sourceFile, '    bool reachable = m_communicationWorking && m_modbusTcpMaster->connected();')
     writeLine(sourceFile, '    if (m_reachable == reachable)')
     writeLine(sourceFile, '        return;')
     writeLine(sourceFile)
@@ -406,7 +465,7 @@ def writeTcpSourceFile():
     debugObjectParamName = className[0].lower() + className[1:]
     writeLine(sourceFile, 'QDebug operator<<(QDebug debug, %s *%s)' % (className, debugObjectParamName))
     writeLine(sourceFile, '{')
-    writeLine(sourceFile, '    debug.nospace().noquote() << "%s(" << %s->hostAddress().toString() << ":" << %s->port() << ")" << "\\n";' % (className, debugObjectParamName, debugObjectParamName))
+    writeLine(sourceFile, '    debug.nospace().noquote() << "%s(" << %s->modbusTcpMaster()->hostAddress().toString() << ":" << %s->modbusTcpMaster()->port() << ")" << "\\n";' % (className, debugObjectParamName, debugObjectParamName))
     writeRegistersDebugLine(sourceFile, debugObjectParamName, registerJson['registers'])
     if 'blocks' in registerJson:
         for blockDefinition in registerJson['blocks']:

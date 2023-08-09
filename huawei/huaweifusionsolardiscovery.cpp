@@ -74,10 +74,10 @@ void HuaweiFusionSolarDiscovery::testNextConnection(const QHostAddress &address)
     // but retry only once to communicate with the device for reachability check...
     connection->setCheckReachableRetries(1);
 
-    qCDebug(dcHuawei()) << "Discovery: Start searching on" << QString("%1:%2").arg(address.toString()).arg(connection->port()) << "slave ID:" << connection->slaveId();
+    qCDebug(dcHuawei()) << "Discovery: Start searching on" << QString("%1:%2").arg(address.toString()).arg(connection->modbusTcpMaster()->port()) << "slave ID:" << connection->slaveId();
     // Try to connect, maybe it works, maybe not...
     if (!connection->connectDevice()) {
-        qCDebug(dcHuawei()) << "Discovery: Failed to connect to" << QString("%1:%2").arg(address.toString()).arg(connection->port()) << "slave ID:" << connection->slaveId() << "Continue...";;
+        qCDebug(dcHuawei()) << "Discovery: Failed to connect to" << QString("%1:%2").arg(address.toString()).arg(connection->modbusTcpMaster()->port()) << "slave ID:" << connection->slaveId() << "Continue...";;
         cleanupConnection(connection);
     }
 }
@@ -117,7 +117,7 @@ void HuaweiFusionSolarDiscovery::checkNetworkDevice(const NetworkDeviceInfo &net
         });
 
         // If we get any error...skip this host...
-        connect(connection, &HuaweiFusionSolar::connectionErrorOccurred, this, [=](QModbusDevice::Error error){
+        connect(connection->modbusTcpMaster(), &ModbusTcpMaster::connectionErrorOccurred, this, [=](QModbusDevice::Error error){
             if (error != QModbusDevice::NoError) {
                 qCDebug(dcHuawei()) << "Discovery: Connection error on" << networkDeviceInfo.address().toString() << "Continue...";;
                 cleanupConnection(connection);
@@ -144,7 +144,7 @@ void HuaweiFusionSolarDiscovery::cleanupConnection(HuaweiFusionSolar *connection
         connection->deleteLater();
     }
 
-    testNextConnection(connection->hostAddress());
+    testNextConnection(connection->modbusTcpMaster()->hostAddress());
 }
 
 void HuaweiFusionSolarDiscovery::finishDiscovery()

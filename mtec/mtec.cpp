@@ -35,15 +35,15 @@ MTec::MTec(const QHostAddress &address, QObject *parent) :
     QObject(parent),
     m_hostAddress(address)
 {
-    m_modbusMaster = new ModbusTCPMaster(address, 502, this);
+    m_modbusMaster = new ModbusTcpMaster(address, 502, this);
     m_modbusMaster->setTimeout(2000);
     m_modbusMaster->setNumberOfRetries(5);
 
-    qCDebug(dcMTec()) << "Created ModbusTCPMaster for" << address.toString();
-    connect(m_modbusMaster, &ModbusTCPMaster::connectionStateChanged, this, &MTec::connectedChanged);
-    connect(m_modbusMaster, &ModbusTCPMaster::receivedHoldingRegister, this, &MTec::onReceivedHoldingRegister);
-    connect(m_modbusMaster, &ModbusTCPMaster::readRequestError, this, &MTec::onModbusError);
-    connect(m_modbusMaster, &ModbusTCPMaster::writeRequestError, this, &MTec::onModbusError);
+    qCDebug(dcMTec()) << "Created ModbusTcpMaster for" << address.toString();
+    connect(m_modbusMaster, &ModbusTcpMaster::connectionStateChanged, this, &MTec::connectedChanged);
+    connect(m_modbusMaster, &ModbusTcpMaster::receivedHoldingRegister, this, &MTec::onReceivedHoldingRegister);
+    connect(m_modbusMaster, &ModbusTcpMaster::readRequestError, this, &MTec::onModbusError);
+    connect(m_modbusMaster, &ModbusTcpMaster::writeRequestError, this, &MTec::onModbusError);
 }
 
 MTec::~MTec()

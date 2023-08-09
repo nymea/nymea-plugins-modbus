@@ -169,7 +169,7 @@ void IntegrationPluginAmperfied::postSetupThing(Thing *thing)
                 connection->update();
             }
             foreach(AmperfiedModbusTcpConnection *connection, m_tcpConnections) {
-                qCDebug(dcAmperfied()) << "Updating connection" << connection->hostAddress();
+                qCDebug(dcAmperfied()) << "Updating connection" << connection->modbusTcpMaster()->hostAddress();
                 connection->update();
             }
         });

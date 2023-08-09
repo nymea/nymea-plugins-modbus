@@ -35,13 +35,13 @@ Webasto::Webasto(const QHostAddress &address, uint port, QObject *parent) :
     QObject(parent)
 {
     qCDebug(dcWebasto()) << "Webasto: Webasto connection created" << address.toString() << port;
-    m_modbusConnection = new ModbusTCPMaster(address, port, this);
+    m_modbusConnection = new ModbusTcpMaster(address, port, this);
     m_modbusConnection->setNumberOfRetries(3);
     m_modbusConnection->setTimeout(1000);
 
-    connect(m_modbusConnection, &ModbusTCPMaster::receivedHoldingRegister, this, &Webasto::onReceivedHoldingRegister);
-    connect(m_modbusConnection, &ModbusTCPMaster::writeRequestExecuted, this, &Webasto::writeRequestExecuted);
-    connect(m_modbusConnection, &ModbusTCPMaster::writeRequestError, this, &Webasto::writeRequestError);
+    connect(m_modbusConnection, &ModbusTcpMaster::receivedHoldingRegister, this, &Webasto::onReceivedHoldingRegister);
+    connect(m_modbusConnection, &ModbusTcpMaster::writeRequestExecuted, this, &Webasto::writeRequestExecuted);
+    connect(m_modbusConnection, &ModbusTcpMaster::writeRequestError, this, &Webasto::writeRequestError);
 
     m_lifeBitTimer = new QTimer(this);
     m_lifeBitTimer->start(10000);

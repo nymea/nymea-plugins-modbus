@@ -131,7 +131,7 @@ public:
 
 private:
 
-    ModbusTCPMaster *m_modbusConnection = nullptr;
+    ModbusTcpMaster *m_modbusConnection = nullptr;
     QHostAddress m_address;
     uint m_unitId = 255;
 

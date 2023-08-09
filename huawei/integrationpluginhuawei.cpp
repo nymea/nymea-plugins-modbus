@@ -431,7 +431,7 @@ void IntegrationPluginHuawei::setupFusionSolar(ThingSetupInfo *info)
     connect(info, &ThingSetupInfo::aborted, connection, &HuaweiFusionSolar::deleteLater);
     connect(connection, &HuaweiFusionSolar::reachableChanged, info, [=](bool reachable){
         if (!reachable) {
-            qCWarning(dcHuawei()) << "Connection init finished with errors" << thing->name() << connection->hostAddress().toString();
+            qCWarning(dcHuawei()) << "Connection init finished with errors" << thing->name() << connection->modbusTcpMaster()->hostAddress().toString();
             hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(monitor);
             connection->disconnectDevice();
             connection->deleteLater();
@@ -486,7 +486,7 @@ void IntegrationPluginHuawei::setupFusionSolar(ThingSetupInfo *info)
             qCDebug(dcHuawei()) << "Network device monitor for" << thing->name() << (reachable ? "is now reachable" : "is not reachable any more" );
 
             if (reachable && !thing->stateValue("connected").toBool()) {
-                connection->setHostAddress(monitor->networkDeviceInfo().address());
+                connection->modbusTcpMaster()->setHostAddress(monitor->networkDeviceInfo().address());
                 connection->connectDevice();
             } else if (!reachable) {
                 // Note: We disable autoreconnect explicitly and we will

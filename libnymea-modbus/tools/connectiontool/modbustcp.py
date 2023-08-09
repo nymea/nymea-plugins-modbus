@@ -71,7 +71,7 @@ def writePropertyGetSetMethodImplementationsTcp(fileDescriptor, className, regis
                 exit(1)
 
             writeLine(fileDescriptor, '    request.setValues(values);')
-            writeLine(fileDescriptor, '    return sendWriteRequest(request, m_slaveId);')
+            writeLine(fileDescriptor, '    return m_modbusTcpMaster->sendWriteRequest(request, m_slaveId);')
             writeLine(fileDescriptor, '}')
             writeLine(fileDescriptor)
 
@@ -90,7 +90,7 @@ def writePropertyUpdateMethodImplementationsTcp(fileDescriptor, className, regis
         writeLine(fileDescriptor, '    qCDebug(dc%s()) << "--> Read \\"%s\\" register:" << %s << "size:" << %s;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
         writeLine(fileDescriptor, '    QModbusReply *reply = read%s();' % (propertyName[0].upper() + propertyName[1:]))
         writeLine(fileDescriptor, '    if (!reply) {')
-        writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Error occurred while reading \\"%s\\" registers from" << hostAddress().toString() << errorString();' % (className, registerDefinition['description']))
+        writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Error occurred while reading \\"%s\\" registers from" << m_modbusTcpMaster->hostAddress().toString() << m_modbusTcpMaster->errorString();' % (className, registerDefinition['description']))
         writeLine(fileDescriptor, '        return;')
         writeLine(fileDescriptor, '    }')
         writeLine(fileDescriptor)
@@ -114,7 +114,7 @@ def writePropertyUpdateMethodImplementationsTcp(fileDescriptor, className, regis
         writeLine(fileDescriptor, '    });')
         writeLine(fileDescriptor)
         writeLine(fileDescriptor, '    connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){')
-        writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Modbus reply error occurred while updating \\"%s\\" registers from" << hostAddress().toString() << error << reply->errorString();' % (className, registerDefinition['description']))
+        writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Modbus reply error occurred while updating \\"%s\\" registers from" << m_modbusTcpMaster->hostAddress().toString() << error << reply->errorString();' % (className, registerDefinition['description']))
         writeLine(fileDescriptor, '    });')
         writeLine(fileDescriptor, '}')
         writeLine(fileDescriptor)
@@ -207,7 +207,7 @@ def writeInternalPropertyReadMethodImplementationsTcp(fileDescriptor, className,
             #Default to holdingRegister
             writeLine(fileDescriptor, '    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, %s, %s);' % (registerDefinition['address'], registerDefinition['size']))
 
-        writeLine(fileDescriptor, '    return sendReadRequest(request, m_slaveId);')
+        writeLine(fileDescriptor, '    return m_modbusTcpMaster->sendReadRequest(request, m_slaveId);')
         writeLine(fileDescriptor, '}')
         writeLine(fileDescriptor)
 
@@ -274,7 +274,7 @@ def writeInternalBlockReadMethodImplementationsTcp(fileDescriptor, className, bl
             #Default to holdingRegister
             writeLine(fileDescriptor, '    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, %s, %s);' % (blockStartAddress, blockSize))
 
-        writeLine(fileDescriptor, '    return sendReadRequest(request, m_slaveId);')
+        writeLine(fileDescriptor, '    return m_modbusTcpMaster->sendReadRequest(request, m_slaveId);')
 
         writeLine(fileDescriptor, '}')
         writeLine(fileDescriptor)
@@ -367,7 +367,7 @@ def writeInitMethodImplementationTcp(fileDescriptor, className, registerDefiniti
                 writeLine(fileDescriptor, '    qCDebug(dc%s()) << "--> Read init \\"%s\\" register:" << %s << "size:" << %s;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
                 writeLine(fileDescriptor, '    reply = read%s();' % (propertyName[0].upper() + propertyName[1:]))
                 writeLine(fileDescriptor, '    if (!reply) {')
-                writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Error occurred while reading \\"%s\\" registers from" << hostAddress().toString() << errorString();' % (className, registerDefinition['description']))
+                writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Error occurred while reading \\"%s\\" registers from" << m_modbusTcpMaster->hostAddress().toString() << m_modbusTcpMaster->errorString();' % (className, registerDefinition['description']))
                 writeLine(fileDescriptor, '        finishInitialization(false);')
                 writeLine(fileDescriptor, '        return false;')
                 writeLine(fileDescriptor, '    }')
@@ -398,7 +398,7 @@ def writeInitMethodImplementationTcp(fileDescriptor, className, registerDefiniti
                 writeLine(fileDescriptor, '    });')
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '    connect(reply, &QModbusReply::errorOccurred, m_initObject, [this, reply] (QModbusDevice::Error error){')
-                writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Modbus reply error occurred while reading \\"%s\\" registers from" << hostAddress().toString() << error << reply->errorString();' % (className, registerDefinition['description']))
+                writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Modbus reply error occurred while reading \\"%s\\" registers from" << m_modbusTcpMaster->hostAddress().toString() << error << reply->errorString();' % (className, registerDefinition['description']))
                 writeLine(fileDescriptor, '    });')
 
         # Read init blocks
@@ -495,7 +495,7 @@ def writeUpdateMethodTcp(fileDescriptor, className, registerDefinitions, blockDe
             break
 
     if updateRequired:
-        writeLine(fileDescriptor, '    if (!connected())')
+        writeLine(fileDescriptor, '    if (!m_modbusTcpMaster->connected())')
         writeLine(fileDescriptor, '        return false;')
         writeLine(fileDescriptor)
         writeLine(fileDescriptor, '    if (!m_pendingUpdateReplies.isEmpty()) {')
@@ -516,7 +516,7 @@ def writeUpdateMethodTcp(fileDescriptor, className, registerDefinitions, blockDe
                 writeLine(fileDescriptor, '    qCDebug(dc%s()) << "--> Read \\"%s\\" register:" << %s << "size:" << %s;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
                 writeLine(fileDescriptor, '    reply = read%s();' % (propertyName[0].upper() + propertyName[1:]))
                 writeLine(fileDescriptor, '    if (!reply) {')
-                writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Error occurred while reading \\"%s\\" registers from" << hostAddress().toString() << errorString();' % (className, registerDefinition['description']))
+                writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Error occurred while reading \\"%s\\" registers from" << m_modbusTcpMaster->hostAddress().toString() << m_modbusTcpMaster->errorString();' % (className, registerDefinition['description']))
                 writeLine(fileDescriptor, '        return false;')
                 writeLine(fileDescriptor, '    }')
                 writeLine(fileDescriptor)
@@ -546,7 +546,7 @@ def writeUpdateMethodTcp(fileDescriptor, className, registerDefinitions, blockDe
                 writeLine(fileDescriptor, '    });')
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '    connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){')
-                writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Modbus reply error occurred while reading \\"%s\\" registers from" << hostAddress().toString() << error << reply->errorString();' % (className, registerDefinition['description']))
+                writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Modbus reply error occurred while reading \\"%s\\" registers from" << m_modbusTcpMaster->hostAddress().toString() << error << reply->errorString();' % (className, registerDefinition['description']))
                 writeLine(fileDescriptor, '    });')
 
         # Read init blocks

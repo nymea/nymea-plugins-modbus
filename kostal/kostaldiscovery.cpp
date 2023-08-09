@@ -133,7 +133,7 @@ void KostalDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceI
     });
 
     // If we get any error...skip this host...
-    connect(connection, &KostalModbusTcpConnection::connectionErrorOccurred, this, [=](QModbusDevice::Error error){
+    connect(connection->modbusTcpMaster(), &ModbusTcpMaster::connectionErrorOccurred, this, [=](QModbusDevice::Error error){
         if (error != QModbusDevice::NoError) {
             qCDebug(dcKostal()) << "Discovery: Connection error on" << networkDeviceInfo.address().toString() << "Continue...";;
             cleanupConnection(connection);
