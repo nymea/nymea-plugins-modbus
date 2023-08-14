@@ -44,8 +44,6 @@ IntegrationPluginAmperfied::IntegrationPluginAmperfied()
 
 void IntegrationPluginAmperfied::discoverThings(ThingDiscoveryInfo *info)
 {
-    hardwareManager()->modbusRtuResource();
-
     if (info->thingClassId() == energyControlThingClassId) {
         EnergyControlDiscovery *discovery = new EnergyControlDiscovery(hardwareManager()->modbusRtuResource(), info);
 
