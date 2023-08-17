@@ -101,6 +101,10 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
     }
 
     CionModbusRtuConnection *cionConnection = new CionModbusRtuConnection(hardwareManager()->modbusRtuResource()->getModbusRtuMaster(uuid), address, this);
+    if (!info->isInitialSetup()) {
+        m_cionConnections.insert(thing, cionConnection);
+        info->finish(Thing::ThingErrorNoError);
+    }
 
     connect(cionConnection, &CionModbusRtuConnection::reachableChanged, thing, [cionConnection, thing](bool reachable){
         qCDebug(dcSchrack()) << "Reachable state changed" << reachable;
@@ -112,15 +116,16 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
     });
 
     connect(cionConnection, &CionModbusRtuConnection::initializationFinished, info, [=](bool success){
-        qCDebug(dcSchrack()) << "Initialisation finsihed" << success;
-        if (success) {
-            qCDebug(dcSchrack) << "DIP switche states:" << cionConnection->dipSwitches();
-            m_cionConnections.insert(thing, cionConnection);
-            info->finish(Thing::ThingErrorNoError);
-            info->thing()->setStateValue(cionCurrentVersionStateTypeId, cionConnection->firmwareVersion());
-        } else {
-            delete cionConnection;
-            info->finish(Thing::ThingErrorHardwareNotAvailable);
+        qCDebug(dcSchrack()) << "Initialisation finished" << success << "DIP switche states:" << cionConnection->dipSwitches();
+        if (info->isInitialSetup()) {
+            if (success) {
+                m_cionConnections.insert(thing, cionConnection);
+                info->finish(Thing::ThingErrorNoError);
+                info->thing()->setStateValue(cionCurrentVersionStateTypeId, cionConnection->firmwareVersion());
+            } else {
+                delete cionConnection;
+                info->finish(Thing::ThingErrorHardwareNotAvailable);
+            }
         }
     });
 
