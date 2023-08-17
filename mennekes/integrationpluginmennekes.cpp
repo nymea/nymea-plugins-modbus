@@ -37,6 +37,14 @@
 #include <network/networkdevicediscovery.h>
 #include <hardwaremanager.h>
 
+QHash<AmtronCompact20ModbusRtuConnection::SolarChargingMode, QString> solarChargingModeMap {
+    {AmtronCompact20ModbusRtuConnection::SolarChargingModeOff, "Off"},
+    {AmtronCompact20ModbusRtuConnection::SolarChargingModeStandard, "Standard"},
+    {AmtronCompact20ModbusRtuConnection::SolarChargingModeSunshine, "Sunshine"},
+    {AmtronCompact20ModbusRtuConnection::SolarChargingModeSunshinePlus, "Sunshine+"}
+};
+
+
 IntegrationPluginMennekes::IntegrationPluginMennekes()
 {
 
@@ -432,6 +440,18 @@ void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
                 }
             });
         }
+        if (info->action().actionTypeId() == amtronCompact20SolarChargingModeActionTypeId) {
+            QString solarChargingMode = info->action().paramValue(amtronCompact20SolarChargingModeActionSolarChargingModeParamTypeId).toString();
+            ModbusRtuReply *reply = amtronCompact20Connection->setSolarChargingMode(solarChargingModeMap.key(solarChargingMode));
+            connect(reply, &ModbusRtuReply::finished, info, [info, reply, solarChargingMode](){
+                if (reply->error() == ModbusRtuReply::NoError) {
+                    info->thing()->setStateValue(amtronCompact20SolarChargingModeStateTypeId, solarChargingMode);
+                    info->finish(Thing::ThingErrorNoError);
+                } else {
+                    info->finish(Thing::ThingErrorHardwareFailure);
+                }
+            });
+        }
     }
 }
 
@@ -810,6 +830,7 @@ void IntegrationPluginMennekes::setupAmtronCompact20Connection(ThingSetupInfo *i
             info->thing()->setStateValue(amtronCompact20CurrentVersionStateTypeId, compact20Connection->firmwareVersion());
             info->thing()->setStateValue(amtronCompact20PowerStateTypeId, compact20Connection->chargingReleaseEnergyManager() == 1);
             info->thing()->setStateValue(amtronCompact20MaxChargingCurrentStateTypeId, qRound(compact20Connection->chargingCurrentEnergyManager()));
+            info->thing()->setStateValue(amtronCompact20SolarChargingModeStateTypeId, solarChargingModeMap.value(compact20Connection->solarChargingMode()));
         }
     });
 
@@ -921,8 +942,12 @@ void IntegrationPluginMennekes::setupAmtronCompact20Connection(ThingSetupInfo *i
         thing->setStateValue(amtronCompact20SessionEnergyStateTypeId, chargedEnergySession);
     });
 
-    connect(compact20Connection, &AmtronCompact20ModbusRtuConnection::chargingReleaseEnergyManagerChanged, this, [thing](quint16 chargingReleaseEnergyManager){
+    connect(compact20Connection, &AmtronCompact20ModbusRtuConnection::chargingReleaseEnergyManagerChanged, thing, [thing](quint16 chargingReleaseEnergyManager){
         thing->setStateValue(amtronCompact20PowerStateTypeId, chargingReleaseEnergyManager == 1);
+    });
+
+    connect(compact20Connection, &AmtronCompact20ModbusRtuConnection::solarChargingModeChanged, thing, [thing](AmtronCompact20ModbusRtuConnection::SolarChargingMode solarChargingMode){
+        thing->setStateValue(amtronCompact20SolarChargingModeStateTypeId, solarChargingModeMap.value(solarChargingMode));
     });
 
 }

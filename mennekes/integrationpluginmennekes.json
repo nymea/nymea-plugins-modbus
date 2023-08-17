@@ -332,6 +332,21 @@
                             "type": "double",
                             "unit": "KiloWattHour",
                             "defaultValue": 0
+                        },
+                        {
+                            "id": "572e45f1-1146-497a-8b00-704e0db50379",
+                            "name": "solarChargingMode",
+                            "displayName": "Solar charging mode",
+                            "displayNameAction": "Set solar charging mode",
+                            "type": "QString",
+                            "possibleValues": [
+                                "Off",
+                                "Standard",
+                                "Sunshine",
+                                "Sunshine+"
+                            ],
+                            "defaultValue": "Off",
+                            "writable": true
                         }
                     ]
                 }
