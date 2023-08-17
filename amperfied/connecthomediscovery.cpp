@@ -85,6 +85,13 @@ void ConnectHomeDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDe
                 cleanupConnection(connection);
                 return;
             }
+
+            if (connection->version() < 0x100 || connection->version() > 0x2ff) {
+                qCInfo(dcAmperfied()) << "Skipping invalid/unsupported AMPERFIED version" << connection->version();
+                cleanupConnection(connection);
+                return;
+            }
+
             Result result;
             result.firmwareVersion = connection->version();
             result.networkDeviceInfo = networkDeviceInfo;

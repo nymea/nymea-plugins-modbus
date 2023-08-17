@@ -44,8 +44,6 @@ IntegrationPluginAmperfied::IntegrationPluginAmperfied()
 
 void IntegrationPluginAmperfied::discoverThings(ThingDiscoveryInfo *info)
 {
-    hardwareManager()->modbusRtuResource();
-
     if (info->thingClassId() == energyControlThingClassId) {
         EnergyControlDiscovery *discovery = new EnergyControlDiscovery(hardwareManager()->modbusRtuResource(), info);
 
@@ -270,6 +268,11 @@ void IntegrationPluginAmperfied::setupRtuConnection(ThingSetupInfo *info)
 {
     Thing *thing = info->thing();
     ModbusRtuMaster *master = hardwareManager()->modbusRtuResource()->getModbusRtuMaster(thing->paramValue(energyControlThingRtuMasterParamTypeId).toUuid());
+    if (!master) {
+        qCWarning(dcAmperfied()) << "The Modbus Master is not available any more.";
+        info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("The modbus RTU connection is not available."));
+        return;
+    }
     quint16 slaveId = thing->paramValue(energyControlThingSlaveIdParamTypeId).toUInt();
     AmperfiedModbusRtuConnection *connection = new AmperfiedModbusRtuConnection(master, slaveId, thing);
 
