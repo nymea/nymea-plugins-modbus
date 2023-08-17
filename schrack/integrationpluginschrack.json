@@ -32,6 +32,16 @@
                             "readOnly": true
                         }
                     ],
+                    "settingsTypes": [
+                        {
+                            "id": "3b4f54d8-8dbf-4d72-837a-a444941e08a2",
+                            "name": "phases",
+                            "displayName": "Phases connected",
+                            "type": "QString",
+                            "allowedValues": ["A", "B", "C", "AB", "BC", "AC", "ABC"],
+                            "defaultValue": "A"
+                        }
+                    ],
                     "stateTypes": [
                         {
                             "id": "b7aa8e49-a6c0-4b48-b65e-47259686185f",
@@ -80,6 +90,23 @@
                             "displayNameEvent": "Charging started or stopped",
                             "type": "bool",
                             "defaultValue": false
+                        },
+                        {
+                            "id": "0115466c-449c-4a9f-81a1-2f806a51e313",
+                            "name": "phaseCount",
+                            "displayName": "Active phases",
+                            "type": "uint",
+                            "minValue": 1,
+                            "maxValue": 3,
+                            "defaultValue": 1
+                        },
+                        {
+                            "id": "879345c0-2c18-4b18-964b-d87363dda382",
+                            "name": "usedPhases",
+                            "displayName": "Used phases",
+                            "type": "QString",
+                            "possibleValues": ["A", "B", "C", "AB", "BC", "AC", "ABC"],
+                            "defaultValue": "A"
                         },
                         {
                             "id": "33780b19-4855-4b5c-bd84-cec8400309be",
