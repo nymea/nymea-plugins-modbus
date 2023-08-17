@@ -1,3 +1,24 @@
+nymea-plugins-modbus (1.8.3) jammy; urgency=medium
+
+  [ Simon Stürz ]
+  * Webasto: Add support fot the Webasto NEXT wallbox
+
+  [ Michael Zanetti ]
+  * Mennekes: Add solarChargingMode state to Compact20s
+  * SMA: Add support for batteries
+  * Mennekes: Use voltage instead of current to determine connected
+    phases
+  * Schrack: Fix a crash when the setup of the wallbox fails
+
+  [ Simon Stürz ]
+  * Schrack: Add setting for connected phases
+
+  [ Michael Zanetti ]
+  * Amperfied: Fix a crash when the Modbus RTU Master is removed
+  * Schrack: Ignore bogus CP signal state which happens occationally
+
+ -- jenkins <developer@nymea.io>  Thu, 17 Aug 2023 14:11:27 +0200
+
 nymea-plugins-modbus (1.8.2) jammy; urgency=medium
 
   [ Simon Stürz ]
