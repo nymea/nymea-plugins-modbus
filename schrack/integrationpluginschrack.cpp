@@ -161,6 +161,10 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
 
     connect(cionConnection, &CionModbusRtuConnection::cpSignalStateChanged, thing, [=](quint16 cpSignalState){
         qCDebug(dcSchrack()) << "CP Signal state changed:" << (char)cpSignalState;
+        if (cpSignalState < 65 || cpSignalState > 68) {
+            qCWarning(dcSchrack()) << "Ignoring bogus CP signal state value" << cpSignalState;
+            return;
+        }
         thing->setStateValue(cionPluggedInStateTypeId, cpSignalState >= 66);
     });
 
