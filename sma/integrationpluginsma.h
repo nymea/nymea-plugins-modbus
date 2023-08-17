@@ -42,7 +42,8 @@
 #include "speedwire/speedwireinverter.h"
 #include "speedwire/speedwireinterface.h"
 
-#include "smainvertermodbustcpconnection.h"
+#include "smasolarinvertermodbustcpconnection.h"
+#include "smabatteryinvertermodbustcpconnection.h"
 
 class IntegrationPluginSma: public IntegrationPlugin {
     Q_OBJECT
@@ -68,7 +69,8 @@ private slots:
 
     void setupRefreshTimer();
 
-    void setupModbusInverterConnection(ThingSetupInfo *info);
+    void setupModbusSolarInverterConnection(ThingSetupInfo *info);
+    void setupModbusBatteryInverterConnection(ThingSetupInfo *info);
 
 private:
     PluginTimer *m_refreshTimer = nullptr;
@@ -78,7 +80,8 @@ private:
     QHash<Thing *, SunnyWebBox *> m_sunnyWebBoxes;
     QHash<Thing *, SpeedwireMeter *> m_speedwireMeters;
     QHash<Thing *, SpeedwireInverter *> m_speedwireInverters;
-    QHash<Thing *, SmaInverterModbusTcpConnection *> m_modbusInverters;
+    QHash<Thing *, SmaSolarInverterModbusTcpConnection *> m_modbusSolarInverters;
+    QHash<Thing *, SmaBatteryInverterModbusTcpConnection *> m_modbusBatteryInverters;
 
     quint32 m_localSerialNumber = 0;
 
@@ -89,7 +92,8 @@ private:
     void markSpeedwireMeterAsDisconnected(Thing *thing);
     void markSpeedwireInverterAsDisconnected(Thing *thing);
     void markSpeedwireBatteryAsDisconnected(Thing *thing);
-    void markModbusInverterAsDisconnected(Thing *thing);
+    void markModbusSolarInverterAsDisconnected(Thing *thing);
+    void markModbusBatteryInverterAsDisconnected(Thing *thing);
 
     quint64 getLocalSerialNumber();
 

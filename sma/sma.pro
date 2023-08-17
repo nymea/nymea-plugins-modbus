@@ -3,13 +3,14 @@ include(../plugins.pri)
 QT += network
 
 # Generate modbus connection
-MODBUS_CONNECTIONS += sma-inverter-registers.json
+MODBUS_CONNECTIONS += sma-solar-inverter-registers.json sma-battery-inverter-registers.json
 MODBUS_TOOLS_CONFIG += VERBOSE
 include(../modbus.pri)
 
 SOURCES += \
     integrationpluginsma.cpp \
-    modbus/smamodbusdiscovery.cpp \
+    modbus/smamodbusbatteryinverterdiscovery.cpp \
+    modbus/smamodbussolarinverterdiscovery.cpp \
     speedwire/speedwirediscovery.cpp \
     speedwire/speedwireinterface.cpp \
     speedwire/speedwireinverter.cpp \
@@ -21,7 +22,8 @@ SOURCES += \
 
 HEADERS += \
     integrationpluginsma.h \
-    modbus/smamodbusdiscovery.h \
+    modbus/smamodbusbatteryinverterdiscovery.h \
+    modbus/smamodbussolarinverterdiscovery.h \
     sma.h \
     speedwire/speedwire.h \
     speedwire/speedwirediscovery.h \
