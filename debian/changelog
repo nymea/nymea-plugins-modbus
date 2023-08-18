@@ -1,3 +1,13 @@
+nymea-plugins-modbus (1.8.4) jammy; urgency=medium
+
+  [ Simon Stürz ]
+  * Webasto: Add support fot the Webasto NEXT wallbox
+
+  [ Michael Zanetti ]
+  * SMA: Add support for batteries
+
+ -- jenkins <developer@nymea.io>  Fri, 18 Aug 2023 17:12:30 +0200
+
 nymea-plugins-modbus (1.8.3) jammy; urgency=medium
 
   [ Simon Stürz ]
