@@ -28,8 +28,8 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef CONNECTHOMEDISCOVERY_H
-#define CONNECTHOMEDISCOVERY_H
+#ifndef AMPERFIEDCONNECTDISCOVERY_H
+#define AMPERFIEDCONNECTDISCOVERY_H
 
 #include <QObject>
 #include <QTimer>
@@ -38,18 +38,19 @@
 
 #include "amperfiedmodbustcpconnection.h"
 
-class ConnectHomeDiscovery : public QObject
+class AmperfiedConnectDiscovery : public QObject
 {
     Q_OBJECT
 public:
-    explicit ConnectHomeDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, QObject *parent = nullptr);
+    explicit AmperfiedConnectDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, QObject *parent = nullptr);
     struct Result {
         quint16 firmwareVersion;
         quint16 slaveId;
+        QString modelName;
         NetworkDeviceInfo networkDeviceInfo;
     };
 
-    void startDiscovery();
+    void startDiscovery(const QString &nameFilter);
 
     QList<Result> discoveryResults() const;
 
@@ -61,6 +62,7 @@ private:
 
     QTimer m_gracePeriodTimer;
     QDateTime m_startDateTime;
+    QString m_nameFilter;
 
     QList<AmperfiedModbusTcpConnection *> m_connections;
 
@@ -72,4 +74,4 @@ private:
     void finishDiscovery();
 };
 
-#endif // CONNECTHOMEDISCOVERY_H
+#endif // AMPERFIEDCONNECTDISCOVERY_H

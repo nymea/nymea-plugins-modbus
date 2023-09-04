@@ -4,6 +4,8 @@ Connects nymea to a Amperfied/Heidelberg wallboxes. Currently supported models a
 
 * Amperfied Energy Control
 * Amperfied connect.home
+* Amperfied connect.solar
+* Amperfied connect.business
 
 # Requirements
 
@@ -15,6 +17,7 @@ The Modbus RTU must be configured with a baud rate of 19200, even parity, 8 data
 In order to allow nymea to automatically discover the wallbox on the bus, the Modbus slave ID must be in the range of 1 - 20.
 If a higher slave ID number is required, the manual setup is to be used.
 
-## Amperfied connect.home
+## Amperfied connect.home/solar/business
+
 The Amperfied connect.home is a Modbus TCP device. This means it must be connected to the same network the nymea system is in.
 
