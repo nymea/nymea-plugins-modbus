@@ -298,8 +298,9 @@ void IntegrationPluginSchrack::executeAction(ThingActionInfo *info)
 {
     CionModbusRtuConnection *cionConnection = m_cionConnections.value(info->thing());
     if (info->action().actionTypeId() == cionPowerActionTypeId) {
-        qCDebug(dcSchrack()) << "Setting charging enabled:" << (info->action().paramValue(cionPowerActionPowerParamTypeId).toBool() ? 1 : 0);
-        int maxSetPoint = info->thing()->stateValue(cionMaxChargingCurrentStateTypeId).toUInt();
+        bool enabled = info->action().paramValue(cionPowerActionPowerParamTypeId).toBool();
+        int maxChargingCurrent = enabled ? info->thing()->stateValue(cionMaxChargingCurrentStateTypeId).toUInt() : 0;
+        qCDebug(dcSchrack()) << "Setting charging enabled:" << (enabled ? 1 : 0) << "(charging current setpoint:" << maxChargingCurrent << ")";
 
         // Note: If the wallbox has an RFID reader connected, writing register 100 (chargingEnabled) won't work as the RFID
         // reader takes control over it. However, if there's no RFID reader connected, we'll have to set it ourselves.
@@ -309,31 +310,35 @@ void IntegrationPluginSchrack::executeAction(ThingActionInfo *info)
         // * In setups without RFID reader, we set 100 to true/false. Note that DIP switches 1 & 2 need to be OFF for register
         //   100 to be writable.
 
-        if (info->action().paramValue(cionPowerActionPowerParamTypeId).toBool()) {
-            // In case there's no RFID reader
-            cionConnection->setChargingEnabled(1);
 
-            // And restore the charging current in case setting the above fails
-            ModbusRtuReply *reply = cionConnection->setChargingCurrentSetpoint(maxSetPoint);
-            waitForActionFinish(info, reply, cionPowerStateTypeId, true);
-        } else {
-            // In case there's no RFID reader
-            cionConnection->setChargingEnabled(0);
+        // In case there's no RFID reader
+        ModbusRtuReply *reply = cionConnection->setChargingEnabled(enabled);
+        connect(reply, &ModbusRtuReply::finished, info, [reply](){
+            qCDebug(dcSchrack) << "Charging enabled command reply:" << reply->error() << reply->errorString();
+        });
 
-            // And set the maxChargingCurrent to 0 in case the above fails
-            ModbusRtuReply *reply = cionConnection->setChargingCurrentSetpoint(0);
-            waitForActionFinish(info, reply, cionPowerStateTypeId, false);
-        }
+        // And restore the charging current in case setting the above fails
+        reply = cionConnection->setChargingCurrentSetpoint(maxChargingCurrent);
+        waitForActionFinish(info, reply, cionPowerStateTypeId, enabled);
+        connect(reply, &ModbusRtuReply::finished, info, [reply](){
+            qCDebug(dcSchrack) << "Implicit max charging current setpoint command reply:" << reply->error() << reply->errorString();
+        });
+
 
     } else if (info->action().actionTypeId() == cionMaxChargingCurrentActionTypeId) {
         // If charging is set to enabled, we'll write the value to the wallbox
+        uint maxChargingCurrent = info->action().paramValue(cionMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toUInt();
         if (info->thing()->stateValue(cionPowerStateTypeId).toBool()) {
-            int maxChargingCurrent = info->action().paramValue(cionMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toUInt();
+            qCDebug(dcSchrack) << "Charging is enabled. Applying max charging current setpoint of" << maxChargingCurrent << "to wallbox";
             ModbusRtuReply *reply = cionConnection->setChargingCurrentSetpoint(maxChargingCurrent);
             waitForActionFinish(info, reply, cionMaxChargingCurrentStateTypeId, maxChargingCurrent);
+            connect(reply, &ModbusRtuReply::finished, info, [reply](){
+                qCDebug(dcSchrack) << "Charging current setpoint command reply:" << reply->error() << reply->errorString();
+            });
 
         } else { // we'll just memorize what the user wants in our state and write it when enabled is set to true
-            info->thing()->setStateValue(cionMaxChargingCurrentStateTypeId, info->action().paramValue(cionMaxChargingCurrentActionMaxChargingCurrentParamTypeId));
+            qCDebug(dcSchrack) << "Charging is disabled, storing max charging current of" << maxChargingCurrent << "to state";
+            info->thing()->setStateValue(cionMaxChargingCurrentStateTypeId, maxChargingCurrent);
             info->finish(Thing::ThingErrorNoError);
         }
     }

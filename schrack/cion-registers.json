@@ -16,7 +16,7 @@
                     "type": "uint16",
                     "registerType": "holdingRegister",
                     "readSchedule": "update",
-                    "description": "Current charging Ampere",
+                    "description": "Current charging current E3",
                     "unit": "A",
                     "defaultValue": 6,
                     "access": "R"
@@ -28,7 +28,7 @@
                     "type": "uint16",
                     "registerType": "holdingRegister",
                     "readSchedule": "update",
-                    "description": "Maximum charging current",
+                    "description": "Maximum charging current E3",
                     "unit": "A",
                     "defaultValue": 32,
                     "access": "R"
