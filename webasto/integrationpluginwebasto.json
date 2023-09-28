@@ -431,6 +431,124 @@
                             "defaultValue": ""
                         }
                     ]
+                },
+                {
+                    "name": "webastoUnite",
+                    "displayName": "Webasto Unite",
+                    "id": "f7598439-a794-44d4-ae51-47ab40189d61",
+                    "createMethods": ["discovery", "user"],
+                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "99aedef2-1b23-4ab8-bee4-7e8b57b8fa18",
+                            "name":"macAddress",
+                            "displayName": "MAC address",
+                            "type": "QString",
+                            "inputType": "MacAddress",
+                            "defaultValue": ""
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "b670620e-c582-4e6e-8313-32a0f7d2c11c",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "dfa057e0-4e25-48da-967f-2821356ad44f",
+                            "name": "pluggedIn",
+                            "displayName": "Plugged in",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "c31ef8a1-4254-4507-bef5-1e959936bd3f",
+                            "name": "charging",
+                            "displayName": "Charging",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "962762ac-3a94-44ac-b591-1060a68a1376",
+                            "name": "phaseCount",
+                            "displayName": "Connected phases",
+                            "type": "uint",
+                            "minValue": 1,
+                            "maxValue": 3,
+                            "defaultValue": 3
+                        },
+                        {
+                            "id": "4cd2d119-0198-4f94-8476-56eebb0b6867",
+                            "name": "desiredPhaseCount",
+                            "displayName": "Desired phase count",
+                            "displayNameAction": "Set desired phase count",
+                            "type": "uint",
+                            "minValue": 1,
+                            "maxValue": 3,
+                            "possibleValues": [1, 3],
+                            "defaultValue": 3,
+                            "writable": true
+                        },
+                        {
+                            "id": "0d70ae14-15d7-4b1a-a621-2d0bc0bc28f1",
+                            "name": "currentPower",
+                            "displayName": "Active power",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "4d5fc8e4-e5f0-46b9-ba01-20e176312e05",
+                            "name": "totalEnergyConsumed",
+                            "displayName": "Total consumed energy",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0.0,
+                            "cached": true
+                        },
+                        {
+                            "id": "ebc0e32e-648e-468f-9566-585768a0d970",
+                            "name": "power",
+                            "displayName": "Charging enabled",
+                            "displayNameAction": "Set charging enabled",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "writable": true
+                        },
+                        {
+                            "id": "04aaf21a-9fd3-46f1-8fca-8cbed2117737",
+                            "name": "maxChargingCurrent",
+                            "displayName": "Maximum charging current",
+                            "displayNameAction": "Set maximum charging current",
+                            "type": "uint",
+                            "unit": "Ampere",
+                            "minValue": 6,
+                            "maxValue": 32,
+                            "defaultValue": 6,
+                            "writable": true
+                        },
+                        {
+                            "id": "106b2bd3-4bd5-4774-8571-d64a2d5bf78b",
+                            "name": "sessionEnergy",
+                            "displayName": "Session energy",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "ac1917a8-3445-4774-b0ec-042ebc7258aa",
+                            "name": "version",
+                            "displayName": "Firmware version",
+                            "type": "QString",
+                            "defaultValue": ""
+                        }
+                    ]
                 }
             ]
         }

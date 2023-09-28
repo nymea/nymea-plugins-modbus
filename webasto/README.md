@@ -4,6 +4,7 @@ Connects nymea to Webasto wallboxes. Currently supported models:
 
 * Webasto Live
 * Webasto NEXT
+* Webasto Unite
 
 ## Requirements
 
