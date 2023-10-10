@@ -241,7 +241,7 @@ void IntegrationPluginHuawei::setupThing(ThingSetupInfo *info)
             }
         });
 
-        connect(connection, &HuaweiModbusRtuConnection::powerMeterEnergyReturnedChanged, thing, [this, thing](qint32 powerMeterEnergyReturned){
+        connect(connection, &HuaweiModbusRtuConnection::powerMeterEnergyReturnedChanged, thing, [this, thing](float powerMeterEnergyReturned){
             Things meterThings = myThings().filterByParentId(thing->id()).filterByThingClassId(huaweiMeterThingClassId);
             if (!meterThings.isEmpty()) {
                 qCDebug(dcHuawei()) << "Meter Total Energy Returned changed" << powerMeterEnergyReturned << "KWh";
@@ -249,7 +249,7 @@ void IntegrationPluginHuawei::setupThing(ThingSetupInfo *info)
             }
         });
 
-        connect(connection, &HuaweiModbusRtuConnection::powerMeterEnergyAquiredChanged, thing, [this, thing](qint32 powerMeterEnergyAquired){
+        connect(connection, &HuaweiModbusRtuConnection::powerMeterEnergyAquiredChanged, thing, [this, thing](float powerMeterEnergyAquired){
             Things meterThings = myThings().filterByParentId(thing->id()).filterByThingClassId(huaweiMeterThingClassId);
             if (!meterThings.isEmpty()) {
                 qCDebug(dcHuawei()) << "Meter power Energy Aquired changed" << powerMeterEnergyAquired << "KWh";
