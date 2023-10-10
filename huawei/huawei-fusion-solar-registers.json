@@ -248,6 +248,32 @@
             "access": "RO"
         },
         {
+            "id": "powerMeterEnergyReturned",
+            "address": 37119,
+            "size": 2,
+            "type": "int32",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": " Positive active electricity - To Grid",
+            "unit": "kWh",
+            "staticScaleFactor": -2,
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "powerMeterEnergyAquired",
+            "address": 37121,
+            "size": 2,
+            "type": "int32",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "Reverse active power - From Grid",
+            "unit": "kWh",
+            "staticScaleFactor": -2,
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
             "id": "lunaBattery1Status",
             "address": 37000,
             "size": 1,
