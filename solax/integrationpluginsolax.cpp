@@ -197,7 +197,7 @@ void IntegrationPluginSolax::setupThing(ThingSetupInfo *info)
                 // Try once to reconnect the device
                 solaxConnection->reconnectDevice();
             } else {
-                // Start update cycle
+                qCInfo(dcSolax()) << "Connection initialized successfully for" << thing;
                 solaxConnection->update();
             }
         });
@@ -309,9 +309,6 @@ void IntegrationPluginSolax::setupThing(ThingSetupInfo *info)
                     batteryThing->setStateValue(solaxBatteryChargingStateStateTypeId, "charging");
                 }
             }
-
-            // Run the next update cycle
-            solaxConnection->update();
         });
 
         connect(thing, &Thing::settingChanged, solaxConnection, [this, thing](const ParamTypeId &paramTypeId, const QVariant &value){
@@ -410,6 +407,28 @@ void IntegrationPluginSolax::setupThing(ThingSetupInfo *info)
 
 void IntegrationPluginSolax::postSetupThing(Thing *thing)
 {
+
+    if (thing->thingClassId() == solaxInverterTcpThingClassId) {
+
+        // Create the update timer if not already set up
+        if (!m_refreshTimer) {
+            qCDebug(dcSolax()) << "Starting plugin timer...";
+            m_refreshTimer = hardwareManager()->pluginTimerManager()->registerTimer(2);
+            connect(m_refreshTimer, &PluginTimer::timeout, this, [this] {
+                foreach(SolaxModbusTcpConnection *connection, m_tcpConnections) {
+                    if (connection->initializing())
+                        continue;
+
+                    //qCDebug(dcSolax()) << "Update connection" << connection->modbusTcpMaster()->hostAddress().toString();
+                    connection->update();
+                }
+            });
+
+            m_refreshTimer->start();
+        }
+        return;
+    }
+
     if (thing->thingClassId() == solaxMeterThingClassId || thing->thingClassId() == solaxBatteryThingClassId || thing->thingClassId() == solaxInverterChildThingClassId) {
         Thing *connectionThing = myThings().findById(thing->parentId());
         if (connectionThing) {
@@ -432,6 +451,11 @@ void IntegrationPluginSolax::thingRemoved(Thing *thing)
     if (m_monitors.contains(thing))
         hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
 
+    if (myThings().isEmpty() && m_refreshTimer) {
+        qCDebug(dcSolax()) << "Stopping refresh timer";
+        hardwareManager()->pluginTimerManager()->unregisterTimer(m_refreshTimer);
+        m_refreshTimer = nullptr;
+    }
 }
 
 Thing *IntegrationPluginSolax::getMeterThing(Thing *parentThing, uint meterId)

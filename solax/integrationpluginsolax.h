@@ -56,6 +56,8 @@ public:
     void thingRemoved(Thing *thing) override;
 
 private:
+    PluginTimer *m_refreshTimer = nullptr;
+
     QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
     QHash<Thing *, SolaxModbusTcpConnection *> m_tcpConnections;
     QHash<Thing *, SolaxModbusRtuConnection *> m_rtuConnections;

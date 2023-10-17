@@ -75,6 +75,7 @@ def writeTcpHeaderFile():
     writeLine(headerFile, '    quint16 slaveId() const;')
     writeLine(headerFile)
     writeLine(headerFile, '    bool reachable() const;')
+    writeLine(headerFile, '    bool initializing() const;')
     writeLine(headerFile)
     
     # Write init and update method declarations
@@ -180,6 +181,7 @@ def writeTcpHeaderFile():
         writeLine(headerFile)
 
     writeLine(headerFile, '    bool m_reachable = false;')
+    writeLine(headerFile, '    bool m_initializing = false;')
     writeLine(headerFile, '    QModbusReply *m_checkRechableReply = nullptr;')
     writeLine(headerFile, '    uint m_checkReachableRetries = 0;')
     writeLine(headerFile, '    uint m_checkReachableRetriesCount = 0;')
@@ -270,6 +272,12 @@ def writeTcpSourceFile():
     writeLine(sourceFile, 'bool %s::reachable() const' % (className))
     writeLine(sourceFile, '{')
     writeLine(sourceFile, '    return m_reachable;')
+    writeLine(sourceFile, '}')
+    writeLine(sourceFile)
+
+    writeLine(sourceFile, 'bool %s::initializing() const' % (className))
+    writeLine(sourceFile, '{')
+    writeLine(sourceFile, '    return m_initializing;')
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
@@ -423,6 +431,7 @@ def writeTcpSourceFile():
     writeLine(sourceFile, '        qCWarning(dc%s()) << "Initialization finished of %s" << m_modbusTcpMaster->hostAddress().toString() << "failed.";' % (className, className))
     writeLine(sourceFile, '    }')
     writeLine(sourceFile)
+    writeLine(sourceFile, '    m_initializing = false;')
 
     if queuedRequests:
         writeLine(sourceFile, '    m_initRequestQueue.clear();')
@@ -460,6 +469,7 @@ def writeTcpSourceFile():
     writeLine(sourceFile, '            m_communicationWorking = false;')
     writeLine(sourceFile, '            m_communicationFailedCounter = 0;')
     writeLine(sourceFile, '            m_checkReachableRetriesCount = 0;')
+    writeLine(sourceFile, '            m_initializing = false;')
 
     if queuedRequests:
         writeLine(sourceFile, '            m_updateRequestQueue.clear();')

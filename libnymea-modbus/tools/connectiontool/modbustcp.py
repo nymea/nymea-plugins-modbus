@@ -590,6 +590,8 @@ def writeInitMethodImplementationTcp(fileDescriptor, className, registerDefiniti
             writeLine(fileDescriptor, '        return false;')
             writeLine(fileDescriptor, '    }')
             writeLine(fileDescriptor)
+            writeLine(fileDescriptor, '    m_initializing = true;')
+            writeLine(fileDescriptor)
 
             # Read individual registers
             for registerDefinition in registerDefinitions:
@@ -613,6 +615,8 @@ def writeInitMethodImplementationTcp(fileDescriptor, className, registerDefiniti
             writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Tried to initialize but the init process is already running.";' % className)
             writeLine(fileDescriptor, '        return false;')
             writeLine(fileDescriptor, '    }')
+            writeLine(fileDescriptor)
+            writeLine(fileDescriptor, '    m_initializing = true;')
             writeLine(fileDescriptor)
             writeLine(fileDescriptor, '    // Parent object for the init process')
             writeLine(fileDescriptor, '    m_initObject = new QObject(this);')
@@ -744,6 +748,7 @@ def writeInitMethodImplementationTcp(fileDescriptor, className, registerDefiniti
 
     else:
         writeLine(fileDescriptor, '    // No init registers defined. Nothing to be done and we are finished.')
+        writeLine(fileDescriptor, '    m_initializing = false;')
         writeLine(fileDescriptor, '    emit initializationFinished(true);')
 
     writeLine(fileDescriptor, '    return true;')
