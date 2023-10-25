@@ -251,9 +251,13 @@ void IntegrationPluginSolax::setupThing(ThingSetupInfo *info)
             }
 
             // Update inverter states
-            thing->setStateValue(solaxInverterTcpCurrentPowerStateTypeId, -solaxConnection->inverterPower());
-            thing->setStateValue(solaxInverterTcpCurrentStateTypeId, -solaxConnection->inverterCurrent());
-            thing->setStateValue(solaxInverterTcpCurrentVoltageStateTypeId, solaxConnection->inverterVoltage());
+
+            int inverterPower = solaxConnection->powerDc1() + solaxConnection->powerDc1();
+            int inverterVoltage = solaxConnection->pvVoltage1() + solaxConnection->pvVoltage2();
+            int inverterCurrent = solaxConnection->pvCurrent1() + solaxConnection->pvCurrent2();
+            thing->setStateValue(solaxInverterTcpCurrentPowerStateTypeId, -inverterPower);
+            thing->setStateValue(solaxInverterTcpCurrentStateTypeId, -inverterCurrent);
+            thing->setStateValue(solaxInverterTcpCurrentVoltageStateTypeId, inverterVoltage);
             thing->setStateValue(solaxInverterTcpTemperatureStateTypeId, solaxConnection->temperature());
             thing->setStateValue(solaxInverterTcpFrequencyStateTypeId, solaxConnection->inverterFrequency());
             thing->setStateValue(solaxInverterTcpTotalEnergyProducedStateTypeId, solaxConnection->totalEnergyProduced());
