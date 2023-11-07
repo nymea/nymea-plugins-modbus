@@ -84,6 +84,8 @@ private:
     QHash<Thing *, QPair<QString, QDateTime>> m_webastoUniteTokens;
     bool validTokenAvailable(Thing *thing);
     QNetworkReply *requestWebstoUniteAccessToken(const QHostAddress &address);
+    QNetworkReply *requestWebstoUnitePhaseCountChange(const QHostAddress &address, const QString &accessToken, uint desiredPhaseCount);
+    void executeWebastoUnitePhaseCountAction(ThingActionInfo *info);
 
 private slots:
     void onConnectionChanged(bool connected);

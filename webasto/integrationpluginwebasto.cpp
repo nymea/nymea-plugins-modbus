@@ -335,7 +335,7 @@ void IntegrationPluginWebasto::postSetupThing(Thing *thing)
     qCDebug(dcWebasto()) << "Post setup thing" << thing->name();
     if (!m_pluginTimer) {
         qCDebug(dcWebasto()) << "Setting up refresh timer for Webasto connections";
-        m_pluginTimer = hardwareManager()->pluginTimerManager()->registerTimer(1);
+        m_pluginTimer = hardwareManager()->pluginTimerManager()->registerTimer(2);
         connect(m_pluginTimer, &PluginTimer::timeout, this, [this] {
 
             foreach(Webasto *connection, m_webastoLiveConnections) {
@@ -555,29 +555,51 @@ void IntegrationPluginWebasto::executeAction(ThingActionInfo *info)
             });
         }
         if (info->action().actionTypeId() == webastoUniteDesiredPhaseCountActionTypeId) {
-            quint8 desiredPhaseCount = info->action().paramValue(webastoUniteDesiredPhaseCountActionDesiredPhaseCountParamTypeId).toUInt();
-            QUrl url;
-            url.setHost(evc04Connection->modbusTcpMaster()->hostAddress().toString());
-            url.setScheme("http");
-            url.setPath("/api/configuration-updates");
-            QNetworkRequest request(url);
-            QVariantList data = {
-                QVariantMap {
-                    {"fieldKey", "installationSettings.currentLimiterPhase"},
-                    {"value", desiredPhaseCount == 3 ? 1 : 0}
-                }
-            };
-            QNetworkReply *reply = hardwareManager()->networkManager()->post(request, QJsonDocument::fromVariant(data).toJson());
-            connect(reply, &QNetworkReply::finished, reply, &QNetworkReply::deleteLater);
-            connect(reply, &QNetworkReply::finished, info, [=](){
-                if (reply->error() != QNetworkReply::NoError) {
-                    qCWarning(dcWebasto()) << "Error setting desired phase count:" << reply->error() << reply->errorString();
-                    info->finish(Thing::ThingErrorHardwareFailure);
-                    return;
-                }
-                thing->setStateValue(webastoUniteDesiredPhaseCountStateTypeId, desiredPhaseCount);
-                info->finish(Thing::ThingErrorNoError);
-            });
+            if (validTokenAvailable(thing)) {
+                executeWebastoUnitePhaseCountAction(info);
+            } else {
+                qCDebug(dcWebasto()) << "HTTP: Authentication required. Update access token for" << thing->name();
+                QNetworkReply *loginReply = requestWebstoUniteAccessToken(evc04Connection->modbusTcpMaster()->hostAddress());
+                connect(loginReply, &QNetworkReply::finished, evc04Connection, [=](){
+                    if (loginReply->error() != QNetworkReply::NoError) {
+                        info->finish(Thing::ThingErrorAuthenticationFailure);
+                        qCWarning(dcWebasto()) << "HTTP: Authentication request failed for" << evc04Connection->modbusTcpMaster()->hostAddress() << loginReply->error() << loginReply->errorString();
+                        return;
+                    }
+
+                    QByteArray response = loginReply->readAll();
+
+                    QJsonParseError error;
+                    QJsonDocument jsonDoc = QJsonDocument::fromJson(response, &error);
+                    if (error.error != QJsonParseError::NoError) {
+                        info->finish(Thing::ThingErrorAuthenticationFailure);
+                        qCWarning(dcWebasto()) << "HTTP: Authentication response JSON error:" << error.errorString();
+                        return;
+                    }
+
+                    QVariantMap responseMap = jsonDoc.toVariant().toMap();
+                    QString accessToken = responseMap.value("access_token").toString();
+                    QDateTime accessTokenExpireDateTime = QDateTime::fromString(responseMap.value("access_token_exp").toString(), Qt::ISODate);
+
+                    QStringList tokenParts = accessToken.split('.');
+                    if (tokenParts.count() != 3) {
+                        qCWarning(dcWebasto()) << "HTTP: Could not read expiration timestamp. Invalid JWT token formatting. Does not contain 3 parts separated by dot.";
+                        return;
+                    }
+
+                    qCDebug(dcWebasto()) << "HTTP: Header" << QByteArray::fromBase64(tokenParts.at(0).toUtf8());
+                    qCDebug(dcWebasto()) << "HTTP: Payload" << QByteArray::fromBase64(tokenParts.at(1).toUtf8());
+                    qCDebug(dcWebasto()) << "HTTP: Signature" << tokenParts.at(2);
+                    QJsonDocument payloadJsonDoc = QJsonDocument::fromJson(QByteArray::fromBase64(tokenParts.at(1).toUtf8()));
+                    QVariantMap payloadMap = payloadJsonDoc.toVariant().toMap();
+                    QDateTime expirationDateTime = QDateTime::fromString(payloadMap.value("access_token_exp").toString(), Qt::ISODate);
+                    qCDebug(dcWebasto()) << "HTTP: Token payload:" << qUtf8Printable(payloadJsonDoc.toJson());
+                    qCDebug(dcWebasto()) << "HTTP: Token expires:" << expirationDateTime.toString("dd.MM.yyyy hh:mm:ss");
+                    qCDebug(dcWebasto()) << "HTTP: Authentication finished successfully. Token:" << accessToken << "Expires:" << accessTokenExpireDateTime.toString("dd.MM.yyyy hh:mm:ss");
+                    m_webastoUniteTokens[thing] = QPair<QString, QDateTime>(accessToken, accessTokenExpireDateTime);
+                    executeWebastoUnitePhaseCountAction(info);
+                });
+            }
         }
         return;
     }
@@ -1149,12 +1171,6 @@ void IntegrationPluginWebasto::setupEVC04Connection(ThingSetupInfo *info)
 
     QHostAddress address = m_monitors.value(thing)->networkDeviceInfo().address();
 
-    pluginStorage()->beginGroup(thing->id().toString());
-    QString accessToken = pluginStorage()->value("accessToken").toString();
-    QDateTime accessTokenExpireDateTime = pluginStorage()->value("accessTokenExpire").toDateTime();
-    m_webastoUniteTokens[thing] = QPair<QString, QDateTime>(accessToken, accessTokenExpireDateTime);
-    pluginStorage()->endGroup();
-
     EVC04ModbusTcpConnection *evc04Connection = new EVC04ModbusTcpConnection(address, 502, 0xff, this);
     connect(info, &ThingSetupInfo::aborted, evc04Connection, &EVC04ModbusTcpConnection::deleteLater);
 
@@ -1175,44 +1191,10 @@ void IntegrationPluginWebasto::setupEVC04Connection(ThingSetupInfo *info)
         }
     });
 
-    connect(evc04Connection, &EVC04ModbusTcpConnection::reachableChanged, thing, [this, thing, evc04Connection](bool reachable){
+    connect(evc04Connection, &EVC04ModbusTcpConnection::reachableChanged, thing, [thing, evc04Connection](bool reachable){
         qCDebug(dcWebasto()) << "Reachable changed to" << reachable << "for" << thing;
         if (reachable) {
             evc04Connection->initialize();
-
-            if (!validTokenAvailable(thing)) {
-                qCDebug(dcWebasto()) << "HTTP authentication required. Update access token for" << thing->name();
-                QNetworkReply *loginReply = requestWebstoUniteAccessToken(evc04Connection->modbusTcpMaster()->hostAddress());
-                connect(loginReply, &QNetworkReply::finished, evc04Connection, [=](){
-                    if (loginReply->error() != QNetworkReply::NoError) {
-                        qCWarning(dcWebasto()) << "Authentication request failed for" << evc04Connection->modbusTcpMaster()->hostAddress() << loginReply->error() << loginReply->errorString();
-                        return;
-                    }
-
-                    QByteArray response = loginReply->readAll();
-
-                    QJsonParseError error;
-                    QJsonDocument jsonDoc = QJsonDocument::fromJson(response, &error);
-                    if (error.error != QJsonParseError::NoError) {
-                        qCWarning(dcWebasto()) << "Authentication response JSON error:" << error.errorString();
-                        return;
-                    }
-
-                    QVariantMap responseMap = jsonDoc.toVariant().toMap();
-                    QString accessToken = responseMap.value("access_token").toString();
-                    QDateTime accessTokenExpireDateTime = QDateTime::fromString(responseMap.value("access_token_exp").toString(), Qt::ISODate);
-
-                    qCDebug(dcWebasto()) << "Authentication finished successfully. Token:" << accessToken << "Expires:" << accessTokenExpireDateTime.toString("dd.MM.yyyy hh:mm:ss");
-
-                    m_webastoUniteTokens[thing] = QPair<QString, QDateTime>(accessToken, accessTokenExpireDateTime);
-
-                    pluginStorage()->beginGroup(thing->id().toString());
-                    pluginStorage()->setValue("accessToken", accessToken);
-                    pluginStorage()->setValue("accessTokenExpire", accessTokenExpireDateTime);
-                    pluginStorage()->endGroup();
-                });
-            }
-
         } else {
             thing->setStateValue(webastoUniteConnectedStateTypeId, false);
             thing->setStateValue(webastoUniteCurrentPowerStateTypeId, 0);
@@ -1256,7 +1238,6 @@ void IntegrationPluginWebasto::setupEVC04Connection(ThingSetupInfo *info)
 
     connect(evc04Connection, &EVC04ModbusTcpConnection::updateFinished, thing, [this, evc04Connection, thing](){
         qCDebug(dcWebasto()) << "EVC04 update finished:" << thing->name() << evc04Connection;
-
         qCDebug(dcWebasto()) << "Serial:" << QString(QString::fromUtf16(evc04Connection->serialNumber().data(), evc04Connection->serialNumber().length()).toUtf8()).trimmed();
         qCDebug(dcWebasto()) << "ChargePoint ID:" << QString(QString::fromUtf16(evc04Connection->chargepointId().data(), evc04Connection->chargepointId().length()).toUtf8()).trimmed();
         qCDebug(dcWebasto()) << "Brand:" << QString(QString::fromUtf16(evc04Connection->brand().data(), evc04Connection->brand().length()).toUtf8()).trimmed();
@@ -1266,11 +1247,13 @@ void IntegrationPluginWebasto::setupEVC04Connection(ThingSetupInfo *info)
 
         // I've been observing the wallbox getting stuck on modbus. It is still functional, but modbus keeps on returning the same old values
         // until the TCP connection is closed and reopened. Checking the wallbox time register to detect that and auto-reconnect.
-        if (m_lastWallboxTime[thing] == evc04Connection->time()) {
+        if (m_lastWallboxTime.contains(thing) && m_lastWallboxTime[thing] == evc04Connection->time()) {
             qCWarning(dcWebasto()) << "Wallbox seems stuck and returning outdated values. Reconnecting...";
-            evc04Connection->reconnectDevice();
+            evc04Connection->disconnectDevice();
+            QTimer::singleShot(1000, evc04Connection, &EVC04ModbusTcpConnection::reconnectDevice);
+        } else {
+            m_lastWallboxTime[thing] = evc04Connection->time();
         }
-        m_lastWallboxTime[thing] = evc04Connection->time();
     });
 
     connect(evc04Connection, &EVC04ModbusTcpConnection::chargepointStateChanged, thing, [thing](EVC04ModbusTcpConnection::ChargePointState chargePointState) {
@@ -1385,11 +1368,16 @@ void IntegrationPluginWebasto::updateEVC04MaxCurrent(Thing *thing)
 bool IntegrationPluginWebasto::validTokenAvailable(Thing *thing)
 {
     if (m_webastoUniteTokens.contains(thing)) {
-        QPair<QString, QDateTime> tokenInfo;
-        if (!tokenInfo.first.isEmpty() && tokenInfo.second > QDateTime::currentDateTime().addMSecs(60)) {
-            qCDebug(dcWebasto()) << "Valid access token found for" << thing->name();
+        QPair<QString, QDateTime> tokenInfo = m_webastoUniteTokens.value(thing);
+        if (!tokenInfo.first.isEmpty() && tokenInfo.second > QDateTime::currentDateTimeUtc().addSecs(60)) {
+            qCDebug(dcWebasto()) << "HTTP: Valid access token found for" << thing->name();
             return true;
+        } else {
+            qCDebug(dcWebasto()) << "HTTP: Token need to be refreshed. The current token for" << thing->name() << "is expired:" << tokenInfo.second.toString("dd.MM.yyyy hh:mm:ss") << QDateTime::currentDateTimeUtc().toString();
+
         }
+    } else {
+        qCDebug(dcWebasto()) << "HTTP: Token need to be refreshed. There is no token for" << thing->name();
     }
 
     return false;
@@ -1402,14 +1390,17 @@ QNetworkReply *IntegrationPluginWebasto::requestWebstoUniteAccessToken(const QHo
     requestMap.insert("username", "admin");
     requestMap.insert("password", "0#54&8eV%c+e2y(P2%h0");
 
+    QJsonDocument jsonDoc = QJsonDocument::fromVariant(requestMap);
+
     QUrl url;
     url.setScheme("https"); // we have to use ssl and ignore the endpoint error
     url.setHost(address.toString());
     url.setPath("/api/login");
 
-    qCDebug(dcWebasto()) << "Requesting access token" << url.toString();
-    QNetworkReply *reply = hardwareManager()->networkManager()->post(QNetworkRequest(url), QJsonDocument::fromVariant(requestMap).toJson());
-
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    qCDebug(dcWebasto()) << "HTTP: Requesting access token" << url.toString() << qUtf8Printable(jsonDoc.toJson(QJsonDocument::Compact));;
+    QNetworkReply *reply = hardwareManager()->networkManager()->post(request, QJsonDocument::fromVariant(requestMap).toJson());
     connect(reply, &QNetworkReply::finished, reply, &QNetworkReply::deleteLater);
     connect(reply, &QNetworkReply::sslErrors, this, [reply](const QList<QSslError> &){
         // We ignore SSL errors in the LAN... quiet useless against MITM attacks
@@ -1417,4 +1408,75 @@ QNetworkReply *IntegrationPluginWebasto::requestWebstoUniteAccessToken(const QHo
     });
 
     return reply;
+}
+
+QNetworkReply *IntegrationPluginWebasto::requestWebstoUnitePhaseCountChange(const QHostAddress &address, const QString &accessToken, uint desiredPhaseCount)
+{
+    QVariantList settingsList;
+    QVariantMap settingMap;
+    settingMap.insert("fieldKey", "installationSettings.currentLimiterPhase");
+    settingMap.insert("value", QString("%1").arg(desiredPhaseCount == 3 ? 1 : 0));
+    settingsList.append(settingMap);
+
+    QJsonDocument jsonDoc = QJsonDocument::fromVariant(settingsList);
+
+    QUrl url;
+    url.setScheme("https"); // we have to use ssl and ignore the endpoint error
+    url.setHost(address.toString());
+    url.setPath("/api/configuration-updates");
+
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    request.setRawHeader("Authorization", "Bearer " + accessToken.toLocal8Bit());
+    qCDebug(dcWebasto()) << "HTTP: Requesting phase count change" << url.toString() << qUtf8Printable(jsonDoc.toJson(QJsonDocument::Compact));
+
+    QNetworkReply *reply = hardwareManager()->networkManager()->post(request, jsonDoc.toJson());
+    connect(reply, &QNetworkReply::finished, reply, &QNetworkReply::deleteLater);
+    connect(reply, &QNetworkReply::sslErrors, this, [reply](const QList<QSslError> &){
+        // We ignore SSL errors in the LAN... quiet useless against MITM attacks
+        reply->ignoreSslErrors();
+    });
+
+    return reply;
+}
+
+void IntegrationPluginWebasto::executeWebastoUnitePhaseCountAction(ThingActionInfo *info)
+{
+    Thing *thing = info->thing();
+    Action action = info->action();
+
+    quint8 desiredPhaseCount = info->action().paramValue(webastoUniteDesiredPhaseCountActionDesiredPhaseCountParamTypeId).toUInt();
+
+    QNetworkReply *reply = requestWebstoUnitePhaseCountChange(m_evc04Connections.value(thing)->modbusTcpMaster()->hostAddress(), m_webastoUniteTokens.value(thing).first, desiredPhaseCount);
+    connect(reply, &QNetworkReply::finished, reply, &QNetworkReply::deleteLater);
+    connect(reply, &QNetworkReply::finished, info, [=](){
+        if (reply->error() != QNetworkReply::NoError) {
+            qCWarning(dcWebasto()) << "HTTP: Error setting desired phase count:" << reply->error() << reply->errorString();
+            info->finish(Thing::ThingErrorHardwareFailure);
+            return;
+        }
+
+        QByteArray response = reply->readAll();
+
+        QJsonParseError error;
+        QJsonDocument jsonDoc = QJsonDocument::fromJson(response, &error);
+        if (error.error != QJsonParseError::NoError) {
+            info->finish(Thing::ThingErrorAuthenticationFailure);
+            qCWarning(dcWebasto()) << "HTTP: Set desired phase count response JSON error:" << error.errorString();
+            return;
+        }
+
+        qCDebug(dcWebasto()) << "HTTP: Response:" << qUtf8Printable(jsonDoc.toJson(QJsonDocument::Compact));
+
+        QVariantMap responseMap = jsonDoc.toVariant().toMap();
+        if (responseMap.value("status").toString() != "SUCCESS") {
+            info->finish(Thing::ThingErrorHardwareFailure);
+            qCWarning(dcWebasto()) << "HTTP: Could not set desired phase count for" << thing->name();
+            return;
+        }
+
+        qCDebug(dcWebasto()) << "HTTP: Set webasto unite phase count to" << desiredPhaseCount << "finished successfully.";
+        thing->setStateValue(webastoUniteDesiredPhaseCountStateTypeId, desiredPhaseCount);
+        info->finish(Thing::ThingErrorNoError);
+    });
 }
