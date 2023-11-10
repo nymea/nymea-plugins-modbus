@@ -66,14 +66,13 @@ void IntegrationPluginMennekes::discoverThings(ThingDiscoveryInfo *info)
 
                 QString name = "AMTRON Charge Control/Professional";
                 QString description = result.model.isEmpty() ? result.networkDeviceInfo.address().toString() :
-                                                               result.model + " (" + result.networkDeviceInfo.address().toString() + ")";
+                                          result.model + " (" + result.networkDeviceInfo.address().toString() + ")";
                 if (result.model.startsWith("CC")) {
                     name = "AMTRON Charge Control";
                 } else if (result.model.startsWith("P")) {
                     name = "AMTRON Professional";
                 } else {
                     qCWarning(dcMennekes()) << "Unknown Amtron model:" << result.model;
-                    continue;
                 }
                 ThingDescriptor descriptor(amtronECUThingClassId, name, description);
                 qCDebug(dcMennekes()) << "Discovered:" << descriptor.title() << descriptor.description();
@@ -289,7 +288,7 @@ void IntegrationPluginMennekes::postSetupThing(Thing *thing)
         qCDebug(dcMennekes()) << "Starting plugin timer...";
         m_pluginTimer = hardwareManager()->pluginTimerManager()->registerTimer(2);
         connect(m_pluginTimer, &PluginTimer::timeout, this, [this] {
-            foreach(AmtronECUModbusTcpConnection *connection, m_amtronECUConnections) {
+            foreach(AmtronECU *connection, m_amtronECUConnections) {
                 qCDebug(dcMennekes()) << "Updating connection" << connection->modbusTcpMaster()->hostAddress().toString();
                 connection->update();
             }
@@ -311,8 +310,7 @@ void IntegrationPluginMennekes::postSetupThing(Thing *thing)
 void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
 {
     if (info->thing()->thingClassId() == amtronECUThingClassId) {
-        AmtronECUModbusTcpConnection *amtronECUConnection = m_amtronECUConnections.value(info->thing());
-
+        AmtronECU *amtronECUConnection = m_amtronECUConnections.value(info->thing());
 
         if (info->action().actionTypeId() == amtronECUPowerActionTypeId) {
             bool power = info->action().paramValue(amtronECUPowerActionPowerParamTypeId).toBool();
@@ -458,7 +456,7 @@ void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
 void IntegrationPluginMennekes::thingRemoved(Thing *thing)
 {
     if (thing->thingClassId() == amtronECUThingClassId && m_amtronECUConnections.contains(thing)) {
-        AmtronECUModbusTcpConnection *connection = m_amtronECUConnections.take(thing);
+        AmtronECU *connection = m_amtronECUConnections.take(thing);
         delete connection;
     }
 
@@ -484,7 +482,7 @@ void IntegrationPluginMennekes::thingRemoved(Thing *thing)
 
 void IntegrationPluginMennekes::updateECUPhaseCount(Thing *thing)
 {
-    AmtronECUModbusTcpConnection *amtronECUConnection = m_amtronECUConnections.value(thing);
+    AmtronECU *amtronECUConnection = m_amtronECUConnections.value(thing);
     int phaseCount = 0;
     qCDebug(dcMennekes()) << "Phases: L1" << amtronECUConnection->meterCurrentL1() << "L2" << amtronECUConnection->meterCurrentL2() << "L3" << amtronECUConnection->meterCurrentL3();
     // the current idles on some 5 - 10 mA when not charging...
@@ -501,17 +499,27 @@ void IntegrationPluginMennekes::updateECUPhaseCount(Thing *thing)
         phaseCount++;
     }
     qCDebug(dcMennekes()) << "Actively charging phases:" << phaseCount;
-    if (phaseCount == 0) {
-        if (amtronECUConnection->meterVoltageL1() > 0) {
-            phaseCount++;
+
+    if (amtronECUConnection->detectedVersion() == AmtronECU::VersionNew) {
+
+        // Only available since 5.22
+        if (phaseCount == 0) {
+            if (amtronECUConnection->meterVoltageL1() > 0) {
+                phaseCount++;
+            }
+            if (amtronECUConnection->meterVoltageL2() > 0) {
+                phaseCount++;
+            }
+            if (amtronECUConnection->meterVoltageL3() > 0) {
+                phaseCount++;
+            }
+            qCDebug(dcMennekes()) << "Connected phases:" << phaseCount;
         }
-        if (amtronECUConnection->meterVoltageL2() > 0) {
-            phaseCount++;
+    } else if (amtronECUConnection->detectedVersion() == AmtronECU::VersionOld) {
+        if (phaseCount == 0) {
+            qCDebug(dcMennekes()) << "Could not detect phases in use. Default to 1 phase.";
+            phaseCount = 1;
         }
-        if (amtronECUConnection->meterVoltageL3() > 0) {
-            phaseCount++;
-        }
-        qCDebug(dcMennekes()) << "Connected phases:" << phaseCount;
     }
 
     thing->setStateValue(amtronECUPhaseCountStateTypeId, phaseCount);
@@ -536,7 +544,7 @@ void IntegrationPluginMennekes::setupAmtronECUConnection(ThingSetupInfo *info)
     QHostAddress address = m_monitors.value(thing)->networkDeviceInfo().address();
 
     qCDebug(dcMennekes()) << "Setting up amtron wallbox on" << address.toString();
-    AmtronECUModbusTcpConnection *amtronECUConnection = new AmtronECUModbusTcpConnection(address, 502, 0xff, this);
+    AmtronECU *amtronECUConnection = new AmtronECU(address, 502, 0xff, this);
     connect(info, &ThingSetupInfo::aborted, amtronECUConnection, &ModbusTcpMaster::deleteLater);
 
     // Reconnect on monitor reachable changed
@@ -556,7 +564,7 @@ void IntegrationPluginMennekes::setupAmtronECUConnection(ThingSetupInfo *info)
         }
     });
 
-    connect(amtronECUConnection, &AmtronECUModbusTcpConnection::reachableChanged, thing, [thing, amtronECUConnection](bool reachable){
+    connect(amtronECUConnection, &AmtronECU::reachableChanged, thing, [thing, amtronECUConnection](bool reachable){
         qCDebug(dcMennekes()) << "Reachable changed to" << reachable << "for" << thing;
         if (reachable) {
             amtronECUConnection->initialize();
@@ -565,7 +573,7 @@ void IntegrationPluginMennekes::setupAmtronECUConnection(ThingSetupInfo *info)
         }
     });
 
-    connect(amtronECUConnection, &AmtronECUModbusTcpConnection::initializationFinished, thing, [=](bool success){
+    connect(amtronECUConnection, &AmtronECU::initializationFinished, thing, [=](bool success){
         if (!thing->setupComplete())
             return;
 
@@ -578,7 +586,8 @@ void IntegrationPluginMennekes::setupAmtronECUConnection(ThingSetupInfo *info)
         }
     });
 
-    connect(amtronECUConnection, &AmtronECUModbusTcpConnection::initializationFinished, info, [=](bool success){
+    connect(amtronECUConnection, &AmtronECU::initializationFinished, info, [=](bool success){
+
         if (!success) {
             qCWarning(dcMennekes()) << "Connection init finished with errors" << thing->name() << amtronECUConnection->modbusTcpMaster()->hostAddress().toString();
             hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(monitor);
@@ -589,44 +598,80 @@ void IntegrationPluginMennekes::setupAmtronECUConnection(ThingSetupInfo *info)
 
         qCDebug(dcMennekes()) << "Connection init finished successfully" << amtronECUConnection;
 
-        QString minimumVersion = "5.22";
-        if (!ensureAmtronECUVersion(amtronECUConnection, minimumVersion)) {
-            qCWarning(dcMennekes()) << "Firmware version too old:" << QByteArray::fromHex(QByteArray::number(amtronECUConnection->firmwareVersion(), 16)) << "Minimum required:" << minimumVersion;
-            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(monitor);
-            amtronECUConnection->deleteLater();
-            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("The firmware version of this wallbox is too old. Please upgrade the firmware to at least version 5.22."));
-            return;
-        }
-
         m_amtronECUConnections.insert(thing, amtronECUConnection);
         info->finish(Thing::ThingErrorNoError);
 
         thing->setStateValue(amtronECUConnectedStateTypeId, true);
+        thing->setStateValue(amtronECUFirmwareVersionStateTypeId, QString::fromUtf8(QByteArray::fromHex(QByteArray::number(amtronECUConnection->firmwareVersion(), 16))));
 
         amtronECUConnection->update();
     });
 
-    connect(amtronECUConnection, &AmtronECUModbusTcpConnection::updateFinished, thing, [this, amtronECUConnection, thing](){
+    connect(amtronECUConnection, &AmtronECU::updateFinished, thing, [this, amtronECUConnection, thing](){
         qCDebug(dcMennekes()) << "Amtron ECU update finished:" << thing->name() << amtronECUConnection;
         updateECUPhaseCount(thing);
+
+        // Firmware >= 5.12
+
+        if (amtronECUConnection->cpSignalState() != AmtronECU::CPSignalStateE) {
+            // State E (Off): don't update as the wallbox goes to this state for a few seconds regardless of the actual plugged in state.
+            qCDebug(dcMennekes()) << "CP signal state changed" << amtronECUConnection->cpSignalState();
+            thing->setStateValue(amtronECUPluggedInStateTypeId, amtronECUConnection->cpSignalState() >= AmtronECU::CPSignalStateB);
+        }
+
+        thing->setStateMinValue(amtronECUMaxChargingCurrentStateTypeId, amtronECUConnection->minCurrentLimit());
+
+        qCDebug(dcMennekes()) << "HEMS current limit:" << amtronECUConnection->hemsCurrentLimit();
+        if (amtronECUConnection->hemsCurrentLimit() == 0) {
+            thing->setStateValue(amtronECUPowerStateTypeId, false);
+        } else {
+            thing->setStateValue(amtronECUPowerStateTypeId, true);
+            thing->setStateValue(amtronECUMaxChargingCurrentStateTypeId, amtronECUConnection->hemsCurrentLimit());
+        }
+
+        if (amtronECUConnection->detectedVersion() == AmtronECU::VersionOld) {
+            // Note: version < 5.22 has no totals, we need to sum them up
+            int totalPower = 0;
+
+            if (amtronECUConnection->meterPowerL1() != 0xffffffff) {
+                totalPower += amtronECUConnection->meterPowerL1();
+            }
+
+            if (amtronECUConnection->meterPowerL2() != 0xffffffff) {
+                totalPower += amtronECUConnection->meterPowerL2();
+            }
+
+            if (amtronECUConnection->meterPowerL3() != 0xffffffff) {
+                totalPower += amtronECUConnection->meterPowerL3();
+            }
+
+            thing->setStateValue(amtronECUCurrentPowerStateTypeId, totalPower);
+
+            double totalEnergy = 0; // Wh
+            if (amtronECUConnection->meterEnergyL1() != 0xffffffff) {
+                totalEnergy += amtronECUConnection->meterEnergyL1();
+            }
+
+            if (amtronECUConnection->meterEnergyL2() != 0xffffffff) {
+                totalEnergy += amtronECUConnection->meterEnergyL2();
+            }
+
+            if (amtronECUConnection->meterEnergyL3() != 0xffffffff) {
+                totalEnergy += amtronECUConnection->meterEnergyL3();
+            }
+
+            totalEnergy /= 1000.0; // Convert Wh to kWh
+            thing->setStateValue(amtronECUTotalEnergyConsumedStateTypeId, qRound(totalEnergy * 100.0) / 100.0); // rounded to 2 as it changes on every update
+        }
     });
 
-    connect(amtronECUConnection, &AmtronECUModbusTcpConnection::cpSignalStateChanged, thing, [thing](AmtronECUModbusTcpConnection::CPSignalState cpSignalState) {
-        qCDebug(dcMennekes()) << "CP signal state changed" << cpSignalState;
-        if (cpSignalState == AmtronECUModbusTcpConnection::CPSignalStateE) {
-            // State E (Off): don't update as the wallbox goes to this state for a few seconds regardless of the actual plugged in state.
-            return;
-        }
-        thing->setStateValue(amtronECUPluggedInStateTypeId, cpSignalState >= AmtronECUModbusTcpConnection::CPSignalStateB);
-    });
-    connect(amtronECUConnection, &AmtronECUModbusTcpConnection::signalledCurrentChanged, thing, [](quint16 signalledCurrent) {
+    connect(amtronECUConnection, &AmtronECU::signalledCurrentChanged, thing, [](quint16 signalledCurrent) {
         qCDebug(dcMennekes()) << "Signalled current changed:" << signalledCurrent;
     });
-    connect(amtronECUConnection, &AmtronECUModbusTcpConnection::minCurrentLimitChanged, thing, [thing](quint16 minCurrentLimit) {
-        qCDebug(dcMennekes()) << "min current limit changed:" << minCurrentLimit;
-        thing->setStateMinValue(amtronECUMaxChargingCurrentStateTypeId, minCurrentLimit);
-    });
-    connect(amtronECUConnection, &AmtronECUModbusTcpConnection::maxCurrentLimitChanged, thing, [this, thing](quint16 maxCurrentLimit) {
+
+    // From here only for firmware version >= 5.22, otherwise these signal will never be emitted, but if the user updates to 5.22, they start working
+
+    connect(amtronECUConnection, &AmtronECU::maxCurrentLimitChanged, thing, [this, thing](quint16 maxCurrentLimit) {
         qCDebug(dcMennekes()) << "max current limit changed:" << maxCurrentLimit;
         // If the vehicle or cable are not capable of reporting the maximum, this will be 0
         // We'll reset to the max defined in the json file in that case
@@ -635,25 +680,19 @@ void IntegrationPluginMennekes::setupAmtronECUConnection(ThingSetupInfo *info)
         }
         thing->setStateMaxValue(amtronECUMaxChargingCurrentStateTypeId, maxCurrentLimit);
     });
-    connect(amtronECUConnection, &AmtronECUModbusTcpConnection::hemsCurrentLimitChanged, thing, [thing](quint16 hemsCurrentLimit) {
-        qCDebug(dcMennekes()) << "HEMS current limit changed:" << hemsCurrentLimit;
-        if (hemsCurrentLimit == 0) {
-            thing->setStateValue(amtronECUPowerStateTypeId, false);
-        } else {
-            thing->setStateValue(amtronECUPowerStateTypeId, true);
-            thing->setStateValue(amtronECUMaxChargingCurrentStateTypeId, hemsCurrentLimit);
-        }
-    });
-    connect(amtronECUConnection, &AmtronECUModbusTcpConnection::meterTotoalEnergyChanged, thing, [thing](quint32 meterTotalEnergy) {
+
+    connect(amtronECUConnection, &AmtronECU::meterTotoalEnergyChanged, thing, [thing](quint32 meterTotalEnergy) {
         qCDebug(dcMennekes()) << "meter total energy changed:" << meterTotalEnergy;
         thing->setStateValue(amtronECUTotalEnergyConsumedStateTypeId, qRound(meterTotalEnergy / 10.0) / 100.0); // rounded to 2 as it changes on every update
     });
-    connect(amtronECUConnection, &AmtronECUModbusTcpConnection::meterTotalPowerChanged, thing, [thing](quint32 meterTotalPower) {
+
+    connect(amtronECUConnection, &AmtronECU::meterTotalPowerChanged, thing, [thing](quint32 meterTotalPower) {
         qCDebug(dcMennekes()) << "meter total power changed:" << meterTotalPower;
         thing->setStateValue(amtronECUCurrentPowerStateTypeId, meterTotalPower);
         thing->setStateValue(amtronECUChargingStateTypeId, meterTotalPower > 0);
     });
-    connect(amtronECUConnection, &AmtronECUModbusTcpConnection::chargedEnergyChanged, thing, [thing](quint32 chargedEnergy) {
+
+    connect(amtronECUConnection, &AmtronECU::chargedEnergyChanged, thing, [thing](quint32 chargedEnergy) {
         qCDebug(dcMennekes()) << "charged energy changed:" << chargedEnergy;
         thing->setStateValue(amtronECUSessionEnergyStateTypeId, qRound(chargedEnergy / 10.0) / 100.0); // rounded to 2 as it changes on every update
     });
@@ -857,31 +896,31 @@ void IntegrationPluginMennekes::setupAmtronCompact20Connection(ThingSetupInfo *i
     connect(compact20Connection, &AmtronCompact20ModbusRtuConnection::cpSignalStateChanged, thing, [thing](AmtronCompact20ModbusRtuConnection::CPSignalState cpSignalState){
         qCDebug(dcMennekes()) << "CP signal state changed:" << thing->name() << cpSignalState;
         // Note: using EVSE state register instead
-//        switch (cpSignalState) {
-//        case AmtronCompact20ModbusRtuConnection::CPSignalStateA1:
-//        case AmtronCompact20ModbusRtuConnection::CPSignalStateA2:
-//            thing->setStateValue(amtronCompact20PluggedInStateTypeId, false);
-//            thing->setStateValue(amtronCompact20ChargingStateTypeId, false);
-//            break;
-//        case AmtronCompact20ModbusRtuConnection::CPSignalStateB1:
-//        case AmtronCompact20ModbusRtuConnection::CPSignalStateB2:
-//            thing->setStateValue(amtronCompact20PluggedInStateTypeId, true);
-//            thing->setStateValue(amtronCompact20ChargingStateTypeId, false);
-//            break;
-//        case AmtronCompact20ModbusRtuConnection::CPSignalStateC1:
-//        case AmtronCompact20ModbusRtuConnection::CPSignalStateC2:
-//        case AmtronCompact20ModbusRtuConnection::CPSignalStateD1:
-//        case AmtronCompact20ModbusRtuConnection::CPSignalStateD2:
-//            thing->setStateValue(amtronCompact20PluggedInStateTypeId, true);
-//            thing->setStateValue(amtronCompact20ChargingStateTypeId, true);
-//            break;
-//        case AmtronCompact20ModbusRtuConnection::CPSignalStateE:
-//        case AmtronCompact20ModbusRtuConnection::CPSignalStateF:
-//            qCWarning(dcMennekes()) << "Wallbox in Error state!";
-//            thing->setStateValue(amtronCompact20PluggedInStateTypeId, false);
-//            thing->setStateValue(amtronCompact20ChargingStateTypeId, false);
-//            break;
-//        }
+        //        switch (cpSignalState) {
+        //        case AmtronCompact20ModbusRtuConnection::CPSignalStateA1:
+        //        case AmtronCompact20ModbusRtuConnection::CPSignalStateA2:
+        //            thing->setStateValue(amtronCompact20PluggedInStateTypeId, false);
+        //            thing->setStateValue(amtronCompact20ChargingStateTypeId, false);
+        //            break;
+        //        case AmtronCompact20ModbusRtuConnection::CPSignalStateB1:
+        //        case AmtronCompact20ModbusRtuConnection::CPSignalStateB2:
+        //            thing->setStateValue(amtronCompact20PluggedInStateTypeId, true);
+        //            thing->setStateValue(amtronCompact20ChargingStateTypeId, false);
+        //            break;
+        //        case AmtronCompact20ModbusRtuConnection::CPSignalStateC1:
+        //        case AmtronCompact20ModbusRtuConnection::CPSignalStateC2:
+        //        case AmtronCompact20ModbusRtuConnection::CPSignalStateD1:
+        //        case AmtronCompact20ModbusRtuConnection::CPSignalStateD2:
+        //            thing->setStateValue(amtronCompact20PluggedInStateTypeId, true);
+        //            thing->setStateValue(amtronCompact20ChargingStateTypeId, true);
+        //            break;
+        //        case AmtronCompact20ModbusRtuConnection::CPSignalStateE:
+        //        case AmtronCompact20ModbusRtuConnection::CPSignalStateF:
+        //            qCWarning(dcMennekes()) << "Wallbox in Error state!";
+        //            thing->setStateValue(amtronCompact20PluggedInStateTypeId, false);
+        //            thing->setStateValue(amtronCompact20ChargingStateTypeId, false);
+        //            break;
+        //        }
     });
 
     connect(compact20Connection, &AmtronCompact20ModbusRtuConnection::evseStateChanged, thing, [thing](AmtronCompact20ModbusRtuConnection::EvseState evseState){
@@ -950,10 +989,4 @@ void IntegrationPluginMennekes::setupAmtronCompact20Connection(ThingSetupInfo *i
         thing->setStateValue(amtronCompact20SolarChargingModeStateTypeId, solarChargingModeMap.value(solarChargingMode));
     });
 
-}
-
-bool IntegrationPluginMennekes::ensureAmtronECUVersion(AmtronECUModbusTcpConnection *connection, const QString &version)
-{
-    QByteArray deviceVersion = QByteArray::fromHex(QByteArray::number(connection->firmwareVersion(), 16));
-    return deviceVersion >= version;
 }

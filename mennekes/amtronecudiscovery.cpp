@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2022, nymea GmbH
+* Copyright 2013 - 2023, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -46,6 +46,8 @@ AmtronECUDiscovery::AmtronECUDiscovery(NetworkDeviceDiscovery *networkDeviceDisc
 void AmtronECUDiscovery::startDiscovery()
 {
     qCInfo(dcMennekes()) << "Discovery: Searching for AMTRON wallboxes in the network...";
+    m_startDateTime = QDateTime::currentDateTime();
+
     NetworkDeviceDiscoveryReply *discoveryReply = m_networkDeviceDiscovery->discover();
 
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::networkDeviceInfoAdded, this, &AmtronECUDiscovery::checkNetworkDevice);
@@ -66,35 +68,50 @@ void AmtronECUDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevi
 {
     int port = 502;
     int slaveId = 0xff;
-    qCDebug(dcMennekes()) << "Checking network device:" << networkDeviceInfo << "Port:" << port << "Slave ID:" << slaveId;
+    qCDebug(dcMennekes()) << "Discovery: Checking network device:" << networkDeviceInfo << "Port:" << port << "Slave ID:" << slaveId;
 
-    AmtronECUModbusTcpConnection *connection = new AmtronECUModbusTcpConnection(networkDeviceInfo.address(), port, slaveId, this);
+    AmtronECU *connection = new AmtronECU(networkDeviceInfo.address(), port, slaveId, this);
     m_connections.append(connection);
 
-    connect(connection, &AmtronECUModbusTcpConnection::reachableChanged, this, [=](bool reachable){
+    connect(connection, &AmtronECU::reachableChanged, this, [=](bool reachable){
         if (!reachable) {
             cleanupConnection(connection);
             return;
         }
 
-        connect(connection, &AmtronECUModbusTcpConnection::initializationFinished, this, [=](bool success){
+        connect(connection, &AmtronECU::initializationFinished, this, [=](bool success){
             if (!success) {
                 qCDebug(dcMennekes()) << "Discovery: Initialization failed on" << networkDeviceInfo.address().toString();
                 cleanupConnection(connection);
                 return;
             }
-            if (connection->firmwareVersion() == 0 || connection->model().isEmpty()) {
-                qCDebug(dcMennekes()) << "Firmware version or model invalid. Skipping" << networkDeviceInfo.address();
-                cleanupConnection(connection);
-                return;
-            }
+
             Result result;
-            result.firmwareVersion = connection->firmwareVersion();
+            result.detectedVersion = connection->detectedVersion();
+            result.firmwareVersion = QString::fromUtf8(QByteArray::fromHex(QByteArray::number(connection->firmwareVersion(), 16)));
             result.model = connection->model();
             result.networkDeviceInfo = networkDeviceInfo;
-            m_discoveryResults.append(result);
 
-            qCDebug(dcMennekes()) << "Discovery: Found wallbox with firmware version:" << result.firmwareVersion << result.networkDeviceInfo;
+            // Note: the model is only known in firmware >= 5.22
+            // Some useres have to stay on 5.12 due to calibration law which is not available on 5.22
+            switch(connection->detectedVersion()) {
+            case AmtronECU::VersionOld:
+                qCDebug(dcMennekes()) << "Discovery: Found wallbox with old firmware version:" << result.firmwareVersion << result.networkDeviceInfo;
+                m_discoveryResults.append(result);
+                break;
+            case AmtronECU::VersionNew:
+                if (connection->model().isEmpty()) {
+                    qCDebug(dcMennekes()) << "Discovery: Firmware version is >= 5.22 but the model could not be fetched. Skipping" << networkDeviceInfo.address();
+                    break;
+                }
+
+                qCDebug(dcMennekes()) << "Discovery: Found wallbox with new firmware version:" << result.model << result.firmwareVersion << result.networkDeviceInfo;
+                m_discoveryResults.append(result);
+                break;
+            case AmtronECU::VersionUnknown:
+                qCDebug(dcMennekes()) << "Discovery: Firmware version or model invalid. Skipping" << networkDeviceInfo.address();
+                break;
+            }
 
             cleanupConnection(connection);
         });
@@ -105,7 +122,7 @@ void AmtronECUDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevi
         }
     });
 
-    connect(connection, &AmtronECUModbusTcpConnection::checkReachabilityFailed, this, [=](){
+    connect(connection, &AmtronECU::checkReachabilityFailed, this, [=](){
         qCDebug(dcMennekes()) << "Discovery: Checking reachability failed on" << networkDeviceInfo.address().toString();
         cleanupConnection(connection);
     });
@@ -113,7 +130,7 @@ void AmtronECUDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevi
     connection->connectDevice();
 }
 
-void AmtronECUDiscovery::cleanupConnection(AmtronECUModbusTcpConnection *connection)
+void AmtronECUDiscovery::cleanupConnection(AmtronECU *connection)
 {
     m_connections.removeAll(connection);
     connection->disconnectDevice();
@@ -125,11 +142,11 @@ void AmtronECUDiscovery::finishDiscovery()
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
 
     // Cleanup any leftovers...we don't care any more
-    foreach (AmtronECUModbusTcpConnection *connection, m_connections)
+    foreach (AmtronECU *connection, m_connections)
         cleanupConnection(connection);
 
     qCInfo(dcMennekes()) << "Discovery: Finished the discovery process. Found" << m_discoveryResults.count()
-                       << "AMTRON wallboxes in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
+                         << "AMTRON ECU wallboxes in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
     m_gracePeriodTimer.stop();
 
     emit discoveryFinished();

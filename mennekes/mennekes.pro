@@ -10,12 +10,14 @@ include(../modbus.pri)
 
 HEADERS += \
     amtroncompact20discovery.h \
+    amtronecu.h \
     amtronecudiscovery.h \
     amtronhcc3discovery.h \
     integrationpluginmennekes.h
 
 SOURCES += \
     amtroncompact20discovery.cpp \
+    amtronecu.cpp \
     amtronecudiscovery.cpp \
     amtronhcc3discovery.cpp \
     integrationpluginmennekes.cpp
