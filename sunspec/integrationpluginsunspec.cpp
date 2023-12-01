@@ -558,8 +558,8 @@ void IntegrationPluginSunSpec::processDiscoveryResult(Thing *thing, SunSpecConne
             qCDebug(dcSunSpec()) << "Found" << modelThing << "for" << model;
 
             if (modelThing->thingClassId() == sunspecSinglePhaseInverterThingClassId
-                    || modelThing->thingClassId() == sunspecSplitPhaseInverterThingClassId
-                    || modelThing->thingClassId() == sunspecThreePhaseInverterThingClassId) {
+                || modelThing->thingClassId() == sunspecSplitPhaseInverterThingClassId
+                || modelThing->thingClassId() == sunspecThreePhaseInverterThingClassId) {
 
                 if (!m_sunSpecInverters.contains(modelThing)) {
                     m_sunSpecInverters.insert(modelThing, model);
@@ -1214,7 +1214,7 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         // Note: solar edge needs some calculations for the current pv power
         double currentPower = calculateSolarEdgePvProduction(thing, -inverter->watts(), -inverter->dcWatts());
         thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerStateTypeId, currentPower);
-        thing->setStateValue(sunspecSinglePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
+        evaluateEnergyProducedValue(thing, inverter->wattHours() / 1000.0);
         thing->setStateValue(sunspecSinglePhaseInverterTotalCurrentStateTypeId, inverter->amps());
         thing->setStateValue(sunspecSinglePhaseInverterFrequencyStateTypeId, inverter->hz());
         thing->setStateValue(sunspecSinglePhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
@@ -1235,7 +1235,7 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
         // Note: solar edge needs some calculations for the current pv power
         double currentPower = calculateSolarEdgePvProduction(thing, -inverter->watts(), -inverter->dcWatts());
         thing->setStateValue(sunspecSinglePhaseInverterCurrentPowerStateTypeId, currentPower);
-        thing->setStateValue(sunspecSinglePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
+        evaluateEnergyProducedValue(thing, inverter->wattHours() / 1000.0);
         thing->setStateValue(sunspecSinglePhaseInverterTotalCurrentStateTypeId, inverter->amps());
         thing->setStateValue(sunspecSinglePhaseInverterFrequencyStateTypeId, inverter->hz());
         thing->setStateValue(sunspecSinglePhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
@@ -1255,7 +1255,7 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
 
         double currentPower = calculateSolarEdgePvProduction(thing, -inverter->watts(), -inverter->dcWatts());
         thing->setStateValue(sunspecSplitPhaseInverterCurrentPowerStateTypeId, currentPower);
-        thing->setStateValue(sunspecSplitPhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
+        evaluateEnergyProducedValue(thing, inverter->wattHours() / 1000.0);
         thing->setStateValue(sunspecSplitPhaseInverterTotalCurrentStateTypeId, inverter->amps());
         thing->setStateValue(sunspecSplitPhaseInverterFrequencyStateTypeId, inverter->hz());
         thing->setStateValue(sunspecSplitPhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
@@ -1278,7 +1278,7 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
 
         double currentPower = calculateSolarEdgePvProduction(thing, -inverter->watts(), -inverter->dcWatts());
         thing->setStateValue(sunspecSplitPhaseInverterCurrentPowerStateTypeId, currentPower);
-        thing->setStateValue(sunspecSplitPhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
+        evaluateEnergyProducedValue(thing, inverter->wattHours() / 1000.0);
         thing->setStateValue(sunspecSplitPhaseInverterTotalCurrentStateTypeId, inverter->amps());
         thing->setStateValue(sunspecSplitPhaseInverterFrequencyStateTypeId, inverter->hz());
         thing->setStateValue(sunspecSplitPhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
@@ -1301,7 +1301,7 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
 
         double currentPower = calculateSolarEdgePvProduction(thing, -inverter->watts(), -inverter->dcWatts());
         thing->setStateValue(sunspecThreePhaseInverterCurrentPowerStateTypeId, currentPower);
-        thing->setStateValue(sunspecThreePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
+        evaluateEnergyProducedValue(thing, inverter->wattHours() / 1000.0);
         thing->setStateValue(sunspecThreePhaseInverterTotalCurrentStateTypeId, inverter->amps());
         thing->setStateValue(sunspecThreePhaseInverterFrequencyStateTypeId, inverter->hz());
         thing->setStateValue(sunspecThreePhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
@@ -1326,7 +1326,7 @@ void IntegrationPluginSunSpec::onInverterBlockUpdated()
 
         double currentPower = calculateSolarEdgePvProduction(thing, -inverter->watts(), -inverter->dcWatts());
         thing->setStateValue(sunspecThreePhaseInverterCurrentPowerStateTypeId, currentPower);
-        thing->setStateValue(sunspecThreePhaseInverterTotalEnergyProducedStateTypeId, inverter->wattHours() / 1000.0);
+        evaluateEnergyProducedValue(thing, inverter->wattHours() / 1000.0);
         thing->setStateValue(sunspecThreePhaseInverterTotalCurrentStateTypeId, inverter->amps());
         thing->setStateValue(sunspecThreePhaseInverterFrequencyStateTypeId, inverter->hz());
         thing->setStateValue(sunspecThreePhaseInverterCabinetTemperatureStateTypeId, inverter->cabinetTemperature());
@@ -1651,4 +1651,48 @@ void IntegrationPluginSunSpec::onSolarEdgeBatteryBlockUpdated()
     thing->setStateValue(solarEdgeBatteryCapacityStateTypeId, battery->batteryData().availableEnergy / 1000.0); // kWh
     thing->setStateValue(solarEdgeBatteryStateOfHealthStateTypeId, battery->batteryData().stateOfHealth);
     thing->setStateValue(solarEdgeBatteryVersionStateTypeId, battery->batteryData().firmwareVersion);
+}
+
+void IntegrationPluginSunSpec::evaluateEnergyProducedValue(Thing *inverterThing, float energyProduced)
+{
+    /* Note: on some systems the inverter sends for a longer period an absurdly
+     * high and wrong value for the produced energy (seen so far with SolarEdge inverters).
+     *
+     * In order to catch such situations, we need to verify if the state changed makes sense,
+     * or if the difference is to big for a regular produced energy value.
+     *
+     * Following scenarios need to be considered:
+     * - This is the first data value, we have no history to verify if this values makes sense
+     * - The system might be switched off for some time, the energy produced could be much more than the last known value
+     * - More than one value in a row could occure, not only single garbage data value
+     */
+
+    StateTypeId energyProducedStateTypeId;
+    if (inverterThing->thingClassId() == sunspecSinglePhaseInverterThingClassId) {
+        energyProducedStateTypeId = sunspecSinglePhaseInverterTotalEnergyProducedStateTypeId;
+    } else if (inverterThing->thingClassId() == sunspecSplitPhaseInverterThingClassId) {
+        energyProducedStateTypeId = sunspecSplitPhaseInverterTotalEnergyProducedStateTypeId;
+    } else if (inverterThing->thingClassId() == sunspecThreePhaseInverterThingClassId) {
+        energyProducedStateTypeId = sunspecThreePhaseInverterTotalEnergyProducedStateTypeId;
+    } else {
+        qCWarning(dcSunSpec()) << "Could not evaluate energy produced value for ThingClassId" << inverterThing->thingClassId() << "The value will not be updated.";
+        return;
+    }
+
+    double currentEnergyValue = inverterThing->stateValue(energyProducedStateTypeId).toDouble();
+    if (currentEnergyValue <= 0) {
+        // Probably the initial value, no fancy data handling here
+        inverterThing->setStateValue(energyProducedStateTypeId, energyProduced);
+    } else {
+        double producedDiff = energyProduced - currentEnergyValue;
+        if (producedDiff > 10000 /*kWh*/) {
+            // The new energy value is way to high in order to be a reglar energy produced change...
+            qCWarning(dcSunSpec()) << "The energy produced value for" << inverterThing << "is way to high compared to the previouse value:"
+                                   << currentEnergyValue << "kWh. Ignoring the value:" << energyProduced << "kWh.";
+            return;
+        } else {
+            // Not a huge jump, just set the value
+            inverterThing->setStateValue(energyProducedStateTypeId, energyProduced);
+        }
+    }
 }
