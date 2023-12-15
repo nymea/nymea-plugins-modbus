@@ -143,6 +143,21 @@ void WebastoDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevice
 
                         // All values good so far, let's assume this is a Webasto NEXT
 
+                        // Final check if there is a hostname available for this network device, if so it shouls contain the string "NEXT_".
+                        // This is neccessary since Wallboxes from Vestel EVC04 aka. Webasto Unite wallboxes would also match
+                        // the creteria up to here get detected as positiv Webasto NEXT.
+
+                        // Example hostname: NEXT-WS10XXXX
+
+                        if (!networkDeviceInfo.hostName().isEmpty() &&
+                            (!networkDeviceInfo.hostName().contains("NEXT_") || networkDeviceInfo.hostName().contains("VESTEL"))) {
+                            qCDebug(dcWebasto()) << "Discovery: network device has a hostname and it does match kriteria for Webasto next:" << networkDeviceInfo.hostName() << "on" << networkDeviceInfo.address().toString() << "Continue...";;
+                            cleanupConnection(connection);
+                            return;
+                        }
+
+                        // Hostname verification also OK, let's assume this is a Webasto NEXT
+
                         Result result;
                         result.productName = "Webasto NEXT";
                         result.type = TypeWebastoNext;

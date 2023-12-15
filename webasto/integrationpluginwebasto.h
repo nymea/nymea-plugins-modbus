@@ -37,10 +37,13 @@
 
 #include "webasto.h"
 #include "webastonextmodbustcpconnection.h"
+#include "evc04modbustcpconnection.h"
 
 #include <QUuid>
 #include <QObject>
 #include <QHostAddress>
+
+class QNetworkReply;
 
 class IntegrationPluginWebasto : public IntegrationPlugin
 {
@@ -65,6 +68,7 @@ private:
 
     QHash<Thing *, Webasto *> m_webastoLiveConnections;
     QHash<Thing *, WebastoNextModbusTcpConnection *> m_webastoNextConnections;
+    QHash<Thing *, EVC04ModbusTcpConnection *> m_evc04Connections;
     QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
 
     void setupWebastoNextConnection(ThingSetupInfo *info);
@@ -73,6 +77,15 @@ private:
     void evaluatePhaseCount(Thing *thing);
 
     void executeWebastoNextPowerAction(ThingActionInfo *info, bool power);
+
+    void setupEVC04Connection(ThingSetupInfo *info);
+    void updateEVC04MaxCurrent(Thing *thing);
+    QHash<Thing *, quint32> m_lastWallboxTime;
+    QHash<Thing *, QPair<QString, QDateTime>> m_webastoUniteTokens;
+    bool validTokenAvailable(Thing *thing);
+    QNetworkReply *requestWebstoUniteAccessToken(const QHostAddress &address);
+    QNetworkReply *requestWebstoUnitePhaseCountChange(const QHostAddress &address, const QString &accessToken, uint desiredPhaseCount);
+    void executeWebastoUnitePhaseCountAction(ThingActionInfo *info);
 
 private slots:
     void onConnectionChanged(bool connected);
