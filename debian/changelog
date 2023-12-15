@@ -1,3 +1,31 @@
+nymea-plugins-modbus (1.9.0) jammy; urgency=medium
+
+  [ Michael Zanetti ]
+  * New Plugin: Vestel
+
+  [ Simon Stürz ]
+  * New plugin: Solax
+
+  [ Michael Zanetti ]
+  * Schrack: Improve some debug prints
+  * New plugin: Wattsonic
+  * Amperfied: Add support for connect.solar and connect.business
+  * Webasto: Add support for the Webasto Unite wallbox
+
+  [ Jenkins ]
+  * Huawei: smartmeter add totals
+
+  [ Bernhard Trinnes ]
+  * UniPi: Removed UniPi debian package dependency to wiringpi
+
+  [ Simon Stürz ]
+  * Mennekes: Add support for Mennekes ECU with 5.12 firmware
+  * Adding LGPL3 license file
+  * SunSpec: Filter out invalid energy produced values
+  * Huawei: Update battery behaviour depending on the battery state
+
+ -- jenkins <developer@nymea.io>  Fri, 15 Dec 2023 10:21:52 +0100
+
 nymea-plugins-modbus (1.8.4) jammy; urgency=medium
 
   [ Simon Stürz ]
