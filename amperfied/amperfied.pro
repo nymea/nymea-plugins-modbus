@@ -7,11 +7,11 @@ MODBUS_TOOLS_CONFIG += VERBOSE
 include(../modbus.pri)
 
 HEADERS += \
+    amperfiedconnectdiscovery.h \
     energycontroldiscovery.h \
-    connecthomediscovery.h \
     integrationpluginamperfied.h
 
 SOURCES += \
+    amperfiedconnectdiscovery.cpp \
     energycontroldiscovery.cpp \
-    connecthomediscovery.cpp \
     integrationpluginamperfied.cpp

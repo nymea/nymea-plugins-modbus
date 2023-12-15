@@ -248,6 +248,16 @@
             "access": "RO"
         },
         {
+            "id": "logisticString",
+            "address": 102,
+            "size": 32,
+            "type": "string",
+            "readSchedule": "init",
+            "registerType": "inputRegister",
+            "description": "Logistic string",
+            "access": "RO"
+        },
+        {
             "id": "chargingCurrent",
             "address": 261,
             "size": 1,
@@ -268,6 +278,16 @@
             "description": "Standby function control",
             "defaultValue": 0,
             "access": "WO"
+        },
+        {
+            "id": "phaseSwitchControl",
+            "address": 501,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "description": "Phase switch control",
+            "defaultValue": 3,
+            "access": "RW"
         }
     ]
 }
