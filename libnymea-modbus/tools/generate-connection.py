@@ -165,8 +165,7 @@ def writeTcpHeaderFile():
     writeLine(headerFile, '    void testReachability();')
     writeLine(headerFile)
 
-    # Private members
-    writeLine(headerFile, 'private:')
+    writeLine(headerFile, '    /* Internals */')
     writeLine(headerFile, '    ModbusTcpMaster *m_modbusTcpMaster = nullptr;')
     writeLine(headerFile, '    ModbusDataUtils::ByteOrder m_endianness = ModbusDataUtils::ByteOrder%s;' % endianness)
     writeLine(headerFile, '    ModbusDataUtils::ByteOrder m_stringEndianness = ModbusDataUtils::ByteOrder%s;' % stringEndianness)
@@ -668,7 +667,7 @@ def writeRtuHeaderFile():
     writeLine(headerFile)
 
     # Private members
-    writeLine(headerFile, 'private:')
+    writeLine(headerFile, '    /* Internals */')
     writeLine(headerFile, '    ModbusRtuMaster *m_modbusRtuMaster = nullptr;')
     writeLine(headerFile, '    ModbusDataUtils::ByteOrder m_endianness = ModbusDataUtils::ByteOrder%s;' % endianness)
     writeLine(headerFile, '    ModbusDataUtils::ByteOrder m_stringEndianness = ModbusDataUtils::ByteOrder%s;' % stringEndianness)

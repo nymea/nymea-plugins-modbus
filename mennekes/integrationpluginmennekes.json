@@ -104,6 +104,14 @@
                             "type": "double",
                             "unit": "KiloWattHour",
                             "defaultValue": 0
+                        },
+                        {
+                            "id": "00813b6e-bd93-4728-a11a-aac6298503e6",
+                            "name": "firmwareVersion",
+                            "displayName": "Firmware version",
+                            "type": "QString",
+                            "defaultValue": "",
+                            "cached": true
                         }
                     ]
                 },

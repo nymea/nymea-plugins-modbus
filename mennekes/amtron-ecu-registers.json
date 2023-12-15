@@ -134,7 +134,13 @@
                     "unit": "mA",
                     "defaultValue": "0",
                     "access": "RO"
-                },
+                }
+            ]
+        },
+        {
+            "id": "consumptionsTotals",
+            "readSchedule": "update",
+            "registers": [
                 {
                     "id": "meterTotoalEnergy",
                     "address": 218,
@@ -142,7 +148,7 @@
                     "type": "uint32",
                     "unit": "Wh",
                     "registerType": "holdingRegister",
-                    "description": "Meter total energy",
+                    "description": "Meter total energy (>= 5.22)",
                     "defaultValue": "0",
                     "access": "RO"
                 },
@@ -152,7 +158,7 @@
                     "size": 2,
                     "type": "uint32",
                     "registerType": "holdingRegister",
-                    "description": "Meter totoal power",
+                    "description": "Meter total power (>= 5.22)",
                     "unit": "W",
                     "defaultValue": "0",
                     "access": "RO"
@@ -163,7 +169,7 @@
                     "size": 2,
                     "type": "uint32",
                     "registerType": "holdingRegister",
-                    "description": "Meter voltage L1",
+                    "description": "Meter voltage L1 (>= 5.22)",
                     "unit": "V",
                     "defaultValue": "0",
                     "access": "RO"
@@ -174,7 +180,7 @@
                     "size": 2,
                     "type": "uint32",
                     "registerType": "holdingRegister",
-                    "description": "Meter voltage L2",
+                    "description": "Meter voltage L2 (>= 5.22)",
                     "unit": "V",
                     "defaultValue": "0",
                     "access": "RO"
@@ -185,7 +191,7 @@
                     "size": 2,
                     "type": "uint32",
                     "registerType": "holdingRegister",
-                    "description": "Meter voltage L3",
+                    "description": "Meter voltage L3 (>= 5.22)",
                     "unit": "V",
                     "defaultValue": "0",
                     "access": "RO"
@@ -224,7 +230,7 @@
             "type": "uint16",
             "readSchedule": "update",
             "registerType": "holdingRegister",
-            "description": "Charge Point availability",
+            "description": "Charge Point availability ( Version < 5.22: 0 available, 1 unavailable | Version >= 5.22 1 available, 0 unavailable )",
             "defaultValue": 0,
             "access": "RW"
         },
@@ -232,10 +238,10 @@
             "id": "model",
             "address": 142,
             "size": 10,
-            "type": "string",
             "readSchedule": "init",
+            "type": "string",
             "registerType": "holdingRegister",
-            "description": "Device model",
+            "description": "Device model (>= 5.22)",
             "access": "RO"
         },
         {
@@ -269,7 +275,7 @@
             "type": "uint16",
             "readSchedule": "update",
             "registerType": "holdingRegister",
-            "description": "Maximum current limit",
+            "description": "Maximum current limit (>= 5.22)",
             "unit": "A",
             "defaultValue": "0",
             "access": "RO"
@@ -281,7 +287,7 @@
             "type": "uint32",
             "readSchedule": "update",
             "registerType": "holdingRegister",
-            "description": "Charged energy for current session",
+            "description": "Charged energy for current session (>= 5.22)",
             "unit": "Wh",
             "defaultValue": "0",
             "access": "RO"

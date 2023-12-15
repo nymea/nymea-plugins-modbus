@@ -28,49 +28,37 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef AMTRONECUDISCOVERY_H
-#define AMTRONECUDISCOVERY_H
+#ifndef AMTRONECU_H
+#define AMTRONECU_H
 
 #include <QObject>
-#include <QTimer>
 
-#include <network/networkdevicediscovery.h>
+#include "amtronecumodbustcpconnection.h"
 
-#include "amtronecu.h"
-
-class AmtronECUDiscovery : public QObject
+class AmtronECU : public AmtronECUModbusTcpConnection
 {
     Q_OBJECT
 public:
-    explicit AmtronECUDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, QObject *parent = nullptr);
-    struct Result {
-        AmtronECU::Version detectedVersion;
-        QString firmwareVersion;
-        QString model;
-        NetworkDeviceInfo networkDeviceInfo;
+    enum Version {
+        VersionUnknown,
+        VersionOld, // < 5.22
+        VersionNew // >= 5.22
     };
+    Q_ENUM(Version)
 
-    void startDiscovery();
+    explicit AmtronECU(const QHostAddress &hostAddress, uint port, quint16 slaveId, QObject *parent = nullptr);
+    explicit AmtronECU(ModbusTcpMaster *modbusTcpMaster, quint16 slaveId, QObject *parent = nullptr);
 
-    QList<Result> discoveryResults() const;
+    bool initialize() override;
+    bool update() override;
 
-signals:
-    void discoveryFinished();
+    Version detectedVersion() const;
 
 private:
-    NetworkDeviceDiscovery *m_networkDeviceDiscovery = nullptr;
+    Version m_detectedVersion = VersionUnknown;
 
-    QTimer m_gracePeriodTimer;
-    QDateTime m_startDateTime;
-
-    QList<AmtronECU *> m_connections;
-
-    QList<Result> m_discoveryResults;
-
-    void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
-    void cleanupConnection(AmtronECU *connection);
-
-    void finishDiscovery();
 };
 
-#endif // AMTRONECUDISCOVERY_H
+QDebug operator<<(QDebug debug, AmtronECU *amtronECU);
+
+#endif // AMTRONECU_H
