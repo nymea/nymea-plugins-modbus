@@ -448,6 +448,19 @@ void HuaweiFusionSolar::readNextRegister()
                     qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values. Requested" << 1 << "but received" << unit.values();
                 } else {
                     processLunaBattery1StatusRegisterValues(unit.values());
+                    switch (m_lunaBattery1Status) {
+                    case HuaweiFusionSolar::BatteryDeviceStatusFault:
+                    case HuaweiFusionSolar::BatteryDeviceStatusStandby:
+                    case HuaweiFusionSolar::BatteryDeviceStatusOffline:
+                    case HuaweiFusionSolar::BatteryDeviceStatusSleepMode:
+                        m_battery1Available = false;
+                        m_lunaBattery1Power = 0;
+                        emit lunaBattery1PowerChanged(m_lunaBattery1Power);
+                        break;
+                    case HuaweiFusionSolar::BatteryDeviceStatusRunning:
+                        m_battery1Available = true;
+                        break;
+                    }
                 }
             }
             finishRequest();
@@ -578,6 +591,19 @@ void HuaweiFusionSolar::readNextRegister()
                     qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values count. Requested" << 1 << "but received" << unit.values();
                 } else {
                     processLunaBattery2StatusRegisterValues(unit.values());
+                    switch (m_lunaBattery2Status) {
+                    case HuaweiFusionSolar::BatteryDeviceStatusFault:
+                    case HuaweiFusionSolar::BatteryDeviceStatusStandby:
+                    case HuaweiFusionSolar::BatteryDeviceStatusOffline:
+                    case HuaweiFusionSolar::BatteryDeviceStatusSleepMode:
+                        m_battery2Available = false;
+                        m_lunaBattery2Power = 0;
+                        emit lunaBattery2PowerChanged(m_lunaBattery2Power);
+                        break;
+                    case HuaweiFusionSolar::BatteryDeviceStatusRunning:
+                        m_battery2Available = true;
+                        break;
+                    }
                 }
             }
             finishRequest();

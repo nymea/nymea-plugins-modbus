@@ -55,8 +55,8 @@ private:
     int m_currentRegisterRequest = -1;
     void finishRequest();
 
-    bool m_battery1Available = true;
-    bool m_battery2Available = true;
+    bool m_battery1Available = false;
+    bool m_battery2Available = false;
 
     double m_actualInverterPower = 0;
 
