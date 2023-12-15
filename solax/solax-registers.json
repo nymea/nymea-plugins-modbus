@@ -305,7 +305,6 @@
                     "description": "Battery power (Charge 1)",
                     "unit": "W",
                     "defaultValue": "0",
-                    "staticScaleFactor": -1,
                     "access": "RO"
                 },
                 {
