@@ -1,0 +1,13 @@
+{
+    "title": "SolaX Power Inverter",
+    "tagline": "Connect to SolaX Power X1 and X3 G4 inverters.",
+    "icon": "solax.png",
+    "stability": "consumer",
+    "offline": true,
+    "technologies": [
+        "network"
+    ],
+    "categories": [
+        "energy"
+    ]
+}

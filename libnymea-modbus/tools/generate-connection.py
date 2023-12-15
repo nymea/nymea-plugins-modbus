@@ -62,6 +62,10 @@ def writeTcpHeaderFile():
         for enumDefinition in registerJson['enums']:
             writeEnumDefinition(headerFile, enumDefinition)
 
+    if queuedRequests:
+        writeLine(headerFile, '    typedef void(%s::*Function)(void);' % className)
+        writeLine(headerFile)
+
     # Constructor
     writeLine(headerFile, '    explicit %s(const QHostAddress &hostAddress, uint port, quint16 slaveId, QObject *parent = nullptr);' % className)
     writeLine(headerFile, '    explicit %s(ModbusTcpMaster *modbusTcpMaster, quint16 slaveId, QObject *parent = nullptr);' % className)
@@ -71,7 +75,14 @@ def writeTcpHeaderFile():
     writeLine(headerFile, '    quint16 slaveId() const;')
     writeLine(headerFile)
     writeLine(headerFile, '    bool reachable() const;')
+    writeLine(headerFile, '    bool initializing() const;')
     writeLine(headerFile)
+    
+    # Write init and update method declarations
+    writeLine(headerFile, '    virtual bool initialize();')
+    writeLine(headerFile, '    virtual bool update();')
+    writeLine(headerFile)
+
     writeLine(headerFile, '    ModbusDataUtils::ByteOrder endianness() const;')
     writeLine(headerFile, '    void setEndianness(ModbusDataUtils::ByteOrder endianness);')
     writeLine(headerFile)
@@ -107,11 +118,6 @@ def writeTcpHeaderFile():
         writeLine(headerFile)
         writeInternalBlockReadMethodDeclarationsTcp(headerFile, registerJson['blocks'])
 
-    writeLine(headerFile)
-
-    # Write init and update method declarations
-    writeLine(headerFile, '    virtual bool initialize();')
-    writeLine(headerFile, '    virtual bool update();')
     writeLine(headerFile)
 
     writeLine(headerFile, 'public slots:')
@@ -166,7 +172,16 @@ def writeTcpHeaderFile():
     writeLine(headerFile, '    ModbusDataUtils::ByteOrder m_stringEndianness = ModbusDataUtils::ByteOrder%s;' % stringEndianness)
     writeLine(headerFile, '    quint16 m_slaveId = 1;')
     writeLine(headerFile)
+
+    if queuedRequests:
+        writeLine(headerFile, '    QModbusReply *m_currentInitReply = nullptr;')
+        writeLine(headerFile, '    QQueue<%s::Function> m_initRequestQueue;' % className)
+        writeLine(headerFile, '    QModbusReply *m_currentUpdateReply = nullptr;')
+        writeLine(headerFile, '    QQueue<%s::Function> m_updateRequestQueue;' % className)
+        writeLine(headerFile)
+
     writeLine(headerFile, '    bool m_reachable = false;')
+    writeLine(headerFile, '    bool m_initializing = false;')
     writeLine(headerFile, '    QModbusReply *m_checkRechableReply = nullptr;')
     writeLine(headerFile, '    uint m_checkReachableRetries = 0;')
     writeLine(headerFile, '    uint m_checkReachableRetriesCount = 0;')
@@ -178,15 +193,23 @@ def writeTcpHeaderFile():
     writeLine(headerFile, '    QVector<QModbusReply *> m_pendingUpdateReplies;')
     writeLine(headerFile)
     writeLine(headerFile, '    QObject *m_initObject = nullptr;')
-    writeLine(headerFile, '    void verifyInitFinished();')
+    writeLine(headerFile, '    bool verifyInitFinished();')
     writeLine(headerFile, '    void finishInitialization(bool success);')
     writeLine(headerFile)
+
     writeLine(headerFile, '    void setupConnection();')
     writeLine(headerFile)
-    writeLine(headerFile, '    void verifyUpdateFinished();')
+    writeLine(headerFile, '    bool verifyUpdateFinished();')
     writeLine(headerFile)
     writeLine(headerFile, '    void onReachabilityCheckFailed();')
     writeLine(headerFile, '    void evaluateReachableState();')
+
+    if queuedRequests:
+        writeLine(headerFile)
+        writeLine(headerFile, '    void sendNextQueuedInitRequest();')
+        writeLine(headerFile, '    void enqueueInitRequest(%s::Function function);' % (className))
+        writeLine(headerFile, '    void sendNextQueuedRequest();')
+        writeLine(headerFile, '    void enqueueRequest(%s::Function function);' % (className))
 
     # End of class
     writeLine(headerFile)
@@ -205,6 +228,7 @@ def writeTcpSourceFile():
     writeLicenseHeader(sourceFile)
     writeLine(sourceFile)
     writeLine(sourceFile, '#include "%s"' % headerFileName)
+    writeLine(sourceFile)
     writeLine(sourceFile, '#include <loggingcategories.h>')
     writeLine(sourceFile, '#include <math.h>')
     writeLine(sourceFile, '#include <QTimer>')
@@ -248,6 +272,12 @@ def writeTcpSourceFile():
     writeLine(sourceFile, 'bool %s::reachable() const' % (className))
     writeLine(sourceFile, '{')
     writeLine(sourceFile, '    return m_reachable;')
+    writeLine(sourceFile, '}')
+    writeLine(sourceFile)
+
+    writeLine(sourceFile, 'bool %s::initializing() const' % (className))
+    writeLine(sourceFile, '{')
+    writeLine(sourceFile, '    return m_initializing;')
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
@@ -310,8 +340,8 @@ def writeTcpSourceFile():
     if 'blocks' in registerJson:
         blocks = registerJson['blocks']
 
-    writeInitMethodImplementationTcp(sourceFile, className, registerJson['registers'], blocks)
-    writeUpdateMethodTcp(sourceFile, className, registerJson['registers'], blocks)
+    writeInitMethodImplementationTcp(sourceFile, className, registerJson['registers'], blocks, queuedRequests)
+    writeUpdateMethodTcp(sourceFile, className, registerJson['registers'], blocks, queuedRequests)
 
     writeLine(sourceFile, 'bool %s::connectDevice()' % (className))
     writeLine(sourceFile, '{')
@@ -332,13 +362,13 @@ def writeTcpSourceFile():
     writeLine(sourceFile)
 
     # Write update methods
-    writePropertyUpdateMethodImplementationsTcp(sourceFile, className, registerJson['registers'])
+    writePropertyUpdateMethodImplementationsTcp(sourceFile, className, registerJson['registers'], queuedRequests, queuedRequestsDelay)
     if 'blocks' in registerJson:
         for blockDefinition in registerJson['blocks']:
-            writePropertyUpdateMethodImplementationsTcp(sourceFile, className, blockDefinition['registers'])
+            writePropertyUpdateMethodImplementationsTcp(sourceFile, className, blockDefinition['registers'], queuedRequests, queuedRequestsDelay)
 
         # Write block update method
-        writeBlockUpdateMethodImplementationsTcp(sourceFile, className, registerJson['blocks'])
+        writeBlockUpdateMethodImplementationsTcp(sourceFile, className, registerJson['blocks'], queuedRequests, queuedRequestsDelay)
 
     # Write internal protected property read method implementations
     writeInternalPropertyReadMethodImplementationsTcp(sourceFile, className, registerJson['registers'])
@@ -377,11 +407,19 @@ def writeTcpSourceFile():
 
     writeTestReachabilityImplementationsTcp(sourceFile, className, registerJson['registers'], checkReachableRegister)
 
-    writeLine(sourceFile, 'void %s::verifyInitFinished()' % (className))
+    writeLine(sourceFile, 'bool %s::verifyInitFinished()' % (className))
     writeLine(sourceFile, '{')
-    writeLine(sourceFile, '    if (m_pendingInitReplies.isEmpty()) {')
-    writeLine(sourceFile, '        finishInitialization(true);')
-    writeLine(sourceFile, '    }')
+    if queuedRequests:
+        writeLine(sourceFile, '    if (m_initRequestQueue.isEmpty() && !m_currentInitReply) {')
+        writeLine(sourceFile, '        finishInitialization(true);')
+        writeLine(sourceFile, '        return true;')
+        writeLine(sourceFile, '    }')
+    else:
+        writeLine(sourceFile, '    if (m_pendingInitReplies.isEmpty()) {')
+        writeLine(sourceFile, '        finishInitialization(true);')
+        writeLine(sourceFile, '        return true;')
+        writeLine(sourceFile, '    }')
+    writeLine(sourceFile, '    return false;')
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
@@ -393,12 +431,20 @@ def writeTcpSourceFile():
     writeLine(sourceFile, '        qCWarning(dc%s()) << "Initialization finished of %s" << m_modbusTcpMaster->hostAddress().toString() << "failed.";' % (className, className))
     writeLine(sourceFile, '    }')
     writeLine(sourceFile)
-    writeLine(sourceFile, '    // Cleanup init')
-    writeLine(sourceFile, '    delete m_initObject;')
-    writeLine(sourceFile, '    m_initObject = nullptr;')
-    writeLine(sourceFile, '    m_pendingInitReplies.clear();')
+    writeLine(sourceFile, '    m_initializing = false;')
+
+    if queuedRequests:
+        writeLine(sourceFile, '    m_initRequestQueue.clear();')
+    else:
+        writeLine(sourceFile, '    // Cleanup init')
+        writeLine(sourceFile, '    delete m_initObject;')
+        writeLine(sourceFile, '    m_initObject = nullptr;')
+        writeLine(sourceFile, '    m_pendingInitReplies.clear();')
+
     writeLine(sourceFile)
-    writeLine(sourceFile, '    emit initializationFinished(success);')
+    writeLine(sourceFile, '    QTimer::singleShot(0, this, [this, success](){')
+    writeLine(sourceFile, '        emit initializationFinished(success);')
+    writeLine(sourceFile, '    });')
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
@@ -410,6 +456,10 @@ def writeTcpSourceFile():
     writeLine(sourceFile, '            // Cleanup before starting to initialize')
     writeLine(sourceFile, '            m_pendingInitReplies.clear();')
     writeLine(sourceFile, '            m_pendingUpdateReplies.clear();')
+    if queuedRequests:
+        writeLine(sourceFile, '            m_updateRequestQueue.clear();')
+        writeLine(sourceFile, '            m_initRequestQueue.clear();')
+
     writeLine(sourceFile, '            m_communicationWorking = false;')
     writeLine(sourceFile, '            m_communicationFailedCounter = 0;')
     writeLine(sourceFile, '            m_checkReachableRetriesCount = 0;')
@@ -419,6 +469,12 @@ def writeTcpSourceFile():
     writeLine(sourceFile, '            m_communicationWorking = false;')
     writeLine(sourceFile, '            m_communicationFailedCounter = 0;')
     writeLine(sourceFile, '            m_checkReachableRetriesCount = 0;')
+    writeLine(sourceFile, '            m_initializing = false;')
+
+    if queuedRequests:
+        writeLine(sourceFile, '            m_updateRequestQueue.clear();')
+        writeLine(sourceFile, '            m_initRequestQueue.clear();')
+
     writeLine(sourceFile, '        }')
     writeLine(sourceFile)
     writeLine(sourceFile, '        evaluateReachableState();')
@@ -426,11 +482,18 @@ def writeTcpSourceFile():
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
-    writeLine(sourceFile, 'void %s::verifyUpdateFinished()' % (className))
+    writeLine(sourceFile, 'bool %s::verifyUpdateFinished()' % (className))
     writeLine(sourceFile, '{')
-    writeLine(sourceFile, '    if (m_pendingUpdateReplies.isEmpty()) {')
-    writeLine(sourceFile, '        emit updateFinished();')
+    if queuedRequests:
+        writeLine(sourceFile, '    if (m_updateRequestQueue.isEmpty() && !m_currentUpdateReply) {')
+        writeLine(sourceFile, '        emit updateFinished();')
+        writeLine(sourceFile, '        return true;')
+    else:
+        writeLine(sourceFile, '    if (m_pendingUpdateReplies.isEmpty()) {')
+        writeLine(sourceFile, '        emit updateFinished();')
+        writeLine(sourceFile, '        return true;')
     writeLine(sourceFile, '    }')
+    writeLine(sourceFile, '    return false;')
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
@@ -461,7 +524,11 @@ def writeTcpSourceFile():
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
-
+    if queuedRequests:
+        writeSendNextQueuedInitRequestMethodImplementation(sourceFile, className)
+        writeEnqueueInitRequestMethodImplementation(sourceFile, className)
+        writeSendNextQueuedRequestMethodImplementation(sourceFile, className)
+        writeEnqueueRequestMethodImplementation(sourceFile, className)
 
     # Write the debug print
     debugObjectParamName = className[0].lower() + className[1:]
@@ -622,7 +689,7 @@ def writeRtuHeaderFile():
     writeLine(headerFile, '    void verifyInitFinished();')
     writeLine(headerFile, '    void finishInitialization(bool success);')
     writeLine(headerFile)
-    writeLine(headerFile, '    void verifyUpdateFinished();')
+    writeLine(headerFile, '    bool verifyUpdateFinished();')
     writeLine(headerFile)
     writeLine(headerFile, '    void onReachabilityCheckFailed();')
     writeLine(headerFile, '    void evaluateReachableState();')
@@ -645,6 +712,7 @@ def writeRtuSourceFile():
     writeLicenseHeader(sourceFile)
 
     writeLine(sourceFile, '#include "%s"' % headerFileName)
+    writeLine(sourceFile)
     writeLine(sourceFile, '#include <loggingcategories.h>')
     writeLine(sourceFile, '#include <math.h>')
     writeLine(sourceFile, '#include <QTimer>')
@@ -831,15 +899,26 @@ def writeRtuSourceFile():
     writeLine(sourceFile, '    m_initObject = nullptr;')
     writeLine(sourceFile, '    m_pendingInitReplies.clear();')
     writeLine(sourceFile)
-    writeLine(sourceFile, '    emit initializationFinished(success);')
+    writeLine(sourceFile, '    QTimer::singleShot(0, this, [this, success](){')
+    writeLine(sourceFile, '        emit initializationFinished(success);')
+    writeLine(sourceFile, '    });')
+
+    if queuedRequests:
+        writeLine(sourceFile)
+        writeLine(sourceFile, '    m_pendingInitReplies.clear();')
+        writeLine(sourceFile, '    m_pendingUpdateReplies.clear();')
+        writeLine(sourceFile, '    update();')
+
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
-    writeLine(sourceFile, 'void %s::verifyUpdateFinished()' % (className))
+    writeLine(sourceFile, 'bool %s::verifyUpdateFinished()' % (className))
     writeLine(sourceFile, '{')
     writeLine(sourceFile, '    if (m_pendingUpdateReplies.isEmpty()) {')
     writeLine(sourceFile, '        emit updateFinished();')
+    writeLine(sourceFile, '        return true;')
     writeLine(sourceFile, '    }')
+    writeLine(sourceFile, '    return false;')
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
@@ -977,14 +1056,27 @@ else:
     logger.debug('Verified successfully checkReachableRegister: %s' % checkReachableRegister['id'])
 
 
+queuedRequests = False
+queuedRequestsDelay = 0
+
+if 'queuedRequests' in registerJson:
+    queuedRequests = registerJson['queuedRequests']
+
+if 'queuedRequestsDelay' in registerJson:
+    queuedRequestsDelay = registerJson['queuedRequestsDelay']
+
 # Inform about parsed and validated configs if debugging enabled
 logger.debug('Script path: %s' % scriptPath)
 logger.debug('Output directory: %s' % outputDirectory)
 logger.debug('Class name prefix: %s' % classNamePrefix)
 logger.debug('Endianness: %s' % endianness)
 logger.debug('String endianness: %s' % stringEndianness)
+logger.debug('Queued requests: %s' % queuedRequests)
+logger.debug('Queued requests delay: %s ms' % queuedRequestsDelay)
+
 logger.debug('Error limit until not reachable: %s' % errorLimitUntilNotReachable)
 logger.debug('Check reachable register: %s' % checkReachableRegister['id'])
+
 
 protocol = 'TCP'
 if 'protocol' in registerJson:
@@ -1063,7 +1155,7 @@ projectIncludeFile = open(projectIncludeFilePath, 'w')
 writeLine(projectIncludeFile, '# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #')
 writeLine(projectIncludeFile, '#')
 writeLine(projectIncludeFile, '# This file has been autogenerated.')
-writeLine(projectIncludeFile, '# Any changes in this file may be overwritten from qmake.')
+writeLine(projectIncludeFile, '# Any changes in this file may be overwritten on a rebuild.')
 writeLine(projectIncludeFile, '#')
 writeLine(projectIncludeFile, '# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #')
 writeLine(projectIncludeFile)

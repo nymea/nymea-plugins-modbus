@@ -146,6 +146,16 @@ QString ModbusDataUtils::convertToString(const QVector<quint16> &registers, Byte
     return QString::fromUtf8(bytes).trimmed();
 }
 
+QByteArray ModbusDataUtils::convertToByteArray(const QVector<quint16> &registers)
+{
+    QByteArray bytes;
+    QDataStream stream(&bytes, QIODevice::WriteOnly);
+    for (int i = 0; i < registers.count(); i++) {
+        stream << registers.at(i);
+    }
+    return bytes;
+}
+
 float ModbusDataUtils::convertToFloat32(const QVector<quint16> &registers, ByteOrder byteOrder)
 {
     Q_ASSERT_X(registers.count() == 2,  "ModbusDataUtils", "invalid raw data size for converting value to float32");

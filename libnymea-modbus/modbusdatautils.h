@@ -90,6 +90,7 @@ public:
     static quint64 convertToUInt64(const QVector<quint16> &registers, ByteOrder byteOrder = ByteOrderLittleEndian);
     static qint64 convertToInt64(const QVector<quint16> &registers, ByteOrder byteOrder = ByteOrderLittleEndian);
     static QString convertToString(const QVector<quint16> &registers, ByteOrder characterByteOrder = ByteOrderLittleEndian);
+    static QByteArray convertToByteArray(const QVector<quint16> &registers);
     static float convertToFloat32(const QVector<quint16> &registers, ByteOrder byteOrder = ByteOrderLittleEndian);
     static double convertToFloat64(const QVector<quint16> &registers, ByteOrder byteOrder = ByteOrderLittleEndian);
 

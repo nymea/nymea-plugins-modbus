@@ -122,10 +122,10 @@ void SmaModbusSolarInverterDiscovery::checkNetworkDevice(const NetworkDeviceInfo
             m_discoveryResults.append(result);
 
             qCDebug(dcSma()) << "Discovery: --> Found" << result.productName;
-            qCDebug(dcSma()) << "  Device name:" << result.deviceName;
-            qCDebug(dcSma()) << "  Serial number:" << result.serialNumber;
-            qCDebug(dcSma()) << "  Software version:" << result.softwareVersion;
-            qCDebug(dcSma()) << " " << result.networkDeviceInfo;
+            qCDebug(dcSma()) << "Discovery:  Device name:" << result.deviceName;
+            qCDebug(dcSma()) << "Discovery:  Serial number:" << result.serialNumber;
+            qCDebug(dcSma()) << "Discovery:  Software version:" << result.softwareVersion;
+            qCDebug(dcSma()) << "Discovery:  " << result.networkDeviceInfo;
 
             // Done with this connection
             cleanupConnection(connection);

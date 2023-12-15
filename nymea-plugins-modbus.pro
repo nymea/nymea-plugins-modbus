@@ -21,9 +21,12 @@ PLUGIN_DIRS = \
     schrack                 \
     senseair                \
     sma                     \
+    solax                   \
     stiebeleltron           \
     sunspec                 \
     unipi                   \
+    vestel                  \
+    wattsonic               \
     webasto                 \
 
 gcc {

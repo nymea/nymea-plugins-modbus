@@ -1,0 +1,13 @@
+{
+    "title": "Wattsonic",
+    "tagline": "Connect Wattsonic devices to nymea.",
+    "icon": "wattsonic.svg",
+    "stability": "consumer",
+    "offline": true,
+    "technologies": [
+        "network"
+    ],
+    "categories": [
+        "energy"
+    ]
+}

@@ -210,6 +210,14 @@ Description: nymea integration plugin for SMA solar inverters and meters
  This package contains the nymea integration plugin for SMA solar inverters and meters.
 
 
+Package: nymea-plugin-solax
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for Solax modbus devices
+ This package contains the nymea integration plugin for solax compatible solar inverters, meters and batteries.
+
+
 Package: nymea-plugin-stiebeleltron
 Architecture: any
 Section: libs
@@ -249,6 +257,27 @@ Replaces: nymea-plugin-wallbe
 Description: nymea integration plugin for PhoenixConnect wallboxes
  This package contains the nymea integration plugin for wallboxes made
  by PhonenixConnect and rebranded as Wallbe, Compleo and Scapo.
+
+
+Package: nymea-plugin-vestel
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for Vestel wallboxes
+ This package contains the nymea integration plugin for wallboxes made
+ by Vestel.
+
+
+Package: nymea-plugin-wattsonic
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for Wattsonic hybrid inverters
+ This package contains the nymea integration plugin for hybrid inverters made
+ by Wattsonic.
+
 
 Package: nymea-plugin-webasto
 Architecture: any

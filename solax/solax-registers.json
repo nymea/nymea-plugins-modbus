@@ -1,0 +1,944 @@
+{
+    "className": "Solax",
+    "protocol": "BOTH",
+    "endianness": "LittleEndian",
+    "errorLimitUntilNotReachable": 5,
+    "queuedRequests": true,
+    "queuedRequestsDelay": 200,
+    "checkReachableRegister": "inverterPower",
+    "enums": [
+        {
+            "name": "RunMode",
+            "values": [
+                {
+                    "key": "WaitMode",
+                    "value": 0
+                },
+                {
+                    "key": "CheckMode",
+                    "value": 1
+                },
+                {
+                    "key": "NormalMode",
+                    "value": 2
+                },
+                {
+                    "key": "FaultMode",
+                    "value": 3
+                },
+                {
+                    "key": "PermanentFaultMode",
+                    "value": 4
+                },
+                {
+                    "key": "UpdateMode",
+                    "value": 5
+                },
+                {
+                    "key": "EpsCheckMode",
+                    "value": 6
+                },
+                {
+                    "key": "EpsMode",
+                    "value": 7
+                },
+                {
+                    "key": "SelfTest",
+                    "value": 8
+                },
+                {
+                    "key": "IdleMode",
+                    "value": 9
+                }
+            ]
+        }
+    ],
+    "blocks": [
+        {
+            "id": "identification",
+            "readSchedule": "init",
+            "registers": [
+                {
+                    "id": "serialNumber",
+                    "address": 0,
+                    "size": 7,
+                    "type": "string",
+                    "registerType": "holdingRegister",
+                    "description": "Serial number",
+                    "access": "RO"
+                },
+                {
+                    "id": "factoryName",
+                    "address": 7,
+                    "size": 7,
+                    "type": "string",
+                    "registerType": "holdingRegister",
+                    "description": "Factory name",
+                    "access": "RO"
+                },
+                {
+                    "id": "moduleName",
+                    "address": 14,
+                    "size": 7,
+                    "type": "string",
+                    "registerType": "holdingRegister",
+                    "description": "Module name",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "versions",
+            "readSchedule": "init",
+            "registers": [
+                {
+                    "id": "firmwareVersion",
+                    "address": 125,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Firmware version",
+                    "access": "RO"
+                },
+                {
+                    "id": "hardwareVerrsion",
+                    "address": 126,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Hardware version",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "inverterEnergyValues",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "inverterVoltage",
+                    "address": 0,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Inverter voltage (X1)",
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "inverterCurrent",
+                    "address": 1,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Inverter current (X1)",
+                    "unit": "A",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "inverterPower",
+                    "address": 2,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Inverter power (X1)",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "hybridVoltageCurrentValues",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "pvVoltage1",
+                    "address": 3,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "PV voltage 1 (Hybrid)",
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "pvVoltage2",
+                    "address": 4,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "PV voltage 2 (Hybrid)",
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "pvCurrent1",
+                    "address": 5,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "PV current 1 (Hybrid)",
+                    "unit": "A",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "pvCurrent2",
+                    "address": 6,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "PV current 2 (Hybrid)",
+                    "unit": "A",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "inverterInformation",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "inverterFrequency",
+                    "address": 7,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Inverter frequency (X1)",
+                    "unit": "Hz",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -2,
+                    "access": "RO"
+                },
+                {
+                    "id": "temperature",
+                    "address": 8,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Radiator temperature",
+                    "unit": "°C",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "runMode",
+                    "address": 9,
+                    "size": 1,
+                    "type": "uint16",
+                    "enum": "RunMode",
+                    "registerType": "inputRegister",
+                    "description": "Run mode",
+                    "defaultValue": "RunModeIdleMode",
+                    "access": "RO"
+                },
+                {
+                    "id": "powerDc1",
+                    "address": 10,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Power DC 1 (Hybrid)",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "powerDc2",
+                    "address": 11,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Power DC 2 (Hybrid)",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "batteryValues",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "batteryVoltage",
+                    "address": 20,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Battery voltage (Charge 1)",
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryCurrent",
+                    "address": 21,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Battery current (Charge 1)",
+                    "unit": "A",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryPower",
+                    "address": 22,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Battery power (Charge 1)",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryConnected",
+                    "address": 23,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Battery connected (0 disconnected, 1 connected)",
+                    "defaultValue": "false",
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryTemperature",
+                    "address": 24,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Battery temperature",
+                    "unit": "°C",
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "batteryEnergyValues",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "batteryCapacity",
+                    "address": 28,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Battery capacity",
+                    "unit": "%",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryEnergyOut",
+                    "address": 29,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Battery output energy",
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "bmsWarning",
+                    "address": 31,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "BMS warning",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                "id": "batteryEnergyOutToday",
+                    "address": 32,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Battery output energy today",
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryEnergyIn",
+                    "address": 33,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Battery input energy",
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryEnergyInToday",
+                    "address": 35,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Battery input energy today",
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "meterValues",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "meterPower",
+                    "address": 70,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "inputRegister",
+                    "description": "Meter power (+ returned, - aquired)",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterTotalEnergyProduced",
+                    "address": 72,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "inputRegister",
+                    "description": "Meter total energy returned",
+                    "unit": "kWh",
+                    "staticScaleFactor": -2,
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterTotalEnergyConsumend",
+                    "address": 74,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "inputRegister",
+                    "description": "Meter total energy consumed",
+                    "unit": "kWh",
+                    "staticScaleFactor": -2,
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "gridAndEpsPhaseValues",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "gridVoltageR",
+                    "address": 106,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Grid voltage R L1",
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "gridCurrentR",
+                    "address": 107,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Grid current R L1",
+                    "unit": "A",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "gridPowerR",
+                    "address": 108,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Grid power R L1",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "gridFrequencyR",
+                    "address": 109,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Grid frequency R L1",
+                    "unit": "Hz",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -2,
+                    "access": "RO"
+                },
+                {
+                    "id": "gridVoltageS",
+                    "address": 110,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Grid voltage S L2",
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "gridCurrentS",
+                    "address": 111,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Grid current S L2",
+                    "unit": "A",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "gridPowerS",
+                    "address": 112,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Grid power S L2",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "gridFrequencyS",
+                    "address": 113,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Grid frequency S L2",
+                    "unit": "Hz",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -2,
+                    "access": "RO"
+                },
+                {
+                    "id": "gridVoltageT",
+                    "address": 114,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Grid voltage T L3",
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "gridCurrentT",
+                    "address": 115,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Grid current T L3",
+                    "unit": "A",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "gridPowerT",
+                    "address": 116,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Grid power T L3",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "gridFrequencyT",
+                    "address": 117,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Grid frequency T L3",
+                    "unit": "Hz",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -2,
+                    "access": "RO"
+                },
+                {
+                    "id": "epsVoltageR",
+                    "address": 118,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "EPS voltage R L1",
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "epsCurrentR",
+                    "address": 119,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "EPS current R L1",
+                    "unit": "A",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "epsPowerActiveR",
+                    "address": 120,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "EPS power R L1",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "epsPowerSR",
+                    "address": 121,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "EPS power S R L1",
+                    "unit": "VA",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "epsVoltageS",
+                    "address": 122,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "EPS voltage S L2",
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "epsCurrentS",
+                    "address": 123,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "EPS current S L2",
+                    "unit": "A",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "epsPowerS",
+                    "address": 124,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "EPS power S L2",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "epsPowerSS",
+                    "address": 125,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "EPS power S S L1",
+                    "unit": "VA",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "epsVoltageT",
+                    "address": 126,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "EPS voltage T L3",
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "epsCurrentT",
+                    "address": 127,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "EPS current T L3",
+                    "unit": "A",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "epsPowerT",
+                    "address": 128,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "EPS power T L3",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "epsPowerST",
+                    "address": 129,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "EPS power S T L1",
+                    "unit": "VA",
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "meter2Values",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "meter2Power",
+                    "address": 168,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "inputRegister",
+                    "description": "Meter 2 power",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meter2EnergyProduced",
+                    "address": 170,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Meter 2 energy produced",
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -2,
+                    "access": "RO"
+                },
+                {
+                    "id": "meter2EnergyConsumed",
+                    "address": 172,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Meter 2 energy consumed",
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -2,
+                    "access": "RO"
+                },
+                {
+                    "id": "meter2EnergyProducedToday",
+                    "address": 174,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Meter 2 energy produced today",
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -2,
+                    "access": "RO"
+                },
+                {
+                    "id": "meter2EnergyConsumedToday",
+                    "address": 176,
+                    "size": 2,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Meter 2 energy consumed today",
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -2,
+                    "access": "RO"
+                },
+                {
+                    "id": "meter2PowerR",
+                    "address": 178,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "inputRegister",
+                    "description": "Meter 2 power R L1",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meter2PowerS",
+                    "address": 180,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "inputRegister",
+                    "description": "Meter 2 power S L2",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meter2PowerT",
+                    "address": 182,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "inputRegister",
+                    "description": "Meter 2 power T L3",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meter1ComState",
+                    "address": 184,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Meter 1 communication state (0 error, 1 normal)",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meter2ComState",
+                    "address": 185,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Meter 2 communication state (0 error, 1 normal)",
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "batteryValues2",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "batteryVoltage2",
+                    "address": 194,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Battery voltage 2 (Charge 1)",
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryCurrent2",
+                    "address": 195,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Battery current 2 (Charge 1)",
+                    "unit": "A",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryPower2",
+                    "address": 196,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Battery power 2 (Charge 1)",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryConnected2",
+                    "address": 197,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Battery connected 2 (0 disconnected, 1 connected)",
+                    "defaultValue": "false",
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryTemperature2",
+                    "address": 198,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Battery temperature 2",
+                    "unit": "°C",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryCapacity2",
+                    "address": 199,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Battery capacity 2",
+                    "unit": "%",
+                    "staticScaleFactor": -2,
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        }
+    ],
+    "registers": [
+        {
+            "id": "totalEnergyProduced",
+            "address": 82,
+            "size": 2,
+            "type": "int32",
+            "readSchedule": "update",
+            "registerType": "inputRegister",
+            "description": "Inverter total energy AC port",
+            "unit": "kWh",
+            "staticScaleFactor": -2,
+            "defaultValue": "0",
+            "access": "RO"
+        }
+    ]
+}
