@@ -31,7 +31,7 @@
 #include "integrationpluginamperfied.h"
 #include "plugininfo.h"
 #include "energycontroldiscovery.h"
-#include "connecthomediscovery.h"
+#include "amperfiedconnectdiscovery.h"
 
 #include <network/networkdevicediscovery.h>
 #include <hardwaremanager.h>
@@ -44,8 +44,6 @@ IntegrationPluginAmperfied::IntegrationPluginAmperfied()
 
 void IntegrationPluginAmperfied::discoverThings(ThingDiscoveryInfo *info)
 {
-    hardwareManager()->modbusRtuResource();
-
     if (info->thingClassId() == energyControlThingClassId) {
         EnergyControlDiscovery *discovery = new EnergyControlDiscovery(hardwareManager()->modbusRtuResource(), info);
 
@@ -81,16 +79,17 @@ void IntegrationPluginAmperfied::discoverThings(ThingDiscoveryInfo *info)
         return;
     }
 
-    if (info->thingClassId() == connectHomeThingClassId) {
-        ConnectHomeDiscovery *discovery = new ConnectHomeDiscovery(hardwareManager()->networkDeviceDiscovery(), info);
-        connect(discovery, &ConnectHomeDiscovery::discoveryFinished, info, [this, info, discovery](){
+    if (info->thingClassId() == connectHomeThingClassId || info->thingClassId() == connectBusinessThingClassId || info->thingClassId() == connectSolarThingClassId) {
+        AmperfiedConnectDiscovery *discovery = new AmperfiedConnectDiscovery(hardwareManager()->networkDeviceDiscovery(), info);
+        connect(discovery, &AmperfiedConnectDiscovery::discoveryFinished, info, [this, info, discovery](){
             qCInfo(dcAmperfied()) << "Discovery results:" << discovery->discoveryResults().count();
 
-            foreach (const ConnectHomeDiscovery::Result &result, discovery->discoveryResults()) {
-                ThingDescriptor descriptor(connectHomeThingClassId, "Amperfied connect.home", QString("MAC: %1").arg(result.networkDeviceInfo.macAddress()));
+            foreach (const AmperfiedConnectDiscovery::Result &result, discovery->discoveryResults()) {
+                ThingDescriptor descriptor(info->thingClassId(), "Amperfied " + result.modelName, QString("MAC: %1").arg(result.networkDeviceInfo.macAddress()));
 
+                ParamTypeId macAddressParamTypeId = thingClass(info->thingClassId()).paramTypes().findByName("macAddress").id();
                 ParamList params{
-                    {connectHomeThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress()}
+                    {macAddressParamTypeId, result.networkDeviceInfo.macAddress()}
                 };
                 descriptor.setParams(params);
 
@@ -104,7 +103,12 @@ void IntegrationPluginAmperfied::discoverThings(ThingDiscoveryInfo *info)
             info->finish(Thing::ThingErrorNoError);
 
         });
-        discovery->startDiscovery();
+        QHash<ThingClassId, QString> map = {
+            {connectHomeThingClassId, "connect.home"},
+            {connectBusinessThingClassId, "connect.business"},
+            {connectSolarThingClassId, "connect.solar"}
+        };
+        discovery->startDiscovery(map.value(info->thingClassId()));
     }
 }
 
@@ -125,14 +129,16 @@ void IntegrationPluginAmperfied::setupThing(ThingSetupInfo *info)
     }
 
 
-    if (info->thing()->thingClassId() == connectHomeThingClassId) {
+    if (info->thing()->thingClassId() == connectHomeThingClassId
+            || info->thing()->thingClassId() == connectSolarThingClassId
+            || info->thing()->thingClassId() == connectBusinessThingClassId) {
         if (m_tcpConnections.contains(info->thing())) {
             delete m_tcpConnections.take(info->thing());
         }
 
         NetworkDeviceMonitor *monitor = m_monitors.value(info->thing());
         if (!monitor) {
-            monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(MacAddress(thing->paramValue(connectHomeThingMacAddressParamTypeId).toString()));
+            monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(MacAddress(thing->paramValue("macAddress").toString()));
             m_monitors.insert(thing, monitor);
         }
 
@@ -143,7 +149,7 @@ void IntegrationPluginAmperfied::setupThing(ThingSetupInfo *info)
             }
         });
 
-        qCDebug(dcAmperfied()) << "Monitor reachable" << monitor->reachable() << thing->paramValue(connectHomeThingMacAddressParamTypeId).toString();
+        qCDebug(dcAmperfied()) << "Monitor reachable" << monitor->reachable() << thing->paramValue("macAddress").toString();
         if (monitor->reachable()) {
             setupTcpConnection(info);
         } else {
@@ -169,7 +175,7 @@ void IntegrationPluginAmperfied::postSetupThing(Thing *thing)
                 connection->update();
             }
             foreach(AmperfiedModbusTcpConnection *connection, m_tcpConnections) {
-                qCDebug(dcAmperfied()) << "Updating connection" << connection->hostAddress();
+                qCDebug(dcAmperfied()) << "Updating connection" << connection->modbusTcpMaster()->hostAddress();
                 connection->update();
             }
         });
@@ -203,7 +209,7 @@ void IntegrationPluginAmperfied::executeAction(ThingActionInfo *info)
             ModbusRtuReply *reply = connection->setChargingCurrent(power ? max : 0);
             connect(reply, &ModbusRtuReply::finished, info, [info, reply, max](){
                 if (reply->error() == ModbusRtuReply::NoError) {
-                    info->thing()->setStateValue(energyControlMaxChargingCurrentStateTypeId, max);
+                    info->thing()->setStateValue(energyControlMaxChargingCurrentStateTypeId, max / 10);
                     info->finish(Thing::ThingErrorNoError);
                 } else {
                     qCWarning(dcAmperfied()) << "Error setting power:" << reply->error() << reply->errorString();
@@ -214,36 +220,54 @@ void IntegrationPluginAmperfied::executeAction(ThingActionInfo *info)
 
     }
 
-    if (info->thing()->thingClassId() == connectHomeThingClassId) {
+    if (info->thing()->thingClassId() == connectHomeThingClassId
+            || info->thing()->thingClassId() == connectBusinessThingClassId
+            || info->thing()->thingClassId() == connectSolarThingClassId) {
+
         AmperfiedModbusTcpConnection *connection = m_tcpConnections.value(info->thing());
 
-        if (info->action().actionTypeId() == connectHomePowerActionTypeId) {
-            bool power = info->action().paramValue(connectHomePowerActionPowerParamTypeId).toBool();
-            QModbusReply *reply = connection->setChargingCurrent(power ? info->thing()->stateValue(connectHomeMaxChargingCurrentStateTypeId).toUInt() * 10 : 0);
+        ActionType actionType = info->thing()->thingClass().actionTypes().findById(info->action().actionTypeId());
+
+        if (actionType.name() == "power") {
+            bool power = info->action().paramValue(actionType.paramTypes().findByName("power").id()).toBool();
+            uint max = info->thing()->stateValue("maxChargingCurrent").toUInt();
+            QModbusReply *reply = connection->setChargingCurrent(power ? max * 10 : 0);
             connect(reply, &QModbusReply::finished, info, [info, reply, power](){
                 if (reply->error() == QModbusDevice::NoError) {
-                    info->thing()->setStateValue(connectHomePowerStateTypeId, power);
+                    info->thing()->setStateValue("power", power);
                     info->finish(Thing::ThingErrorNoError);
                 } else {
                     qCWarning(dcAmperfied()) << "Error setting power:" << reply->error() << reply->errorString();
                     info->finish(Thing::ThingErrorHardwareFailure);
                 }
             });
-        }
-
-        if (info->action().actionTypeId() == connectHomeMaxChargingCurrentActionTypeId) {
-            bool power = info->thing()->stateValue(connectHomePowerStateTypeId).toBool();
-            uint max = info->action().paramValue(connectHomeMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toUInt() * 10;
-            QModbusReply *reply = connection->setChargingCurrent(power ? max : 0);
+        } else if (actionType.name() == "maxChargingCurrent") {
+            bool power = info->thing()->stateValue("power").toBool();
+            uint max = info->action().paramValue(actionType.paramTypes().findByName("maxChargingCurrent").id()).toUInt();
+            QModbusReply *reply = connection->setChargingCurrent(power ? max * 10 : 0);
             connect(reply, &QModbusReply::finished, info, [info, reply, max](){
                 if (reply->error() == QModbusDevice::NoError) {
-                    info->thing()->setStateValue(connectHomeMaxChargingCurrentStateTypeId, max);
+                    info->thing()->setStateValue("maxChargingCurrent", max / 10);
                     info->finish(Thing::ThingErrorNoError);
                 } else {
                     qCWarning(dcAmperfied()) << "Error setting power:" << reply->error() << reply->errorString();
                     info->finish(Thing::ThingErrorHardwareFailure);
                 }
             });
+        } else if (actionType.name() == "desiredPhaseCount") {
+            uint desiredPhaseCount = info->thing()->stateValue("desiredPhaseCount").toBool();
+            QModbusReply *reply = connection->setPhaseSwitchControl(desiredPhaseCount);
+            connect(reply, &QModbusReply::finished, info, [info, reply, desiredPhaseCount](){
+                if (reply->error() == QModbusDevice::NoError) {
+                    info->thing()->setStateValue("desiredPhaseCount", desiredPhaseCount);
+                    info->finish(Thing::ThingErrorNoError);
+                } else {
+                    qCWarning(dcAmperfied()) << "Error setting desired phase count:" << reply->error() << reply->errorString();
+                    info->finish(Thing::ThingErrorHardwareFailure);
+                }
+            });
+        } else {
+            info->finish(Thing::ThingErrorUnsupportedFeature);
         }
 
     }
@@ -256,7 +280,9 @@ void IntegrationPluginAmperfied::thingRemoved(Thing *thing)
         delete m_rtuConnections.take(thing);
     }
 
-    if (thing->thingClassId() == connectHomeThingClassId) {
+    if (thing->thingClassId() == connectHomeThingClassId
+            || thing->thingClassId() == connectBusinessThingClassId
+            || thing->thingClassId() == connectSolarThingClassId) {
         delete m_tcpConnections.take(thing);
     }
 
@@ -270,6 +296,11 @@ void IntegrationPluginAmperfied::setupRtuConnection(ThingSetupInfo *info)
 {
     Thing *thing = info->thing();
     ModbusRtuMaster *master = hardwareManager()->modbusRtuResource()->getModbusRtuMaster(thing->paramValue(energyControlThingRtuMasterParamTypeId).toUuid());
+    if (!master) {
+        qCWarning(dcAmperfied()) << "The Modbus Master is not available any more.";
+        info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("The modbus RTU connection is not available."));
+        return;
+    }
     quint16 slaveId = thing->paramValue(energyControlThingSlaveIdParamTypeId).toUInt();
     AmperfiedModbusRtuConnection *connection = new AmperfiedModbusRtuConnection(master, slaveId, thing);
 
@@ -281,9 +312,12 @@ void IntegrationPluginAmperfied::setupRtuConnection(ThingSetupInfo *info)
             thing->setStateValue(energyControlConnectedStateTypeId, false);
         }
     });
-    connect(connection, &AmperfiedModbusRtuConnection::initializationFinished, thing, [thing](bool success){
+    connect(connection, &AmperfiedModbusRtuConnection::initializationFinished, thing, [connection, thing](bool success){
         if (success) {
             thing->setStateValue(energyControlConnectedStateTypeId, true);
+
+            // Disabling the auto-standby as it will shut down modbus
+            connection->setStandby(AmperfiedModbusRtuConnection::StandbyStandbyDisabled);
         }
     });
 
@@ -331,7 +365,9 @@ void IntegrationPluginAmperfied::setupRtuConnection(ThingSetupInfo *info)
         case AmperfiedModbusRtuConnection::ChargingStateE:
         case AmperfiedModbusRtuConnection::ChargingStateError:
         case AmperfiedModbusRtuConnection::ChargingStateF:
-            qCWarning(dcAmperfied()) << "Unhandled charging state:" << connection->chargingState();
+            qCWarning(dcAmperfied()) << "Erraneous charging state:" << connection->chargingState();
+            thing->setStateValue(energyControlPluggedInStateTypeId, false);
+            break;
         }
 
         int phaseCount = 0;
@@ -365,8 +401,8 @@ void IntegrationPluginAmperfied::setupTcpConnection(ThingSetupInfo *info)
         if (reachable) {
             connection->initialize();
         } else {
-            thing->setStateValue(connectHomeCurrentPowerStateTypeId, 0);
-            thing->setStateValue(connectHomeConnectedStateTypeId, false);
+            thing->setStateValue("currentPower", 0);
+            thing->setStateValue("connected", false);
         }
     });
 
@@ -390,35 +426,41 @@ void IntegrationPluginAmperfied::setupTcpConnection(ThingSetupInfo *info)
     connect(connection, &AmperfiedModbusTcpConnection::updateFinished, thing, [connection, thing](){
         qCDebug(dcAmperfied()) << "Updated:" << connection;
 
-        thing->setStateValue(connectHomeConnectedStateTypeId, true);
+        thing->setStateValue("connected", true);
 
         if (connection->chargingCurrent() == 0) {
-            thing->setStateValue(connectHomePowerStateTypeId, false);
+            thing->setStateValue("power", false);
         } else {
-            thing->setStateValue(connectHomePowerStateTypeId, true);
-            thing->setStateValue(connectHomeMaxChargingCurrentStateTypeId, connection->chargingCurrent() / 10);
+            thing->setStateValue("power", true);
+            thing->setStateValue("maxChargingCurrent", connection->chargingCurrent() / 10);
         }
-        thing->setStateMinMaxValues(connectHomeMaxChargingCurrentStateTypeId, connection->minChargingCurrent(), connection->maxChargingCurrent());
-        thing->setStateValue(connectHomeCurrentPowerStateTypeId, connection->currentPower());
-        thing->setStateValue(connectHomeTotalEnergyConsumedStateTypeId, connection->totalEnergy() / 1000.0);
-        thing->setStateValue(connectHomeSessionEnergyStateTypeId, connection->sessionEnergy() / 1000.0);
+        thing->setStateMinMaxValues("maxChargingCurrent", connection->minChargingCurrent(), connection->maxChargingCurrent());
+        thing->setStateValue("currentPower", connection->currentPower());
+        thing->setStateValue("totalEnergyConsumed", connection->totalEnergy() / 1000.0);
+        thing->setStateValue("sessionEnergy", connection->sessionEnergy() / 1000.0);
         switch (connection->chargingState()) {
         case AmperfiedModbusTcpConnection::ChargingStateUndefined:
         case AmperfiedModbusTcpConnection::ChargingStateA1:
         case AmperfiedModbusTcpConnection::ChargingStateA2:
-            thing->setStateValue(connectHomePluggedInStateTypeId, false);
+            thing->setStateValue("pluggedIn", false);
+            thing->setStateValue("charging", false);
             break;
         case AmperfiedModbusTcpConnection::ChargingStateB1:
         case AmperfiedModbusTcpConnection::ChargingStateB2:
+            thing->setStateValue("pluggedIn", true);
+            thing->setStateValue("charging", false);
+            break;
         case AmperfiedModbusTcpConnection::ChargingStateC1:
         case AmperfiedModbusTcpConnection::ChargingStateC2:
-            thing->setStateValue(connectHomePluggedInStateTypeId, true);
+            thing->setStateValue("pluggedIn", true);
+            thing->setStateValue("charging", true);
             break;
         case AmperfiedModbusTcpConnection::ChargingStateDerating:
         case AmperfiedModbusTcpConnection::ChargingStateE:
         case AmperfiedModbusTcpConnection::ChargingStateError:
         case AmperfiedModbusTcpConnection::ChargingStateF:
-            qCWarning(dcAmperfied()) << "Unhandled charging state:" << connection->chargingState();
+            qCWarning(dcAmperfied()) << "Erraneous CP signal state:" << connection->chargingState();
+            thing->setStateValue("charging", false);
         }
 
         int phaseCount = 0;
@@ -432,9 +474,8 @@ void IntegrationPluginAmperfied::setupTcpConnection(ThingSetupInfo *info)
             phaseCount++;
         }
         if (phaseCount > 0) {
-            thing->setStateValue(connectHomePhaseCountStateTypeId, phaseCount);
+            thing->setStateValue("phaseCount", phaseCount);
         }
-        thing->setStateValue(connectHomeChargingStateTypeId, phaseCount > 0);
     });
 
     connection->connectDevice();

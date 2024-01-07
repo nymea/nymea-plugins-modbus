@@ -33,6 +33,7 @@
 
 #include <QVector>
 #include <QObject>
+#include <QModbusPdu>
 
 class ModbusDataUtils
 {
@@ -88,7 +89,8 @@ public:
     static qint32 convertToInt32(const QVector<quint16> &registers, ByteOrder byteOrder = ByteOrderLittleEndian);
     static quint64 convertToUInt64(const QVector<quint16> &registers, ByteOrder byteOrder = ByteOrderLittleEndian);
     static qint64 convertToInt64(const QVector<quint16> &registers, ByteOrder byteOrder = ByteOrderLittleEndian);
-    static QString convertToString(const QVector<quint16> &registers);
+    static QString convertToString(const QVector<quint16> &registers, ByteOrder characterByteOrder = ByteOrderLittleEndian);
+    static QByteArray convertToByteArray(const QVector<quint16> &registers);
     static float convertToFloat32(const QVector<quint16> &registers, ByteOrder byteOrder = ByteOrderLittleEndian);
     static double convertToFloat64(const QVector<quint16> &registers, ByteOrder byteOrder = ByteOrderLittleEndian);
 
@@ -99,9 +101,11 @@ public:
     static QVector<quint16> convertFromInt32(qint32 value, ByteOrder byteOrder = ByteOrderLittleEndian);
     static QVector<quint16> convertFromUInt64(quint64 value, ByteOrder byteOrder = ByteOrderLittleEndian);
     static QVector<quint16> convertFromInt64(qint64 value, ByteOrder byteOrder = ByteOrderLittleEndian);
-    static QVector<quint16> convertFromString(const QString &value, quint16 stringLength);
+    static QVector<quint16> convertFromString(const QString &value, quint16 stringLength, ByteOrder characterByteOrder = ByteOrderLittleEndian);
     static QVector<quint16> convertFromFloat32(float value, ByteOrder byteOrder = ByteOrderLittleEndian);
     static QVector<quint16> convertFromFloat64(double value, ByteOrder byteOrder = ByteOrderLittleEndian);
+
+    static QString exceptionCodeToString(QModbusPdu::ExceptionCode exception);
 };
 
 #endif // MODBUSDATAUTILS_H

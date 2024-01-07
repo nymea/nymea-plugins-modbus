@@ -54,10 +54,7 @@ public:
     };
     Q_ENUM(State)
 
-    explicit SpeedwireInverter(const QHostAddress &address, quint16 modelId, quint32 serialNumber, QObject *parent = nullptr);
-
-    bool initialize();
-    bool initialized() const;
+    explicit SpeedwireInverter(SpeedwireInterface *speedwireInterface, const QHostAddress &address, quint16 modelId, quint32 serialNumber, QObject *parent = nullptr);
 
     State state() const;
 
@@ -94,12 +91,20 @@ public:
     double currentDcMpp1() const;
     double currentDcMpp2() const;
 
+    bool batteryAvailable() const;
+    double batteryCycles() const;
+    double batteryCharge() const;
+    double batteryTemperature() const;
+    double batteryCurrent() const;
+    double batteryVoltage() const;
+
     // Query methods
     SpeedwireInverterReply *sendIdentifyRequest();
     SpeedwireInverterReply *sendLoginRequest(const QString &password = "0000", bool loginAsUser = true);
     SpeedwireInverterReply *sendLogoutRequest();
     SpeedwireInverterReply *sendSoftwareVersionRequest();
     SpeedwireInverterReply *sendDeviceTypeRequest();
+    SpeedwireInverterReply *sendBatteryInfoRequest();
 
     // Start connecting
     void startConnecting(const QString &password = "0000");
@@ -112,9 +117,11 @@ signals:
     void loginFinished(bool success);
     void stateChanged(State state);
     void valuesUpdated();
+    void batteryAvailableChanged(bool available);
+    void batteryValuesUpdated();
 
 private:
-    SpeedwireInterface *m_interface = nullptr;
+    SpeedwireInterface *m_speedwireInterface = nullptr;
     QHostAddress m_address;
     QString m_password;
 
@@ -124,7 +131,7 @@ private:
 
     bool m_reachable = false;
     State m_state = StateDisconnected;
-    quint16 m_packetId = 1;
+    quint8 m_packetId = 1;
 
     bool m_deviceInformationFetched = false;
 
@@ -163,6 +170,14 @@ private:
     double m_currentDcMpp1 = 0;
     double m_currentDcMpp2 = 0;
 
+    bool m_batteryAvailable = false;
+
+    double m_batteryCycles = 0;
+    double m_batteryVoltage = 0;
+    double m_batteryCurrent = 0;
+    double m_batteryCharge = 0;
+    double m_batteryTemperature = 0;
+
     void setState(State state);
 
     void sendNextReply();
@@ -185,12 +200,16 @@ private:
     void processDcVoltageCurrentResponse(const QByteArray &response);
     void processEnergyProductionResponse(const QByteArray &response);
     void processGridFrequencyResponse(const QByteArray &response);
+    void processBatteryInfoResponse(const QByteArray &response);
+    void processBatteryChargeResponse(const QByteArray &response);
     void processInverterStatusResponse(const QByteArray &response);
 
     void readUntilEndOfMeasurement(QDataStream &stream);
     double readValue(quint32 value, double divisor = 1.0);
+    double readValue(qint32 value, double divisor = 1.0);
 
     void setReachable(bool reachable);
+    void setBatteryAvailable(bool available);
 
 private slots:
     void processData(const QHostAddress &senderAddress, quint16 senderPort, const QByteArray &data);

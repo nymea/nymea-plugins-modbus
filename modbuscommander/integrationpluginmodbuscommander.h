@@ -61,7 +61,7 @@ public:
 private:
     PluginTimer *m_refreshTimer = nullptr;
 
-    QHash<Thing*, ModbusTCPMaster*> m_modbusTCPMasters;
+    QHash<Thing*, ModbusTcpMaster*> m_modbusTCPMasters;
     QHash<Thing *, ModbusRtuMaster *> m_modbusRtuMasters;
     QHash<QUuid, ThingActionInfo*> m_asyncActions;
     QHash<QUuid, Thing*> m_readRequests;

@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2021, nymea GmbH
+* Copyright 2013 - 2023, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -32,12 +32,14 @@
 #define INTEGRATIONPLUGINSUNSPEC_H
 
 #include <integrations/integrationplugin.h>
+#include <network/networkdevicemonitor.h>
 #include <plugintimer.h>
 
 #include <sunspecconnection.h>
 #include <models/sunspecmodelfactory.h>
 
 #include "sunspecthing.h"
+#include "extern-plugininfo.h"
 
 #include <QUuid>
 
@@ -74,6 +76,8 @@ private:
 
     PluginTimer *m_refreshTimer = nullptr;
 
+    QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
+
     QHash<ThingId, SunSpecConnection *> m_sunSpecConnections;
     QHash<Thing *, SunSpecThing *> m_sunSpecThings;
 
@@ -81,15 +85,13 @@ private:
     QHash<Thing *, SunSpecModel *> m_sunSpecMeters;
     QHash<Thing *, SunSpecModel *> m_sunSpecStorages;
 
+
+    Thing *getThingForSunSpecModel(uint modelId, uint modbusAddress, const ThingId &parentId);
     bool sunspecThingAlreadyAdded(uint modelId, uint modbusAddress, const ThingId &parentId);
     void processDiscoveryResult(Thing *thing, SunSpecConnection *connection);
-    void checkAutoSetupModels(Thing *connectionThing, QList<SunSpecModel *> models);
 
     // SunSpec things
-    void setupConnection(ThingSetupInfo *info);
-    void setupInverter(ThingSetupInfo *info);
-    void setupMeter(ThingSetupInfo *info);
-    void setupStorage(ThingSetupInfo *info);
+    SunSpecConnection *createConnection(Thing *thing);
 
     // Custom types
     void setupSolarEdgeBattery(ThingSetupInfo *info);
@@ -106,6 +108,9 @@ private:
     QString getInverterStateString(quint16 state);
     QString getInverterErrorString(quint32 flag);
 
+    double fixValueSign(double targetValue, double powerValue);
+    bool hasManufacturer(const QStringList &manufacturers, const QString &manufacturer);
+    void markThingStatesDisconnected(Thing *thing);
 
 private slots:
     void onRefreshTimer();
@@ -115,6 +120,9 @@ private slots:
     void onMeterBlockUpdated();
     void onStorageBlockUpdated();
     void onSolarEdgeBatteryBlockUpdated();
+
+    void evaluateEnergyProducedValue(Thing *inverterThing, float energyProduced);
+
 
 };
 #endif // INTEGRATIONPLUGINSUNSPEC_H

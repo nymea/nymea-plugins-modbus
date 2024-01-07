@@ -1,0 +1,324 @@
+{
+    "className": "AmtronCompact20",
+    "protocol": "RTU",
+    "endianness": "BigEndian",
+    "errorLimitUntilNotReachable": 20,
+    "checkReachableRegister": "cpSignalState",
+    "enums": [
+        {
+            "name": "CPSignalState",
+            "values": [
+                {
+                    "key": "A1",
+                    "value": 10
+                },
+                {
+                    "key": "B1",
+                    "value": 11
+                },
+                {
+                    "key": "C1",
+                    "value": 12
+                },
+                {
+                    "key": "D1",
+                    "value": 13
+                },
+                {
+                    "key": "E",
+                    "value": 14
+                },
+                {
+                    "key": "F",
+                    "value": 15
+                },
+                {
+                    "key": "A2",
+                    "value": 26
+                },
+                {
+                    "key": "B2",
+                    "value": 27
+                },
+                {
+                    "key": "C2",
+                    "value": 28
+                },
+                {
+                    "key": "D2",
+                    "value": 29
+                }
+            ]
+        },
+        {
+            "name": "EvseState",
+            "values": [
+                {
+                    "key": "NotInitialized",
+                    "value": 0
+                },
+                {
+                    "key": "Idle",
+                    "value": 1
+                },
+                {
+                    "key": "EvConnected",
+                    "value": 2
+                },
+                {
+                    "key": "PreconditionsValidButNotCharging",
+                    "value": 3
+                },
+                {
+                    "key": "ReadyToCharge",
+                    "value": 4
+                },
+                {
+                    "key": "Charging",
+                    "value": 5
+                },
+                {
+                    "key": "Error",
+                    "value": 6
+                },
+                {
+                    "key": "ServiceMode",
+                    "value": 7
+                }
+            ]
+        },
+        {
+            "name": "PhaseMode",
+            "values": [
+                {
+                    "key": "All",
+                    "value": 0
+                },
+                {
+                    "key": "Single",
+                    "value": 1
+                }
+            ]
+        },
+        {
+            "name": "SolarChargingMode",
+            "values": [
+                {
+                    "key": "Off",
+                    "value": 0
+                },
+                {
+                    "key": "Standard",
+                    "value": 1
+                },
+                {
+                    "key": "Sunshine",
+                    "value": 2
+                },
+                {
+                    "key": "SunshinePlus",
+                    "value": 3
+                }
+            ]
+        }
+    ],
+    "blocks": [
+        {
+            "id": "session",
+            "readSchedule": "udpate",
+            "registers": [
+                {
+                    "id": "maxCurrentSession",
+                    "address": 2816,
+                    "size": 2,
+                    "type": "float",
+                    "registerType": "holdingRegister",
+                    "description": "Max current for session",
+                    "defaultValue": 32,
+                    "access": "RO"
+                },
+                {
+                    "id": "chargedEnergySession",
+                    "address": 2818,
+                    "size": 2,
+                    "type": "float",
+                    "registerType": "holdingRegister",
+                    "description": "Charged energy session",
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "sessionDuration",
+                    "address": 2820,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Session duration",
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "detectedEVPhases",
+                    "address": 2822,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Detected EV phases",
+                    "defaultValue": 0,
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "functions",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "solarChargingMode",
+                    "address": 3331,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Solar charging mode (LED)",
+                    "enum": "SolarChargingMode",
+                    "defaultValue": "SolarChargingModeOff",
+                    "access": "RW"
+                },
+                {
+                    "id": "requestedPhases",
+                    "address": 3332,
+                    "size": 1,
+                    "type": "uint16",
+                    "readSchedule": "update",
+                    "registerType": "holdingRegister",
+                    "description": "Requested phases",
+                    "enum": "PhaseMode",
+                    "defaultValue": "PhaseModeAll",
+                    "access": "RW"
+                },
+                {
+                    "id": "chargingReleaseEnergyManager",
+                    "address": 3333,
+                    "size": 1,
+                    "type": "uint16",
+                    "readSchedule": "update",
+                    "registerType": "holdingRegister",
+                    "description": "Charging release energy manager",
+                    "defaultValue": 0,
+                    "access": "RW"
+                }
+            ]
+        }
+    ],
+    "registers": [
+        {
+            "id": "firmwareVersion",
+            "address": 1,
+            "size": 8,
+            "type": "string",
+            "readSchedule": "init",
+            "registerType": "holdingRegister",
+            "description": "Firmware version",
+            "access": "RO"
+        },
+        {
+            "id": "serial",
+            "address": 19,
+            "size": 8,
+            "type": "string",
+            "readSchedule": "init",
+            "registerType": "holdingRegister",
+            "description": "Serial number",
+            "access": "RO"
+        },
+        {
+            "id": "evseState",
+            "address": 256,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "EVSE state",
+            "enum": "EvseState",
+            "defaultValue": "EvseStateNotInitialized",
+            "access": "RO"
+        },
+        {
+            "id": "cpSignalState",
+            "address": 264,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "CP signal state",
+            "enum": "CPSignalState",
+            "defaultValue": "CPSignalStateA1",
+            "access": "RO"
+        },
+        {
+            "id": "chargingCurrentEnergyManager",
+            "address": 770,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Charging current energy manager",
+            "defaultValue": 32,
+            "access": "RW"
+        },
+        {
+            "id": "maxCurrentEVSE",
+            "address": 774,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Max current EVSE",
+            "defaultValue": 32,
+            "access": "R"
+        },
+        {
+            "id": "powerOverall",
+            "address": 1298,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Overall power on all phases",
+            "defaultValue": 0,
+            "access": "RO"
+        },
+        {
+            "id": "heartbeat",
+            "address": 3328,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "description": "Heartbeat",
+            "access": "WO"
+        },
+        {
+            "id": "switchedPhases",
+            "address": 3586,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Switched phases",
+            "enum": "PhaseMode",
+            "defaultValue": "PhaseModeAll",
+            "access": "RO"
+        },
+        {
+            "id": "chargedEnergyTotal",
+            "address": 4096,
+            "size": 2,
+            "type": "float",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Charged energy total",
+            "defaultValue": 0,
+            "access": "RO"
+        }
+    ]
+}

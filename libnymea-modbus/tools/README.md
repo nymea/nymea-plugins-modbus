@@ -20,8 +20,11 @@ The basic structure of the modbus register JSON looks like following example:
     "className": "MyConnection",
     "protocol": "BOTH",
     "endianness": "BigEndian",
+    "stringEndianness": "BigEndian",
     "errorLimitUntilNotReachable": 10,
     "checkReachableRegister": "registerPropertyName",
+    "queuedRequests": false,
+    "queuedRequestsDelay": 0,
     "enums": [
         {
             "name": "NameOfEnum",
@@ -138,12 +141,38 @@ There are 2 possibilities:
 * `BigEndian`: default if not specified: register bytes come in following order `[0, 1, 2, 3]`: `ABCD`
 * `LittleEndian`: register bytes come in following order `[0, 1, 2, 3]`: `CDAB`
 
+
+## String endianness
+
+When converting multiple registers to a string, some modbus devices use a different endianess within a register.
+One register contains 2 bytes, miltiple registers in a row build up a string. The string endianess tells the generated class how to parse those strings. 
+
+There are 2 possibilities:
+
+* `BigEndian`: default if not specified: register bytes come in following order `[0, 1], [2, 3]`: `ABCD`
+* `LittleEndian`: register bytes come in following order `[1, 0] [3, 2]`: `BADC`
+
+Please not that the overall endianess of the device does not change the order of the register regarding strings since in modbus a normal register is definded as big endian. Only multiple registers combined to a numeric data type will be taken into account by the `endianess` property.
+
 ## Enums
 
 Many modbus devices provide inforation using `Enums`, indicating a special state trough a defined list of values. If a register implements an enum, you can define it in the `enums` section. The `name` property defines the name of the enum, and the script will generate a c++ enum definition from this section. Each enum value will then be generated using `<EnumName><EnumValueName> = <value>`.
 
 If a register represets an enum, you simply add the property `"enum": "NameOfEnum"` in the register map and the property will be defined using the resulting enum type. All convertion between enum and resulting modbus register value will be done automatically.
 
+
+## Queued requests
+
+Some modbus devices can process only one request at the time, and sometimes even require a delay between requests. For this purpose the boolean property `queuedRequests` and integer property `queuedRequestsDelay` (milliseconds) property hase been introdiced. By default, requests are not queued and the delay 0 ms.
+
+```
+{
+    ...
+    "queuedRequests": false,
+    "queuedRequestsDelay": 0,
+    ...
+}
+```
 
 ## Read schedules
 

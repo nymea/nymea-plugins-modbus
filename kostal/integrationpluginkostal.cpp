@@ -195,7 +195,7 @@ void IntegrationPluginKostal::postSetupThing(Thing *thing)
             m_pluginTimer = hardwareManager()->pluginTimerManager()->registerTimer(2);
             connect(m_pluginTimer, &PluginTimer::timeout, this, [this] {
                 foreach(KostalModbusTcpConnection *connection, m_kostalConnections) {
-                    qCDebug(dcKostal()) << "Update connection" << connection->hostAddress().toString();
+                    qCDebug(dcKostal()) << "Update connection" << connection->modbusTcpMaster()->hostAddress().toString();
                     connection->update();
                 }
             });
@@ -319,7 +319,7 @@ void IntegrationPluginKostal::setupKostalConnection(ThingSetupInfo *info)
             return;
 
         if (reachable && !thing->stateValue("connected").toBool()) {
-            kostalConnection->setHostAddress(monitor->networkDeviceInfo().address());
+            kostalConnection->modbusTcpMaster()->setHostAddress(monitor->networkDeviceInfo().address());
             kostalConnection->connectDevice();
         } else if (!reachable) {
             // Note: We disable autoreconnect explicitly and we will
@@ -358,7 +358,7 @@ void IntegrationPluginKostal::setupKostalConnection(ThingSetupInfo *info)
 
     connect(kostalConnection, &KostalModbusTcpConnection::initializationFinished, info, [=](bool success){
         if (!success) {
-            qCWarning(dcKostal()) << "Connection init finished with errors" << thing->name() << kostalConnection->hostAddress().toString();
+            qCWarning(dcKostal()) << "Connection init finished with errors" << thing->name() << kostalConnection->modbusTcpMaster()->hostAddress().toString();
             hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(monitor);
             kostalConnection->deleteLater();
             info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Could not initialize the communication with the inverter."));

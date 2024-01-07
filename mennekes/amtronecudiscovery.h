@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2022, nymea GmbH
+* Copyright 2013 - 2023, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -36,7 +36,7 @@
 
 #include <network/networkdevicediscovery.h>
 
-#include "amtronecumodbustcpconnection.h"
+#include "amtronecu.h"
 
 class AmtronECUDiscovery : public QObject
 {
@@ -44,6 +44,7 @@ class AmtronECUDiscovery : public QObject
 public:
     explicit AmtronECUDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, QObject *parent = nullptr);
     struct Result {
+        AmtronECU::Version detectedVersion;
         QString firmwareVersion;
         QString model;
         NetworkDeviceInfo networkDeviceInfo;
@@ -62,12 +63,12 @@ private:
     QTimer m_gracePeriodTimer;
     QDateTime m_startDateTime;
 
-    QList<AmtronECUModbusTcpConnection *> m_connections;
+    QList<AmtronECU *> m_connections;
 
     QList<Result> m_discoveryResults;
 
     void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
-    void cleanupConnection(AmtronECUModbusTcpConnection *connection);
+    void cleanupConnection(AmtronECU *connection);
 
     void finishDiscovery();
 };

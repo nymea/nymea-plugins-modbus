@@ -1,3 +1,119 @@
+nymea-plugins-modbus (1.9.0) jammy; urgency=medium
+
+  [ Michael Zanetti ]
+  * New Plugin: Vestel
+
+  [ Simon Stürz ]
+  * New plugin: Solax
+
+  [ Michael Zanetti ]
+  * Schrack: Improve some debug prints
+  * New plugin: Wattsonic
+  * Amperfied: Add support for connect.solar and connect.business
+  * Webasto: Add support for the Webasto Unite wallbox
+
+  [ Jenkins ]
+  * Huawei: smartmeter add totals
+
+  [ Bernhard Trinnes ]
+  * UniPi: Removed UniPi debian package dependency to wiringpi
+
+  [ Simon Stürz ]
+  * Mennekes: Add support for Mennekes ECU with 5.12 firmware
+  * Adding LGPL3 license file
+  * SunSpec: Filter out invalid energy produced values
+  * Huawei: Update battery behaviour depending on the battery state
+
+ -- jenkins <developer@nymea.io>  Fri, 15 Dec 2023 10:21:52 +0100
+
+nymea-plugins-modbus (1.8.4) jammy; urgency=medium
+
+  [ Simon Stürz ]
+  * Webasto: Add support fot the Webasto NEXT wallbox
+
+  [ Michael Zanetti ]
+  * SMA: Add support for batteries
+
+ -- jenkins <developer@nymea.io>  Fri, 18 Aug 2023 17:12:30 +0200
+
+nymea-plugins-modbus (1.8.3) jammy; urgency=medium
+
+  [ Simon Stürz ]
+  * Webasto: Add support fot the Webasto NEXT wallbox
+
+  [ Michael Zanetti ]
+  * Mennekes: Add solarChargingMode state to Compact20s
+  * SMA: Add support for batteries
+  * Mennekes: Use voltage instead of current to determine connected
+    phases
+  * Schrack: Fix a crash when the setup of the wallbox fails
+
+  [ Simon Stürz ]
+  * Schrack: Add setting for connected phases
+
+  [ Michael Zanetti ]
+  * Amperfied: Fix a crash when the Modbus RTU Master is removed
+  * Schrack: Ignore bogus CP signal state which happens occationally
+
+ -- jenkins <developer@nymea.io>  Thu, 17 Aug 2023 14:11:27 +0200
+
+nymea-plugins-modbus (1.8.2) jammy; urgency=medium
+
+  [ Simon Stürz ]
+  * Huawei: Extend discovery to scan for multiple modbus servers
+
+  [ Michael Zanetti ]
+  * Amperfied: Fix the standby register being Write-Only in old
+    firmwares
+  * Mennekes: Fix amtron ECU power action handling
+
+  [ Simon Stürz ]
+  * SMA: Improve speedwire interface handling and sharing
+
+ -- jenkins <developer@nymea.io>  Wed, 26 Jul 2023 15:35:08 +0200
+
+nymea-plugins-modbus (1.8.1) jammy; urgency=medium
+
+  [ Michael Zanetti ]
+  * ModbusCommander: Fix value state name typo
+
+  [ Simon Stürz ]
+  * SMA: improve inverter value reading and enable battery
+  * SunSpec: Fix autoremove devices if the model does not exist any more
+  * nymea-modbus-cli: Add exception code parsing
+
+ -- jenkins <developer@nymea.io>  Sun, 11 Jun 2023 19:44:25 +0200
+
+nymea-plugins-modbus (1.8.0) jammy; urgency=medium
+
+  [ Bernhard Trinnes ]
+  * Drexel und Weiss: Add smartmeterconsumer interface
+
+  [ Michael Zanetti ]
+  * Amperfied/Heidelberg: Disable auto-standby and smaller fixes
+
+  [ Simon Stürz ]
+  * SunSpec: Fix meter phase power and phase current signs
+  * modbus-tool: Introduce string endianess
+
+  [ Michael Zanetti ]
+  * Mennekes: Complete HCC3 controller implementation
+
+  [ Simon Stürz ]
+  * nymea-modbus-cli: Add modbus RTU functionality
+  * SunSpec: Do not delete TCP connection upon reconnect
+  * SunSpec: Precise discovery and use network device monitor
+  * SMA: Improve speedwire protocol handling and add SMA battery
+
+  [ Michael Zanetti ]
+  * Mennekes: Add support for the Amtron Compact 2.0
+
+  [ Simon Stürz ]
+  * modbus-tool: process response only if the result register count
+    matches the requested size
+
+ -- jenkins <developer@nymea.io>  Mon, 22 May 2023 17:15:16 +0200
+
 nymea-plugins-modbus (1.7.0) jammy; urgency=medium
 
   [ Michael Zanetti ]

@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2020, nymea GmbH
+* Copyright 2013 - 2023, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -31,14 +31,19 @@
 #ifndef INTEGRATIONPLUGINWEBASTO_H
 #define INTEGRATIONPLUGINWEBASTO_H
 
-#include <integrations/integrationplugin.h>
 #include <plugintimer.h>
+#include <integrations/integrationplugin.h>
+#include <network/networkdevicemonitor.h>
 
 #include "webasto.h"
+#include "webastonextmodbustcpconnection.h"
+#include "evc04modbustcpconnection.h"
 
+#include <QUuid>
 #include <QObject>
 #include <QHostAddress>
-#include <QUuid>
+
+class QNetworkReply;
 
 class IntegrationPluginWebasto : public IntegrationPlugin
 {
@@ -53,16 +58,34 @@ public:
     void discoverThings(ThingDiscoveryInfo *info) override;
     void setupThing(ThingSetupInfo *info) override;
     void postSetupThing(Thing *thing) override;
-    void executeAction(ThingActionInfo *info) override;
     void thingRemoved(Thing *thing) override;
+    void executeAction(ThingActionInfo *info) override;
 
 private:
     PluginTimer *m_pluginTimer = nullptr;
-    QHash<Thing *, Webasto *> m_webastoConnections;
+
     QHash<QUuid, ThingActionInfo *> m_asyncActions;
+
+    QHash<Thing *, Webasto *> m_webastoLiveConnections;
+    QHash<Thing *, WebastoNextModbusTcpConnection *> m_webastoNextConnections;
+    QHash<Thing *, EVC04ModbusTcpConnection *> m_evc04Connections;
+    QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
+
+    void setupWebastoNextConnection(ThingSetupInfo *info);
 
     void update(Webasto *webasto);
     void evaluatePhaseCount(Thing *thing);
+
+    void executeWebastoNextPowerAction(ThingActionInfo *info, bool power);
+
+    void setupEVC04Connection(ThingSetupInfo *info);
+    void updateEVC04MaxCurrent(Thing *thing);
+    QHash<Thing *, quint32> m_lastWallboxTime;
+    QHash<Thing *, QPair<QString, QDateTime>> m_webastoUniteTokens;
+    bool validTokenAvailable(Thing *thing);
+    QNetworkReply *requestWebstoUniteAccessToken(const QHostAddress &address);
+    QNetworkReply *requestWebstoUnitePhaseCountChange(const QHostAddress &address, const QString &accessToken, uint desiredPhaseCount);
+    void executeWebastoUnitePhaseCountAction(ThingActionInfo *info);
 
 private slots:
     void onConnectionChanged(bool connected);

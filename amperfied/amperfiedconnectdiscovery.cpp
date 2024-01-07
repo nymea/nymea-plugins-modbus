@@ -28,10 +28,10 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "connecthomediscovery.h"
+#include "amperfiedconnectdiscovery.h"
 #include "extern-plugininfo.h"
 
-ConnectHomeDiscovery::ConnectHomeDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, QObject *parent) :
+AmperfiedConnectDiscovery::AmperfiedConnectDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, QObject *parent) :
     QObject{parent},
     m_networkDeviceDiscovery{networkDeviceDiscovery}
 {
@@ -43,12 +43,13 @@ ConnectHomeDiscovery::ConnectHomeDiscovery(NetworkDeviceDiscovery *networkDevice
     });
 }
 
-void ConnectHomeDiscovery::startDiscovery()
+void AmperfiedConnectDiscovery::startDiscovery(const QString &nameFilter)
 {
-    qCInfo(dcAmperfied()) << "Discovery: Searching for Amperfied wallboxes in the network...";
+    qCInfo(dcAmperfied()) << "Discovery: Searching for Amperfied" << nameFilter << "wallboxes in the network...";
+    m_nameFilter = nameFilter;
     NetworkDeviceDiscoveryReply *discoveryReply = m_networkDeviceDiscovery->discover();
 
-    connect(discoveryReply, &NetworkDeviceDiscoveryReply::networkDeviceInfoAdded, this, &ConnectHomeDiscovery::checkNetworkDevice);
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::networkDeviceInfoAdded, this, &AmperfiedConnectDiscovery::checkNetworkDevice);
 
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
         qCDebug(dcAmperfied()) << "Discovery: Network discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "network devices";
@@ -57,12 +58,12 @@ void ConnectHomeDiscovery::startDiscovery()
     });
 }
 
-QList<ConnectHomeDiscovery::Result> ConnectHomeDiscovery::discoveryResults() const
+QList<AmperfiedConnectDiscovery::Result> AmperfiedConnectDiscovery::discoveryResults() const
 {
     return m_discoveryResults;
 }
 
-void ConnectHomeDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo)
+void AmperfiedConnectDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo)
 {
     int port = 502;
     int slaveId = 1;
@@ -85,12 +86,27 @@ void ConnectHomeDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDe
                 cleanupConnection(connection);
                 return;
             }
+
+            if (connection->version() < 0x100 || connection->version() > 0x2ff) {
+                qCInfo(dcAmperfied()) << "Skipping invalid/unsupported AMPERFIED version" << connection->version();
+                cleanupConnection(connection);
+                return;
+            }
+
+            if (!m_nameFilter.isEmpty() && connection->logisticString() != m_nameFilter) {
+                qCInfo(dcAmperfied()) << "Skipping" << connection->modbusTcpMaster()->hostAddress().toString() << "as name" << connection->logisticString() << "does not match filter" << m_nameFilter;
+                cleanupConnection(connection);
+                return;
+            }
+
             Result result;
             result.firmwareVersion = connection->version();
+            result.modelName = connection->logisticString();
             result.networkDeviceInfo = networkDeviceInfo;
             m_discoveryResults.append(result);
 
             qCDebug(dcAmperfied()) << "Discovery: --> Found"
+                                << result.modelName
                                 << "Version:" << result.firmwareVersion
                                 << result.networkDeviceInfo;
 
@@ -115,14 +131,14 @@ void ConnectHomeDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDe
     connection->connectDevice();
 }
 
-void ConnectHomeDiscovery::cleanupConnection(AmperfiedModbusTcpConnection *connection)
+void AmperfiedConnectDiscovery::cleanupConnection(AmperfiedModbusTcpConnection *connection)
 {
     m_connections.removeAll(connection);
     connection->disconnectDevice();
     connection->deleteLater();
 }
 
-void ConnectHomeDiscovery::finishDiscovery()
+void AmperfiedConnectDiscovery::finishDiscovery()
 {
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
 

@@ -1,0 +1,13 @@
+{
+    "title": "Bestel",
+    "tagline": "Connect Vestel wallboxes to nymea.",
+    "icon": "vestel.png",
+    "stability": "consumer",
+    "offline": true,
+    "technologies": [
+        "network"
+    ],
+    "categories": [
+        "energy"
+    ]
+}

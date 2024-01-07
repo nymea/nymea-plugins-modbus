@@ -43,18 +43,20 @@ public:
     explicit HuaweiFusionSolar(const QHostAddress &hostAddress, uint port, quint16 slaveId, QObject *parent = nullptr);
     ~HuaweiFusionSolar() = default;
 
-    virtual bool initialize() override;
     virtual bool update() override;
 
+    quint16 slaveId() const;
+
 private:
+    quint16 m_slaveId;
     QQueue<HuaweiFusionModbusTcpConnection::Registers> m_registersQueue;
     QModbusReply *m_initReply = nullptr;
 
     int m_currentRegisterRequest = -1;
     void finishRequest();
 
-    bool m_battery1Available = true;
-    bool m_battery2Available = true;
+    bool m_battery1Available = false;
+    bool m_battery2Available = false;
 
     double m_actualInverterPower = 0;
 

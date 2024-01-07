@@ -1,0 +1,362 @@
+{
+    "className": "EVC04",
+    "protocol": "TCP",
+    "endianness": "BigEndian",
+    "errorLimitUntilNotReachable": 20,
+    "checkReachableRegister": "chargepointState",
+    "enums": [
+        {
+            "name": "ChargePointState",
+            "values": [
+                {
+                    "key": "Available",
+                    "value": 0
+                },
+                {
+                    "key": "Preparing",
+                    "value": 1
+                },
+                {
+                    "key": "Charging",
+                    "value": 2
+                },
+                {
+                    "key": "SuspendedEVSE",
+                    "value": 3
+                },
+                {
+                    "key": "SuspendedEV",
+                    "value": 4
+                },
+                {
+                    "key": "Finishing",
+                    "value": 5
+                },
+                {
+                    "key": "Reserved",
+                    "value": 6
+                },
+                {
+                    "key": "Unavailable",
+                    "value": 7
+                },
+                {
+                    "key": "Faulted",
+                    "value": 8
+                }
+            ]
+        },
+        {
+            "name": "ChargingState",
+            "values": [
+                {
+                    "key": "NotCharging",
+                    "value": 0
+                },
+                {
+                    "key": "Charging",
+                    "value": 1
+                }
+            ]
+        },
+        {
+            "name": "NumPhases",
+            "values": [
+                {
+                    "key": "1",
+                    "value": 0
+                },
+                {
+                    "key": "3",
+                    "value": 1
+                }
+            ]
+        },
+        {
+            "name": "CableState",
+            "values": [
+                {
+                    "key": "NotConnected",
+                    "value": 0
+                },
+                {
+                    "key": "CableConnectedVehicleNotConnected",
+                    "value": 1
+                },
+                {
+                    "key": "CableConnectedVehicleConnected",
+                    "value": 2
+                },
+                {
+                    "key": "CableConnectedVehicleConnectedCableLocked",
+                    "value": 3
+                }
+            ]
+        }
+    ],
+    "registers": [
+        {
+            "id": "serialNumber",
+            "address": 100,
+            "size": 25,
+            "type": "raw",
+            "readSchedule": "init",
+            "registerType": "inputRegister",
+            "description": "Serial number",
+            "access": "RO"
+        },
+        {
+            "id": "chargepointId",
+            "address": 130,
+            "size": 50,
+            "type": "raw",
+            "readSchedule": "init",
+            "registerType": "inputRegister",
+            "description": "Chargepoint ID",
+            "access": "RO"
+        },
+        {
+            "id": "brand",
+            "address": 190,
+            "size": 10,
+            "type": "raw",
+            "readSchedule": "init",
+            "registerType": "inputRegister",
+            "description": "Brand",
+            "access": "RO"
+        },
+        {
+            "id": "model",
+            "address": 210,
+            "size": 5,
+            "type": "raw",
+            "readSchedule": "init",
+            "registerType": "inputRegister",
+            "description": "Model",
+            "access": "RO"
+        },
+        {
+            "id": "firmwareVersion",
+            "address": 230,
+            "size": 50,
+            "type": "raw",
+            "readSchedule": "init",
+            "registerType": "inputRegister",
+            "description": "Firmware version",
+            "access": "RO"
+        },
+        {
+            "id": "time",
+            "address": 294,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "update",
+            "registerType": "inputRegister",
+            "description": "Wallbox time",
+            "access": "RO"
+        },
+        {
+            "id": "maxChargePointPower",
+            "address": 400,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "init",
+            "registerType": "inputRegister",
+            "description": "Max power of Chargepoint",
+            "unit": "W",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "numPhases",
+            "address": 404,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "inputRegister",
+            "description": "Number of Phases",
+            "enum": "NumPhases",
+            "defaultValue": "NumPhases1",
+            "access": "RO"
+        },
+        {
+            "id": "chargepointState",
+            "address": 1000,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "inputRegister",
+            "description": "Chargepoint State",
+            "enum": "ChargePointState",
+            "defaultValue": "ChargePointStateAvailable",
+            "access": "RO"
+        },
+        {
+            "id": "chargingState",
+            "address": 1001,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "inputRegister",
+            "description": "Charging State",
+            "enum": "ChargingState",
+            "defaultValue": "ChargingStateNotCharging",
+            "access": "RO"
+        },
+        {
+            "id": "cableState",
+            "address": 1004,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "inputRegister",
+            "description": "Cable state",
+            "enum": "CableState",
+            "defaultValue": "CableStateNotConnected",
+            "access": "RO"
+        },
+        {
+            "id": "activePowerTotal",
+            "address": 1020,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "update",
+            "registerType": "inputRegister",
+            "description": "Active Power Total",
+            "unit": "W",
+            "defaultValue": 0,
+            "access": "RO"
+        },
+        {
+            "id": "meterReading",
+            "address": 1036,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "update",
+            "registerType": "inputRegister",
+            "description": "Meter reading",
+            "unit": "1/10 kWh",
+            "defaultValue": "ChargingStateNotCharging",
+            "access": "RO"
+        },
+        {
+            "id": "sessionMaxCurrent",
+            "address": 1100,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "inputRegister",
+            "description": "Session max current",
+            "unit": "A",
+            "defaultValue": 0,
+            "access": "RO"
+        },
+        {
+            "id": "evseMinCurrent",
+            "address": 1102,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "inputRegister",
+            "description": "EVSE min current",
+            "unit": "A",
+            "defaultValue": 6,
+            "access": "RO"
+        },
+        {
+            "id": "evseMaxCurrent",
+            "address": 1104,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "inputRegister",
+            "description": "EVSE max current",
+            "unit": "A",
+            "defaultValue": 32,
+            "access": "RO"
+        },
+        {
+            "id": "cableMaxCurrent",
+            "address": 1106,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "inputRegister",
+            "description": "Cable max current",
+            "unit": "A",
+            "defaultValue": 32,
+            "access": "RO"
+        },
+        {
+            "id": "sessionEnergy",
+            "address": 1502,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "update",
+            "registerType": "inputRegister",
+            "description": "Session energy",
+            "unit": "Wh",
+            "defaultValue": 0,
+            "access": "RO"
+        },
+        {
+            "id": "sessionDuration",
+            "address": 1508,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "update",
+            "registerType": "inputRegister",
+            "description": "Session duration",
+            "unit": "s",
+            "defaultValue": 0,
+            "access": "RO"
+        },
+        {
+            "id": "failsafeCurrent",
+            "address": 2000,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Failsafe current",
+            "unit": "A",
+            "defaultValue": 6,
+            "access": "RW"
+        },
+        {
+            "id": "failsafeTimeout",
+            "address": 2002,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Failsafe timeout",
+            "unit": "s",
+            "defaultValue": 20,
+            "access": "RW"
+        },
+        {
+            "id": "chargingCurrent",
+            "address": 5004,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Dynamic charging current",
+            "unit": "A",
+            "defaultValue": 6,
+            "access": "RW"
+        },
+        {
+            "id": "aliveRegister",
+            "address": 6000,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Alive register",
+            "defaultValue": 0,
+            "access": "RW"
+        }
+    ]
+}

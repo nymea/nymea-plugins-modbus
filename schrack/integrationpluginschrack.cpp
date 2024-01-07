@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2021, nymea GmbH
+* Copyright 2013 - 2023, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -30,6 +30,8 @@
 
 #include "integrationpluginschrack.h"
 #include "plugininfo.h"
+
+#include <hardware/electricity.h>
 
 #include "ciondiscovery.h"
 
@@ -101,6 +103,10 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
     }
 
     CionModbusRtuConnection *cionConnection = new CionModbusRtuConnection(hardwareManager()->modbusRtuResource()->getModbusRtuMaster(uuid), address, this);
+    if (!info->isInitialSetup()) {
+        m_cionConnections.insert(thing, cionConnection);
+        info->finish(Thing::ThingErrorNoError);
+    }
 
     connect(cionConnection, &CionModbusRtuConnection::reachableChanged, thing, [cionConnection, thing](bool reachable){
         qCDebug(dcSchrack()) << "Reachable state changed" << reachable;
@@ -112,15 +118,16 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
     });
 
     connect(cionConnection, &CionModbusRtuConnection::initializationFinished, info, [=](bool success){
-        qCDebug(dcSchrack()) << "Initialisation finsihed" << success;
-        if (success) {
-            qCDebug(dcSchrack) << "DIP switche states:" << cionConnection->dipSwitches();
-            m_cionConnections.insert(thing, cionConnection);
-            info->finish(Thing::ThingErrorNoError);
-            info->thing()->setStateValue(cionCurrentVersionStateTypeId, cionConnection->firmwareVersion());
-        } else {
-            delete cionConnection;
-            info->finish(Thing::ThingErrorHardwareNotAvailable);
+        qCDebug(dcSchrack()) << "Initialisation finished" << success << "DIP switche states:" << cionConnection->dipSwitches();
+        if (info->isInitialSetup()) {
+            if (success) {
+                m_cionConnections.insert(thing, cionConnection);
+                info->finish(Thing::ThingErrorNoError);
+                info->thing()->setStateValue(cionCurrentVersionStateTypeId, cionConnection->firmwareVersion());
+            } else {
+                delete cionConnection;
+                info->finish(Thing::ThingErrorHardwareNotAvailable);
+            }
         }
     });
 
@@ -154,6 +161,10 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
 
     connect(cionConnection, &CionModbusRtuConnection::cpSignalStateChanged, thing, [=](quint16 cpSignalState){
         qCDebug(dcSchrack()) << "CP Signal state changed:" << (char)cpSignalState;
+        if (cpSignalState < 65 || cpSignalState > 68) {
+            qCWarning(dcSchrack()) << "Ignoring bogus CP signal state value" << cpSignalState;
+            return;
+        }
         thing->setStateValue(cionPluggedInStateTypeId, cpSignalState >= 66);
     });
 
@@ -219,6 +230,14 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
     // To prevent running out of sync we'll "uncache" min/max values too.
     thing->setStateMinMaxValues(cionMaxChargingCurrentStateTypeId, 6, 32);
 
+    connect(thing, &Thing::settingChanged, this, [this, thing](const ParamTypeId &paramTypeId, const QVariant &value){
+        if (paramTypeId == cionSettingsPhasesParamTypeId) {
+            qCInfo(dcSchrack()) << "The connected phases setting has changed to" << value.toString();
+            updatePhaseCount(thing, value.toString());
+        }
+    });
+
+    updatePhaseCount(thing, thing->setting(cionSettingsPhasesParamTypeId).toString());
 }
 
 void IntegrationPluginSchrack::postSetupThing(Thing *thing)
@@ -279,8 +298,9 @@ void IntegrationPluginSchrack::executeAction(ThingActionInfo *info)
 {
     CionModbusRtuConnection *cionConnection = m_cionConnections.value(info->thing());
     if (info->action().actionTypeId() == cionPowerActionTypeId) {
-        qCDebug(dcSchrack()) << "Setting charging enabled:" << (info->action().paramValue(cionPowerActionPowerParamTypeId).toBool() ? 1 : 0);
-        int maxSetPoint = info->thing()->stateValue(cionMaxChargingCurrentStateTypeId).toUInt();
+        bool enabled = info->action().paramValue(cionPowerActionPowerParamTypeId).toBool();
+        int maxChargingCurrent = enabled ? info->thing()->stateValue(cionMaxChargingCurrentStateTypeId).toUInt() : 0;
+        qCDebug(dcSchrack()) << "Setting charging enabled:" << (enabled ? 1 : 0) << "(charging current setpoint:" << maxChargingCurrent << ")";
 
         // Note: If the wallbox has an RFID reader connected, writing register 100 (chargingEnabled) won't work as the RFID
         // reader takes control over it. However, if there's no RFID reader connected, we'll have to set it ourselves.
@@ -290,31 +310,35 @@ void IntegrationPluginSchrack::executeAction(ThingActionInfo *info)
         // * In setups without RFID reader, we set 100 to true/false. Note that DIP switches 1 & 2 need to be OFF for register
         //   100 to be writable.
 
-        if (info->action().paramValue(cionPowerActionPowerParamTypeId).toBool()) {
-            // In case there's no RFID reader
-            cionConnection->setChargingEnabled(1);
 
-            // And restore the charging current in case setting the above fails
-            ModbusRtuReply *reply = cionConnection->setChargingCurrentSetpoint(maxSetPoint);
-            waitForActionFinish(info, reply, cionPowerStateTypeId, true);
-        } else {
-            // In case there's no RFID reader
-            cionConnection->setChargingEnabled(0);
+        // In case there's no RFID reader
+        ModbusRtuReply *reply = cionConnection->setChargingEnabled(enabled);
+        connect(reply, &ModbusRtuReply::finished, info, [reply](){
+            qCDebug(dcSchrack) << "Charging enabled command reply:" << reply->error() << reply->errorString();
+        });
 
-            // And set the maxChargingCurrent to 0 in case the above fails
-            ModbusRtuReply *reply = cionConnection->setChargingCurrentSetpoint(0);
-            waitForActionFinish(info, reply, cionPowerStateTypeId, false);
-        }
+        // And restore the charging current in case setting the above fails
+        reply = cionConnection->setChargingCurrentSetpoint(maxChargingCurrent);
+        waitForActionFinish(info, reply, cionPowerStateTypeId, enabled);
+        connect(reply, &ModbusRtuReply::finished, info, [reply](){
+            qCDebug(dcSchrack) << "Implicit max charging current setpoint command reply:" << reply->error() << reply->errorString();
+        });
+
 
     } else if (info->action().actionTypeId() == cionMaxChargingCurrentActionTypeId) {
         // If charging is set to enabled, we'll write the value to the wallbox
+        uint maxChargingCurrent = info->action().paramValue(cionMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toUInt();
         if (info->thing()->stateValue(cionPowerStateTypeId).toBool()) {
-            int maxChargingCurrent = info->action().paramValue(cionMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toUInt();
+            qCDebug(dcSchrack) << "Charging is enabled. Applying max charging current setpoint of" << maxChargingCurrent << "to wallbox";
             ModbusRtuReply *reply = cionConnection->setChargingCurrentSetpoint(maxChargingCurrent);
             waitForActionFinish(info, reply, cionMaxChargingCurrentStateTypeId, maxChargingCurrent);
+            connect(reply, &ModbusRtuReply::finished, info, [reply](){
+                qCDebug(dcSchrack) << "Charging current setpoint command reply:" << reply->error() << reply->errorString();
+            });
 
         } else { // we'll just memorize what the user wants in our state and write it when enabled is set to true
-            info->thing()->setStateValue(cionMaxChargingCurrentStateTypeId, info->action().paramValue(cionMaxChargingCurrentActionMaxChargingCurrentParamTypeId));
+            qCDebug(dcSchrack) << "Charging is disabled, storing max charging current of" << maxChargingCurrent << "to state";
+            info->thing()->setStateValue(cionMaxChargingCurrentStateTypeId, maxChargingCurrent);
             info->finish(Thing::ThingErrorNoError);
         }
     }
@@ -331,4 +355,10 @@ void IntegrationPluginSchrack::waitForActionFinish(ThingActionInfo *info, Modbus
             info->thing()->setStateValue(stateTypeId, value);
         }
     });
+}
+
+void IntegrationPluginSchrack::updatePhaseCount(Thing *thing, const QString &phases)
+{
+    thing->setStateValue(cionUsedPhasesStateTypeId, phases);
+    thing->setStateValue(cionPhaseCountStateTypeId, Electricity::getPhaseCount(Electricity::convertPhasesFromString(phases)));
 }

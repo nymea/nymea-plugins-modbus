@@ -1,0 +1,246 @@
+{
+    "name": "Wattsonic",
+    "displayName": "Wattsonic",
+    "id": "d0eaf684-001e-4b1c-9e37-122955958de3",
+    "vendors": [
+        {
+            "name": "wattsonic",
+            "displayName": "Wattsonic",
+            "id": "c335f9bc-3bc9-46bf-8c50-800cd93e827a",
+            "thingClasses": [
+                {
+                    "name": "inverter",
+                    "displayName": "Wattsonic hybrid inverter",
+                    "id": "688bef8d-2ba8-4eb3-b30e-16193eba02fb",
+                    "createMethods": ["discovery", "user"],
+                    "interfaces": ["solarinverter", "connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "55a7d9ed-5f4f-41a2-8dc1-c6a5a79512d2",
+                            "name": "slaveAddress",
+                            "displayName": "Modbus slave address",
+                            "type": "uint",
+                            "defaultValue": 1
+                        },
+                        {
+                            "id": "4f1238b5-07e0-4516-b84a-71670141ef81",
+                            "name": "modbusMasterUuid",
+                            "displayName": "Modbus RTU master",
+                            "type": "QUuid",
+                            "defaultValue": ""
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "c0f77c00-b82a-478e-826b-bc3204d66100",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "2cbb25e6-c1bd-4216-b354-6ad6fa957e29",
+                            "name": "totalEnergyProduced",
+                            "displayName": "Total energy produced",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "3107958e-07a2-4ebd-83a1-96fb5998cfb9",
+                            "name": "currentPower",
+                            "displayName": "Current power consumption",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0,
+                            "cached": false
+                        }
+                    ]
+                },
+                {
+                    "id": "e27a9590-0d13-4d7f-b66b-946dad86b8c8",
+                    "name": "meter",
+                    "displayName": "Wattsonic energy meter",
+                    "createMethods": ["auto"],
+                    "interfaces": ["energymeter", "connectable"],
+                    "stateTypes": [
+                        {
+                            "id": "d3bf44be-00d0-4119-ad16-45648bc1532a",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "d5ce5ba0-bc1d-4af3-9afa-cbfb6c0d01ec",
+                            "name": "currentPower",
+                            "displayName": "Current power consumption",
+                            "type": "double",
+                            "unit": "Watt",
+                            "cached": false,
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "60d486a6-337d-4977-9624-78d99657aea9",
+                            "name": "totalEnergyConsumed",
+                            "displayName": "Total consumed energy",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "3fd2e110-8851-4530-bb53-e8e5b20cd4cb",
+                            "name": "totalEnergyProduced",
+                            "displayName": "Total returned energy",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "1def2f00-8d1c-4d22-b662-a31a552c8a82",
+                            "name": "currentPowerPhaseA",
+                            "displayName": "Power consumption phase A",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "404549a1-de1e-42e2-8d5d-f581b8674b7d",
+                            "name": "currentPowerPhaseB",
+                            "displayName": "Power consumption phase B",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "6fccc09c-7c89-45b7-908e-9cbe5bda1c2c",
+                            "name": "currentPowerPhaseC",
+                            "displayName": "Power consumption phase C",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "12798e83-3093-411e-ab8e-5955956717da",
+                            "name": "voltagePhaseA",
+                            "displayName": "Voltage phase A",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "eef67976-2c39-4d79-8b6d-053e369346a8",
+                            "name": "voltagePhaseB",
+                            "displayName": "Voltage phase B",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "1e237634-d23c-4c20-b710-b3586bbb988f",
+                            "name": "voltagePhaseC",
+                            "displayName": "Voltage phase C",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "80c12358-c2d9-4c1b-9150-b7dc3da8a7ae",
+                            "name": "currentPhaseA",
+                            "displayName": "Current phase A",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "d0914688-59ae-4bd9-97ee-1668e7948ab0",
+                            "name": "currentPhaseB",
+                            "displayName": "Current phase B",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "ecb8072f-dcb0-4e5e-8cc9-95947d3b7185",
+                            "name": "currentPhaseC",
+                            "displayName": "Current phase C",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0,
+                            "cached": false
+                        }
+                    ]
+                },
+                {
+                    "id": "04c4e5fd-7b64-444f-8905-75651833224e",
+                    "name": "battery",
+                    "displayName": "Wattsonic energy storage",
+                    "createMethods": ["auto"],
+                    "interfaces": ["energystorage", "connectable"],
+                    "stateTypes": [
+                        {
+                            "id": "a8673429-043e-4149-8775-c89cab0b63ca",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "76c70da1-484d-4bb2-8070-22e5e141cadd",
+                            "name": "batteryCritical",
+                            "displayName": "Battery critical",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "113cac91-24cf-45eb-93bf-e81145ba6c4e",
+                            "name": "batteryLevel",
+                            "displayName": "Battery level",
+                            "type": "int",
+                            "minValue": 0,
+                            "maxValue": 100,
+                            "unit": "Percentage",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "dfaa3890-e3d2-4262-be3d-ece18b520ed9",
+                            "name": "chargingState",
+                            "displayName": "Charging state",
+                            "type": "QString",
+                            "possibleValues": ["idle", "charging", "discharging"],
+                            "defaultValue": "idle"
+                        },
+                        {
+                            "id": "608da87c-e45f-471d-975d-936807a94c9a",
+                            "name": "currentPower",
+                            "displayName": "Current power consumption",
+                            "type": "double",
+                            "unit": "Watt",
+                            "cached": false,
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "5c652ecd-1302-4796-92fa-672a3d9442c8",
+                            "name": "capacity",
+                            "displayName": "Capacity",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

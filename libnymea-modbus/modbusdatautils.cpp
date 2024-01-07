@@ -133,15 +133,27 @@ qint64 ModbusDataUtils::convertToInt64(const QVector<quint16> &registers, ByteOr
     return result;
 }
 
-QString ModbusDataUtils::convertToString(const QVector<quint16> &registers)
+QString ModbusDataUtils::convertToString(const QVector<quint16> &registers, ByteOrder characterByteOrder)
+{
+    QByteArray bytes;
+    QDataStream stream(&bytes, QIODevice::WriteOnly);
+    // Note: some devices use little endian within the register uint16 representation of the 2 characters.
+    stream.setByteOrder(characterByteOrder == ByteOrderBigEndian ? QDataStream::BigEndian : QDataStream::LittleEndian);
+    for (int i = 0; i < registers.count(); i++) {
+        stream << registers.at(i);
+    }
+
+    return QString::fromUtf8(bytes).trimmed();
+}
+
+QByteArray ModbusDataUtils::convertToByteArray(const QVector<quint16> &registers)
 {
     QByteArray bytes;
     QDataStream stream(&bytes, QIODevice::WriteOnly);
     for (int i = 0; i < registers.count(); i++) {
         stream << registers.at(i);
     }
-
-    return QString::fromUtf8(bytes).trimmed();
+    return bytes;
 }
 
 float ModbusDataUtils::convertToFloat32(const QVector<quint16> &registers, ByteOrder byteOrder)
@@ -239,11 +251,13 @@ QVector<quint16> ModbusDataUtils::convertFromInt64(qint64 value, ByteOrder byteO
     return values;
 }
 
-QVector<quint16> ModbusDataUtils::convertFromString(const QString &value, quint16 stringLength)
+QVector<quint16> ModbusDataUtils::convertFromString(const QString &value, quint16 stringLength, ByteOrder characterByteOrder)
 {
     Q_ASSERT_X(value.length() <= stringLength, "ModbusDataUtils", "cannot convert a string which is bigger than the desired register vector.");
     QByteArray data = value.toLatin1() + QByteArray('\0', stringLength - value.count());
     QDataStream stream(&data, QIODevice::ReadOnly);
+    // Note: some devices use little endian within the register uint16 representation of the 2 characters.
+    stream.setByteOrder(characterByteOrder == ByteOrderBigEndian ? QDataStream::BigEndian : QDataStream::LittleEndian);
     QVector<quint16> values;
     for (int i = 0; i < stringLength; i++) {
         quint16 registerValue = 0;
@@ -265,4 +279,46 @@ QVector<quint16> ModbusDataUtils::convertFromFloat64(double value, ByteOrder byt
     quint64 rawValue = 0;
     memcpy(&rawValue, &value, sizeof(double));
     return ModbusDataUtils::convertFromUInt64(rawValue, byteOrder);
+}
+
+QString ModbusDataUtils::exceptionCodeToString(QModbusPdu::ExceptionCode exception)
+{
+    QString exceptionString;
+    switch (exception) {
+    case QModbusPdu::IllegalFunction:
+        exceptionString = "Illegal function";
+        break;
+    case QModbusPdu::IllegalDataAddress:
+        exceptionString = "Illegal data address";
+        break;
+    case QModbusPdu::IllegalDataValue:
+        exceptionString = "Illegal data value";
+        break;
+    case QModbusPdu::ServerDeviceFailure:
+        exceptionString = "Server device failure";
+        break;
+    case QModbusPdu::Acknowledge:
+        exceptionString = "Acknowledge";
+        break;
+    case QModbusPdu::ServerDeviceBusy:
+        exceptionString = "Server device busy";
+        break;
+    case QModbusPdu::NegativeAcknowledge:
+        exceptionString = "Negative acknowledge";
+        break;
+    case QModbusPdu::MemoryParityError:
+        exceptionString = "Memory parity error";
+        break;
+    case QModbusPdu::GatewayPathUnavailable:
+        exceptionString = "Gateway path unavailable";
+        break;
+    case QModbusPdu::GatewayTargetDeviceFailedToRespond:
+        exceptionString = "Gateway target device failed to respond";
+        break;
+    case QModbusPdu::ExtendedException:
+        exceptionString = "Extended exception";
+        break;
+    }
+
+    return exceptionString;
 }

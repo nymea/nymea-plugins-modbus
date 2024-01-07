@@ -31,78 +31,117 @@
 #include "speedwireinterface.h"
 #include "extern-plugininfo.h"
 
-SpeedwireInterface::SpeedwireInterface(bool multicast, QObject *parent) :
-    QObject(parent),
-    m_multicast(multicast)
-{
+#include <QNetworkInterface>
 
-    m_socket = new QUdpSocket(this);
-    connect(m_socket, &QUdpSocket::readyRead, this, &SpeedwireInterface::readPendingDatagrams);
-    connect(m_socket, &QUdpSocket::stateChanged, this, &SpeedwireInterface::onSocketStateChanged);
-    connect(m_socket, SIGNAL(error(QAbstractSocket::SocketError)),this, SLOT(onSocketError(QAbstractSocket::SocketError)));
+SpeedwireInterface::SpeedwireInterface(quint32 sourceSerialNumber, QObject *parent) :
+    QObject(parent),
+    m_sourceSerialNumber(sourceSerialNumber)
+{
+    m_unicast = new QUdpSocket(this);
+    connect(m_unicast, &QUdpSocket::readyRead, this, [=](){
+        QByteArray datagram;
+        QHostAddress senderAddress;
+        quint16 senderPort;
+
+        while (m_unicast->hasPendingDatagrams()) {
+            datagram.resize(m_unicast->pendingDatagramSize());
+            m_unicast->readDatagram(datagram.data(), datagram.size(), &senderAddress, &senderPort);
+
+            qCDebug(dcSma()).noquote() << "SpeedwireInterface: Unicast socket received data from" << QString("%1:%2").arg(senderAddress.toString()).arg(senderPort);
+            qCDebug(dcSma()) << "SpeedwireInterface: " << datagram.toHex();
+            emit dataReceived(senderAddress, senderPort, datagram, false);
+        }
+    });
+
+    connect(m_unicast, &QUdpSocket::stateChanged, this, [=](QAbstractSocket::SocketState socketState){
+        qCDebug(dcSma()) << "SpeedwireInterface: Unicast socket state changed" << socketState;
+    });
+
+    connect(m_unicast, static_cast<void (QUdpSocket::*)( QAbstractSocket::SocketError )>(&QAbstractSocket::error), this, [=](QAbstractSocket::SocketError error){
+        qCWarning(dcSma()) << "SpeedwireInterface: Unicast socket error occurred" << error << m_unicast->errorString();
+    });
+
+
+    m_multicast = new QUdpSocket(this);
+    connect(m_multicast, &QUdpSocket::readyRead, this, [=](){
+        QByteArray datagram;
+        QHostAddress senderAddress;
+        quint16 senderPort;
+
+        while (m_multicast->hasPendingDatagrams()) {
+            datagram.resize(m_multicast->pendingDatagramSize());
+            m_multicast->readDatagram(datagram.data(), datagram.size(), &senderAddress, &senderPort);
+
+            qCDebug(dcSma()).noquote() << "SpeedwireInterface: Multicast socket received data from" << QString("%1:%2").arg(senderAddress.toString()).arg(senderPort);
+            //qCDebug(dcSma()) << "SpeedwireInterface: " << datagram.toHex();
+            emit dataReceived(senderAddress, senderPort, datagram, true);
+        }
+    });
+
+    connect(m_multicast, &QUdpSocket::stateChanged, this, [=](QAbstractSocket::SocketState socketState){
+        qCDebug(dcSma()) << "SpeedwireInterface: Multicast socket state changed" << socketState;
+    });
+    connect(m_multicast, static_cast<void (QUdpSocket::*)( QAbstractSocket::SocketError )>(&QAbstractSocket::error), this, [=](QAbstractSocket::SocketError error){
+        qCWarning(dcSma()) << "SpeedwireInterface: Multicast socket error occurred" << error << m_multicast->errorString();
+    });
+
+    if (initialize()) {
+        qCDebug(dcSma()) << "SpeedwireInterface: Initialized sucessfully unicast and multicast interface.";
+    } else {
+        qCWarning(dcSma()) << "SpeedwireInterface: Failed to initialize.";
+    }
 }
 
 SpeedwireInterface::~SpeedwireInterface()
 {
-    deinitialize();
-}
+    if (m_unicast)
+        m_unicast->close();
 
-bool SpeedwireInterface::initialize(const QHostAddress &address)
-{
-    if (m_initialized && !m_multicast) {
-        qCWarning(dcSma()) << "Try to initialize an already initialized speed wire interface. Please deinitialize() before calling this method again.";
-        return false;
-    }
-
-    // If already initialized and multicast, nothing could habe changed...done here
-    if (m_initialized && m_multicast)
-        return true;
-
-
-    if (!m_socket->bind(QHostAddress::AnyIPv4, m_port, QAbstractSocket::ShareAddress | QAbstractSocket::ReuseAddressHint)) {
-        qCWarning(dcSma()) << "SpeedwireInterface: Initialization failed. Could not bind to port" << m_port;
-        return false;
-    }
-
-    if (m_multicast && !m_socket->joinMulticastGroup(m_multicastAddress)) {
-        qCWarning(dcSma()) << "SpeedwireInterface: Initialization failed. Could not join multicast group" << m_multicastAddress.toString() << m_socket->errorString();
-        return false;
-    }
-
-    qCDebug(dcSma()) << "SpeedwireInterface: Interface initialized successfully for" << address.toString() << (m_multicast ? "multicast" : "unicast");
-    m_address = address;
-    m_initialized = true;
-    return m_initialized;
-}
-
-void SpeedwireInterface::deinitialize()
-{
-    if (m_initialized) {
-        if (m_multicast) {
-            if (!m_socket->leaveMulticastGroup(m_multicastAddress)) {
-                qCWarning(dcSma()) << "SpeedwireInterface: Failed to leave multicast group" << m_multicastAddress.toString();
-            }
+    if (m_multicast) {
+        if (!m_multicast->leaveMulticastGroup(Speedwire::multicastAddress())) {
+            qCWarning(dcSma()) << "SpeedwireInterface: Failed to leave multicast group" << Speedwire::multicastAddress().toString();
         }
 
-        m_address = QHostAddress();
-        m_socket->close();
-        m_initialized = false;
+        m_multicast->close();
     }
 }
 
-bool SpeedwireInterface::multicast() const
+bool SpeedwireInterface::available() const
 {
-    return m_multicast;
+    return m_available;
 }
 
-bool SpeedwireInterface::initialized() const
+void SpeedwireInterface::reconfigureMulticastGroup()
 {
-    return m_initialized;
-}
+    qCDebug(dcSma()) << "Reconfigure multicast interfaces";
+    if (m_multicast->joinMulticastGroup(Speedwire::multicastAddress())) {
+        qCDebug(dcSma()) << "SpeedwireInterface: Joined successfully multicast group" << Speedwire::multicastAddress().toString();
+    } else {
+        qCWarning(dcSma()) << "SpeedwireInterface: Failed to join multicast group" << Speedwire::multicastAddress().toString() << m_multicast->errorString() << "Retrying in 5 seconds...";
+        // FIXME: It would probably be better to monitor the network interfaces and re-join if necessary
+        QTimer::singleShot(5000, this, &SpeedwireInterface::reconfigureMulticastGroup);
+    }
 
-quint16 SpeedwireInterface::sourceModelId() const
-{
-    return m_sourceModelId;
+    //    foreach (const QNetworkInterface &interface, QNetworkInterface::allInterfaces()) {
+    //        if(interface.isValid() && !interface.flags().testFlag(QNetworkInterface::IsLoopBack)
+    //                && interface.flags().testFlag(QNetworkInterface::CanMulticast)
+    //                && interface.flags().testFlag(QNetworkInterface::IsRunning)) {
+
+    //            QList<QNetworkAddressEntry> addressEntries = interface.addressEntries();
+    //            for (int i = 0; i < addressEntries.length(); i++) {
+    //                if (addressEntries.at(i).ip().protocol() == QAbstractSocket::IPv4Protocol) {
+
+    //                    if (!m_multicast->joinMulticastGroup(Speedwire::multicastAddress(), interface)) {
+    //                        qCWarning(dcSma()) << "SpeedwireInterface: Could not join multicast group" << Speedwire::multicastAddress().toString() << "on interface" << interface << m_multicast->errorString();
+    //                    } else {
+    //                        qCDebug(dcSma()) << "SpeedwireInterface: Joined successfully multicast group" << Speedwire::multicastAddress().toString() << "on interface" << interface ;
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    }
+
+    //    qCDebug(dcSma()) << "Multicast outgoing interface" << m_multicast->multicastInterface();
 }
 
 quint32 SpeedwireInterface::sourceSerialNumber() const
@@ -110,40 +149,53 @@ quint32 SpeedwireInterface::sourceSerialNumber() const
     return m_sourceSerialNumber;
 }
 
-void SpeedwireInterface::sendData(const QByteArray &data)
+bool SpeedwireInterface::initialize()
 {
-    qCDebug(dcSma()) << "SpeedwireInterface: -->" << m_address.toString() << m_port << data.toHex();
-    if (m_socket->writeDatagram(data, m_address, m_port) < 0) {
-        qCWarning(dcSma()) << "SpeedwireInterface: failed to send data" << m_socket->errorString();
+    bool success = true;
+    if (m_unicast->state() != QUdpSocket::BoundState) {
+        m_unicast->close();
+        if (!m_unicast->bind(QHostAddress::AnyIPv4, Speedwire::port(), QAbstractSocket::ShareAddress | QAbstractSocket::ReuseAddressHint)) {
+            qCWarning(dcSma()) << "SpeedwireInterface: Unicast socket could not be bound to port" << Speedwire::port();
+            success = false;
+        }
+    }
+
+    if (m_multicast->state() != QUdpSocket::BoundState) {
+        if (!m_multicast->bind(QHostAddress::AnyIPv4, Speedwire::port(), QAbstractSocket::ShareAddress | QAbstractSocket::ReuseAddressHint)) {
+            qCWarning(dcSma()) << "SpeedwireInterface: Unicast socket could not be bound to port" << Speedwire::port();
+            success = false;
+        }
+    }
+
+
+    reconfigureMulticastGroup();
+    m_available = success;
+    return success;
+}
+
+void SpeedwireInterface::sendDataUnicast(const QHostAddress &address, const QByteArray &data)
+{
+    qCDebug(dcSma()) << "SpeedwireInterface: Unicast -->" << address.toString() << Speedwire::port() << data.toHex();
+
+    if (!m_unicast) {
+        qCWarning(dcSma()) << "SpeedwireInterface: Failed to send unicast data, the socket is not available";
+        return;
+    }
+
+    if (m_unicast->writeDatagram(data, address, Speedwire::port()) < 0) {
+        qCWarning(dcSma()) << "SpeedwireInterface: Failed to send unicast data to" << address.toString() << m_unicast->errorString();
     }
 }
 
-void SpeedwireInterface::readPendingDatagrams()
+void SpeedwireInterface::sendDataMulticast(const QByteArray &data)
 {
-    QByteArray datagram;
-    QHostAddress senderAddress;
-    quint16 senderPort;
-
-    while (m_socket->hasPendingDatagrams()) {
-        datagram.resize(m_socket->pendingDatagramSize());
-        m_socket->readDatagram(datagram.data(), datagram.size(), &senderAddress, &senderPort);
-
-        // Process only data coming from our target address if there is any
-        if (!m_address.isNull() && senderAddress != m_address)
-            continue;
-
-        qCDebug(dcSma()) << "SpeedwireInterface: Received data from" << QString("%1:%2").arg(senderAddress.toString()).arg(senderPort);
-        //qCDebug(dcSma()) << "SpeedwireInterface: " << datagram.toHex();
-        emit dataReceived(senderAddress, senderPort, datagram);
+    qCDebug(dcSma()) << "SpeedwireInterface: Multicast -->" << Speedwire::multicastAddress().toString() << Speedwire::port() << data.toHex();
+    if (!m_multicast) {
+        qCWarning(dcSma()) << "SpeedwireInterface: Failed to send multicast data, the socket is not available";
+        return;
     }
-}
 
-void SpeedwireInterface::onSocketError(QAbstractSocket::SocketError error)
-{
-    qCDebug(dcSma()) << "SpeedwireInterface: Socket error" << error;
-}
-
-void SpeedwireInterface::onSocketStateChanged(QAbstractSocket::SocketState socketState)
-{
-    qCDebug(dcSma()) << "SpeedwireInterface: Socket state changed" << socketState;
+    if (m_multicast->writeDatagram(data, Speedwire::multicastAddress(), Speedwire::port()) < 0) {
+        qCWarning(dcSma()) << "SpeedwireInterface: Failed to send multicast data to" << Speedwire::multicastAddress().toString() << m_multicast->errorString();
+    }
 }

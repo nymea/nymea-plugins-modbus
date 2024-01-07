@@ -115,7 +115,7 @@ void IntegrationPluginPhoenixConnect::setupThing(ThingSetupInfo *info)
     });
 
     connect(monitor, &NetworkDeviceMonitor::networkDeviceInfoChanged, this, [=](const NetworkDeviceInfo &networkDeviceInfo){
-        connection->setHostAddress(networkDeviceInfo.address());
+        connection->modbusTcpMaster()->setHostAddress(networkDeviceInfo.address());
     });
 
     connect(connection, &PhoenixModbusTcpConnection::reachableChanged, thing, [connection, thing](bool reachable){

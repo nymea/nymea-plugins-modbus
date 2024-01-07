@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2022, nymea GmbH
+* Copyright 2013 - 2023, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -37,8 +37,9 @@
 
 #include "extern-plugininfo.h"
 
-#include "amtronecumodbustcpconnection.h"
+#include "amtronecu.h"
 #include "amtronhcc3modbustcpconnection.h"
+#include "amtroncompact20modbusrtuconnection.h"
 
 class IntegrationPluginMennekes: public IntegrationPlugin
 {
@@ -58,16 +59,17 @@ public:
 
 private slots:
     void updateECUPhaseCount(Thing *thing);
+    void updateCompact20PhaseCount(Thing *thing);
 
 private:
     void setupAmtronECUConnection(ThingSetupInfo *info);
     void setupAmtronHCC3Connection(ThingSetupInfo *info);
-
-    bool ensureAmtronECUVersion(AmtronECUModbusTcpConnection *connection, const QString &version);
+    void setupAmtronCompact20Connection(ThingSetupInfo *info);
 
     PluginTimer *m_pluginTimer = nullptr;
-    QHash<Thing *, AmtronECUModbusTcpConnection *> m_amtronECUConnections;
+    QHash<Thing *, AmtronECU *> m_amtronECUConnections;
     QHash<Thing *, AmtronHCC3ModbusTcpConnection *> m_amtronHCC3Connections;
+    QHash<Thing *, AmtronCompact20ModbusRtuConnection *> m_amtronCompact20Connections;
     QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
 
 };

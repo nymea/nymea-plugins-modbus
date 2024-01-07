@@ -236,7 +236,7 @@ void IntegrationPluginModbusCommander::setupThing(ThingSetupInfo *info)
             m_modbusTCPMasters.take(thing)->deleteLater();
         }
 
-        foreach (ModbusTCPMaster *modbusTCPMaster, m_modbusTCPMasters.values()) {
+        foreach (ModbusTcpMaster *modbusTCPMaster, m_modbusTCPMasters.values()) {
             if ((modbusTCPMaster->hostAddress() == hostAddress) && (modbusTCPMaster->port() == port)) {
                 m_modbusTCPMasters.insert(thing, modbusTCPMaster);
                 return info->finish(Thing::ThingErrorNoError);
@@ -249,15 +249,15 @@ void IntegrationPluginModbusCommander::setupThing(ThingSetupInfo *info)
         qCDebug(dcModbusCommander()) << "      number of retries:" << numberOfRetries;
         qCDebug(dcModbusCommander()) << "      timeout:" << timeout;
 
-        ModbusTCPMaster *modbusTCPMaster = new ModbusTCPMaster(hostAddress, port, this);
-        connect(modbusTCPMaster, &ModbusTCPMaster::connectionStateChanged, this, &IntegrationPluginModbusCommander::onConnectionStateChanged);
-        connect(modbusTCPMaster, &ModbusTCPMaster::writeRequestExecuted, this, &IntegrationPluginModbusCommander::onRequestExecuted);
-        connect(modbusTCPMaster, &ModbusTCPMaster::writeRequestError, this, &IntegrationPluginModbusCommander::onRequestError);
-        connect(modbusTCPMaster, &ModbusTCPMaster::receivedCoil, this, &IntegrationPluginModbusCommander::onReceivedCoil);
-        connect(modbusTCPMaster, &ModbusTCPMaster::receivedDiscreteInput, this, &IntegrationPluginModbusCommander::onReceivedDiscreteInput);
-        connect(modbusTCPMaster, &ModbusTCPMaster::receivedHoldingRegister, this, &IntegrationPluginModbusCommander::onReceivedHoldingRegister);
-        connect(modbusTCPMaster, &ModbusTCPMaster::receivedInputRegister, this, &IntegrationPluginModbusCommander::onReceivedInputRegister);
-        connect(modbusTCPMaster, &ModbusTCPMaster::connectionStateChanged, info, [info, modbusTCPMaster, this] (bool connected) {
+        ModbusTcpMaster *modbusTCPMaster = new ModbusTcpMaster(hostAddress, port, this);
+        connect(modbusTCPMaster, &ModbusTcpMaster::connectionStateChanged, this, &IntegrationPluginModbusCommander::onConnectionStateChanged);
+        connect(modbusTCPMaster, &ModbusTcpMaster::writeRequestExecuted, this, &IntegrationPluginModbusCommander::onRequestExecuted);
+        connect(modbusTCPMaster, &ModbusTcpMaster::writeRequestError, this, &IntegrationPluginModbusCommander::onRequestError);
+        connect(modbusTCPMaster, &ModbusTcpMaster::receivedCoil, this, &IntegrationPluginModbusCommander::onReceivedCoil);
+        connect(modbusTCPMaster, &ModbusTcpMaster::receivedDiscreteInput, this, &IntegrationPluginModbusCommander::onReceivedDiscreteInput);
+        connect(modbusTCPMaster, &ModbusTcpMaster::receivedHoldingRegister, this, &IntegrationPluginModbusCommander::onReceivedHoldingRegister);
+        connect(modbusTCPMaster, &ModbusTcpMaster::receivedInputRegister, this, &IntegrationPluginModbusCommander::onReceivedInputRegister);
+        connect(modbusTCPMaster, &ModbusTcpMaster::connectionStateChanged, info, [info, modbusTCPMaster, this] (bool connected) {
             if (connected) {
                 info->finish(Thing::ThingErrorNoError);
                 m_modbusTCPMasters.insert(info->thing(), modbusTCPMaster);
@@ -416,8 +416,8 @@ void IntegrationPluginModbusCommander::onPluginConfigurationChanged(const ParamT
 void IntegrationPluginModbusCommander::onConnectionStateChanged(bool status)
 {
     auto modbus = sender();
-    if (m_modbusTCPMasters.values().contains(static_cast<ModbusTCPMaster *>(modbus))) {
-        Thing *thing = m_modbusTCPMasters.key(static_cast<ModbusTCPMaster *>(modbus));
+    if (m_modbusTCPMasters.values().contains(static_cast<ModbusTcpMaster *>(modbus))) {
+        Thing *thing = m_modbusTCPMasters.key(static_cast<ModbusTcpMaster *>(modbus));
         qCDebug(dcModbusCommander()) << "Connections state changed" << thing->name() << status;
         thing->setStateValue(modbusTCPClientConnectedStateTypeId, status);
     }
@@ -458,8 +458,8 @@ void IntegrationPluginModbusCommander::onRequestError(QUuid requestId, const QSt
 void IntegrationPluginModbusCommander::onReceivedCoil(quint32 slaveAddress, quint32 modbusRegister, const QVector<quint16> &values)
 {
     auto modbus = sender();
-    if (m_modbusTCPMasters.values().contains(static_cast<ModbusTCPMaster *>(modbus))) {
-        Thing *parent = m_modbusTCPMasters.key(static_cast<ModbusTCPMaster *>(modbus));
+    if (m_modbusTCPMasters.values().contains(static_cast<ModbusTcpMaster *>(modbus))) {
+        Thing *parent = m_modbusTCPMasters.key(static_cast<ModbusTcpMaster *>(modbus));
         foreach (Thing *thing, myThings().filterByParentId(parent->id())) {
             if (thing->thingClassId() == coilThingClassId) {
                 if ((thing->paramValue(m_slaveAddressParamTypeId.value(thing->thingClassId())) == slaveAddress)
@@ -477,8 +477,8 @@ void IntegrationPluginModbusCommander::onReceivedDiscreteInput(quint32 slaveAddr
 {
     auto modbus = sender();
 
-    if (m_modbusTCPMasters.values().contains(static_cast<ModbusTCPMaster *>(modbus))) {
-        Thing *parent = m_modbusTCPMasters.key(static_cast<ModbusTCPMaster *>(modbus));
+    if (m_modbusTCPMasters.values().contains(static_cast<ModbusTcpMaster *>(modbus))) {
+        Thing *parent = m_modbusTCPMasters.key(static_cast<ModbusTcpMaster *>(modbus));
         foreach (Thing *thing, myThings().filterByParentId(parent->id())) {
             if (thing->thingClassId() == discreteInputThingClassId) {
                 if ((thing->paramValue(m_slaveAddressParamTypeId.value(thing->thingClassId())) == slaveAddress)
@@ -496,8 +496,8 @@ void IntegrationPluginModbusCommander::onReceivedHoldingRegister(uint slaveAddre
 {
     auto modbus = sender();
 
-    if (m_modbusTCPMasters.values().contains(static_cast<ModbusTCPMaster *>(modbus))) {
-        Thing *parent = m_modbusTCPMasters.key(static_cast<ModbusTCPMaster *>(modbus));
+    if (m_modbusTCPMasters.values().contains(static_cast<ModbusTcpMaster *>(modbus))) {
+        Thing *parent = m_modbusTCPMasters.key(static_cast<ModbusTcpMaster *>(modbus));
         foreach (Thing *thing, myThings().filterByParentId(parent->id())) {
             if (thing->thingClassId() == holdingRegisterThingClassId) {
                 if ((thing->paramValue(m_slaveAddressParamTypeId.value(thing->thingClassId())) == slaveAddress)
@@ -515,8 +515,8 @@ void IntegrationPluginModbusCommander::onReceivedInputRegister(uint slaveAddress
 {
     auto modbus = sender();
 
-    if (m_modbusTCPMasters.values().contains(static_cast<ModbusTCPMaster *>(modbus))) {
-        Thing *parent = m_modbusTCPMasters.key(static_cast<ModbusTCPMaster *>(modbus));
+    if (m_modbusTCPMasters.values().contains(static_cast<ModbusTcpMaster *>(modbus))) {
+        Thing *parent = m_modbusTCPMasters.key(static_cast<ModbusTcpMaster *>(modbus));
         foreach (Thing *thing, myThings().filterByParentId(parent->id())) {
             if (thing->thingClassId() == inputRegisterThingClassId) {
                 if ((thing->paramValue(m_slaveAddressParamTypeId.value(thing->thingClassId())) == slaveAddress)
@@ -544,7 +544,7 @@ void IntegrationPluginModbusCommander::readRegister(Thing *thing)
     QUuid requestId;
 
     if (parent->thingClassId() == modbusTCPClientThingClassId) {
-        ModbusTCPMaster *modbus = m_modbusTCPMasters.value(parent);
+        ModbusTcpMaster *modbus = m_modbusTCPMasters.value(parent);
         if (!modbus)
             return;
 
@@ -657,7 +657,7 @@ void IntegrationPluginModbusCommander::writeRegister(Thing *thing, ThingActionIn
     Action action = info->action();
 
     if (parent->thingClassId() == modbusTCPClientThingClassId) {
-        ModbusTCPMaster *modbus = m_modbusTCPMasters.value(parent);
+        ModbusTcpMaster *modbus = m_modbusTCPMasters.value(parent);
         if (!modbus) {
             qCWarning(dcModbusCommander()) << "Could not find modbus TCP master for" << thing;
             info->finish(Thing::ThingErrorHardwareNotAvailable);

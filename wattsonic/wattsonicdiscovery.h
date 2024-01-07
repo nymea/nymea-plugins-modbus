@@ -28,25 +28,22 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef CONNECTHOMEDISCOVERY_H
-#define CONNECTHOMEDISCOVERY_H
+#ifndef WATTSONICDISCOVERY_H
+#define WATTSONICDISCOVERY_H
 
 #include <QObject>
-#include <QTimer>
+#include <hardware/modbus/modbusrtuhardwareresource.h>
 
-#include <network/networkdevicediscovery.h>
-
-#include "amperfiedmodbustcpconnection.h"
-
-class ConnectHomeDiscovery : public QObject
+class WattsonicDiscovery : public QObject
 {
     Q_OBJECT
 public:
-    explicit ConnectHomeDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, QObject *parent = nullptr);
+    explicit WattsonicDiscovery(ModbusRtuHardwareResource *modbusRtuResource, QObject *parent = nullptr);
+
     struct Result {
-        quint16 firmwareVersion;
+        QUuid modbusRtuMasterId;
+        QString serialNumber;
         quint16 slaveId;
-        NetworkDeviceInfo networkDeviceInfo;
     };
 
     void startDiscovery();
@@ -54,22 +51,15 @@ public:
     QList<Result> discoveryResults() const;
 
 signals:
-    void discoveryFinished();
+    void discoveryFinished(bool modbusRtuMasterAvailable);
+
+private slots:
+    void tryConnect(ModbusRtuMaster *master, quint16 slaveIdIndex);
 
 private:
-    NetworkDeviceDiscovery *m_networkDeviceDiscovery = nullptr;
-
-    QTimer m_gracePeriodTimer;
-    QDateTime m_startDateTime;
-
-    QList<AmperfiedModbusTcpConnection *> m_connections;
+    ModbusRtuHardwareResource *m_modbusRtuResource = nullptr;
 
     QList<Result> m_discoveryResults;
-
-    void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
-    void cleanupConnection(AmperfiedModbusTcpConnection *connection);
-
-    void finishDiscovery();
 };
 
-#endif // CONNECTHOMEDISCOVERY_H
+#endif // WATTSONICDISCOVERY_H

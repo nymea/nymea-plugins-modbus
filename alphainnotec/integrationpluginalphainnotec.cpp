@@ -110,13 +110,13 @@ void IntegrationPluginAlphaInnotec::setupThing(ThingSetupInfo *info)
         quint16 slaveId = thing->paramValue(alphaConnectThingSlaveIdParamTypeId).toUInt();
 
         AlphaInnotecModbusTcpConnection *alphaConnectTcpConnection = new AlphaInnotecModbusTcpConnection(hostAddress, port, slaveId, this);
-        connect(alphaConnectTcpConnection, &AlphaInnotecModbusTcpConnection::connectionStateChanged, this, [thing, alphaConnectTcpConnection](bool status){
-            qCDebug(dcAlphaInnotec()) << "Connected changed to" << status << "for" << thing;
-            if (status) {
+        connect(alphaConnectTcpConnection, &AlphaInnotecModbusTcpConnection::reachableChanged, this, [thing, alphaConnectTcpConnection](bool reachable){
+            qCDebug(dcAlphaInnotec()) << "Reachable changed to" << reachable << "for" << thing;
+            if (reachable) {
                 alphaConnectTcpConnection->update();
             }
 
-            thing->setStateValue(alphaConnectConnectedStateTypeId, status);
+            thing->setStateValue(alphaConnectConnectedStateTypeId, reachable);
         });
 
 
@@ -311,7 +311,7 @@ void IntegrationPluginAlphaInnotec::postSetupThing(Thing *thing)
             m_pluginTimer = hardwareManager()->pluginTimerManager()->registerTimer(10);
             connect(m_pluginTimer, &PluginTimer::timeout, this, [this] {
                 foreach (AlphaInnotecModbusTcpConnection *connection, m_connections) {
-                    if (connection->connected()) {
+                    if (connection->reachable()) {
                         connection->update();
                     }
                 }
@@ -340,7 +340,7 @@ void IntegrationPluginAlphaInnotec::executeAction(ThingActionInfo *info)
     Thing *thing = info->thing();
     AlphaInnotecModbusTcpConnection *connection = m_connections.value(thing);
 
-    if (!connection->connected()) {
+    if (!connection->reachable()) {
         qCWarning(dcAlphaInnotec()) << "Could not execute action. The modbus connection is currently not available.";
         info->finish(Thing::ThingErrorHardwareNotAvailable);
         return;

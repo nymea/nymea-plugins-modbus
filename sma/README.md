@@ -7,9 +7,8 @@ nymea plug-in for SMA solar equipment.
 * Sunny WebBox
 * SMA speedwire Meters
 * SMA speedwire Inverters
-* SMA inverters using modbus
-
-> Note: the SMA battery equipment is still missing due to testing possibilities. Will be added as soon someone can with the appropriate setup.
+* SMA solar inverters using modbus
+* SMA battery inverters using modbus
 
 ## Requirements
 

@@ -34,7 +34,8 @@
 #include "sma.h"
 #include "speedwire/speedwirediscovery.h"
 #include "sunnywebbox/sunnywebboxdiscovery.h"
-#include "modbus/smamodbusdiscovery.h"
+#include "modbus/smamodbussolarinverterdiscovery.h"
+#include "modbus/smamodbusbatteryinverterdiscovery.h"
 
 #include <network/networkdevicediscovery.h>
 
@@ -94,15 +95,15 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
         webBoxDiscovery->startDiscovery();
 
     } else if (info->thingClassId() == speedwireMeterThingClassId) {
-
-        // Note: does not require the network device discovery...
-        SpeedwireDiscovery *speedwireDiscovery = new SpeedwireDiscovery(hardwareManager()->networkDeviceDiscovery(), info);
-        if (!speedwireDiscovery->initialize(SpeedwireInterface::DeviceTypeMeter)) {
+        SpeedwireInterface *speedwireInterface = getSpeedwireInterface();
+        if (!speedwireInterface || !speedwireInterface->available()) {
             qCWarning(dcSma()) << "Could not discovery inverter. The speedwire interface initialization failed.";
             info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Unable to discover the network."));
             return;
         }
 
+        // Note: does not require the network device discovery...
+        SpeedwireDiscovery *speedwireDiscovery = new SpeedwireDiscovery(hardwareManager()->networkDeviceDiscovery(), speedwireInterface, getLocalSerialNumber(), info);
         connect(speedwireDiscovery, &SpeedwireDiscovery::discoveryFinished, this, [=](){
             qCDebug(dcSma()) << "Speed wire discovery finished.";
             speedwireDiscovery->deleteLater();
@@ -110,13 +111,19 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
             ThingDescriptors descriptors;
             foreach (const SpeedwireDiscovery::SpeedwireDiscoveryResult &result, speedwireDiscovery->discoveryResult()) {
 
-                if (result.deviceType != SpeedwireInterface::DeviceTypeMeter)
+                if (result.deviceType != Speedwire::DeviceTypeMeter)
                     continue;
 
                 if (result.serialNumber == 0)
                     continue;
 
-                ThingDescriptor descriptor(speedwireMeterThingClassId, "SMA Energy Meter (" + QString::number(result.serialNumber) + ")" , result.address.toString());
+                QString thingName = "SMA Energy Meter (" + QString::number(result.serialNumber) + ")";
+
+                // Note: the SMA Homemanager 2 identifies it self as inverter / data provider...we filter it out here.
+                if (result.modelId == 372)
+                    thingName = "SMA Home Manager 2.0 (" + QString::number(result.serialNumber) + ")";
+
+                ThingDescriptor descriptor(speedwireMeterThingClassId, thingName, result.address.toString());
                 // We found an energy meter, let's check if we already added this one
                 foreach (Thing *existingThing, myThings()) {
                     if (existingThing->paramValue(speedwireMeterThingSerialNumberParamTypeId).toUInt() == result.serialNumber) {
@@ -145,13 +152,14 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
             return;
         }
 
-        SpeedwireDiscovery *speedwireDiscovery = new SpeedwireDiscovery(hardwareManager()->networkDeviceDiscovery(), info);
-        if (!speedwireDiscovery->initialize(SpeedwireInterface::DeviceTypeInverter)) {
+        SpeedwireInterface *speedwireInterface = getSpeedwireInterface();
+        if (!speedwireInterface || !speedwireInterface->available()) {
             qCWarning(dcSma()) << "Could not discovery inverter. The speedwire interface initialization failed.";
             info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Unable to discover the network."));
             return;
         }
 
+        SpeedwireDiscovery *speedwireDiscovery = new SpeedwireDiscovery(hardwareManager()->networkDeviceDiscovery(), speedwireInterface, getLocalSerialNumber(), info);
         connect(speedwireDiscovery, &SpeedwireDiscovery::discoveryFinished, this, [=](){
             qCDebug(dcSma()) << "Speed wire discovery finished.";
             speedwireDiscovery->deleteLater();
@@ -159,10 +167,15 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
             ThingDescriptors descriptors;
             foreach (const SpeedwireDiscovery::SpeedwireDiscoveryResult &result, speedwireDiscovery->discoveryResult()) {
 
-                if (result.deviceType != SpeedwireInterface::DeviceTypeInverter)
+                if (result.deviceType != Speedwire::DeviceTypeInverter)
                     continue;
 
                 if (result.serialNumber == 0)
+                    continue;
+
+                // Note: the SMA Homemanager 2 identifies him self as inverter / data provider...
+                // we filter it out here since it is a meter and also should identify as one.
+                if (result.modelId == 372)
                     continue;
 
                 ThingDescriptor descriptor(speedwireInverterThingClassId, "SMA inverter (" + QString::number(result.serialNumber) + ")", result.address.toString());
@@ -189,7 +202,7 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
 
         speedwireDiscovery->startDiscovery();
 
-    } else if (info->thingClassId() == modbusInverterThingClassId) {
+    } else if (info->thingClassId() == modbusSolarInverterThingClassId) {
         if (!hardwareManager()->networkDeviceDiscovery()->available()) {
             qCWarning(dcSma()) << "The network discovery is not available on this platform.";
             info->finish(Thing::ThingErrorUnsupportedFeature, QT_TR_NOOP("The network device discovery is not available."));
@@ -197,25 +210,25 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
         }
 
         // Create a discovery with the info as parent for auto deleting the object once the discovery info is done
-        SmaModbusDiscovery *discovery = new SmaModbusDiscovery(hardwareManager()->networkDeviceDiscovery(), 502, 3, info);
-        connect(discovery, &SmaModbusDiscovery::discoveryFinished, info, [=](){
-            foreach (const SmaModbusDiscovery::SmaModbusDiscoveryResult &result, discovery->discoveryResults()) {
+        SmaModbusSolarInverterDiscovery *discovery = new SmaModbusSolarInverterDiscovery(hardwareManager()->networkDeviceDiscovery(), 502, 3, info);
+        connect(discovery, &SmaModbusSolarInverterDiscovery::discoveryFinished, info, [=](){
+            foreach (const SmaModbusSolarInverterDiscovery::SmaModbusDiscoveryResult &result, discovery->discoveryResults()) {
 
-                ThingDescriptor descriptor(modbusInverterThingClassId, "SMA inverter " + result.productName, QT_TR_NOOP("Serial: ") + result.serialNumber + " (" + result.networkDeviceInfo.address().toString() + ")");
+                ThingDescriptor descriptor(modbusSolarInverterThingClassId, "SMA inverter " + result.productName, QT_TR_NOOP("Serial: ") + result.serialNumber + " (" + result.networkDeviceInfo.address().toString() + ")");
                 qCDebug(dcSma()) << "Discovered:" << descriptor.title() << descriptor.description();
 
                 // Note: use the serial and not the mac address as identifier because more than one inverter might be behind a network device
-                Things existingThings = myThings().filterByParam(modbusInverterThingSerialNumberParamTypeId, result.serialNumber);
+                Things existingThings = myThings().filterByParam(modbusSolarInverterThingSerialNumberParamTypeId, result.serialNumber);
                 if (existingThings.count() == 1) {
                     qCDebug(dcSma()) << "This SMA inverter already exists in the system:" << result.serialNumber;
                     descriptor.setThingId(existingThings.first()->id());
                 }
 
                 ParamList params;
-                params << Param(modbusInverterThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
-                params << Param(modbusInverterThingPortParamTypeId, result.port);
-                params << Param(modbusInverterThingSlaveIdParamTypeId, result.modbusAddress);
-                params << Param(modbusInverterThingSerialNumberParamTypeId, result.serialNumber);
+                params << Param(modbusSolarInverterThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
+                params << Param(modbusSolarInverterThingPortParamTypeId, result.port);
+                params << Param(modbusSolarInverterThingSlaveIdParamTypeId, result.modbusAddress);
+                params << Param(modbusSolarInverterThingSerialNumberParamTypeId, result.serialNumber);
                 descriptor.setParams(params);
                 info->addThingDescriptor(descriptor);
             }
@@ -225,6 +238,39 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
 
         // Start the discovery process
         discovery->startDiscovery();
+    } else if (info->thingClassId() == modbusBatteryInverterThingClassId) {
+        if (!hardwareManager()->networkDeviceDiscovery()->available()) {
+            qCWarning(dcSma()) << "The network discovery is not available on this platform.";
+            info->finish(Thing::ThingErrorUnsupportedFeature, QT_TR_NOOP("Unable to scan the network. Please ensure that the system is installed correctly."));
+            return;
+        }
+
+        SmaModbusBatteryInverterDiscovery *discovery = new SmaModbusBatteryInverterDiscovery(hardwareManager()->networkDeviceDiscovery(), 502, 3, info);
+        connect(discovery, &SmaModbusBatteryInverterDiscovery::discoveryFinished, info, [=](){
+            foreach (const SmaModbusBatteryInverterDiscovery::Result &result, discovery->discoveryResults()) {
+
+                qCInfo(dcSma()) << "Discovered:" << result.deviceName << result.serialNumber << result.networkDeviceInfo.address().toString();
+                ThingDescriptor descriptor(modbusBatteryInverterThingClassId, "SMA battery inverter", QT_TR_NOOP("Serial: ") + result.serialNumber + " (" + result.networkDeviceInfo.address().toString() + ")");
+
+                Things existingThings = myThings().filterByParam(modbusBatteryInverterThingSerialNumberParamTypeId, result.serialNumber);
+                if (existingThings.count() == 1) {
+                    qCInfo(dcSma()) << "This SMA inverter already exists in the system:" << result.serialNumber;
+                    descriptor.setThingId(existingThings.first()->id());
+                }
+
+                ParamList params;
+                params << Param(modbusBatteryInverterThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
+                params << Param(modbusBatteryInverterThingPortParamTypeId, result.port);
+                params << Param(modbusBatteryInverterThingSlaveIdParamTypeId, result.modbusAddress);
+                params << Param(modbusBatteryInverterThingSerialNumberParamTypeId, result.serialNumber);
+                descriptor.setParams(params);
+                info->addThingDescriptor(descriptor);
+            }
+
+            info->finish(Thing::ThingErrorNoError);
+        });
+        discovery->startDiscovery();
+
     }
 }
 
@@ -244,18 +290,9 @@ void IntegrationPluginSma::confirmPairing(ThingPairingInfo *info, const QString 
             return;
         }
 
-        // Init with the default password
-        QString password = "0000";
-        if (!secret.isEmpty()) {
-            qCDebug(dcSma()) << "Pairing: Using password" << secret;
-            password = secret;
-        } else {
-            qCDebug(dcSma()) << "Pairing: The given password is empty. Using default password" << password;
-        }
-
         // Just store details, we'll test the login in setupDevice
         pluginStorage()->beginGroup(info->thingId().toString());
-        pluginStorage()->setValue("password", password);
+        pluginStorage()->setValue("password", secret);
         pluginStorage()->endGroup();
 
         info->finish(Thing::ThingErrorNoError);
@@ -300,9 +337,12 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
 
     } else if (thing->thingClassId() == speedwireMeterThingClassId) {
 
-        // Create the multicast interface if not created already.
-        if (!m_multicastInterface)
-            m_multicastInterface = new SpeedwireInterface(true, this);
+        SpeedwireInterface *speedwireInterface = getSpeedwireInterface();
+        if (!speedwireInterface || !speedwireInterface->available()) {
+            qCWarning(dcSma()) << "Could not set up speedwire meter. The speedwire interface is not available.";
+            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Unable to communicate with the meter."));
+            return;
+        }
 
         quint32 serialNumber = static_cast<quint32>(thing->paramValue(speedwireMeterThingSerialNumberParamTypeId).toUInt());
         quint16 modelId = static_cast<quint16>(thing->paramValue(speedwireMeterThingModelIdParamTypeId).toUInt());
@@ -311,14 +351,7 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
         if (m_speedwireMeters.contains(thing))
             m_speedwireMeters.take(thing)->deleteLater();
 
-        SpeedwireMeter *meter = new SpeedwireMeter(m_multicastInterface, modelId, serialNumber, this);
-        if (!meter->initialize()) {
-            meter->deleteLater();
-            qCWarning(dcSma()) << "Setup failed. Could not initialize meter interface.";
-            info->finish(Thing::ThingErrorHardwareFailure);
-            return;
-        }
-
+        SpeedwireMeter *meter = new SpeedwireMeter(speedwireInterface, modelId, serialNumber, this);
         connect(meter, &SpeedwireMeter::reachableChanged, thing, [=](bool reachable){
             thing->setStateValue(speedwireMeterConnectedStateTypeId, reachable);
             if (!reachable) {
@@ -327,6 +360,7 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
         });
 
         connect(meter, &SpeedwireMeter::valuesUpdated, thing, [=](){
+            qCDebug(dcSma()) << "Meter values updated for" << thing->name() << meter->currentPower() << "W";
             thing->setStateValue(speedwireMeterConnectedStateTypeId, true);
             thing->setStateValue(speedwireMeterCurrentPowerStateTypeId, meter->currentPower());
             thing->setStateValue(speedwireMeterCurrentPowerPhaseAStateTypeId, meter->currentPowerPhaseA());
@@ -355,6 +389,9 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
     } else if (thing->thingClassId() == speedwireInverterThingClassId) {
 
         QHostAddress address = QHostAddress(thing->paramValue(speedwireInverterThingHostParamTypeId).toString());
+
+        // FIXME: use the monitor here since the IP might change
+
         quint32 serialNumber = static_cast<quint32>(thing->paramValue(speedwireInverterThingSerialNumberParamTypeId).toUInt());
         quint16 modelId = static_cast<quint16>(thing->paramValue(speedwireInverterThingModelIdParamTypeId).toUInt());
 
@@ -362,18 +399,12 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
             m_speedwireInverters.take(thing)->deleteLater();
         }
 
-        SpeedwireInverter *inverter = new SpeedwireInverter(address, modelId, serialNumber, this);
-        if (!inverter->initialize()) {
-            qCWarning(dcSma()) << "Setup failed. Could not initialize inverter interface.";
-            info->finish(Thing::ThingErrorHardwareFailure);
-            return;
-        }
-
+        SpeedwireInverter *inverter = new SpeedwireInverter(getSpeedwireInterface(), address, modelId, serialNumber, this);
         qCDebug(dcSma()) << "Inverter: Interface initialized successfully.";
 
         QString password;
         pluginStorage()->beginGroup(info->thing()->id().toString());
-        password = pluginStorage()->value("password", "0000").toString();
+        password = pluginStorage()->value("password").toString();
         pluginStorage()->endGroup();
 
         // Connection exists only as long info exists
@@ -386,7 +417,7 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
                 pluginStorage()->remove("");
                 pluginStorage()->endGroup();
 
-                delete inverter;
+                inverter->deleteLater();
                 info->finish(Thing::ThingErrorAuthenticationFailure, QT_TR_NOOP("Failed to log in with the given password. Please try again."));
                 return;
             }
@@ -406,9 +437,18 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
             if (!reachable) {
                 markSpeedwireInverterAsDisconnected(thing);
             }
+
+            foreach (Thing *batteryThing, myThings().filterByParentId(thing->id()).filterByThingClassId(speedwireBatteryThingClassId)) {
+                if (reachable) {
+                    thing->setStateValue(speedwireBatteryConnectedStateTypeId, true);
+                } else {
+                    markSpeedwireBatteryAsDisconnected(batteryThing);
+                }
+            }
         });
 
         connect(inverter, &SpeedwireInverter::valuesUpdated, thing, [=](){
+            qCDebug(dcSma()) << "Inverter values updated for" << thing->name() << -inverter->totalAcPower() << "W" << inverter->totalEnergyProduced() << "kWh";
             thing->setStateValue(speedwireInverterConnectedStateTypeId, true);
             thing->setStateValue(speedwireInverterTotalEnergyProducedStateTypeId, inverter->totalEnergyProduced());
             thing->setStateValue(speedwireInverterEnergyProducedTodayStateTypeId, inverter->todayEnergyProduced());
@@ -427,22 +467,59 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
             thing->setStateValue(speedwireInverterCurrentPowerMpp2StateTypeId, inverter->powerDcMpp2());
         });
 
+        connect(inverter, &SpeedwireInverter::batteryValuesUpdated, thing, [=](){
+            if (!thing->setupComplete() || !inverter->batteryAvailable())
+                return;
+
+            // First check if we already set up a battery for this inverter
+            Things childThings = myThings().filterByParentId(thing->id()).filterByThingClassId(speedwireBatteryThingClassId);
+            if (childThings.isEmpty()) {
+                // Autocreate battery
+                emit autoThingsAppeared(ThingDescriptors() << ThingDescriptor(speedwireBatteryThingClassId, "SMA Battery", QString(), thing->id()));
+            } else {
+                // We can only have one battery as a child
+                Thing *batteryThing = childThings.first();
+                batteryThing->setStateValue(speedwireBatteryConnectedStateTypeId, true);
+                batteryThing->setStateValue(speedwireBatteryBatteryLevelStateTypeId, inverter->batteryCharge());
+                batteryThing->setStateValue(speedwireBatteryBatteryCriticalStateTypeId, inverter->batteryCharge() < 10);
+                batteryThing->setStateValue(speedwireBatteryTemperatureStateTypeId, inverter->batteryTemperature());
+                batteryThing->setStateValue(speedwireBatteryVoltageStateTypeId, inverter->batteryVoltage());
+                batteryThing->setStateValue(speedwireBatteryCurrentStateTypeId, inverter->batteryCurrent());
+
+                double batteryPower = -1 * inverter->batteryVoltage() * inverter->batteryCurrent(); // P = U * I
+                qCDebug(dcSma()) << "Battery values updated for" << batteryThing->name() << batteryPower << "W";
+                batteryThing->setStateValue(speedwireBatteryCurrentPowerStateTypeId, batteryPower);
+                if (batteryPower == 0) {
+                    batteryThing->setStateValue(speedwireBatteryChargingStateStateTypeId, "idle");
+                } else if (batteryPower < 0) {
+                    batteryThing->setStateValue(speedwireBatteryChargingStateStateTypeId, "discharging");
+                } else if (batteryPower > 0) {
+                    batteryThing->setStateValue(speedwireBatteryChargingStateStateTypeId, "charging");
+                }
+            }
+        });
+
         qCDebug(dcSma()) << "Inverter: Start connecting using password" << password;
         inverter->startConnecting(password);
 
-    } else if (thing->thingClassId() == modbusInverterThingClassId) {
+    } else if (thing->thingClassId() == speedwireBatteryThingClassId) {
+
+        qCDebug(dcSma()) << "Battery: Setup SMA battery" << thing;
+        info->finish(Thing::ThingErrorNoError);
+
+    } else if (thing->thingClassId() == modbusSolarInverterThingClassId) {
 
         // Handle reconfigure
-        if (m_modbusInverters.contains(thing)) {
+        if (m_modbusSolarInverters.contains(thing)) {
             qCDebug(dcSma()) << "Reconfiguring existing thing" << thing->name();
-            m_modbusInverters.take(thing)->deleteLater();
+            m_modbusSolarInverters.take(thing)->deleteLater();
 
             if (m_monitors.contains(thing)) {
                 hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
             }
         }
 
-        MacAddress macAddress = MacAddress(thing->paramValue(modbusInverterThingMacAddressParamTypeId).toString());
+        MacAddress macAddress = MacAddress(thing->paramValue(modbusSolarInverterThingMacAddressParamTypeId).toString());
         if (!macAddress.isValid()) {
             qCWarning(dcSma()) << "The configured mac address is not valid" << thing->params();
             info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The MAC address is not known. Please reconfigure the thing."));
@@ -472,13 +549,65 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
         // Wait for the monitor to be ready
         if (monitor->reachable()) {
             // Thing already reachable...let's continue with the setup
-            setupModbusInverterConnection(info);
+            setupModbusSolarInverterConnection(info);
         } else {
             qCDebug(dcSma()) << "Waiting for the network monitor to get reachable before continue to set up the connection" << thing->name() << address.toString() << "...";
             connect(monitor, &NetworkDeviceMonitor::reachableChanged, info, [=](bool reachable){
                 if (reachable) {
                     qCDebug(dcSma()) << "The monitor for thing setup" << thing->name() << "is now reachable. Continue setup...";
-                    setupModbusInverterConnection(info);
+                    setupModbusSolarInverterConnection(info);
+                }
+            });
+        }
+
+    } else if (thing->thingClassId() == modbusBatteryInverterThingClassId) {
+
+        if (m_modbusBatteryInverters.contains(thing)) {
+            qCDebug(dcSma()) << "Reconfiguring existing thing" << thing->name();
+            m_modbusBatteryInverters.take(thing)->deleteLater();
+
+            if (m_monitors.contains(thing)) {
+                hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+            }
+        }
+
+        MacAddress macAddress = MacAddress(thing->paramValue(modbusBatteryInverterThingMacAddressParamTypeId).toString());
+        if (!macAddress.isValid()) {
+            qCWarning(dcSma()) << "The configured mac address is not valid" << thing->params();
+            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The MAC address is not known. Please reconfigure the thing."));
+            return;
+        }
+
+        // Create the monitor
+        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(macAddress);
+        m_monitors.insert(thing, monitor);
+
+        QHostAddress address = monitor->networkDeviceInfo().address();
+        if (address.isNull()) {
+            qCWarning(dcSma()) << "Cannot set up sma modbus battery inverter. The host address is not known yet. Maybe it will be available in the next run...";
+            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("The host address is not known yet. Trying again later."));
+            return;
+        }
+
+        // Clean up in case the setup gets aborted
+        connect(info, &ThingSetupInfo::aborted, monitor, [=](){
+            if (m_monitors.contains(thing)) {
+                qCDebug(dcSma()) << "Unregister monitor because setup has been aborted.";
+                hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+            }
+        });
+
+        // Wait for the monitor to be ready
+        if (monitor->reachable()) {
+            // Thing already reachable...let's continue with the setup
+            setupModbusBatteryInverterConnection(info);
+        } else {
+            qCDebug(dcSma()) << "Waiting for the network monitor to become reachable before continue to set up the connection" << thing->name() << address.toString() << "...";
+            connect(monitor, &NetworkDeviceMonitor::reachableChanged, info, [=](bool reachable){
+                if (reachable) {
+                    qCDebug(dcSma()) << "The monitor for thing setup" << thing->name() << "is now reachable. Continuing with setup...";
+                    setupModbusBatteryInverterConnection(info);
                 }
             });
         }
@@ -514,8 +643,22 @@ void IntegrationPluginSma::postSetupThing(Thing *thing)
 
         setupRefreshTimer();
 
-    } else if (thing->thingClassId() == modbusInverterThingClassId) {
-        SmaInverterModbusTcpConnection *connection = m_modbusInverters.value(thing);
+    } else if (thing->thingClassId() == speedwireBatteryThingClassId) {
+        SpeedwireInverter *inverter = m_speedwireInverters.value(myThings().findById(thing->parentId()));
+        if (inverter) {
+            if (inverter->reachable()) {
+                thing->setStateValue(speedwireBatteryConnectedStateTypeId, true);
+            } else {
+                markSpeedwireBatteryAsDisconnected(thing);
+            }
+        } else {
+            markSpeedwireBatteryAsDisconnected(thing);
+        }
+
+        setupRefreshTimer();
+
+    } else if (thing->thingClassId() == modbusSolarInverterThingClassId) {
+        SmaSolarInverterModbusTcpConnection *connection = m_modbusSolarInverters.value(thing);
         if (connection) {
             thing->setStateValue("connected", connection->reachable());
             if (!connection->reachable()) {
@@ -541,21 +684,28 @@ void IntegrationPluginSma::thingRemoved(Thing *thing)
     }
 
     if (thing->thingClassId() == speedwireInverterThingClassId && m_speedwireInverters.contains(thing)) {
+        // Remove invalid password from settings
+        pluginStorage()->beginGroup(thing->id().toString());
+        pluginStorage()->remove("");
+        pluginStorage()->endGroup();
+
         m_speedwireInverters.take(thing)->deleteLater();
     }
 
-    if (thing->thingClassId() == modbusInverterThingClassId && m_modbusInverters.contains(thing)) {
-        m_modbusInverters.take(thing)->deleteLater();
+    if (thing->thingClassId() == modbusSolarInverterThingClassId && m_modbusSolarInverters.contains(thing)) {
+        m_modbusSolarInverters.take(thing)->deleteLater();
     }
 
     if (m_monitors.contains(thing)) {
         hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
     }
 
-    if (myThings().filterByThingClassId(speedwireMeterThingClassId).isEmpty() && m_multicastInterface) {
+    if (myThings().filterByThingClassId(speedwireMeterThingClassId).isEmpty()
+            && myThings().filterByThingClassId(speedwireInverterThingClassId).isEmpty()
+            && myThings().filterByThingClassId(speedwireBatteryThingClassId).isEmpty()) {
         // Delete shared multicast socket...
-        m_multicastInterface->deleteLater();
-        m_multicastInterface = nullptr;
+        m_speedwireInterface->deleteLater();
+        m_speedwireInterface = nullptr;
     }
 
     if (myThings().isEmpty()) {
@@ -613,7 +763,10 @@ void IntegrationPluginSma::setupRefreshTimer()
             inverter->refresh();
         }
 
-        foreach (SmaInverterModbusTcpConnection *connection, m_modbusInverters) {
+        foreach (SmaSolarInverterModbusTcpConnection *connection, m_modbusSolarInverters) {
+            connection->update();
+        }
+        foreach (SmaBatteryInverterModbusTcpConnection *connection, m_modbusBatteryInverters) {
             connection->update();
         }
     });
@@ -621,17 +774,17 @@ void IntegrationPluginSma::setupRefreshTimer()
     m_refreshTimer->start();
 }
 
-void IntegrationPluginSma::setupModbusInverterConnection(ThingSetupInfo *info)
+void IntegrationPluginSma::setupModbusSolarInverterConnection(ThingSetupInfo *info)
 {
     Thing *thing = info->thing();
 
     QHostAddress address = m_monitors.value(thing)->networkDeviceInfo().address();
-    uint port = thing->paramValue(modbusInverterThingPortParamTypeId).toUInt();
-    quint16 slaveId = thing->paramValue(modbusInverterThingSlaveIdParamTypeId).toUInt();
+    uint port = thing->paramValue(modbusSolarInverterThingPortParamTypeId).toUInt();
+    quint16 slaveId = thing->paramValue(modbusSolarInverterThingSlaveIdParamTypeId).toUInt();
 
     qCDebug(dcSma()) << "Setting up SMA inverter on" << address.toString() << port << "unit ID:" << slaveId;
-    SmaInverterModbusTcpConnection *connection = new SmaInverterModbusTcpConnection(address, port, slaveId, this);
-    connect(info, &ThingSetupInfo::aborted, connection, &SmaInverterModbusTcpConnection::deleteLater);
+    SmaSolarInverterModbusTcpConnection *connection = new SmaSolarInverterModbusTcpConnection(address, port, slaveId, this);
+    connect(info, &ThingSetupInfo::aborted, connection, &SmaSolarInverterModbusTcpConnection::deleteLater);
 
     // Reconnect on monitor reachable changed
     NetworkDeviceMonitor *monitor = m_monitors.value(thing);
@@ -641,31 +794,31 @@ void IntegrationPluginSma::setupModbusInverterConnection(ThingSetupInfo *info)
             return;
 
         if (reachable && !thing->stateValue("connected").toBool()) {
-            connection->setHostAddress(monitor->networkDeviceInfo().address());
+            connection->modbusTcpMaster()->setHostAddress(monitor->networkDeviceInfo().address());
             connection->connectDevice();
         } else if (!reachable) {
             // Note: We disable autoreconnect explicitly and we will
             // connect the device once the monitor says it is reachable again
             connection->disconnectDevice();
-            markModbusInverterAsDisconnected(thing);
+            markModbusSolarInverterAsDisconnected(thing);
         }
     });
 
-    connect(connection, &SmaInverterModbusTcpConnection::reachableChanged, thing, [this, thing, connection](bool reachable){
+    connect(connection, &SmaSolarInverterModbusTcpConnection::reachableChanged, thing, [this, thing, connection](bool reachable){
         qCDebug(dcSma()) << "Reachable changed to" << reachable << "for" << thing;
         if (reachable) {
             // Connected true will be set after successfull init
             connection->initialize();
         } else {
             thing->setStateValue("connected", false);
-            markModbusInverterAsDisconnected(thing);
+            markModbusSolarInverterAsDisconnected(thing);
             foreach (Thing *childThing, myThings().filterByParentId(thing->id())) {
                 childThing->setStateValue("connected", false);
             }
         }
     });
 
-    connect(connection, &SmaInverterModbusTcpConnection::initializationFinished, thing, [=](bool success){
+    connect(connection, &SmaSolarInverterModbusTcpConnection::initializationFinished, thing, [=](bool success){
         if (!thing->setupComplete())
             return;
 
@@ -677,13 +830,13 @@ void IntegrationPluginSma::setupModbusInverterConnection(ThingSetupInfo *info)
         if (!success) {
             // Try once to reconnect the device
             connection->reconnectDevice();
-            markModbusInverterAsDisconnected(thing);
+            markModbusSolarInverterAsDisconnected(thing);
         }
     });
 
-    connect(connection, &SmaInverterModbusTcpConnection::initializationFinished, info, [=](bool success){
+    connect(connection, &SmaSolarInverterModbusTcpConnection::initializationFinished, info, [=](bool success){
         if (!success) {
-            qCWarning(dcSma()) << "Connection init finished with errors" << thing->name() << connection->hostAddress().toString();
+            qCWarning(dcSma()) << "Connection init finished with errors" << thing->name() << connection->modbusTcpMaster()->hostAddress().toString();
             hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(monitor);
             connection->deleteLater();
             info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Could not initialize the communication with the inverter."));
@@ -691,7 +844,7 @@ void IntegrationPluginSma::setupModbusInverterConnection(ThingSetupInfo *info)
         }
 
         qCDebug(dcSma()) << "Connection init finished successfully" << connection;
-        m_modbusInverters.insert(thing, connection);
+        m_modbusSolarInverters.insert(thing, connection);
         info->finish(Thing::ThingErrorNoError);
 
         // Set connected true
@@ -700,52 +853,52 @@ void IntegrationPluginSma::setupModbusInverterConnection(ThingSetupInfo *info)
             childThing->setStateValue("connected", true);
         }
 
-        connect(connection, &SmaInverterModbusTcpConnection::updateFinished, thing, [=](){
+        connect(connection, &SmaSolarInverterModbusTcpConnection::updateFinished, thing, [=](){
             qCDebug(dcSma()) << "Updated" << connection;
 
             // Grid voltage
             if (isModbusValueValid(connection->gridVoltagePhaseA()))
-                thing->setStateValue(modbusInverterVoltagePhaseAStateTypeId, connection->gridVoltagePhaseA() / 100.0);
+                thing->setStateValue(modbusSolarInverterVoltagePhaseAStateTypeId, connection->gridVoltagePhaseA() / 100.0);
 
             if (isModbusValueValid(connection->gridVoltagePhaseB()))
-                thing->setStateValue(modbusInverterVoltagePhaseBStateTypeId, connection->gridVoltagePhaseB() / 100.0);
+                thing->setStateValue(modbusSolarInverterVoltagePhaseBStateTypeId, connection->gridVoltagePhaseB() / 100.0);
 
             if (isModbusValueValid(connection->gridVoltagePhaseC()))
-                thing->setStateValue(modbusInverterVoltagePhaseCStateTypeId, connection->gridVoltagePhaseC() / 100.0);
+                thing->setStateValue(modbusSolarInverterVoltagePhaseCStateTypeId, connection->gridVoltagePhaseC() / 100.0);
 
             // Grid current
             if (isModbusValueValid(connection->gridCurrentPhaseA()))
-                thing->setStateValue(modbusInverterCurrentPhaseAStateTypeId, connection->gridCurrentPhaseA() / 1000.0);
+                thing->setStateValue(modbusSolarInverterCurrentPhaseAStateTypeId, connection->gridCurrentPhaseA() / 1000.0);
 
             if (isModbusValueValid(connection->gridCurrentPhaseB()))
-                thing->setStateValue(modbusInverterCurrentPhaseBStateTypeId, connection->gridCurrentPhaseB() / 1000.0);
+                thing->setStateValue(modbusSolarInverterCurrentPhaseBStateTypeId, connection->gridCurrentPhaseB() / 1000.0);
 
             if (isModbusValueValid(connection->gridCurrentPhaseC()))
-                thing->setStateValue(modbusInverterCurrentPhaseCStateTypeId, connection->gridCurrentPhaseC() / 1000.0);
+                thing->setStateValue(modbusSolarInverterCurrentPhaseCStateTypeId, connection->gridCurrentPhaseC() / 1000.0);
 
             // Phase power
             if (isModbusValueValid(connection->currentPowerPhaseA()))
-                thing->setStateValue(modbusInverterCurrentPowerPhaseAStateTypeId, connection->currentPowerPhaseA());
+                thing->setStateValue(modbusSolarInverterCurrentPowerPhaseAStateTypeId, connection->currentPowerPhaseA());
 
             if (isModbusValueValid(connection->currentPowerPhaseB()))
-                thing->setStateValue(modbusInverterCurrentPowerPhaseBStateTypeId, connection->currentPowerPhaseB());
+                thing->setStateValue(modbusSolarInverterCurrentPowerPhaseBStateTypeId, connection->currentPowerPhaseB());
 
             if (isModbusValueValid(connection->currentPowerPhaseC()))
-                thing->setStateValue(modbusInverterCurrentPowerPhaseCStateTypeId, connection->currentPowerPhaseC());
+                thing->setStateValue(modbusSolarInverterCurrentPowerPhaseCStateTypeId, connection->currentPowerPhaseC());
 
             // Others
             if (isModbusValueValid(connection->totalYield()))
-                thing->setStateValue(modbusInverterTotalEnergyProducedStateTypeId, connection->totalYield() / 1000.0); // kWh
+                thing->setStateValue(modbusSolarInverterTotalEnergyProducedStateTypeId, connection->totalYield() / 1000.0); // kWh
 
             if (isModbusValueValid(connection->dailyYield()))
-                thing->setStateValue(modbusInverterEnergyProducedTodayStateTypeId, connection->dailyYield() / 1000.0); // kWh
+                thing->setStateValue(modbusSolarInverterEnergyProducedTodayStateTypeId, connection->dailyYield() / 1000.0); // kWh
 
             // Power
             if (isModbusValueValid(connection->currentPower()))
-                thing->setStateValue(modbusInverterCurrentPowerStateTypeId, -connection->currentPower());
+                thing->setStateValue(modbusSolarInverterCurrentPowerStateTypeId, -connection->currentPower());
 
             // Version
-            thing->setStateValue(modbusInverterFirmwareVersionStateTypeId, Sma::buildSoftwareVersionString(connection->softwarePackage()));
+            thing->setStateValue(modbusSolarInverterFirmwareVersionStateTypeId, Sma::buildSoftwareVersionString(connection->softwarePackage()));
         });
 
         // Update registers
@@ -753,6 +906,107 @@ void IntegrationPluginSma::setupModbusInverterConnection(ThingSetupInfo *info)
     });
 
     connection->connectDevice();
+}
+
+void IntegrationPluginSma::setupModbusBatteryInverterConnection(ThingSetupInfo *info)
+{
+    Thing *thing = info->thing();
+
+    QHostAddress address = m_monitors.value(thing)->networkDeviceInfo().address();
+    uint port = thing->paramValue(modbusBatteryInverterThingPortParamTypeId).toUInt();
+    quint16 slaveId = thing->paramValue(modbusBatteryInverterThingSlaveIdParamTypeId).toUInt();
+
+    qCDebug(dcSma()) << "Setting up SMA inverter on" << address.toString() << port << "unit ID:" << slaveId;
+    SmaBatteryInverterModbusTcpConnection *connection = new SmaBatteryInverterModbusTcpConnection(address, port, slaveId, this);
+    connect(info, &ThingSetupInfo::aborted, connection, &SmaBatteryInverterModbusTcpConnection::deleteLater);
+
+    // Reconnect on monitor reachable changed
+    NetworkDeviceMonitor *monitor = m_monitors.value(thing);
+    connect(monitor, &NetworkDeviceMonitor::reachableChanged, thing, [=](bool reachable){
+        qCDebug(dcSma()) << "Network device monitor reachable changed for" << thing->name() << reachable;
+        if (!thing->setupComplete())
+            return;
+
+        if (reachable && !thing->stateValue("connected").toBool()) {
+            connection->modbusTcpMaster()->setHostAddress(monitor->networkDeviceInfo().address());
+            connection->connectDevice();
+        } else if (!reachable) {
+            // Note: We disable autoreconnect explicitly and we will
+            // connect the device once the monitor says it is reachable again
+            connection->disconnectDevice();
+            markModbusBatteryInverterAsDisconnected(thing);
+        }
+    });
+
+    connect(connection, &SmaBatteryInverterModbusTcpConnection::reachableChanged, thing, [this, thing, connection](bool reachable){
+        qCDebug(dcSma()) << "Reachable changed to" << reachable << "for" << thing;
+        if (reachable) {
+            // Connected true will be set after successfull init
+            connection->initialize();
+        } else {
+            thing->setStateValue("connected", false);
+            markModbusBatteryInverterAsDisconnected(thing);
+        }
+    });
+
+    connect(connection, &SmaBatteryInverterModbusTcpConnection::initializationFinished, thing, [=](bool success){
+        if (!thing->setupComplete())
+            return;
+
+        thing->setStateValue("connected", success);
+        foreach (Thing *childThing, myThings().filterByParentId(thing->id())) {
+            childThing->setStateValue("connected", success);
+        }
+
+        if (!success) {
+            // Try once to reconnect the device
+            connection->reconnectDevice();
+            markModbusBatteryInverterAsDisconnected(thing);
+        }
+    });
+
+    connect(connection, &SmaBatteryInverterModbusTcpConnection::initializationFinished, info, [=](bool success){
+        if (!success) {
+            qCWarning(dcSma()) << "Connection init finished with errors" << thing->name() << connection->modbusTcpMaster()->hostAddress().toString();
+            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(monitor);
+            connection->deleteLater();
+            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Could not initialize the communication with the battery inverter."));
+            return;
+        }
+
+        qCDebug(dcSma()) << "Connection init finished successfully" << connection;
+        m_modbusBatteryInverters.insert(thing, connection);
+        info->finish(Thing::ThingErrorNoError);
+
+        thing->setStateValue("connected", true);
+
+        connect(connection, &SmaBatteryInverterModbusTcpConnection::updateFinished, thing, [=](){
+            qCDebug(dcSma()) << "Updated" << connection;
+            thing->setStateValue(modbusBatteryInverterFirmwareVersionStateTypeId, Sma::buildSoftwareVersionString(connection->softwarePackage()));
+
+            thing->setStateValue(modbusBatteryInverterBatteryLevelStateTypeId, connection->batterySOC());
+            thing->setStateValue(modbusBatteryInverterBatteryCriticalStateTypeId, connection->batterySOC() <= 5);
+            thing->setStateValue(modbusBatteryInverterCurrentPowerStateTypeId, -connection->currentPower());
+            thing->setStateValue(modbusBatteryInverterChargingStateStateTypeId, connection->currentPower() == 0 ? "idle" : (connection->currentPower() > 0 ? "charging" : "discharging"));
+
+        });
+
+        // Update registers
+        connection->update();
+    });
+
+    connection->connectDevice();
+}
+
+SpeedwireInterface *IntegrationPluginSma::getSpeedwireInterface()
+{
+    if (!m_speedwireInterface)
+        m_speedwireInterface = new SpeedwireInterface(getLocalSerialNumber(), this);
+
+    if (!m_speedwireInterface->available())
+        m_speedwireInterface->initialize();
+
+    return m_speedwireInterface;
 }
 
 void IntegrationPluginSma::markSpeedwireMeterAsDisconnected(Thing *thing)
@@ -782,18 +1036,54 @@ void IntegrationPluginSma::markSpeedwireInverterAsDisconnected(Thing *thing)
     thing->setStateValue(speedwireInverterCurrentPowerStateTypeId, 0);
 }
 
-void IntegrationPluginSma::markModbusInverterAsDisconnected(Thing *thing)
+void IntegrationPluginSma::markSpeedwireBatteryAsDisconnected(Thing *thing)
 {
-    thing->setStateValue(modbusInverterVoltagePhaseAStateTypeId, 0);
-    thing->setStateValue(modbusInverterVoltagePhaseBStateTypeId, 0);
-    thing->setStateValue(modbusInverterVoltagePhaseCStateTypeId, 0);
-    thing->setStateValue(modbusInverterCurrentPhaseAStateTypeId, 0);
-    thing->setStateValue(modbusInverterCurrentPhaseBStateTypeId, 0);
-    thing->setStateValue(modbusInverterCurrentPhaseCStateTypeId, 0);
-    thing->setStateValue(modbusInverterCurrentPowerPhaseAStateTypeId, 0);
-    thing->setStateValue(modbusInverterCurrentPowerPhaseBStateTypeId, 0);
-    thing->setStateValue(modbusInverterCurrentPowerPhaseCStateTypeId, 0);
-    thing->setStateValue(modbusInverterCurrentPowerStateTypeId, 0);
+    thing->setStateValue(speedwireBatteryConnectedStateTypeId, false);
+    thing->setStateValue(speedwireBatteryVoltageStateTypeId, 0);
+    thing->setStateValue(speedwireBatteryCurrentStateTypeId, 0);
+    thing->setStateValue(speedwireBatteryCurrentPowerStateTypeId, 0);
+    thing->setStateValue(speedwireBatteryChargingStateStateTypeId, "idle");
+}
+
+void IntegrationPluginSma::markModbusSolarInverterAsDisconnected(Thing *thing)
+{
+    thing->setStateValue(modbusSolarInverterVoltagePhaseAStateTypeId, 0);
+    thing->setStateValue(modbusSolarInverterVoltagePhaseBStateTypeId, 0);
+    thing->setStateValue(modbusSolarInverterVoltagePhaseCStateTypeId, 0);
+    thing->setStateValue(modbusSolarInverterCurrentPhaseAStateTypeId, 0);
+    thing->setStateValue(modbusSolarInverterCurrentPhaseBStateTypeId, 0);
+    thing->setStateValue(modbusSolarInverterCurrentPhaseCStateTypeId, 0);
+    thing->setStateValue(modbusSolarInverterCurrentPowerPhaseAStateTypeId, 0);
+    thing->setStateValue(modbusSolarInverterCurrentPowerPhaseBStateTypeId, 0);
+    thing->setStateValue(modbusSolarInverterCurrentPowerPhaseCStateTypeId, 0);
+    thing->setStateValue(modbusSolarInverterCurrentPowerStateTypeId, 0);
+}
+
+void IntegrationPluginSma::markModbusBatteryInverterAsDisconnected(Thing *thing)
+{
+    thing->setStateValue(modbusBatteryInverterCurrentPowerStateTypeId, 0);
+}
+
+quint64 IntegrationPluginSma::getLocalSerialNumber()
+{
+    m_localSerialNumber = pluginStorage()->value("localSerialNumber", 0).toUInt();
+
+    if (m_localSerialNumber == 0) {
+        srand(QDateTime::currentMSecsSinceEpoch() / 1000);
+        // Generate one and save it for the next time, each instance should have it's own serial number
+        QByteArray data;
+        QDataStream inStream(&data, QIODevice::ReadWrite);
+        for (int i = 0; i < 4; i++) {
+            inStream << static_cast<quint8>(rand() % 256);
+        }
+
+        QDataStream outStream(data);
+        outStream >> m_localSerialNumber;
+        pluginStorage()->setValue("localSerialNumber", m_localSerialNumber);
+    }
+
+    qCInfo(dcSma()) << "Using local serial number" << m_localSerialNumber;
+    return m_localSerialNumber;
 }
 
 bool IntegrationPluginSma::isModbusValueValid(quint32 value)

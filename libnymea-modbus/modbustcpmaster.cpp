@@ -32,7 +32,7 @@
 
 Q_LOGGING_CATEGORY(dcModbusTcpMaster, "ModbusTcpMaster")
 
-ModbusTCPMaster::ModbusTCPMaster(const QHostAddress &hostAddress, uint port, QObject *parent) :
+ModbusTcpMaster::ModbusTcpMaster(const QHostAddress &hostAddress, uint port, QObject *parent) :
     QObject(parent),
     m_hostAddress(hostAddress),
     m_port(port)
@@ -43,132 +43,127 @@ ModbusTCPMaster::ModbusTCPMaster(const QHostAddress &hostAddress, uint port, QOb
     m_modbusTcpClient->setTimeout(m_timeout);
     m_modbusTcpClient->setNumberOfRetries(m_numberOfRetries);
 
-    connect(m_modbusTcpClient, &QModbusTcpClient::stateChanged, this, &ModbusTCPMaster::onModbusStateChanged);
-    connect(m_modbusTcpClient, &QModbusRtuSerialMaster::errorOccurred, this, &ModbusTCPMaster::onModbusErrorOccurred);
+    connect(m_modbusTcpClient, &QModbusTcpClient::stateChanged, this, &ModbusTcpMaster::onModbusStateChanged);
+    connect(m_modbusTcpClient, &QModbusRtuSerialMaster::errorOccurred, this, &ModbusTcpMaster::onModbusErrorOccurred);
 
     m_reconnectTimer = new QTimer(this);
     m_reconnectTimer->setSingleShot(true);
     m_reconnectTimer->setInterval(4000);
-    connect(m_reconnectTimer, &QTimer::timeout, this, &ModbusTCPMaster::connectDevice);
+    connect(m_reconnectTimer, &QTimer::timeout, this, &ModbusTcpMaster::connectDevice);
 }
 
-ModbusTCPMaster::~ModbusTCPMaster()
+ModbusTcpMaster::~ModbusTcpMaster()
 {
     if (m_reconnectTimer) {
         m_reconnectTimer->stop();
     }
 
-    if (m_modbusTcpClient) {
-        disconnectDevice();
-    }
+    disconnectDevice();
 }
 
-QHostAddress ModbusTCPMaster::hostAddress() const
+QHostAddress ModbusTcpMaster::hostAddress() const
 {
     return m_hostAddress;
 }
 
-uint ModbusTCPMaster::port() const
+uint ModbusTcpMaster::port() const
 {
     return m_port;
 }
 
-void ModbusTCPMaster::setPort(uint port)
+void ModbusTcpMaster::setPort(uint port)
 {
     m_port = port;
 }
 
-void ModbusTCPMaster::setHostAddress(const QHostAddress &hostAddress)
+QString ModbusTcpMaster::connectionUrl() const
+{
+    return QString("%1:%2").arg(m_hostAddress.toString()).arg(m_port);
+}
+
+void ModbusTcpMaster::setHostAddress(const QHostAddress &hostAddress)
 {
     m_hostAddress = hostAddress;
 }
 
-bool ModbusTCPMaster::connectDevice() {
+bool ModbusTcpMaster::connectDevice()
+{
     // TCP connection to target device
     if (!m_modbusTcpClient)
         return false;
 
     // Only connect if we are in the unconnected state
     if (m_modbusTcpClient->state() == QModbusDevice::UnconnectedState) {
-        qCDebug(dcModbusTcpMaster()) << "Connecting modbus TCP client to" << QString("%1:%2").arg(m_hostAddress.toString()).arg(m_port);
+        qCDebug(dcModbusTcpMaster()) << "Connecting modbus TCP client to" << connectionUrl();
         m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkPortParameter, m_port);
         m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkAddressParameter, m_hostAddress.toString());
         m_modbusTcpClient->setTimeout(m_timeout);
         m_modbusTcpClient->setNumberOfRetries(m_numberOfRetries);
         return m_modbusTcpClient->connectDevice();
-    } else if (m_modbusTcpClient->state() != QModbusDevice::ConnectedState) {
+    } else if (m_modbusTcpClient->state() != QModbusDevice::ConnectedState && m_modbusTcpClient->state() != QModbusDevice::ConnectingState) {
         // Restart the timer in case of connecting not finished yet or closing
+        qCDebug(dcModbusTcpMaster()) << "Starting the re-connect mechanism timer";
         m_reconnectTimer->start();
     } else {
-        qCWarning(dcModbusTcpMaster()) << "Connect modbus TCP device" << QString("%1:%2").arg(m_hostAddress.toString()).arg(m_port) << "called, but the socket is currently in the" << m_modbusTcpClient->state();
+        qCWarning(dcModbusTcpMaster()) << "Connect modbus TCP device" << connectionUrl() << "called, but the socket is currently in the" << m_modbusTcpClient->state();
     }
 
     return false;
 }
 
-void ModbusTCPMaster::disconnectDevice()
+void ModbusTcpMaster::disconnectDevice()
 {
-    if (!m_modbusTcpClient)
-        return;
-
     // Stop the reconnect timer since disconnect was explicitly called
     m_reconnectTimer->stop();
     m_modbusTcpClient->disconnectDevice();
 }
 
-bool ModbusTCPMaster::reconnectDevice()
+bool ModbusTcpMaster::reconnectDevice()
 {
-    qCWarning(dcModbusTcpMaster()) << "Reconnecting modbus TCP device" << QString("%1:%2").arg(m_hostAddress.toString()).arg(m_port);
-    if (!m_modbusTcpClient)
-        return false;
-
+    qCWarning(dcModbusTcpMaster()) << "Reconnecting modbus TCP device" << connectionUrl();
     disconnectDevice();
     return connectDevice();
 }
 
-bool ModbusTCPMaster::connected() const
+bool ModbusTcpMaster::connected() const
 {
     return m_connected;
 }
 
-int ModbusTCPMaster::numberOfRetries() const
+int ModbusTcpMaster::numberOfRetries() const
 {
     return m_modbusTcpClient->numberOfRetries();
 }
 
-void ModbusTCPMaster::setNumberOfRetries(int number)
+void ModbusTcpMaster::setNumberOfRetries(int number)
 {
     m_numberOfRetries = number;
     m_modbusTcpClient->setNumberOfRetries(number);
 }
 
-int ModbusTCPMaster::timeout() const
+int ModbusTcpMaster::timeout() const
 {
     return m_modbusTcpClient->timeout();
 }
 
-void ModbusTCPMaster::setTimeout(int timeout)
+void ModbusTcpMaster::setTimeout(int timeout)
 {
     m_timeout = timeout;
     m_modbusTcpClient->setTimeout(timeout);
 }
 
-QString ModbusTCPMaster::errorString() const
+QString ModbusTcpMaster::errorString() const
 {
     return m_modbusTcpClient->errorString();
 }
 
-QModbusDevice::Error ModbusTCPMaster::error() const
+QModbusDevice::Error ModbusTcpMaster::error() const
 {
     return m_modbusTcpClient->error();
 }
 
-QUuid ModbusTCPMaster::readCoil(uint slaveAddress, uint registerAddress, uint size)
+QUuid ModbusTcpMaster::readCoil(uint slaveAddress, uint registerAddress, uint size)
 {
-    if (!m_modbusTcpClient) {
-        return QUuid();
-    }
-
     QUuid requestId = QUuid::createUuid();
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, registerAddress, size);
 
@@ -183,12 +178,12 @@ QUuid ModbusTCPMaster::readCoil(uint slaveAddress, uint registerAddress, uint si
                     emit receivedCoil(reply->serverAddress(), modbusAddress, unit.values());
                 } else {
                     emit readRequestExecuted(requestId, false);
-                    qCWarning(dcModbusTcpMaster()) << "Read response error for device" << m_hostAddress.toString() << ":" << reply->error();
+                    qCWarning(dcModbusTcpMaster()) << "Read response error for device" << connectionUrl() << ":" << reply->error();
                 }
             });
 
             connect(reply, &QModbusReply::errorOccurred, this, [reply, requestId, this] (QModbusDevice::Error error){
-                qCWarning(dcModbusTcpMaster()) << "Modbus reply error for device" << m_hostAddress.toString() << ":" << error;
+                qCWarning(dcModbusTcpMaster()) << "Modbus reply error for device" << connectionUrl() << ":" << error;
                 emit readRequestError(requestId, reply->errorString());
             });
 
@@ -198,18 +193,14 @@ QUuid ModbusTCPMaster::readCoil(uint slaveAddress, uint registerAddress, uint si
             return QUuid();
         }
     } else {
-        qCWarning(dcModbusTcpMaster()) << "Read error for device" << m_hostAddress.toString() << ":" << m_modbusTcpClient->errorString();
+        qCWarning(dcModbusTcpMaster()) << "Read error for device" << connectionUrl() << ":" << m_modbusTcpClient->errorString();
         return QUuid();
     }
     return requestId;
 }
 
-QUuid ModbusTCPMaster::writeHoldingRegisters(uint slaveAddress, uint registerAddress, const QVector<quint16> &values)
+QUuid ModbusTcpMaster::writeHoldingRegisters(uint slaveAddress, uint registerAddress, const QVector<quint16> &values)
 {
-    if (!m_modbusTcpClient) {
-        return QUuid();
-    }
-
     QUuid requestId = QUuid::createUuid();
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, registerAddress, values.length());
     request.setValues(values);
@@ -224,13 +215,13 @@ QUuid ModbusTCPMaster::writeHoldingRegisters(uint slaveAddress, uint registerAdd
                     emit receivedHoldingRegister(reply->serverAddress(), modbusAddress, unit.values());
                 } else {
                     emit writeRequestExecuted(requestId, false);
-                    qCWarning(dcModbusTcpMaster()) << "Read response error for device" << m_hostAddress.toString() << ":" << reply->error();
+                    qCWarning(dcModbusTcpMaster()) << "Read response error for device" << connectionUrl() << ":" << reply->error();
                 }
                 reply->deleteLater();
             });
 
             connect(reply, &QModbusReply::errorOccurred, this, [reply, requestId, this] (QModbusDevice::Error error){
-                qCWarning(dcModbusTcpMaster()) << "Modbus replay error for device" << m_hostAddress.toString() << ":" << error;
+                qCWarning(dcModbusTcpMaster()) << "Modbus replay error for device" << connectionUrl() << ":" << error;
                 emit writeRequestError(requestId, reply->errorString());
             });
 
@@ -240,37 +231,34 @@ QUuid ModbusTCPMaster::writeHoldingRegisters(uint slaveAddress, uint registerAdd
             return QUuid();
         }
     } else {
-        qCWarning(dcModbusTcpMaster()) << "Read error for device" << m_hostAddress.toString() << ":" << m_modbusTcpClient->errorString();
+        qCWarning(dcModbusTcpMaster()) << "Read error for device" << connectionUrl() << ":" << m_modbusTcpClient->errorString();
         return QUuid();
     }
     return requestId;
 }
 
-QModbusReply *ModbusTCPMaster::sendRawRequest(const QModbusRequest &request, int serverAddress)
+QModbusReply *ModbusTcpMaster::sendRawRequest(const QModbusRequest &request, int serverAddress)
 {
     return m_modbusTcpClient->sendRawRequest(request, serverAddress);
 }
 
-QModbusReply *ModbusTCPMaster::sendReadRequest(const QModbusDataUnit &read, int serverAddress)
+QModbusReply *ModbusTcpMaster::sendReadRequest(const QModbusDataUnit &read, int serverAddress)
 {
     return m_modbusTcpClient->sendReadRequest(read, serverAddress);
 }
 
-QModbusReply *ModbusTCPMaster::sendReadWriteRequest(const QModbusDataUnit &read, const QModbusDataUnit &write, int serverAddress)
+QModbusReply *ModbusTcpMaster::sendReadWriteRequest(const QModbusDataUnit &read, const QModbusDataUnit &write, int serverAddress)
 {
     return m_modbusTcpClient->sendReadWriteRequest(read, write, serverAddress);
 }
 
-QModbusReply *ModbusTCPMaster::sendWriteRequest(const QModbusDataUnit &write, int serverAddress)
+QModbusReply *ModbusTcpMaster::sendWriteRequest(const QModbusDataUnit &write, int serverAddress)
 {
     return m_modbusTcpClient->sendWriteRequest(write, serverAddress);
 }
 
-QUuid ModbusTCPMaster::readDiscreteInput(uint slaveAddress, uint registerAddress, uint size)
+QUuid ModbusTcpMaster::readDiscreteInput(uint slaveAddress, uint registerAddress, uint size)
 {
-    if (!m_modbusTcpClient) {
-        return QUuid();
-    }
     QUuid requestId = QUuid::createUuid();
 
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::DiscreteInputs, registerAddress, size);
@@ -286,12 +274,12 @@ QUuid ModbusTCPMaster::readDiscreteInput(uint slaveAddress, uint registerAddress
                     emit receivedDiscreteInput(reply->serverAddress(), modbusAddress, unit.values());
                 } else {
                     emit readRequestExecuted(requestId, false);
-                    qCWarning(dcModbusTcpMaster()) << "Read response error for device" << m_hostAddress.toString() << ":" << reply->error();
+                    qCWarning(dcModbusTcpMaster()) << "Read response error for device" << connectionUrl() << ":" << reply->error();
                 }
             });
 
             connect(reply, &QModbusReply::errorOccurred, this, [requestId, reply, this] (QModbusDevice::Error error){
-                qCWarning(dcModbusTcpMaster()) << "Modbus replay error for device" << m_hostAddress.toString() << ":" << error;
+                qCWarning(dcModbusTcpMaster()) << "Modbus replay error for device" << connectionUrl() << ":" << error;
                 emit readRequestError(requestId, reply->errorString());
             });
 
@@ -301,13 +289,13 @@ QUuid ModbusTCPMaster::readDiscreteInput(uint slaveAddress, uint registerAddress
             return QUuid();
         }
     } else {
-        qCWarning(dcModbusTcpMaster()) << "Read error for device" << m_hostAddress.toString() << ":" << m_modbusTcpClient->errorString();
+        qCWarning(dcModbusTcpMaster()) << "Read error for device" << connectionUrl() << ":" << m_modbusTcpClient->errorString();
         return QUuid();
     }
     return requestId;
 }
 
-QUuid ModbusTCPMaster::readInputRegister(uint slaveAddress, uint registerAddress, uint size)
+QUuid ModbusTcpMaster::readInputRegister(uint slaveAddress, uint registerAddress, uint size)
 {
     if (!m_modbusTcpClient) {
         return QUuid();
@@ -328,12 +316,12 @@ QUuid ModbusTCPMaster::readInputRegister(uint slaveAddress, uint registerAddress
                     emit receivedInputRegister(reply->serverAddress(), modbusAddress, unit.values());
                 } else {
                     emit readRequestExecuted(requestId, false);
-                    qCWarning(dcModbusTcpMaster()) << "Read response error for device" << m_hostAddress.toString() << ":" << reply->error();
+                    qCWarning(dcModbusTcpMaster()) << "Read response error for device" << connectionUrl() << ":" << reply->error();
                 }
             });
 
             connect(reply, &QModbusReply::errorOccurred, this, [reply, requestId, this] (QModbusDevice::Error error){
-                qCWarning(dcModbusTcpMaster()) << "Modbus reply error for device" << m_hostAddress.toString() << ":" << error;
+                qCWarning(dcModbusTcpMaster()) << "Modbus reply error for device" << connectionUrl() << ":" << error;
                 emit readRequestError(requestId, reply->errorString());
             });
 
@@ -344,18 +332,14 @@ QUuid ModbusTCPMaster::readInputRegister(uint slaveAddress, uint registerAddress
             return QUuid();
         }
     } else {
-        qCWarning(dcModbusTcpMaster()) << "Read error for device" << m_hostAddress.toString() << ":" << m_modbusTcpClient->errorString();
+        qCWarning(dcModbusTcpMaster()) << "Read error for device" << connectionUrl() << ":" << m_modbusTcpClient->errorString();
         return QUuid();
     }
     return requestId;
 }
 
-QUuid ModbusTCPMaster::readHoldingRegister(uint slaveAddress, uint registerAddress, uint size)
+QUuid ModbusTcpMaster::readHoldingRegister(uint slaveAddress, uint registerAddress, uint size)
 {
-    if (!m_modbusTcpClient) {
-        return QUuid();
-    }
-
     QUuid requestId = QUuid::createUuid();
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, registerAddress, size);
 
@@ -372,7 +356,7 @@ QUuid ModbusTCPMaster::readHoldingRegister(uint slaveAddress, uint registerAddre
 
                 } else {
                     emit writeRequestExecuted(requestId, false);
-                    qCWarning(dcModbusTcpMaster()) << "Read response error for device" << m_hostAddress.toString() << ":" << reply->error();
+                    qCWarning(dcModbusTcpMaster()) << "Read response error for device" << connectionUrl() << ":" << reply->error();
                     emit readRequestError(requestId, reply->errorString());
                 }
                 reply->deleteLater();
@@ -380,7 +364,7 @@ QUuid ModbusTCPMaster::readHoldingRegister(uint slaveAddress, uint registerAddre
 
             connect(reply, &QModbusReply::errorOccurred, this, [reply, requestId, this] (QModbusDevice::Error error){
 
-                qCWarning(dcModbusTcpMaster()) << "Modbus reply error for device" << m_hostAddress.toString() << ":" << error;
+                qCWarning(dcModbusTcpMaster()) << "Modbus reply error for device" << connectionUrl() << ":" << error;
                 emit readRequestError(requestId, reply->errorString());
             });
 
@@ -390,23 +374,19 @@ QUuid ModbusTCPMaster::readHoldingRegister(uint slaveAddress, uint registerAddre
             return QUuid();
         }
     } else {
-        qCWarning(dcModbusTcpMaster()) << "Read error for device" << m_hostAddress.toString() << ":" << m_modbusTcpClient->errorString();
+        qCWarning(dcModbusTcpMaster()) << "Read error for device" << connectionUrl() << ":" << m_modbusTcpClient->errorString();
         return QUuid();
     }
     return requestId;
 }
 
-QUuid ModbusTCPMaster::writeCoil(uint slaveAddress, uint registerAddress, bool value)
+QUuid ModbusTcpMaster::writeCoil(uint slaveAddress, uint registerAddress, bool value)
 {
     return writeCoils(slaveAddress, registerAddress, QVector<quint16>() << static_cast<quint16>(value));
 }
 
-QUuid ModbusTCPMaster::writeCoils(uint slaveAddress, uint registerAddress, const QVector<quint16> &values)
+QUuid ModbusTcpMaster::writeCoils(uint slaveAddress, uint registerAddress, const QVector<quint16> &values)
 {
-    if (!m_modbusTcpClient) {
-        return QUuid();
-    }
-
     QUuid requestId = QUuid::createUuid();
     QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, registerAddress, values.length());
     request.setValues(values);
@@ -424,13 +404,13 @@ QUuid ModbusTCPMaster::writeCoils(uint slaveAddress, uint registerAddress, const
 
                 } else {
                     emit writeRequestExecuted(requestId, false);
-                    qCWarning(dcModbusTcpMaster()) << "Write response error for device" << m_hostAddress.toString() << ":" << reply->error();
+                    qCWarning(dcModbusTcpMaster()) << "Write response error for device" << connectionUrl() << ":" << reply->error();
                 }
                 reply->deleteLater();
             });
 
             connect(reply, &QModbusReply::errorOccurred, this, [reply, requestId, this] (QModbusDevice::Error error){
-                qCWarning(dcModbusTcpMaster()) << "Modbus reply error for device" << m_hostAddress.toString() << ":" << error;
+                qCWarning(dcModbusTcpMaster()) << "Modbus reply error for device" << connectionUrl() << ":" << error;
                 emit writeRequestError(requestId, reply->errorString());
             });
 
@@ -440,24 +420,24 @@ QUuid ModbusTCPMaster::writeCoils(uint slaveAddress, uint registerAddress, const
             return QUuid();
         }
     } else {
-        qCWarning(dcModbusTcpMaster()) << "Read error for device" << m_hostAddress.toString() << ":" << m_modbusTcpClient->errorString();
+        qCWarning(dcModbusTcpMaster()) << "Read error for device" << connectionUrl() << ":" << m_modbusTcpClient->errorString();
         return QUuid();
     }
     return requestId;
 }
 
-QUuid ModbusTCPMaster::writeHoldingRegister(uint slaveAddress, uint registerAddress, quint16 value)
+QUuid ModbusTcpMaster::writeHoldingRegister(uint slaveAddress, uint registerAddress, quint16 value)
 {
     return writeHoldingRegisters(slaveAddress, registerAddress, QVector<quint16>() << value);
 }
 
-void ModbusTCPMaster::onModbusErrorOccurred(QModbusDevice::Error error)
+void ModbusTcpMaster::onModbusErrorOccurred(QModbusDevice::Error error)
 {
-    qCWarning(dcModbusTcpMaster()) << "An error occurred for device" << m_hostAddress.toString() << ":" << error;
+    qCWarning(dcModbusTcpMaster()) << "An error occurred for device" << connectionUrl() << ":" << error;
     emit connectionErrorOccurred(error);
 }
 
-void ModbusTCPMaster::onModbusStateChanged(QModbusDevice::State state)
+void ModbusTcpMaster::onModbusStateChanged(QModbusDevice::State state)
 {
     qCDebug(dcModbusTcpMaster()) << "Connection state changed for" << m_hostAddress << state;
     bool connected = (state == QModbusDevice::ConnectedState);

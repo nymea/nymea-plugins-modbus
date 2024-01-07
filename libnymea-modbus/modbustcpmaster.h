@@ -40,12 +40,12 @@
 
 Q_DECLARE_LOGGING_CATEGORY(dcModbusTcpMaster)
 
-class ModbusTCPMaster : public QObject
+class ModbusTcpMaster : public QObject
 {
     Q_OBJECT
 public:
-    explicit ModbusTCPMaster(const QHostAddress &hostAddress, uint port, QObject *parent = nullptr);
-    ~ModbusTCPMaster();
+    explicit ModbusTcpMaster(const QHostAddress &hostAddress, uint port, QObject *parent = nullptr);
+    ~ModbusTcpMaster();
 
     // If you change the hostaddress, make sure to reconnectDevice afterwards
     QHostAddress hostAddress() const;
@@ -54,6 +54,8 @@ public:
     // If you change the port, make sure to reconnectDevice afterwards
     uint port() const;
     void setPort(uint port);
+
+    QString connectionUrl() const;
 
     bool connected() const;
 

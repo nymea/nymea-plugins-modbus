@@ -64,9 +64,9 @@ QList<PhoenixDiscovery::Result> PhoenixDiscovery::discoveryResults() const
 
 void PhoenixDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo)
 {
-    if (networkDeviceInfo.macAddressManufacturer() != "wallbe GmbH" && networkDeviceInfo.macAddressManufacturer() != "Phoenix") {
-        return;
-    }
+//    if (networkDeviceInfo.macAddressManufacturer() != "wallbe GmbH" && networkDeviceInfo.macAddressManufacturer() != "Phoenix") {
+//        return;
+//    }
 
     int port = 502;
     int slaveId = 0xff;

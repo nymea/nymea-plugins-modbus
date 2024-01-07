@@ -123,7 +123,7 @@ private:
     };
 
     QHostAddress m_hostAddress;
-    ModbusTCPMaster *m_modbusMaster = nullptr;
+    ModbusTcpMaster *m_modbusMaster = nullptr;
 
     double m_roomTemperature = 0;
     double m_targetRoomTemperature = 0;

@@ -120,11 +120,11 @@ void IntegrationPluginMyPv::setupThing(ThingSetupInfo *info)
 
     if(thing->thingClassId() == elwaThingClassId) {
         QHostAddress address = QHostAddress(thing->paramValue(elwaThingIpAddressParamTypeId).toString());
-        ModbusTCPMaster *modbusTcpMaster = new ModbusTCPMaster(address, 502, this);
-        connect(modbusTcpMaster, &ModbusTCPMaster::connectionStateChanged, this, &IntegrationPluginMyPv::onConnectionStateChanged);
-        connect(modbusTcpMaster, &ModbusTCPMaster::receivedHoldingRegister, this, &IntegrationPluginMyPv::onReceivedHoldingRegister);
-        connect(modbusTcpMaster, &ModbusTCPMaster::writeRequestExecuted, this, &IntegrationPluginMyPv::onWriteRequestExecuted);
-        connect(modbusTcpMaster, &ModbusTCPMaster::writeRequestError, this, &IntegrationPluginMyPv::onWriteRequestError);
+        ModbusTcpMaster *modbusTcpMaster = new ModbusTcpMaster(address, 502, this);
+        connect(modbusTcpMaster, &ModbusTcpMaster::connectionStateChanged, this, &IntegrationPluginMyPv::onConnectionStateChanged);
+        connect(modbusTcpMaster, &ModbusTcpMaster::receivedHoldingRegister, this, &IntegrationPluginMyPv::onReceivedHoldingRegister);
+        connect(modbusTcpMaster, &ModbusTcpMaster::writeRequestExecuted, this, &IntegrationPluginMyPv::onWriteRequestExecuted);
+        connect(modbusTcpMaster, &ModbusTcpMaster::writeRequestError, this, &IntegrationPluginMyPv::onWriteRequestError);
 
         m_modbusTcpMasters.insert(thing, modbusTcpMaster);
     } else {
@@ -147,7 +147,7 @@ void IntegrationPluginMyPv::postSetupThing(Thing *thing)
 void IntegrationPluginMyPv::thingRemoved(Thing *thing)
 {
     if (thing->thingClassId() == elwaThingClassId) {
-        ModbusTCPMaster *modbusTCPMaster = m_modbusTcpMasters.take(thing);
+        ModbusTcpMaster *modbusTCPMaster = m_modbusTcpMasters.take(thing);
         modbusTCPMaster->deleteLater();
     }
 
@@ -164,7 +164,7 @@ void IntegrationPluginMyPv::executeAction(ThingActionInfo *info)
 
     if (thing->thingClassId() == elwaThingClassId) {
 
-        ModbusTCPMaster *modbusTCPMaster = m_modbusTcpMasters.value(thing);
+        ModbusTcpMaster *modbusTCPMaster = m_modbusTcpMasters.value(thing);
         if (action.actionTypeId() == elwaHeatingPowerActionTypeId) {
             int heatingPower = action.param(elwaHeatingPowerActionHeatingPowerParamTypeId).value().toInt();
             QUuid requestId = modbusTCPMaster->writeHoldingRegister(0xff, ElwaModbusRegisters::Power, heatingPower);
@@ -202,7 +202,7 @@ void IntegrationPluginMyPv::onRefreshTimer()
 
 void IntegrationPluginMyPv::onConnectionStateChanged(bool status)
 {
-    ModbusTCPMaster *modbusTcpMaster = static_cast<ModbusTCPMaster *>(sender());
+    ModbusTcpMaster *modbusTcpMaster = static_cast<ModbusTcpMaster *>(sender());
     Thing *thing = m_modbusTcpMasters.key(modbusTcpMaster);
     if (!thing)
         return;
@@ -230,7 +230,7 @@ void IntegrationPluginMyPv::onWriteRequestError(QUuid requestId, const QString &
 void IntegrationPluginMyPv::onReceivedHoldingRegister(quint32 slaveAddress, quint32 modbusRegister, const QVector<quint16> &value)
 {
     Q_UNUSED(slaveAddress)
-    ModbusTCPMaster *modbusTcpMaster = static_cast<ModbusTCPMaster *>(sender());
+    ModbusTcpMaster *modbusTcpMaster = static_cast<ModbusTcpMaster *>(sender());
     Thing *thing = m_modbusTcpMasters.key(modbusTcpMaster);
     if (!thing)
         return;
@@ -299,7 +299,7 @@ void IntegrationPluginMyPv::onReceivedHoldingRegister(quint32 slaveAddress, quin
 void IntegrationPluginMyPv::update(Thing *thing)
 {
     if (thing->thingClassId() == elwaThingClassId) {
-        ModbusTCPMaster *modbusTCPMaster = m_modbusTcpMasters.value(thing);
+        ModbusTcpMaster *modbusTCPMaster = m_modbusTcpMasters.value(thing);
 
         modbusTCPMaster->readHoldingRegister(0xff, ElwaModbusRegisters::Status);
         modbusTCPMaster->readHoldingRegister(0xff, ElwaModbusRegisters::WaterTemperature);

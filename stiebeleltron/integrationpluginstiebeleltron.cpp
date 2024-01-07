@@ -102,14 +102,14 @@ void IntegrationPluginStiebelEltron::setupThing(ThingSetupInfo *info) {
         StiebelEltronModbusTcpConnection *connection =
             new StiebelEltronModbusTcpConnection(address, port, slaveId, this);
 
-        connect(connection, &StiebelEltronModbusTcpConnection::connectionStateChanged, thing,
-                [thing, connection](bool status) {
-                    qCDebug(dcStiebelEltron()) << "Connected changed to" << status << "for" << thing;
-                    if (status) {
+        connect(connection, &StiebelEltronModbusTcpConnection::reachableChanged, thing,
+                [thing, connection](bool reachable) {
+                    qCDebug(dcStiebelEltron()) << "Reachable changed to" << reachable << "for" << thing;
+                    if (reachable) {
                         connection->update();
                     }
 
-                    thing->setStateValue(stiebelEltronConnectedStateTypeId, status);
+                    thing->setStateValue(stiebelEltronConnectedStateTypeId, reachable);
                 });
 
         connect(connection, &StiebelEltronModbusTcpConnection::outdoorTemperatureChanged, thing,
@@ -268,7 +268,7 @@ void IntegrationPluginStiebelEltron::postSetupThing(Thing *thing) {
             m_pluginTimer = hardwareManager()->pluginTimerManager()->registerTimer(10);
             connect(m_pluginTimer, &PluginTimer::timeout, this, [this] {
                 foreach (StiebelEltronModbusTcpConnection *connection, m_connections) {
-                    if (connection->connected()) {
+                    if (connection->reachable()) {
                         connection->update();
                     }
                 }
@@ -294,7 +294,7 @@ void IntegrationPluginStiebelEltron::executeAction(ThingActionInfo *info) {
     Thing *thing = info->thing();
     StiebelEltronModbusTcpConnection *connection = m_connections.value(thing);
 
-    if (!connection->connected()) {
+    if (!connection->reachable()) {
         qCWarning(dcStiebelEltron()) << "Could not execute action. The modbus connection is currently "
                                         "not available.";
         info->finish(Thing::ThingErrorHardwareNotAvailable);

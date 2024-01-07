@@ -41,6 +41,13 @@ class Speedwire
 {
     Q_GADGET
 public:
+    enum DeviceType {
+        DeviceTypeUnknown,
+        DeviceTypeMeter,
+        DeviceTypeInverter
+    };
+    Q_ENUM(DeviceType)
+
     enum Command {
         CommandIdentify = 0x00000201,
         CommandQueryStatus = 0x51800200,
@@ -101,6 +108,7 @@ public:
 
     //static QHash<quint16, QString> deviceTypes = { {0x0000, "Unknwon"} };
 
+    static quint16 sourceModelId() { return  120; }
     static quint16 port() { return  9522; }
     static QHostAddress multicastAddress() { return QHostAddress("239.12.255.254"); }
     static quint32 smaSignature() { return  0x534d4100; }
@@ -115,19 +123,44 @@ public:
     //        0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x20,     // 0xffffffff group, 0x0000 length, 0x0020 "SMA Net ?", Version ?
     //        0x00, 0x00, 0x00, 0x00                              // 0x0000 protocol, 0x00 #long words, 0x00 ctrl
 
-    // Unicast device discovery request packet, according to SMA documentation
-    //        0x53, 0x4d, 0x41, 0x00, 0x00, 0x04, 0x02, 0xa0,     // sma signature, tag0
-    //        0x00, 0x00, 0x00, 0x01, 0x00, 0x26, 0x00, 0x10,     // 0x26 length, 0x0010 "SMA Net 2", Version 0
-    //        0x60, 0x65, 0x09, 0xa0, 0xff, 0xff, 0xff, 0xff,     // 0x6065 protocol, 0x09 #long words, 0xa0 ctrl, 0xffff dst susyID any, 0xffffffff dst serial any
-    //        0xff, 0xff, 0x00, 0x00, 0x7d, 0x00, 0x52, 0xbe,     // 0x0000 dst cntrl, 0x007d src susy id, 0x3a28be52 src serial
-    //        0x28, 0x3a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,     // 0x0000 src cntrl, 0x0000 error code, 0x0000 fragment ID
-    //        0x01, 0x80, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00,     // 0x8001 packet ID
-    //        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    //        0x00, 0x00
-
     static QByteArray discoveryDatagramMulticast() { return QByteArray::fromHex("534d4100000402a0ffffffff0000002000000000"); }
     static QByteArray discoveryResponseDatagram() { return QByteArray::fromHex("534d4100000402A000000001000200000001"); }
-    static QByteArray discoveryDatagramUnicast() { return QByteArray::fromHex("534d4100000402a00000000100260010606509a0ffffffffffff00007d0052be283a000000000000018000020000000000000000000000000000"); }
+
+    static QByteArray pingRequest( quint16 sourceSusyId, quint32 sourceSerialNumber) {
+        QByteArray requestData;
+        QDataStream stream(&requestData, QIODevice::WriteOnly);
+        stream << smaSignature();
+        stream << static_cast<quint16>(0x0004); // header length
+        stream << tag0();
+        stream << static_cast<quint32>(0x00000001); // group
+        stream << static_cast<quint16>(0x0026); // entry length
+        stream << smaNet2Version();
+        stream << static_cast<quint16>(ProtocolIdInverter);
+
+        // From now on little endian
+        stream.setByteOrder(QDataStream::LittleEndian);
+        stream << static_cast<quint8>(0x09); // length
+        stream << static_cast<quint8>(0xa0); // control
+        stream << static_cast<quint16>(0xffff); // destination susyID
+        stream << static_cast<quint32>(0xffffffff); // destination serial
+        stream << static_cast<quint16>(0x00); // job id
+        stream << static_cast<quint16>(sourceSusyId); // source susyID
+        stream << static_cast<quint32>(sourceSerialNumber); // source susyID
+        stream << static_cast<quint16>(0x00); // job id
+        stream << static_cast<quint16>(0x00); // status
+        stream << static_cast<quint16>(0x00); // packet count
+        stream << static_cast<quint16>(0x8001); // packet id
+        stream << static_cast<quint8>(0x00); // command
+        stream << static_cast<quint8>(0x02); // param count
+        stream << static_cast<quint16>(0x00); // Object
+
+        stream << static_cast<quint32>(0x0); // Param 1
+        stream << static_cast<quint32>(0x0); // Param 2
+
+        stream << static_cast<quint32>(0x0); // Packet end
+
+        return requestData;
+    }
 
     static Speedwire::Header parseHeader(QDataStream &stream) {
         stream.setByteOrder(QDataStream::BigEndian);
@@ -139,7 +172,7 @@ public:
         stream >> protocolId;
         header.protocolId = static_cast<ProtocolId>(protocolId);
         return header;
-    };
+    }
 
     static Speedwire::InverterPacket parseInverterPacket(QDataStream &stream) {
         // Make sure the data stream is little endian
@@ -158,7 +191,7 @@ public:
         stream >> packet.packetId;
         stream >> packet.command;
         return packet;
-    };
+    }
 };
 
 inline QDebug operator<<(QDebug debug, const Speedwire::Header &header)
@@ -174,7 +207,7 @@ inline QDebug operator<<(QDebug debug, const Speedwire::InverterPacket &packet)
     debug.nospace() << ", command: " << packet.command;
     debug.nospace() << ", error: " << packet.errorCode;
     debug.nospace() << ", fragment: " << packet.fragmentId;
-    debug.nospace() << ", packet ID: " << packet.fragmentId;
+    debug.nospace() << ", packet ID: " << packet.packetId;
     debug.nospace()  << ")";
     return debug.maybeSpace();
 }

@@ -28,13 +28,13 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "smamodbusdiscovery.h"
+#include "smamodbussolarinverterdiscovery.h"
 #include "extern-plugininfo.h"
 
 #include "sma.h"
 
 
-SmaModbusDiscovery::SmaModbusDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint16 port, quint16 modbusAddress,QObject *parent)
+SmaModbusSolarInverterDiscovery::SmaModbusSolarInverterDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint16 port, quint16 modbusAddress,QObject *parent)
     : QObject{parent},
       m_networkDeviceDiscovery{networkDeviceDiscovery},
       m_port{port},
@@ -43,13 +43,13 @@ SmaModbusDiscovery::SmaModbusDiscovery(NetworkDeviceDiscovery *networkDeviceDisc
 
 }
 
-void SmaModbusDiscovery::startDiscovery()
+void SmaModbusSolarInverterDiscovery::startDiscovery()
 {
     qCInfo(dcSma()) << "Discovery: Start searching for SMA modbus inverters in the network...";
     NetworkDeviceDiscoveryReply *discoveryReply = m_networkDeviceDiscovery->discover();
 
     // Imedialty check any new device gets discovered
-    connect(discoveryReply, &NetworkDeviceDiscoveryReply::networkDeviceInfoAdded, this, &SmaModbusDiscovery::checkNetworkDevice);
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::networkDeviceInfoAdded, this, &SmaModbusSolarInverterDiscovery::checkNetworkDevice);
 
     // Check what might be left on finished
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
@@ -71,12 +71,12 @@ void SmaModbusDiscovery::startDiscovery()
     });
 }
 
-QList<SmaModbusDiscovery::SmaModbusDiscoveryResult> SmaModbusDiscovery::discoveryResults() const
+QList<SmaModbusSolarInverterDiscovery::SmaModbusDiscoveryResult> SmaModbusSolarInverterDiscovery::discoveryResults() const
 {
     return m_discoveryResults;
 }
 
-void SmaModbusDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo)
+void SmaModbusSolarInverterDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo)
 {
     // Create a kostal connection and try to initialize it.
     // Only if initialized successfully and all information have been fetched correctly from
@@ -86,11 +86,11 @@ void SmaModbusDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevi
     if (m_verifiedNetworkDeviceInfos.contains(networkDeviceInfo))
         return;
 
-    SmaInverterModbusTcpConnection *connection = new SmaInverterModbusTcpConnection(networkDeviceInfo.address(), m_port, m_modbusAddress, this);
+    SmaSolarInverterModbusTcpConnection *connection = new SmaSolarInverterModbusTcpConnection(networkDeviceInfo.address(), m_port, m_modbusAddress, this);
     m_connections.append(connection);
     m_verifiedNetworkDeviceInfos.append(networkDeviceInfo);
 
-    connect(connection, &SmaInverterModbusTcpConnection::reachableChanged, this, [=](bool reachable){
+    connect(connection, &SmaSolarInverterModbusTcpConnection::reachableChanged, this, [=](bool reachable){
         if (!reachable) {
             // Disconnected ... done with this connection
             cleanupConnection(connection);
@@ -98,7 +98,7 @@ void SmaModbusDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevi
         }
 
         // Modbus TCP connected...ok, let's try to initialize it!
-        connect(connection, &SmaInverterModbusTcpConnection::initializationFinished, this, [=](bool success){
+        connect(connection, &SmaSolarInverterModbusTcpConnection::initializationFinished, this, [=](bool success){
             if (!success) {
                 qCDebug(dcSma()) << "Discovery: Initialization failed on" << networkDeviceInfo.address().toString() << "Continue...";;
                 cleanupConnection(connection);
@@ -122,10 +122,10 @@ void SmaModbusDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevi
             m_discoveryResults.append(result);
 
             qCDebug(dcSma()) << "Discovery: --> Found" << result.productName;
-            qCDebug(dcSma()) << "  Device name:" << result.deviceName;
-            qCDebug(dcSma()) << "  Serial number:" << result.serialNumber;
-            qCDebug(dcSma()) << "  Software version:" << result.softwareVersion;
-            qCDebug(dcSma()) << " " << result.networkDeviceInfo;
+            qCDebug(dcSma()) << "Discovery:  Device name:" << result.deviceName;
+            qCDebug(dcSma()) << "Discovery:  Serial number:" << result.serialNumber;
+            qCDebug(dcSma()) << "Discovery:  Software version:" << result.softwareVersion;
+            qCDebug(dcSma()) << "Discovery:  " << result.networkDeviceInfo;
 
             // Done with this connection
             cleanupConnection(connection);
@@ -139,7 +139,7 @@ void SmaModbusDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevi
     });
 
     // If we get any error...skip this host...
-    connect(connection, &SmaInverterModbusTcpConnection::connectionErrorOccurred, this, [=](QModbusDevice::Error error){
+    connect(connection->modbusTcpMaster(), &ModbusTcpMaster::connectionErrorOccurred, this, [=](QModbusDevice::Error error){
         if (error != QModbusDevice::NoError) {
             qCDebug(dcSma()) << "Discovery: Connection error on" << networkDeviceInfo.address().toString() << "Continue...";;
             cleanupConnection(connection);
@@ -147,7 +147,7 @@ void SmaModbusDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevi
     });
 
     // If check reachability failed...skip this host...
-    connect(connection, &SmaInverterModbusTcpConnection::checkReachabilityFailed, this, [=](){
+    connect(connection, &SmaSolarInverterModbusTcpConnection::checkReachabilityFailed, this, [=](){
         qCDebug(dcSma()) << "Discovery: Check reachability failed on" << networkDeviceInfo.address().toString() << "Continue...";;
         cleanupConnection(connection);
     });
@@ -156,19 +156,19 @@ void SmaModbusDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevi
     connection->connectDevice();
 }
 
-void SmaModbusDiscovery::cleanupConnection(SmaInverterModbusTcpConnection *connection)
+void SmaModbusSolarInverterDiscovery::cleanupConnection(SmaSolarInverterModbusTcpConnection *connection)
 {
     m_connections.removeAll(connection);
     connection->disconnectDevice();
     connection->deleteLater();
 }
 
-void SmaModbusDiscovery::finishDiscovery()
+void SmaModbusSolarInverterDiscovery::finishDiscovery()
 {
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
 
     // Cleanup any leftovers...we don't care any more
-    foreach (SmaInverterModbusTcpConnection *connection, m_connections)
+    foreach (SmaSolarInverterModbusTcpConnection *connection, m_connections)
         cleanupConnection(connection);
 
     qCInfo(dcSma()) << "Discovery: Finished the discovery process. Found" << m_discoveryResults.count() << "SMA inverters in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
