@@ -155,12 +155,15 @@ void IntegrationPluginVestel::executeAction(ThingActionInfo *info)
             // If the car is *not* connected, writing a 0 to the charging current register will cause it to go to 6 A instead of 0
             // Because of this, we we're not connected, we'll do nothing, but once it get's connected, we'll sync the state over (see below in cableStateChanged)
             if (!power && evc04Connection->cableState() < EVC04ModbusTcpConnection::CableStateCableConnectedVehicleConnected) {
+                qCDebug(dcVestel()) << "Set state to" << false << "but do nothing since the car is not connected";
                 info->thing()->setStateValue(evc04PowerStateTypeId, false);
                 info->finish(Thing::ThingErrorNoError);
                 return;
             }
 
-            QModbusReply *reply = evc04Connection->setChargingCurrent(power ? info->thing()->stateValue(evc04MaxChargingCurrentStateTypeId).toUInt() : 0);
+            uint chargingCurrent = (power ? info->thing()->stateValue(evc04MaxChargingCurrentStateTypeId).toUInt() : 0);
+            qCDebug(dcVestel()) << "Write max charging current" << chargingCurrent;
+            QModbusReply *reply = evc04Connection->setChargingCurrent(chargingCurrent);
             connect(reply, &QModbusReply::finished, info, [info, reply, power](){
                 if (reply->error() == QModbusDevice::NoError) {
                     info->thing()->setStateValue(evc04PowerStateTypeId, power);
@@ -171,17 +174,29 @@ void IntegrationPluginVestel::executeAction(ThingActionInfo *info)
                 }
             });
         }
+
         if (info->action().actionTypeId() == evc04MaxChargingCurrentActionTypeId) {
+
+            // Note: only write the register if power is true, otherwise we would start charging. The state represents the desired current,
+            // once the power is true, the current will be written to the corresponding current.
+
             int maxChargingCurrent = info->action().paramValue(evc04MaxChargingCurrentActionMaxChargingCurrentParamTypeId).toInt();
-            QModbusReply *reply = evc04Connection->setChargingCurrent(maxChargingCurrent);
-            connect(reply, &QModbusReply::finished, info, [info, reply, maxChargingCurrent](){
-                if (reply->error() == QModbusDevice::NoError) {
-                    info->thing()->setStateValue(evc04MaxChargingCurrentStateTypeId, maxChargingCurrent);
-                    info->finish(Thing::ThingErrorNoError);
-                } else {
-                    info->finish(Thing::ThingErrorHardwareFailure);
-                }
-            });
+
+            if (info->thing()->stateValue(evc04PowerStateTypeId).toBool()) {
+                qCDebug(dcVestel()) << "Write max charging current" << maxChargingCurrent;
+                QModbusReply *reply = evc04Connection->setChargingCurrent(maxChargingCurrent);
+                connect(reply, &QModbusReply::finished, info, [info, reply, maxChargingCurrent](){
+                    if (reply->error() == QModbusDevice::NoError) {
+                        info->thing()->setStateValue(evc04MaxChargingCurrentStateTypeId, maxChargingCurrent);
+                        info->finish(Thing::ThingErrorNoError);
+                    } else {
+                        info->finish(Thing::ThingErrorHardwareFailure);
+                    }
+                });
+            } else {
+                qCDebug(dcVestel()) << "Set state to" << maxChargingCurrent << "but do nothing since the power is false";
+                info->thing()->setStateValue(evc04MaxChargingCurrentStateTypeId, maxChargingCurrent);
+            }
         }
     }
 }
@@ -295,7 +310,7 @@ void IntegrationPluginVestel::setupEVC04Connection(ThingSetupInfo *info)
     });
 
     connect(evc04Connection, &EVC04ModbusTcpConnection::chargepointStateChanged, thing, [thing](EVC04ModbusTcpConnection::ChargePointState chargePointState) {
-        qCDebug(dcVestel()) << "Chargepoint state changed" << chargePointState;
+        qCDebug(dcVestel()) << "Chargepoint state changed" << thing->name() << chargePointState;
         //        switch (chargePointState) {
         //        case EVC04ModbusTcpConnection::ChargePointStateAvailable:
         //        case EVC04ModbusTcpConnection::ChargePointStatePreparing:
@@ -382,6 +397,9 @@ void IntegrationPluginVestel::setupEVC04Connection(ThingSetupInfo *info)
             if (thing->stateValue(evc04PowerStateTypeId).toBool() == false) {
                 qCInfo(dcVestel()) << "Car plugged in. Syncing cached power off state to wallbox";
                 evc04Connection->setChargingCurrent(0);
+            } else {
+                qCInfo(dcVestel()) << "Car plugged in. Syncing cached current valie to wallbox";
+                evc04Connection->setChargingCurrent(static_cast<quint16>(thing->stateValue(evc04MaxChargingCurrentStateTypeId).toUInt()));
             }
 
             break;
