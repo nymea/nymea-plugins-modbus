@@ -1,3 +1,16 @@
+nymea-plugins-modbus (1.9.1) jammy; urgency=medium
+
+  [ Michael Zanetti ]
+  * New Plugin: Vestel
+  * New plugin: Wattsonic
+  * Webasto: Add support for the Webasto Unite wallbox
+
+  [ Simon Stürz ]
+  * Mennekes: Add support for Mennekes ECU with 5.12 firmware
+  * Vestel: Update charging current behavior
+
+ -- jenkins <developer@nymea.io>  Fri, 12 Jan 2024 13:01:57 +0100
+
 nymea-plugins-modbus (1.9.0) jammy; urgency=medium
 
   [ Michael Zanetti ]
