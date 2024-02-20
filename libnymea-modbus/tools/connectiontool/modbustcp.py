@@ -783,6 +783,7 @@ def writeUpdateMethodTcp(fileDescriptor, className, registerDefinitions, blockDe
 
             writeLine(fileDescriptor, '    if (!m_updateRequestQueue.isEmpty()) {')
             writeLine(fileDescriptor, '        qCDebug(dc%s()) << "Tried to update but there are still some update requests pending. Waiting for them to be finished..." << m_updateRequestQueue.count();' % className)
+            writeLine(fileDescriptor, '        sendNextQueuedRequest();')
             writeLine(fileDescriptor, '        return true;')
             writeLine(fileDescriptor, '    }')
             writeLine(fileDescriptor)
