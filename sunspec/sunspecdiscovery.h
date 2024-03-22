@@ -66,6 +66,7 @@ private:
 
     QDateTime m_startDateTime;
     QHash<QHostAddress, QQueue<SunSpecConnection *>> m_pendingConnectionAttempts;
+    QHash<SunSpecConnection *, QTimer *> m_connectionTimers;
 
     QList<SunSpecConnection *> m_connections;
     QList<Result> m_results;
