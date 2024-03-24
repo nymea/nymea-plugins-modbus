@@ -1,0 +1,13 @@
+{
+    "title": "Sungrow Inverter",
+    "tagline": "Connect to Sungrow inverters.",
+    "icon": "sungrow.png",
+    "stability": "consumer",
+    "offline": true,
+    "technologies": [
+        "network"
+    ],
+    "categories": [
+        "energy"
+    ]
+}

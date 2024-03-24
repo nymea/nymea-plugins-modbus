@@ -23,6 +23,7 @@ PLUGIN_DIRS = \
     sma                     \
     solax                   \
     stiebeleltron           \
+    sungrow                 \
     sunspec                 \
     unipi                   \
     vestel                  \
