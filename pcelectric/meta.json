@@ -1,0 +1,13 @@
+{
+    "title": "PC Electric",
+    "tagline": "Integrate the PCE EV11.3 wallbox with nymea.",
+    "icon": "pce.png",
+    "stability": "consumer",
+    "offline": true,
+    "technologies": [
+        "modbus"
+    ],
+    "categories": [
+        "energy"
+    ]
+}
