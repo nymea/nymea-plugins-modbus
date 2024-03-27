@@ -629,6 +629,20 @@ void SpeedwireInverter::processAcPowerResponse(const QByteArray &response)
     // 09 4246 40 ec767864 c8050000 c8050000 c8050000 c8050000 01000000
     // 00000000
 
+
+    // Note: sometimes the inverter sends negative power values, we filter those away since it does not make sense.
+
+    // D | Sma: Inverter: Process AC power query response "0a0000000c000000094046406740b165a7feffffa7feffffa7feffffa7feffff01000000094146406740b165a7feffffa7feffffa7feffffa7feffff01000000094246406740b165a6feffffa6feffffa6feffffa6feffff0100000000000000"
+    // D | Sma: Inverter: Power AC phase 1 4.29497e+06 W
+    // D | Sma: Inverter: Power AC phase 2 4.29497e+06 W
+    // D | Sma: Inverter: Power AC phase 3 4.29497e+06 W
+
+    // 0a000000 0c000000
+    // 09 4046 40 6740b165 a7feffff a7feffff a7feffff a7feffff 01000000
+    // 09 4146 40 6740b165 a7feffff a7feffff a7feffff a7feffff 01000000
+    // 09 4246 40 6740b165 a6feffff a6feffff a6feffff a6feffff 01000000
+    // 00000000
+
     // 40464001
     qCDebug(dcSma()) << "Inverter: Process AC power query response" << response.toHex();
     QDataStream stream(response);
@@ -655,22 +669,35 @@ void SpeedwireInverter::processAcPowerResponse(const QByteArray &response)
 
         // Read measurent lines
         if (measurementId == 0x464000) {
-            quint32 powerAcPhase1;
+            qint32 powerAcPhase1;
             stream >> powerAcPhase1;
-            m_powerAcPhase1 = readValue(powerAcPhase1, 1000.0);
-            qCDebug(dcSma()) << "Inverter: Power AC phase 1" << m_powerAcPhase1 << "W";
+            if (powerAcPhase1 >= 0) {
+                m_powerAcPhase1 = readValue(powerAcPhase1, 1000.0);
+                qCDebug(dcSma()) << "Inverter: Power AC phase 1" << m_powerAcPhase1 << "W";
+            } else {
+                qCDebug(dcSma()) << "Inverter: Power AC phase 1 is negative, ignoring value" << powerAcPhase1 << "W";
+            }
             readUntilEndOfMeasurement(stream);
         } else if (measurementId == 0x464100) {
-            quint32 powerAcPhase2;
+            qint32 powerAcPhase2;
             stream >> powerAcPhase2;
-            m_powerAcPhase2 = readValue(powerAcPhase2, 1000.0);
-            qCDebug(dcSma()) << "Inverter: Power AC phase 2" << m_powerAcPhase2 << "W";
+            if (powerAcPhase2 >= 0) {
+                m_powerAcPhase2 = readValue(powerAcPhase2, 1000.0);
+                qCDebug(dcSma()) << "Inverter: Power AC phase 2" << m_powerAcPhase2 << "W";
+            } else {
+                qCDebug(dcSma()) << "Inverter: Power AC phase 2 is negative, ignoring value" << powerAcPhase2 << "W";
+            }
             readUntilEndOfMeasurement(stream);
         } else if (measurementId == 0x464200) {
-            quint32 powerAcPhase3;
+            qint32 powerAcPhase3;
             stream >> powerAcPhase3;
-            m_powerAcPhase3 = readValue(powerAcPhase3, 1000.0);
-            qCDebug(dcSma()) << "Inverter: Power AC phase 3" << m_powerAcPhase3 << "W";
+            if (powerAcPhase3 >= 0) {
+                m_powerAcPhase3 = readValue(powerAcPhase3, 1000.0);
+                qCDebug(dcSma()) << "Inverter: Power AC phase 3" << m_powerAcPhase3 << "W";
+            } else {
+                qCDebug(dcSma()) << "Inverter: Power AC phase 3 is negative, ignoring value" << powerAcPhase3 << "W";
+            }
+
             readUntilEndOfMeasurement(stream);
         }
     }
@@ -793,10 +820,14 @@ void SpeedwireInverter::processAcTotalPowerResponse(const QByteArray &response)
 
         // Read measurent lines
         if (measurementId == 0x263f00) {
-            quint32 totalAcPower;
+            qint32 totalAcPower;
             stream >> totalAcPower;
-            m_totalAcPower = readValue(totalAcPower);
-            qCDebug(dcSma()) << "Inverter: Total AC power" << m_totalAcPower << "W";
+            if (totalAcPower >= 0) {
+                m_totalAcPower = readValue(totalAcPower);
+                qCDebug(dcSma()) << "Inverter: Total AC power" << m_totalAcPower << "W";
+            } else {
+                qCDebug(dcSma()) << "Inverter: Total AC power is negative, ignoring value" << totalAcPower << "W";
+            }
             readUntilEndOfMeasurement(stream);
         }
     }
@@ -1132,7 +1163,9 @@ void SpeedwireInverter::readUntilEndOfMeasurement(QDataStream &stream)
 
 double SpeedwireInverter::readValue(quint32 value, double divisor)
 {
-    if (value == 0x80000000 || value == 0xffffffff)
+    // Note: the first 2 are verifies as invalid values, the last one has been seen on some system in the field,
+    // where the inverter has sent garbage data, the only consistancy was the ffff xxxx.
+    if (value == 0x80000000 || value == 0xffffffff || ((value & 0xffff0000) == 0xffff0000))
         return 0;
 
     return value / divisor;
