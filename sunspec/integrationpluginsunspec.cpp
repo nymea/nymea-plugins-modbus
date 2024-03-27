@@ -547,7 +547,7 @@ bool IntegrationPluginSunSpec::sunspecThingAlreadyAdded(uint modelId, uint modbu
 
 void IntegrationPluginSunSpec::processDiscoveryResult(Thing *thing, SunSpecConnection *connection)
 {
-    qCDebug(dcSunSpec()) << "Processing discovery result from" << thing->name() << connection;
+    qCInfo(dcSunSpec()) << "Processing discovery result from" << thing->name() << connection;
 
     foreach (SunSpecModel *model, connection->models()) {
         Thing *modelThing = getThingForSunSpecModel(model->modelId(), model->modbusStartRegister(), thing->id());
@@ -631,7 +631,7 @@ void IntegrationPluginSunSpec::processDiscoveryResult(Thing *thing, SunSpecConne
     // As of now there might be following situation where this code is required:
     //  - A setup has changed and something has been removed or replaced
     //  - Some SunSpec device seem to communicate different model id depending on the startup phase
-    //    i.e. they communicate a SinglePhase Meter on register x, few mnutes later it is a 3 phase meter on x
+    //    i.e. they communicate a SinglePhase Meter on register x, few minutes later it is a 3 phase meter on x
     // This code should handle such weird setups...
 
     if (connection->models().isEmpty())
@@ -896,9 +896,34 @@ double IntegrationPluginSunSpec::calculateSolarEdgePvProduction(Thing *thing, do
 
 void IntegrationPluginSunSpec::autocreateSunSpecModelThing(const ThingClassId &thingClassId, const QString &thingName, const ThingId &parentId, SunSpecModel *model)
 {
+    /* On some systems we get duplicated things having the same serial number but are on different registers.
+     * Those devices normally dissapear after some time again. For now, we need to prevent to even create those
+     * devices by filtering out those who already have been added using the serialnumber, not only the combination
+     * of model number and start address. */
+
+    QString serialNumber = model->commonModelInfo().serialNumber;
+    if (!serialNumber.isEmpty()) {
+        // If we have any model with this exact serial number, we skip adding this model
+        foreach (Thing *thing, myThings()) {
+            if (m_serialNumberParamTypeIds.contains(thing->thingClassId())) {
+                QString thingSerialNumber = thing->paramValue(m_serialNumberParamTypeIds.value(thing->thingClassId())).toString();
+                if (serialNumber == thingSerialNumber) {
+                    qCWarning(dcSunSpec()) << "Trying to add a new thing for a SunSpec model, but we already have a thing with this serial number. Not adding it to the system...";
+                    qCWarning(dcSunSpec()) << "--> Already added:" << thing << thing->params();
+                    qCWarning(dcSunSpec()) << "--> Attempt to add:" << thingName << model
+                                           << model->commonModelInfo().modelName
+                                           << model->commonModelInfo().manufacturerName
+                                           << model->commonModelInfo().serialNumber
+                                           << model->commonModelInfo().versionString;
+
+                    return;
+                }
+            }
+        }
+    }
+
     ThingDescriptor descriptor(thingClassId);
     descriptor.setParentId(parentId);
-
     QString finalThingName;
     if (model->commonModelInfo().manufacturerName.isEmpty()) {
         finalThingName = thingName;
