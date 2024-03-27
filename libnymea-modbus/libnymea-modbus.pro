@@ -17,11 +17,13 @@ gcc {
 
 HEADERS += \
     modbusdatautils.h \
-    modbustcpmaster.h
+    modbustcpmaster.h \
+    queuedmodbusreply.h
 
 SOURCES += \
     modbusdatautils.cpp \
-    modbustcpmaster.cpp
+    modbustcpmaster.cpp \
+    queuedmodbusreply.cpp
 
 
 # define install target

@@ -1,0 +1,334 @@
+{
+    "className": "EV11",
+    "protocol": "TCP",
+    "endianness": "BigEndian",
+    "errorLimitUntilNotReachable": 10,
+    "checkReachableRegister": "chargingState",
+    "enums": [
+        {
+            "name": "ChargingState",
+            "values": [
+                {
+                    "key": "Initializing",
+                    "value": 0
+                },
+                {
+                    "key": "A1",
+                    "value": 1
+                },
+                {
+                    "key": "A2",
+                    "value": 2
+                },
+                {
+                    "key": "B1",
+                    "value": 3
+                },
+                {
+                    "key": "B2",
+                    "value": 4
+                },
+                {
+                    "key": "C1",
+                    "value": 5
+                },
+                {
+                    "key": "C2",
+                    "value": 6
+                },
+                {
+                    "key": "Error",
+                    "value": 7
+                }
+            ]
+        },
+        {
+            "name": "ChargingRelayState",
+            "values": [
+                {
+                    "key": "NoCharging",
+                    "value": 0
+                },
+                {
+                    "key": "SinglePhase",
+                    "value": 1
+                },
+                {
+                    "key": "TheePhase",
+                    "value": 2
+                }
+            ]
+        },
+        {
+            "name": "Error",
+            "values": [
+                {
+                    "key": "NoError",
+                    "value": 0
+                },
+                {
+                    "key": "Overheating",
+                    "value": 1
+                },
+                {
+                    "key": "DCFaultCurrent",
+                    "value": 2
+                },
+                {
+                    "key": "ChargingWithVentilation",
+                    "value": 3
+                },
+                {
+                    "key": "CPErrorEF",
+                    "value": 4
+                },
+                {
+                    "key": "CPErrorBypass",
+                    "value": 5
+                },
+                {
+                    "key": "CPErrorDiodFault",
+                    "value": 6
+                },
+                {
+                    "key": "DCFaultCurrentCalibrating",
+                    "value": 7
+                },
+                {
+                    "key": "DCFaultCurrentCommunication",
+                    "value": 8
+                },
+                {
+                    "key": "DCFaultCurrentError",
+                    "value": 9
+                }
+            ]
+        }
+    ],
+    "blocks": [
+        {
+            "id": "status",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "chargingState",
+                    "address": 100,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "enum": "ChargingState",
+                    "description": "Current charging state",
+                    "defaultValue": "ChargingStateInitializing",
+                    "access": "R"
+                },
+                {
+                    "id": "chargingRelayState",
+                    "address": 101,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "enum": "ChargingRelayState",
+                    "description": "Charging relay state",
+                    "defaultValue": "ChargingRelayStateNoCharging",
+                    "access": "R"
+                },
+                {
+                    "id": "maxChargingCurrentDip",
+                    "address": 102,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Maximum charging current (DIP)",
+                    "unit": "mA",
+                    "defaultValue": "6000",
+                    "access": "R"
+                },
+                {
+                    "id": "phaseAutoSwitch",
+                    "address": 103,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Automatic phase switching",
+                    "defaultValue": "0",
+                    "access": "R"
+                },
+                {
+                    "id": "activeChargingCurrent",
+                    "address": 104,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Active charging current",
+                    "unit": "mA",
+                    "defaultValue": "0",
+                    "access": "R"
+                },
+                {
+                    "id": "sessionDuration",
+                    "address": 105,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Session durration",
+                    "unit": "10 seconds",
+                    "defaultValue": "0",
+                    "access": "R"
+                },
+                {
+                    "id": "powerMeter0",
+                    "address": 106,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Current session energy",
+                    "unit": "kWh",
+                    "staticScaleFactor": -2,
+                    "defaultValue": "0",
+                    "access": "R"
+                },
+                {
+                    "id": "powerMeter1",
+                    "address": 107,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Last session energy",
+                    "unit": "kWh",
+                    "staticScaleFactor": -2,
+                    "defaultValue": "0",
+                    "access": "R"
+                },
+                {
+                    "id": "powerMeter3",
+                    "address": 108,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Penultimate session energy",
+                    "unit": "kWh",
+                    "staticScaleFactor": -2,
+                    "defaultValue": "0",
+                    "access": "R"
+                },
+                {
+                    "id": "temperature",
+                    "address": 109,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Onboard temperature",
+                    "unit": "°C",
+                    "staticScaleFactor": -1,
+                    "defaultValue": "0",
+                    "access": "R"
+                },
+                {
+                    "id": "error",
+                    "address": 110,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "enum": "Error",
+                    "description": "Error",
+                    "defaultValue": "ErrorNoError",
+                    "access": "R"
+                }
+            ]
+        },
+        {
+            "id": "initInfos",
+            "readSchedule": "init",
+            "registers": [
+                {
+                    "id": "firmwareRevision",
+                    "address": 135,
+                    "size": 2,
+                    "type": "string",
+                    "registerType": "holdingRegister",
+                    "description": "Firmware revision (ASCII)",
+                    "access": "R"
+                },
+                {
+                    "id": "hardwareRevision",
+                    "address": 137,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Hardware revision",
+                    "defaultValue": "0",
+                    "access": "R"
+                },
+                {
+                    "id": "serialNumber",
+                    "address": 138,
+                    "size": 3,
+                    "type": "raw",
+                    "registerType": "holdingRegister",
+                    "description": "Serial number",
+                    "access": "R"
+                },
+                {
+                    "id": "macAddress",
+                    "address": 141,
+                    "size": 3,
+                    "type": "raw",
+                    "registerType": "holdingRegister",
+                    "description": "MAC address",
+                    "access": "R"
+                }
+            ]
+        }
+    ],
+    "registers": [
+        {
+            "id": "chargingCurrent",
+            "address": 200,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "description": "Write charging current",
+            "unit": "mA",
+            "access": "WO"
+        },
+        {
+            "id": "chargingCurrentOffline",
+            "address": 201,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "description": "Write charging current",
+            "unit": "mA",
+            "access": "WO"
+        },
+        {
+            "id": "maxChargingTime",
+            "address": 202,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "description": "Max charging time",
+            "unit": "Minutes",
+            "access": "WO"
+        },
+        {
+            "id": "heartbeat",
+            "address": 203,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "description": "Heartbeat (write < 60s to keep alive)",
+            "access": "WO"
+        },
+        {
+            "id": "ledBrightness",
+            "address": 204,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "description": "LED brightness",
+            "unit": "%",
+            "access": "WO"
+        }
+    ]
+}

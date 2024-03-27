@@ -322,3 +322,27 @@ QString ModbusDataUtils::exceptionCodeToString(QModbusPdu::ExceptionCode excepti
 
     return exceptionString;
 }
+
+QString ModbusDataUtils::registerTypeToString(QModbusDataUnit::RegisterType registerType)
+{
+    QString registerTypeString;
+    switch (registerType) {
+    case QModbusDataUnit::DiscreteInputs:
+        registerTypeString = "DiscreteInputs";
+        break;
+    case QModbusDataUnit::Coils:
+        registerTypeString = "Coils";
+        break;
+    case QModbusDataUnit::InputRegisters:
+        registerTypeString = "InputRegisters";
+        break;
+    case QModbusDataUnit::HoldingRegisters:
+        registerTypeString = "HoldingRegisters";
+        break;
+    default:
+        registerTypeString = "Invalid";
+        break;
+    }
+
+    return registerTypeString;
+}
