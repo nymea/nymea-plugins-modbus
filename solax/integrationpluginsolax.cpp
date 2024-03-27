@@ -128,7 +128,10 @@ void IntegrationPluginSolax::setupThing(ThingSetupInfo *info)
 
         qCInfo(dcSolax()) << "Setting up solax on" << address.toString() << port << "unit ID:" << slaveId;
         SolaxModbusTcpConnection *solaxConnection = new SolaxModbusTcpConnection(address, port, slaveId, this);
-        connect(info, &ThingSetupInfo::aborted, solaxConnection, &SolaxModbusTcpConnection::deleteLater);
+        connect(info, &ThingSetupInfo::aborted, solaxConnection, [solaxConnection](){
+            solaxConnection->disconnectDevice();
+            solaxConnection->deleteLater();
+        });
 
         // Reconnect on monitor reachable changed
         connect(monitor, &NetworkDeviceMonitor::reachableChanged, thing, [=](bool reachable){
@@ -149,9 +152,10 @@ void IntegrationPluginSolax::setupThing(ThingSetupInfo *info)
         connect(solaxConnection, &SolaxModbusTcpConnection::reachableChanged, thing, [this, thing, solaxConnection](bool reachable){
             qCDebug(dcSolax()) << "Reachable changed to" << reachable << "for" << thing;
             if (reachable) {
-                // Connected true will be set after successfull init
+                qCDebug(dcSolax()) << "The connection is now reachable for" << thing << "... start initializing.";
                 solaxConnection->initialize();
             } else {
+                qCDebug(dcSolax()) << "The connection is not reachable any more" << thing;
                 thing->setStateValue("connected", false);
                 foreach (Thing *childThing, myThings().filterByParentId(thing->id())) {
                     childThing->setStateValue("connected", false);
@@ -196,9 +200,12 @@ void IntegrationPluginSolax::setupThing(ThingSetupInfo *info)
             if (!success) {
                 // Try once to reconnect the device
                 solaxConnection->reconnectDevice();
+                qCWarning(dcSolax()) << "Unable to initialize" << thing << "Trying to reconnect...";
             } else {
                 qCInfo(dcSolax()) << "Connection initialized successfully for" << thing;
-                solaxConnection->update();
+                if (!solaxConnection->update()) {
+                    qCWarning(dcSolax()) << "Unable to update the values from" << thing << "after initializiation.";
+                }
             }
         });
 
@@ -411,7 +418,6 @@ void IntegrationPluginSolax::setupThing(ThingSetupInfo *info)
 
 void IntegrationPluginSolax::postSetupThing(Thing *thing)
 {
-
     if (thing->thingClassId() == solaxInverterTcpThingClassId) {
 
         // Create the update timer if not already set up
@@ -420,10 +426,12 @@ void IntegrationPluginSolax::postSetupThing(Thing *thing)
             m_refreshTimer = hardwareManager()->pluginTimerManager()->registerTimer(2);
             connect(m_refreshTimer, &PluginTimer::timeout, this, [this] {
                 foreach(SolaxModbusTcpConnection *connection, m_tcpConnections) {
-                    if (connection->initializing())
+                    if (connection->initializing()) {
+                        qCDebug(dcSolax()) << "Skip updating" << connection->modbusTcpMaster() << "since the connection is still initializing.";
                         continue;
+                    }
 
-                    //qCDebug(dcSolax()) << "Update connection" << connection->modbusTcpMaster()->hostAddress().toString();
+                    qCDebug(dcSolax()) << "Updating connection" << connection->modbusTcpMaster()->hostAddress().toString();
                     connection->update();
                 }
             });
