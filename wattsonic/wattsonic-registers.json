@@ -92,7 +92,7 @@
             "registerType": "holdingRegister",
             "description": "Phase A power",
             "defaultValue": 0,
-            "unit": "1/1000 kW",
+            "unit": "W",
             "access": "RO"
         },
         {
@@ -104,7 +104,7 @@
             "registerType": "holdingRegister",
             "description": "Phase B power",
             "defaultValue": 0,
-            "unit": "1/1000 kW",
+            "unit": "W",
             "access": "RO"
         },
         {
@@ -116,7 +116,7 @@
             "registerType": "holdingRegister",
             "description": "Phase C power",
             "defaultValue": 0,
-            "unit": "1/1000 kW",
+            "unit": "W",
             "access": "RO"
         },
         {
@@ -128,7 +128,7 @@
             "registerType": "holdingRegister",
             "description": "Total power on meter",
             "defaultValue": 0,
-            "unit": "1/1000 kW",
+            "unit": "W",
             "access": "RO"
         },
         {
@@ -236,7 +236,7 @@
             "registerType": "holdingRegister",
             "description": "P_AC",
             "defaultValue": 0,
-            "unit": "1/1000 kW",
+            "unit": "W",
             "access": "RO"
         },
         {
@@ -260,7 +260,7 @@
             "registerType": "holdingRegister",
             "description": "PV Total Input Power",
             "defaultValue": 0,
-            "unit": "1/1000 kW",
+            "unit": "W",
             "access": "RO"
         },
         {
@@ -271,7 +271,7 @@
             "readSchedule": "update",
             "registerType": "holdingRegister",
             "description": "Total_Backup_P/AC Active Power",
-            "unit": "1/1000 kW",
+            "unit": "W",
             "defaultValue": 0,
             "access": "RO"
         },
@@ -296,7 +296,7 @@
             "registerType": "holdingRegister",
             "description": "Battery power",
             "defaultValue": 0,
-            "unit": "1/1000 kW",
+            "unit": "W",
             "access": "RO"
         },
         {

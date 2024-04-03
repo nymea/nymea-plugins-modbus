@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2023, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -142,7 +142,7 @@ void IntegrationPluginWattsonic::postSetupThing(Thing *thing)
 void IntegrationPluginWattsonic::thingRemoved(Thing *thing)
 {
     if (thing->thingClassId() == inverterThingClassId && m_connections.contains(thing)) {
-        delete m_connections.take(thing);
+        m_connections.take(thing)->deleteLater();
     }
 
     if (myThings().isEmpty() && m_pluginTimer) {
@@ -170,27 +170,16 @@ void IntegrationPluginWattsonic::setupWattsonicConnection(ThingSetupInfo *info)
     }
 
     WattsonicModbusRtuConnection *connection = new WattsonicModbusRtuConnection(hardwareManager()->modbusRtuResource()->getModbusRtuMaster(uuid), slaveId, this);
-    connect(info, &ThingSetupInfo::aborted, connection, &ModbusRtuMaster::deleteLater);
-
     m_connections.insert(thing, connection);
+
+    // Only for setup
+    connect(info, &ThingSetupInfo::aborted, connection, &WattsonicModbusRtuConnection::deleteLater);
     connect(info, &ThingSetupInfo::aborted, this, [=](){
         m_connections.take(info->thing())->deleteLater();
     });
 
-    connect(connection, &WattsonicModbusRtuConnection::reachableChanged, thing, [connection, thing, this](bool reachable){
-        qCDebug(dcWattsonic()) << "Reachable state changed" << reachable;
-        if (reachable) {
-            connection->initialize();
-        } else {
-            thing->setStateValue("connected", false);
-            foreach (Thing *child, myThings().filterByParentId(thing->id())) {
-                child->setStateValue("connected", true);
-            }
-        }
-    });
-
     connect(connection, &WattsonicModbusRtuConnection::initializationFinished, info, [=](bool success){
-        qCDebug(dcWattsonic()) << "Initialisation finished" << success;
+        qCDebug(dcWattsonic()) << "Initialization finished" << success;
         if (info->isInitialSetup() && !success) {
             m_connections.take(info->thing())->deleteLater();
             info->finish(Thing::ThingErrorHardwareNotAvailable);
@@ -198,27 +187,31 @@ void IntegrationPluginWattsonic::setupWattsonicConnection(ThingSetupInfo *info)
         }
 
         info->finish(Thing::ThingErrorNoError);
-
-        if (success) {
-            qCDebug(dcWattsonic) << "Firmware version:" << connection->firmwareVersion();
-//            info->thing()->setStateValue(inverterCurrentVersionStateTypeId, compact20Connection->firmwareVersion());
-        }
+        qCDebug(dcWattsonic) << "Firmware version:" << connection->firmwareVersion();
     });
 
-    connect(connection, &WattsonicModbusRtuConnection::reachableChanged, thing, [=](bool reachable){
-        thing->setStateValue(inverterConnectedStateTypeId, reachable);
-        foreach (Thing *child, myThings().filterByParentId(thing->id())) {
-            child->setStateValue("connected", reachable);
+    // Runtime connections
+    connect(connection, &WattsonicModbusRtuConnection::reachableChanged, thing, [connection, thing, this](bool reachable){
+        qCDebug(dcWattsonic()) << "Reachable state changed" << reachable;
+        if (reachable) {
+            connection->initialize();
         }
+
+        setConnectedStates(thing, reachable);
     });
 
+    connect(connection, &WattsonicModbusRtuConnection::reachableChanged, thing, [this, thing](bool reachable){
+        setConnectedStates(thing, reachable);
+    });
 
     connect(connection, &WattsonicModbusRtuConnection::updateFinished, thing, [this, connection, thing](){
         qCDebug(dcWattsonic()) << "Update finished:" << thing->name() << connection;
 
-        Thing *inverter = thing;
+        // We received an update, make sure we are connected
+        setConnectedStates(thing, true);
 
-        inverter->setStateValue(inverterCurrentPowerStateTypeId, connection->pAC() * -1.0);
+        Thing *inverter = thing;
+        inverter->setStateValue(inverterCurrentPowerStateTypeId, connection->pvInputTotalPower() * -1.0);
         inverter->setStateValue(inverterTotalEnergyProducedStateTypeId, connection->totalPVGenerationFromInstallation() * 0.1);
         qCInfo(dcWattsonic()) << "Updating inverter:" << inverter->stateValue(inverterCurrentPowerStateTypeId).toDouble() << "W" << inverter->stateValue(inverterTotalEnergyProducedStateTypeId).toDouble() << "kWh";
 
@@ -235,14 +228,15 @@ void IntegrationPluginWattsonic::setupWattsonicConnection(ThingSetupInfo *info)
             meter->setStateValue(meterVoltagePhaseBStateTypeId, connection->gridPhaseBVoltage() / 10.0);
             meter->setStateValue(meterVoltagePhaseCStateTypeId, connection->gridPhaseCVoltage() / 10.0);
             // The phase current registers don't seem to contain proper values. Calculating ourselves instead
-//            meter->setStateValue(meterCurrentPhaseAStateTypeId, connection->gridPhaseACurrent() / 10.0);
-//            meter->setStateValue(meterCurrentPhaseBStateTypeId, connection->gridPhaseBCurrent() / 10.0);
-//            meter->setStateValue(meterCurrentPhaseCStateTypeId, connection->gridPhaseCCurrent() / 10.0);
+            // meter->setStateValue(meterCurrentPhaseAStateTypeId, connection->gridPhaseACurrent() / 10.0);
+            // meter->setStateValue(meterCurrentPhaseBStateTypeId, connection->gridPhaseBCurrent() / 10.0);
+            // meter->setStateValue(meterCurrentPhaseCStateTypeId, connection->gridPhaseCCurrent() / 10.0);
             meter->setStateValue(meterCurrentPhaseAStateTypeId, (connection->phaseAPower() * -1.0) / (connection->gridPhaseAVoltage() / 10.0));
             meter->setStateValue(meterCurrentPhaseBStateTypeId, (connection->phaseBPower() * -1.0) / (connection->gridPhaseBVoltage() / 10.0));
             meter->setStateValue(meterCurrentPhaseCStateTypeId, (connection->phaseCPower() * -1.0) / (connection->gridPhaseCVoltage() / 10.0));
             qCInfo(dcWattsonic()) << "Updating meter:" << meter->stateValue(meterCurrentPowerStateTypeId).toDouble() << "W" << meter->stateValue(meterTotalEnergyProducedStateTypeId).toDouble() << "kWh";
         }
+
         Things batteries = myThings().filterByParentId(thing->id()).filterByThingClassId(batteryThingClassId);
         if (!batteries.isEmpty() && connection->SOC() > 0) {
             Thing *battery = batteries.first();
@@ -255,8 +249,13 @@ void IntegrationPluginWattsonic::setupWattsonicConnection(ThingSetupInfo *info)
             battery->setStateValue(batteryBatteryLevelStateTypeId, connection->SOC() / 100.0);
             battery->setStateValue(batteryBatteryCriticalStateTypeId, connection->SOC() < 500);
         }
-
     });
+}
 
-
+void IntegrationPluginWattsonic::setConnectedStates(Thing *thing, bool connected)
+{
+    thing->setStateValue("connected", connected);
+    foreach (Thing *child, myThings().filterByParentId(thing->id())) {
+        child->setStateValue("connected", connected);
+    }
 }
