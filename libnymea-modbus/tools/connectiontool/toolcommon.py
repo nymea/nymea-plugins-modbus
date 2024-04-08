@@ -1,4 +1,4 @@
-# Copyright (C) 2021 - 2023 nymea GmbH <developer@nymea.io>
+# Copyright (C) 2021 - 2024 nymea GmbH <developer@nymea.io>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -14,11 +14,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-import os
 import re
-import sys
 import json
-import shutil
 import datetime
 import logging
 
@@ -488,6 +485,7 @@ def writeProtectedPropertyMembers(fileDescriptor, registerDefinitions):
         else:
             writeLine(fileDescriptor, '    %s m_%s;' % (propertyTyp, propertyName))
 
+##############################################################
 
 def writePropertyProcessMethodDeclaration(fileDescriptor, registerDefinitions):
     for registerDefinition in registerDefinitions:
@@ -512,16 +510,78 @@ def writePropertyProcessMethodImplementations(fileDescriptor, className, registe
 
         writeLine(fileDescriptor, 'void %s::process%sRegisterValues(const QVector<quint16> &values)' % (className, propertyName[0].upper() + propertyName[1:]))
         writeLine(fileDescriptor, '{')
-        writeLine(fileDescriptor, '    %s received%s = %s;' % (propertyTyp, propertyName[0].upper() + propertyName[1:], getValueConversionMethod(registerDefinition)))
-        writeLine(fileDescriptor, '    emit %sReadFinished(received%s);' % (propertyName, propertyName[0].upper() + propertyName[1:]))
+        writeLine(fileDescriptor, '    qCDebug(dc%s()) << "<-- Response from \\"%s\\" register" << %s << "size:" << %s << values;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
+        writeLine(fileDescriptor, '    if (values.size() == %s) {' % (registerDefinition['size']))
+        writeLine(fileDescriptor, '        %s received%s = %s;' % (propertyTyp, propertyName[0].upper() + propertyName[1:], getValueConversionMethod(registerDefinition)))
+        writeLine(fileDescriptor, '        emit %sReadFinished(received%s);' % (propertyName, propertyName[0].upper() + propertyName[1:]))
         writeLine(fileDescriptor)
-        writeLine(fileDescriptor, '    if (m_%s != received%s) {' % (propertyName, propertyName[0].upper() + propertyName[1:]))
-        writeLine(fileDescriptor, '        m_%s = received%s;' % (propertyName, propertyName[0].upper() + propertyName[1:]))
-        writeLine(fileDescriptor, '        emit %sChanged(m_%s);' % (propertyName, propertyName))
+        writeLine(fileDescriptor, '        if (m_%s != received%s) {' % (propertyName, propertyName[0].upper() + propertyName[1:]))
+        writeLine(fileDescriptor, '            m_%s = received%s;' % (propertyName, propertyName[0].upper() + propertyName[1:]))
+        writeLine(fileDescriptor, '            emit %sChanged(m_%s);' % (propertyName, propertyName))
+        writeLine(fileDescriptor, '        }')
+        writeLine(fileDescriptor, '    } else {')
+        writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Reading from \\"%s\\" registers" << %s << "size:" << %s << "returned different size than requested. Ignoring incomplete data" << values;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
         writeLine(fileDescriptor, '    }')
         writeLine(fileDescriptor, '}')
         writeLine(fileDescriptor)
 
+##############################################################
+
+def writeBlockPropertiesProcessMethodDeclaration(fileDescriptor, blockDefinitions):
+
+    for blockDefinition in blockDefinitions:
+        blockName = blockDefinition['id']
+        blockRegisters = blockDefinition['registers']
+        blockStartAddress = 0
+        blockSize = 0
+        registerCount = 0
+
+        writeLine(fileDescriptor, '    /* Process block data from start addess %s with size of %s registers containing following %s properties:' % (blockStartAddress, blockSize, registerCount))
+        for i, registerDefinition in enumerate(blockRegisters):
+            if 'unit' in registerDefinition and registerDefinition['unit'] != '':
+                writeLine(fileDescriptor, '     - %s [%s] - Address: %s, Size: %s' % (registerDefinition['description'], registerDefinition['unit'], registerDefinition['address'], registerDefinition['size']))
+            else:
+                writeLine(fileDescriptor, '     - %s - Address: %s, Size: %s' % (registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
+        
+        writeLine(fileDescriptor, '    */' )
+        writeLine(fileDescriptor, '    void processBlock%sRegisterValues(const QVector<quint16> &blockValues);' % (blockName[0].upper() + blockName[1:]))
+        writeLine(fileDescriptor)
+    
+
+def writeBlockPropertiesProcessMethodImplementations(fileDescriptor, className, blockDefinitions):
+    for blockDefinition in blockDefinitions:
+        blockName = blockDefinition['id']
+        blockRegisters = blockDefinition['registers']
+        blockStartAddress = 0
+        blockSize = 0
+        registerCount = 0
+
+        for i, blockRegister in enumerate(blockRegisters):
+            if i == 0:
+                blockStartAddress = blockRegister['address']
+
+            registerCount += 1
+            blockSize += blockRegister['size']
+
+        writeLine(fileDescriptor, 'void %s::processBlock%sRegisterValues(const QVector<quint16> &blockValues)' % (className, blockName[0].upper() + blockName[1:]))
+        writeLine(fileDescriptor, '{')
+        writeLine(fileDescriptor, '    qCDebug(dc%s()) << "<-- Response from reading block \\"%s\\" register" << %s << "size:" << %s << blockValues;' % (className, blockName, blockStartAddress, blockSize))
+        writeLine(fileDescriptor, '    if (blockValues.size() == %s) {' % (blockSize))
+
+        # Start parsing the registers using offsets
+        offset = 0
+        for i, blockRegister in enumerate(blockRegisters):
+            propertyName = blockRegister['id']
+            writeLine(fileDescriptor, '        process%sRegisterValues(blockValues.mid(%s, %s));' % (propertyName[0].upper() + propertyName[1:], offset, blockRegister['size']))
+            offset += blockRegister['size']
+
+        writeLine(fileDescriptor, '    } else {')
+        writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Reading from \\"%s\\" block registers" << %s << "size:" << %s << "returned different size than requested. Ignoring incomplete data" << blockValues;' % (className, blockName, blockStartAddress, blockSize))
+        writeLine(fileDescriptor, '    }')
+        writeLine(fileDescriptor, '}')
+        writeLine(fileDescriptor)
+
+##############################################################
 
 def writeSendNextQueuedInitRequestMethodImplementation(fileDescriptor, className):
     writeLine(fileDescriptor, 'void %s::sendNextQueuedInitRequest()' % (className))
