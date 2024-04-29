@@ -259,7 +259,7 @@ void IntegrationPluginSolax::setupThing(ThingSetupInfo *info)
 
             // Update inverter states
 
-            int inverterPower = solaxConnection->powerDc1() + solaxConnection->powerDc1();
+            int inverterPower = solaxConnection->powerDc1() + solaxConnection->powerDc2();
             int inverterVoltage = solaxConnection->pvVoltage1() + solaxConnection->pvVoltage2();
             int inverterCurrent = solaxConnection->pvCurrent1() + solaxConnection->pvCurrent2();
             thing->setStateValue(solaxInverterTcpCurrentPowerStateTypeId, -inverterPower);
