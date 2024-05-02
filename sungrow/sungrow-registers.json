@@ -4,8 +4,8 @@
     "endianness": "LittleEndian",
     "errorLimitUntilNotReachable": 5,
     "queuedRequests": true,
-    "queuedRequestsDelay": 200,
-    "checkReachableRegister": "inverterTemperature",
+    "queuedRequestsDelay": 400,
+    "checkReachableRegister": "totalPVPower",
     "enums": [
         {
             "name": "SystemState",
@@ -197,6 +197,27 @@
             "readSchedule": "update",
             "registers": [
                 {
+                    "id": "inverterTemperature",
+                    "address": 5007,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Inverter temperature",
+                    "unit": "°C",
+                    "staticScaleFactor": -1,
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "dummy0",
+                    "address": 5008,
+                    "size": 8,
+                    "type": "raw",
+                    "registerType": "inputRegister",
+                    "description": "none",
+                    "access": "RO"
+                },
+                {
                     "id": "totalPVPower",
                     "address": 5016,
                     "size": 2,
@@ -242,13 +263,16 @@
                     "staticScaleFactor": -1,
                     "defaultValue": "0",
                     "access": "RO"
-                }
-            ]
-        },
-        {
-            "id": "energyValues2",
-            "readSchedule": "update",
-            "registers": [
+                },
+                {
+                    "id": "dummy1",
+                    "address": 5021,
+                    "size": 11,
+                    "type": "raw",
+                    "registerType": "inputRegister",
+                    "description": "none",
+                    "access": "RO"
+                },
                 {
                     "id": "reactivePower",
                     "address": 5032,
@@ -286,7 +310,7 @@
             ]
         },
         {
-            "id": "energyValues3",
+            "id": "energyValues2",
             "readSchedule": "update",
             "registers": [
                 {
@@ -403,13 +427,96 @@
                     "defaultValue": "0",
                     "staticScaleFactor": -1,
                     "access": "RO"
-                }
-            ]
-        },
-        {
-            "id": "energyValues4",
-            "readSchedule": "update",
-            "registers": [
+                },
+                {
+                    "id": "dummy2",
+                    "address": 13014,
+                    "size": 5,
+                    "type": "raw",
+                    "registerType": "inputRegister",
+                    "description": "none",
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryVoltage",
+                    "address": 13019,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Battery voltage",
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryCurrent",
+                    "address": 13020,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Battery current",
+                    "unit": "A",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryPower",
+                    "address": 13021,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Battery power",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryLevel",
+                    "address": 13022,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Battery level",
+                    "unit": "%",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryHealthState",
+                    "address": 13023,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Battery health state",
+                    "unit": "%",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryTemperature",
+                    "address": 13024,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Battery temperature",
+                    "unit": "°C",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "dummy3",
+                    "address": 13025,
+                    "size": 4,
+                    "type": "raw",
+                    "registerType": "inputRegister",
+                    "description": "none",
+                    "access": "RO"
+                },
                 {
                     "id": "gridState",
                     "address": 13029,
@@ -490,6 +597,27 @@
                     "defaultValue": "0",
                     "staticScaleFactor": -1,
                     "access": "RO"
+                },
+                {
+                    "id": "dummy4",
+                    "address": 13038,
+                    "size": 7,
+                    "type": "raw",
+                    "registerType": "inputRegister",
+                    "description": "none",
+                    "access": "RO"
+                },
+                {
+                    "id": "totalExportEnergy",
+                    "address": 13045,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Total export energy",
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
                 }
             ]
         },
@@ -532,111 +660,8 @@
                     "access": "RO"
                 }
             ]
-        },
-        {
-            "id": "batteryValues",
-            "readSchedule": "update",
-            "registers": [
-                {
-                    "id": "batteryVoltage",
-                    "address": 13019,
-                    "size": 1,
-                    "type": "uint16",
-                    "registerType": "inputRegister",
-                    "description": "Battery voltage",
-                    "unit": "V",
-                    "defaultValue": "0",
-                    "staticScaleFactor": -1,
-                    "access": "RO"
-                },
-                {
-                    "id": "batteryCurrent",
-                    "address": 13020,
-                    "size": 1,
-                    "type": "uint16",
-                    "registerType": "inputRegister",
-                    "description": "Battery current",
-                    "unit": "A",
-                    "defaultValue": "0",
-                    "staticScaleFactor": -1,
-                    "access": "RO"
-                },
-                {
-                    "id": "batteryPower",
-                    "address": 13021,
-                    "size": 1,
-                    "type": "uint16",
-                    "registerType": "inputRegister",
-                    "description": "Battery power",
-                    "unit": "W",
-                    "defaultValue": "0",
-                    "access": "RO"
-                },
-                {
-                    "id": "batteryLevel",
-                    "address": 13022,
-                    "size": 1,
-                    "type": "uint16",
-                    "registerType": "inputRegister",
-                    "description": "Battery level",
-                    "unit": "%",
-                    "defaultValue": "0",
-                    "staticScaleFactor": -1,
-                    "access": "RO"
-                },
-                {
-                    "id": "batteryHealthState",
-                    "address": 13023,
-                    "size": 1,
-                    "type": "uint16",
-                    "registerType": "inputRegister",
-                    "description": "Battery health state",
-                    "unit": "%",
-                    "defaultValue": "0",
-                    "staticScaleFactor": -1,
-                    "access": "RO"
-                },
-                {
-                    "id": "batteryTemperature",
-                    "address": 13024,
-                    "size": 1,
-                    "type": "int16",
-                    "registerType": "inputRegister",
-                    "description": "Battery temperature",
-                    "unit": "°C",
-                    "defaultValue": "0",
-                    "staticScaleFactor": -1,
-                    "access": "RO"
-                }
-            ]
         }
     ],
     "registers": [
-        {
-            "id": "inverterTemperature",
-            "address": 5007,
-            "size": 1,
-            "readSchedule": "update",
-            "type": "int16",
-            "registerType": "inputRegister",
-            "description": "Inverter temperature",
-            "unit": "°C",
-            "staticScaleFactor": -1,
-            "defaultValue": "0",
-            "access": "RO"
-        },
-        {
-            "id": "totalExportEnergy",
-            "address": 13045,
-            "size": 2,
-            "readSchedule": "update",
-            "type": "uint32",
-            "registerType": "inputRegister",
-            "description": "Total export energy",
-            "unit": "kWh",
-            "defaultValue": "0",
-            "staticScaleFactor": -1,
-            "access": "RO"
-        }
     ]
 }
