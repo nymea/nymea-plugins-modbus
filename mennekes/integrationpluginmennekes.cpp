@@ -646,6 +646,8 @@ void IntegrationPluginMennekes::setupAmtronECUConnection(ThingSetupInfo *info)
             }
 
             thing->setStateValue(amtronECUCurrentPowerStateTypeId, totalPower);
+            thing->setStateValue(amtronECUChargingStateTypeId, totalPower > 0);
+
 
             double totalEnergy = 0; // Wh
             if (amtronECUConnection->meterEnergyL1() != 0xffffffff) {
