@@ -1,0 +1,667 @@
+{
+    "className": "Sungrow",
+    "protocol": "TCP",
+    "endianness": "LittleEndian",
+    "errorLimitUntilNotReachable": 5,
+    "queuedRequests": true,
+    "queuedRequestsDelay": 400,
+    "checkReachableRegister": "totalPVPower",
+    "enums": [
+        {
+            "name": "SystemState",
+            "values": [
+                {
+                    "key": "Stop",
+                    "value": 2
+                },
+                {
+                    "key": "Standby",
+                    "value": 8
+                },
+                {
+                    "key": "InitialStandby",
+                    "value": 16
+                },
+                {
+                    "key": "Startup",
+                    "value": 32
+                },
+                {
+                    "key": "Running",
+                    "value": 64
+                },
+                {
+                    "key": "Fault",
+                    "value": 256
+                },
+                {
+                    "key": "RunningMainMode",
+                    "value": 1024
+                },
+                {
+                    "key": "RunningForcedMode",
+                    "value": 2048
+                },
+                {
+                    "key": "RunningOffGridMode",
+                    "value": 4096
+                },
+                {
+                    "key": "Restarting",
+                    "value": 9473
+                },
+                {
+                    "key": "RunningExternalEMSMode",
+                    "value": 16384
+                }
+            ]
+        },
+        {
+            "name": "BatteryType",
+            "values": [
+                {
+                    "key": "LeadAcidNarada",
+                    "value": 0
+                },
+                {
+                    "key": "LiIonSamsung",
+                    "value": 1
+                },
+                {
+                    "key": "NoBattery",
+                    "value": 2
+                },
+                {
+                    "key": "LeadAcidOther",
+                    "value": 3
+                },
+                {
+                    "key": "LiIonUS2000A",
+                    "value": 4
+                },
+                {
+                    "key": "LiIonLG",
+                    "value": 5
+                },
+                {
+                    "key": "LiIonUS2000B",
+                    "value": 6
+                },
+                {
+                    "key": "LiIonGCL",
+                    "value": 7
+                },
+                {
+                    "key": "LiIonBSG",
+                    "value": 8
+                },
+                {
+                    "key": "LiIonSungrow",
+                    "value": 9
+                },
+                {
+                    "key": "LiIonBYD",
+                    "value": 10
+                },
+                {
+                    "key": "LiIonTawaki",
+                    "value": 11
+                }
+            ]
+        }
+    ],
+    "blocks": [
+        {
+            "id": "version",
+            "readSchedule": "init",
+            "registers": [
+                {
+                    "id": "protocolNumber",
+                    "address": 4949,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Protocol number",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "protocolVersion",
+                    "address": 4951,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Device type code",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "armSoftwareVersion",
+                    "address": 4953,
+                    "size": 15,
+                    "type": "string",
+                    "registerType": "inputRegister",
+                    "description": "ARM software version",
+                    "access": "RO"
+                },
+                {
+                    "id": "dspSoftwareVersion",
+                    "address": 4968,
+                    "size": 15,
+                    "type": "string",
+                    "registerType": "inputRegister",
+                    "description": "ARM software version",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "identification",
+            "readSchedule": "init",
+            "registers": [
+                {
+                    "id": "serialNumber",
+                    "address": 4989,
+                    "size": 10,
+                    "type": "string",
+                    "registerType": "inputRegister",
+                    "description": "Serial number",
+                    "access": "RO"
+                },
+                {
+                    "id": "deviceTypeCode",
+                    "address": 4999,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Device type code",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "nominalOutputPower",
+                    "address": 5000,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Nominal output power",
+                    "unit": "kW",
+                    "staticScaleFactor": -1,
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "energyValues1",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "inverterTemperature",
+                    "address": 5007,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Inverter temperature",
+                    "unit": "°C",
+                    "staticScaleFactor": -1,
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "dummy0",
+                    "address": 5008,
+                    "size": 8,
+                    "type": "raw",
+                    "registerType": "inputRegister",
+                    "description": "none",
+                    "access": "RO"
+                },
+                {
+                    "id": "totalPVPower",
+                    "address": 5016,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Total PV power",
+                    "defaultValue": "0",
+                    "unit": "W",
+                    "access": "RO"
+                },
+                {
+                    "id": "phaseAVoltage",
+                    "address": 5018,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Phase A voltage",
+                    "unit": "V",
+                    "staticScaleFactor": -1,
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "phaseBVoltage",
+                    "address": 5019,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Phase B voltage",
+                    "unit": "V",
+                    "staticScaleFactor": -1,
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "phaseCVoltage",
+                    "address": 5020,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Phase C voltage",
+                    "unit": "V",
+                    "staticScaleFactor": -1,
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "dummy1",
+                    "address": 5021,
+                    "size": 11,
+                    "type": "raw",
+                    "registerType": "inputRegister",
+                    "description": "none",
+                    "access": "RO"
+                },
+                {
+                    "id": "reactivePower",
+                    "address": 5032,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "inputRegister",
+                    "description": "Reactive power",
+                    "defaultValue": "0",
+                    "unit": "var",
+                    "access": "RO"
+                },
+                {
+                    "id": "powerFactor",
+                    "address": 5034,
+                    "size": 1,
+                    "type": "int32",
+                    "registerType": "inputRegister",
+                    "description": "Power factor",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -3,
+                    "access": "RO"
+                },
+                {
+                    "id": "gridFrequency",
+                    "address": 5035,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Grid frequency",
+                    "defaultValue": "0",
+                    "unit": "Hz",
+                    "staticScaleFactor": -2,
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "energyValues2",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "systemState",
+                    "address": 12999,
+                    "size": 1,
+                    "type": "uint16",
+                    "enum": "SystemState",
+                    "registerType": "inputRegister",
+                    "description": "System state",
+                    "defaultValue": "SystemStateStop",
+                    "access": "RO"
+                },
+                {
+                    "id": "runningState",
+                    "address": 13000,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Running state",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "dailyPVGeneration",
+                    "address": 13001,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Daily PV generation",
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "totalPVGeneration",
+                    "address": 13002,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Total PV generation",
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "dailyPVExport",
+                    "address": 13004,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Daily PV export",
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "totalPVExport",
+                    "address": 13005,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Total PV export´",
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "loadPower",
+                    "address": 13007,
+                    "size": 2,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Load power",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "exportPower",
+                    "address": 13009,
+                    "size": 2,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Export power",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "dailyBatteryChargePV",
+                    "address": 13011,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Daily battery charge from PV",
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "totalBatteryChargePV",
+                    "address": 13012,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Total battery charge from PV",
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "dummy2",
+                    "address": 13014,
+                    "size": 5,
+                    "type": "raw",
+                    "registerType": "inputRegister",
+                    "description": "none",
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryVoltage",
+                    "address": 13019,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Battery voltage",
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryCurrent",
+                    "address": 13020,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Battery current",
+                    "unit": "A",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryPower",
+                    "address": 13021,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Battery power",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryLevel",
+                    "address": 13022,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Battery level",
+                    "unit": "%",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryHealthState",
+                    "address": 13023,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Battery health state",
+                    "unit": "%",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryTemperature",
+                    "address": 13024,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Battery temperature",
+                    "unit": "°C",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "dummy3",
+                    "address": 13025,
+                    "size": 4,
+                    "type": "raw",
+                    "registerType": "inputRegister",
+                    "description": "none",
+                    "access": "RO"
+                },
+                {
+                    "id": "gridState",
+                    "address": 13029,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Grid state",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "phaseACurrent",
+                    "address": 13030,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Phase A current",
+                    "unit": "A",
+                    "staticScaleFactor": -1,
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "phaseBCurrent",
+                    "address": 13031,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Phase B current",
+                    "unit": "A",
+                    "staticScaleFactor": -1,
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "phaseCCurrent",
+                    "address": 13032,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Phase C current",
+                    "unit": "A",
+                    "staticScaleFactor": -1,
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "totalActivePower",
+                    "address": 13033,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "inputRegister",
+                    "description": "Total active power",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "dailyImportEnergy",
+                    "address": 13035,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Daily import energy",
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "totalImportEnergy",
+                    "address": 13036,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Total import energy",
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "dummy4",
+                    "address": 13038,
+                    "size": 7,
+                    "type": "raw",
+                    "registerType": "inputRegister",
+                    "description": "none",
+                    "access": "RO"
+                },
+                {
+                    "id": "totalExportEnergy",
+                    "address": 13045,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Total export energy",
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "batteryInformation",
+            "readSchedule": "init",
+            "registers": [
+                {
+                    "id": "batteryType",
+                    "address": 13054,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Battery type",
+                    "enum": "BatteryType",
+                    "defaultValue": "BatteryTypeNoBattery",
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryNominalVoltage",
+                    "address": 13055,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Battery nominal voltage",
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryCapacity",
+                    "address": 13056,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Battery capacity",
+                    "unit": "Ah",
+                    "defaultValue": "10",
+                    "access": "RO"
+                }
+            ]
+        }
+    ],
+    "registers": [
+    ]
+}

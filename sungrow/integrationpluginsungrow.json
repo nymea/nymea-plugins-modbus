@@ -1,0 +1,289 @@
+{
+    "name": "Sungrow",
+    "displayName": "Sungrow",
+    "id": "250c9b83-1127-4013-bbd0-11e7ea482057",
+    "vendors": [
+        {
+            "name": "sungrow",
+            "displayName": "Sungrow",
+            "id": "cdc58e0d-bfdb-45d9-b961-9c0b036c35aa",
+            "thingClasses": [
+                {
+                    "name": "sungrowInverterTcp",
+                    "displayName": "Sungrow Inverter",
+                    "id": "59cb2da4-da07-11ee-adea-7397f8a9afe9",
+                    "createMethods": ["discovery"],
+                    "discoveryType": "weak",
+                    "interfaces": ["solarinverter", "connectable"],
+                    "providedInterfaces": [ "energymeter", "energystorage"],
+                    "paramTypes": [
+                        {
+                            "id": "62137142-da07-11ee-9522-2f74f3b1fc5d",
+                            "name":"macAddress",
+                            "displayName": "MAC address",
+                            "type": "QString",
+                            "inputType": "MacAddress",
+                            "defaultValue": ""
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "6c68b170-da07-11ee-9891-3335ced0ad72",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "6fb11fe8-da07-11ee-b77f-8393cc11be21",
+                            "name": "currentPower",
+                            "displayName": "Active power",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "7bf092a2-da07-11ee-abe9-138e66e6f2a5",
+                            "name": "totalEnergyProduced",
+                            "displayName": "Total energy produced",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0.0,
+                            "cached": true
+                        },
+                        {
+                            "id": "80b35fc2-da07-11ee-a73d-5774b082c92b",
+                            "name": "temperature",
+                            "displayName": "Temperature",
+                            "type": "double",
+                            "unit": "DegreeCelsius",
+                            "defaultValue": 0.00,
+                            "cached": false
+                        },
+                        {
+                            "id": "84bcbc58-da07-11ee-b94d-a39792ee6f59",
+                            "name": "frequency",
+                            "displayName": "Frequency",
+                            "type": "double",
+                            "unit": "Hertz",
+                            "defaultValue": 0.00,
+                            "cached": false
+                        }
+                    ]
+                },
+                {
+                    "name": "sungrowMeter",
+                    "displayName": "Sungrow Meter",
+                    "id": "a935e49c-da07-11ee-bd11-3fcf27dc6373",
+                    "createMethods": ["auto"],
+                    "interfaces": [ "energymeter", "connectable"],
+                    "stateTypes": [
+                        {
+                            "id": "d26b59dc-da07-11ee-b494-3781cc3081a7",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "d777530e-da07-11ee-a526-c7d23dd34f57",
+                            "name": "currentPower",
+                            "displayName": "Current power",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0.00,
+                            "cached": false
+                        },
+                        {
+                            "id": "e80bb836-da07-11ee-afd1-dbff8484ba11",
+                            "name": "voltagePhaseA",
+                            "displayName": "Voltage phase A",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "ebefd252-da07-11ee-a8a4-c7ea9df0b6f9",
+                            "name": "voltagePhaseB",
+                            "displayName": "Voltage phase B",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "efd82b30-da07-11ee-9668-7b523696940d",
+                            "name": "voltagePhaseC",
+                            "displayName": "Voltage phase C",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "f3d850c0-da07-11ee-883f-4ff8b7e55bdc",
+                            "name": "currentPhaseA",
+                            "displayName": "Current phase A",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "f82603de-da07-11ee-93bc-6b9f9f333c30",
+                            "name": "currentPhaseB",
+                            "displayName": "Current phase B",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "fcf77988-da07-11ee-99da-3b2415014506",
+                            "name": "currentPhaseC",
+                            "displayName": "Current phase C",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "167aa300-faef-11ee-859a-bb6f4e8be7c9",
+                            "name": "apparentPowerPhaseA",
+                            "displayName": "Apparent power phase A",
+                            "type": "double",
+                            "unit": "VoltAmpere",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "2c3ac134-faef-11ee-9c28-9f6bb77683d3",
+                            "name": "apparentPowerPhaseB",
+                            "displayName": "Apparent power phase B",
+                            "type": "double",
+                            "unit": "VoltAmpere",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "3f7ca9e2-faef-11ee-81e7-6f53d07e9197",
+                            "name": "apparentPowerPhaseC",
+                            "displayName": "Apparent power phase C",
+                            "type": "double",
+                            "unit": "VoltAmpere",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "00eb83c2-da08-11ee-b67d-1f74a41e6218",
+                            "name": "totalEnergyProduced",
+                            "displayName": "Total returned energy",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0.00,
+                            "cached": true
+                        },
+                        {
+                            "id": "03ef972a-da08-11ee-9a1f-d741d1e276be",
+                            "name": "totalEnergyConsumed",
+                            "displayName": "Total imported energy",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0.00,
+                            "cached": true
+                        },
+                        {
+                            "id": "07b526ea-da08-11ee-ab24-ab0d1ca8555d",
+                            "name": "frequency",
+                            "displayName": "Frequency",
+                            "type": "double",
+                            "unit": "Hertz",
+                            "defaultValue": 0.00,
+                            "cached": false
+                        }
+                    ]
+                },
+                {
+                    "name": "sungrowBattery",
+                    "displayName": "Sungrow Battery",
+                    "id": "0aea1b90-da08-11ee-9195-afc9f857a324",
+                    "createMethods": ["auto"],
+                    "interfaces": ["energystorage", "connectable"],
+                    "stateTypes": [
+                        {
+                            "id": "0ff3c834-da08-11ee-bac7-0f1044f86ea3",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "13f48cde-da08-11ee-81c8-3362a92b58c8",
+                            "name": "batteryCritical",
+                            "displayName": "Battery critical",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "1738bcf8-da08-11ee-b1d0-a3e1183dabba",
+                            "name": "batteryLevel",
+                            "displayName": "Battery level",
+                            "type": "int",
+                            "unit": "Percentage",
+                            "minValue": 0,
+                            "maxValue": 100,
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "1aa8cf86-da08-11ee-9697-3b0a8023db88",
+                            "name": "currentPower",
+                            "displayName": "Total real power",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0.00,
+                            "cached": false
+                        },
+                        {
+                            "id": "1e6bf760-da08-11ee-ba39-c31ecdbb8fc9",
+                            "name": "voltage",
+                            "displayName": "Voltage",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0.00,
+                            "cached": false
+                        },
+                        {
+                            "id": "221ccae2-da08-11ee-9e4d-4b6abbf9e564",
+                            "name": "temperature",
+                            "displayName": "Temperature",
+                            "type": "double",
+                            "unit": "DegreeCelsius",
+                            "defaultValue": 0.00,
+                            "cached": false
+                        },
+                        {
+                            "id": "264ac092-da08-11ee-ad8d-9f0751d6c499",
+                            "name": "capacity",
+                            "displayName": "Capacity",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0.00
+                        },
+                        {
+                            "id": "29e8a6d8-da08-11ee-87ba-539307b7d2ee",
+                            "name": "chargingState",
+                            "displayName": "Charging state",
+                            "type": "QString",
+                            "possibleValues": ["idle", "charging", "discharging"],
+                            "defaultValue": "idle",
+                            "cached": false
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
