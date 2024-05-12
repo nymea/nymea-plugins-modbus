@@ -318,13 +318,24 @@ void IntegrationPluginSungrow::postSetupThing(Thing *thing)
             qCDebug(dcSungrow()) << "Starting plugin timer...";
             m_refreshTimer = hardwareManager()->pluginTimerManager()->registerTimer(2);
             connect(m_refreshTimer, &PluginTimer::timeout, this, [this] {
-                foreach(SungrowModbusTcpConnection *connection, m_tcpConnections) {
+                foreach(auto thing, myThings().filterByThingClassId(sungrowInverterTcpThingClassId)) {
+                    auto monitor = m_monitors.value(thing);
+                    if (!monitor->reachable()) {
+                        continue;
+                    }
+
+                    auto connection = m_tcpConnections.value(thing);
                     if (connection->initializing()) {
                         qCDebug(dcSungrow()) << "Skip updating" << connection->modbusTcpMaster() << "since the connection is still initializing.";
                         continue;
                     }
-                    qCDebug(dcSungrow()) << "Updating connection" << connection->modbusTcpMaster()->hostAddress().toString();
-                    connection->update();
+                    if (connection->reachable()) {
+                        qCDebug(dcSungrow()) << "Updating connection" << connection->modbusTcpMaster()->hostAddress().toString();
+                        connection->update();
+                    } else {
+                        qCDebug(dcSungrow()) << "Device not reachable. Probably a TCP connection error. Reconnecting TCP socket";
+                        connection->reconnectDevice();
+                    }
                 }
             });
             m_refreshTimer->start();
