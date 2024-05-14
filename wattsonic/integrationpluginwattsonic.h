@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2023, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -59,6 +59,8 @@ private:
 
     PluginTimer *m_pluginTimer = nullptr;
     QHash<Thing *, WattsonicModbusRtuConnection *> m_connections;
+
+    void setConnectedStates(Thing * thing, bool connected);
 };
 
 #endif // INTEGRATIONPLUGINWATTSONIC_H
