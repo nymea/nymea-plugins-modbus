@@ -36,9 +36,9 @@
 
 SunSpecDiscovery::SunSpecDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, const QList<quint16> &slaveIds, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent)
     : QObject{parent},
-      m_networkDeviceDiscovery{networkDeviceDiscovery},
-      m_slaveIds{slaveIds},
-      m_byteOrder{byteOrder}
+    m_networkDeviceDiscovery{networkDeviceDiscovery},
+    m_slaveIds{slaveIds},
+    m_byteOrder{byteOrder}
 {
     m_scanPorts.append(502);
     m_scanPorts.append(1502);
@@ -94,7 +94,31 @@ void SunSpecDiscovery::testNextConnection(const QHostAddress &address)
     if (!connection->connectDevice()) {
         qCDebug(dcSunSpec()) << "Discovery: Failed to connect to" << QString("%1:%2").arg(address.toString()).arg(connection->port()) << "slave ID:" << connection->slaveId() << "Continue...";;
         cleanupConnection(connection);
+        return;
     }
+
+    /* Some connection will block the connection process and the connection will pending in the
+     * connecting state for over a minute before failing.
+     * This behavior blocks further connection tests for during the disdovery process and the discovery failes to detect the device.
+     * This timer will make sure the connection can be established within 5 seconds, otherwise we continue with the next connection.
+     */
+
+    QTimer *connectionTimer = new QTimer(connection);
+    connectionTimer->setInterval(5000);
+    connectionTimer->setSingleShot(true);
+
+    m_connectionTimers.insert(connection, connectionTimer);
+
+    connect(connectionTimer, &QTimer::timeout, connection, [this, connection, connectionTimer](){
+        qCDebug(dcSunSpec()) << "Discovery: Could not establish a connection within" << connectionTimer->interval() << "ms. Continue...";
+        m_connectionTimers.remove(connection);
+        connection->disconnectDevice();
+        // Note: since the connection is the parent of the timer, it will be deleted with the connection
+        cleanupConnection(connection);
+    });
+
+    // Once connected, the timer will be stopped.
+    connectionTimer->start();
 }
 
 void SunSpecDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo)
@@ -119,6 +143,13 @@ void SunSpecDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevice
                     // Disconnected ... done with this connection
                     cleanupConnection(connection);
                     return;
+                }
+
+                // Successfully connected, we can stop the connection timer which takes care about blocking connection attempts
+                if (m_connectionTimers.contains(connection)) {
+                    QTimer *connectionTimer = m_connectionTimers.take(connection);
+                    connectionTimer->stop();
+                    connectionTimer->deleteLater();
                 }
 
                 // Modbus TCP connected, try to discovery sunspec models...
@@ -179,6 +210,11 @@ void SunSpecDiscovery::cleanupConnection(SunSpecConnection *connection)
     m_connections.removeAll(connection);
     connection->disconnectDevice();
     connection->deleteLater();
+
+    if (m_connectionTimers.contains(connection)) {
+        QTimer *connectionTimer = m_connectionTimers.take(connection);
+        connectionTimer->stop();
+    }
 
     testNextConnection(connection->hostAddress());
 }
