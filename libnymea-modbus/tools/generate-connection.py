@@ -487,8 +487,11 @@ def writeTcpSourceFile():
     writeLine(sourceFile, '            // Cleanup before starting to initialize')
     writeLine(sourceFile, '            m_pendingInitReplies.clear();')
     writeLine(sourceFile, '            m_pendingUpdateReplies.clear();')
+
     if queuedRequests:
+        writeLine(sourceFile, '            m_currentUpdateReply = nullptr;')
         writeLine(sourceFile, '            m_updateRequestQueue.clear();')
+        writeLine(sourceFile, '            m_currentInitReply = nullptr;')
         writeLine(sourceFile, '            m_initRequestQueue.clear();')
 
     writeLine(sourceFile, '            m_communicationWorking = false;')
@@ -503,7 +506,9 @@ def writeTcpSourceFile():
     writeLine(sourceFile, '            m_initializing = false;')
 
     if queuedRequests:
+        writeLine(sourceFile, '            m_currentUpdateReply = nullptr;')
         writeLine(sourceFile, '            m_updateRequestQueue.clear();')
+        writeLine(sourceFile, '            m_currentInitReply = nullptr;')
         writeLine(sourceFile, '            m_initRequestQueue.clear();')
 
     writeLine(sourceFile, '        }')

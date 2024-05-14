@@ -14,11 +14,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-import os
 import re
-import sys
 import json
-import shutil
 import datetime
 import logging
 
@@ -615,11 +612,15 @@ def writeEnqueueInitRequestMethodImplementation(fileDescriptor, className):
 def writeSendNextQueuedRequestMethodImplementation(fileDescriptor, className):
     writeLine(fileDescriptor, 'void %s::sendNextQueuedRequest()' % (className))
     writeLine(fileDescriptor, '{')
-    writeLine(fileDescriptor, '    if (m_updateRequestQueue.isEmpty())')
+    writeLine(fileDescriptor, '    if (m_updateRequestQueue.isEmpty()) {')
+    writeLine(fileDescriptor, '        qCDebug(dc%s()) << "Do not send next request since there are no requests left...";' % className)
     writeLine(fileDescriptor, '        return;')
+    writeLine(fileDescriptor, '    }')
     writeLine(fileDescriptor)
-    writeLine(fileDescriptor, '    if (m_currentUpdateReply)')
+    writeLine(fileDescriptor, '    if (m_currentUpdateReply) {')
+    writeLine(fileDescriptor, '        qCDebug(dc%s()) << "Do not send next request since there is already a request pending...";' % className)
     writeLine(fileDescriptor, '        return;')
+    writeLine(fileDescriptor, '    }')
     writeLine(fileDescriptor)
     writeLine(fileDescriptor, '    %s::Function function = m_updateRequestQueue.dequeue();' % (className))
     writeLine(fileDescriptor, '    (this->*function)();')
