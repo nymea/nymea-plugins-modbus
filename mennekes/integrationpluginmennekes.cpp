@@ -564,12 +564,20 @@ void IntegrationPluginMennekes::setupAmtronECUConnection(ThingSetupInfo *info)
         }
     });
 
-    connect(amtronECUConnection, &AmtronECU::reachableChanged, thing, [thing, amtronECUConnection](bool reachable){
+    connect(amtronECUConnection, &AmtronECU::reachableChanged, thing, [thing, amtronECUConnection, monitor](bool reachable){
         qCDebug(dcMennekes()) << "Reachable changed to" << reachable << "for" << thing;
         if (reachable) {
             amtronECUConnection->initialize();
         } else {
             thing->setStateValue(amtronECUConnectedStateTypeId, false);
+
+            // Note: sometimes the device does not repond any more on requests, but the connection is still
+            // up and a reconnect fixes this behavior. Let us try to reconnect in case the TCP connection is up
+            // or the monitor is reachable
+            if (amtronECUConnection->modbusTcpMaster()->connected() || monitor->reachable()) {
+                qCWarning(dcMennekes()) << "The amtron ECU connection is not reachable any more, but the device seems to be still reachable. Trying to reconnect...";
+                amtronECUConnection->modbusTcpMaster()->reconnectDevice();
+            }
         }
     });
 
