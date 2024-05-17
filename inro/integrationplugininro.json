@@ -1,0 +1,155 @@
+{
+    "name": "inro",
+    "displayName": "INRO",
+    "id": "e2751951-4d53-4156-bd1a-a54c39e5c6cc",
+    "vendors": [
+        {
+            "name": "inro",
+            "displayName": "INRO Elektrotechnik GmbH",
+            "id": "53669eec-4e67-444d-973f-40668aaa37a6",
+            "thingClasses": [
+                {
+                    "name": "pantabox",
+                    "displayName": "PANTABOX",
+                    "id": "6de119fb-a579-4a88-9903-f05aac167b19",
+                    "createMethods": ["discovery", "user"],
+                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable"],
+                    "paramTypes": [
+                        {
+                            "id": "a3bc042c-0613-40a9-867a-3482d4d0901e",
+                            "name":"macAddress",
+                            "displayName": "MAC address",
+                            "type": "QString",
+                            "defaultValue": "",
+                            "readOnly": true
+                        },
+                        {
+                            "id": "064e393b-b921-4c9c-9127-8b03852d9687",
+                            "name":"serialNumber",
+                            "displayName": "Serial number",
+                            "type": "QString",
+                            "defaultValue": "",
+                            "readOnly": true
+                        }
+                    ],
+                    "settingsTypes": [
+                        {
+                            "id": "78225651-565c-49f7-8610-c067faf8822a",
+                            "name": "phases",
+                            "displayName": "Phases connected",
+                            "type": "QString",
+                            "allowedValues": ["A", "B", "C", "AB", "BC", "AC", "ABC"],
+                            "defaultValue": "ABC"
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "345909fc-22e2-44bb-a063-26dd8e30793b",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "bb2f4ff0-f7ca-4ffd-a2f1-73f9b230a1eb",
+                            "name": "pluggedIn",
+                            "displayName": "Plugged in",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "5a606c6a-030c-4d55-9700-723c9c859c7f",
+                            "name": "charging",
+                            "displayName": "Charging",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "969eb83e-a044-46f2-9aab-f113e2cd7d4d",
+                            "name": "chargingState",
+                            "displayName": "Charging state",
+                            "type": "QString",
+                            "possibleValues": ["A", "B", "C", "D", "E", "F"],
+                            "defaultValue": "A",
+                            "cached": false
+                        },
+                        {
+                            "id": "e23181a7-0747-4ff2-8b10-90256a8377b3",
+                            "name": "currentPower",
+                            "displayName": "Active power",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "b6e309d4-d480-477a-88f1-79e00bca450a",
+                            "name": "totalEnergyConsumed",
+                            "displayName": "Total consumed energy",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0.0,
+                            "cached": true
+                        },
+                        {
+                            "id": "d885ee23-8c50-48f1-82a9-72e0e92715ac",
+                            "name": "power",
+                            "displayName": "Charging enabled",
+                            "displayNameAction": "Set charging enabled",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "writable": true
+                        },
+                        {
+                            "id": "db02bf36-1ce2-40b4-bf88-8a4e3842a63b",
+                            "name": "maxChargingCurrent",
+                            "displayName": "Maximum charging current",
+                            "displayNameAction": "Set maximum charging current",
+                            "type": "uint",
+                            "unit": "Ampere",
+                            "minValue": 6,
+                            "maxValue": 16,
+                            "defaultValue": 6,
+                            "writable": true
+                        },
+                        {
+                            "id": "95719ca2-bda2-4eb4-b76d-e54d7a98dfdb",
+                            "name": "sessionEnergy",
+                            "displayName": "Session energy",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "5cc3aa90-c83f-4453-9f22-5ef408e847a0",
+                            "name": "phaseCount",
+                            "displayName": "Active phases",
+                            "type": "uint",
+                            "minValue": 1,
+                            "maxValue": 3,
+                            "defaultValue": 3
+                        },
+                        {
+                            "id": "db8d452a-8459-429b-b8f1-d73c805bd857",
+                            "name": "usedPhases",
+                            "displayName": "Used phases",
+                            "type": "QString",
+                            "possibleValues": ["A", "B", "C", "AB", "BC", "AC", "ABC"],
+                            "defaultValue": "ABC"
+                        },
+                        {
+                            "id": "c454b965-8b21-491e-85e9-71068575c5e1",
+                            "name": "modbusTcpVersion",
+                            "displayName": "Modbus TCP version",
+                            "type": "QString",
+                            "defaultValue": ""
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
