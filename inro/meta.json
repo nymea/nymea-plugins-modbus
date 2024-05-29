@@ -1,0 +1,14 @@
+{
+    "title": "INRO",
+    "tagline": "Connect INRO PANTABOX wallboxes to nymea.",
+    "icon": "inro.png",
+    "stability": "consumer",
+    "offline": true,
+    "technologies": [
+        "network",
+        "modbus"
+    ],
+    "categories": [
+        "energy"
+    ]
+}
