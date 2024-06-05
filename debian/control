@@ -127,6 +127,17 @@ Description: nymea integration plugin for inepro Metering Modbus based energy me
  made by inepro Metering.
 
 
+Package: nymea-plugin-inro
+Architecture: any
+Multi-Arch: same
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for INRO PANTABOX chargers
+ This package contains the nymea integration plugin for Modbus based PANTABOX 
+ support.
+
+
 Package: nymea-plugin-huawei      
 Architecture: any
 Multi-Arch: same 
