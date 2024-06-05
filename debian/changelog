@@ -1,3 +1,13 @@
+nymea-plugins-modbus (1.10.0) jammy; urgency=medium
+
+  [ Boernsman ]
+  * New plugin: Sungrow
+
+  [ Simon Stürz ]
+  * New Plugin: Inro: Add support for PANTABOX
+
+ -- jenkins <developer@nymea.io>  Wed, 05 Jun 2024 08:45:31 +0200
+
 nymea-plugins-modbus (1.9.2) jammy; urgency=medium
 
   [ Simon Stürz ]
