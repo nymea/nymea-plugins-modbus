@@ -44,10 +44,11 @@ def writeTcpHeaderFile():
     writeLine(headerFile)
     writeLine(headerFile, '#include <modbusdatautils.h>')
     writeLine(headerFile, '#include <modbustcpmaster.h>')
+    writeLine(headerFile, '#include <modbustcpconnection.h>')
     writeLine(headerFile)
 
     # Begin of class
-    writeLine(headerFile, 'class %s : public QObject' % className)
+    writeLine(headerFile, 'class %s : public ModbusTcpConnection' % className)
     writeLine(headerFile, '{')
     writeLine(headerFile, '    Q_OBJECT')
 
@@ -69,18 +70,18 @@ def writeTcpHeaderFile():
     # Constructor
     writeLine(headerFile, '    explicit %s(const QHostAddress &hostAddress, uint port, quint16 slaveId, QObject *parent = nullptr);' % className)
     writeLine(headerFile, '    explicit %s(ModbusTcpMaster *modbusTcpMaster, quint16 slaveId, QObject *parent = nullptr);' % className)
-    writeLine(headerFile, '    ~%s() = default;' % className)
+    writeLine(headerFile, '    ~%s() override = default;' % className)
     writeLine(headerFile)
-    writeLine(headerFile, '    ModbusTcpMaster *modbusTcpMaster() const;')
+    writeLine(headerFile, '    ModbusTcpMaster *modbusTcpMaster() const override; ')
     writeLine(headerFile, '    quint16 slaveId() const;')
     writeLine(headerFile)
-    writeLine(headerFile, '    bool reachable() const;')
-    writeLine(headerFile, '    bool initializing() const;')
+    writeLine(headerFile, '    bool reachable() const override;')
+    writeLine(headerFile, '    bool initializing() const override;')
     writeLine(headerFile)
     
     # Write init and update method declarations
-    writeLine(headerFile, '    virtual bool initialize();')
-    writeLine(headerFile, '    virtual bool update();')
+    writeLine(headerFile, '    virtual bool initialize() override;')
+    writeLine(headerFile, '    virtual bool update() override;')
     writeLine(headerFile)
 
     writeLine(headerFile, '    ModbusDataUtils::ByteOrder endianness() const;')
@@ -137,18 +138,16 @@ def writeTcpHeaderFile():
     writeLine(headerFile)
 
     writeLine(headerFile, 'public slots:')
-    writeLine(headerFile, '    bool connectDevice();')
-    writeLine(headerFile, '    void disconnectDevice();')
-    writeLine(headerFile, '    bool reconnectDevice();')
+    writeLine(headerFile, '    bool connectDevice() override;')
+    writeLine(headerFile, '    void disconnectDevice() override;')
+    writeLine(headerFile, '    bool reconnectDevice() override;')
     writeLine(headerFile)
 
     # Write registers value changed signals
     writeLine(headerFile, 'signals:')
-    writeLine(headerFile, '    void reachableChanged(bool reachable);')
     writeLine(headerFile, '    void checkReachabilityFailed();')
     writeLine(headerFile, '    void checkReachableRetriesChanged(uint checkReachableRetries);')
     writeLine(headerFile)
-    writeLine(headerFile, '    void initializationFinished(bool success);')
     writeLine(headerFile, '    void updateFinished();')
     writeLine(headerFile)
     writeLine(headerFile, '    void endiannessChanged(ModbusDataUtils::ByteOrder endianness);')
@@ -257,18 +256,18 @@ def writeTcpSourceFile():
 
     # Constructor
     writeLine(sourceFile, '%s::%s(const QHostAddress &hostAddress, uint port, quint16 slaveId, QObject *parent) :' % (className, className))
-    writeLine(sourceFile, '    QObject(parent),')
-    writeLine(sourceFile, '    m_modbusTcpMaster(new ModbusTcpMaster(hostAddress, port, this)),')
-    writeLine(sourceFile, '    m_slaveId(slaveId)')
+    writeLine(sourceFile, '    ModbusTcpConnection{parent},')
+    writeLine(sourceFile, '    m_modbusTcpMaster{new ModbusTcpMaster(hostAddress, port, this)},')
+    writeLine(sourceFile, '    m_slaveId{slaveId}')
     writeLine(sourceFile, '{')
     writeLine(sourceFile, '    setupConnection();')
     writeLine(sourceFile, '}')
     writeLine(sourceFile)
 
     writeLine(sourceFile, '%s::%s(ModbusTcpMaster *modbusTcpMaster, quint16 slaveId, QObject *parent) :' % (className, className))
-    writeLine(sourceFile, '    QObject(parent),')
-    writeLine(sourceFile, '    m_modbusTcpMaster(modbusTcpMaster),')
-    writeLine(sourceFile, '    m_slaveId(slaveId)')
+    writeLine(sourceFile, '    ModbusTcpConnection{parent},')
+    writeLine(sourceFile, '    m_modbusTcpMaster{modbusTcpMaster},')
+    writeLine(sourceFile, '    m_slaveId{slaveId}')
     writeLine(sourceFile, '{')
     writeLine(sourceFile, '    setupConnection();')
     writeLine(sourceFile, '}')

@@ -17,6 +17,7 @@ gcc {
 
 HEADERS += \
     modbusdatautils.h \
+    modbustcpconnection.h \
     modbustcpmaster.h \
     queuedmodbusreply.h
 
