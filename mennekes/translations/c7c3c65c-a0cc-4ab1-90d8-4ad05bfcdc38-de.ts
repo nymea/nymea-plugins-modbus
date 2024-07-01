@@ -1,40 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1">
+<TS version="2.1" language="de">
 <context>
     <name>IntegrationPluginMennekes</name>
     <message>
         <location filename="../integrationpluginmennekes.cpp" line="59"/>
         <location filename="../integrationpluginmennekes.cpp" line="101"/>
         <source>The network device discovery is not available.</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Netzwerksuche ist nicht verfügbar.</translation>
     </message>
     <message>
         <location filename="../integrationpluginmennekes.cpp" line="138"/>
         <source>No modbus RTU master with appropriate settings found. Please set up a modbus RTU master with a baudrate of 57600, 8 data bits, 2 stop bits and no parity first.</source>
-        <translation type="unfinished"></translation>
+        <translation>Es konnte kein Modbus RTU Master mit den erforderlichen Einstellungen gefunden werden. Bitte richte einen Modbus RTU Master ein mit einer Baudrate von 57600, 8 Daten Bits, 2 Stop Bits und ohne Parität.</translation>
     </message>
     <message>
         <location filename="../integrationpluginmennekes.cpp" line="188"/>
         <location filename="../integrationpluginmennekes.cpp" line="250"/>
         <source>Failed to set up the connection to the EV charger. Please specify either manually the IP address or get the MAC address using the network discovery.</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Verbindung zur Ladestation konnte nicht eingerichtet werden. Bitte gib entweder manuell die IP-Adresse ein oder suche die MAC-Adresse mithilfe der automatischen Netzwerksuche.</translation>
     </message>
     <message>
         <location filename="../integrationpluginmennekes.cpp" line="650"/>
         <location filename="../integrationpluginmennekes.cpp" line="845"/>
         <source>Error communicating with the wallbox.</source>
-        <translation type="unfinished"></translation>
+        <translation>Fehler bei der Kommunikation mit der Ladestation.</translation>
     </message>
     <message>
         <location filename="../integrationpluginmennekes.cpp" line="938"/>
         <source>The Modbus address not valid. It must be a value between 1 and 254.</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Modbus Adresse ist nicht gültig. Die Adresse muss ein Wert zwischen 1 und 254 sein.</translation>
     </message>
     <message>
         <location filename="../integrationpluginmennekes.cpp" line="945"/>
         <source>The Modbus RTU resource is not available.</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Modbus RTU Verbindung ist nicht verfügbar.</translation>
     </message>
 </context>
 <context>
@@ -43,31 +43,31 @@
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="89"/>
         <source>AMTRON Charge Control/Professional</source>
         <extracomment>The name of the ThingClass ({fb48e067-2237-4eaf-8d2c-681d406395fc})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>AMTRON Charge Control/Professional</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="83"/>
         <source>1</source>
         <extracomment>The name of a possible value of StateType {64b64747-7a67-419c-88d1-c63872ef83b7} of ThingClass amtronCompact20</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>1</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="86"/>
         <source>3</source>
         <extracomment>The name of a possible value of StateType {64b64747-7a67-419c-88d1-c63872ef83b7} of ThingClass amtronCompact20</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>3</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="92"/>
         <source>AMTRON Compact 2.0s</source>
         <extracomment>The name of the ThingClass ({5c9c3b51-26e0-4f92-b6cf-d77bcae3d47c})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>AMTRON Compact 2.0s</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="95"/>
         <source>AMTRON XTRA/Premium</source>
         <extracomment>The name of the ThingClass ({01995c4f-a7b5-4bdd-9333-486390ff75fd})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>AMTRON XTRA/Premium</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="98"/>
@@ -79,7 +79,7 @@
 The name of the StateType ({96b9c121-3caf-44fe-8380-483b9b40dbd9}) of ThingClass amtronHCC3
 ----------
 The name of the StateType ({8b2eb039-b4e3-49ae-94fc-a8b825fd8d9b}) of ThingClass amtronECU</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Ladeleistung</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="107"/>
@@ -91,7 +91,7 @@ The name of the StateType ({8b2eb039-b4e3-49ae-94fc-a8b825fd8d9b}) of ThingClass
 The name of the StateType ({982af18d-dbfb-4dd8-b5b3-4d22c64642a6}) of ThingClass amtronHCC3
 ----------
 The name of the StateType ({c8c812c6-dd56-425c-8dd1-8dd621bd3a11}) of ThingClass amtronECU</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Laden</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="116"/>
@@ -112,13 +112,13 @@ The name of the StateType ({130585ca-14e9-45b7-87d7-c0d935228104}) of ThingClass
 The name of the ParamType (ThingClass: amtronECU, ActionType: power, ID: {53dc845a-a397-4c90-890b-fd50512666f4})
 ----------
 The name of the StateType ({53dc845a-a397-4c90-890b-fd50512666f4}) of ThingClass amtronECU</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Ladefreigabe erteilt</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="134"/>
         <source>Charging phases</source>
         <extracomment>The name of the StateType ({b415c330-9295-41f2-b117-14b9fc0b2ed9}) of ThingClass amtronCompact20</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Phasen</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="137"/>
@@ -130,7 +130,7 @@ The name of the StateType ({53dc845a-a397-4c90-890b-fd50512666f4}) of ThingClass
 The name of the StateType ({899e270f-7666-44b3-8509-0dad43ac9c4c}) of ThingClass amtronHCC3
 ----------
 The name of the StateType ({352be84a-f5c6-434d-8a92-a4065a24ff0a}) of ThingClass amtronECU</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Verbunden</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="146"/>
@@ -139,7 +139,7 @@ The name of the StateType ({352be84a-f5c6-434d-8a92-a4065a24ff0a}) of ThingClass
         <extracomment>The name of the StateType ({05c095b6-2395-4bbf-8d14-a77576ce7717}) of ThingClass amtronHCC3
 ----------
 The name of the StateType ({a51d0beb-f4fd-4279-85b5-b436b283a86e}) of ThingClass amtronECU</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Angeschlossene Phasen</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="152"/>
@@ -148,7 +148,7 @@ The name of the StateType ({a51d0beb-f4fd-4279-85b5-b436b283a86e}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: amtronCompact20, ActionType: desiredPhaseCount, ID: {64b64747-7a67-419c-88d1-c63872ef83b7})
 ----------
 The name of the StateType ({64b64747-7a67-419c-88d1-c63872ef83b7}) of ThingClass amtronCompact20</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Gewünschte Phasenanzahl</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="158"/>
@@ -157,7 +157,7 @@ The name of the StateType ({64b64747-7a67-419c-88d1-c63872ef83b7}) of ThingClass
         <extracomment>The name of the StateType ({25717de6-dd6c-4f06-a0fc-ca11bbef1598}) of ThingClass amtronCompact20
 ----------
 The name of the StateType ({00813b6e-bd93-4728-a11a-aac6298503e6}) of ThingClass amtronECU</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Firmware Version</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="164"/>
@@ -166,7 +166,7 @@ The name of the StateType ({00813b6e-bd93-4728-a11a-aac6298503e6}) of ThingClass
         <extracomment>The name of the ParamType (ThingClass: amtronHCC3, Type: thing, ID: {0dae61b0-5d2d-49df-bdac-93aec86b2085})
 ----------
 The name of the ParamType (ThingClass: amtronECU, Type: thing, ID: {36d11ea0-524a-43d2-b157-f69a744ac5d8})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>IP-Adresse</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="170"/>
@@ -175,13 +175,13 @@ The name of the ParamType (ThingClass: amtronECU, Type: thing, ID: {36d11ea0-524
         <extracomment>The name of the ParamType (ThingClass: amtronHCC3, Type: thing, ID: {6112045e-e472-4475-bc11-f373e9c39cdd})
 ----------
 The name of the ParamType (ThingClass: amtronECU, Type: thing, ID: {0b9c1466-5eb9-4b25-9450-513e2484a3b4})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>MAC-Adresse</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="176"/>
         <source>MENNEKES</source>
         <extracomment>The name of the vendor ({7c585571-e3a3-458c-a598-e11f510cbc10})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>MENNEKES</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="179"/>
@@ -202,31 +202,31 @@ The name of the StateType ({87b4e9cb-e57b-461a-90f9-207bb5dab44c}) of ThingClass
 The name of the ParamType (ThingClass: amtronECU, ActionType: maxChargingCurrent, ID: {fb12ff61-f88a-4bfc-930f-a4a55b342d1b})
 ----------
 The name of the StateType ({fb12ff61-f88a-4bfc-930f-a4a55b342d1b}) of ThingClass amtronECU</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Maximaler Ladestrom</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="197"/>
         <source>Mennekes</source>
         <extracomment>The name of the plugin Mennekes ({c7c3c65c-a0cc-4ab1-90d8-4ad05bfcdc38})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Mennekes</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="200"/>
         <source>Modbus RTU master</source>
         <extracomment>The name of the ParamType (ThingClass: amtronCompact20, Type: thing, ID: {b73ce51f-792a-4875-a169-76ab16597081})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Modbus RTU Master</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="203"/>
         <source>Modbus slave address</source>
         <extracomment>The name of the ParamType (ThingClass: amtronCompact20, Type: thing, ID: {f98609c4-c7e7-49df-aebf-34122974c019})</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Modbus Slave Adresse</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="206"/>
         <source>Off</source>
         <extracomment>The name of a possible value of StateType {572e45f1-1146-497a-8b00-704e0db50379} of ThingClass amtronCompact20</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Aus</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="209"/>
@@ -238,7 +238,7 @@ The name of the StateType ({fb12ff61-f88a-4bfc-930f-a4a55b342d1b}) of ThingClass
 The name of the StateType ({fed5a1ba-48f5-41ef-98f7-9356bcae7612}) of ThingClass amtronHCC3
 ----------
 The name of the StateType ({c93d7377-8a4a-4c35-9876-1032d8b309e3}) of ThingClass amtronECU</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Angesteckt</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="218"/>
@@ -250,7 +250,7 @@ The name of the StateType ({c93d7377-8a4a-4c35-9876-1032d8b309e3}) of ThingClass
 The name of the StateType ({c5882da3-963b-4cb3-ba1a-44d16d219e7e}) of ThingClass amtronHCC3
 ----------
 The name of the StateType ({2ce6b363-5b8d-4703-8376-611a0e573f71}) of ThingClass amtronECU</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Energie der aktuellen Ladung</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="227"/>
@@ -262,13 +262,13 @@ The name of the StateType ({2ce6b363-5b8d-4703-8376-611a0e573f71}) of ThingClass
 The name of the ActionType ({130585ca-14e9-45b7-87d7-c0d935228104}) of ThingClass amtronHCC3
 ----------
 The name of the ActionType ({53dc845a-a397-4c90-890b-fd50512666f4}) of ThingClass amtronECU</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Erteile Ladefreigabe</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="236"/>
         <source>Set desired phase count</source>
         <extracomment>The name of the ActionType ({64b64747-7a67-419c-88d1-c63872ef83b7}) of ThingClass amtronCompact20</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Setze gewünschte Phasenanzahl</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="239"/>
@@ -280,13 +280,13 @@ The name of the ActionType ({53dc845a-a397-4c90-890b-fd50512666f4}) of ThingClas
 The name of the ActionType ({87b4e9cb-e57b-461a-90f9-207bb5dab44c}) of ThingClass amtronHCC3
 ----------
 The name of the ActionType ({fb12ff61-f88a-4bfc-930f-a4a55b342d1b}) of ThingClass amtronECU</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Setze maximalen Ladestrom</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="248"/>
         <source>Set solar charging mode</source>
         <extracomment>The name of the ActionType ({572e45f1-1146-497a-8b00-704e0db50379}) of ThingClass amtronCompact20</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Setze Solar Charging Modus</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="251"/>
@@ -295,25 +295,25 @@ The name of the ActionType ({fb12ff61-f88a-4bfc-930f-a4a55b342d1b}) of ThingClas
         <extracomment>The name of the ParamType (ThingClass: amtronCompact20, ActionType: solarChargingMode, ID: {572e45f1-1146-497a-8b00-704e0db50379})
 ----------
 The name of the StateType ({572e45f1-1146-497a-8b00-704e0db50379}) of ThingClass amtronCompact20</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Solar Charging Modus</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="257"/>
         <source>Standard</source>
         <extracomment>The name of a possible value of StateType {572e45f1-1146-497a-8b00-704e0db50379} of ThingClass amtronCompact20</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Standard</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="260"/>
         <source>Sunshine</source>
         <extracomment>The name of a possible value of StateType {572e45f1-1146-497a-8b00-704e0db50379} of ThingClass amtronCompact20</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Sonnenschein</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="263"/>
         <source>Sunshine+</source>
         <extracomment>The name of a possible value of StateType {572e45f1-1146-497a-8b00-704e0db50379} of ThingClass amtronCompact20</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Sonnenschein+</translation>
     </message>
     <message>
         <location filename="../../../build-nymea-plugins-modbus-Desktop-Debug/mennekes/plugininfo.h" line="266"/>
@@ -325,7 +325,7 @@ The name of the StateType ({572e45f1-1146-497a-8b00-704e0db50379}) of ThingClass
 The name of the StateType ({3d1384fc-8b46-42b0-b043-23279d8c7665}) of ThingClass amtronHCC3
 ----------
 The name of the StateType ({5b8bfdf0-eaa6-41d0-8f2f-119b06aed181}) of ThingClass amtronECU</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Gesamte verbrauchte Energie</translation>
     </message>
 </context>
 </TS>
