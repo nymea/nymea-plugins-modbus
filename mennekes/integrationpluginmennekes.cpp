@@ -1,4 +1,4 @@
-#/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
 * Copyright 2013 - 2022, nymea GmbH
 * Contact: contact@nymea.io
@@ -342,6 +342,13 @@ void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
             int effectiveCurrent = power ? maxChargingCurrent : 0;
             qCInfo(dcMennekes()) << "Executing power action:" << power << "max current:" << maxChargingCurrent << "-> effective current" << effectiveCurrent;
             QModbusReply *reply = amtronECUConnection->setHemsCurrentLimit(effectiveCurrent);
+            if (!reply) {
+                qCWarning(dcMennekes()) << "Could not execute action:" << amtronECUConnection->modbusTcpMaster()->errorString();
+                info->finish(Thing::ThingErrorHardwareFailure);
+                return;
+            }
+
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
             connect(reply, &QModbusReply::finished, info, [info, reply, power](){
                 if (reply->error() == QModbusDevice::NoError) {
                     info->thing()->setStateValue(amtronECUPowerStateTypeId, power);
@@ -359,6 +366,13 @@ void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
             int effectiveCurrent = power ? maxChargingCurrent : 0;
             qCInfo(dcMennekes()) << "Executing max current action:" << maxChargingCurrent << "Power is" << power << "-> effective:" << effectiveCurrent;
             QModbusReply *reply = amtronECUConnection->setHemsCurrentLimit(effectiveCurrent);
+            if (!reply) {
+                qCWarning(dcMennekes()) << "Could not execute action:" << amtronECUConnection->modbusTcpMaster()->errorString();
+                info->finish(Thing::ThingErrorHardwareFailure);
+                return;
+            }
+
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
             connect(reply, &QModbusReply::finished, info, [info, reply, maxChargingCurrent](){
                 if (reply->error() == QModbusDevice::NoError) {
                     info->thing()->setStateValue(amtronECUMaxChargingCurrentStateTypeId, maxChargingCurrent);
@@ -390,6 +404,13 @@ void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
             }
 
             QModbusReply *reply = amtronHCC3Connection->setChangeChargeState(chargeState);
+            if (!reply) {
+                qCWarning(dcMennekes()) << "Could not execute action:" << amtronHCC3Connection->modbusTcpMaster()->errorString();
+                info->finish(Thing::ThingErrorHardwareFailure);
+                return;
+            }
+
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
             connect(reply, &QModbusReply::finished, info, [info, reply, power](){
                 if (reply->error() == QModbusDevice::NoError) {
                     info->thing()->setStateValue(amtronHCC3PowerStateTypeId, power);
@@ -403,6 +424,13 @@ void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
         if (info->action().actionTypeId() == amtronHCC3MaxChargingCurrentActionTypeId) {
             int maxChargingCurrent = info->action().paramValue(amtronHCC3MaxChargingCurrentActionMaxChargingCurrentParamTypeId).toInt();
             QModbusReply *reply = amtronHCC3Connection->setCustomerCurrentLimitation(maxChargingCurrent);
+            if (!reply) {
+                qCWarning(dcMennekes()) << "Could not execute action:" << amtronHCC3Connection->modbusTcpMaster()->errorString();
+                info->finish(Thing::ThingErrorHardwareFailure);
+                return;
+            }
+
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
             connect(reply, &QModbusReply::finished, info, [info, reply, maxChargingCurrent](){
                 if (reply->error() == QModbusDevice::NoError) {
                     info->thing()->setStateValue(amtronHCC3MaxChargingCurrentStateTypeId, maxChargingCurrent);
@@ -421,6 +449,7 @@ void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
             bool power = info->action().paramValue(amtronCompact20PowerActionPowerParamTypeId).toBool();
 
             ModbusRtuReply *reply = amtronCompact20Connection->setChargingReleaseEnergyManager(power ? 1 : 0);
+            // Note: modbus RTU replies delete them self on finished
             connect(reply, &ModbusRtuReply::finished, info, [info, reply, power](){
                 if (reply->error() == ModbusRtuReply::NoError) {
                     info->thing()->setStateValue(amtronCompact20PowerStateTypeId, power);
@@ -441,6 +470,7 @@ void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
             }
 
             ModbusRtuReply *reply = amtronCompact20Connection->setChargingCurrentEnergyManager(value);
+            // Note: modbus RTU replies delete them self on finished
             connect(reply, &ModbusRtuReply::finished, info, [info, reply, maxChargingCurrent](){
                 if (reply->error() == ModbusRtuReply::NoError) {
                     info->thing()->setStateValue(amtronCompact20MaxChargingCurrentStateTypeId, maxChargingCurrent);
@@ -454,6 +484,7 @@ void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
             int desiredPhaseCount = info->action().paramValue(amtronCompact20DesiredPhaseCountActionDesiredPhaseCountParamTypeId).toInt();
 
             ModbusRtuReply *reply = amtronCompact20Connection->setRequestedPhases(desiredPhaseCount == 1 ? AmtronCompact20ModbusRtuConnection::PhaseModeSingle : AmtronCompact20ModbusRtuConnection::PhaseModeAll);
+            // Note: modbus RTU replies delete them self on finished
             connect(reply, &ModbusRtuReply::finished, info, [info, reply, desiredPhaseCount](){
                 if (reply->error() == ModbusRtuReply::NoError) {
                     info->thing()->setStateValue(amtronCompact20DesiredPhaseCountStateTypeId, desiredPhaseCount);
@@ -466,6 +497,7 @@ void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
         if (info->action().actionTypeId() == amtronCompact20SolarChargingModeActionTypeId) {
             QString solarChargingMode = info->action().paramValue(amtronCompact20SolarChargingModeActionSolarChargingModeParamTypeId).toString();
             ModbusRtuReply *reply = amtronCompact20Connection->setSolarChargingMode(solarChargingModeMap.key(solarChargingMode));
+            // Note: modbus RTU replies delete them self on finished
             connect(reply, &ModbusRtuReply::finished, info, [info, reply, solarChargingMode](){
                 if (reply->error() == ModbusRtuReply::NoError) {
                     info->thing()->setStateValue(amtronCompact20SolarChargingModeStateTypeId, solarChargingMode);
@@ -843,7 +875,6 @@ void IntegrationPluginMennekes::setupAmtronHCC3Connection(ThingSetupInfo *info)
             amtronHCC3Connection->reconnectDevice();
         }
     });
-
 
     connect(amtronHCC3Connection, &AmtronHCC3ModbusTcpConnection::updateFinished, thing, [amtronHCC3Connection, thing](){
         qCDebug(dcMennekes()) << "Amtron HCC3 update finished:" << thing->name() << amtronHCC3Connection;
