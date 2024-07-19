@@ -16,11 +16,20 @@
                     "interfaces": ["evcharger", "smartmeterconsumer", "connectable"],
                     "paramTypes": [
                         {
+                            "id": "36d11ea0-524a-43d2-b157-f69a744ac5d8",
+                            "name": "address",
+                            "displayName": "Host address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": ""
+                        },
+                        {
                             "id": "0b9c1466-5eb9-4b25-9450-513e2484a3b4",
                             "name":"macAddress",
                             "displayName": "MAC address",
                             "type": "QString",
                             "inputType": "MacAddress",
+                            "readOnly": true,
                             "defaultValue": ""
                         }
                     ],
@@ -123,11 +132,20 @@
                     "interfaces": ["evcharger", "smartmeterconsumer", "connectable"],
                     "paramTypes": [
                         {
+                            "id": "0dae61b0-5d2d-49df-bdac-93aec86b2085",
+                            "name": "address",
+                            "displayName": "Host address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": ""
+                        },
+                        {
                             "id": "6112045e-e472-4475-bc11-f373e9c39cdd",
                             "name":"macAddress",
                             "displayName": "MAC address",
                             "type": "QString",
                             "inputType": "MacAddress",
+                            "readOnly": true,
                             "defaultValue": ""
                         }
                     ],

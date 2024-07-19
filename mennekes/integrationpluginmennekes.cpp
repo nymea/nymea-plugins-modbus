@@ -121,7 +121,6 @@ void IntegrationPluginMennekes::discoverThings(ThingDiscoveryInfo *info)
                     descriptor.setThingId(existingThings.first()->id());
                 }
 
-
                 ParamList params;
                 params << Param(amtronHCC3ThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
                 // Note: if we discover also the port and modbusaddress, we must fill them in from the discovery here, for now everywhere the defaults...
@@ -136,7 +135,7 @@ void IntegrationPluginMennekes::discoverThings(ThingDiscoveryInfo *info)
         AmtronCompact20Discovery *discovery = new AmtronCompact20Discovery(hardwareManager()->modbusRtuResource(), info);
         connect(discovery, &AmtronCompact20Discovery::discoveryFinished, info, [this, info, discovery](bool modbusMasterAvailable){
             if (!modbusMasterAvailable) {
-                info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("No modbus RTU master with appropriate settings found. Please set up a modbus RTU master with a baudrate of 57600, 8 data bis, 2 stop bits and no parity first."));
+                info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("No modbus RTU master with appropriate settings found. Please set up a modbus RTU master with a baudrate of 57600, 8 data bits, 2 stop bits and no parity first."));
                 return;
             }
 
@@ -182,40 +181,52 @@ void IntegrationPluginMennekes::setupThing(ThingSetupInfo *info)
         }
 
         MacAddress macAddress = MacAddress(thing->paramValue(amtronECUThingMacAddressParamTypeId).toString());
-        if (!macAddress.isValid()) {
-            qCWarning(dcMennekes()) << "The configured mac address is not valid" << thing->params();
-            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The MAC address is not known. Please reconfigure the thing."));
+        QHostAddress address = QHostAddress(thing->paramValue(amtronECUThingAddressParamTypeId).toString());
+
+        if (macAddress.isNull() && address.isNull()) {
+            qCWarning(dcMennekes()) << "There is no MAC address and no host address configured in the thing params. Cannot set up thing" << thing;
+            info->finish(Thing::ThingErrorMissingParameter, QT_TR_NOOP("Failed to set up the connection to the EV charger. Please specify either manually the IP address or get the MAC address using the network discovery."));
             return;
         }
 
-        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(macAddress);
-        m_monitors.insert(thing, monitor);
+        if (!macAddress.isNull()) {
+            // ########### MAC based connection
+            qCDebug(dcMennekes()) << "Setting up MAC address based ModbusTcp connection for" << thing;
+            NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(macAddress);
+            m_monitors.insert(thing, monitor);
 
-        QHostAddress address = monitor->networkDeviceInfo().address();
-        if (address.isNull()) {
-            qCWarning(dcMennekes()) << "Cannot set up thing. The host address is not known yet...";
-            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
-            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("The host address is not known yet. Trying later again."));
-            return;
-        }
-
-        connect(info, &ThingSetupInfo::aborted, monitor, [=](){
-            if (m_monitors.contains(thing)) {
-                qCDebug(dcMennekes()) << "Unregistering monitor because setup has been aborted.";
-                hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
-            }
-        });
-
-        if (monitor->reachable()) {
-            setupAmtronECUConnection(info);
-        } else {
-            qCDebug(dcMennekes()) << "Waiting for the network monitor to get reachable before continue to set up the connection" << thing->name() << address.toString() << "...";
-            connect(monitor, &NetworkDeviceMonitor::reachableChanged, info, [=](bool reachable){
-                if (reachable) {
-                    qCDebug(dcMennekes()) << "The monitor for thing setup" << thing->name() << "is now reachable. Continue setup...";
-                    setupAmtronECUConnection(info);
+            // Make sure the monitor gets cleaned up when setup gets aborted
+            connect(info, &ThingSetupInfo::aborted, monitor, [this, thing](){
+                if (m_monitors.contains(thing)) {
+                    qCDebug(dcMennekes()) << "Unregistering monitor because setup has been aborted.";
+                    hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
                 }
             });
+
+            // If this is the initial setup, wait for the monitor to be reachable and make sure
+            // we have an IP address, otherwise let the monitor do his work
+            if (info->isInitialSetup()) {
+                // Continue with setup only if we know that the network device is reachable
+                if (monitor->reachable()) {
+                    setupAmtronECUConnection(info);
+                } else {
+                    // otherwise wait until we reach the networkdevice before setting up the device
+                    qCDebug(dcMennekes()) << "Network device" << thing->name() << "is not reachable yet. Continue with the setup once reachable.";
+                    connect(monitor, &NetworkDeviceMonitor::reachableChanged, info, [=](bool reachable){
+                        if (reachable) {
+                            qCDebug(dcMennekes()) << "Network device" << thing->name() << "is now reachable. Continue with the setup...";
+                            setupAmtronECUConnection(info);
+                        }
+                    });
+                }
+            } else {
+                // Continue setup with monitor...
+                setupAmtronECUConnection(info);
+            }
+        } else {
+            // ########### IP based connection
+            qCDebug(dcMennekes()) << "Setting up IP address based ModbusTcp connection for" << thing;
+            setupAmtronECUConnection(info);
         }
 
         return;
@@ -232,41 +243,54 @@ void IntegrationPluginMennekes::setupThing(ThingSetupInfo *info)
         }
 
         MacAddress macAddress = MacAddress(thing->paramValue(amtronHCC3ThingMacAddressParamTypeId).toString());
-        if (!macAddress.isValid()) {
-            qCWarning(dcMennekes()) << "The configured mac address is not valid" << thing->params();
-            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The MAC address is not known. Please reconfigure the thing."));
+        QHostAddress address = QHostAddress(thing->paramValue(amtronHCC3ThingAddressParamTypeId).toString());
+
+        if (macAddress.isNull() && address.isNull()) {
+            qCWarning(dcMennekes()) << "There is no MAC address and no host address configured in the thing params. Cannot set up thing" << thing;
+            info->finish(Thing::ThingErrorMissingParameter, QT_TR_NOOP("Failed to set up the connection to the EV charger. Please specify either manually the IP address or get the MAC address using the network discovery."));
             return;
         }
 
-        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(macAddress);
-        m_monitors.insert(thing, monitor);
+        if (!macAddress.isNull()) {
+            // ########### MAC based connection
+            qCDebug(dcMennekes()) << "Setting up MAC address based ModbusTcp connection for" << thing;
+            NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(macAddress);
+            m_monitors.insert(thing, monitor);
 
-        QHostAddress address = monitor->networkDeviceInfo().address();
-        if (address.isNull()) {
-            qCWarning(dcMennekes()) << "Cannot set up thing. The host address is not known yet...";
-            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
-            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("The host address is not known yet. Trying later again."));
-            return;
-        }
-
-        connect(info, &ThingSetupInfo::aborted, monitor, [=](){
-            if (m_monitors.contains(thing)) {
-                qCDebug(dcMennekes()) << "Unregistering monitor because setup has been aborted.";
-                hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
-            }
-        });
-
-        if (monitor->reachable()) {
-            setupAmtronHCC3Connection(info);
-        } else {
-            qCDebug(dcMennekes()) << "Waiting for the network monitor to get reachable before continue to set up the connection" << thing->name() << address.toString() << "...";
-            connect(monitor, &NetworkDeviceMonitor::reachableChanged, info, [=](bool reachable){
-                if (reachable) {
-                    qCDebug(dcMennekes()) << "The monitor for thing setup" << thing->name() << "is now reachable. Continue setup...";
-                    setupAmtronHCC3Connection(info);
+            // Make sure the monitor gets cleaned up when setup gets aborted
+            connect(info, &ThingSetupInfo::aborted, monitor, [this, thing](){
+                if (m_monitors.contains(thing)) {
+                    qCDebug(dcMennekes()) << "Unregistering monitor because setup has been aborted.";
+                    hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
                 }
             });
+
+            // If this is the initial setup, wait for the monitor to be reachable and make sure
+            // we have an IP address, otherwise let the monitor do his work
+            if (info->isInitialSetup()) {
+                // Continue with setup only if we know that the network device is reachable
+                if (monitor->reachable()) {
+                    setupAmtronHCC3Connection(info);
+                } else {
+                    // otherwise wait until we reach the networkdevice before setting up the device
+                    qCDebug(dcMennekes()) << "Network device" << thing->name() << "is not reachable yet. Continue with the setup once reachable.";
+                    connect(monitor, &NetworkDeviceMonitor::reachableChanged, info, [=](bool reachable){
+                        if (reachable) {
+                            qCDebug(dcMennekes()) << "Network device" << thing->name() << "is now reachable. Continue with the setup...";
+                            setupAmtronHCC3Connection(info);
+                        }
+                    });
+                }
+            } else {
+                // Continue setup with monitor...
+                setupAmtronHCC3Connection(info);
+            }
+        } else {
+            // ########### IP based connection
+            qCDebug(dcMennekes()) << "Setting up IP address based ModbusTcp connection for" << thing;
+            setupAmtronHCC3Connection(info);
         }
+
         return;
     }
 
@@ -318,6 +342,13 @@ void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
             int effectiveCurrent = power ? maxChargingCurrent : 0;
             qCInfo(dcMennekes()) << "Executing power action:" << power << "max current:" << maxChargingCurrent << "-> effective current" << effectiveCurrent;
             QModbusReply *reply = amtronECUConnection->setHemsCurrentLimit(effectiveCurrent);
+            if (!reply) {
+                qCWarning(dcMennekes()) << "Could not execute action:" << amtronECUConnection->modbusTcpMaster()->errorString();
+                info->finish(Thing::ThingErrorHardwareFailure);
+                return;
+            }
+
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
             connect(reply, &QModbusReply::finished, info, [info, reply, power](){
                 if (reply->error() == QModbusDevice::NoError) {
                     info->thing()->setStateValue(amtronECUPowerStateTypeId, power);
@@ -328,12 +359,20 @@ void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
                 }
             });
         }
+
         if (info->action().actionTypeId() == amtronECUMaxChargingCurrentActionTypeId) {
             bool power = info->thing()->stateValue(amtronECUPowerStateTypeId).toBool();
             int maxChargingCurrent = info->action().paramValue(amtronECUMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toInt();
             int effectiveCurrent = power ? maxChargingCurrent : 0;
             qCInfo(dcMennekes()) << "Executing max current action:" << maxChargingCurrent << "Power is" << power << "-> effective:" << effectiveCurrent;
             QModbusReply *reply = amtronECUConnection->setHemsCurrentLimit(effectiveCurrent);
+            if (!reply) {
+                qCWarning(dcMennekes()) << "Could not execute action:" << amtronECUConnection->modbusTcpMaster()->errorString();
+                info->finish(Thing::ThingErrorHardwareFailure);
+                return;
+            }
+
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
             connect(reply, &QModbusReply::finished, info, [info, reply, maxChargingCurrent](){
                 if (reply->error() == QModbusDevice::NoError) {
                     info->thing()->setStateValue(amtronECUMaxChargingCurrentStateTypeId, maxChargingCurrent);
@@ -365,6 +404,13 @@ void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
             }
 
             QModbusReply *reply = amtronHCC3Connection->setChangeChargeState(chargeState);
+            if (!reply) {
+                qCWarning(dcMennekes()) << "Could not execute action:" << amtronHCC3Connection->modbusTcpMaster()->errorString();
+                info->finish(Thing::ThingErrorHardwareFailure);
+                return;
+            }
+
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
             connect(reply, &QModbusReply::finished, info, [info, reply, power](){
                 if (reply->error() == QModbusDevice::NoError) {
                     info->thing()->setStateValue(amtronHCC3PowerStateTypeId, power);
@@ -378,6 +424,13 @@ void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
         if (info->action().actionTypeId() == amtronHCC3MaxChargingCurrentActionTypeId) {
             int maxChargingCurrent = info->action().paramValue(amtronHCC3MaxChargingCurrentActionMaxChargingCurrentParamTypeId).toInt();
             QModbusReply *reply = amtronHCC3Connection->setCustomerCurrentLimitation(maxChargingCurrent);
+            if (!reply) {
+                qCWarning(dcMennekes()) << "Could not execute action:" << amtronHCC3Connection->modbusTcpMaster()->errorString();
+                info->finish(Thing::ThingErrorHardwareFailure);
+                return;
+            }
+
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
             connect(reply, &QModbusReply::finished, info, [info, reply, maxChargingCurrent](){
                 if (reply->error() == QModbusDevice::NoError) {
                     info->thing()->setStateValue(amtronHCC3MaxChargingCurrentStateTypeId, maxChargingCurrent);
@@ -396,6 +449,7 @@ void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
             bool power = info->action().paramValue(amtronCompact20PowerActionPowerParamTypeId).toBool();
 
             ModbusRtuReply *reply = amtronCompact20Connection->setChargingReleaseEnergyManager(power ? 1 : 0);
+            // Note: modbus RTU replies delete them self on finished
             connect(reply, &ModbusRtuReply::finished, info, [info, reply, power](){
                 if (reply->error() == ModbusRtuReply::NoError) {
                     info->thing()->setStateValue(amtronCompact20PowerStateTypeId, power);
@@ -416,6 +470,7 @@ void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
             }
 
             ModbusRtuReply *reply = amtronCompact20Connection->setChargingCurrentEnergyManager(value);
+            // Note: modbus RTU replies delete them self on finished
             connect(reply, &ModbusRtuReply::finished, info, [info, reply, maxChargingCurrent](){
                 if (reply->error() == ModbusRtuReply::NoError) {
                     info->thing()->setStateValue(amtronCompact20MaxChargingCurrentStateTypeId, maxChargingCurrent);
@@ -429,6 +484,7 @@ void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
             int desiredPhaseCount = info->action().paramValue(amtronCompact20DesiredPhaseCountActionDesiredPhaseCountParamTypeId).toInt();
 
             ModbusRtuReply *reply = amtronCompact20Connection->setRequestedPhases(desiredPhaseCount == 1 ? AmtronCompact20ModbusRtuConnection::PhaseModeSingle : AmtronCompact20ModbusRtuConnection::PhaseModeAll);
+            // Note: modbus RTU replies delete them self on finished
             connect(reply, &ModbusRtuReply::finished, info, [info, reply, desiredPhaseCount](){
                 if (reply->error() == ModbusRtuReply::NoError) {
                     info->thing()->setStateValue(amtronCompact20DesiredPhaseCountStateTypeId, desiredPhaseCount);
@@ -441,6 +497,7 @@ void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
         if (info->action().actionTypeId() == amtronCompact20SolarChargingModeActionTypeId) {
             QString solarChargingMode = info->action().paramValue(amtronCompact20SolarChargingModeActionSolarChargingModeParamTypeId).toString();
             ModbusRtuReply *reply = amtronCompact20Connection->setSolarChargingMode(solarChargingModeMap.key(solarChargingMode));
+            // Note: modbus RTU replies delete them self on finished
             connect(reply, &ModbusRtuReply::finished, info, [info, reply, solarChargingMode](){
                 if (reply->error() == ModbusRtuReply::NoError) {
                     info->thing()->setStateValue(amtronCompact20SolarChargingModeStateTypeId, solarChargingMode);
@@ -541,30 +598,70 @@ void IntegrationPluginMennekes::setupAmtronECUConnection(ThingSetupInfo *info)
 {
     Thing *thing = info->thing();
 
-    QHostAddress address = m_monitors.value(thing)->networkDeviceInfo().address();
+    // Set up depending on the available params, mac can only be filled in by discovery (ro param),
+    // the ip could be used as static manual config for VPN networks or WAN IP's
+    QHostAddress address;
+    if (m_monitors.contains(thing)) {
+        address = m_monitors.value(thing)->networkDeviceInfo().address();
+    } else {
+        address = QHostAddress(thing->paramValue(amtronECUThingAddressParamTypeId).toString());
+        if (address.isNull()) {
+            qCWarning(dcMennekes()) << "Could not set up the Amtron ECU connection. The IP address is not valid.";
+            info->finish(Thing::ThingErrorHardwareNotAvailable);
+            return;
+        }
+    }
 
-    qCDebug(dcMennekes()) << "Setting up amtron wallbox on" << address.toString();
+    qCDebug(dcMennekes()) << "Creating Amtron ECU connection for" << address.toString();
     AmtronECU *amtronECUConnection = new AmtronECU(address, 502, 0xff, this);
     connect(info, &ThingSetupInfo::aborted, amtronECUConnection, &ModbusTcpMaster::deleteLater);
 
-    // Reconnect on monitor reachable changed
-    NetworkDeviceMonitor *monitor = m_monitors.value(thing);
-    connect(monitor, &NetworkDeviceMonitor::reachableChanged, thing, [=](bool reachable){
-        qCDebug(dcMennekes()) << "Network device monitor reachable changed for" << thing->name() << reachable;
-        if (!thing->setupComplete())
-            return;
+    if (m_monitors.contains(thing)) {
 
-        if (reachable && !thing->stateValue("connected").toBool()) {
-            amtronECUConnection->modbusTcpMaster()->setHostAddress(monitor->networkDeviceInfo().address());
-            amtronECUConnection->connectDevice();
-        } else if (!reachable) {
-            // Note: We disable autoreconnect explicitly and we will
-            // connect the device once the monitor says it is reachable again
-            amtronECUConnection->disconnectDevice();
+        // Only relevant for MAC based connections...
+
+        // Reconnect on monitor reachable changed
+        NetworkDeviceMonitor *monitor = m_monitors.value(thing);
+        connect(monitor, &NetworkDeviceMonitor::reachableChanged, thing, [=](bool reachable){
+            qCDebug(dcMennekes()) << "Network device monitor reachable changed for" << thing->name() << reachable;
+            if (!thing->setupComplete())
+                return;
+
+            if (reachable && !thing->stateValue("connected").toBool()) {
+                amtronECUConnection->modbusTcpMaster()->setHostAddress(monitor->networkDeviceInfo().address());
+                amtronECUConnection->connectDevice();
+            } else if (!reachable) {
+                // Note: We disable autoreconnect explicitly and we will
+                // connect the device once the monitor says it is reachable again
+                amtronECUConnection->disconnectDevice();
+            }
+        });
+    }
+
+    // Init during setup
+    connect(amtronECUConnection, &AmtronECU::initializationFinished, info, [this, thing, amtronECUConnection, info](bool success){
+
+        if (!success) {
+            qCWarning(dcMennekes()) << "Connection init finished with errors" << thing->name() << amtronECUConnection->modbusTcpMaster()->hostAddress().toString();
+            if (m_monitors.contains(thing))
+                hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+
+            amtronECUConnection->deleteLater();
+            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Error communicating with the wallbox."));
+            return;
         }
+
+        qCDebug(dcMennekes()) << "Connection init finished successfully" << amtronECUConnection;
+        m_amtronECUConnections.insert(thing, amtronECUConnection);
+        info->finish(Thing::ThingErrorNoError);
+
+        thing->setStateValue(amtronECUConnectedStateTypeId, true);
+        thing->setStateValue(amtronECUFirmwareVersionStateTypeId, QString::fromUtf8(QByteArray::fromHex(QByteArray::number(amtronECUConnection->firmwareVersion(), 16))));
+
+        amtronECUConnection->update();
     });
 
-    connect(amtronECUConnection, &AmtronECU::reachableChanged, thing, [thing, amtronECUConnection, monitor](bool reachable){
+    connect(amtronECUConnection, &AmtronECU::reachableChanged, thing, [this, thing, amtronECUConnection](bool reachable){
         qCDebug(dcMennekes()) << "Reachable changed to" << reachable << "for" << thing;
         if (reachable) {
             amtronECUConnection->initialize();
@@ -574,7 +671,11 @@ void IntegrationPluginMennekes::setupAmtronECUConnection(ThingSetupInfo *info)
             // Note: sometimes the device does not repond any more on requests, but the connection is still
             // up and a reconnect fixes this behavior. Let us try to reconnect in case the TCP connection is up
             // or the monitor is reachable
-            if (amtronECUConnection->modbusTcpMaster()->connected() || monitor->reachable()) {
+            bool monitorReachable = false;
+            if (m_monitors.contains(thing))
+                monitorReachable = m_monitors.value(thing)->reachable();
+
+            if (amtronECUConnection->modbusTcpMaster()->connected() || monitorReachable) {
                 qCWarning(dcMennekes()) << "The amtron ECU connection is not reachable any more, but the device seems to be still reachable. Trying to reconnect...";
                 amtronECUConnection->modbusTcpMaster()->reconnectDevice();
             }
@@ -592,27 +693,6 @@ void IntegrationPluginMennekes::setupAmtronECUConnection(ThingSetupInfo *info)
             // Try once to reconnect the device
             amtronECUConnection->reconnectDevice();
         }
-    });
-
-    connect(amtronECUConnection, &AmtronECU::initializationFinished, info, [=](bool success){
-
-        if (!success) {
-            qCWarning(dcMennekes()) << "Connection init finished with errors" << thing->name() << amtronECUConnection->modbusTcpMaster()->hostAddress().toString();
-            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(monitor);
-            amtronECUConnection->deleteLater();
-            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Error communicating with the wallbox."));
-            return;
-        }
-
-        qCDebug(dcMennekes()) << "Connection init finished successfully" << amtronECUConnection;
-
-        m_amtronECUConnections.insert(thing, amtronECUConnection);
-        info->finish(Thing::ThingErrorNoError);
-
-        thing->setStateValue(amtronECUConnectedStateTypeId, true);
-        thing->setStateValue(amtronECUFirmwareVersionStateTypeId, QString::fromUtf8(QByteArray::fromHex(QByteArray::number(amtronECUConnection->firmwareVersion(), 16))));
-
-        amtronECUConnection->update();
     });
 
     connect(amtronECUConnection, &AmtronECU::updateFinished, thing, [this, amtronECUConnection, thing](){
@@ -714,27 +794,64 @@ void IntegrationPluginMennekes::setupAmtronHCC3Connection(ThingSetupInfo *info)
 {
     Thing *thing = info->thing();
 
-    QHostAddress address = m_monitors.value(thing)->networkDeviceInfo().address();
+    // Set up depending on the available params, mac can only be filled in by discovery (ro param),
+    // the ip could be used as static manual config for VPN networks or WAN IP's
+    QHostAddress address;
+    if (m_monitors.contains(thing)) {
+        address = m_monitors.value(thing)->networkDeviceInfo().address();
+    } else {
+        address = QHostAddress(thing->paramValue(amtronHCC3ThingAddressParamTypeId).toString());
+        if (address.isNull()) {
+            qCWarning(dcMennekes()) << "Could not set up the Amtron HCC3 connection. The IP address is not valid.";
+            info->finish(Thing::ThingErrorHardwareNotAvailable);
+            return;
+        }
+    }
 
-    qCDebug(dcMennekes()) << "Setting up amtron wallbox on" << address.toString();
+    qCDebug(dcMennekes()) << "Creating Amtron HHC3 connection for" << address.toString();
     AmtronHCC3ModbusTcpConnection *amtronHCC3Connection = new AmtronHCC3ModbusTcpConnection(address, 502, 0xff, this);
     connect(info, &ThingSetupInfo::aborted, amtronHCC3Connection, &ModbusTcpMaster::deleteLater);
 
-    // Reconnect on monitor reachable changed
-    NetworkDeviceMonitor *monitor = m_monitors.value(thing);
-    connect(monitor, &NetworkDeviceMonitor::reachableChanged, thing, [=](bool reachable){
-        qCDebug(dcMennekes()) << "Network device monitor reachable changed for" << thing->name() << reachable;
-        if (!thing->setupComplete())
-            return;
+    if (m_monitors.contains(thing)) {
 
-        if (reachable && !thing->stateValue("connected").toBool()) {
-            amtronHCC3Connection->modbusTcpMaster()->setHostAddress(monitor->networkDeviceInfo().address());
-            amtronHCC3Connection->connectDevice();
-        } else if (!reachable) {
-            // Note: We disable autoreconnect explicitly and we will
-            // connect the device once the monitor says it is reachable again
-            amtronHCC3Connection->disconnectDevice();
+        // Only relevant for MAC based connections...
+
+        // Reconnect on monitor reachable changed
+        NetworkDeviceMonitor *monitor = m_monitors.value(thing);
+        connect(monitor, &NetworkDeviceMonitor::reachableChanged, thing, [=](bool reachable){
+            qCDebug(dcMennekes()) << "Network device monitor reachable changed for" << thing->name() << reachable;
+            if (!thing->setupComplete())
+                return;
+
+            if (reachable && !thing->stateValue("connected").toBool()) {
+                amtronHCC3Connection->modbusTcpMaster()->setHostAddress(monitor->networkDeviceInfo().address());
+                amtronHCC3Connection->connectDevice();
+            } else if (!reachable) {
+                // Note: We disable autoreconnect explicitly and we will
+                // connect the device once the monitor says it is reachable again
+                amtronHCC3Connection->disconnectDevice();
+            }
+        });
+    }
+
+    // Init during setup
+    connect(amtronHCC3Connection, &AmtronHCC3ModbusTcpConnection::initializationFinished, info, [=](bool success){
+        if (!success) {
+            qCWarning(dcMennekes()) << "Connection init finished with errors" << thing->name() << amtronHCC3Connection->modbusTcpMaster()->hostAddress().toString();
+            if (m_monitors.contains(thing))
+                hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+
+            amtronHCC3Connection->deleteLater();
+            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Error communicating with the wallbox."));
+            return;
         }
+
+        qCDebug(dcMennekes()) << "Connection init finished successfully" << amtronHCC3Connection;
+        m_amtronHCC3Connections.insert(thing, amtronHCC3Connection);
+        info->finish(Thing::ThingErrorNoError);
+
+        thing->setStateValue(amtronHCC3ConnectedStateTypeId, true);
+        amtronHCC3Connection->update();
     });
 
     connect(amtronHCC3Connection, &AmtronHCC3ModbusTcpConnection::reachableChanged, thing, [thing, amtronHCC3Connection](bool reachable){
@@ -757,23 +874,6 @@ void IntegrationPluginMennekes::setupAmtronHCC3Connection(ThingSetupInfo *info)
             // Try once to reconnect the device
             amtronHCC3Connection->reconnectDevice();
         }
-    });
-
-    connect(amtronHCC3Connection, &AmtronHCC3ModbusTcpConnection::initializationFinished, info, [=](bool success){
-        if (!success) {
-            qCWarning(dcMennekes()) << "Connection init finished with errors" << thing->name() << amtronHCC3Connection->modbusTcpMaster()->hostAddress().toString();
-            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(monitor);
-            amtronHCC3Connection->deleteLater();
-            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Error communicating with the wallbox."));
-            return;
-        }
-
-        qCDebug(dcMennekes()) << "Connection init finished successfully" << amtronHCC3Connection;
-        m_amtronHCC3Connections.insert(thing, amtronHCC3Connection);
-        info->finish(Thing::ThingErrorNoError);
-
-        thing->setStateValue(amtronHCC3ConnectedStateTypeId, true);
-        amtronHCC3Connection->update();
     });
 
     connect(amtronHCC3Connection, &AmtronHCC3ModbusTcpConnection::updateFinished, thing, [amtronHCC3Connection, thing](){
@@ -824,7 +924,6 @@ void IntegrationPluginMennekes::setupAmtronHCC3Connection(ThingSetupInfo *info)
     connect(amtronHCC3Connection, &AmtronHCC3ModbusTcpConnection::customerCurrentLimitationChanged, thing, [thing](quint16 customerCurrentLimitation) {
         thing->setStateValue(amtronHCC3MaxChargingCurrentStateTypeId, customerCurrentLimitation);
     });
-
 
     amtronHCC3Connection->connectDevice();
 }
