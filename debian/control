@@ -1,8 +1,8 @@
 Source: nymea-plugins-modbus
 Section: utils
-Priority: options
+Priority: optional
 Maintainer: nymea GmbH <developer@nymea.io>
-Standards-Version: 3.9.3
+Standards-Version: 4.6.0
 Build-depends: debhelper (>= 9.0.0),
                libnymea-dev (>= 0.17),
                libnymea-gpio-dev,
