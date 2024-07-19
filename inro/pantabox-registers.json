@@ -1,0 +1,144 @@
+{
+    "className": "Pantabox",
+    "protocol": "TCP",
+    "endianness": "LittleEndian",
+    "errorLimitUntilNotReachable": 2,
+    "checkReachableRegister": "chargingState",
+    "blocks": [ ],
+    "enums": [
+        {
+            "name": "ChargingState",
+            "values": [
+                {
+                    "key": "A",
+                    "value": 65
+                },
+                {
+                    "key": "B",
+                    "value": 66
+                },
+                {
+                    "key": "C",
+                    "value": 67
+                },
+                {
+                    "key": "D",
+                    "value": 68
+                },
+                {
+                    "key": "E",
+                    "value": 69
+                },
+                {
+                    "key": "F",
+                    "value": 70
+                }
+            ]
+        }
+    ],
+    "registers": [
+        {
+            "id": "serialNumber",
+            "address": 256,
+            "size": 2,
+            "type": "uint32",
+            "registerType": "inputRegister",
+            "description": "Serial number (hex)",
+            "readSchedule": "init",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "modbusTcpVersion",
+            "address": 258,
+            "size": 2,
+            "type": "uint32",
+            "registerType": "inputRegister",
+            "description": "ModbusTCP version",
+            "readSchedule": "init",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "chargingState",
+            "address": 512,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "inputRegister",
+            "description": "Charging state",
+            "enum": "ChargingState",
+            "readSchedule": "update",
+            "defaultValue": "ChargingStateA",
+            "access": "RO"
+        },
+        {
+            "id": "currentPower",
+            "address": 513,
+            "size": 2,
+            "type": "uint32",
+            "registerType": "inputRegister",
+            "description": "Current charging power",
+            "unit": "W",
+            "readSchedule": "update",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "chargedEnergy",
+            "address": 515,
+            "size": 2,
+            "type": "uint32",
+            "registerType": "inputRegister",
+            "description": "Charged energy",
+            "unit": "Wh",
+            "readSchedule": "update",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "maxPossibleChargingCurrent",
+            "address": 517,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "inputRegister",
+            "description": "Maximal possible charging current (adapter)",
+            "unit": "A",
+            "readSchedule": "update",
+            "defaultValue": "6",
+            "access": "RO"
+        },
+        {
+            "id": "chargingCurrent",
+            "address": 518,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "inputRegister",
+            "description": "Actual charging current",
+            "unit": "A",
+            "readSchedule": "update",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "chargingEnabled",
+            "address": 768,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Charging enabled (1) / disabled (0)",
+            "defaultValue": 0,
+            "access": "RW"
+        },
+        {
+            "id": "maxChargingCurrent",
+            "address": 769,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Max charging current",
+            "access": "RW"
+        }
+    ]
+}
