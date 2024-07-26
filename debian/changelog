@@ -1,3 +1,13 @@
+nymea-plugins-modbus (1.10.0) jammy; urgency=medium
+
+  [ Boernsman ]
+  * New plugin: Sungrow
+
+  [ Simon Stürz ]
+  * PC-Electric: Add integration plugin documentation
+
+ -- jenkins <developer@nymea.io>  Fri, 26 Jul 2024 15:39:34 +0200
+
 nymea-plugins-modbus (1.9.3) jammy; urgency=medium
 
   [ Boernsman ]
