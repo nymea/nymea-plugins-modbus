@@ -60,6 +60,36 @@
             "access": "RO"
         },
         {
+            "id": "vendorName",
+            "address": 260,
+            "size": 2,
+            "type": "string",
+            "registerType": "inputRegister",
+            "description": "Name of vendor",
+            "readSchedule": "init",
+            "access": "RO"
+        },
+        {
+            "id": "productName",
+            "address": 262,
+            "size": 4,
+            "type": "string",
+            "registerType": "inputRegister",
+            "description": "Name of product",
+            "readSchedule": "init",
+            "access": "RO"
+        },
+        {
+            "id": "firmwareVersion",
+            "address": 266,
+            "size": 16,
+            "type": "uint32",
+            "registerType": "inputRegister",
+            "description": "Firmware version",
+            "readSchedule": "init",
+            "access": "RO"
+        },
+        {
             "id": "chargingState",
             "address": 512,
             "size": 1,
@@ -115,6 +145,18 @@
             "registerType": "inputRegister",
             "description": "Actual charging current",
             "unit": "A",
+            "readSchedule": "update",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "absoluteEnergy",
+            "address": 519,
+            "size": 2,
+            "type": "uint32",
+            "registerType": "inputRegister",
+            "description": "Absolute charged energy",
+            "unit": "Wh",
             "readSchedule": "update",
             "defaultValue": "0",
             "access": "RO"
