@@ -8,8 +8,10 @@ include(../modbus.pri)
 
 HEADERS += \
     integrationplugininro.h \
+    pantabox.h \
     pantaboxdiscovery.h
 
 SOURCES += \
     integrationplugininro.cpp \
+    pantabox.cpp \
     pantaboxdiscovery.cpp

@@ -69,10 +69,10 @@ void PantaboxDiscovery::startDiscovery()
 
 void PantaboxDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo)
 {
-    PantaboxModbusTcpConnection *connection = new PantaboxModbusTcpConnection(networkDeviceInfo.address(), m_port, m_modbusAddress, this);
+    Pantabox *connection = new Pantabox(networkDeviceInfo.address(), m_port, m_modbusAddress, this);
     m_connections.append(connection);
 
-    connect(connection, &PantaboxModbusTcpConnection::reachableChanged, this, [=](bool reachable){
+    connect(connection, &Pantabox::reachableChanged, this, [=](bool reachable){
         if (!reachable) {
             // Disconnected ... done with this connection
             cleanupConnection(connection);
@@ -80,30 +80,42 @@ void PantaboxDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevic
         }
 
         // Modbus TCP connected...ok, let's try to initialize it!
-        connect(connection, &PantaboxModbusTcpConnection::initializationFinished, this, [=](bool success){
+        connect(connection, &Pantabox::initializationFinished, this, [=](bool success){
             if (!success) {
                 qCDebug(dcInro()) << "Discovery: Initialization failed on" << networkDeviceInfo.address().toString() << "Continue...";
                 cleanupConnection(connection);
                 return;
             }
 
-            // FIXME: find a better way to discover the device besides a valid init
-            qCDebug(dcInro()) << "Discovery: Connection initialized successfully" << connection->serialNumber();
+            // Modbus registers for vendor and product name are available since Modbus version 1.1
+            if (connection->modbusTcpVersion() > 257) {
 
-            Result result;
-            result.serialNumber = QString::number(connection->serialNumber(), 16).toUpper();
-            result.modbusTcpVersion = modbusVersionToString(connection->modbusTcpVersion());
-            result.networkDeviceInfo = networkDeviceInfo;
-            m_results.append(result);
+                // Only add device to result when correct device parameters were read
+                if (connection->vendorName() == "INRO" && connection->productName() == "PANTABOX") {
+                    qCDebug(dcInro()) << "Discovery: Connection initialized successfully" << connection->serialNumber();
 
-            qCInfo(dcInro()) << "Discovery: --> Found"
-                             << "Serial number:" << result.serialNumber
-                             << "(" << connection->serialNumber() << ")"
-                             << "ModbusTCP version:" << result.modbusTcpVersion
-                             << result.networkDeviceInfo;
+                    Result result;
+                    result.serialNumber = QString::number(connection->serialNumber(), 16).toUpper();
+                    result.modbusTcpVersion = modbusVersionToString(connection->modbusTcpVersion());
+                    result.networkDeviceInfo = networkDeviceInfo;
+                    m_results.append(result);
 
-            // Done with this connection
-            cleanupConnection(connection);
+                    qCInfo(dcInro()) << "Discovery: --> Found"
+                                     << "Serial number:" << result.serialNumber
+                                     << "(" << connection->serialNumber() << ")"
+                                     << "ModbusTCP version:" << result.modbusTcpVersion
+                                     << result.networkDeviceInfo;
+
+                    // Done with this connection
+                    cleanupConnection(connection);
+                } else {
+                    qCDebug(dcInro()) << "Discovery: Device not added to result because of wrong vendor or/and product name"
+                                      << connection->vendorName()
+                                      << connection->productName();
+                }
+            } else {
+                qCDebug(dcInro()) << "Discovery: Device not added to result because of wrong ModbusTcpVersion" << modbusVersionToString(connection->modbusTcpVersion());
+            }
         });
 
         // Initializing...
@@ -122,7 +134,7 @@ void PantaboxDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevic
     });
 
     // If check reachability failed...skip this host...
-    connect(connection, &PantaboxModbusTcpConnection::checkReachabilityFailed, this, [=](){
+    connect(connection, &Pantabox::checkReachabilityFailed, this, [=](){
         qCDebug(dcInro()) << "Discovery: Check reachability failed on" << networkDeviceInfo.address().toString() << "Continue...";
         cleanupConnection(connection);
     });
@@ -131,7 +143,7 @@ void PantaboxDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevic
     connection->connectDevice();
 }
 
-void PantaboxDiscovery::cleanupConnection(PantaboxModbusTcpConnection *connection)
+void PantaboxDiscovery::cleanupConnection(Pantabox *connection)
 {
     m_connections.removeAll(connection);
     connection->disconnectDevice();
@@ -143,7 +155,7 @@ void PantaboxDiscovery::finishDiscovery()
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
 
     // Cleanup any leftovers...we don't care any more
-    foreach (PantaboxModbusTcpConnection *connection, m_connections)
+    foreach (Pantabox *connection, m_connections)
         cleanupConnection(connection);
 
     qCInfo(dcInro()) << "Discovery: Finished the discovery process. Found" << m_results.count()

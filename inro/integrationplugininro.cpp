@@ -136,7 +136,7 @@ void IntegrationPluginInro::postSetupThing(Thing *thing)
     if (!m_refreshTimer) {
         m_refreshTimer = hardwareManager()->pluginTimerManager()->registerTimer(2);
         connect(m_refreshTimer, &PluginTimer::timeout, this, [this] {
-            foreach (PantaboxModbusTcpConnection *connection, m_connections) {
+            foreach (Pantabox *connection, m_connections) {
                 if (connection->reachable()) {
                     connection->update();
                 }
@@ -152,7 +152,7 @@ void IntegrationPluginInro::executeAction(ThingActionInfo *info)
 {
     if (info->thing()->thingClassId() == pantaboxThingClassId) {
 
-        PantaboxModbusTcpConnection *connection = m_connections.value(info->thing());
+        Pantabox *connection = m_connections.value(info->thing());
 
         if (!connection->reachable()) {
             qCWarning(dcInro()) << "Cannot execute action. The PANTABOX is not reachable";
@@ -248,7 +248,7 @@ void IntegrationPluginInro::thingRemoved(Thing *thing)
     qCDebug(dcInro()) << "Thing removed" << thing->name();
 
     if (m_connections.contains(thing)) {
-        PantaboxModbusTcpConnection *connection = m_connections.take(thing);
+        Pantabox *connection = m_connections.take(thing);
         connection->disconnectDevice();
         connection->deleteLater();
     }
@@ -269,8 +269,8 @@ void IntegrationPluginInro::setupConnection(ThingSetupInfo *info)
     Thing *thing = info->thing();
     NetworkDeviceMonitor *monitor = m_monitors.value(thing);
 
-    PantaboxModbusTcpConnection *connection = new PantaboxModbusTcpConnection(monitor->networkDeviceInfo().address(), 502, 1, this);
-    connect(info, &ThingSetupInfo::aborted, connection, &PantaboxModbusTcpConnection::deleteLater);
+    Pantabox *connection = new Pantabox(monitor->networkDeviceInfo().address(), 502, 1, this);
+    connect(info, &ThingSetupInfo::aborted, connection, &Pantabox::deleteLater);
 
     // Monitor reachability
     connect(monitor, &NetworkDeviceMonitor::reachableChanged, thing, [=](bool reachable){
@@ -289,7 +289,7 @@ void IntegrationPluginInro::setupConnection(ThingSetupInfo *info)
     });
 
     // Connection reachability
-    connect(connection, &PantaboxModbusTcpConnection::reachableChanged, thing, [thing, connection](bool reachable){
+    connect(connection, &Pantabox::reachableChanged, thing, [thing, connection](bool reachable){
         qCInfo(dcInro()) << "Reachable changed to" << reachable << "for" << thing;
         thing->setStateValue("connected", reachable);
 
@@ -301,28 +301,28 @@ void IntegrationPluginInro::setupConnection(ThingSetupInfo *info)
         }
     });
 
-    connect(connection, &PantaboxModbusTcpConnection::updateFinished, thing, [thing, connection](){
+    connect(connection, &Pantabox::updateFinished, thing, [thing, connection](){
         qCDebug(dcInro()) << "Update finished for" << thing;
         qCDebug(dcInro()) << connection;
 
         QString chargingStateString;
         switch(connection->chargingState()) {
-        case PantaboxModbusTcpConnection::ChargingStateA:
+        case Pantabox::ChargingStateA:
             chargingStateString = "A";
             break;
-        case PantaboxModbusTcpConnection::ChargingStateB:
+        case Pantabox::ChargingStateB:
             chargingStateString = "B";
             break;
-        case PantaboxModbusTcpConnection::ChargingStateC:
+        case Pantabox::ChargingStateC:
             chargingStateString = "C";
             break;
-        case PantaboxModbusTcpConnection::ChargingStateD:
+        case Pantabox::ChargingStateD:
             chargingStateString = "D";
             break;
-        case PantaboxModbusTcpConnection::ChargingStateE:
+        case Pantabox::ChargingStateE:
             chargingStateString = "E";
             break;
-        case PantaboxModbusTcpConnection::ChargingStateF:
+        case Pantabox::ChargingStateF:
             chargingStateString = "F";
             break;
         }
@@ -333,8 +333,8 @@ void IntegrationPluginInro::setupConnection(ThingSetupInfo *info)
         // C: connected, charging
         // D: ventilation required
         // E: F: fault/error
-        thing->setStateValue(pantaboxPluggedInStateTypeId, connection->chargingState() >= PantaboxModbusTcpConnection::ChargingStateB);
-        thing->setStateValue(pantaboxChargingStateTypeId, connection->chargingState() >= PantaboxModbusTcpConnection::ChargingStateC);
+        thing->setStateValue(pantaboxPluggedInStateTypeId, connection->chargingState() >= Pantabox::ChargingStateB);
+        thing->setStateValue(pantaboxChargingStateTypeId, connection->chargingState() >= Pantabox::ChargingStateC);
         thing->setStateValue(pantaboxCurrentPowerStateTypeId, connection->currentPower()); // W
         thing->setStateValue(pantaboxTotalEnergyConsumedStateTypeId, connection->chargedEnergy() / 1000.0); // Wh
         thing->setStateMaxValue(pantaboxMaxChargingCurrentActionTypeId, connection->maxPossibleChargingCurrent());

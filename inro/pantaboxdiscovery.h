@@ -34,8 +34,7 @@
 #include <QObject>
 
 #include <network/networkdevicediscovery.h>
-
-#include "pantaboxmodbustcpconnection.h"
+#include "pantabox.h"
 
 class PantaboxDiscovery : public QObject
 {
@@ -66,12 +65,12 @@ private:
 
     QDateTime m_startDateTime;
 
-    QList<PantaboxModbusTcpConnection *> m_connections;
+    QList<Pantabox *> m_connections;
 
     QList<Result> m_results;
 
     void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
-    void cleanupConnection(PantaboxModbusTcpConnection *connection);
+    void cleanupConnection(Pantabox *connection);
 
     void finishDiscovery();
 };

@@ -36,7 +36,7 @@
 #include <network/networkdevicemonitor.h>
 
 #include "extern-plugininfo.h"
-#include "pantaboxmodbustcpconnection.h"
+#include "pantabox.h"
 
 class IntegrationPluginInro: public IntegrationPlugin
 {
@@ -56,7 +56,7 @@ public:
 
 private:
     PluginTimer *m_refreshTimer = nullptr;
-    QHash<Thing *, PantaboxModbusTcpConnection *> m_connections;
+    QHash<Thing *, Pantabox *> m_connections;
     QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
 
     void setupConnection(ThingSetupInfo *info);
