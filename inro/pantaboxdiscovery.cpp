@@ -33,7 +33,7 @@
 
 PantaboxDiscovery::PantaboxDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, QObject *parent)
     : QObject{parent},
-    m_networkDeviceDiscovery{networkDeviceDiscovery}
+      m_networkDeviceDiscovery{networkDeviceDiscovery}
 {
 
 }
@@ -41,13 +41,6 @@ PantaboxDiscovery::PantaboxDiscovery(NetworkDeviceDiscovery *networkDeviceDiscov
 QList<PantaboxDiscovery::Result> PantaboxDiscovery::results() const
 {
     return m_results;
-}
-
-QString PantaboxDiscovery::modbusVersionToString(quint32 value)
-{
-    quint16 modbusVersionMinor = (value >> 8) & 0xffff;
-    quint16 modbusVersionMajor = value & 0xffff;
-    return QString("%1.%2").arg(modbusVersionMajor).arg(modbusVersionMinor);
 }
 
 void PantaboxDiscovery::startDiscovery()
@@ -69,10 +62,10 @@ void PantaboxDiscovery::startDiscovery()
 
 void PantaboxDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo)
 {
-    PantaboxModbusTcpConnection *connection = new PantaboxModbusTcpConnection(networkDeviceInfo.address(), m_port, m_modbusAddress, this);
+    Pantabox *connection = new Pantabox(networkDeviceInfo.address(), m_port, m_modbusAddress, this);
     m_connections.append(connection);
 
-    connect(connection, &PantaboxModbusTcpConnection::reachableChanged, this, [=](bool reachable){
+    connect(connection, &Pantabox::reachableChanged, this, [=](bool reachable){
         if (!reachable) {
             // Disconnected ... done with this connection
             cleanupConnection(connection);
@@ -80,30 +73,56 @@ void PantaboxDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevic
         }
 
         // Modbus TCP connected...ok, let's try to initialize it!
-        connect(connection, &PantaboxModbusTcpConnection::initializationFinished, this, [=](bool success){
+        connect(connection, &Pantabox::initializationFinished, this, [=](bool success){
             if (!success) {
                 qCDebug(dcInro()) << "Discovery: Initialization failed on" << networkDeviceInfo.address().toString() << "Continue...";
                 cleanupConnection(connection);
                 return;
             }
 
-            // FIXME: find a better way to discover the device besides a valid init
-            qCDebug(dcInro()) << "Discovery: Connection initialized successfully" << connection->serialNumber();
+            // Vendor and product name registers are available since modbus TCP version 1.1 (0x0001 0x0001) 0x10001 = 65537
+            if (connection->modbusTcpVersion() >= 65537) {
 
-            Result result;
-            result.serialNumber = QString::number(connection->serialNumber(), 16).toUpper();
-            result.modbusTcpVersion = modbusVersionToString(connection->modbusTcpVersion());
-            result.networkDeviceInfo = networkDeviceInfo;
-            m_results.append(result);
+                QModbusReply *reply = connection->readProductName();
+                if (!reply) {
+                    cleanupConnection(connection);
+                    return;
+                }
 
-            qCInfo(dcInro()) << "Discovery: --> Found"
-                             << "Serial number:" << result.serialNumber
-                             << "(" << connection->serialNumber() << ")"
-                             << "ModbusTCP version:" << result.modbusTcpVersion
-                             << result.networkDeviceInfo;
+                if (reply->isFinished()) {
+                    reply->deleteLater(); // Broadcast reply returns immediatly
+                    cleanupConnection(connection);
+                    return;
+                }
 
-            // Done with this connection
-            cleanupConnection(connection);
+                connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+                connect(reply, &QModbusReply::finished, this, [this, reply, connection, networkDeviceInfo](){
+                    if (reply->error() != QModbusDevice::NoError) {
+                        qCDebug(dcInro()) << "Discovery: Error reading product name error on" << networkDeviceInfo.address().toString() << "Continue...";
+                        cleanupConnection(connection);
+                        return;
+                    }
+
+                    const QModbusDataUnit unit = reply->result();
+                    if (unit.values().size() == 4) {
+                        QString receivedProductName = ModbusDataUtils::convertToString(unit.values(), connection->stringEndianness());
+                        if (receivedProductName.toUpper().contains("PANTABOX")) {
+                            addResult(connection, networkDeviceInfo);
+                        } else {
+                            qCDebug(dcInro()) << "Discovery: Invalid product name " << receivedProductName
+                                              << "on" << networkDeviceInfo.address().toString() << "Continue...";
+                            cleanupConnection(connection);
+                        }
+                    } else {
+                        qCDebug(dcInro()) << "Discovery: Reading from \"Name of product\" registers" << 262 << "size:" << 4 << "returned different size than requested. Ignoring incomplete data" << unit.values();
+                        cleanupConnection(connection);
+                    }
+                });
+            } else {
+                qCDebug(dcInro()) << "Discovery: Adding connection to results even tough the result is not precise due to modbus TCP protocol version:"
+                                  << connection->modbusTcpVersion() << Pantabox::modbusVersionToString(connection->modbusTcpVersion());
+                addResult(connection, networkDeviceInfo);
+            }
         });
 
         // Initializing...
@@ -122,7 +141,7 @@ void PantaboxDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevic
     });
 
     // If check reachability failed...skip this host...
-    connect(connection, &PantaboxModbusTcpConnection::checkReachabilityFailed, this, [=](){
+    connect(connection, &Pantabox::checkReachabilityFailed, this, [=](){
         qCDebug(dcInro()) << "Discovery: Check reachability failed on" << networkDeviceInfo.address().toString() << "Continue...";
         cleanupConnection(connection);
     });
@@ -131,7 +150,7 @@ void PantaboxDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevic
     connection->connectDevice();
 }
 
-void PantaboxDiscovery::cleanupConnection(PantaboxModbusTcpConnection *connection)
+void PantaboxDiscovery::cleanupConnection(Pantabox *connection)
 {
     m_connections.removeAll(connection);
     connection->disconnectDevice();
@@ -143,10 +162,30 @@ void PantaboxDiscovery::finishDiscovery()
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
 
     // Cleanup any leftovers...we don't care any more
-    foreach (PantaboxModbusTcpConnection *connection, m_connections)
+    foreach (Pantabox *connection, m_connections)
         cleanupConnection(connection);
 
     qCInfo(dcInro()) << "Discovery: Finished the discovery process. Found" << m_results.count()
                      << "PANTABOXE wallboxes in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
     emit discoveryFinished();
+}
+
+void PantaboxDiscovery::addResult(Pantabox *connection, const NetworkDeviceInfo &networkDeviceInfo)
+{
+    qCDebug(dcInro()) << "Discovery: Connection initialized successfully" << connection->serialNumber();
+
+    Result result;
+    result.serialNumber = QString::number(connection->serialNumber(), 16).toUpper();
+    result.modbusTcpVersion = Pantabox::modbusVersionToString(connection->modbusTcpVersion());
+    result.networkDeviceInfo = networkDeviceInfo;
+    m_results.append(result);
+
+    qCInfo(dcInro()) << "Discovery: --> Found"
+                     << "Serial number:" << result.serialNumber
+                     << "(" << connection->serialNumber() << ")"
+                     << "ModbusTCP version:" << result.modbusTcpVersion
+                     << result.networkDeviceInfo;
+
+    // Done with this connection
+    cleanupConnection(connection);
 }

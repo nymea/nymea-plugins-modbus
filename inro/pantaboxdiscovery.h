@@ -34,8 +34,7 @@
 #include <QObject>
 
 #include <network/networkdevicediscovery.h>
-
-#include "pantaboxmodbustcpconnection.h"
+#include "pantabox.h"
 
 class PantaboxDiscovery : public QObject
 {
@@ -51,8 +50,6 @@ public:
 
     QList<PantaboxDiscovery::Result> results() const;
 
-    static QString modbusVersionToString(quint32 value);
-
 public slots:
     void startDiscovery();
 
@@ -66,14 +63,15 @@ private:
 
     QDateTime m_startDateTime;
 
-    QList<PantaboxModbusTcpConnection *> m_connections;
+    QList<Pantabox *> m_connections;
 
     QList<Result> m_results;
 
     void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
-    void cleanupConnection(PantaboxModbusTcpConnection *connection);
+    void cleanupConnection(Pantabox *connection);
 
     void finishDiscovery();
+    void addResult(Pantabox *connection, const NetworkDeviceInfo &networkDeviceInfo);
 };
 
 #endif // PANTABOXDISCOVERY_H
