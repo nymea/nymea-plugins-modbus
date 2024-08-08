@@ -42,10 +42,6 @@ public:
     ~Pantabox() = default;
 
     virtual bool update() override;
-    virtual bool initialize() override;
-
-signals:
-
 };
 
 #endif // PANTABOX_H

@@ -163,10 +163,10 @@ void IntegrationPluginInro::executeAction(ThingActionInfo *info)
         if (info->action().actionTypeId() == pantaboxPowerActionTypeId) {
             bool power = info->action().paramValue(pantaboxPowerActionPowerParamTypeId).toBool();
 
-            if (info->action().triggeredBy() == Action::TriggeredByUser) {
-
+            // Play/pause charging session feature is available from Modbus Tcp version 1.1
+            if (connection->modbusTcpVersion() <= 65536) {
                 // When power is set by user, charging is going to stop or start depending on setting
-                qCDebug(dcInro()) << "PANTABOX: Set power by user" << (power ? 1 : 0);
+                qCDebug(dcInro()) << "Set power by user" << (power ? 1 : 0);
                 QModbusReply *reply = connection->setChargingEnabled(power ? 1 : 0);
 
                 if (!reply) {
@@ -179,7 +179,7 @@ void IntegrationPluginInro::executeAction(ThingActionInfo *info)
                 connect(reply, &QModbusReply::finished, info, [info, reply, power](){
                     if (reply->error() == QModbusDevice::NoError) {
                         info->thing()->setStateValue(pantaboxPowerStateTypeId, power);
-                        qCDebug(dcInro()) << "PANTABOX: Set power by user finished successfully";
+                        qCDebug(dcInro()) << "Set power by user finished successfully";
                         info->finish(Thing::ThingErrorNoError);
                     } else {
                         qCWarning(dcInro()) << "Error setting power by user:" << reply->error() << reply->errorString();
@@ -188,31 +188,55 @@ void IntegrationPluginInro::executeAction(ThingActionInfo *info)
                 });
                 return;
             } else {
+                if (info->action().triggeredBy() == Action::TriggeredByUser) {
 
-                // When power is set to 0 by energy manager, max charging current is set to 0 otherwise take the configured max charging current
-                qCDebug(dcInro()) << "PANTABOX: Pause session by energy manager";
+                    // When power is set by user, charging is going to stop or start depending on setting
+                    qCDebug(dcInro()) << "Set power by user" << (power ? 1 : 0);
+                    QModbusReply *reply = connection->setChargingEnabled(power ? 1 : 0);
 
-                quint16 chargingCurrent = power ? info->action().paramValue(pantaboxMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toUInt() : 0;
-                QModbusReply *reply = connection->setMaxChargingCurrent(chargingCurrent);
+                    if (!reply) {
+                        qCWarning(dcInro()) << "Execute action failed because the reply could not be created.";
+                        info->finish(Thing::ThingErrorHardwareFailure);
+                        return;
+                    }
 
-                if (!reply) {
-                    qCWarning(dcInro()) << "Execute action failed because the reply could not be created.";
-                    info->finish(Thing::ThingErrorHardwareFailure);
+                    connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+                    connect(reply, &QModbusReply::finished, info, [info, reply, power](){
+                        if (reply->error() == QModbusDevice::NoError) {
+                            info->thing()->setStateValue(pantaboxPowerStateTypeId, power);
+                            qCDebug(dcInro()) << "Set power by user finished successfully";
+                            info->finish(Thing::ThingErrorNoError);
+                        } else {
+                            qCWarning(dcInro()) << "Error setting power by user:" << reply->error() << reply->errorString();
+                            info->finish(Thing::ThingErrorHardwareFailure);
+                        }
+                    });
+                    return;
+                } else {
+                    // When power is set to 0 by automatisnm, max charging current is set to 0 otherwise take the configured max charging current
+                    qCDebug(dcInro()) << "Going to play/pause charging session";
+
+                    quint16 chargingCurrent = power ? info->thing()->stateValue(pantaboxMaxChargingCurrentStateTypeId).toUInt() : 0;
+                    QModbusReply *reply = connection->setMaxChargingCurrent(chargingCurrent);
+
+                    if (!reply) {
+                        qCWarning(dcInro()) << "Execute action failed because the reply could not be created.";
+                        info->finish(Thing::ThingErrorHardwareFailure);
+                        return;
+                    }
+
+                    connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+                    connect(reply, &QModbusReply::finished, info, [info, reply, power](){
+                        if (reply->error() == QModbusDevice::NoError) {
+                            qCDebug(dcInro()) << (power ? "Play" : "Pause") << "session by energy manager";
+                            info->finish(Thing::ThingErrorNoError);
+                        } else {
+                            qCWarning(dcInro()) << "Error setting charging current:" << reply->error() << reply->errorString();
+                            info->finish(Thing::ThingErrorHardwareFailure);
+                        }
+                    });
                     return;
                 }
-
-                connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
-                connect(reply, &QModbusReply::finished, info, [info, reply, chargingCurrent](){
-                    if (reply->error() == QModbusDevice::NoError) {
-                        info->thing()->setStateValue(pantaboxMaxChargingCurrentStateTypeId, chargingCurrent);
-                        qCDebug(dcInro()) << "PANTABOX: Set max charging current finished successfully";
-                        info->finish(Thing::ThingErrorNoError);
-                    } else {
-                        qCWarning(dcInro()) << "Error setting charging current:" << reply->error() << reply->errorString();
-                        info->finish(Thing::ThingErrorHardwareFailure);
-                    }
-                });
-                return;
             }
         }
 

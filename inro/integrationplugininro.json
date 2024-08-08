@@ -146,34 +146,13 @@
                             "displayName": "Modbus TCP version",
                             "type": "QString",
                             "defaultValue": ""
-                        },
-                        {
-                            "id": "e247585c-18d2-454f-ac12-d625ce36cc52",
-                            "name": "vendorName",
-                            "displayName": "Vendor name",
-                            "type": "QString",
-                            "defaultValue": ""
-                        },
-                        {
-                            "id": "815db609-f739-4df6-aafc-6814ec12e102",
-                            "name": "productName",
-                            "displayName": "Product name",
-                            "type": "QString",
-                            "defaultValue": ""
-                        },
+                        },                        
                         {
                             "id": "8c92890f-c9fb-44dd-8665-f1502fc90912",
                             "name": "firmwareVersion",
                             "displayName": "Firmware version",
                             "type": "QString",
                             "defaultValue": ""
-                        },
-                        {
-                            "id": "e772b753-ced9-41dc-8cbd-7fc58834eaa9",
-                            "name": "absoluteEnergy",
-                            "displayName": "Absolute charged energy",
-                            "type": "double",
-                            "defaultValue": 0
                         }
                     ]
                 }

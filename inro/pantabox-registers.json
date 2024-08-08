@@ -66,7 +66,6 @@
             "type": "string",
             "registerType": "inputRegister",
             "description": "Name of vendor",
-            "readSchedule": "init",
             "access": "RO"
         },
         {
@@ -76,7 +75,6 @@
             "type": "string",
             "registerType": "inputRegister",
             "description": "Name of product",
-            "readSchedule": "init",
             "access": "RO"
         },
         {
@@ -86,7 +84,7 @@
             "type": "uint32",
             "registerType": "inputRegister",
             "description": "Firmware version",
-            "readSchedule": "init",
+            "readSchedule": "update",
             "access": "RO"
         },
         {

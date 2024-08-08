@@ -73,6 +73,7 @@ private:
     void cleanupConnection(Pantabox *connection);
 
     void finishDiscovery();
+    void addResult(Pantabox *connection, const NetworkDeviceInfo &networkDeviceInfo);
 };
 
 #endif // PANTABOXDISCOVERY_H

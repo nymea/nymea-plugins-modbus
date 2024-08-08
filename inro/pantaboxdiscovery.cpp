@@ -33,7 +33,7 @@
 
 PantaboxDiscovery::PantaboxDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, QObject *parent)
     : QObject{parent},
-    m_networkDeviceDiscovery{networkDeviceDiscovery}
+      m_networkDeviceDiscovery{networkDeviceDiscovery}
 {
 
 }
@@ -88,33 +88,47 @@ void PantaboxDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevic
             }
 
             // Modbus registers for vendor and product name are available since Modbus version 1.1
-            if (connection->modbusTcpVersion() > 257) {
+            if (connection->modbusTcpVersion() > 65536) {
 
-                // Only add device to result when correct device parameters were read
-                if (connection->vendorName() == "INRO" && connection->productName() == "PANTABOX") {
-                    qCDebug(dcInro()) << "Discovery: Connection initialized successfully" << connection->serialNumber();
-
-                    Result result;
-                    result.serialNumber = QString::number(connection->serialNumber(), 16).toUpper();
-                    result.modbusTcpVersion = modbusVersionToString(connection->modbusTcpVersion());
-                    result.networkDeviceInfo = networkDeviceInfo;
-                    m_results.append(result);
-
-                    qCInfo(dcInro()) << "Discovery: --> Found"
-                                     << "Serial number:" << result.serialNumber
-                                     << "(" << connection->serialNumber() << ")"
-                                     << "ModbusTCP version:" << result.modbusTcpVersion
-                                     << result.networkDeviceInfo;
-
-                    // Done with this connection
+                QModbusReply *reply = connection->readProductName();
+                if (!reply) {
                     cleanupConnection(connection);
-                } else {
-                    qCDebug(dcInro()) << "Discovery: Device not added to result because of wrong vendor or/and product name"
-                                      << connection->vendorName()
-                                      << connection->productName();
+                    return;
                 }
+
+                if (reply->isFinished()) {
+                    reply->deleteLater(); // Broadcast reply returns immediatly
+                    cleanupConnection(connection);
+                    return;
+                }
+
+                connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+                connect(reply, &QModbusReply::finished, this, [this, reply, connection, networkDeviceInfo](){
+                    if (reply->error() != QModbusDevice::NoError) {
+                        qCDebug(dcInro()) << "Discovery: Error reading product name error on" << networkDeviceInfo.address().toString() << "Continue...";
+                        cleanupConnection(connection);
+                        return;
+                    }
+
+                    const QModbusDataUnit unit = reply->result();
+                    qCDebug(dcInro()) << "<-- Response from \"Name of product\" register" << 262 << "size:" << 4 << unit.values();
+                    if (unit.values().size() == 4) {
+                        QString receivedProductName = ModbusDataUtils::convertToString(unit.values(), connection->stringEndianness());
+                        if (receivedProductName.toUpper().contains("PANTABOX")) {
+                            addResult(connection, networkDeviceInfo);
+                        } else {
+                            qCDebug(dcInro()) << "Discovery: Invalid product name " << receivedProductName
+                                              << "on" << networkDeviceInfo.address().toString() << "Continue...";
+                            cleanupConnection(connection);
+                        }
+                    } else {
+                        qCDebug(dcInro()) << "Discovery: Reading from \"Name of product\" registers" << 262 << "size:" << 4 << "returned different size than requested. Ignoring incomplete data" << unit.values();
+                        cleanupConnection(connection);
+                    }
+                });
             } else {
                 qCDebug(dcInro()) << "Discovery: Device not added to result because of wrong ModbusTcpVersion" << modbusVersionToString(connection->modbusTcpVersion());
+                addResult(connection, networkDeviceInfo);
             }
         });
 
@@ -161,4 +175,24 @@ void PantaboxDiscovery::finishDiscovery()
     qCInfo(dcInro()) << "Discovery: Finished the discovery process. Found" << m_results.count()
                      << "PANTABOXE wallboxes in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
     emit discoveryFinished();
+}
+
+void PantaboxDiscovery::addResult(Pantabox *connection, const NetworkDeviceInfo &networkDeviceInfo)
+{
+    qCDebug(dcInro()) << "Discovery: Connection initialized successfully" << connection->serialNumber();
+
+    Result result;
+    result.serialNumber = QString::number(connection->serialNumber(), 16).toUpper();
+    result.modbusTcpVersion = modbusVersionToString(connection->modbusTcpVersion());
+    result.networkDeviceInfo = networkDeviceInfo;
+    m_results.append(result);
+
+    qCInfo(dcInro()) << "Discovery: --> Found"
+                     << "Serial number:" << result.serialNumber
+                     << "(" << connection->serialNumber() << ")"
+                     << "ModbusTCP version:" << result.modbusTcpVersion
+                     << result.networkDeviceInfo;
+
+    // Done with this connection
+    cleanupConnection(connection);
 }
