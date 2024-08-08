@@ -29,13 +29,19 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "pantabox.h"
-#include "loggingcategories.h"
 #include "pantaboxmodbustcpconnection.cpp"
 
 Pantabox::Pantabox(const QHostAddress &hostAddress, uint port, quint16 slaveId, QObject *parent) :
     PantaboxModbusTcpConnection(hostAddress, port, slaveId, parent)
 {
 
+}
+
+QString Pantabox::modbusVersionToString(quint32 value)
+{
+    quint16 modbusVersionMinor = (value >> 16) & 0xffff;
+    quint16 modbusVersionMajor = value & 0xffff;
+    return QString("%1.%2").arg(modbusVersionMajor).arg(modbusVersionMinor);
 }
 
 bool Pantabox::update() {
@@ -308,45 +314,11 @@ bool Pantabox::update() {
         }
     });
 
-    // The Modbus register for absolute charged energy is available since Modbusversion 1.1
-    if (m_modbusTcpVersion > 65536) {
 
-        // Read Absolute charged energy
-        qCDebug(dcPantaboxModbusTcpConnection()) << "--> Read \"Absolute charged energy\" register:" << 519 << "size:" << 2;
-        reply = readAbsoluteEnergy();
-        if (!reply) {
-            qCWarning(dcPantaboxModbusTcpConnection()) << "Error occurred while reading \"Absolute charged energy\" registers from" << m_modbusTcpMaster->hostAddress().toString() << m_modbusTcpMaster->errorString();
-            return false;
-        }
+    // Following Modbus registers depend on the modbus TCP protocol version and require compatibility checks
 
-        if (reply->isFinished()) {
-            reply->deleteLater(); // Broadcast reply returns immediatly
-            return false;
-        }
-
-        m_pendingUpdateReplies.append(reply);
-        connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
-        connect(reply, &QModbusReply::finished, this, [this, reply](){
-            m_pendingUpdateReplies.removeAll(reply);
-            handleModbusError(reply->error());
-            if (reply->error() != QModbusDevice::NoError) {
-                verifyUpdateFinished();
-                return;
-            }
-
-            const QModbusDataUnit unit = reply->result();
-            processAbsoluteEnergyRegisterValues(unit.values());
-            verifyUpdateFinished();
-        });
-
-        connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
-            QModbusResponse response = reply->rawResult();
-            if (reply->error() == QModbusDevice::ProtocolError && response.isException()) {
-                qCWarning(dcPantaboxModbusTcpConnection()) << "Modbus reply error occurred while reading \"Absolute charged energy\" registers from" << m_modbusTcpMaster->hostAddress().toString() << error << reply->errorString() << ModbusDataUtils::exceptionCodeToString(response.exceptionCode());
-            } else {
-                qCWarning(dcPantaboxModbusTcpConnection()) << "Modbus reply error occurred while reading \"Absolute charged energy\" registers from" << m_modbusTcpMaster->hostAddress().toString() << error << reply->errorString();
-            }
-        });
+    // Firmware version registers are available since modbus TCP version 1.1 (0x0001 0x0001) 0x10001 = 65537
+    if (m_modbusTcpVersion >= 65537) {
 
         // Read Firmware version
         qCDebug(dcPantaboxModbusTcpConnection()) << "--> Read \"Firmware version\" register:" << 266 << "size:" << 16;
@@ -385,5 +357,47 @@ bool Pantabox::update() {
             }
         });
     }
+
+    //  Absolute charged energy is available since modbus TCP version 1.2 (0x0001 0x0002) 0x10002 = 65538
+    if (m_modbusTcpVersion >= 65538) {
+
+        // Read Absolute charged energy
+        qCDebug(dcPantaboxModbusTcpConnection()) << "--> Read \"Absolute charged energy\" register:" << 519 << "size:" << 2;
+        reply = readAbsoluteEnergy();
+        if (!reply) {
+            qCWarning(dcPantaboxModbusTcpConnection()) << "Error occurred while reading \"Absolute charged energy\" registers from" << m_modbusTcpMaster->hostAddress().toString() << m_modbusTcpMaster->errorString();
+            return false;
+        }
+
+        if (reply->isFinished()) {
+            reply->deleteLater(); // Broadcast reply returns immediatly
+            return false;
+        }
+
+        m_pendingUpdateReplies.append(reply);
+        connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+        connect(reply, &QModbusReply::finished, this, [this, reply](){
+            m_pendingUpdateReplies.removeAll(reply);
+            handleModbusError(reply->error());
+            if (reply->error() != QModbusDevice::NoError) {
+                verifyUpdateFinished();
+                return;
+            }
+
+            const QModbusDataUnit unit = reply->result();
+            processAbsoluteEnergyRegisterValues(unit.values());
+            verifyUpdateFinished();
+        });
+
+        connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){
+            QModbusResponse response = reply->rawResult();
+            if (reply->error() == QModbusDevice::ProtocolError && response.isException()) {
+                qCWarning(dcPantaboxModbusTcpConnection()) << "Modbus reply error occurred while reading \"Absolute charged energy\" registers from" << m_modbusTcpMaster->hostAddress().toString() << error << reply->errorString() << ModbusDataUtils::exceptionCodeToString(response.exceptionCode());
+            } else {
+                qCWarning(dcPantaboxModbusTcpConnection()) << "Modbus reply error occurred while reading \"Absolute charged energy\" registers from" << m_modbusTcpMaster->hostAddress().toString() << error << reply->errorString();
+            }
+        });
+    }
+
     return true;
 }

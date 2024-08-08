@@ -50,8 +50,6 @@ public:
 
     QList<PantaboxDiscovery::Result> results() const;
 
-    static QString modbusVersionToString(quint32 value);
-
 public slots:
     void startDiscovery();
 

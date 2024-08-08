@@ -321,7 +321,13 @@ void IntegrationPluginInro::setupConnection(ThingSetupInfo *info)
             // Reset energy live values on disconnected
             thing->setStateValue(pantaboxCurrentPowerStateTypeId, 0);
         } else {
-            thing->setStateValue(pantaboxModbusTcpVersionStateTypeId, PantaboxDiscovery::modbusVersionToString(connection->modbusTcpVersion()));
+            connection->initialize();
+        }
+    });
+
+    connect(connection, &Pantabox::initializationFinished, thing, [thing, connection](bool success){
+        if (success) {
+            thing->setStateValue(pantaboxModbusTcpVersionStateTypeId, Pantabox::modbusVersionToString(connection->modbusTcpVersion()));
         }
     });
 
@@ -360,7 +366,7 @@ void IntegrationPluginInro::setupConnection(ThingSetupInfo *info)
         thing->setStateValue(pantaboxPluggedInStateTypeId, connection->chargingState() >= Pantabox::ChargingStateB);
         thing->setStateValue(pantaboxChargingStateTypeId, connection->chargingState() >= Pantabox::ChargingStateC);
         thing->setStateValue(pantaboxCurrentPowerStateTypeId, connection->currentPower()); // W
-        thing->setStateValue(pantaboxTotalEnergyConsumedStateTypeId, connection->chargedEnergy() / 1000.0); // Wh
+        thing->setStateValue(pantaboxSessionEnergyStateTypeId, connection->chargedEnergy() / 1000.0); // Wh
         thing->setStateMaxValue(pantaboxMaxChargingCurrentActionTypeId, connection->maxPossibleChargingCurrent());
 
         // Phase count is a setting, since we don't get the information from the device.
@@ -370,6 +376,10 @@ void IntegrationPluginInro::setupConnection(ThingSetupInfo *info)
         Electricity::Phases phases = Electricity::convertPhasesFromString(thing->setting(pantaboxSettingsPhasesParamTypeId).toString());
         thing->setStateValue(pantaboxPhaseCountStateTypeId, Electricity::getPhaseCount(phases));
         thing->setStateValue(pantaboxUsedPhasesStateTypeId, thing->setting(pantaboxSettingsPhasesParamTypeId).toString());
+
+        // Following states depend on the modbus TCP version, default they will be reset.
+        thing->setStateValue(pantaboxFirmwareVersionStateTypeId, connection->firmwareVersion());
+        thing->setStateValue(pantaboxTotalEnergyConsumedStateTypeId, connection->absoluteEnergy() / 1000.0); // Wh
 
     });
 

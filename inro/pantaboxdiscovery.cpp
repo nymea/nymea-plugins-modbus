@@ -43,13 +43,6 @@ QList<PantaboxDiscovery::Result> PantaboxDiscovery::results() const
     return m_results;
 }
 
-QString PantaboxDiscovery::modbusVersionToString(quint32 value)
-{
-    quint16 modbusVersionMinor = (value >> 8) & 0xffff;
-    quint16 modbusVersionMajor = value & 0xffff;
-    return QString("%1.%2").arg(modbusVersionMajor).arg(modbusVersionMinor);
-}
-
 void PantaboxDiscovery::startDiscovery()
 {
     qCInfo(dcInro()) << "Discovery: Start searching for PANTABOX wallboxes in the network...";
@@ -87,8 +80,8 @@ void PantaboxDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevic
                 return;
             }
 
-            // Modbus registers for vendor and product name are available since Modbus version 1.1
-            if (connection->modbusTcpVersion() > 65536) {
+            // Vendor and product name registers are available since modbus TCP version 1.1 (0x0001 0x0001) 0x10001 = 65537
+            if (connection->modbusTcpVersion() >= 65537) {
 
                 QModbusReply *reply = connection->readProductName();
                 if (!reply) {
@@ -111,7 +104,6 @@ void PantaboxDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevic
                     }
 
                     const QModbusDataUnit unit = reply->result();
-                    qCDebug(dcInro()) << "<-- Response from \"Name of product\" register" << 262 << "size:" << 4 << unit.values();
                     if (unit.values().size() == 4) {
                         QString receivedProductName = ModbusDataUtils::convertToString(unit.values(), connection->stringEndianness());
                         if (receivedProductName.toUpper().contains("PANTABOX")) {
@@ -127,7 +119,8 @@ void PantaboxDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevic
                     }
                 });
             } else {
-                qCDebug(dcInro()) << "Discovery: Device not added to result because of wrong ModbusTcpVersion" << modbusVersionToString(connection->modbusTcpVersion());
+                qCDebug(dcInro()) << "Discovery: Adding connection to results even tough the result is not precise due to modbus TCP protocol version:"
+                                  << connection->modbusTcpVersion() << Pantabox::modbusVersionToString(connection->modbusTcpVersion());
                 addResult(connection, networkDeviceInfo);
             }
         });
@@ -183,7 +176,7 @@ void PantaboxDiscovery::addResult(Pantabox *connection, const NetworkDeviceInfo 
 
     Result result;
     result.serialNumber = QString::number(connection->serialNumber(), 16).toUpper();
-    result.modbusTcpVersion = modbusVersionToString(connection->modbusTcpVersion());
+    result.modbusTcpVersion = Pantabox::modbusVersionToString(connection->modbusTcpVersion());
     result.networkDeviceInfo = networkDeviceInfo;
     m_results.append(result);
 

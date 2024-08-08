@@ -39,9 +39,11 @@ class Pantabox : public PantaboxModbusTcpConnection
 public:
     explicit Pantabox(const QHostAddress &hostAddress, uint port, quint16 slaveId, QObject *parent = nullptr);
     explicit Pantabox(ModbusTcpMaster *modbusTcpMaster, quint16 slaveId, QObject *parent = nullptr);
-    ~Pantabox() = default;
+    ~Pantabox() override = default ;
 
-    virtual bool update() override;
+    static QString modbusVersionToString(quint32 value);
+
+    bool update() override;
 };
 
 #endif // PANTABOX_H
