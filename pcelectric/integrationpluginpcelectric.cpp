@@ -70,6 +70,7 @@ void IntegrationPluginPcElectric::discoverThings(ThingDiscoveryInfo *info)
 
             ParamList params;
             params << Param(ev11ThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
+            params << Param(ev11ThingSerialNumberParamTypeId, result.serialNumber);
             // Note: if we discover also the port and modbusaddress, we must fill them in from the discovery here, for now everywhere the defaults...
             descriptor.setParams(params);
             info->addThingDescriptor(descriptor);

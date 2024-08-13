@@ -23,6 +23,13 @@
                             "type": "QString",
                             "inputType": "MacAddress",
                             "defaultValue": ""
+                        },
+                        {
+                            "id": "db834ca7-934a-473b-8bd8-c641ff0ea879",
+                            "name":"serialNumber",
+                            "displayName": "Serial number",
+                            "type": "QString",
+                            "defaultValue": ""
                         }
                     ],
                     "settingsTypes": [
