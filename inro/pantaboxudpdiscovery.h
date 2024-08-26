@@ -28,42 +28,47 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef INTEGRATIONPLUGININRO_H
-#define INTEGRATIONPLUGININRO_H
+#ifndef PANTABOXUDPDISCOVERY_H
+#define PANTABOXUDPDISCOVERY_H
 
-#include <plugintimer.h>
-#include <integrations/integrationplugin.h>
-#include <network/networkdevicemonitor.h>
+#include <QObject>
+#include <QUdpSocket>
 
-#include "extern-plugininfo.h"
-#include "pantabox.h"
-#include "pantaboxudpdiscovery.h"
+#include <network/macaddress.h>
 
-class IntegrationPluginInro: public IntegrationPlugin
+class PantaboxUdpDiscovery : public QObject
 {
     Q_OBJECT
-
-    Q_PLUGIN_METADATA(IID "io.nymea.IntegrationPlugin" FILE "integrationplugininro.json")
-    Q_INTERFACES(IntegrationPlugin)
-
 public:
-    explicit IntegrationPluginInro();
+    explicit PantaboxUdpDiscovery(QObject *parent = nullptr);
 
-    void discoverThings(ThingDiscoveryInfo *info) override;
-    void setupThing(ThingSetupInfo *info) override;
-    void postSetupThing(Thing *thing) override;
-    void executeAction(ThingActionInfo *info) override;
-    void thingRemoved(Thing *thing) override;
+    typedef struct PantaboxUdp {
+        QString serialNumber;
+        MacAddress macAddress;
+        QHostAddress ipAddress;
+    } PantaboxUdp;
+
+    bool available() const;
+
+    QHash<QString, PantaboxUdp> results() const;
+
+signals:
+    void pantaboxDiscovered(const PantaboxUdp &pantabox);
+
+private slots:
+    void readPendingDatagrams();
 
 private:
-    PluginTimer *m_refreshTimer = nullptr;
-    QHash<Thing *, Pantabox *> m_connections;
-    QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
-    QHash<Thing *, bool> m_initReadRequired;
+    QUdpSocket *m_socket = nullptr;
+    bool m_available = false;
 
-    PantaboxUdpDiscovery *m_updDiscovery = nullptr;
+    QHash<QHostAddress, QByteArray> m_buffers;
+    QHash<QHostAddress, bool> m_prefixStartDiscovered;
 
-    void setupConnection(ThingSetupInfo *info);
+    quint8 calculateCrc8(const QByteArray &data);
+    void processDataBuffer(const QHostAddress &address);
+
+    QHash<QString, PantaboxUdp> m_results;
 };
 
-#endif // INTEGRATIONPLUGININRO_H
+#endif // PANTABOXUDPDISCOVERY_H

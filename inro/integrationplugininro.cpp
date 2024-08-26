@@ -39,6 +39,7 @@
 
 IntegrationPluginInro::IntegrationPluginInro()
 {
+    m_updDiscovery = new PantaboxUdpDiscovery(this);
 
 }
 
@@ -93,41 +94,16 @@ void IntegrationPluginInro::setupThing(ThingSetupInfo *info)
         }
     }
 
-    MacAddress macAddress = MacAddress(thing->paramValue(pantaboxThingMacAddressParamTypeId).toString());
-    if (!macAddress.isValid()) {
-        qCWarning(dcInro()) << "The configured mac address is not valid" << thing->params();
-        info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The MAC address is not known. Please reconfigure the thing."));
+
+    QString serialNumber = thing->paramValue(pantaboxThingSerialNumberParamTypeId).toString();
+
+    if (serialNumber.isEmpty()) {
+        qCWarning(dcInro()) << "Could not set up PANTABOX because the configured serial number is empty" << thing->params();
+        info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The serial number is not known. Please reconfigure the thing."));
         return;
     }
 
-    NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(macAddress);
-    m_monitors.insert(thing, monitor);
-
-    connect(info, &ThingSetupInfo::aborted, monitor, [=](){
-        if (m_monitors.contains(thing)) {
-            qCDebug(dcInro()) << "Unregistering monitor because setup has been aborted.";
-            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
-        }
-    });
-
-    // Only make sure the connection is working in the initial setup, otherwise we let the monitor do the work
-    if (info->isInitialSetup()) {
-        // Continue with setup only if we know that the network device is reachable
-        if (monitor->reachable()) {
-            setupConnection(info);
-        } else {
-            // otherwise wait until we reach the networkdevice before setting up the device
-            qCDebug(dcInro()) << "Network device" << thing->name() << "is not reachable yet. Continue with the setup once reachable.";
-            connect(monitor, &NetworkDeviceMonitor::reachableChanged, info, [=](bool reachable){
-                if (reachable) {
-                    qCDebug(dcInro()) << "Network device" << thing->name() << "is now reachable. Continue with the setup...";
-                    setupConnection(info);
-                }
-            });
-        }
-    } else {
-        setupConnection(info);
-    }
+    setupConnection(info);
 }
 
 void IntegrationPluginInro::postSetupThing(Thing *thing)
@@ -293,24 +269,21 @@ void IntegrationPluginInro::thingRemoved(Thing *thing)
 void IntegrationPluginInro::setupConnection(ThingSetupInfo *info)
 {
     Thing *thing = info->thing();
-    NetworkDeviceMonitor *monitor = m_monitors.value(thing);
+    // NetworkDeviceMonitor *monitor = m_monitors.value(thing);
 
-    Pantabox *connection = new Pantabox(monitor->networkDeviceInfo().address(), 502, 1, this);
+    Pantabox *connection = new Pantabox(QHostAddress(), 502, 1, this);
     connect(info, &ThingSetupInfo::aborted, connection, &Pantabox::deleteLater);
 
-    // Monitor reachability
-    connect(monitor, &NetworkDeviceMonitor::reachableChanged, thing, [=](bool reachable){
-        if (!thing->setupComplete())
+    connect(m_updDiscovery, &PantaboxUdpDiscovery::pantaboxDiscovered, connection, [connection, thing](const PantaboxUdpDiscovery::PantaboxUdp &pantabox){
+        QString serialNumber = thing->paramValue(pantaboxThingSerialNumberParamTypeId).toString();
+        if (pantabox.serialNumber != serialNumber)
             return;
 
-        qCDebug(dcInro()) << "Network device monitor for" << thing->name() << (reachable ? "is now reachable" : "is not reachable any more" );
-        if (reachable && !thing->stateValue("connected").toBool()) {
-            connection->modbusTcpMaster()->setHostAddress(monitor->networkDeviceInfo().address());
+        connection->modbusTcpMaster()->setHostAddress(pantabox.ipAddress);
+
+        if (!thing->stateValue("connected").toBool()) {
+            qCDebug(dcInro()) << "Received discovery paket for" << thing << "Start connecting to the PANTABOX on" << pantabox.ipAddress.toString();
             connection->connectDevice();
-        } else if (!reachable) {
-            // Note: We disable autoreconnect explicitly and we will
-            // connect the device once the monitor says it is reachable again
-            connection->disconnectDevice();
         }
     });
 
@@ -397,10 +370,4 @@ void IntegrationPluginInro::setupConnection(ThingSetupInfo *info)
 
     m_connections.insert(thing, connection);
     info->finish(Thing::ThingErrorNoError);
-
-    qCDebug(dcInro()) << "Setting up PANTABOX finished successfully" << monitor->networkDeviceInfo().address().toString();
-
-    // Connect reight the way if the monitor indicates reachable, otherwise the connect will handle the connect later
-    if (monitor->reachable())
-        connection->connectDevice();
 }
