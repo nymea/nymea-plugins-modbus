@@ -277,6 +277,8 @@ void IntegrationPluginInro::thingRemoved(Thing *thing)
         connection->deleteLater();
     }
 
+    m_initReadRequired.remove(thing);
+
     // Unregister related hardware resources
     if (m_monitors.contains(thing))
         hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
@@ -325,13 +327,14 @@ void IntegrationPluginInro::setupConnection(ThingSetupInfo *info)
         }
     });
 
-    connect(connection, &Pantabox::initializationFinished, thing, [thing, connection](bool success){
+    connect(connection, &Pantabox::initializationFinished, thing, [this, thing, connection](bool success){
         if (success) {
             thing->setStateValue(pantaboxModbusTcpVersionStateTypeId, Pantabox::modbusVersionToString(connection->modbusTcpVersion()));
+            m_initReadRequired[thing] = true;
         }
     });
 
-    connect(connection, &Pantabox::updateFinished, thing, [thing, connection](){
+    connect(connection, &Pantabox::updateFinished, thing, [this, thing, connection](){
         qCDebug(dcInro()) << "Update finished for" << thing;
         qCDebug(dcInro()) << connection;
 
@@ -381,6 +384,15 @@ void IntegrationPluginInro::setupConnection(ThingSetupInfo *info)
         thing->setStateValue(pantaboxFirmwareVersionStateTypeId, connection->firmwareVersion());
         thing->setStateValue(pantaboxTotalEnergyConsumedStateTypeId, connection->absoluteEnergy() / 1000.0); // Wh
 
+        // Sync states only right after the connection
+        if (m_initReadRequired.value(thing, false)) {
+            qCDebug(dcInro()) << "Set initial charging current and charging enabled values.";
+            m_initReadRequired.remove(thing);
+            if (connection->maxChargingCurrent() > 0) {
+                thing->setStateValue(pantaboxMaxChargingCurrentStateTypeId, connection->maxChargingCurrent());
+            }
+            thing->setStateValue(pantaboxPowerStateTypeId, connection->chargingEnabled());
+        }
     });
 
     m_connections.insert(thing, connection);
