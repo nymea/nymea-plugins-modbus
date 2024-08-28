@@ -48,6 +48,8 @@ public:
 
     bool available() const;
 
+    static bool isOwnInterface(const QHostAddress &hostAddress);
+
     quint32 sourceSerialNumber() const;
 
     bool initialize();
