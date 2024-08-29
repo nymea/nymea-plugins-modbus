@@ -58,10 +58,9 @@ public:
 private:
     PluginTimer *m_refreshTimer = nullptr;
     QHash<Thing *, Pantabox *> m_connections;
-    QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
     QHash<Thing *, bool> m_initReadRequired;
 
-    PantaboxUdpDiscovery *m_updDiscovery = nullptr;
+    PantaboxUdpDiscovery *m_udpDiscovery = nullptr;
 
     void setupConnection(ThingSetupInfo *info);
 };

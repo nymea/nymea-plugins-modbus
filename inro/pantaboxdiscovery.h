@@ -31,21 +31,21 @@
 #ifndef PANTABOXDISCOVERY_H
 #define PANTABOXDISCOVERY_H
 
+#include <QTimer>
 #include <QObject>
 
-#include <network/networkdevicediscovery.h>
 #include "pantabox.h"
+#include "pantaboxudpdiscovery.h"
 
 class PantaboxDiscovery : public QObject
 {
     Q_OBJECT
 public:
-    explicit PantaboxDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, QObject *parent = nullptr);
+    explicit PantaboxDiscovery(QObject *parent = nullptr);
 
     typedef struct Result {
-        QString serialNumber;
+        PantaboxUdpDiscovery::DeviceInfo deviceInfo;
         QString modbusTcpVersion;
-        NetworkDeviceInfo networkDeviceInfo;
     } Result;
 
     QList<PantaboxDiscovery::Result> results() const;
@@ -57,21 +57,22 @@ signals:
     void discoveryFinished();
 
 private:
-    NetworkDeviceDiscovery *m_networkDeviceDiscovery = nullptr;
+    PantaboxUdpDiscovery *m_discovery = nullptr;
     quint16 m_port = 502;
     quint16 m_modbusAddress = 1;
-
     QDateTime m_startDateTime;
+    QTimer m_discoveryTimer;
 
     QList<Pantabox *> m_connections;
+    QList<QHostAddress> m_alreadyCheckedHosts;
 
     QList<Result> m_results;
 
-    void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
+    void checkNetworkDevice(const PantaboxUdpDiscovery::DeviceInfo &deviceInfo);
     void cleanupConnection(Pantabox *connection);
 
     void finishDiscovery();
-    void addResult(Pantabox *connection, const NetworkDeviceInfo &networkDeviceInfo);
+    void addResult(Pantabox *connection, const PantaboxUdpDiscovery::DeviceInfo &deviceInfo);
 };
 
 #endif // PANTABOXDISCOVERY_H

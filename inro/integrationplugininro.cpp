@@ -31,7 +31,6 @@
 #include "integrationplugininro.h"
 #include "plugininfo.h"
 
-#include <network/networkdevicediscovery.h>
 #include <hardwaremanager.h>
 #include <hardware/electricity.h>
 
@@ -39,37 +38,29 @@
 
 IntegrationPluginInro::IntegrationPluginInro()
 {
-    m_updDiscovery = new PantaboxUdpDiscovery(this);
 
 }
 
 void IntegrationPluginInro::discoverThings(ThingDiscoveryInfo *info)
 {
-
-    if (!hardwareManager()->networkDeviceDiscovery()->available()) {
-        qCWarning(dcInro()) << "The network discovery is not available on this platform.";
-        info->finish(Thing::ThingErrorUnsupportedFeature, QT_TR_NOOP("The network device discovery is not available."));
-        return;
-    }
-
-    PantaboxDiscovery *discovery = new PantaboxDiscovery(hardwareManager()->networkDeviceDiscovery(), info);
+    PantaboxDiscovery *discovery = new PantaboxDiscovery(info);
     connect(discovery, &PantaboxDiscovery::discoveryFinished, info, [this, info, discovery](){
 
         foreach (const PantaboxDiscovery::Result &result, discovery->results()) {
-            QString title = QString("PANTABOX - %1").arg(result.serialNumber);
-            QString description = QString("%1 (%2)").arg(result.networkDeviceInfo.macAddress(), result.networkDeviceInfo.address().toString());
+            QString title = QString("PANTABOX - %1").arg(result.deviceInfo.serialNumber);
+            QString description = QString("%1 (%2)").arg(result.deviceInfo.macAddress.toString(), result.deviceInfo.ipAddress.toString());
             ThingDescriptor descriptor(pantaboxThingClassId, title, description);
 
             // Check if we already have set up this device
-            Things existingThings = myThings().filterByParam(pantaboxThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
+            Things existingThings = myThings().filterByParam(pantaboxThingSerialNumberParamTypeId, result.deviceInfo.serialNumber);
             if (existingThings.count() == 1) {
-                qCDebug(dcInro()) << "This PANTABOX already exists in the system:" << result.networkDeviceInfo;
+                qCDebug(dcInro()) << "This PANTABOX already exists in the system:" << result.deviceInfo.serialNumber << result.deviceInfo.ipAddress.toString();
                 descriptor.setThingId(existingThings.first()->id());
             }
 
             ParamList params;
-            params << Param(pantaboxThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
-            params << Param(pantaboxThingSerialNumberParamTypeId, result.serialNumber);
+            params << Param(pantaboxThingMacAddressParamTypeId, result.deviceInfo.macAddress.toString());
+            params << Param(pantaboxThingSerialNumberParamTypeId, result.deviceInfo.serialNumber);
             descriptor.setParams(params);
             info->addThingDescriptor(descriptor);
         }
@@ -87,13 +78,11 @@ void IntegrationPluginInro::setupThing(ThingSetupInfo *info)
 
     if (m_connections.contains(thing)) {
         qCDebug(dcInro()) << "Reconfiguring existing thing" << thing->name();
-        m_connections.take(thing)->deleteLater();
-
-        if (m_monitors.contains(thing)) {
-            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
-        }
+        Pantabox *connection = m_connections.take(thing);
+        connection->modbusTcpMaster()->disconnectDevice();
+        connection->deleteLater();
+        thing->setStateValue(pantaboxConnectedStateTypeId, false);
     }
-
 
     QString serialNumber = thing->paramValue(pantaboxThingSerialNumberParamTypeId).toString();
 
@@ -255,34 +244,38 @@ void IntegrationPluginInro::thingRemoved(Thing *thing)
 
     m_initReadRequired.remove(thing);
 
-    // Unregister related hardware resources
-    if (m_monitors.contains(thing))
-        hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
-
     if (myThings().isEmpty() && m_refreshTimer) {
         qCDebug(dcInro()) << "Stopping reconnect timer";
         hardwareManager()->pluginTimerManager()->unregisterTimer(m_refreshTimer);
         m_refreshTimer = nullptr;
     }
+
+    if (myThings().isEmpty() && m_udpDiscovery) {
+        qCDebug(dcInro()) << "Destroy UDP discovery since not needed any more";
+        m_udpDiscovery->deleteLater();
+        m_udpDiscovery = nullptr;
+    }
 }
 
 void IntegrationPluginInro::setupConnection(ThingSetupInfo *info)
 {
+    if (!m_udpDiscovery)
+        m_udpDiscovery = new PantaboxUdpDiscovery(this);
+
     Thing *thing = info->thing();
-    // NetworkDeviceMonitor *monitor = m_monitors.value(thing);
 
     Pantabox *connection = new Pantabox(QHostAddress(), 502, 1, this);
     connect(info, &ThingSetupInfo::aborted, connection, &Pantabox::deleteLater);
 
-    connect(m_updDiscovery, &PantaboxUdpDiscovery::pantaboxDiscovered, connection, [connection, thing](const PantaboxUdpDiscovery::PantaboxUdp &pantabox){
+    connect(m_udpDiscovery, &PantaboxUdpDiscovery::pantaboxDiscovered, connection, [connection, thing](const PantaboxUdpDiscovery::DeviceInfo &deviceInfo){
         QString serialNumber = thing->paramValue(pantaboxThingSerialNumberParamTypeId).toString();
-        if (pantabox.serialNumber != serialNumber)
+        if (deviceInfo.serialNumber != serialNumber)
             return;
 
-        connection->modbusTcpMaster()->setHostAddress(pantabox.ipAddress);
+        connection->modbusTcpMaster()->setHostAddress(deviceInfo.ipAddress);
 
         if (!thing->stateValue("connected").toBool()) {
-            qCDebug(dcInro()) << "Received discovery paket for" << thing << "Start connecting to the PANTABOX on" << pantabox.ipAddress.toString();
+            qCDebug(dcInro()) << "Received discovery paket for" << thing << "Start connecting to the PANTABOX on" << deviceInfo.ipAddress.toString();
             connection->connectDevice();
         }
     });

@@ -42,18 +42,18 @@ class PantaboxUdpDiscovery : public QObject
 public:
     explicit PantaboxUdpDiscovery(QObject *parent = nullptr);
 
-    typedef struct PantaboxUdp {
+    typedef struct DeviceInfo {
         QString serialNumber;
         MacAddress macAddress;
         QHostAddress ipAddress;
-    } PantaboxUdp;
+    } DeviceInfo;
 
     bool available() const;
 
-    QHash<QString, PantaboxUdp> results() const;
+    QHash<QString, DeviceInfo> results() const;
 
 signals:
-    void pantaboxDiscovered(const PantaboxUdp &pantabox);
+    void pantaboxDiscovered(const PantaboxUdpDiscovery::DeviceInfo &deviceInfo);
 
 private slots:
     void readPendingDatagrams();
@@ -68,7 +68,7 @@ private:
     quint8 calculateCrc8(const QByteArray &data);
     void processDataBuffer(const QHostAddress &address);
 
-    QHash<QString, PantaboxUdp> m_results;
+    QHash<QString, DeviceInfo> m_results;
 };
 
 #endif // PANTABOXUDPDISCOVERY_H

@@ -48,12 +48,15 @@ PantaboxUdpDiscovery::PantaboxUdpDiscovery(QObject *parent)
     }
 
     connect(m_socket, &QUdpSocket::readyRead, this, &PantaboxUdpDiscovery::readPendingDatagrams);
-
     m_available = true;
-
 }
 
-QHash<QString, PantaboxUdpDiscovery::PantaboxUdp> PantaboxUdpDiscovery::results() const
+bool PantaboxUdpDiscovery::available() const
+{
+    return m_available;
+}
+
+QHash<QString, PantaboxUdpDiscovery::DeviceInfo> PantaboxUdpDiscovery::results() const
 {
     return m_results;
 }
@@ -129,6 +132,7 @@ void PantaboxUdpDiscovery::processDataBuffer(const QHostAddress &address)
     }
 
     //qCDebug(dcInro()) << "UdpDiscovery:" << qUtf8Printable(jsonDoc.toJson(QJsonDocument::Indented));
+
     /*
          {
             "deviceId": "e45749d4-8c05-44b2-9dbc-xxxxxxxxxxxx",
@@ -146,7 +150,7 @@ void PantaboxUdpDiscovery::processDataBuffer(const QHostAddress &address)
 
     QVariantMap dataMap = jsonDoc.toVariant().toMap();
     if (dataMap.contains("serialNumber") && dataMap.contains("ipAddress") && dataMap.contains("macAddress")) {
-        PantaboxUdp pantabox;
+        DeviceInfo pantabox;
         pantabox.serialNumber = dataMap.value("serialNumber").toString().remove("#");
         pantabox.macAddress = MacAddress(dataMap.value("macAddress").toString());
         pantabox.ipAddress = QHostAddress(dataMap.value("ipAddress").toString());
