@@ -329,7 +329,7 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
 
         thing->setStateMaxValue(ev11MaxChargingCurrentStateTypeId, connection->maxChargingCurrentDip() / 1000);
         thing->setStateValue(ev11PluggedInStateTypeId, connection->chargingState() >= PceWallbox::ChargingStateB1 &&
-                                                           connection->chargingState() < PceWallbox::ChargingStateError);
+                             connection->chargingState() < PceWallbox::ChargingStateError);
 
         thing->setStateValue(ev11ChargingStateTypeId, connection->chargingState() == PceWallbox::ChargingStateC2);
         if (connection->chargingRelayState() != EV11ModbusTcpConnection::ChargingRelayStateNoCharging) {
@@ -372,6 +372,18 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
             thing->setStateValue(ev11ErrorStateTypeId, "DC Fehlerstromsensor, Fehler.");
             break;
         }
+
+        switch (connection->digitalInputMode()) {
+        case EV11ModbusTcpConnection::DigitalInputModeEnableCharging:
+            thing->setSettingValue(ev11SettingsDigitalInputModeParamTypeId, "Charging allowed");
+            break;
+        case EV11ModbusTcpConnection::DigitalInputModeEnableChargingInverted:
+            thing->setSettingValue(ev11SettingsDigitalInputModeParamTypeId, "Charging allowed inverted");
+            break;
+        case EV11ModbusTcpConnection::DigitalInputModePwmS0Enabled:
+            thing->setSettingValue(ev11SettingsDigitalInputModeParamTypeId, "PWM and S0 signaling");
+            break;
+        }
     });
 
     connect(thing, &Thing::settingChanged, connection, [thing, connection](const ParamTypeId &paramTypeId, const QVariant &value){
@@ -386,6 +398,26 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
                 }
 
                 qCDebug(dcPcElectric()) << "Successfully set led brightness to" << percentage << "%";
+            });
+        } else if (paramTypeId == ev11SettingsDigitalInputModeParamTypeId) {
+            QString mode = value.toString();
+            qCDebug(dcPcElectric()) << "Set Digital input mode" << mode;
+            EV11ModbusTcpConnection::DigitalInputMode modeValue = EV11ModbusTcpConnection::DigitalInputModeEnableCharging;
+
+            if (mode == "Charging allowed inverted") {
+                modeValue = EV11ModbusTcpConnection::DigitalInputModeEnableChargingInverted;
+            } else if (mode == "PWM and S0 signaling") {
+                modeValue = EV11ModbusTcpConnection::DigitalInputModePwmS0Enabled;
+            }
+
+            QueuedModbusReply *reply = connection->setDigitalInputMode(modeValue);
+            connect(reply, &QueuedModbusReply::finished, thing, [reply, modeValue](){
+                if (reply->error() != QModbusDevice::NoError) {
+                    qCWarning(dcPcElectric()) << "Could not set digital input mode to" << modeValue << reply->errorString();
+                    return;
+                }
+
+                qCDebug(dcPcElectric()) << "Successfully set digital input mode to" << modeValue;
             });
         }
     });

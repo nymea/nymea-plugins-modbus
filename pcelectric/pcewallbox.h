@@ -51,6 +51,8 @@ public:
 
     QueuedModbusReply *setLedBrightness(quint16 percentage);
 
+    QueuedModbusReply *setDigitalInputMode(DigitalInputMode digitalInputMode);
+
     // Note: the modbus implementation of the wallbox gets stuck if a Modbus request has been sent
     // and we disconnect the socket before the response has arrived. Only a reboot of the wallbox
     // fixes the broken communication afterwards. This method waits for the current request before closing the

@@ -103,6 +103,23 @@
                     "value": 9
                 }
             ]
+        },
+        {
+            "name": "DigitalInputMode",
+            "values": [
+                {
+                    "key": "EnableCharging",
+                    "value": 0
+                },
+                {
+                    "key": "EnableChargingInverted",
+                    "value": 1
+                },
+                {
+                    "key": "PwmS0Enabled",
+                    "value": 2
+                }
+            ]
         }
     ],
     "blocks": [
@@ -329,6 +346,16 @@
             "description": "LED brightness",
             "unit": "%",
             "access": "WO"
+        },
+        {
+            "id": "digitalInputMode",
+            "address": 205,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "description": "Digital input mode",
+            "enum": "DigitalInputMode",
+            "access": "WR"
         }
     ]
 }
