@@ -274,9 +274,19 @@ void IntegrationPluginInro::setupConnection(ThingSetupInfo *info)
 
         connection->modbusTcpMaster()->setHostAddress(deviceInfo.ipAddress);
 
-        if (!thing->stateValue("connected").toBool()) {
-            qCDebug(dcInro()) << "Received discovery paket for" << thing << "Start connecting to the PANTABOX on" << deviceInfo.ipAddress.toString();
-            connection->connectDevice();
+        if (!connection->reachable()) {
+
+            if (connection->modbusTcpMaster()->connected()) {
+                qCDebug(dcInro()) << "Received discovery paket for" << thing->name() <<
+                    "which is not reachable but the TCP socket is still connected. Reconnecting the TCP socket on" <<
+                    deviceInfo.ipAddress.toString();
+                connection->modbusTcpMaster()->reconnectDevice();
+            } else {
+                qCDebug(dcInro()) << "Received discovery paket for" << thing->name() <<
+                    "which is not reachable and not connected. Start connecting to the PANTABOX on" <<
+                    deviceInfo.ipAddress.toString();
+                connection->connectDevice();
+            }
         }
     });
 
