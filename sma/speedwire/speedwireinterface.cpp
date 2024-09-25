@@ -72,6 +72,10 @@ SpeedwireInterface::SpeedwireInterface(quint32 sourceSerialNumber, QObject *pare
             datagram.resize(m_multicast->pendingDatagramSize());
             m_multicast->readDatagram(datagram.data(), datagram.size(), &senderAddress, &senderPort);
 
+            // Filter our own requests on the multicast
+            if (isOwnInterface(senderAddress))
+                return;
+
             qCDebug(dcSma()).noquote() << "SpeedwireInterface: Multicast socket received data from" << QString("%1:%2").arg(senderAddress.toString()).arg(senderPort);
             //qCDebug(dcSma()) << "SpeedwireInterface: " << datagram.toHex();
             emit dataReceived(senderAddress, senderPort, datagram, true);
@@ -109,6 +113,33 @@ SpeedwireInterface::~SpeedwireInterface()
 bool SpeedwireInterface::available() const
 {
     return m_available;
+}
+
+bool SpeedwireInterface::isOwnInterface(const QHostAddress &hostAddress)
+{
+    foreach (const QNetworkInterface &networkInterface, QNetworkInterface::allInterfaces()) {
+        if (networkInterface.flags().testFlag(QNetworkInterface::IsLoopBack))
+            continue;
+
+        if (!networkInterface.flags().testFlag(QNetworkInterface::IsUp))
+            continue;
+
+        if (!networkInterface.flags().testFlag(QNetworkInterface::IsRunning))
+            continue;
+
+        foreach (const QNetworkAddressEntry &entry, networkInterface.addressEntries()) {
+
+            // Only IPv4
+            if (entry.ip().protocol() != QAbstractSocket::IPv4Protocol)
+                continue;
+
+            if (entry.ip() == hostAddress) {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 void SpeedwireInterface::reconfigureMulticastGroup()
