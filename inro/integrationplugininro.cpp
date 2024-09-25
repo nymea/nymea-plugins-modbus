@@ -31,7 +31,6 @@
 #include "integrationplugininro.h"
 #include "plugininfo.h"
 
-#include <network/networkdevicediscovery.h>
 #include <hardwaremanager.h>
 #include <hardware/electricity.h>
 
@@ -44,31 +43,24 @@ IntegrationPluginInro::IntegrationPluginInro()
 
 void IntegrationPluginInro::discoverThings(ThingDiscoveryInfo *info)
 {
-
-    if (!hardwareManager()->networkDeviceDiscovery()->available()) {
-        qCWarning(dcInro()) << "The network discovery is not available on this platform.";
-        info->finish(Thing::ThingErrorUnsupportedFeature, QT_TR_NOOP("The network device discovery is not available."));
-        return;
-    }
-
-    PantaboxDiscovery *discovery = new PantaboxDiscovery(hardwareManager()->networkDeviceDiscovery(), info);
+    PantaboxDiscovery *discovery = new PantaboxDiscovery(info);
     connect(discovery, &PantaboxDiscovery::discoveryFinished, info, [this, info, discovery](){
 
         foreach (const PantaboxDiscovery::Result &result, discovery->results()) {
-            QString title = QString("PANTABOX - %1").arg(result.serialNumber);
-            QString description = QString("%1 (%2)").arg(result.networkDeviceInfo.macAddress(), result.networkDeviceInfo.address().toString());
+            QString title = QString("PANTABOX - %1").arg(result.deviceInfo.serialNumber);
+            QString description = QString("%1 (%2)").arg(result.deviceInfo.macAddress.toString(), result.deviceInfo.ipAddress.toString());
             ThingDescriptor descriptor(pantaboxThingClassId, title, description);
 
             // Check if we already have set up this device
-            Things existingThings = myThings().filterByParam(pantaboxThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
+            Things existingThings = myThings().filterByParam(pantaboxThingSerialNumberParamTypeId, result.deviceInfo.serialNumber);
             if (existingThings.count() == 1) {
-                qCDebug(dcInro()) << "This PANTABOX already exists in the system:" << result.networkDeviceInfo;
+                qCDebug(dcInro()) << "This PANTABOX already exists in the system:" << result.deviceInfo.serialNumber << result.deviceInfo.ipAddress.toString();
                 descriptor.setThingId(existingThings.first()->id());
             }
 
             ParamList params;
-            params << Param(pantaboxThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
-            params << Param(pantaboxThingSerialNumberParamTypeId, result.serialNumber);
+            params << Param(pantaboxThingMacAddressParamTypeId, result.deviceInfo.macAddress.toString());
+            params << Param(pantaboxThingSerialNumberParamTypeId, result.deviceInfo.serialNumber);
             descriptor.setParams(params);
             info->addThingDescriptor(descriptor);
         }
@@ -86,48 +78,21 @@ void IntegrationPluginInro::setupThing(ThingSetupInfo *info)
 
     if (m_connections.contains(thing)) {
         qCDebug(dcInro()) << "Reconfiguring existing thing" << thing->name();
-        m_connections.take(thing)->deleteLater();
-
-        if (m_monitors.contains(thing)) {
-            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
-        }
+        Pantabox *connection = m_connections.take(thing);
+        connection->modbusTcpMaster()->disconnectDevice();
+        connection->deleteLater();
+        thing->setStateValue(pantaboxConnectedStateTypeId, false);
     }
 
-    MacAddress macAddress = MacAddress(thing->paramValue(pantaboxThingMacAddressParamTypeId).toString());
-    if (!macAddress.isValid()) {
-        qCWarning(dcInro()) << "The configured mac address is not valid" << thing->params();
-        info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The MAC address is not known. Please reconfigure the thing."));
+    QString serialNumber = thing->paramValue(pantaboxThingSerialNumberParamTypeId).toString();
+
+    if (serialNumber.isEmpty()) {
+        qCWarning(dcInro()) << "Could not set up PANTABOX because the configured serial number is empty" << thing->params();
+        info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The serial number is not known. Please reconfigure the thing."));
         return;
     }
 
-    NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(macAddress);
-    m_monitors.insert(thing, monitor);
-
-    connect(info, &ThingSetupInfo::aborted, monitor, [=](){
-        if (m_monitors.contains(thing)) {
-            qCDebug(dcInro()) << "Unregistering monitor because setup has been aborted.";
-            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
-        }
-    });
-
-    // Only make sure the connection is working in the initial setup, otherwise we let the monitor do the work
-    if (info->isInitialSetup()) {
-        // Continue with setup only if we know that the network device is reachable
-        if (monitor->reachable()) {
-            setupConnection(info);
-        } else {
-            // otherwise wait until we reach the networkdevice before setting up the device
-            qCDebug(dcInro()) << "Network device" << thing->name() << "is not reachable yet. Continue with the setup once reachable.";
-            connect(monitor, &NetworkDeviceMonitor::reachableChanged, info, [=](bool reachable){
-                if (reachable) {
-                    qCDebug(dcInro()) << "Network device" << thing->name() << "is now reachable. Continue with the setup...";
-                    setupConnection(info);
-                }
-            });
-        }
-    } else {
-        setupConnection(info);
-    }
+    setupConnection(info);
 }
 
 void IntegrationPluginInro::postSetupThing(Thing *thing)
@@ -136,7 +101,7 @@ void IntegrationPluginInro::postSetupThing(Thing *thing)
     if (!m_refreshTimer) {
         m_refreshTimer = hardwareManager()->pluginTimerManager()->registerTimer(2);
         connect(m_refreshTimer, &PluginTimer::timeout, this, [this] {
-            foreach (PantaboxModbusTcpConnection *connection, m_connections) {
+            foreach (Pantabox *connection, m_connections) {
                 if (connection->reachable()) {
                     connection->update();
                 }
@@ -152,7 +117,7 @@ void IntegrationPluginInro::executeAction(ThingActionInfo *info)
 {
     if (info->thing()->thingClassId() == pantaboxThingClassId) {
 
-        PantaboxModbusTcpConnection *connection = m_connections.value(info->thing());
+        Pantabox *connection = m_connections.value(info->thing());
 
         if (!connection->reachable()) {
             qCWarning(dcInro()) << "Cannot execute action. The PANTABOX is not reachable";
@@ -162,27 +127,99 @@ void IntegrationPluginInro::executeAction(ThingActionInfo *info)
 
         if (info->action().actionTypeId() == pantaboxPowerActionTypeId) {
             bool power = info->action().paramValue(pantaboxPowerActionPowerParamTypeId).toBool();
-            qCDebug(dcInro()) << "PANTABOX: Set power" << (power ? 1 : 0);
 
-            QModbusReply *reply = connection->setChargingEnabled(power ? 1 : 0);
-            if (!reply) {
-                qCWarning(dcInro()) << "Execute action failed because the reply could not be created.";
-                info->finish(Thing::ThingErrorHardwareFailure);
-                return;
-            }
+            // Play/pause charging session feature is available since Modbus Tcp version 1.2 (0x0001 0x0002) 0x10002 = 65538
+            if (connection->modbusTcpVersion() < 65538) {
+                // When power is set by user, charging is going to stop or start depending on setting
+                qCDebug(dcInro()) << "Set power by user" << (power ? 1 : 0);
+                QModbusReply *reply = connection->setChargingEnabled(power ? 1 : 0);
 
-            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
-            connect(reply, &QModbusReply::finished, info, [info, reply, power](){
-                if (reply->error() == QModbusDevice::NoError) {
-                    info->thing()->setStateValue(pantaboxPowerStateTypeId, power);
-                    qCDebug(dcInro()) << "PANTABOX: Set power finished successfully";
-                    info->finish(Thing::ThingErrorNoError);
-                } else {
-                    qCWarning(dcInro()) << "Error setting power:" << reply->error() << reply->errorString();
+                if (!reply) {
+                    qCWarning(dcInro()) << "Execute action failed because the reply could not be created.";
                     info->finish(Thing::ThingErrorHardwareFailure);
+                    return;
                 }
-            });
-            return;
+
+                connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+                connect(reply, &QModbusReply::finished, info, [info, reply, power](){
+                    if (reply->error() == QModbusDevice::NoError) {
+                        info->thing()->setStateValue(pantaboxPowerStateTypeId, power);
+                        qCDebug(dcInro()) << "Set power by user finished successfully";
+                        info->finish(Thing::ThingErrorNoError);
+                    } else {
+                        qCWarning(dcInro()) << "Error setting power by user:" << reply->error() << reply->errorString();
+                        info->finish(Thing::ThingErrorHardwareFailure);
+                    }
+                });
+                return;
+
+            } else {
+
+                // Modbus version >= 1.2
+
+                if (info->action().triggeredBy() == Action::TriggeredByUser) {
+
+                    // When power is set by user, charging is going to stop or start depending on setting
+                    qCDebug(dcInro()) << "Set power by user" << (power ? 1 : 0);
+                    QModbusReply *reply = connection->setChargingEnabled(power ? 1 : 0);
+
+                    if (!reply) {
+                        qCWarning(dcInro()) << "Execute action failed because the reply could not be created.";
+                        info->finish(Thing::ThingErrorHardwareFailure);
+                        return;
+                    }
+
+                    connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+                    connect(reply, &QModbusReply::finished, info, [info, reply, power](){
+                        if (reply->error() == QModbusDevice::NoError) {
+                            info->thing()->setStateValue(pantaboxPowerStateTypeId, power);
+                            qCDebug(dcInro()) << "Set power by user finished successfully";
+                            info->finish(Thing::ThingErrorNoError);
+                        } else {
+                            qCWarning(dcInro()) << "Error setting power by user:" << reply->error() << reply->errorString();
+                            info->finish(Thing::ThingErrorHardwareFailure);
+                        }
+                    });
+                    return;
+
+                } else {
+                    // When power is set to 0 by automatisnm, max charging current is set to 0 otherwise take the configured max charging current
+                    qCDebug(dcInro()) << "Going to play/pause charging session";
+
+                    quint16 chargingCurrent = power ? info->thing()->stateValue(pantaboxMaxChargingCurrentStateTypeId).toUInt() : 0;
+                    QModbusReply *reply = connection->setMaxChargingCurrent(chargingCurrent);
+
+                    if (!reply) {
+                        qCWarning(dcInro()) << "Execute action failed because the reply could not be created.";
+                        info->finish(Thing::ThingErrorHardwareFailure);
+                        return;
+                    }
+
+                    connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+                    connect(reply, &QModbusReply::finished, info, [info, reply, power, connection](){
+                        if (reply->error() == QModbusDevice::NoError) {
+                            qCDebug(dcInro()) << (power ? "Play" : "Pause") << "session by energy manager";
+                            info->finish(Thing::ThingErrorNoError);
+                            if (power) {
+                                // Make sure the charging is enabled, just in case
+                                QModbusReply *reply = connection->setChargingEnabled(1);
+                                connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+                                connect(reply, &QModbusReply::finished, info, [reply](){
+                                    if (reply->error() != QModbusDevice::NoError) {
+                                        qCWarning(dcInro()) << "Error setting charging enabled:" << reply->error() << reply->errorString();
+                                    }
+                                });
+                            }
+                        } else {
+                            qCWarning(dcInro()) << "Error setting charging current:" << reply->error() << reply->errorString();
+                            info->finish(Thing::ThingErrorHardwareFailure);
+                        }
+
+                    });
+
+                    return;
+                }
+            }
         }
 
         if (info->action().actionTypeId() == pantaboxMaxChargingCurrentActionTypeId) {
@@ -217,48 +254,61 @@ void IntegrationPluginInro::thingRemoved(Thing *thing)
     qCDebug(dcInro()) << "Thing removed" << thing->name();
 
     if (m_connections.contains(thing)) {
-        PantaboxModbusTcpConnection *connection = m_connections.take(thing);
+        Pantabox *connection = m_connections.take(thing);
         connection->disconnectDevice();
         connection->deleteLater();
     }
 
-    // Unregister related hardware resources
-    if (m_monitors.contains(thing))
-        hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+    m_initReadRequired.remove(thing);
 
     if (myThings().isEmpty() && m_refreshTimer) {
         qCDebug(dcInro()) << "Stopping reconnect timer";
         hardwareManager()->pluginTimerManager()->unregisterTimer(m_refreshTimer);
         m_refreshTimer = nullptr;
     }
+
+    if (myThings().isEmpty() && m_udpDiscovery) {
+        qCDebug(dcInro()) << "Destroy UDP discovery since not needed any more";
+        m_udpDiscovery->deleteLater();
+        m_udpDiscovery = nullptr;
+    }
 }
 
 void IntegrationPluginInro::setupConnection(ThingSetupInfo *info)
 {
+    if (!m_udpDiscovery)
+        m_udpDiscovery = new PantaboxUdpDiscovery(this);
+
     Thing *thing = info->thing();
-    NetworkDeviceMonitor *monitor = m_monitors.value(thing);
 
-    PantaboxModbusTcpConnection *connection = new PantaboxModbusTcpConnection(monitor->networkDeviceInfo().address(), 502, 1, this);
-    connect(info, &ThingSetupInfo::aborted, connection, &PantaboxModbusTcpConnection::deleteLater);
+    Pantabox *connection = new Pantabox(QHostAddress(), 502, 1, this);
+    connect(info, &ThingSetupInfo::aborted, connection, &Pantabox::deleteLater);
 
-    // Monitor reachability
-    connect(monitor, &NetworkDeviceMonitor::reachableChanged, thing, [=](bool reachable){
-        if (!thing->setupComplete())
+    connect(m_udpDiscovery, &PantaboxUdpDiscovery::pantaboxDiscovered, connection, [connection, thing](const PantaboxUdpDiscovery::DeviceInfo &deviceInfo){
+        QString serialNumber = thing->paramValue(pantaboxThingSerialNumberParamTypeId).toString();
+        if (deviceInfo.serialNumber != serialNumber)
             return;
 
-        qCDebug(dcInro()) << "Network device monitor for" << thing->name() << (reachable ? "is now reachable" : "is not reachable any more" );
-        if (reachable && !thing->stateValue("connected").toBool()) {
-            connection->modbusTcpMaster()->setHostAddress(monitor->networkDeviceInfo().address());
-            connection->connectDevice();
-        } else if (!reachable) {
-            // Note: We disable autoreconnect explicitly and we will
-            // connect the device once the monitor says it is reachable again
-            connection->disconnectDevice();
+        connection->modbusTcpMaster()->setHostAddress(deviceInfo.ipAddress);
+
+        if (!connection->reachable()) {
+
+            if (connection->modbusTcpMaster()->connected()) {
+                qCDebug(dcInro()) << "Received discovery paket for" << thing->name() <<
+                    "which is not reachable but the TCP socket is still connected. Reconnecting the TCP socket on" <<
+                    deviceInfo.ipAddress.toString();
+                connection->modbusTcpMaster()->reconnectDevice();
+            } else {
+                qCDebug(dcInro()) << "Received discovery paket for" << thing->name() <<
+                    "which is not reachable and not connected. Start connecting to the PANTABOX on" <<
+                    deviceInfo.ipAddress.toString();
+                connection->connectDevice();
+            }
         }
     });
 
     // Connection reachability
-    connect(connection, &PantaboxModbusTcpConnection::reachableChanged, thing, [thing, connection](bool reachable){
+    connect(connection, &Pantabox::reachableChanged, thing, [thing, connection](bool reachable){
         qCInfo(dcInro()) << "Reachable changed to" << reachable << "for" << thing;
         thing->setStateValue("connected", reachable);
 
@@ -266,32 +316,39 @@ void IntegrationPluginInro::setupConnection(ThingSetupInfo *info)
             // Reset energy live values on disconnected
             thing->setStateValue(pantaboxCurrentPowerStateTypeId, 0);
         } else {
-            thing->setStateValue(pantaboxModbusTcpVersionStateTypeId, PantaboxDiscovery::modbusVersionToString(connection->modbusTcpVersion()));
+            connection->initialize();
         }
     });
 
-    connect(connection, &PantaboxModbusTcpConnection::updateFinished, thing, [thing, connection](){
+    connect(connection, &Pantabox::initializationFinished, thing, [this, thing, connection](bool success){
+        if (success) {
+            thing->setStateValue(pantaboxModbusTcpVersionStateTypeId, Pantabox::modbusVersionToString(connection->modbusTcpVersion()));
+            m_initReadRequired[thing] = true;
+        }
+    });
+
+    connect(connection, &Pantabox::updateFinished, thing, [this, thing, connection](){
         qCDebug(dcInro()) << "Update finished for" << thing;
         qCDebug(dcInro()) << connection;
 
         QString chargingStateString;
         switch(connection->chargingState()) {
-        case PantaboxModbusTcpConnection::ChargingStateA:
+        case Pantabox::ChargingStateA:
             chargingStateString = "A";
             break;
-        case PantaboxModbusTcpConnection::ChargingStateB:
+        case Pantabox::ChargingStateB:
             chargingStateString = "B";
             break;
-        case PantaboxModbusTcpConnection::ChargingStateC:
+        case Pantabox::ChargingStateC:
             chargingStateString = "C";
             break;
-        case PantaboxModbusTcpConnection::ChargingStateD:
+        case Pantabox::ChargingStateD:
             chargingStateString = "D";
             break;
-        case PantaboxModbusTcpConnection::ChargingStateE:
+        case Pantabox::ChargingStateE:
             chargingStateString = "E";
             break;
-        case PantaboxModbusTcpConnection::ChargingStateF:
+        case Pantabox::ChargingStateF:
             chargingStateString = "F";
             break;
         }
@@ -302,10 +359,10 @@ void IntegrationPluginInro::setupConnection(ThingSetupInfo *info)
         // C: connected, charging
         // D: ventilation required
         // E: F: fault/error
-        thing->setStateValue(pantaboxPluggedInStateTypeId, connection->chargingState() >= PantaboxModbusTcpConnection::ChargingStateB);
-        thing->setStateValue(pantaboxChargingStateTypeId, connection->chargingState() >= PantaboxModbusTcpConnection::ChargingStateC);
+        thing->setStateValue(pantaboxPluggedInStateTypeId, connection->chargingState() >= Pantabox::ChargingStateB);
+        thing->setStateValue(pantaboxChargingStateTypeId, connection->chargingState() >= Pantabox::ChargingStateC);
         thing->setStateValue(pantaboxCurrentPowerStateTypeId, connection->currentPower()); // W
-        thing->setStateValue(pantaboxTotalEnergyConsumedStateTypeId, connection->chargedEnergy() / 1000.0); // Wh
+        thing->setStateValue(pantaboxSessionEnergyStateTypeId, connection->chargedEnergy() / 1000.0); // Wh
         thing->setStateMaxValue(pantaboxMaxChargingCurrentActionTypeId, connection->maxPossibleChargingCurrent());
 
         // Phase count is a setting, since we don't get the information from the device.
@@ -316,14 +373,21 @@ void IntegrationPluginInro::setupConnection(ThingSetupInfo *info)
         thing->setStateValue(pantaboxPhaseCountStateTypeId, Electricity::getPhaseCount(phases));
         thing->setStateValue(pantaboxUsedPhasesStateTypeId, thing->setting(pantaboxSettingsPhasesParamTypeId).toString());
 
+        // Following states depend on the modbus TCP version, default they will be reset.
+        thing->setStateValue(pantaboxFirmwareVersionStateTypeId, connection->firmwareVersion());
+        thing->setStateValue(pantaboxTotalEnergyConsumedStateTypeId, connection->absoluteEnergy() / 1000.0); // Wh
+
+        // Sync states only right after the connection
+        if (m_initReadRequired.value(thing, false)) {
+            qCDebug(dcInro()) << "Set initial charging current and charging enabled values.";
+            m_initReadRequired.remove(thing);
+            if (connection->maxChargingCurrent() > 0) {
+                thing->setStateValue(pantaboxMaxChargingCurrentStateTypeId, connection->maxChargingCurrent());
+            }
+            thing->setStateValue(pantaboxPowerStateTypeId, connection->chargingEnabled());
+        }
     });
 
     m_connections.insert(thing, connection);
     info->finish(Thing::ThingErrorNoError);
-
-    qCDebug(dcInro()) << "Setting up PANTABOX finished successfully" << monitor->networkDeviceInfo().address().toString();
-
-    // Connect reight the way if the monitor indicates reachable, otherwise the connect will handle the connect later
-    if (monitor->reachable())
-        connection->connectDevice();
 }

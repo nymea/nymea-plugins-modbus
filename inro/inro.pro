@@ -7,9 +7,14 @@ MODBUS_TOOLS_CONFIG += VERBOSE
 include(../modbus.pri)
 
 HEADERS += \
+    crclookuptable.h \
     integrationplugininro.h \
-    pantaboxdiscovery.h
+    pantabox.h \
+    pantaboxdiscovery.h \
+    pantaboxudpdiscovery.h
 
 SOURCES += \
     integrationplugininro.cpp \
-    pantaboxdiscovery.cpp
+    pantabox.cpp \
+    pantaboxdiscovery.cpp \
+    pantaboxudpdiscovery.cpp

@@ -146,6 +146,13 @@
                             "displayName": "Modbus TCP version",
                             "type": "QString",
                             "defaultValue": ""
+                        },                        
+                        {
+                            "id": "8c92890f-c9fb-44dd-8665-f1502fc90912",
+                            "name": "firmwareVersion",
+                            "displayName": "Firmware version",
+                            "type": "QString",
+                            "defaultValue": ""
                         }
                     ]
                 }

@@ -28,41 +28,22 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef INTEGRATIONPLUGININRO_H
-#define INTEGRATIONPLUGININRO_H
+#ifndef PANTABOX_H
+#define PANTABOX_H
 
-#include <plugintimer.h>
-#include <integrations/integrationplugin.h>
-#include <network/networkdevicemonitor.h>
+#include "pantaboxmodbustcpconnection.h"
 
-#include "extern-plugininfo.h"
-#include "pantabox.h"
-#include "pantaboxudpdiscovery.h"
-
-class IntegrationPluginInro: public IntegrationPlugin
+class Pantabox : public PantaboxModbusTcpConnection
 {
     Q_OBJECT
-
-    Q_PLUGIN_METADATA(IID "io.nymea.IntegrationPlugin" FILE "integrationplugininro.json")
-    Q_INTERFACES(IntegrationPlugin)
-
 public:
-    explicit IntegrationPluginInro();
+    explicit Pantabox(const QHostAddress &hostAddress, uint port, quint16 slaveId, QObject *parent = nullptr);
+    explicit Pantabox(ModbusTcpMaster *modbusTcpMaster, quint16 slaveId, QObject *parent = nullptr);
+    ~Pantabox() override = default ;
 
-    void discoverThings(ThingDiscoveryInfo *info) override;
-    void setupThing(ThingSetupInfo *info) override;
-    void postSetupThing(Thing *thing) override;
-    void executeAction(ThingActionInfo *info) override;
-    void thingRemoved(Thing *thing) override;
+    static QString modbusVersionToString(quint32 value);
 
-private:
-    PluginTimer *m_refreshTimer = nullptr;
-    QHash<Thing *, Pantabox *> m_connections;
-    QHash<Thing *, bool> m_initReadRequired;
-
-    PantaboxUdpDiscovery *m_udpDiscovery = nullptr;
-
-    void setupConnection(ThingSetupInfo *info);
+    bool update() override;
 };
 
-#endif // INTEGRATIONPLUGININRO_H
+#endif // PANTABOX_H
