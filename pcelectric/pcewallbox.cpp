@@ -108,6 +108,35 @@ bool PceWallbox::update()
     });
 
     enqueueRequest(reply);
+
+    foreach (QueuedModbusReply *r, m_queue) {
+        if (r->dataUnit().startAddress() == digitalInputModeDataUnit().startAddress()) {
+            return true;
+        }
+    }
+
+    reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeRead, digitalInputModeDataUnit(), this);
+    connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
+    connect(reply, &QueuedModbusReply::finished, this, [this, reply](){
+
+        if (m_currentReply == reply)
+            m_currentReply = nullptr;
+
+        if (reply->error() != QModbusDevice::NoError) {
+            emit updateFinished();
+            sendNextRequest();
+            return;
+        }
+
+        const QModbusDataUnit unit = reply->reply()->result();
+        const QVector<quint16> values = unit.values();
+        processDigitalInputModeRegisterValues(values);
+
+        emit updateFinished();
+        sendNextRequest();
+    });
+
+    enqueueRequest(reply);
     return true;
 }
 
@@ -149,6 +178,27 @@ QueuedModbusReply *PceWallbox::setLedBrightness(quint16 percentage)
 
     enqueueRequest(reply, true);
     return reply;
+}
+
+QueuedModbusReply *PceWallbox::setDigitalInputMode(DigitalInputMode digitalInputMode)
+{
+    if (m_aboutToDelete)
+        return nullptr;
+
+    QueuedModbusReply *reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeWrite, setDigitalInputModeDataUnit(digitalInputMode), this);
+
+    connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
+    connect(reply, &QueuedModbusReply::finished, this, [this, reply](){
+        if (m_currentReply == reply)
+            m_currentReply = nullptr;
+
+        sendNextRequest();
+        return;
+    });
+
+    enqueueRequest(reply, true);
+    return reply;
+
 }
 
 void PceWallbox::gracefullDeleteLater()
