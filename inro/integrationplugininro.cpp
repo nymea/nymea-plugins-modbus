@@ -128,8 +128,8 @@ void IntegrationPluginInro::executeAction(ThingActionInfo *info)
         if (info->action().actionTypeId() == pantaboxPowerActionTypeId) {
             bool power = info->action().paramValue(pantaboxPowerActionPowerParamTypeId).toBool();
 
-            // Play/pause charging session feature is available from Modbus Tcp version 1.1
-            if (connection->modbusTcpVersion() <= 65536) {
+            // Play/pause charging session feature is available since Modbus Tcp version 1.2 (0x0001 0x0002) 0x10002 = 65538
+            if (connection->modbusTcpVersion() < 65538) {
                 // When power is set by user, charging is going to stop or start depending on setting
                 qCDebug(dcInro()) << "Set power by user" << (power ? 1 : 0);
                 QModbusReply *reply = connection->setChargingEnabled(power ? 1 : 0);
@@ -152,7 +152,11 @@ void IntegrationPluginInro::executeAction(ThingActionInfo *info)
                     }
                 });
                 return;
+
             } else {
+
+                // Modbus version >= 1.2
+
                 if (info->action().triggeredBy() == Action::TriggeredByUser) {
 
                     // When power is set by user, charging is going to stop or start depending on setting
@@ -177,6 +181,7 @@ void IntegrationPluginInro::executeAction(ThingActionInfo *info)
                         }
                     });
                     return;
+
                 } else {
                     // When power is set to 0 by automatisnm, max charging current is set to 0 otherwise take the configured max charging current
                     qCDebug(dcInro()) << "Going to play/pause charging session";
@@ -191,15 +196,27 @@ void IntegrationPluginInro::executeAction(ThingActionInfo *info)
                     }
 
                     connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
-                    connect(reply, &QModbusReply::finished, info, [info, reply, power](){
+                    connect(reply, &QModbusReply::finished, info, [info, reply, power, connection](){
                         if (reply->error() == QModbusDevice::NoError) {
                             qCDebug(dcInro()) << (power ? "Play" : "Pause") << "session by energy manager";
                             info->finish(Thing::ThingErrorNoError);
+                            if (power) {
+                                // Make sure the charging is enabled, just in case
+                                QModbusReply *reply = connection->setChargingEnabled(1);
+                                connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+                                connect(reply, &QModbusReply::finished, info, [reply](){
+                                    if (reply->error() != QModbusDevice::NoError) {
+                                        qCWarning(dcInro()) << "Error setting charging enabled:" << reply->error() << reply->errorString();
+                                    }
+                                });
+                            }
                         } else {
                             qCWarning(dcInro()) << "Error setting charging current:" << reply->error() << reply->errorString();
                             info->finish(Thing::ThingErrorHardwareFailure);
                         }
+
                     });
+
                     return;
                 }
             }
