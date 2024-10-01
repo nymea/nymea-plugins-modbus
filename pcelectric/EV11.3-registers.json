@@ -345,7 +345,7 @@
             "registerType": "holdingRegister",
             "description": "LED brightness",
             "unit": "%",
-            "access": "WO"
+            "access": "RW"
         },
         {
             "id": "digitalInputMode",
@@ -355,7 +355,7 @@
             "registerType": "holdingRegister",
             "description": "Digital input mode",
             "enum": "DigitalInputMode",
-            "access": "WR"
+            "access": "RW"
         }
     ]
 }

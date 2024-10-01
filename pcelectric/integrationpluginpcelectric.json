@@ -41,7 +41,7 @@
                             "minValue": 0,
                             "maxValue": 100,
                             "unit": "Percentage",
-                            "defaultValue": 50
+                            "defaultValue": 100
                         },
                         {
                             "id": "930e0bf9-0038-436d-9eae-5c0f1cb28825",
@@ -49,7 +49,11 @@
                             "displayName": "Digital input mode",
                             "type": "QString",
                             "defaultValue": "Charging allowed",
-                            "allowedValues": ["Charging allowed", "Charging allowed inverted", "PWM and S0 signaling"]
+                            "allowedValues": [
+                                "Charging allowed",
+                                "Charging allowed inverted",
+                                "PWM and S0 signaling"
+                            ]
                         }
                     ],
                     "stateTypes": [

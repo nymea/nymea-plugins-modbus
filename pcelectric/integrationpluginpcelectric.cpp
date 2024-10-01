@@ -164,6 +164,9 @@ void IntegrationPluginPcElectric::thingRemoved(Thing *thing)
         connection->deleteLater();
     }
 
+    if (m_initialUpdate.contains(thing))
+        m_initialUpdate.remove(thing);
+
     // Unregister related hardware resources
     if (m_monitors.contains(thing))
         hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
@@ -285,6 +288,9 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
     PceWallbox *connection = new PceWallbox(monitor->networkDeviceInfo().address(), 502, 1, this);
     connect(info, &ThingSetupInfo::aborted, connection, &PceWallbox::deleteLater);
 
+    if (monitor->networkDeviceInfo().isComplete())
+        connection->modbusTcpMaster()->setHostAddress(monitor->networkDeviceInfo().address());
+
     // Monitor reachability
     connect(monitor, &NetworkDeviceMonitor::reachableChanged, thing, [=](bool reachable){
         if (!thing->setupComplete())
@@ -302,12 +308,13 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
     });
 
     // Connection reachability
-    connect(connection, &PceWallbox::reachableChanged, thing, [thing](bool reachable){
+    connect(connection, &PceWallbox::reachableChanged, thing, [this, thing](bool reachable){
         qCInfo(dcPcElectric()) << "Reachable changed to" << reachable << "for" << thing;
+        m_initialUpdate[thing] = true;
         thing->setStateValue("connected", reachable);
     });
 
-    connect(connection, &PceWallbox::updateFinished, thing, [thing, connection](){
+    connect(connection, &PceWallbox::updateFinished, thing, [this, thing, connection](){
         qCDebug(dcPcElectric()) << "Update finished for" << thing;
         qCDebug(dcPcElectric()) << connection;
         if (!connection->phaseAutoSwitch()) {
@@ -345,51 +352,61 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
             thing->setStateValue(ev11ErrorStateTypeId, "Kein Fehler aktiv");
             break;
         case EV11ModbusTcpConnection::ErrorOverheating:
-            thing->setStateValue(ev11ErrorStateTypeId, "Übertemperatur. Ladevorgang wird automatisch fortgesetzt.");
+            thing->setStateValue(ev11ErrorStateTypeId, "1: Übertemperatur. Ladevorgang wird automatisch fortgesetzt.");
             break;
         case EV11ModbusTcpConnection::ErrorDCFaultCurrent:
-            thing->setStateValue(ev11ErrorStateTypeId, "DC Fehlerstromsensor ausgelöst.");
+            thing->setStateValue(ev11ErrorStateTypeId, "2: DC Fehlerstromsensor ausgelöst.");
             break;
         case EV11ModbusTcpConnection::ErrorChargingWithVentilation:
-            thing->setStateValue(ev11ErrorStateTypeId, "Ladeanforderung mit Belüftung.");
+            thing->setStateValue(ev11ErrorStateTypeId, "3: Ladeanforderung mit Belüftung.");
             break;
         case EV11ModbusTcpConnection::ErrorCPErrorEF:
-            thing->setStateValue(ev11ErrorStateTypeId, "CP Signal, Fehlercode E oder F.");
+            thing->setStateValue(ev11ErrorStateTypeId, "4: CP Signal, Fehlercode E oder F.");
             break;
         case EV11ModbusTcpConnection::ErrorCPErrorBypass:
-            thing->setStateValue(ev11ErrorStateTypeId, "CP Signal, bypass.");
+            thing->setStateValue(ev11ErrorStateTypeId, "5: CP Signal, bypass.");
             break;
         case EV11ModbusTcpConnection::ErrorCPErrorDiodFault:
-            thing->setStateValue(ev11ErrorStateTypeId, "CP Signal, Diode defekt.");
+            thing->setStateValue(ev11ErrorStateTypeId, "6: CP Signal, Diode defekt.");
             break;
         case EV11ModbusTcpConnection::ErrorDCFaultCurrentCalibrating:
-            thing->setStateValue(ev11ErrorStateTypeId, "DC Fehlerstromsensor, Kalibrirung.");
+            thing->setStateValue(ev11ErrorStateTypeId, "7: DC Fehlerstromsensor, Kalibrirung.");
             break;
         case EV11ModbusTcpConnection::ErrorDCFaultCurrentCommunication:
-            thing->setStateValue(ev11ErrorStateTypeId, "DC Fehlerstromsensor, Kommunikationsfehler.");
+            thing->setStateValue(ev11ErrorStateTypeId, "8: DC Fehlerstromsensor, Kommunikationsfehler.");
             break;
         case EV11ModbusTcpConnection::ErrorDCFaultCurrentError:
-            thing->setStateValue(ev11ErrorStateTypeId, "DC Fehlerstromsensor, Fehler.");
+            thing->setStateValue(ev11ErrorStateTypeId, "9: DC Fehlerstromsensor, Fehler.");
             break;
         }
 
-        switch (connection->digitalInputMode()) {
-        case EV11ModbusTcpConnection::DigitalInputModeEnableCharging:
-            thing->setSettingValue(ev11SettingsDigitalInputModeParamTypeId, "Charging allowed");
-            break;
-        case EV11ModbusTcpConnection::DigitalInputModeEnableChargingInverted:
-            thing->setSettingValue(ev11SettingsDigitalInputModeParamTypeId, "Charging allowed inverted");
-            break;
-        case EV11ModbusTcpConnection::DigitalInputModePwmS0Enabled:
-            thing->setSettingValue(ev11SettingsDigitalInputModeParamTypeId, "PWM and S0 signaling");
-            break;
+        if (m_initialUpdate.value(thing)) {
+
+            m_initialUpdate[thing] = false;
+            qCDebug(dcPcElectric()) << "Updating initial settings after connecting...";
+
+            thing->setSettingValue(ev11SettingsLedBrightnessParamTypeId, connection->ledBrightness());
+
+            switch (connection->digitalInputMode()) {
+            case EV11ModbusTcpConnection::DigitalInputModeEnableCharging:
+                thing->setSettingValue(ev11SettingsDigitalInputModeParamTypeId, "Charging allowed");
+                break;
+            case EV11ModbusTcpConnection::DigitalInputModeEnableChargingInverted:
+                thing->setSettingValue(ev11SettingsDigitalInputModeParamTypeId, "Charging allowed inverted");
+                break;
+            case EV11ModbusTcpConnection::DigitalInputModePwmS0Enabled:
+                thing->setSettingValue(ev11SettingsDigitalInputModeParamTypeId, "PWM and S0 signaling");
+                break;
+            }
         }
     });
 
     connect(thing, &Thing::settingChanged, connection, [thing, connection](const ParamTypeId &paramTypeId, const QVariant &value){
+
         if (paramTypeId == ev11SettingsLedBrightnessParamTypeId) {
             quint16 percentage = value.toUInt();
-            qCDebug(dcPcElectric()) << "Set LED brightness" << percentage << "%";
+
+            qCDebug(dcPcElectric()) << "Setting LED brightness to" << percentage << "%";
             QueuedModbusReply *reply = connection->setLedBrightness(percentage);
             connect(reply, &QueuedModbusReply::finished, thing, [reply, percentage](){
                 if (reply->error() != QModbusDevice::NoError) {
@@ -401,13 +418,18 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
             });
         } else if (paramTypeId == ev11SettingsDigitalInputModeParamTypeId) {
             QString mode = value.toString();
-            qCDebug(dcPcElectric()) << "Set Digital input mode" << mode;
-            EV11ModbusTcpConnection::DigitalInputMode modeValue = EV11ModbusTcpConnection::DigitalInputModeEnableCharging;
+            qCDebug(dcPcElectric()) << "Setting Digital input mode to" << mode;
 
-            if (mode == "Charging allowed inverted") {
+            EV11ModbusTcpConnection::DigitalInputMode modeValue;
+            if (mode == "Charging allowed") {
+                modeValue = EV11ModbusTcpConnection::DigitalInputModeEnableCharging;
+            } else if (mode == "Charging allowed inverted") {
                 modeValue = EV11ModbusTcpConnection::DigitalInputModeEnableChargingInverted;
             } else if (mode == "PWM and S0 signaling") {
                 modeValue = EV11ModbusTcpConnection::DigitalInputModePwmS0Enabled;
+            } else {
+                qCWarning(dcPcElectric()) << "Unknown mode value" << mode;
+                return;
             }
 
             QueuedModbusReply *reply = connection->setDigitalInputMode(modeValue);
