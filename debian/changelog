@@ -1,3 +1,19 @@
+nymea-plugins-modbus (1.9.4) jammy; urgency=medium
+
+  [ Simon Stürz ]
+  * PC-Electric: Add integration plugin documentation
+
+  [ Jenkins ]
+  * INRO: PANTABOX add support for Modbus API V1.1 and 1.2
+
+  [ Simon Stürz ]
+  * PCE: Add serial number as paramter
+  * Update license and debian copyright
+  * SMA: Fix circular disovery on multiple interfaces in the same
+    network
+
+ -- jenkins <developer@nymea.io>  Wed, 02 Oct 2024 10:42:01 +0200
+
 nymea-plugins-modbus (1.9.3) jammy; urgency=medium
 
   [ Boernsman ]
