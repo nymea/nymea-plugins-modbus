@@ -389,13 +389,13 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
 
             switch (connection->digitalInputMode()) {
             case EV11ModbusTcpConnection::DigitalInputModeEnableCharging:
-                thing->setSettingValue(ev11SettingsDigitalInputModeParamTypeId, "Charging allowed");
+                thing->setSettingValue(ev11SettingsDigitalInputModeParamTypeId, "0 | Charging allowed");
                 break;
             case EV11ModbusTcpConnection::DigitalInputModeEnableChargingInverted:
-                thing->setSettingValue(ev11SettingsDigitalInputModeParamTypeId, "Charging allowed inverted");
+                thing->setSettingValue(ev11SettingsDigitalInputModeParamTypeId, "1 | Charging allowed inverted");
                 break;
             case EV11ModbusTcpConnection::DigitalInputModePwmS0Enabled:
-                thing->setSettingValue(ev11SettingsDigitalInputModeParamTypeId, "PWM and S0 signaling");
+                thing->setSettingValue(ev11SettingsDigitalInputModeParamTypeId, "2 | PWM and S0 signaling");
                 break;
             }
         }
@@ -421,11 +421,11 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
             qCDebug(dcPcElectric()) << "Setting Digital input mode to" << mode;
 
             EV11ModbusTcpConnection::DigitalInputMode modeValue;
-            if (mode == "Charging allowed") {
+            if (mode == "0 | Charging allowed") {
                 modeValue = EV11ModbusTcpConnection::DigitalInputModeEnableCharging;
-            } else if (mode == "Charging allowed inverted") {
+            } else if (mode == "1 | Charging allowed inverted") {
                 modeValue = EV11ModbusTcpConnection::DigitalInputModeEnableChargingInverted;
-            } else if (mode == "PWM and S0 signaling") {
+            } else if (mode == "2 | PWM and S0 signaling") {
                 modeValue = EV11ModbusTcpConnection::DigitalInputModePwmS0Enabled;
             } else {
                 qCWarning(dcPcElectric()) << "Unknown mode value" << mode;

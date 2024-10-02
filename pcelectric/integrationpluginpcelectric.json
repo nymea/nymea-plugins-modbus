@@ -48,11 +48,11 @@
                             "name": "digitalInputMode",
                             "displayName": "Digital input mode",
                             "type": "QString",
-                            "defaultValue": "Charging allowed",
+                            "defaultValue": "0 | Charging allowed",
                             "allowedValues": [
-                                "Charging allowed",
-                                "Charging allowed inverted",
-                                "PWM and S0 signaling"
+                                "0 | Charging allowed",
+                                "1 | Charging allowed inverted",
+                                "2 | PWM and S0 signaling"
                             ]
                         }
                     ],
