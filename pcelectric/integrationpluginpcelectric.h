@@ -61,6 +61,7 @@ private:
     PluginTimer *m_refreshTimer = nullptr;
     QHash<Thing *, PceWallbox *> m_connections;
     QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
+    QHash<Thing *, bool> m_initialUpdate;
 
     void setupConnection(ThingSetupInfo *info);
 

@@ -94,8 +94,7 @@ bool PceWallbox::update()
             m_currentReply = nullptr;
 
         if (reply->error() != QModbusDevice::NoError) {
-            emit updateFinished();
-            sendNextRequest();
+            QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
             return;
         }
 
@@ -103,11 +102,76 @@ bool PceWallbox::update()
         const QVector<quint16> blockValues = unit.values();
         processBlockStatusRegisterValues(blockValues);
 
-        emit updateFinished();
-        sendNextRequest();
+        QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
     });
 
     enqueueRequest(reply);
+
+    // Digital input
+    bool digitalInputAlreadyQueued = false;
+    foreach (QueuedModbusReply *r, m_queue) {
+        if (r->dataUnit().startAddress() == digitalInputModeDataUnit().startAddress()) {
+            digitalInputAlreadyQueued = true;
+            break;
+        }
+    }
+
+    if (!digitalInputAlreadyQueued) {
+        reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeRead, digitalInputModeDataUnit(), this);
+        connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
+        connect(reply, &QueuedModbusReply::finished, this, [this, reply](){
+
+            if (m_currentReply == reply)
+                m_currentReply = nullptr;
+
+            if (reply->error() != QModbusDevice::NoError) {
+                QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
+                return;
+            }
+
+            const QModbusDataUnit unit = reply->reply()->result();
+            const QVector<quint16> values = unit.values();
+            processDigitalInputModeRegisterValues(values);
+
+            QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
+        });
+
+        enqueueRequest(reply);
+    }
+
+
+    // Led brightness
+    bool ledBrightnessAlreadyQueued = false;
+    foreach (QueuedModbusReply *r, m_queue) {
+        if (r->dataUnit().startAddress() == ledBrightnessDataUnit().startAddress()) {
+            ledBrightnessAlreadyQueued = true;
+            break;
+        }
+    }
+
+    if (!ledBrightnessAlreadyQueued) {
+        reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeRead, ledBrightnessDataUnit(), this);
+        connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
+        connect(reply, &QueuedModbusReply::finished, this, [this, reply](){
+
+            if (m_currentReply == reply)
+                m_currentReply = nullptr;
+
+            if (reply->error() != QModbusDevice::NoError) {
+                QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
+                return;
+            }
+
+            const QModbusDataUnit unit = reply->reply()->result();
+            const QVector<quint16> values = unit.values();
+            processLedBrightnessRegisterValues(values);
+
+            emit updateFinished();
+            QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
+        });
+
+        enqueueRequest(reply);
+    }
     return true;
 }
 
@@ -123,7 +187,7 @@ QueuedModbusReply *PceWallbox::setChargingCurrent(quint16 chargingCurrent)
         if (m_currentReply == reply)
             m_currentReply = nullptr;
 
-        sendNextRequest();
+        QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
         return;
     });
 
@@ -143,12 +207,33 @@ QueuedModbusReply *PceWallbox::setLedBrightness(quint16 percentage)
         if (m_currentReply == reply)
             m_currentReply = nullptr;
 
-        sendNextRequest();
+        QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
         return;
     });
 
     enqueueRequest(reply, true);
     return reply;
+}
+
+QueuedModbusReply *PceWallbox::setDigitalInputMode(DigitalInputMode digitalInputMode)
+{
+    if (m_aboutToDelete)
+        return nullptr;
+
+    QueuedModbusReply *reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeWrite, setDigitalInputModeDataUnit(digitalInputMode), this);
+
+    connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
+    connect(reply, &QueuedModbusReply::finished, this, [this, reply](){
+        if (m_currentReply == reply)
+            m_currentReply = nullptr;
+
+        QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
+        return;
+    });
+
+    enqueueRequest(reply, true);
+    return reply;
+
 }
 
 void PceWallbox::gracefullDeleteLater()
@@ -178,7 +263,6 @@ void PceWallbox::sendHeartbeat()
     QueuedModbusReply *reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeWrite, setHeartbeatDataUnit(m_heartbeat++), this);
 
     connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
-
     connect(reply, &QueuedModbusReply::finished, this, [this, reply](){
         if (m_currentReply == reply)
             m_currentReply = nullptr;
@@ -189,7 +273,7 @@ void PceWallbox::sendHeartbeat()
             qCDebug(dcPcElectric()) << "Successfully sent heartbeat to" << m_modbusTcpMaster->hostAddress().toString();
         }
 
-        sendNextRequest();
+        QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
         return;
     });
 
@@ -230,13 +314,13 @@ void PceWallbox::sendNextRequest()
 
     if (!m_currentReply->reply()) {
         qCWarning(dcPcElectric()) << "Error occurred while sending" << m_currentReply->requestType()
-                                  << ModbusDataUtils::registerTypeToString(m_currentReply->dataUnit().registerType())
-                                  << "register:" << m_currentReply->dataUnit().startAddress()
-                                  << "length:" << m_currentReply->dataUnit().valueCount()
-                                  << "to" << m_modbusTcpMaster->hostAddress().toString() << m_modbusTcpMaster->errorString();
+        << ModbusDataUtils::registerTypeToString(m_currentReply->dataUnit().registerType())
+        << "register:" << m_currentReply->dataUnit().startAddress()
+        << "length:" << m_currentReply->dataUnit().valueCount()
+        << "to" << m_modbusTcpMaster->hostAddress().toString() << m_modbusTcpMaster->errorString();
         m_currentReply->deleteLater();
         m_currentReply = nullptr;
-        sendNextRequest();
+        QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
         return;
     }
 
@@ -244,7 +328,7 @@ void PceWallbox::sendNextRequest()
         qCWarning(dcPcElectric()) << "Reply immediatly finished";
         m_currentReply->deleteLater();
         m_currentReply = nullptr;
-        sendNextRequest();
+        QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
         return;
     }
 }
@@ -257,7 +341,7 @@ void PceWallbox::enqueueRequest(QueuedModbusReply *reply, bool prepend)
         m_queue.enqueue(reply);
     }
 
-    sendNextRequest();
+    QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
 }
 
 void PceWallbox::cleanupQueue()
