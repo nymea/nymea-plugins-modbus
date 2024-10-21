@@ -306,7 +306,7 @@
             "registerType": "holdingRegister",
             "description": "Write charging current",
             "unit": "mA",
-            "access": "WO"
+            "access": "RW"
         },
         {
             "id": "chargingCurrentOffline",

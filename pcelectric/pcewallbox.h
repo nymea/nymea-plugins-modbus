@@ -33,6 +33,7 @@
 
 #include <QTimer>
 #include <QQueue>
+#include <QDebug>
 #include <QObject>
 
 #include <queuedmodbusreply.h>
@@ -43,6 +44,12 @@ class PceWallbox : public EV11ModbusTcpConnection
 {
     Q_OBJECT
 public:
+    typedef struct ChargingCurrentState {
+        bool power = false;
+        double maxChargingCurrent = 6;
+        uint desiredPhaseCount = 3;
+    } ChargingCurrentState;
+
     explicit PceWallbox(const QHostAddress &hostAddress, uint port, quint16 slaveId, QObject *parent = nullptr);
 
     bool update() override;
@@ -54,13 +61,15 @@ public:
     QueuedModbusReply *setDigitalInputMode(DigitalInputMode digitalInputMode);
 
 
-
     // Note: the modbus implementation of the wallbox gets stuck if a Modbus request has been sent
     // and we disconnect the socket before the response has arrived. Only a reboot of the wallbox
     // fixes the broken communication afterwards. This method waits for the current request before closing the
     // socket and deletes it self.
     // IMPORTNAT: do not use the object after this call, this is a temporary workaround
     void gracefullDeleteLater();
+
+    static quint16 deriveRegisterFromStates(PceWallbox::ChargingCurrentState state);
+    static PceWallbox::ChargingCurrentState deriveStatesFromRegister(quint16 registerValue);
 
 private slots:
     void sendHeartbeat();
@@ -77,5 +86,8 @@ private:
 
     void cleanupQueue();
 };
+
+QDebug operator<<(QDebug debug, const PceWallbox::ChargingCurrentState &chargingCurrentState);
+
 
 #endif // PCEWALLBOX_H
