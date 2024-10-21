@@ -139,6 +139,7 @@ void IntegrationPluginPcElectric::setupThing(ThingSetupInfo *info)
 void IntegrationPluginPcElectric::postSetupThing(Thing *thing)
 {
     qCDebug(dcPcElectric()) << "Post setup thing" << thing->name();
+
     if (!m_refreshTimer) {
         m_refreshTimer = hardwareManager()->pluginTimerManager()->registerTimer(1);
         connect(m_refreshTimer, &PluginTimer::timeout, this, [this] {
@@ -152,6 +153,14 @@ void IntegrationPluginPcElectric::postSetupThing(Thing *thing)
         qCDebug(dcPcElectric()) << "Starting refresh timer...";
         m_refreshTimer->start();
     }
+
+
+    PceWallbox::ChargingCurrentState chargingCurrentState;
+    chargingCurrentState.power = thing->stateValue(ev11PowerStateTypeId).toBool();
+    chargingCurrentState.maxChargingCurrent = thing->stateValue(ev11MaxChargingCurrentStateTypeId).toDouble();
+    chargingCurrentState.desiredPhaseCount = thing->stateValue(ev11DesiredPhaseCountStateTypeId).toDouble();
+    qCDebug(dcPcElectric()) << "Initialize charging current state with cached values" << chargingCurrentState;
+    m_chargingCurrentStateBuffer[thing] = chargingCurrentState;
 }
 
 void IntegrationPluginPcElectric::thingRemoved(Thing *thing)
@@ -166,6 +175,9 @@ void IntegrationPluginPcElectric::thingRemoved(Thing *thing)
 
     if (m_initialUpdate.contains(thing))
         m_initialUpdate.remove(thing);
+
+    if (m_chargingCurrentStateBuffer.contains(thing))
+        m_chargingCurrentStateBuffer.remove(thing);
 
     // Unregister related hardware resources
     if (m_monitors.contains(thing))
@@ -190,90 +202,80 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
     }
 
     if (info->action().actionTypeId() == ev11PowerActionTypeId) {
-        bool power = info->action().paramValue(ev11PowerActionPowerParamTypeId).toBool();
-        quint16 chargingCurrent = 0;
-        if (power) {
-            chargingCurrent = thing->stateValue(ev11MaxChargingCurrentStateTypeId).toUInt() * 1000;
-            if (thing->stateValue(ev11DesiredPhaseCountStateTypeId).toUInt() == 3) {
-                // If 3 phase charging is enabled, we set the first bit
-                chargingCurrent |= static_cast<quint16>(1) << 15;
-            }
-        }
 
-        qCDebug(dcPcElectric()) << "Writing charging current register" << chargingCurrent << "mA";
-        QueuedModbusReply *reply = connection->setChargingCurrent(chargingCurrent);
-        connect(reply, &QueuedModbusReply::finished, info, [reply, info, thing, power, chargingCurrent](){
+        bool power = info->action().paramValue(ev11PowerActionPowerParamTypeId).toBool();
+        qCDebug(dcPcElectric()) << "Set charging enabled to" << power;
+
+        // Update buffer
+        m_chargingCurrentStateBuffer[thing].power = power;
+
+        quint16 registerValue = PceWallbox::deriveRegisterFromStates(m_chargingCurrentStateBuffer.value(thing));
+        qCDebug(dcPcElectric()) << "Writing charging current register" << registerValue;
+        QueuedModbusReply *reply = connection->setChargingCurrent(registerValue);
+        connect(reply, &QueuedModbusReply::finished, info, [reply, info, thing, power, registerValue](){
             if (reply->error() != QModbusDevice::NoError) {
-                qCWarning(dcPcElectric()) << "Could not set power state to" << power << "(" << chargingCurrent << "mA)" << reply->errorString();
+                qCWarning(dcPcElectric()) << "Could not set power state to" << power << "(" << registerValue << ")" << reply->errorString();
                 info->finish(Thing::ThingErrorHardwareFailure);
                 return;
             }
 
-            qCDebug(dcPcElectric()) << "Successfully set power state to" << power << "(" << chargingCurrent << "mA)";
+            qCDebug(dcPcElectric()) << "Successfully set power state to" << power << "(" << registerValue << ")";
             thing->setStateValue(ev11PowerStateTypeId, power);
             info->finish(Thing::ThingErrorNoError);
         });
+
         return;
+
     } else if (info->action().actionTypeId() == ev11MaxChargingCurrentActionTypeId) {
+
         uint desiredChargingCurrent = info->action().paramValue(ev11MaxChargingCurrentActionMaxChargingCurrentParamTypeId).toUInt();
         qCDebug(dcPcElectric()) << "Set max charging current to" << desiredChargingCurrent << "A";
-        if (thing->stateValue(ev11PowerStateTypeId).toBool()) {
-            // The charging is enabled, let's write the value to the wallbox
-            quint16 finalChargingCurrent = static_cast<quint16>(desiredChargingCurrent * 1000);
-            if (thing->stateValue(ev11DesiredPhaseCountStateTypeId).toUInt() == 3) {
-                // If 3 phase charging is enabled, we set the first bit
-                finalChargingCurrent |= static_cast<quint16>(1) << 15;
+
+        // Update buffer
+        m_chargingCurrentStateBuffer[thing].maxChargingCurrent = desiredChargingCurrent;
+
+        quint16 registerValue = PceWallbox::deriveRegisterFromStates(m_chargingCurrentStateBuffer.value(thing));
+        qCDebug(dcPcElectric()) << "Writing charging current register" << registerValue;
+        QueuedModbusReply *reply = connection->setChargingCurrent(registerValue);
+        connect(reply, &QueuedModbusReply::finished, info, [reply, info, thing, desiredChargingCurrent](){
+            if (reply->error() != QModbusDevice::NoError) {
+                qCWarning(dcPcElectric()) << "Could not set charging current to" << desiredChargingCurrent << reply->errorString();
+                info->finish(Thing::ThingErrorHardwareFailure);
+                return;
             }
 
-            qCDebug(dcPcElectric()) << "Writing charging current register" << finalChargingCurrent << "mA";
-            QueuedModbusReply *reply = connection->setChargingCurrent(finalChargingCurrent);
-            connect(reply, &QueuedModbusReply::finished, info, [reply, info, thing, desiredChargingCurrent](){
-                if (reply->error() != QModbusDevice::NoError) {
-                    qCWarning(dcPcElectric()) << "Could not set charging current to" << desiredChargingCurrent << "mA" << reply->errorString();
-                    info->finish(Thing::ThingErrorHardwareFailure);
-                    return;
-                }
-
-                qCDebug(dcPcElectric()) << "Successfully set charging current to" << desiredChargingCurrent << "mA";
-                thing->setStateValue(ev11MaxChargingCurrentStateTypeId, desiredChargingCurrent);
-                info->finish(Thing::ThingErrorNoError);
-            });
-        } else {
-            // Save the value in the state, but do not send the value to the wallbox since the power state is reflected using the charging current...
-            qCDebug(dcPcElectric()) << "Setting charging current to" << desiredChargingCurrent << "without synching to wallbox since the power state is false";
+            qCDebug(dcPcElectric()) << "Successfully set charging current (" << desiredChargingCurrent << ")";
             thing->setStateValue(ev11MaxChargingCurrentStateTypeId, desiredChargingCurrent);
             info->finish(Thing::ThingErrorNoError);
-        }
-        return;
-    } else if (info->action().actionTypeId() == ev11DesiredPhaseCountActionTypeId) {
-        uint desiredPhaseCount = info->action().paramValue(ev11DesiredPhaseCountActionDesiredPhaseCountParamTypeId).toUInt();
-        qCDebug(dcPcElectric()) << "Desried phase count changed" << desiredPhaseCount;
-        thing->setStateValue(ev11DesiredPhaseCountStateTypeId, desiredPhaseCount);
-        info->finish(Thing::ThingErrorNoError);
+        });
 
-        // Update the max charging current according to the new desired phase count
-        if (thing->stateValue(ev11PowerStateTypeId).toBool()) {
-            uint chargingCurrent = thing->stateValue(ev11MaxChargingCurrentStateTypeId).toUInt();
-            quint16 finalChargingCurrent = static_cast<quint16>(chargingCurrent * 1000);
-            if (thing->stateValue(ev11DesiredPhaseCountStateTypeId).toUInt() == 3) {
-                // If 3 phase charging is enabled, we set the first bit
-                finalChargingCurrent |= static_cast<quint16>(1) << 15;
+        return;
+
+    } else if (info->action().actionTypeId() == ev11DesiredPhaseCountActionTypeId) {
+
+        uint desiredPhaseCount = info->action().paramValue(ev11DesiredPhaseCountActionDesiredPhaseCountParamTypeId).toUInt();
+        qCDebug(dcPcElectric()) << "Set desried phase count to" << desiredPhaseCount;
+
+        // Update buffer
+        m_chargingCurrentStateBuffer[thing].desiredPhaseCount = desiredPhaseCount;
+
+        quint16 registerValue = PceWallbox::deriveRegisterFromStates(m_chargingCurrentStateBuffer.value(thing));
+        qCDebug(dcPcElectric()) << "Writing charging current register" << registerValue;
+        QueuedModbusReply *reply = connection->setChargingCurrent(registerValue);
+        connect(reply, &QueuedModbusReply::finished, info, [reply, info, thing, desiredPhaseCount](){
+            if (reply->error() != QModbusDevice::NoError) {
+                qCWarning(dcPcElectric()) << "Could not set desired phase count to" << desiredPhaseCount << reply->errorString();
+                info->finish(Thing::ThingErrorHardwareFailure);
+                return;
             }
 
-            qCDebug(dcPcElectric()) << "Writing charging current register" << finalChargingCurrent << "mA";
-            QueuedModbusReply *reply = connection->setChargingCurrent(finalChargingCurrent);
-            connect(reply, &QueuedModbusReply::finished, info, [reply, finalChargingCurrent](){
-                if (reply->error() != QModbusDevice::NoError) {
-                    qCWarning(dcPcElectric()) << "Could not set charging current to" << finalChargingCurrent << "mA" << reply->errorString();
-                    return;
-                }
+            qCDebug(dcPcElectric()) << "Successfully set phase count (" << desiredPhaseCount << ")";
+            thing->setStateValue(ev11DesiredPhaseCountStateTypeId, desiredPhaseCount);
+            info->finish(Thing::ThingErrorNoError);
+        });
 
-                qCDebug(dcPcElectric()) << "Successfully set charging current to" << finalChargingCurrent << "mA";
-            });
-        }
         return;
     }
-
 
     Q_ASSERT_X(false, "IntegrationPluginPcElectric::executeAction", QString("Unhandled action: %1").arg(info->action().actionTypeId().toString()).toLocal8Bit());
 }
@@ -336,7 +338,7 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
 
         thing->setStateMaxValue(ev11MaxChargingCurrentStateTypeId, connection->maxChargingCurrentDip() / 1000);
         thing->setStateValue(ev11PluggedInStateTypeId, connection->chargingState() >= PceWallbox::ChargingStateB1 &&
-                             connection->chargingState() < PceWallbox::ChargingStateError);
+                                                           connection->chargingState() < PceWallbox::ChargingStateError);
 
         thing->setStateValue(ev11ChargingStateTypeId, connection->chargingState() == PceWallbox::ChargingStateC2);
         if (connection->chargingRelayState() != EV11ModbusTcpConnection::ChargingRelayStateNoCharging) {
@@ -383,6 +385,19 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
         if (m_initialUpdate.value(thing)) {
 
             m_initialUpdate[thing] = false;
+
+            qCDebug(dcPcElectric()) << "Update initial charger states from charging current register...";
+
+            PceWallbox::ChargingCurrentState chargingCurrentState = PceWallbox::deriveStatesFromRegister(connection->chargingCurrent());
+            qCDebug(dcPcElectric()) << chargingCurrentState;
+            thing->setStateValue(ev11PowerStateTypeId, chargingCurrentState.power);
+            thing->setStateValue(ev11DesiredPhaseCountStateTypeId, chargingCurrentState.desiredPhaseCount);
+            if (chargingCurrentState.power) {
+                thing->setStateValue(ev11MaxChargingCurrentStateTypeId, chargingCurrentState.maxChargingCurrent);
+            }
+
+            m_chargingCurrentStateBuffer[thing] = chargingCurrentState;
+
             qCDebug(dcPcElectric()) << "Updating initial settings after connecting...";
 
             thing->setSettingValue(ev11SettingsLedBrightnessParamTypeId, connection->ledBrightness());
@@ -451,3 +466,4 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
     if (monitor->reachable())
         connection->connectDevice();
 }
+

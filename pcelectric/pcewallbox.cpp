@@ -107,6 +107,41 @@ bool PceWallbox::update()
 
     enqueueRequest(reply);
 
+    // charging current register. Contains
+    // - power state
+    // - chargingcurrent (if power is true)
+    // - phases (if power is true)
+    bool chargingCurrentQueued = false;
+    foreach (QueuedModbusReply *r, m_queue) {
+        if (r->dataUnit().startAddress() == chargingCurrentDataUnit().startAddress()) {
+            chargingCurrentQueued = true;
+            break;
+        }
+    }
+
+    if (!chargingCurrentQueued) {
+        reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeRead, chargingCurrentDataUnit(), this);
+        connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
+        connect(reply, &QueuedModbusReply::finished, this, [this, reply](){
+
+            if (m_currentReply == reply)
+                m_currentReply = nullptr;
+
+            if (reply->error() != QModbusDevice::NoError) {
+                QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
+                return;
+            }
+
+            const QModbusDataUnit unit = reply->reply()->result();
+            const QVector<quint16> values = unit.values();
+            processChargingCurrentRegisterValues(values);
+
+            QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
+        });
+
+        enqueueRequest(reply);
+    }
+
     // Digital input
     bool digitalInputAlreadyQueued = false;
     foreach (QueuedModbusReply *r, m_queue) {
@@ -255,6 +290,38 @@ void PceWallbox::gracefullDeleteLater()
     }
 }
 
+quint16 PceWallbox::deriveRegisterFromStates(PceWallbox::ChargingCurrentState state)
+{
+    quint16 registerValue = 0;
+    if (!state.power)
+        return registerValue; // 0
+
+    registerValue = state.maxChargingCurrent * 1000; // convert to mA
+    if (state.desiredPhaseCount > 1) {
+        registerValue |= static_cast<quint16>(1) << 15;
+    }
+
+    return registerValue;
+}
+
+PceWallbox::ChargingCurrentState PceWallbox::deriveStatesFromRegister(quint16 registerValue)
+{
+    PceWallbox::ChargingCurrentState chargingCurrentState;
+    chargingCurrentState.power = (registerValue != 0);
+
+    // Only set max charging current if power, otherwise we use default 6A
+    if (chargingCurrentState.power) {
+
+        bool threePhaseCharging = (registerValue & (1 << 15));
+        chargingCurrentState.desiredPhaseCount = (threePhaseCharging ? 3 : 1);
+
+        chargingCurrentState.maxChargingCurrent = (registerValue & 0x7FFF) / 1000.0;
+    }
+
+    return chargingCurrentState;
+}
+
+
 void PceWallbox::sendHeartbeat()
 {
     if (m_aboutToDelete)
@@ -348,4 +415,11 @@ void PceWallbox::cleanupQueue()
 {
     qDeleteAll(m_queue);
     m_queue.clear();
+}
+
+QDebug operator<<(QDebug debug, const PceWallbox::ChargingCurrentState &chargingCurrentState)
+{
+    QDebugStateSaver saver(debug);
+    debug.nospace() << "ChargingCurrentState(" << chargingCurrentState.power << ", " << chargingCurrentState.maxChargingCurrent << " [A], " << chargingCurrentState.desiredPhaseCount << ')';
+    return debug;
 }

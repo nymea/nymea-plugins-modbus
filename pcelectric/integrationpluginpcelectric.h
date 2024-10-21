@@ -32,6 +32,7 @@
 #define INTEGRATIONPLUGINPCELECTRIC_H
 
 #include <QObject>
+#include <QDebug>
 
 #include <integrations/integrationplugin.h>
 #include <network/networkdevicediscovery.h>
@@ -59,12 +60,22 @@ public:
 
 private:
     PluginTimer *m_refreshTimer = nullptr;
+
     QHash<Thing *, PceWallbox *> m_connections;
     QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
     QHash<Thing *, bool> m_initialUpdate;
 
+    // We need to buffer the desired power / current / phase count states because all 3 states
+    // will be represented by one register (200 - chaegingCurrent). If all 3 actions get executed, they might
+    // overwrite each other, since the action gets started right the way, but the request gets queued.
+    // If the actions would be queued, there would be still the issue with the order of the actions
+    // (set power to false and then set charging current would always enable charging in the end).
+    QHash<Thing *, PceWallbox::ChargingCurrentState> m_chargingCurrentStateBuffer;
+
     void setupConnection(ThingSetupInfo *info);
 
 };
+
+
 
 #endif // INTEGRATIONPLUGINPCELECTRIC_H
