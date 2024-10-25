@@ -45,8 +45,7 @@ PceWallbox::PceWallbox(const QHostAddress &hostAddress, uint port, quint16 slave
         if (!reachable) {
             m_timer.stop();
 
-            qDeleteAll(m_queue);
-            m_queue.clear();
+            cleanupQueues();
 
             if (m_currentReply) {
                 m_currentReply = nullptr;
@@ -80,7 +79,7 @@ bool PceWallbox::update()
         return false;
 
     // Make sure we only have one update call in the queue
-    foreach (QueuedModbusReply *r, m_queue) {
+    foreach (QueuedModbusReply *r, m_readQueue) {
         if (r->dataUnit().startAddress() == readBlockInitInfosDataUnit().startAddress()) {
             return true;
         }
@@ -112,7 +111,7 @@ bool PceWallbox::update()
     // - chargingcurrent (if power is true)
     // - phases (if power is true)
     bool chargingCurrentQueued = false;
-    foreach (QueuedModbusReply *r, m_queue) {
+    foreach (QueuedModbusReply *r, m_readQueue) {
         if (r->dataUnit().startAddress() == chargingCurrentDataUnit().startAddress()) {
             chargingCurrentQueued = true;
             break;
@@ -144,7 +143,7 @@ bool PceWallbox::update()
 
     // Digital input
     bool digitalInputAlreadyQueued = false;
-    foreach (QueuedModbusReply *r, m_queue) {
+    foreach (QueuedModbusReply *r, m_readQueue) {
         if (r->dataUnit().startAddress() == digitalInputModeDataUnit().startAddress()) {
             digitalInputAlreadyQueued = true;
             break;
@@ -177,7 +176,7 @@ bool PceWallbox::update()
 
     // Led brightness
     bool ledBrightnessAlreadyQueued = false;
-    foreach (QueuedModbusReply *r, m_queue) {
+    foreach (QueuedModbusReply *r, m_readQueue) {
         if (r->dataUnit().startAddress() == ledBrightnessDataUnit().startAddress()) {
             ledBrightnessAlreadyQueued = true;
             break;
@@ -226,7 +225,7 @@ QueuedModbusReply *PceWallbox::setChargingCurrent(quint16 chargingCurrent)
         return;
     });
 
-    enqueueRequest(reply, true);
+    enqueueRequest(reply);
     return reply;
 }
 
@@ -246,7 +245,7 @@ QueuedModbusReply *PceWallbox::setLedBrightness(quint16 percentage)
         return;
     });
 
-    enqueueRequest(reply, true);
+    enqueueRequest(reply);
     return reply;
 }
 
@@ -266,7 +265,7 @@ QueuedModbusReply *PceWallbox::setDigitalInputMode(DigitalInputMode digitalInput
         return;
     });
 
-    enqueueRequest(reply, true);
+    enqueueRequest(reply);
     return reply;
 
 }
@@ -275,7 +274,7 @@ void PceWallbox::gracefullDeleteLater()
 {
     // Clean up the queue
     m_aboutToDelete = true;
-    cleanupQueue();
+    cleanupQueues();
 
     m_timer.stop();
 
@@ -344,12 +343,12 @@ void PceWallbox::sendHeartbeat()
         return;
     });
 
-    enqueueRequest(reply, true);
+    enqueueRequest(reply);
 }
 
 void PceWallbox::sendNextRequest()
 {
-    if (m_queue.isEmpty())
+    if (m_writeQueue.isEmpty() && m_readQueue.isEmpty())
         return;
 
     if (m_currentReply)
@@ -362,7 +361,20 @@ void PceWallbox::sendNextRequest()
         return;
     }
 
-    m_currentReply = m_queue.dequeue();
+    // Note: due to the fact that we have one register which controls 3 states,
+    // the order of the execution is critical at this point. We have to make sure
+    // the register gets written in the same order as they where requested by the action
+    // execution (and the dedicated ChargingCurrentState buffer)
+
+    if (!m_writeQueue.isEmpty()) {
+        // Prioritize write requests
+        m_currentReply = m_writeQueue.dequeue();
+        qCDebug(dcPcElectric()) << "Dequeued write request. Queue count: W" << m_writeQueue.count() << "| R:" << m_readQueue.count();
+    } else {
+        m_currentReply = m_readQueue.dequeue();
+        qCDebug(dcPcElectric()) << "Dequeued read request. Queue count: W" << m_writeQueue.count() << "| R:" << m_readQueue.count();
+    }
+
     switch(m_currentReply->requestType()) {
     case QueuedModbusReply::RequestTypeRead:
         qCDebug(dcPcElectric()) << "--> Reading" << ModbusDataUtils::registerTypeToString(m_currentReply->dataUnit().registerType())
@@ -400,21 +412,27 @@ void PceWallbox::sendNextRequest()
     }
 }
 
-void PceWallbox::enqueueRequest(QueuedModbusReply *reply, bool prepend)
+void PceWallbox::enqueueRequest(QueuedModbusReply *reply)
 {
-    if (prepend) {
-        m_queue.prepend(reply);
-    } else {
-        m_queue.enqueue(reply);
+    switch (reply->requestType()) {
+    case QueuedModbusReply::RequestTypeRead:
+        m_readQueue.enqueue(reply);
+        break;
+    case QueuedModbusReply::RequestTypeWrite:
+        m_writeQueue.enqueue(reply);
+        break;
     }
 
     QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
 }
 
-void PceWallbox::cleanupQueue()
+void PceWallbox::cleanupQueues()
 {
-    qDeleteAll(m_queue);
-    m_queue.clear();
+    qDeleteAll(m_readQueue);
+    m_readQueue.clear();
+
+    qDeleteAll(m_writeQueue);
+    m_writeQueue.clear();
 }
 
 QDebug operator<<(QDebug debug, const PceWallbox::ChargingCurrentState &chargingCurrentState)

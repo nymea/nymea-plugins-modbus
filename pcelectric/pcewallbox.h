@@ -79,12 +79,13 @@ private:
     QTimer m_timer;
     quint16 m_heartbeat = 1;
     QueuedModbusReply *m_currentReply = nullptr;
-    QQueue<QueuedModbusReply *> m_queue;
+    QQueue<QueuedModbusReply *> m_writeQueue;
+    QQueue<QueuedModbusReply *> m_readQueue;
     bool m_aboutToDelete = false;
 
-    void enqueueRequest(QueuedModbusReply *reply, bool prepend = false);
+    void enqueueRequest(QueuedModbusReply *reply);
 
-    void cleanupQueue();
+    void cleanupQueues();
 };
 
 QDebug operator<<(QDebug debug, const PceWallbox::ChargingCurrentState &chargingCurrentState);
