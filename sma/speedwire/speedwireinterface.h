@@ -70,6 +70,7 @@ private:
     quint32 m_sourceSerialNumber = 0;
     bool m_available = false;
     QTimer m_multicastReconfigureationTimer;
+    uint m_multicastWarningPrintCount = 0;
 };
 
 
