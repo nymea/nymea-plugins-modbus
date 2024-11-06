@@ -86,12 +86,20 @@ void EVC04Discovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceIn
                 cleanupConnection(connection);
                 return;
             }
+
             Result result;
             result.chargepointId = QString(QString::fromUtf16(connection->chargepointId().data(), connection->chargepointId().length()).toUtf8()).trimmed();
             result.brand = QString(QString::fromUtf16(connection->brand().data(), connection->brand().length()).toUtf8()).trimmed();
             result.model = QString(QString::fromUtf16(connection->model().data(), connection->model().length()).toUtf8()).trimmed();
             result.firmwareVersion = QString(QString::fromUtf16(connection->firmwareVersion().data(), connection->firmwareVersion().length()).toUtf8()).trimmed();
             result.networkDeviceInfo = networkDeviceInfo;
+
+            if (result.chargepointId.isEmpty() && result.brand.isEmpty() && result.model.isEmpty() && result.firmwareVersion.isEmpty()) {
+                qCDebug(m_dc()) << "Discovery: Found modbus device with valid register set (initialized successfully), but the information seem not to be valid. This is probably some other device. Ignoring" << result.networkDeviceInfo;
+                cleanupConnection(connection);
+                return;
+            }
+
             m_discoveryResults.append(result);
 
             qCDebug(m_dc()) << "Discovery: Found wallbox with firmware version:" << result.firmwareVersion << result.networkDeviceInfo;
