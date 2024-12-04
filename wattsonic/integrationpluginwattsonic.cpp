@@ -76,7 +76,8 @@ void IntegrationPluginWattsonic::discoverThings(ThingDiscoveryInfo *info)
 
             info->finish(Thing::ThingErrorNoError);
         });
-        discovery->startDiscovery();
+
+        discovery->startDiscovery(info->params().paramValue(inverterDiscoverySlaveAddressParamTypeId).toUInt());
     }
 }
 
