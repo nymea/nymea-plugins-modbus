@@ -42,11 +42,11 @@ IntegrationPluginWattsonic::IntegrationPluginWattsonic()
 
 void IntegrationPluginWattsonic::discoverThings(ThingDiscoveryInfo *info)
 {
-
     if (info->thingClassId() == inverterThingClassId) {
 
         WattsonicDiscovery *discovery = new WattsonicDiscovery(hardwareManager()->modbusRtuResource(), info);
         connect(discovery, &WattsonicDiscovery::discoveryFinished, info, [=](bool modbusRtuMasterAvailable){
+
             if (!modbusRtuMasterAvailable) {
                 info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("No suitable Modbus RTU connection available. Please set up a Modbus RTU master with a baudrate of 9600, 8 data bits, 1 stop bit and no parity."));
                 return;
@@ -54,13 +54,14 @@ void IntegrationPluginWattsonic::discoverThings(ThingDiscoveryInfo *info)
 
             foreach (const WattsonicDiscovery::Result &result, discovery->discoveryResults()) {
 
-                QString name = "Wattsonic hybrid inverter";
-                ThingDescriptor descriptor(inverterThingClassId, name, result.serialNumber);
+                QString name = "Wattsonic inverter (" + result.serialNumber + ")";
+                ThingDescriptor descriptor(inverterThingClassId, name, QString("Modbus ID: %1").arg(result.slaveId));
                 qCDebug(dcWattsonic()) << "Discovered:" << descriptor.title() << descriptor.description();
 
                 ParamList params {
                     {inverterThingModbusMasterUuidParamTypeId, result.modbusRtuMasterId},
-                    {inverterThingSlaveAddressParamTypeId, result.slaveId}
+                    {inverterThingSlaveAddressParamTypeId, result.slaveId},
+                    {inverterThingSerialNumberParamTypeId, result.serialNumber}
                 };
                 descriptor.setParams(params);
 
@@ -110,21 +111,7 @@ void IntegrationPluginWattsonic::setupThing(ThingSetupInfo *info)
 
 void IntegrationPluginWattsonic::postSetupThing(Thing *thing)
 {
-    if (thing->thingClassId() == inverterThingClassId) {
-        Things meters = myThings().filterByParentId(thing->id()).filterByThingClassId(meterThingClassId);
-        if (meters.isEmpty()) {
-            qCInfo(dcWattsonic()) << "No energy meter set up yet. Creating thing...";
-            ThingDescriptor descriptor(meterThingClassId, "Wattsonic energy meter", QString(), thing->id());
-            emit autoThingsAppeared({descriptor});
-        }
-        Things batteries = myThings().filterByParentId(thing->id()).filterByThingClassId(batteryThingClassId);
-        if (batteries.isEmpty()) {
-            qCInfo(dcWattsonic()) << "No battery set up yet. Creating thing...";
-            ThingDescriptor descriptor(batteryThingClassId, "Wattsonic energy storage", QString(), thing->id());
-            emit autoThingsAppeared({descriptor});
-        }
-    }
-
+    Q_UNUSED(thing)
 
     if (!m_pluginTimer) {
         qCDebug(dcWattsonic()) << "Starting plugin timer...";
@@ -216,7 +203,32 @@ void IntegrationPluginWattsonic::setupWattsonicConnection(ThingSetupInfo *info)
         inverter->setStateValue(inverterTotalEnergyProducedStateTypeId, connection->totalPVGenerationFromInstallation() * 0.1);
         qCInfo(dcWattsonic()) << "Updating inverter:" << inverter->stateValue(inverterCurrentPowerStateTypeId).toDouble() << "W" << inverter->stateValue(inverterTotalEnergyProducedStateTypeId).toDouble() << "kWh";
 
-        Things meters = myThings().filterByParentId(thing->id()).filterByThingClassId(meterThingClassId);
+        Things meters = myThings().filterByParentId(thing->id()).filterByThingClassId(meterThingClassId);        
+
+        // Check if a meter is connected or not. We detect a meter by reading the totalEnergyPurchasedFromGrid totalEnergyInjectedToGrid registers,
+        // As of now, there is no other way to detect the presence of the meter. Voltage is always there, even if there is no meter connected.
+        bool meterDetected = connection->totalEnergyPurchasedFromGrid() != 0 || connection->totalEnergyInjectedToGrid() != 0;
+
+        if (meterDetected) {
+            if (meters.isEmpty()) {
+                qCInfo(dcWattsonic()) << "No energy meter set up yet but measurements detected. Creating meter thing...";
+                QString parentSerialNumber = thing->paramValue(inverterThingSerialNumberParamTypeId).toString();
+                QString name = "Wattsonic energy meter";
+                if (!parentSerialNumber.isEmpty())
+                    name.append(" (" + parentSerialNumber + ")");
+
+                ThingDescriptor descriptor(meterThingClassId, name, QString(), thing->id());
+                emit autoThingsAppeared({descriptor});
+            }
+        } else {
+            // No meter detected
+            if (!meters.isEmpty()) {
+                // Remove existing meter thing
+                qCInfo(dcWattsonic()) << "Meter set up yet but energy measurments detected in the registers. Removing meter thing...";
+                emit autoThingDisappeared(meters.first()->id());
+            }
+        }
+
         if (!meters.isEmpty()) {
             Thing *meter = meters.first();
             meter->setStateValue(meterCurrentPowerStateTypeId, connection->totalPowerOnMeter() * -1.0);
@@ -239,6 +251,26 @@ void IntegrationPluginWattsonic::setupWattsonicConnection(ThingSetupInfo *info)
         }
 
         Things batteries = myThings().filterByParentId(thing->id()).filterByThingClassId(batteryThingClassId);
+
+        // Check if a battery is connected or not. We detect a battery by reading the DC voltage, if there is no voltage, there is no battery
+        if (connection->batteryVoltageDc() > 0) {
+            if (batteries.isEmpty()) {
+                qCInfo(dcWattsonic()) << "No battery set up yet but DC voltage detected in the registers. Creating battery thing...";
+                QString parentSerialNumber = thing->paramValue(inverterThingSerialNumberParamTypeId).toString();
+                QString name = "Wattsonic energy storage";
+                if (!parentSerialNumber.isEmpty())
+                    name.append(" (" + parentSerialNumber + ")");
+
+                ThingDescriptor descriptor(batteryThingClassId, name, QString(), thing->id());
+                emit autoThingsAppeared({descriptor});
+            }
+        } else {
+            if (!batteries.isEmpty()) {
+                qCInfo(dcWattsonic()) << "Battery set up yet but no DC voltage detected in the registers. Removing battery thing...";
+                emit autoThingDisappeared(batteries.first()->id());
+            }
+        }
+
         if (!batteries.isEmpty() && connection->SOC() > 0) {
             Thing *battery = batteries.first();
             QHash<WattsonicModbusRtuConnection::BatteryMode, QString> map {

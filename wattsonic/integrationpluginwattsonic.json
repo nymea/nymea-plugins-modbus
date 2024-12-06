@@ -37,6 +37,13 @@
                             "displayName": "Modbus RTU master",
                             "type": "QUuid",
                             "defaultValue": ""
+                        },
+                        {
+                            "id": "47a655ca-bc68-42b0-8252-bde20de56974",
+                            "name": "serialNumber",
+                            "displayName": "Serial number",
+                            "type": "QString",
+                            "defaultValue": ""
                         }
                     ],
                     "stateTypes": [
