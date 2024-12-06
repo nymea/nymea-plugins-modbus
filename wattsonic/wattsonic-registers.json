@@ -276,6 +276,18 @@
             "access": "RO"
         },
         {
+            "id": "batteryVoltageDc",
+            "address": 30254,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Battery voltage DC",
+            "defaultValue": 0,
+            "unit": "1/10 V",
+            "access": "RO"
+        },
+        {
             "id": "batteryMode",
             "address": 30256,
             "size": 1,
