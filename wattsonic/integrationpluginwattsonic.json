@@ -14,19 +14,35 @@
                     "id": "688bef8d-2ba8-4eb3-b30e-16193eba02fb",
                     "createMethods": ["discovery", "user"],
                     "interfaces": ["solarinverter", "connectable"],
+                    "discoveryParamTypes": [
+                        {
+                            "id": "a4e58882-d26a-43ee-813f-11c6ca74ee6d",
+                            "name": "slaveAddress",
+                            "displayName": "Modbus slave address",
+                            "type": "uint",
+                            "defaultValue": 247
+                        }
+                    ],
                     "paramTypes": [
                         {
                             "id": "55a7d9ed-5f4f-41a2-8dc1-c6a5a79512d2",
                             "name": "slaveAddress",
                             "displayName": "Modbus slave address",
                             "type": "uint",
-                            "defaultValue": 1
+                            "defaultValue": 247
                         },
                         {
                             "id": "4f1238b5-07e0-4516-b84a-71670141ef81",
                             "name": "modbusMasterUuid",
                             "displayName": "Modbus RTU master",
                             "type": "QUuid",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "47a655ca-bc68-42b0-8252-bde20de56974",
+                            "name": "serialNumber",
+                            "displayName": "Serial number",
+                            "type": "QString",
                             "defaultValue": ""
                         }
                     ],

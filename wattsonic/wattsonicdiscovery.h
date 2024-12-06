@@ -46,7 +46,7 @@ public:
         quint16 slaveId;
     };
 
-    void startDiscovery();
+    void startDiscovery(quint16 slaveId);
 
     QList<Result> discoveryResults() const;
 
@@ -54,7 +54,7 @@ signals:
     void discoveryFinished(bool modbusRtuMasterAvailable);
 
 private slots:
-    void tryConnect(ModbusRtuMaster *master, quint16 slaveIdIndex);
+    void tryConnect(ModbusRtuMaster *master, quint16 slaveId);
 
 private:
     ModbusRtuHardwareResource *m_modbusRtuResource = nullptr;
