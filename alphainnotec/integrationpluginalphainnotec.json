@@ -13,15 +13,22 @@
                     "displayName": "alpha connect",
                     "id": "c5437b68-cfd2-4ec8-bad6-006fb5e8a8da",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": ["smartgridheatpump", "connectable"],
+                    "interfaces": ["smartgridheatpump", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "64a18910-9111-4eaf-986d-f7b64b03b99a",
-                            "name": "ipAddress",
+                            "name": "address",
                             "displayName": "IP address",
                             "type": "QString",
                             "inputType": "IPv4Address",
-                            "defaultValue": "127.0.0.1"
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "f8d3b955-9560-492d-b32f-f89c69be1dec",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "defaultValue": ""
                         },
                         {
                             "id": "f791c219-98a5-41ee-8e5f-1bfb5136dc9c",

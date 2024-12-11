@@ -36,6 +36,8 @@
 
 #include "alphainnotecmodbustcpconnection.h"
 
+class NetworkDeviceMonitor;
+
 class IntegrationPluginAlphaInnotec: public IntegrationPlugin
 {
     Q_OBJECT
@@ -56,6 +58,7 @@ public:
 private:
     PluginTimer *m_pluginTimer = nullptr;
     QHash<Thing *, AlphaInnotecModbusTcpConnection *> m_connections;
+    QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
 };
 
 #endif // INTEGRATIONPLUGINALPHAINNOTEC_H
