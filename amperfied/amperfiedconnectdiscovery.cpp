@@ -49,10 +49,11 @@ void AmperfiedConnectDiscovery::startDiscovery(const QString &nameFilter)
     m_nameFilter = nameFilter;
     NetworkDeviceDiscoveryReply *discoveryReply = m_networkDeviceDiscovery->discover();
 
-    connect(discoveryReply, &NetworkDeviceDiscoveryReply::networkDeviceInfoAdded, this, &AmperfiedConnectDiscovery::checkNetworkDevice);
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::hostAddressDiscovered, this, &AmperfiedConnectDiscovery::checkNetworkDevice);
 
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
         qCDebug(dcAmperfied()) << "Discovery: Network discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "network devices";
+        m_networkDeviceInfos = discoveryReply->networkDeviceInfos();
         m_gracePeriodTimer.start();
         discoveryReply->deleteLater();
     });
@@ -63,13 +64,14 @@ QList<AmperfiedConnectDiscovery::Result> AmperfiedConnectDiscovery::discoveryRes
     return m_discoveryResults;
 }
 
-void AmperfiedConnectDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo)
+void AmperfiedConnectDiscovery::checkNetworkDevice(const QHostAddress &address)
 {
     int port = 502;
     int slaveId = 1;
-    qCDebug(dcAmperfied()) << "Checking network device:" << networkDeviceInfo << "Port:" << port << "Slave ID:" << slaveId;
 
-    AmperfiedModbusTcpConnection *connection = new AmperfiedModbusTcpConnection(networkDeviceInfo.address(), port, slaveId, this);
+    qCDebug(dcAmperfied()) << "Checking network device:" << address.toString() << "Port:" << port << "Slave ID:" << slaveId;
+
+    AmperfiedModbusTcpConnection *connection = new AmperfiedModbusTcpConnection(address, port, slaveId, this);
     m_connections.append(connection);
 
     connect(connection, &AmperfiedModbusTcpConnection::reachableChanged, this, [=](bool reachable){
@@ -82,7 +84,7 @@ void AmperfiedConnectDiscovery::checkNetworkDevice(const NetworkDeviceInfo &netw
         // Modbus TCP connected...ok, let's try to initialize it!
         connect(connection, &AmperfiedModbusTcpConnection::initializationFinished, this, [=](bool success){
             if (!success) {
-                qCDebug(dcAmperfied()) << "Discovery: Initialization failed on" << networkDeviceInfo.address().toString();
+                qCDebug(dcAmperfied()) << "Discovery: Initialization failed on" << address.toString();
                 cleanupConnection(connection);
                 return;
             }
@@ -102,28 +104,27 @@ void AmperfiedConnectDiscovery::checkNetworkDevice(const NetworkDeviceInfo &netw
             Result result;
             result.firmwareVersion = connection->version();
             result.modelName = connection->logisticString();
-            result.networkDeviceInfo = networkDeviceInfo;
+            result.address = address;
             m_discoveryResults.append(result);
 
             qCDebug(dcAmperfied()) << "Discovery: --> Found"
                                 << result.modelName
                                 << "Version:" << result.firmwareVersion
-                                << result.networkDeviceInfo;
-
+                                << result.address.toString();
 
             // Done with this connection
             cleanupConnection(connection);
         });
 
         if (!connection->initialize()) {
-            qCDebug(dcAmperfied()) << "Discovery: Unable to initialize connection on" << networkDeviceInfo.address().toString();
+            qCDebug(dcAmperfied()) << "Discovery: Unable to initialize connection on" << address.toString();
             cleanupConnection(connection);
         }
     });
 
     // If check reachability failed...skip this host...
     connect(connection, &AmperfiedModbusTcpConnection::checkReachabilityFailed, this, [=](){
-        qCDebug(dcAmperfied()) << "Discovery: Checking reachability failed on" << networkDeviceInfo.address().toString();
+        qCDebug(dcAmperfied()) << "Discovery: Checking reachability failed on" << address.toString();
         cleanupConnection(connection);
     });
 
@@ -141,6 +142,10 @@ void AmperfiedConnectDiscovery::cleanupConnection(AmperfiedModbusTcpConnection *
 void AmperfiedConnectDiscovery::finishDiscovery()
 {
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
+
+    // Fill in finished network device information
+    for (int i = 0; i < m_discoveryResults.count(); i++)
+        m_discoveryResults[i].networkDeviceInfo = m_networkDeviceInfos.get(m_discoveryResults.value(i).address);
 
     // Cleanup any leftovers...we don't care any more
     foreach (AmperfiedModbusTcpConnection *connection, m_connections)

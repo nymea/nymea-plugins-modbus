@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2023, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -47,6 +47,7 @@ public:
         quint16 firmwareVersion;
         quint16 slaveId;
         QString modelName;
+        QHostAddress address;
         NetworkDeviceInfo networkDeviceInfo;
     };
 
@@ -65,10 +66,11 @@ private:
     QString m_nameFilter;
 
     QList<AmperfiedModbusTcpConnection *> m_connections;
+    NetworkDeviceInfos m_networkDeviceInfos;
 
     QList<Result> m_discoveryResults;
 
-    void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
+    void checkNetworkDevice(const QHostAddress &address);
     void cleanupConnection(AmperfiedModbusTcpConnection *connection);
 
     void finishDiscovery();
