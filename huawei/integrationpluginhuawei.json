@@ -13,7 +13,7 @@
                     "displayName": "Huawei FusionSolar Inverter (SmartDongle)",
                     "id": "87e75ee0-d544-457b-add3-bd4e58160fcd",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": ["solarinverter", "connectable"],
+                    "interfaces": ["solarinverter", "connectable", "networkdevice"],
                     "providedInterfaces": [ "solarinverter", "energymeter", "energystorage"],
                     "paramTypes": [
                         {
@@ -22,6 +22,21 @@
                             "displayName": "MAC address",
                             "type": "QString",
                             "inputType": "MacAddress",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "55f90597-e3ba-4d7e-a33e-2e3b7dc7e095",
+                            "name": "address",
+                            "displayName": "Host address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "00c3880d-3687-4955-8563-648684b02cbd",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
                             "defaultValue": ""
                         },
                         {
