@@ -85,12 +85,29 @@ void IntegrationPluginAmperfied::discoverThings(ThingDiscoveryInfo *info)
             qCInfo(dcAmperfied()) << "Discovery results:" << discovery->discoveryResults().count();
 
             foreach (const AmperfiedConnectDiscovery::Result &result, discovery->discoveryResults()) {
-                ThingDescriptor descriptor(info->thingClassId(), "Amperfied " + result.modelName, QString("MAC: %1").arg(result.networkDeviceInfo.macAddress()));
+                QString description;
+                switch (result.networkDeviceInfo.monitorMode()) {
+                case NetworkDeviceInfo::MonitorModeMac:
+                    description = "MAC " + result.networkDeviceInfo.macAddressInfos().constFirst().macAddress().toString();
+                    break;
+                case NetworkDeviceInfo::MonitorModeHostName:
+                    description = "Host name " + result.networkDeviceInfo.hostName();
+                    break;
+                case NetworkDeviceInfo::MonitorModeIp:
+                    description = "IP " + result.networkDeviceInfo.address().toString();
+                    break;
+                }
+
+                ThingDescriptor descriptor(info->thingClassId(), "Amperfied " + result.modelName, description);
 
                 ParamTypeId macAddressParamTypeId = thingClass(info->thingClassId()).paramTypes().findByName("macAddress").id();
-                ParamList params{
-                    {macAddressParamTypeId, result.networkDeviceInfo.macAddress()}
-                };
+                ParamTypeId hostNameParamTypeId = thingClass(info->thingClassId()).paramTypes().findByName("hostName").id();
+                ParamTypeId addressParamTypeId = thingClass(info->thingClassId()).paramTypes().findByName("address").id();
+
+                ParamList params;
+                params.append(Param(macAddressParamTypeId, result.networkDeviceInfo.thingParamValueMacAddress()));
+                params.append(Param(hostNameParamTypeId, result.networkDeviceInfo.thingParamValueHostName()));
+                params.append(Param(addressParamTypeId, result.networkDeviceInfo.thingParamValueAddress()));
                 descriptor.setParams(params);
 
                 Thing *existingThing = myThings().findByParams(params);
@@ -138,7 +155,7 @@ void IntegrationPluginAmperfied::setupThing(ThingSetupInfo *info)
 
         NetworkDeviceMonitor *monitor = m_monitors.value(info->thing());
         if (!monitor) {
-            monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(MacAddress(thing->paramValue("macAddress").toString()));
+            monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(thing);
             m_monitors.insert(thing, monitor);
         }
 
@@ -285,6 +302,9 @@ void IntegrationPluginAmperfied::thingRemoved(Thing *thing)
             || thing->thingClassId() == connectSolarThingClassId) {
         delete m_tcpConnections.take(thing);
     }
+
+    if (m_monitors.contains(thing))
+        hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
 
     if (myThings().isEmpty() && m_pluginTimer) {
         hardwareManager()->pluginTimerManager()->unregisterTimer(m_pluginTimer);
