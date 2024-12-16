@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2022, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -42,12 +42,14 @@ class AmtronHCC3Discovery : public QObject
 {
     Q_OBJECT
 public:
-    explicit AmtronHCC3Discovery(NetworkDeviceDiscovery *networkDeviceDiscovery, QObject *parent = nullptr);
     typedef struct AmtronDiscoveryResult {
         QString wallboxName;
         QString serialNumber;
+        QHostAddress address;
         NetworkDeviceInfo networkDeviceInfo;
     } AmtronDiscoveryResult;
+
+    explicit AmtronHCC3Discovery(NetworkDeviceDiscovery *networkDeviceDiscovery, QObject *parent = nullptr);
 
     void startDiscovery();
 
@@ -58,15 +60,13 @@ signals:
 
 private:
     NetworkDeviceDiscovery *m_networkDeviceDiscovery = nullptr;
-
     QTimer m_gracePeriodTimer;
     QDateTime m_startDateTime;
-
+    NetworkDeviceInfos m_networkDeviceInfos;
     QList<AmtronHCC3ModbusTcpConnection *> m_connections;
-
     QList<AmtronDiscoveryResult> m_discoveryResults;
 
-    void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
+    void checkNetworkDevice(const QHostAddress &address);
     void cleanupConnection(AmtronHCC3ModbusTcpConnection *connection);
 
     void finishDiscovery();
