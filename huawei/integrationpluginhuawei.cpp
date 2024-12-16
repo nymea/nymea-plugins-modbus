@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2022, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This fileDescriptor is part of nymea.
@@ -59,25 +59,42 @@ void IntegrationPluginHuawei::discoverThings(ThingDiscoveryInfo *info)
                 if (!result.modelName.isEmpty())
                     name = "Huawei " + result.modelName;
 
-                QString desctiption = result.networkDeviceInfo.macAddress() + " - " + result.networkDeviceInfo.address().toString();
-                if (!result.serialNumber.isEmpty()) {
-                    desctiption = "SN: " + result.serialNumber + " " + result.networkDeviceInfo.macAddress() + " - " + result.networkDeviceInfo.address().toString();
+                QString description;
+
+                if (!result.serialNumber.isEmpty())
+                    description = "SN: " + result.serialNumber;
+
+                switch (result.networkDeviceInfo.monitorMode()) {
+                case NetworkDeviceInfo::MonitorModeMac:
+                    description += " MAC: " + result.networkDeviceInfo.macAddressInfos().constFirst().macAddress().toString() +
+                                   " - " + result.networkDeviceInfo.address().toString();
+                    break;
+                case NetworkDeviceInfo::MonitorModeHostName:
+                    description += " Host name: " + result.networkDeviceInfo.hostName() +
+                                   " - " + result.networkDeviceInfo.address().toString();
+                    break;
+                case NetworkDeviceInfo::MonitorModeIp:
+                    description += " IP: " + result.networkDeviceInfo.address().toString();
+                    break;
                 }
 
-                ThingDescriptor descriptor(huaweiFusionSolarInverterThingClassId, name, desctiption) ;
+                ThingDescriptor descriptor(huaweiFusionSolarInverterThingClassId, name, description) ;
                 qCDebug(dcHuawei()) << "Discovered:" << descriptor.title() << descriptor.description();
 
-                // Check if we already have set up this device
-                Things existingThings = myThings().filterByParam(huaweiFusionSolarInverterThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
-                if (existingThings.count() == 1) {
-                    qCDebug(dcHuawei()) << "This inverter already exists in the system:" << result.networkDeviceInfo;
-                    descriptor.setThingId(existingThings.first()->id());
-                }
-
                 ParamList params;
-                params << Param(huaweiFusionSolarInverterThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
+                params << Param(huaweiFusionSolarInverterThingMacAddressParamTypeId, result.networkDeviceInfo.thingParamValueMacAddress());
+                params << Param(huaweiFusionSolarInverterThingHostNameParamTypeId, result.networkDeviceInfo.thingParamValueHostName());
+                params << Param(huaweiFusionSolarInverterThingAddressParamTypeId, result.networkDeviceInfo.thingParamValueAddress());
                 params << Param(huaweiFusionSolarInverterThingSlaveIdParamTypeId, result.slaveId);
                 descriptor.setParams(params);
+
+                // Check if we already have set up this device
+                Thing *existingThing = myThings().findByParams(params);
+                if (existingThing) {
+                    qCDebug(dcHuawei()) << "This inverter already exists in the system:" << result.networkDeviceInfo;
+                    descriptor.setThingId(existingThing->id());
+                }
+
                 info->addThingDescriptor(descriptor);
             }
 
@@ -131,21 +148,18 @@ void IntegrationPluginHuawei::setupThing(ThingSetupInfo *info)
         if (m_monitors.contains(thing))
             hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
 
-        // Make sure we have a valid mac address, otherwise no monitor and not auto searching is possible
-        MacAddress macAddress = MacAddress(thing->paramValue(huaweiFusionSolarInverterThingMacAddressParamTypeId).toString());
-        if (macAddress.isNull()) {
-            qCWarning(dcHuawei()) << "Failed to set up Fusion Solar because the MAC address is not valid:" << thing->paramValue(huaweiFusionSolarInverterThingMacAddressParamTypeId).toString() << macAddress.toString();
-            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The MAC address is not vaild. Please reconfigure the device to fix this."));
+        // Create a monitor so we always get the correct IP in the network and see if the device is reachable without polling on our own
+        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(thing);
+        if (!monitor) {
+            qCWarning(dcHuawei()) << "Failed to set up Fusion Solar because the params are incomplete for creating a monitor:" << thing->params();
+            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The parameters are incomplete. Please reconfigure the device to fix this."));
             return;
         }
 
-        // Create a monitor so we always get the correct IP in the network and see if the device is reachable without polling on our own
-        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(macAddress);
         m_monitors.insert(thing, monitor);
         connect(info, &ThingSetupInfo::aborted, monitor, [=](){
             hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
         });
-
 
         // Continue with setup only if we know that the network device is reachable
         if (info->isInitialSetup()) {

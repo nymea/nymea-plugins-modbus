@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2022, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -47,6 +47,7 @@ public:
         QString modelName;
         QString serialNumber;
         quint16 slaveId;
+        QHostAddress address;
         NetworkDeviceInfo networkDeviceInfo;
     } Result;
 
@@ -67,13 +68,14 @@ private:
     QList<HuaweiFusionSolar *> m_connections;
     QList<Result> m_results;
 
+    NetworkDeviceInfos m_networkDeviceInfos;
+
     void testNextConnection(const QHostAddress &address);
 
-    void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
+    void checkNetworkDevice(const QHostAddress &address);
     void cleanupConnection(HuaweiFusionSolar *connection);
 
     void finishDiscovery();
-
 };
 
 #endif // HUAWEIFUSIONSOLARDISCOVERY_H
