@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2022, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -50,6 +50,7 @@ public:
         QString articleNumber;
         QString softwareVersionMainController;
         QString softwareVersionIoController;
+        QHostAddress address;
         NetworkDeviceInfo networkDeviceInfo;
     } KostalDiscoveryResult;
 
@@ -64,17 +65,14 @@ private:
     NetworkDeviceDiscovery *m_networkDeviceDiscovery = nullptr;
     quint16 m_port;
     quint16 m_modbusAddress;
-
     QDateTime m_startDateTime;
 
     NetworkDeviceInfos m_networkDeviceInfos;
-    NetworkDeviceInfos m_verifiedNetworkDeviceInfos;
 
     QList<KostalModbusTcpConnection *> m_connections;
-
     QList<KostalDiscoveryResult> m_discoveryResults;
 
-    void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
+    void checkNetworkDevice(const QHostAddress &address);
     void cleanupConnection(KostalModbusTcpConnection *connection);
 
     void finishDiscovery();
