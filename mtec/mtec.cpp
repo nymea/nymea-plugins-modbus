@@ -51,6 +51,11 @@ MTec::~MTec()
     m_modbusMaster->disconnectDevice();
 }
 
+ModbusTcpMaster *MTec::modbusTcpMaster() const
+{
+    return m_modbusMaster;
+}
+
 QHostAddress MTec::hostAddress() const
 {
     return m_hostAddress;
