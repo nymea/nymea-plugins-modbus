@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2023, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -49,6 +49,7 @@ public:
         int port;
         int modbusAddress;
         QString softwareVersion;
+        QHostAddress address;
         NetworkDeviceInfo networkDeviceInfo;
     };
 
@@ -67,11 +68,11 @@ private:
     QTimer m_gracePeriodTimer;
     QDateTime m_startDateTime;
 
+    NetworkDeviceInfos m_networkDeviceInfos;
     QList<SmaBatteryInverterModbusTcpConnection *> m_connections;
-
     QList<Result> m_discoveryResults;
 
-    void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
+    void checkNetworkDevice(const QHostAddress &address);
     void cleanupConnection(SmaBatteryInverterModbusTcpConnection *connection);
 
     void finishDiscovery();

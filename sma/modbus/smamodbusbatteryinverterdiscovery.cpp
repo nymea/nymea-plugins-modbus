@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2023, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -45,20 +45,20 @@ SmaModbusBatteryInverterDiscovery::SmaModbusBatteryInverterDiscovery(NetworkDevi
         qCDebug(dcSma()) << "Discovery: Grace period timer triggered.";
         finishDiscovery();
     });
-
 }
 
 void SmaModbusBatteryInverterDiscovery::startDiscovery()
 {
     qCInfo(dcSma()) << "Discovery: Searching for SMA battery inverters in the network...";
     NetworkDeviceDiscoveryReply *discoveryReply = m_networkDeviceDiscovery->discover();
+    m_startDateTime = QDateTime::currentDateTime();
 
-    connect(discoveryReply, &NetworkDeviceDiscoveryReply::networkDeviceInfoAdded, this, &SmaModbusBatteryInverterDiscovery::checkNetworkDevice);
-
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::hostAddressDiscovered, this, &SmaModbusBatteryInverterDiscovery::checkNetworkDevice);
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
         qCDebug(dcSma()) << "Discovery: Network discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "network devices";
+        m_networkDeviceInfos = discoveryReply->networkDeviceInfos();
         m_gracePeriodTimer.start();
-        discoveryReply->deleteLater();
     });
 }
 
@@ -67,11 +67,11 @@ QList<SmaModbusBatteryInverterDiscovery::Result> SmaModbusBatteryInverterDiscove
     return m_discoveryResults;
 }
 
-void SmaModbusBatteryInverterDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo)
+void SmaModbusBatteryInverterDiscovery::checkNetworkDevice(const QHostAddress &address)
 {
-    qCInfo(dcSma()) << "Checking network device:" << networkDeviceInfo << "Port:" << m_port << "Slave ID:" << m_modbusAddress;
+    qCInfo(dcSma()) << "Checking network device:" << address << "Port:" << m_port << "Slave ID:" << m_modbusAddress;
 
-    SmaBatteryInverterModbusTcpConnection *connection = new SmaBatteryInverterModbusTcpConnection(networkDeviceInfo.address(), m_port, m_modbusAddress, this);
+    SmaBatteryInverterModbusTcpConnection *connection = new SmaBatteryInverterModbusTcpConnection(address, m_port, m_modbusAddress, this);
     m_connections.append(connection);
 
     connect(connection, &SmaBatteryInverterModbusTcpConnection::reachableChanged, this, [=](bool reachable){
@@ -82,13 +82,13 @@ void SmaModbusBatteryInverterDiscovery::checkNetworkDevice(const NetworkDeviceIn
 
         connect(connection, &SmaBatteryInverterModbusTcpConnection::initializationFinished, this, [=](bool success){
             if (!success) {
-                qCInfo(dcSma()) << "Discovery: Initialization failed on" << networkDeviceInfo.address().toString() << "Skipping result...";;
+                qCInfo(dcSma()) << "Discovery: Initialization failed on" << address.toString() << "Skipping result...";;
                 cleanupConnection(connection);
                 return;
             }
 
             if (connection->deviceClass() != Sma::DeviceClassBatteryInverter) {
-                qCInfo(dcSma()) << "Discovery: Initialization successful for" << networkDeviceInfo.address().toString() << "but the device class is not a battery inverter. Skipping result...";;
+                qCInfo(dcSma()) << "Discovery: Initialization successful for" << address.toString() << "but the device class is not a battery inverter. Skipping result...";;
                 cleanupConnection(connection);
                 return;
             }
@@ -99,7 +99,7 @@ void SmaModbusBatteryInverterDiscovery::checkNetworkDevice(const NetworkDeviceIn
             result.port = m_port;
             result.modbusAddress = m_modbusAddress;
             result.softwareVersion = Sma::buildSoftwareVersionString(connection->softwarePackage());
-            result.networkDeviceInfo = networkDeviceInfo;
+            result.address = address;
             m_discoveryResults.append(result);
 
             qCInfo(dcSma()) << "Discovery: --> Found";
@@ -112,18 +112,17 @@ void SmaModbusBatteryInverterDiscovery::checkNetworkDevice(const NetworkDeviceIn
         });
 
         if (!connection->initialize()) {
-            qCDebug(dcSma()) << "Discovery: Unable to initialize connection on" << networkDeviceInfo.address().toString();
+            qCDebug(dcSma()) << "Discovery: Unable to initialize connection on" << address.toString();
             cleanupConnection(connection);
         }
     });
 
     connect(connection, &SmaBatteryInverterModbusTcpConnection::checkReachabilityFailed, this, [=](){
-        qCDebug(dcSma()) << "Discovery: Checking reachability failed on" << networkDeviceInfo.address().toString();
+        qCDebug(dcSma()) << "Discovery: Checking reachability failed on" << address.toString();
         cleanupConnection(connection);
     });
 
     connection->connectDevice();
-
 }
 
 void SmaModbusBatteryInverterDiscovery::cleanupConnection(SmaBatteryInverterModbusTcpConnection *connection)
@@ -137,12 +136,16 @@ void SmaModbusBatteryInverterDiscovery::finishDiscovery()
 {
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
 
+    // Fill in all network device infos we have
+    for (int i = 0; i < m_discoveryResults.count(); i++)
+        m_discoveryResults[i].networkDeviceInfo = m_networkDeviceInfos.get(m_discoveryResults.at(i).address);
+
     // Cleanup any leftovers...we don't care any more
     foreach (SmaBatteryInverterModbusTcpConnection *connection, m_connections)
         cleanupConnection(connection);
 
     qCInfo(dcSma()) << "Discovery: Finished the discovery process. Found" << m_discoveryResults.count()
-                       << "SMA battery inverters in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
+                    << "SMA battery inverters in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
     m_gracePeriodTimer.stop();
 
     emit discoveryFinished();
