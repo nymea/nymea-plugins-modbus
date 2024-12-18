@@ -13,15 +13,23 @@
                     "displayName": "Stiebel Eltron Heatpump",
                     "id": "e02ecf61-7d28-43c2-b87e-e7e98a48fbfd",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": ["smartgridheatpump", "connectable"],
+                    "interfaces": ["smartgridheatpump", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "47d221fa-f6d2-400e-b80f-bb90abccb72c",
-                            "name": "ipAddress",
+                            "name": "address",
                             "displayName": "IP address",
                             "type": "QString",
                             "inputType": "IPv4Address",
-                            "defaultValue": "127.0.0.1"
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "f39a2708-a0f2-419f-a01d-4e600dabe664",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
                         },
                         {
                             "id": "05cd59b8-3068-460f-b0d2-6d49f27458df",
