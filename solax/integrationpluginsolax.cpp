@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2023, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -63,20 +63,23 @@ void IntegrationPluginSolax::discoverThings(ThingDiscoveryInfo *info)
             if (!result.serialNumber.isEmpty())
                 title.append(" " + result.serialNumber);
 
-            ThingDescriptor descriptor(solaxInverterTcpThingClassId, title, result.networkDeviceInfo.address().toString() + " " + result.networkDeviceInfo.macAddress());
+            ThingDescriptor descriptor(solaxInverterTcpThingClassId, title, result.networkDeviceInfo.address().toString());
             qCInfo(dcSolax()) << "Discovered:" << descriptor.title() << descriptor.description();
 
-            // Check if we already have set up this device
-            Things existingThings = myThings().filterByParam(solaxInverterTcpThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
-            if (existingThings.count() == 1) {
-                qCDebug(dcSolax()) << "This solax inverter already exists in the system:" << result.networkDeviceInfo;
-                descriptor.setThingId(existingThings.first()->id());
-            }
-
             ParamList params;
-            params << Param(solaxInverterTcpThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
+            params << Param(solaxInverterTcpThingMacAddressParamTypeId, result.networkDeviceInfo.thingParamValueMacAddress());
+            params << Param(solaxInverterTcpThingHostNameParamTypeId, result.networkDeviceInfo.thingParamValueHostName());
+            params << Param(solaxInverterTcpThingAddressParamTypeId, result.networkDeviceInfo.thingParamValueAddress());
             // Note: if we discover also the port and modbusaddress, we must fill them in from the discovery here, for now everywhere the defaults...
             descriptor.setParams(params);
+
+            // Check if we already have set up this device
+            Thing *existingThing = myThings().findByParams(params);
+            if (existingThing) {
+                qCDebug(dcSolax()) << "This thing already exists in the system:" << result.networkDeviceInfo;
+                descriptor.setThingId(existingThing->id());
+            }
+
             info->addThingDescriptor(descriptor);
         }
 
@@ -104,16 +107,16 @@ void IntegrationPluginSolax::setupThing(ThingSetupInfo *info)
             }
         }
 
-        MacAddress macAddress = MacAddress(thing->paramValue(solaxInverterTcpThingMacAddressParamTypeId).toString());
-        if (!macAddress.isValid()) {
-            qCWarning(dcSolax()) << "The configured mac address is not valid" << thing->params();
-            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The MAC address is not known. Please reconfigure the thing."));
+        // Create the monitor
+        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(thing);
+        if (!monitor) {
+            qCWarning(dcSolax()) << "Unable to register monitor with the given params" << thing->params();
+            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("Unable to set up the connection with this configuration, please reconfigure the connection."));
             return;
         }
 
-        // Create the monitor
-        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(macAddress);
         m_monitors.insert(thing, monitor);
+
         connect(info, &ThingSetupInfo::aborted, monitor, [=](){
             // Clean up in case the setup gets aborted
             if (m_monitors.contains(thing)) {
