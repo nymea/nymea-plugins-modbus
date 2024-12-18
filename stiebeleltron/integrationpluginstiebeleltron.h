@@ -1,6 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2021, nymea GmbH, Consolinno Energy GmbH, L. Heizinger  
+* Copyright 2013 - 2024, nymea GmbH
+*           2021, Consolinno Energy GmbH, L. Heizinger
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -33,6 +34,7 @@
 
 #include <plugintimer.h>
 #include <integrations/integrationplugin.h>
+#include <network/networkdevicemonitor.h>
 
 #include "stiebeleltronmodbustcpconnection.h"
 
@@ -47,7 +49,6 @@ public:
     explicit IntegrationPluginStiebelEltron();
 
     void discoverThings(ThingDiscoveryInfo *info) override;
-    void startMonitoringAutoThings() override;
     void setupThing(ThingSetupInfo *info) override;
     void postSetupThing(Thing *thing) override;
     void thingRemoved(Thing *thing) override;
@@ -56,6 +57,7 @@ public:
 private:
     PluginTimer *m_pluginTimer = nullptr;
 
+    QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
     QHash<Thing *, StiebelEltronModbusTcpConnection *> m_connections;
 
 
