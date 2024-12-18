@@ -14,9 +14,25 @@
                     "id": "59cb2da4-da07-11ee-adea-7397f8a9afe9",
                     "createMethods": ["discovery"],
                     "discoveryType": "weak",
-                    "interfaces": ["solarinverter", "connectable"],
+                    "interfaces": ["solarinverter", "connectable", "networkdevice"],
                     "providedInterfaces": [ "energymeter", "energystorage"],
                     "paramTypes": [
+                        {
+                            "id": "311c0038-0134-4d91-878d-57526c3eec11",
+                            "name": "address",
+                            "displayName": "Host address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "6676fcea-1f3a-4241-ae03-18dae96c5d8d",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
+                        },
                         {
                             "id": "62137142-da07-11ee-9522-2f74f3b1fc5d",
                             "name":"macAddress",

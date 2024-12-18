@@ -50,7 +50,6 @@ void IntegrationPluginSungrow::discoverThings(ThingDiscoveryInfo *info)
 
     // Create a discovery with the info as parent for auto deleting the object once the discovery info is done
     SungrowDiscovery *discovery = new SungrowDiscovery(hardwareManager()->networkDeviceDiscovery(), m_modbusTcpPort, m_modbusSlaveAddress, info);
-    connect(discovery, &SungrowDiscovery::discoveryFinished, discovery, &SungrowDiscovery::deleteLater);
     connect(discovery, &SungrowDiscovery::discoveryFinished, info, [=](){
         foreach (const SungrowDiscovery::SungrowDiscoveryResult &result, discovery->discoveryResults()) {
             QString title = "Sungrow " + QString::number(result.nominalOutputPower) + "kW Inverter";
@@ -58,19 +57,22 @@ void IntegrationPluginSungrow::discoverThings(ThingDiscoveryInfo *info)
             if (!result.serialNumber.isEmpty())
                 title.append(" " + result.serialNumber);
 
-            ThingDescriptor descriptor(sungrowInverterTcpThingClassId, title, result.networkDeviceInfo.address().toString() + " " + result.networkDeviceInfo.macAddress());
+            ThingDescriptor descriptor(sungrowInverterTcpThingClassId, title, result.networkDeviceInfo.address().toString());
             qCInfo(dcSungrow()) << "Discovered:" << descriptor.title() << descriptor.description();
 
+            ParamList params;
+            params << Param(sungrowInverterTcpThingMacAddressParamTypeId, result.networkDeviceInfo.thingParamValueMacAddress());
+            params << Param(sungrowInverterTcpThingHostNameParamTypeId, result.networkDeviceInfo.thingParamValueHostName());
+            params << Param(sungrowInverterTcpThingAddressParamTypeId, result.networkDeviceInfo.thingParamValueAddress());
+            descriptor.setParams(params);
+
             // Check if we already have set up this device
-            Things existingThings = myThings().filterByParam(sungrowInverterTcpThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
-            if (existingThings.count() == 1) {
-                qCDebug(dcSungrow()) << "This Sungrow inverter already exists in the system:" << result.networkDeviceInfo;
-                descriptor.setThingId(existingThings.first()->id());
+            Thing *existingThing = myThings().findByParams(params);
+            if (existingThing) {
+                qCDebug(dcSungrow()) << "This thing already exists in the system:" << result.networkDeviceInfo;
+                descriptor.setThingId(existingThing->id());
             }
 
-            ParamList params;
-            params << Param(sungrowInverterTcpThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
-            descriptor.setParams(params);
             info->addThingDescriptor(descriptor);
         }
 
@@ -97,16 +99,16 @@ void IntegrationPluginSungrow::setupThing(ThingSetupInfo *info)
             }
         }
 
-        MacAddress macAddress = MacAddress(thing->paramValue(sungrowInverterTcpThingMacAddressParamTypeId).toString());
-        if (!macAddress.isValid()) {
-            qCWarning(dcSungrow()) << "The configured MAC address is not valid" << thing->params();
-            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The MAC address is not known. Please reconfigure this inverter."));
+        // Create the monitor
+        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(thing);
+        if (!monitor) {
+            qCWarning(dcSungrow()) << "Unable to register monitor with the given params" << thing->params();
+            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("Unable to set up the connection with this configuration, please reconfigure the connection."));
             return;
         }
 
-        // Create the monitor
-        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(macAddress);
         m_monitors.insert(thing, monitor);
+
         connect(info, &ThingSetupInfo::aborted, monitor, [=](){
             // Clean up in case the setup gets aborted
             if (m_monitors.contains(thing)) {
