@@ -46,10 +46,11 @@ void SungrowDiscovery::startDiscovery()
     m_startDateTime = QDateTime::currentDateTime();
 
     NetworkDeviceDiscoveryReply *discoveryReply = m_networkDeviceDiscovery->discover();
-    connect(discoveryReply, &NetworkDeviceDiscoveryReply::networkDeviceInfoAdded, this, &SungrowDiscovery::checkNetworkDevice);
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::hostAddressDiscovered, this, &SungrowDiscovery::checkNetworkDevice);
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=] () {
         qCDebug(dcSungrow()) << "Discovery: Network discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "network devices";
+        m_networkDeviceInfos = discoveryReply->networkDeviceInfos();
 
         // Give the last connections added right before the network discovery finished a chance to check the device...
         QTimer::singleShot(3000, this, [this] () {
@@ -64,15 +65,15 @@ QList<SungrowDiscovery::SungrowDiscoveryResult> SungrowDiscovery::discoveryResul
     return m_discoveryResults;
 }
 
-void SungrowDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo)
+void SungrowDiscovery::checkNetworkDevice(const QHostAddress &address)
 {
     /* Create a Sungrow connection and try to initialize it.
     * Only if initialized successfully and all information have been fetched correctly from
     * the device we can assume this is what we are locking for (ip, port, modbus address, correct registers).
     */
 
-    qCDebug(dcSungrow()) << "Creating Sungrow Modbus TCP connection for" << networkDeviceInfo.address() << "Port:" << m_port << "Slave Address" << m_modbusAddress;
-    SungrowModbusTcpConnection *connection = new SungrowModbusTcpConnection(networkDeviceInfo.address(), m_port, m_modbusAddress, this);
+    qCDebug(dcSungrow()) << "Creating Sungrow Modbus TCP connection for" << address << "Port:" << m_port << "Slave Address" << m_modbusAddress;
+    SungrowModbusTcpConnection *connection = new SungrowModbusTcpConnection(address, m_port, m_modbusAddress, this);
     connection->modbusTcpMaster()->setTimeout(5000);
     connection->modbusTcpMaster()->setNumberOfRetries(0);
     m_connections.append(connection);
@@ -87,12 +88,12 @@ void SungrowDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevice
 
         connect(connection, &SungrowModbusTcpConnection::initializationFinished, this, [=](bool success){
             if (!success) {
-                qCDebug(dcSungrow()) << "Discovery: Initialization failed on" << networkDeviceInfo.address().toString() << "Continue...";
+                qCDebug(dcSungrow()) << "Discovery: Initialization failed on" << address.toString() << "Continue...";
                 cleanupConnection(connection);
                 return;
             }
 
-            qCDebug(dcSungrow()) << "Discovery: Initialized successfully" << networkDeviceInfo << connection->serialNumber();
+            qCDebug(dcSungrow()) << "Discovery: Initialized successfully" << address.toString() << connection->serialNumber();
             qCDebug(dcSungrow()) << "    - Protocol number:" << connection->protocolNumber();
             qCDebug(dcSungrow()) << "    - Protocol version:" << connection->protocolVersion();
             qCDebug(dcSungrow()) << "    - ARM software version:" << connection->armSoftwareVersion();
@@ -100,7 +101,7 @@ void SungrowDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevice
 
             if (connection->deviceTypeCode() >= 0xd00 &&  connection->deviceTypeCode() <= 0xeff) {
                 SungrowDiscoveryResult result;
-                result.networkDeviceInfo = networkDeviceInfo;
+                result.address = address;
                 result.serialNumber = connection->serialNumber();
                 result.nominalOutputPower = connection->nominalOutputPower();
                 result.deviceType = connection->deviceTypeCode();
@@ -110,9 +111,9 @@ void SungrowDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevice
             connection->disconnectDevice();
         });
 
-        qCDebug(dcSungrow()) << "Discovery: The host" << networkDeviceInfo << "is reachable. Starting with initialization.";
+        qCDebug(dcSungrow()) << "Discovery: The host" << address << "is reachable. Starting with initialization.";
         if (!connection->initialize()) {
-            qCDebug(dcSungrow()) << "Discovery: Unable to initialize connection on" << networkDeviceInfo.address().toString() << "Continue...";
+            qCDebug(dcSungrow()) << "Discovery: Unable to initialize connection on" << address.toString() << "Continue...";
             cleanupConnection(connection);
         }
     });
@@ -120,21 +121,21 @@ void SungrowDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevice
     // In case of an error skip the host
     connect(connection->modbusTcpMaster(), &ModbusTcpMaster::connectionStateChanged, this, [=](bool connected){
         if (connected) {
-            qCDebug(dcSungrow()) << "Discovery: Connected with" << networkDeviceInfo.address().toString() << m_port;
+            qCDebug(dcSungrow()) << "Discovery: Connected with" << address.toString() << m_port;
         }
     });
 
     // In case of an error skip the host
     connect(connection->modbusTcpMaster(), &ModbusTcpMaster::connectionErrorOccurred, this, [=](QModbusDevice::Error error){
         if (error != QModbusDevice::NoError) {
-            qCDebug(dcSungrow()) << "Discovery: Connection error on" << networkDeviceInfo.address().toString() << "Continue...";
+            qCDebug(dcSungrow()) << "Discovery: Connection error on" << address.toString() << "Continue...";
             cleanupConnection(connection);
         }
     });
 
     // If the reachability check failed skip the host
     connect(connection, &SungrowModbusTcpConnection::checkReachabilityFailed, this, [=](){
-        qCDebug(dcSungrow()) << "Discovery: Check reachability failed on" << networkDeviceInfo.address().toString() << "Continue...";
+        qCDebug(dcSungrow()) << "Discovery: Check reachability failed on" << address.toString() << "Continue...";
         cleanupConnection(connection);
     });
 
@@ -152,6 +153,10 @@ void SungrowDiscovery::cleanupConnection(SungrowModbusTcpConnection *connection)
 void SungrowDiscovery::finishDiscovery()
 {
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
+
+    // Fill in all network device infos we have
+    for (int i = 0; i < m_discoveryResults.count(); i++)
+        m_discoveryResults[i].networkDeviceInfo = m_networkDeviceInfos.get(m_discoveryResults.at(i).address);
 
     foreach (SungrowModbusTcpConnection *connection, m_connections)
         cleanupConnection(connection);

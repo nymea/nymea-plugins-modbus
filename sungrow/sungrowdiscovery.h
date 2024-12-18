@@ -45,6 +45,7 @@ public:
     explicit SungrowDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint16 port = 502, quint16 modbusAddress = 1, QObject *parent = nullptr);
     typedef struct SungrowDiscoveryResult {
         QString serialNumber;
+        QHostAddress address;
         NetworkDeviceInfo networkDeviceInfo;
         float nominalOutputPower;
         int deviceType;
@@ -64,10 +65,11 @@ private:
 
     QDateTime m_startDateTime;
 
+    NetworkDeviceInfos m_networkDeviceInfos;
     QList<SungrowModbusTcpConnection *> m_connections;
     QList<SungrowDiscoveryResult> m_discoveryResults;
 
-    void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
+    void checkNetworkDevice(const QHostAddress &address);
     void cleanupConnection(SungrowModbusTcpConnection *connection);
 
     void finishDiscovery();
