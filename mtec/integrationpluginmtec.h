@@ -37,6 +37,8 @@
 
 #include <QUuid>
 
+class NetworkDeviceMonitor;
+
 class IntegrationPluginMTec: public IntegrationPlugin
 {
     Q_OBJECT
@@ -57,6 +59,7 @@ public:
 private:
     PluginTimer *m_pluginTimer = nullptr;
     QHash<Thing *, MTec *> m_mtecConnections;
+    QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
 
 private slots:
     void update(Thing *thing);
