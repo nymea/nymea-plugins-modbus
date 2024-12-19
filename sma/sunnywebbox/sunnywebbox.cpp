@@ -31,9 +31,9 @@
 #include "sunnywebbox.h"
 #include "extern-plugininfo.h"
 
-#include "QJsonDocument"
-#include "QJsonObject"
-#include "QJsonArray"
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 
 SunnyWebBox::SunnyWebBox(NetworkAccessManager *networkAccessManager, const QHostAddress &hostAddress,  QObject *parrent) :
     QObject(parrent),
@@ -140,16 +140,6 @@ void SunnyWebBox::setHostAddress(const QHostAddress &address)
 {
     qCDebug(dcSma()) << "SunnyWebBox: Setting host address to" << address.toString();
     m_hostAddresss = address;
-}
-
-QString SunnyWebBox::macAddress() const
-{
-    return m_macAddress;
-}
-
-void SunnyWebBox::setMacAddress(const QString &macAddress)
-{
-    m_macAddress = macAddress;
 }
 
 QNetworkReply *SunnyWebBox::sendRequest(const QHostAddress &address, const QString &procedure, const QJsonObject &params, const QString &requestId)

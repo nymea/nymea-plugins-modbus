@@ -13,15 +13,23 @@
                     "name": "sunnyWebBox",
                     "displayName": "SMA Sunny WebBox",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": ["solarinverter"],
+                    "interfaces": ["solarinverter", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "864d4162-e3ce-48b8-b8ac-c1b971b52d42",
-                            "name": "host",
+                            "name": "address",
                             "displayName": "Host address",
                             "type": "QString",
                             "inputType": "IPv4Address",
-                            "defaultValue": "192.168.0.168"
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "19e1f60a-f7c3-4e40-b971-7cae25db1def",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
                         },
                         {
                             "id": "03f32361-4e13-4597-a346-af8d16a986b3",
@@ -30,7 +38,7 @@
                             "type": "QString",
                             "inputType": "TextLine",
                             "readOnly": true,
-                            "defaultValue": "00:00:00:00:00:00"
+                            "defaultValue": ""
                         }
                     ],
                     "stateTypes": [
@@ -286,15 +294,23 @@
                     "displayName": "SMA Inverter",
                     "createMethods": ["discovery", "user"],
                     "setupMethod": "EnterPin",
-                    "interfaces": [ "solarinverter", "connectable"],
+                    "interfaces": [ "solarinverter", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "c8098d53-69eb-4d0b-9f07-e43c4a0ea9a9",
-                            "name": "host",
+                            "name": "address",
                             "displayName": "Host address",
                             "type": "QString",
                             "inputType": "IPv4Address",
-                            "defaultValue": "192.168.0.168"
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "d72e1831-04f2-4bd6-a86d-d767e92868ef",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
                         },
                         {
                             "id": "7df0ab60-0f11-4495-8e0d-508ba2b6d858",
@@ -537,8 +553,24 @@
                     "name": "modbusSolarInverter",
                     "displayName": "SMA Solar Inverter (Modbus)",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": [ "solarinverter" ],
+                    "interfaces": [ "solarinverter", "connectable", "networkdevice" ],
                     "paramTypes": [
+                        {
+                            "id": "07720ebe-2e4b-4d8e-a0c0-88ad21879375",
+                            "name": "address",
+                            "displayName": "Host address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "e5e420c7-eb99-45c4-bb44-06218ebec8a2",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
+                        },
                         {
                             "id": "3cea46a0-9535-4612-9971-19167109e63c",
                             "name":"macAddress",
@@ -699,8 +731,24 @@
                     "name": "modbusBatteryInverter",
                     "displayName": "SMA Battery Inverter (Modbus)",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": [ "energystorage", "connectable" ],
+                    "interfaces": [ "energystorage", "connectable", "networkdevice" ],
                     "paramTypes": [
+                        {
+                            "id": "75d5d4ec-6f0c-44e8-bc30-a533f4a1001a",
+                            "name": "address",
+                            "displayName": "Host address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "8a8a17aa-5e10-4232-bab6-77cc386d59e6",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
+                        },
                         {
                             "id": "03a5a009-0edc-4370-924a-785e7fcee30a",
                             "name":"macAddress",
