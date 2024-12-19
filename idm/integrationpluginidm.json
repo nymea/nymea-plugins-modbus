@@ -13,13 +13,30 @@
                     "displayName": "Navigator 2.0",
                     "id": "1c95ac91-4eca-4cbf-b0f4-d60d35d069ed",
                     "createMethods": ["user", "discovery"],
-                    "interfaces": ["thermostat", "smartmeterconsumer", "connectable" ],
+                    "interfaces": ["thermostat", "smartmeterconsumer", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "d178ca29-41a1-4f56-82ec-76a833c1de50",
                             "name": "macAddress",
                             "displayName": "MAC address",
                             "type": "QString",
+                            "inputType": "MacAddress",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "c3cc7351-ab16-4bab-9d92-0588c82e6180",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "63114206-3b76-4a9e-8510-cb552d3e32c2",
+                            "name": "address",
+                            "displayName": "IP address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
                             "defaultValue": ""
                         }
                     ],
