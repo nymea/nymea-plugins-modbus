@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2023, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -44,6 +44,7 @@ class SunSpecDiscovery : public QObject
 public:
     explicit SunSpecDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, const QList<quint16> &slaveIds, SunSpecDataPoint::ByteOrder byteOrder = SunSpecDataPoint::ByteOrderLittleEndian, QObject *parent = nullptr);
     typedef struct Result {
+        QHostAddress address;
         NetworkDeviceInfo networkDeviceInfo;
         quint16 port;
         quint16 slaveId;
@@ -67,13 +68,13 @@ private:
     QDateTime m_startDateTime;
     QHash<QHostAddress, QQueue<SunSpecConnection *>> m_pendingConnectionAttempts;
     QHash<SunSpecConnection *, QTimer *> m_connectionTimers;
-
     QList<SunSpecConnection *> m_connections;
+    NetworkDeviceInfos m_networkDeviceInfos;
     QList<Result> m_results;
 
     void testNextConnection(const QHostAddress &address);
 
-    void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
+    void checkNetworkDevice(const QHostAddress &address);
     void cleanupConnection(SunSpecConnection *connection);
 
     void finishDiscovery();

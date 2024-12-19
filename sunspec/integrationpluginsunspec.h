@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2023, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -62,9 +62,10 @@ public:
 
 private:
     // SunSpec Connection params map
-    QHash<ThingClassId, ParamTypeId> m_connectionIpParamTypeIds;
-    QHash<ThingClassId, ParamTypeId> m_connectionPortParamTypeIds;
     QHash<ThingClassId, ParamTypeId> m_connectionMacAddressParamTypeIds;
+    QHash<ThingClassId, ParamTypeId> m_connectionAddressParamTypeIds;
+    QHash<ThingClassId, ParamTypeId> m_connectionHostNameParamTypeIds;
+    QHash<ThingClassId, ParamTypeId> m_connectionPortParamTypeIds;
     QHash<ThingClassId, ParamTypeId> m_connectionSlaveIdParamTypeIds;
 
     // SunSpec thing params map
