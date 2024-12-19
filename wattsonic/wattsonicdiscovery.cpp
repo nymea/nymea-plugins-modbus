@@ -33,8 +33,6 @@
 
 #include <modbusdatautils.h>
 
-QList<int> slaveIdCandidates = {247};
-
 WattsonicDiscovery::WattsonicDiscovery(ModbusRtuHardwareResource *modbusRtuResource, QObject *parent):
     QObject{parent},
     m_modbusRtuResource(modbusRtuResource)
@@ -42,7 +40,7 @@ WattsonicDiscovery::WattsonicDiscovery(ModbusRtuHardwareResource *modbusRtuResou
 
 }
 
-void WattsonicDiscovery::startDiscovery()
+void WattsonicDiscovery::startDiscovery(quint16 slaveId)
 {
     qCInfo(dcWattsonic()) << "Discovery: Searching for Wattsonic device on modbus RTU...";
 
@@ -54,16 +52,16 @@ void WattsonicDiscovery::startDiscovery()
     }
 
     if (candidateMasters.isEmpty()) {
-        qCWarning(dcWattsonic()) << "No usable modbus RTU master found.";
+        qCWarning(dcWattsonic()) << "Discovery: No usable modbus RTU master found.";
         emit discoveryFinished(false);
         return;
     }
 
     foreach (ModbusRtuMaster *master, candidateMasters) {
         if (master->connected()) {
-            tryConnect(master, 0);
+            tryConnect(master, slaveId);
         } else {
-            qCWarning(dcWattsonic()) << "Modbus RTU master" << master->modbusUuid().toString() << "is not connected.";
+            qCWarning(dcWattsonic()) << "Discovery: Modbus RTU master" << master->modbusUuid().toString() << "is not connected.";
         }
     }
 }
@@ -73,28 +71,21 @@ QList<WattsonicDiscovery::Result> WattsonicDiscovery::discoveryResults() const
     return m_discoveryResults;
 }
 
-void WattsonicDiscovery::tryConnect(ModbusRtuMaster *master, quint16 slaveIdIndex)
+void WattsonicDiscovery::tryConnect(ModbusRtuMaster *master, quint16 slaveId)
 {
-    quint8 slaveId = slaveIdCandidates.at(slaveIdIndex);
-    qCDebug(dcWattsonic()) << "Scanning modbus RTU master" << master->modbusUuid() << "Slave ID:" << slaveId;
+    qCDebug(dcWattsonic()) << "Discovery: Scanning modbus RTU master" << master->modbusUuid() << "Slave ID:" << slaveId;
 
     ModbusRtuReply *reply = master->readHoldingRegister(slaveId, 10000, 8);
-    connect(reply, &ModbusRtuReply::finished, this, [=](){
+    connect(reply, &ModbusRtuReply::finished, this, [this, master, reply, slaveId](){
 
         if (reply->error() == ModbusRtuReply::NoError) {
-
             QString serialNumber = ModbusDataUtils::convertToString(reply->result(), ModbusDataUtils::ByteOrderBigEndian);
-            qCDebug(dcWattsonic()) << "Test reply finished!" << reply->error() << reply->result() << serialNumber;
+            qCDebug(dcWattsonic()) << "Discovery: Test reply finished!" << reply->error() << reply->result() << serialNumber;
 
             Result result {master->modbusUuid(), serialNumber, slaveId};
             m_discoveryResults.append(result);
-
         }
 
-        if (slaveIdIndex < slaveIdCandidates.count() - 1) {
-            tryConnect(master, slaveIdIndex+1);
-        } else {
-            emit discoveryFinished(true);
-        }
+        emit discoveryFinished(true);
     });
 }
