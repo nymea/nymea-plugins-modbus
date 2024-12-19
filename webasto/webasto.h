@@ -114,8 +114,8 @@ public:
 
     explicit Webasto(const QHostAddress &address, uint port = 502, QObject *parent = nullptr);
 
-    void setAddress(const QHostAddress &address);
-    QHostAddress address() const;
+    ModbusTcpMaster *modbusTcpMaster() const;
+
     bool connected();
     bool connectDevice();
 

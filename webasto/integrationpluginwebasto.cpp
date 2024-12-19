@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2023, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -67,7 +67,7 @@ void IntegrationPluginWebasto::discoverThings(ThingDiscoveryInfo *info)
         qCInfo(dcWebasto()) << "Start discovering webasto live in the local network...";
         NetworkDeviceDiscoveryReply *discoveryReply = hardwareManager()->networkDeviceDiscovery()->discover();
         connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
-        connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
+        connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [this, discoveryReply, info](){
             ThingDescriptors descriptors;
             qCDebug(dcWebasto()) << "Discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "devices";
             foreach (const NetworkDeviceInfo &networkDeviceInfo, discoveryReply->networkDeviceInfos()) {
@@ -83,25 +83,38 @@ void IntegrationPluginWebasto::discoverThings(ThingDiscoveryInfo *info)
                 }
 
                 QString description;
-                if (networkDeviceInfo.macAddressManufacturer().isEmpty()) {
-                    description = networkDeviceInfo.macAddress();
-                } else {
-                    description = networkDeviceInfo.macAddress() + " (" + networkDeviceInfo.macAddressManufacturer() + ")";
+                MacAddressInfo macInfo;
+                switch (networkDeviceInfo.monitorMode()) {
+                case NetworkDeviceInfo::MonitorModeMac:
+                    macInfo = networkDeviceInfo.macAddressInfos().constFirst();
+                    description = macInfo.macAddress().toString();
+                    if (!macInfo.vendorName().isEmpty())
+                        description += " - " + macInfo.vendorName();
+
+                    break;
+                case NetworkDeviceInfo::MonitorModeHostName:
+                    description = networkDeviceInfo.hostName();
+                    break;
+                case NetworkDeviceInfo::MonitorModeIp:
+                    description = "Interface: " + networkDeviceInfo.networkInterface().name();
+                    break;
                 }
 
                 ThingDescriptor descriptor(webastoLiveThingClassId, title, description);
 
+                ParamList params;
+                params << Param(webastoLiveThingMacAddressParamTypeId, networkDeviceInfo.thingParamValueMacAddress());
+                params << Param(webastoLiveThingAddressParamTypeId, networkDeviceInfo.thingParamValueAddress());
+                params << Param(webastoLiveThingHostNameParamTypeId, networkDeviceInfo.thingParamValueHostName());
+                descriptor.setParams(params);
+
                 // Check if we already have set up this device
-                Things existingThings = myThings().filterByParam(webastoLiveThingIpAddressParamTypeId, networkDeviceInfo.address().toString());
-                if (existingThings.count() == 1) {
-                    qCDebug(dcWebasto()) << "This thing already exists in the system." << existingThings.first() << networkDeviceInfo;
-                    descriptor.setThingId(existingThings.first()->id());
+                Thing *existingThing = myThings().findByParams(params);
+                if (existingThing) {
+                    qCDebug(dcWebasto()) << "This thing already exists in the system:" << networkDeviceInfo;
+                    descriptor.setThingId(existingThing->id());
                 }
 
-                ParamList params;
-                params << Param(webastoLiveThingIpAddressParamTypeId, networkDeviceInfo.address().toString());
-                params << Param(webastoLiveThingMacAddressParamTypeId, networkDeviceInfo.macAddress());
-                descriptor.setParams(params);
                 info->addThingDescriptor(descriptor);
             }
             info->finish(Thing::ThingErrorNoError);
@@ -117,7 +130,7 @@ void IntegrationPluginWebasto::discoverThings(ThingDiscoveryInfo *info)
 
         // Create a discovery with the info as parent for auto deleting the object once the discovery info is done
         WebastoDiscovery *discovery = new WebastoDiscovery(hardwareManager()->networkDeviceDiscovery(), info);
-        connect(discovery, &WebastoDiscovery::discoveryFinished, info, [=](){
+        connect(discovery, &WebastoDiscovery::discoveryFinished, info, [this, discovery, info](){
             foreach (const WebastoDiscovery::Result &result, discovery->results()) {
 
                 QString title = "Webasto Next";
@@ -125,25 +138,39 @@ void IntegrationPluginWebasto::discoverThings(ThingDiscoveryInfo *info)
                     title.append(" (" + result.networkDeviceInfo.hostName() + ")");
                 }
 
-                QString description = result.networkDeviceInfo.address().toString();
-                if (result.networkDeviceInfo.macAddressManufacturer().isEmpty()) {
-                    description += " " + result.networkDeviceInfo.macAddress();
-                } else {
-                    description += " " + result.networkDeviceInfo.macAddress() + " (" + result.networkDeviceInfo.macAddressManufacturer() + ")";
+                QString description;
+                MacAddressInfo macInfo;
+                switch (result.networkDeviceInfo.monitorMode()) {
+                case NetworkDeviceInfo::MonitorModeMac:
+                    macInfo = result.networkDeviceInfo.macAddressInfos().constFirst();
+                    description = macInfo.macAddress().toString();
+                    if (!macInfo.vendorName().isEmpty())
+                        description += " - " + macInfo.vendorName();
+
+                    break;
+                case NetworkDeviceInfo::MonitorModeHostName:
+                    description = result.networkDeviceInfo.hostName();
+                    break;
+                case NetworkDeviceInfo::MonitorModeIp:
+                    description = "Interface: " + result.networkDeviceInfo.networkInterface().name();
+                    break;
                 }
 
                 ThingDescriptor descriptor(webastoNextThingClassId, title, description);
 
+                ParamList params;
+                params << Param(webastoNextThingMacAddressParamTypeId, result.networkDeviceInfo.thingParamValueMacAddress());
+                params << Param(webastoNextThingHostNameParamTypeId, result.networkDeviceInfo.thingParamValueHostName());
+                params << Param(webastoNextThingAddressParamTypeId, result.networkDeviceInfo.thingParamValueAddress());
+                descriptor.setParams(params);
+
                 // Check if we already have set up this device
-                Things existingThings = myThings().filterByParam(webastoNextThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
-                if (existingThings.count() == 1) {
-                    qCDebug(dcWebasto()) << "This thing already exists in the system." << existingThings.first() << result.networkDeviceInfo;
-                    descriptor.setThingId(existingThings.first()->id());
+                Thing *existingThing = myThings().findByParams(params);
+                if (existingThing) {
+                    qCDebug(dcWebasto()) << "This thing already exists in the system:" << result.networkDeviceInfo;
+                    descriptor.setThingId(existingThing->id());
                 }
 
-                ParamList params;
-                params << Param(webastoNextThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
-                descriptor.setParams(params);
                 info->addThingDescriptor(descriptor);
             }
 
@@ -168,24 +195,29 @@ void IntegrationPluginWebasto::discoverThings(ThingDiscoveryInfo *info)
                 ThingDescriptor descriptor(webastoUniteThingClassId, name, description);
                 qCDebug(dcWebasto()) << "Discovered:" << descriptor.title() << descriptor.description();
 
+                ParamList params;
+                params << Param(webastoUniteThingMacAddressParamTypeId, result.networkDeviceInfo.thingParamValueMacAddress());
+                params << Param(webastoUniteThingHostNameParamTypeId, result.networkDeviceInfo.thingParamValueHostName());
+                params << Param(webastoUniteThingAddressParamTypeId, result.networkDeviceInfo.thingParamValueAddress());
+                descriptor.setParams(params);
+
                 // Check if we already have set up this device
-                Things existingThings = myThings().filterByParam(webastoUniteThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
-                if (existingThings.count() == 1) {
-                    qCDebug(dcWebasto()) << "This wallbox already exists in the system:" << result.networkDeviceInfo;
-                    descriptor.setThingId(existingThings.first()->id());
+                Thing *existingThing = myThings().findByParams(params);
+                if (existingThing) {
+                    qCDebug(dcWebasto()) << "This thing already exists in the system:" << result.networkDeviceInfo;
+                    descriptor.setThingId(existingThing->id());
                 }
 
-                ParamList params;
-                params << Param(webastoUniteThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
-                descriptor.setParams(params);
                 info->addThingDescriptor(descriptor);
             }
 
             info->finish(Thing::ThingErrorNoError);
         });
-        discovery->startDiscovery();
 
+        discovery->startDiscovery();
+        return;
     }
+
     Q_ASSERT_X(false, "discoverThings", QString("Unhandled thingClassId: %1").arg(info->thingClassId().toString()).toUtf8());
 }
 
@@ -199,25 +231,73 @@ void IntegrationPluginWebasto::setupThing(ThingSetupInfo *info)
         if (m_webastoLiveConnections.contains(thing)) {
             // Clean up after reconfiguration
             m_webastoLiveConnections.take(thing)->deleteLater();
+
+            if (m_monitors.contains(thing)) {
+                hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+            }
         }
 
-        QHostAddress address = QHostAddress(thing->paramValue(webastoLiveThingIpAddressParamTypeId).toString());
+        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(thing);
+        if (!monitor) {
+            qCWarning(dcWebasto()) << "Unable to register monitor with the given params" << thing->params();
+            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("Unable to set up the connection with this configuration, please reconfigure the connection."));
+            return;
+        }
+
+        m_monitors.insert(thing, monitor);
+
+        connect(info, &ThingSetupInfo::aborted, monitor, [this, thing](){
+            if (m_monitors.contains(thing)) {
+                qCDebug(dcWebasto()) << "Unregistering monitor because setup has been aborted.";
+                hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+            }
+
+            if (m_webastoLiveConnections.contains(thing)) {
+                qCDebug(dcWebasto()) << "Clean up connection because setup has been aborted.";
+                m_webastoLiveConnections.take(thing)->deleteLater();
+            }
+        });
+
+        QHostAddress address = monitor->networkDeviceInfo().address();
+        if (address.isNull()) {
+            qCWarning(dcWebasto()) << "Cannot set up thing. The host address is not known yet. Maybe it will be available in the next run...";
+            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("The host address is not known yet. Trying later again."));
+            return;
+        }
+
         Webasto *webasto = new Webasto(address, 502, thing);
         m_webastoLiveConnections.insert(thing, webasto);
-        connect(webasto, &Webasto::destroyed, this, [thing, this] {m_webastoLiveConnections.remove(thing);});
-        connect(webasto, &Webasto::connectionStateChanged, this, &IntegrationPluginWebasto::onConnectionChanged);
+
+        connect(monitor, &NetworkDeviceMonitor::reachableChanged, thing, [monitor, webasto, thing](bool reachable){
+            qCDebug(dcWebasto()) << "Network device monitor reachable changed for" << thing->name() << reachable;
+            if (!thing->setupComplete())
+                return;
+
+            if (reachable && !thing->stateValue("connected").toBool()) {
+                webasto->modbusTcpMaster()->setHostAddress(monitor->networkDeviceInfo().address());
+                webasto->connectDevice();
+            } else if (!reachable) {
+                // Note: We disable autoreconnect explicitly and we will
+                // connect the device once the monitor says it is reachable again
+                webasto->modbusTcpMaster()->disconnectDevice();
+            }
+        });
+
+        connect(webasto, &Webasto::connectionStateChanged, this, [thing](bool state){
+            thing->setStateValue(webastoLiveConnectedStateTypeId, state);
+        });
+
         connect(webasto, &Webasto::receivedRegister, this, &IntegrationPluginWebasto::onReceivedRegister);
         connect(webasto, &Webasto::writeRequestError, this, &IntegrationPluginWebasto::onWriteRequestError);
         connect(webasto, &Webasto::writeRequestExecuted, this, &IntegrationPluginWebasto::onWriteRequestExecuted);
+
         if (!webasto->connectDevice()) {
             qCWarning(dcWebasto()) << "Could not connect to device";
             info->finish(Thing::ThingErrorSetupFailed);
         }
-        connect(webasto, &Webasto::connectionStateChanged, info, [info] (bool connected) {
-            if (connected)
-                info->finish(Thing::ThingErrorNoError);
-        });
 
+        info->finish(Thing::ThingErrorNoError);
         return;
     }
 
@@ -233,15 +313,14 @@ void IntegrationPluginWebasto::setupThing(ThingSetupInfo *info)
             }
         }
 
-        MacAddress macAddress = MacAddress(thing->paramValue(webastoNextThingMacAddressParamTypeId).toString());
-        if (!macAddress.isValid()) {
-            qCWarning(dcWebasto()) << "The configured mac address is not valid" << thing->params();
-            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The MAC address is not known. Please reconfigure the thing."));
+        // Create the monitor
+        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(thing);
+        if (!monitor) {
+            qCWarning(dcWebasto()) << "Unable to register monitor with the given params" << thing->params();
+            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("Unable to set up the connection with this configuration, please reconfigure the connection."));
             return;
         }
 
-        // Create the monitor
-        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(macAddress);
         m_monitors.insert(thing, monitor);
 
         QHostAddress address = monitor->networkDeviceInfo().address();
@@ -294,14 +373,13 @@ void IntegrationPluginWebasto::setupThing(ThingSetupInfo *info)
             }
         }
 
-        MacAddress macAddress = MacAddress(thing->paramValue(webastoUniteThingMacAddressParamTypeId).toString());
-        if (!macAddress.isValid()) {
-            qCWarning(dcWebasto()) << "The configured mac address is not valid" << thing->params();
-            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The MAC address is not known. Please reconfigure the thing."));
+        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(thing);
+        if (!monitor) {
+            qCWarning(dcWebasto()) << "Unable to register monitor with the given params" << thing->params();
+            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("Unable to set up the connection with this configuration, please reconfigure the connection."));
             return;
         }
 
-        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(macAddress);
         m_monitors.insert(thing, monitor);
 
         connect(info, &ThingSetupInfo::aborted, monitor, [=](){
@@ -311,23 +389,28 @@ void IntegrationPluginWebasto::setupThing(ThingSetupInfo *info)
             }
         });
 
-        if (monitor->reachable()) {
-            setupEVC04Connection(info);
+        // If this is the first setup, the monitor must become reachable before we finish the setup
+        if (info->isInitialSetup()) {
+            // Wait for the monitor to be ready
+            if (monitor->reachable()) {
+                setupEVC04Connection(info);
+            } else {
+                qCDebug(dcWebasto()) << "Waiting for the network monitor to get reachable before continuing to set up the connection" << thing->name() << "...";
+                connect(monitor, &NetworkDeviceMonitor::reachableChanged, info, [=](bool reachable){
+                    if (reachable) {
+                        qCDebug(dcWebasto()) << "The monitor for thing setup" << thing->name() << "is now reachable. Continuing setup on" << monitor->networkDeviceInfo().address().toString();
+                        setupEVC04Connection(info);
+                    }
+                });
+            }
         } else {
-            qCDebug(dcWebasto()) << "Waiting for the network monitor to get reachable before continuing to set up the connection" << thing->name() << "...";
-            connect(monitor, &NetworkDeviceMonitor::reachableChanged, info, [=](bool reachable){
-                if (reachable) {
-                    qCDebug(dcWebasto()) << "The monitor for thing setup" << thing->name() << "is now reachable. Continuing setup on" << monitor->networkDeviceInfo().address().toString();
-                    setupEVC04Connection(info);
-                }
-            });
+            // Not the first setup, just add and let the monitor do the check reachable work
+            setupEVC04Connection(info);
         }
-
         return;
     }
 
     Q_ASSERT_X(false, "setupThing", QString("Unhandled thingClassId: %1").arg(thing->thingClassId().toString()).toUtf8());
-
 }
 
 void IntegrationPluginWebasto::postSetupThing(Thing *thing)
@@ -936,17 +1019,6 @@ void IntegrationPluginWebasto::executeWebastoNextPowerAction(ThingActionInfo *in
     });
 }
 
-void IntegrationPluginWebasto::onConnectionChanged(bool connected)
-{
-    Webasto *connection = static_cast<Webasto *>(sender());
-    Thing *thing = m_webastoLiveConnections.key(connection);
-    if (!thing) {
-        qCWarning(dcWebasto()) << "On connection changed, thing not found for connection";
-        return;
-    }
-    thing->setStateValue(webastoLiveConnectedStateTypeId, connected);
-}
-
 void IntegrationPluginWebasto::onWriteRequestExecuted(const QUuid &requestId, bool success)
 {
     if (m_asyncActions.contains(requestId)) {
@@ -1258,21 +1330,21 @@ void IntegrationPluginWebasto::setupEVC04Connection(ThingSetupInfo *info)
 
     connect(evc04Connection, &EVC04ModbusTcpConnection::chargepointStateChanged, thing, [thing](EVC04ModbusTcpConnection::ChargePointState chargePointState) {
         qCDebug(dcWebasto()) << "Chargepoint state changed" << thing->name() << chargePointState;
-//        switch (chargePointState) {
-//        case EVC04ModbusTcpConnection::ChargePointStateAvailable:
-//        case EVC04ModbusTcpConnection::ChargePointStatePreparing:
-//        case EVC04ModbusTcpConnection::ChargePointStateReserved:
-//        case EVC04ModbusTcpConnection::ChargePointStateUnavailable:
-//        case EVC04ModbusTcpConnection::ChargePointStateFaulted:
-//            thing->setStateValue(evc04PluggedInStateTypeId, false);
-//            break;
-//        case EVC04ModbusTcpConnection::ChargePointStateCharging:
-//        case EVC04ModbusTcpConnection::ChargePointStateSuspendedEVSE:
-//        case EVC04ModbusTcpConnection::ChargePointStateSuspendedEV:
-//        case EVC04ModbusTcpConnection::ChargePointStateFinishing:
-//            thing->setStateValue(evc04PluggedInStateTypeId, true);
-//            break;
-//        }
+        // switch (chargePointState) {
+        // case EVC04ModbusTcpConnection::ChargePointStateAvailable:
+        // case EVC04ModbusTcpConnection::ChargePointStatePreparing:
+        // case EVC04ModbusTcpConnection::ChargePointStateReserved:
+        // case EVC04ModbusTcpConnection::ChargePointStateUnavailable:
+        // case EVC04ModbusTcpConnection::ChargePointStateFaulted:
+        //     thing->setStateValue(evc04PluggedInStateTypeId, false);
+        //     break;
+        // case EVC04ModbusTcpConnection::ChargePointStateCharging:
+        // case EVC04ModbusTcpConnection::ChargePointStateSuspendedEVSE:
+        // case EVC04ModbusTcpConnection::ChargePointStateSuspendedEV:
+        // case EVC04ModbusTcpConnection::ChargePointStateFinishing:
+        //     thing->setStateValue(evc04PluggedInStateTypeId, true);
+        //     break;
+        // }
     });
     connect(evc04Connection, &EVC04ModbusTcpConnection::chargingStateChanged, thing, [thing](EVC04ModbusTcpConnection::ChargingState chargingState) {
         qCDebug(dcWebasto()) << "Charging state changed:" << chargingState;
