@@ -52,9 +52,12 @@ void PcElectricDiscovery::startDiscovery()
     m_startDateTime = QDateTime::currentDateTime();
 
     NetworkDeviceDiscoveryReply *discoveryReply = m_networkDeviceDiscovery->discover();
-    connect(discoveryReply, &NetworkDeviceDiscoveryReply::networkDeviceInfoAdded, this, &PcElectricDiscovery::checkNetworkDevice);
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::hostAddressDiscovered, this, &PcElectricDiscovery::checkNetworkDevice);
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
+
+        m_networkDeviceInfos = discoveryReply->networkDeviceInfos();
+
         // Finish with some delay so the last added network device information objects still can be checked.
         QTimer::singleShot(3000, this, [this](){
             qCDebug(dcPcElectric()) << "Discovery: Grace period timer triggered.";
@@ -63,9 +66,9 @@ void PcElectricDiscovery::startDiscovery()
     });
 }
 
-void PcElectricDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo)
+void PcElectricDiscovery::checkNetworkDevice(const QHostAddress &address)
 {
-    EV11ModbusTcpConnection *connection = new EV11ModbusTcpConnection(networkDeviceInfo.address(), m_port, m_modbusAddress, this);
+    EV11ModbusTcpConnection *connection = new EV11ModbusTcpConnection(address, m_port, m_modbusAddress, this);
     m_connections.append(connection);
 
     connect(connection, &EV11ModbusTcpConnection::reachableChanged, this, [=](bool reachable){
@@ -78,7 +81,7 @@ void PcElectricDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDev
         // Modbus TCP connected...ok, let's try to initialize it!
         connect(connection, &EV11ModbusTcpConnection::initializationFinished, this, [=](bool success){
             if (!success) {
-                qCDebug(dcPcElectric()) << "Discovery: Initialization failed on" << networkDeviceInfo.address().toString() << "Continue...";;
+                qCDebug(dcPcElectric()) << "Discovery: Initialization failed on" << address.toString() << "Continue...";;
                 cleanupConnection(connection);
                 return;
             }
@@ -95,7 +98,7 @@ void PcElectricDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDev
             qCDebug(dcPcElectric()) << "Fetched mac address" << macRawData.toHex() << registerMacAddress;
 
             // According to PCE the HW revision must be 0
-            if (registerMacAddress == MacAddress(networkDeviceInfo.macAddress()) && connection->hardwareRevision() == 0) {
+            if (!registerMacAddress.isNull() && connection->hardwareRevision() == 0) {
 
                 // Parse the serial number
                 QByteArray serialRawData;
@@ -110,13 +113,9 @@ void PcElectricDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDev
                 Result result;
                 result.serialNumber = QString::number(serialNumber);
                 result.firmwareRevision = connection->firmwareRevision();
-                result.networkDeviceInfo = networkDeviceInfo;
-                m_results.append(result);
-
-                qCInfo(dcPcElectric()) << "Discovery: --> Found"
-                                       << "Serial number:" << result.serialNumber
-                                       << "Firmware revision:" << result.firmwareRevision
-                                       << result.networkDeviceInfo;
+                result.address = address;
+                result.registerMacAddress = registerMacAddress;
+                m_potentialResults.append(result);
             }
 
             // Done with this connection
@@ -125,7 +124,7 @@ void PcElectricDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDev
 
         // Initializing...
         if (!connection->initialize()) {
-            qCDebug(dcPcElectric()) << "Discovery: Unable to initialize connection on" << networkDeviceInfo.address().toString() << "Continue...";;
+            qCDebug(dcPcElectric()) << "Discovery: Unable to initialize connection on" << address.toString() << "Continue...";;
             cleanupConnection(connection);
         }
     });
@@ -133,14 +132,14 @@ void PcElectricDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDev
     // If we get any error...skip this host...
     connect(connection->modbusTcpMaster(), &ModbusTcpMaster::connectionErrorOccurred, this, [=](QModbusDevice::Error error){
         if (error != QModbusDevice::NoError) {
-            qCDebug(dcPcElectric()) << "Discovery: Connection error on" << networkDeviceInfo.address().toString() << "Continue...";;
+            qCDebug(dcPcElectric()) << "Discovery: Connection error on" << address.toString() << "Continue...";;
             cleanupConnection(connection);
         }
     });
 
     // If check reachability failed...skip this host...
     connect(connection, &EV11ModbusTcpConnection::checkReachabilityFailed, this, [=](){
-        qCDebug(dcPcElectric()) << "Discovery: Check reachability failed on" << networkDeviceInfo.address().toString() << "Continue...";;
+        qCDebug(dcPcElectric()) << "Discovery: Check reachability failed on" << address.toString() << "Continue...";;
         cleanupConnection(connection);
     });
 
@@ -158,6 +157,28 @@ void PcElectricDiscovery::cleanupConnection(EV11ModbusTcpConnection *connection)
 void PcElectricDiscovery::finishDiscovery()
 {
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
+
+    for (int i = 0; i < m_potentialResults.count(); i++) {
+        const NetworkDeviceInfo networkDeviceInfo = m_networkDeviceInfos.get(m_potentialResults.at(i).address);
+        m_potentialResults[i].networkDeviceInfo = networkDeviceInfo;
+
+        Result result = m_potentialResults.at(i);
+        if (networkDeviceInfo.macAddressInfos().hasMacAddress(result.registerMacAddress)) {
+            qCInfo(dcPcElectric()) << "Discovery: --> Found EV11.3"
+                                   << "Serial number:" << result.serialNumber
+                                   << "Firmware revision:" << result.firmwareRevision
+                                   << result.networkDeviceInfo;
+            m_results.append(result);
+        } else {
+            qCWarning(dcPcElectric()) << "Discovery: --> Found potential EV11.3, but not adding to the results due to imcomplete MAC address check:"
+                                      << "Serial number:" << result.serialNumber
+                                      << "Firmware revision:" << result.firmwareRevision
+                                      << result.networkDeviceInfo;
+        }
+    }
+
+    m_potentialResults.clear();
+    m_networkDeviceInfos.clear();
 
     // Cleanup any leftovers...we don't care any more
     foreach (EV11ModbusTcpConnection *connection, m_connections)
