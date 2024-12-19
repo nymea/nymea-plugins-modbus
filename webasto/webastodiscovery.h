@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2023, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -34,7 +34,6 @@
 #include <QObject>
 
 #include <network/networkdevicediscovery.h>
-
 #include "webastonextmodbustcpconnection.h"
 
 class WebastoDiscovery : public QObject
@@ -50,6 +49,7 @@ public:
     typedef struct Result {
         QString productName;
         Type type;
+        QHostAddress address;
         NetworkDeviceInfo networkDeviceInfo;
     } Result;
 
@@ -64,14 +64,14 @@ signals:
 
 private:
     NetworkDeviceDiscovery *m_networkDeviceDiscovery = nullptr;
-
-    QList<WebastoNextModbusTcpConnection *> m_connections;
-
-    QList<Result> m_results;
-
     QDateTime m_startDateTime;
 
-    void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
+    NetworkDeviceInfos m_networkDeviceInfos;
+    QList<WebastoNextModbusTcpConnection *> m_connections;
+    QList<Result> m_temporaryResults;
+    QList<Result> m_results;
+
+    void checkNetworkDevice(const QHostAddress &address);
     void cleanupConnection(WebastoNextModbusTcpConnection *connection);
 
     void finishDiscovery();
