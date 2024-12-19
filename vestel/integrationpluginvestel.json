@@ -12,15 +12,32 @@
                     "name": "evc04",
                     "displayName": "EVC04",
                     "id": "396de19c-ef2b-4f32-b551-9d0d153304a4",
-                    "createMethods": ["discovery", "user"],
-                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable"],
+                    "createMethods": [ "discovery", "user" ],
+                    "interfaces": [ "evcharger", "smartmeterconsumer", "connectable", "networkdevice" ],
                     "paramTypes": [
+                        {
+                            "id": "e7413345-6c69-4e41-8522-e0795949ef79",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "42a27ea2-e3dc-4568-bd17-f8779dc8c135",
+                            "name": "address",
+                            "displayName": "IP address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": ""
+                        },
                         {
                             "id": "afdc55b7-b509-4d0c-ab79-176f2edf8488",
                             "name":"macAddress",
                             "displayName": "MAC address",
                             "type": "QString",
                             "inputType": "MacAddress",
+                            "readOnly": true,
                             "defaultValue": ""
                         }
                     ],

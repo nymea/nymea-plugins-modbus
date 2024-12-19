@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2022, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -58,21 +58,25 @@ void IntegrationPluginVestel::discoverThings(ThingDiscoveryInfo *info)
                 ThingDescriptor descriptor(evc04ThingClassId, name, description);
                 qCDebug(dcVestel()) << "Discovered:" << descriptor.title() << descriptor.description();
 
+                ParamList params;
+                params << Param(evc04ThingMacAddressParamTypeId, result.networkDeviceInfo.thingParamValueMacAddress());
+                params << Param(evc04ThingHostNameParamTypeId, result.networkDeviceInfo.thingParamValueHostName());
+                params << Param(evc04ThingAddressParamTypeId, result.networkDeviceInfo.thingParamValueAddress());
+                descriptor.setParams(params);
+
                 // Check if we already have set up this device
-                Things existingThings = myThings().filterByParam(evc04ThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
-                if (existingThings.count() == 1) {
-                    qCDebug(dcVestel()) << "This wallbox already exists in the system:" << result.networkDeviceInfo;
-                    descriptor.setThingId(existingThings.first()->id());
+                Thing *existingThing = myThings().findByParams(params);
+                if (existingThing) {
+                    qCDebug(dcVestel()) << "This thing already exists in the system:" << existingThing << existingThing->params();
+                    descriptor.setThingId(existingThing->id());
                 }
 
-                ParamList params;
-                params << Param(evc04ThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
-                descriptor.setParams(params);
                 info->addThingDescriptor(descriptor);
             }
 
             info->finish(Thing::ThingErrorNoError);
         });
+
         discovery->startDiscovery();
     }
 }
@@ -80,7 +84,7 @@ void IntegrationPluginVestel::discoverThings(ThingDiscoveryInfo *info)
 void IntegrationPluginVestel::setupThing(ThingSetupInfo *info)
 {
     Thing *thing = info->thing();
-    qCDebug(dcVestel()) << "Setup" << thing << thing->params();
+    qCDebug(dcVestel()) << "Setting up" << thing << thing->params();
 
     if (thing->thingClassId() == evc04ThingClassId) {
 
@@ -93,36 +97,45 @@ void IntegrationPluginVestel::setupThing(ThingSetupInfo *info)
             }
         }
 
-        MacAddress macAddress = MacAddress(thing->paramValue(evc04ThingMacAddressParamTypeId).toString());
-        if (!macAddress.isValid()) {
-            qCWarning(dcVestel()) << "The configured mac address is not valid" << thing->params();
-            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The MAC address is not known. Please reconfigure the thing."));
+        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(thing);
+        if (!monitor) {
+            qCWarning(dcVestel()) << "Unable to register monitor with the given params" << thing->params();
+            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("Unable to set up the connection with this configuration, please reconfigure the connection."));
             return;
         }
 
-        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(macAddress);
         m_monitors.insert(thing, monitor);
 
-        connect(info, &ThingSetupInfo::aborted, monitor, [=](){
+        connect(info, &ThingSetupInfo::aborted, monitor, [this, thing](){
             if (m_monitors.contains(thing)) {
                 qCDebug(dcVestel()) << "Unregistering monitor because setup has been aborted.";
                 hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
             }
+
+            if (m_evc04Connections.contains(thing)) {
+                qCDebug(dcVestel()) << "Clean up connection because setup has been aborted.";
+                m_evc04Connections.take(thing)->deleteLater();
+            }
         });
 
-        if (monitor->reachable()) {
-            setupEVC04Connection(info);
+        // If this is the initial setup, wait for the monitor to be reachable and make sure
+        // we have an IP address, otherwise let the monitor do his work
+        if (info->isInitialSetup()) {
+            // Continue with setup only if we know that the network device is reachable
+            if (monitor->reachable()) {
+                setupEVC04Connection(info);
+            } else {
+                qCDebug(dcVestel()) << "Waiting for the network monitor to get reachable before continuing to set up the connection" << thing->name() << "...";
+                connect(monitor, &NetworkDeviceMonitor::reachableChanged, info, [this, thing, info, monitor](bool reachable){
+                    if (reachable) {
+                        qCDebug(dcVestel()) << "The monitor for thing setup" << thing->name() << "is now reachable. Continuing setup on" << monitor->networkDeviceInfo().address().toString();
+                        setupEVC04Connection(info);
+                    }
+                });
+            }
         } else {
-            qCDebug(dcVestel()) << "Waiting for the network monitor to get reachable before continuing to set up the connection" << thing->name() << "...";
-            connect(monitor, &NetworkDeviceMonitor::reachableChanged, info, [=](bool reachable){
-                if (reachable) {
-                    qCDebug(dcVestel()) << "The monitor for thing setup" << thing->name() << "is now reachable. Continuing setup on" << monitor->networkDeviceInfo().address().toString();
-                    setupEVC04Connection(info);
-                }
-            });
+            setupEVC04Connection(info);
         }
-
-        return;
     }
 }
 

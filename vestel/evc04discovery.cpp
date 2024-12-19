@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2023, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -48,13 +48,14 @@ void EVC04Discovery::startDiscovery()
 {
     qCInfo(m_dc()) << "Discovery: Searching for Vestel EVC04 wallboxes in the network...";
     NetworkDeviceDiscoveryReply *discoveryReply = m_networkDeviceDiscovery->discover();
+    m_startDateTime = QDateTime::currentDateTime();
 
-    connect(discoveryReply, &NetworkDeviceDiscoveryReply::networkDeviceInfoAdded, this, &EVC04Discovery::checkNetworkDevice);
-
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::hostAddressDiscovered, this, &EVC04Discovery::checkNetworkDevice);
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
         qCDebug(m_dc()) << "Discovery: Network discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "network devices";
+        m_networkDeviceInfos = discoveryReply->networkDeviceInfos();
         m_gracePeriodTimer.start();
-        discoveryReply->deleteLater();
     });
 }
 
@@ -63,13 +64,13 @@ QList<EVC04Discovery::Result> EVC04Discovery::discoveryResults() const
     return m_discoveryResults;
 }
 
-void EVC04Discovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo)
+void EVC04Discovery::checkNetworkDevice(const QHostAddress &address)
 {
     int port = 502;
     int slaveId = 0xff;
-    qCDebug(m_dc()) << "Checking network device:" << networkDeviceInfo << "Port:" << port << "Slave ID:" << slaveId;
+    qCDebug(m_dc()) << "Discovery: Checking network device:" << address << "Port:" << port << "Slave ID:" << slaveId;
 
-    EVC04ModbusTcpConnection *connection = new EVC04ModbusTcpConnection(networkDeviceInfo.address(), port, slaveId, this);
+    EVC04ModbusTcpConnection *connection = new EVC04ModbusTcpConnection(address, port, slaveId, this);
     m_connections.append(connection);
 
     connect(connection, &EVC04ModbusTcpConnection::reachableChanged, this, [=](bool reachable){
@@ -79,10 +80,10 @@ void EVC04Discovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceIn
         }
 
         connect(connection, &EVC04ModbusTcpConnection::initializationFinished, this, [=](bool success){
-            qCDebug(m_dc()) << "Discovered device on" << networkDeviceInfo.address() << connection->brand() << connection->model() << connection->firmwareVersion();
+            qCDebug(m_dc()) << "Discovery: Discovered device on" << address.toString() << connection->brand() << connection->model() << connection->firmwareVersion();
             qCDebug(m_dc()) << connection;
             if (!success) {
-                qCDebug(m_dc()) << "Discovery: Initialization failed on" << networkDeviceInfo.address().toString();
+                qCDebug(m_dc()) << "Discovery: Initialization failed on" << address.toString();
                 cleanupConnection(connection);
                 return;
             }
@@ -92,29 +93,28 @@ void EVC04Discovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceIn
             result.brand = QString(QString::fromUtf16(connection->brand().data(), connection->brand().length()).toUtf8()).trimmed();
             result.model = QString(QString::fromUtf16(connection->model().data(), connection->model().length()).toUtf8()).trimmed();
             result.firmwareVersion = QString(QString::fromUtf16(connection->firmwareVersion().data(), connection->firmwareVersion().length()).toUtf8()).trimmed();
-            result.networkDeviceInfo = networkDeviceInfo;
+            result.address = address;
 
             if (result.chargepointId.isEmpty() && result.brand.isEmpty() && result.model.isEmpty() && result.firmwareVersion.isEmpty()) {
-                qCDebug(m_dc()) << "Discovery: Found modbus device with valid register set (initialized successfully), but the information seem not to be valid. This is probably some other device. Ignoring" << result.networkDeviceInfo;
+                qCDebug(m_dc()) << "Discovery: Found modbus device with valid register set (initialized successfully), but the information seem not to be valid. "
+                                   "This is probably some other device. Ignoring" << address.toString();
                 cleanupConnection(connection);
                 return;
             }
 
             m_discoveryResults.append(result);
-
-            qCDebug(m_dc()) << "Discovery: Found wallbox with firmware version:" << result.firmwareVersion << result.networkDeviceInfo;
-
+            qCDebug(m_dc()) << "Discovery: Found wallbox with firmware version:" << result.firmwareVersion << address.toString();
             cleanupConnection(connection);
         });
 
         if (!connection->initialize()) {
-            qCDebug(m_dc()) << "Discovery: Unable to initialize connection on" << networkDeviceInfo.address().toString();
+            qCDebug(m_dc()) << "Discovery: Unable to initialize connection on" << address.toString();
             cleanupConnection(connection);
         }
     });
 
     connect(connection, &EVC04ModbusTcpConnection::checkReachabilityFailed, this, [=](){
-        qCDebug(m_dc()) << "Discovery: Checking reachability failed on" << networkDeviceInfo.address().toString();
+        qCDebug(m_dc()) << "Discovery: Checking reachability failed on" << address.toString();
         cleanupConnection(connection);
     });
 
@@ -132,12 +132,16 @@ void EVC04Discovery::finishDiscovery()
 {
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
 
+    // Fill in all network device infos we have
+    for (int i = 0; i < m_discoveryResults.count(); i++)
+        m_discoveryResults[i].networkDeviceInfo = m_networkDeviceInfos.get(m_discoveryResults.at(i).address);
+
     // Cleanup any leftovers...we don't care any more
     foreach (EVC04ModbusTcpConnection *connection, m_connections)
         cleanupConnection(connection);
 
     qCInfo(m_dc()) << "Discovery: Finished the discovery process. Found" << m_discoveryResults.count()
-                   << "Vestel EVC04 wallboxes in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
+                   << "EVC04 wallboxes in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
     m_gracePeriodTimer.stop();
 
     emit discoveryFinished();
