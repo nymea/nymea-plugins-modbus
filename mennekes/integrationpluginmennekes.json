@@ -13,7 +13,7 @@
                     "displayName": "AMTRON Charge Control/Professional",
                     "id": "fb48e067-2237-4eaf-8d2c-681d406395fc",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable"],
+                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "36d11ea0-524a-43d2-b157-f69a744ac5d8",
@@ -21,6 +21,14 @@
                             "displayName": "Host address",
                             "type": "QString",
                             "inputType": "IPv4Address",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "26c08902-37f8-448a-9c1f-e2c563a98461",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
                             "defaultValue": ""
                         },
                         {
@@ -129,7 +137,7 @@
                     "displayName": "AMTRON XTRA/Premium",
                     "id": "01995c4f-a7b5-4bdd-9333-486390ff75fd",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable"],
+                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "0dae61b0-5d2d-49df-bdac-93aec86b2085",
@@ -137,6 +145,14 @@
                             "displayName": "Host address",
                             "type": "QString",
                             "inputType": "IPv4Address",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "8f597d67-7ba1-410e-9232-476ac37f5b4b",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
                             "defaultValue": ""
                         },
                         {
