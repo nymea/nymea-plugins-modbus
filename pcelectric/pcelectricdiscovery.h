@@ -46,6 +46,8 @@ public:
     typedef struct Result {
         QString serialNumber;
         QString firmwareRevision;
+        QHostAddress address;
+        MacAddress registerMacAddress;
         NetworkDeviceInfo networkDeviceInfo;
     } Result;
 
@@ -64,10 +66,12 @@ private:
     QDateTime m_startDateTime;
 
     QList<EV11ModbusTcpConnection *> m_connections;
+    NetworkDeviceInfos m_networkDeviceInfos;
+    QList<Result> m_potentialResults;
 
     QList<Result> m_results;
 
-    void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
+    void checkNetworkDevice(const QHostAddress &address);
     void cleanupConnection(EV11ModbusTcpConnection *connection);
 
     void finishDiscovery();

@@ -14,8 +14,24 @@
                     "displayName": "PCE EV11.3",
                     "id": "88d96940-a940-4a07-8176-5e6aba7ca832",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": ["evcharger", "connectable"],
+                    "interfaces": ["evcharger", "connectable", "networkdevice"],
                     "paramTypes": [
+                        {
+                            "id": "aa18f1ae-e2d5-4918-9230-ab3f6fb49010",
+                            "name": "address",
+                            "displayName": "Host address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "a8b81e4a-f4ec-479b-9cb8-19147759c4cc",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
+                        },
                         {
                             "id": "0a3f8d12-9d33-4ae2-b763-9568f32e8da1",
                             "name":"macAddress",
