@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2022, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -50,37 +50,49 @@ void IntegrationPluginIdm::discoverThings(ThingDiscoveryInfo *info)
     qCDebug(dcIdm()) << "Discovering network...";
     NetworkDeviceDiscoveryReply *discoveryReply = hardwareManager()->networkDeviceDiscovery()->discover();
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
-    connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
-        ThingDescriptors descriptors;
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [this, discoveryReply, info](){
         qCDebug(dcIdm()) << "Discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "devices";
         foreach (const NetworkDeviceInfo &networkDeviceInfo, discoveryReply->networkDeviceInfos()) {
             qCDebug(dcIdm()) << networkDeviceInfo;
             QString title;
-            if (networkDeviceInfo.hostName().isEmpty()) {
-                title += networkDeviceInfo.address().toString();
-            } else {
-                title += networkDeviceInfo.address().toString() + " (" + networkDeviceInfo.hostName() + ")";
-            }
-
             QString description;
-            if (networkDeviceInfo.macAddressManufacturer().isEmpty()) {
-                description = networkDeviceInfo.macAddress();
-            } else {
-                description = networkDeviceInfo.macAddress() + " (" + networkDeviceInfo.macAddressManufacturer() + ")";
-            }
+            switch (networkDeviceInfo.monitorMode()) {
+            case NetworkDeviceInfo::MonitorModeMac:
+                description = networkDeviceInfo.address().toString();
+                if (!networkDeviceInfo.macAddressInfos().constFirst().vendorName().isEmpty())
+                    description += " - " + networkDeviceInfo.macAddressInfos().constFirst().vendorName();
 
-            ThingDescriptor descriptor(navigator2ThingClassId, title, description);
+                if (networkDeviceInfo.hostName().isEmpty()) {
+                    title = networkDeviceInfo.macAddressInfos().constFirst().macAddress().toString();
+                } else {
+                    title = networkDeviceInfo.hostName() + " (" + networkDeviceInfo.macAddressInfos().constFirst().macAddress().toString() + ")";
+                }
 
-            // Check if we already have set up this device
-            Things existingThings = myThings().filterByParam(navigator2ThingMacAddressParamTypeId, networkDeviceInfo.macAddress());
-            if (existingThings.count() == 1) {
-                qCDebug(dcIdm()) << "This thing already exists in the system." << existingThings.first() << networkDeviceInfo;
-                descriptor.setThingId(existingThings.first()->id());
+                break;
+            case NetworkDeviceInfo::MonitorModeHostName:
+                title = networkDeviceInfo.hostName();
+                description = networkDeviceInfo.address().toString();
+                break;
+            case NetworkDeviceInfo::MonitorModeIp:
+                title = "Network device " + networkDeviceInfo.address().toString();
+                description = "Interface: " + networkDeviceInfo.networkInterface().name();
+                break;
             }
 
             ParamList params;
-            params << Param(navigator2ThingMacAddressParamTypeId, networkDeviceInfo.macAddress());
+            params << Param(navigator2ThingMacAddressParamTypeId, networkDeviceInfo.thingParamValueAddress());
+            params << Param(navigator2ThingHostNameParamTypeId, networkDeviceInfo.thingParamValueHostName());
+            params << Param(navigator2ThingAddressParamTypeId, networkDeviceInfo.thingParamValueAddress());
+            ThingDescriptor descriptor(navigator2ThingClassId, title, description);
             descriptor.setParams(params);
+
+            // Check if we already have set up this device
+            Thing *existingThing = myThings().findByParams(params);
+            if (existingThing) {
+                qCDebug(dcIdm()) << "This thing already exists in the system." << existingThing << networkDeviceInfo;
+                descriptor.setThingId(existingThing->id());
+            }
+
             info->addThingDescriptor(descriptor);
         }
         info->finish(Thing::ThingErrorNoError);
@@ -113,7 +125,7 @@ void IntegrationPluginIdm::setupThing(ThingSetupInfo *info)
         }
 
         // Create the monitor
-        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(macAddress);
+        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(thing);
         m_monitors.insert(thing, monitor);
 
         QHostAddress address = monitor->networkDeviceInfo().address();
