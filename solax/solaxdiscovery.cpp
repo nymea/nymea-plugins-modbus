@@ -1,6 +1,6 @@
  /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2023, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -46,10 +46,11 @@ void SolaxDiscovery::startDiscovery()
     m_startDateTime = QDateTime::currentDateTime();
 
     NetworkDeviceDiscoveryReply *discoveryReply = m_networkDeviceDiscovery->discover();
-    connect(discoveryReply, &NetworkDeviceDiscoveryReply::networkDeviceInfoAdded, this, &SolaxDiscovery::checkNetworkDevice);
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::hostAddressDiscovered, this, &SolaxDiscovery::checkNetworkDevice);
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
-    connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [this, discoveryReply](){
         qCDebug(dcSolax()) << "Discovery: Network discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "network devices";
+        m_networkDeviceInfos = discoveryReply->networkDeviceInfos();
 
         // Give the last connections added right before the network discovery finished a chance to check the device...
         QTimer::singleShot(3000, this, [this](){
@@ -64,19 +65,19 @@ QList<SolaxDiscovery::SolaxDiscoveryResult> SolaxDiscovery::discoveryResults() c
     return m_discoveryResults;
 }
 
-void SolaxDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo)
+void SolaxDiscovery::checkNetworkDevice(const QHostAddress &address)
 {
     // Create a Solax connection and try to initialize it.
     // Only if initialized successfully and all information have been fetched correctly from
     // the device we can assume this is what we are locking for (ip, port, modbus address, correct registers).
     // We cloud tough also filter the result only for certain software versions, manufactueres or whatever...
 
-    SolaxModbusTcpConnection *connection = new SolaxModbusTcpConnection(networkDeviceInfo.address(), m_port, m_modbusAddress, this);
+    SolaxModbusTcpConnection *connection = new SolaxModbusTcpConnection(address, m_port, m_modbusAddress, this);
     connection->modbusTcpMaster()->setTimeout(500);
     connection->modbusTcpMaster()->setNumberOfRetries(0);
     m_connections.append(connection);
 
-    connect(connection, &SolaxModbusTcpConnection::reachableChanged, this, [=](bool reachable){
+    connect(connection, &SolaxModbusTcpConnection::reachableChanged, this, [this, connection, address](bool reachable){
         if (!reachable) {
             // Disconnected ... done with this connection
             cleanupConnection(connection);
@@ -84,14 +85,14 @@ void SolaxDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceIn
         }
 
         // Modbus TCP connected and reachable call successed, let's try to initialize it!
-        connect(connection, &SolaxModbusTcpConnection::initializationFinished, this, [=](bool success){
+        connect(connection, &SolaxModbusTcpConnection::initializationFinished, this, [this, connection, address](bool success){
             if (!success) {
-                qCDebug(dcSolax()) << "Discovery: Initialization failed on" << networkDeviceInfo.address().toString() << "Continue...";;
+                qCDebug(dcSolax()) << "Discovery: Initialization failed on" << address.toString() << "Continue...";;
                 cleanupConnection(connection);
                 return;
             }
 
-            qCInfo(dcSolax()) << "Discovery: Initialized successfully" << networkDeviceInfo << connection->factoryName() << connection->serialNumber();
+            qCInfo(dcSolax()) << "Discovery: Initialized successfully" << address.toString() << connection->factoryName() << connection->serialNumber();
 
             // Let's make sure the information are correct
             if (connection->factoryName().toLower().contains("solax")) {
@@ -99,7 +100,7 @@ void SolaxDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceIn
                 result.productName = connection->moduleName();
                 result.manufacturerName = connection->factoryName();
                 result.serialNumber = connection->serialNumber();
-                result.networkDeviceInfo = networkDeviceInfo;
+                result.address = address;
                 m_discoveryResults.append(result);
 
                 qCInfo(dcSolax()) << "Discovery: --> Found" << result.manufacturerName << result.productName
@@ -110,31 +111,31 @@ void SolaxDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceIn
             connection->disconnectDevice();
         });
 
-        qCDebug(dcSolax()) << "Discovery: The host" << networkDeviceInfo << "is reachable, trying to initialize...";
+        qCDebug(dcSolax()) << "Discovery: The host" << address << "is reachable, trying to initialize...";
         if (!connection->initialize()) {
-            qCDebug(dcSolax()) << "Discovery: Unable to initialize connection on" << networkDeviceInfo.address().toString() << "Continue...";;
+            qCDebug(dcSolax()) << "Discovery: Unable to initialize connection on" << address.toString() << "Continue...";;
             cleanupConnection(connection);
         }
     });
 
     // If we get any error...skip this host...
-    connect(connection->modbusTcpMaster(), &ModbusTcpMaster::connectionStateChanged, this, [=](bool connected){
+    connect(connection->modbusTcpMaster(), &ModbusTcpMaster::connectionStateChanged, this, [this, address](bool connected){
         if (connected) {
-            qCDebug(dcSolax()) << "Discovery: Connected with" << networkDeviceInfo.address().toString() << m_port;
+            qCDebug(dcSolax()) << "Discovery: Connected with" << address.toString() << m_port;
         }
     });
 
     // If we get any error...skip this host...
-    connect(connection->modbusTcpMaster(), &ModbusTcpMaster::connectionErrorOccurred, this, [=](QModbusDevice::Error error){
+    connect(connection->modbusTcpMaster(), &ModbusTcpMaster::connectionErrorOccurred, this, [this, connection, address](QModbusDevice::Error error){
         if (error != QModbusDevice::NoError) {
-            qCDebug(dcSolax()) << "Discovery: Connection error on" << networkDeviceInfo.address().toString() << "Continue...";;
+            qCDebug(dcSolax()) << "Discovery: Connection error on" << address.toString() << "Continue...";;
             cleanupConnection(connection);
         }
     });
 
     // If check reachability failed...skip this host...
-    connect(connection, &SolaxModbusTcpConnection::checkReachabilityFailed, this, [=](){
-        qCDebug(dcSolax()) << "Discovery: Check reachability failed on" << networkDeviceInfo.address().toString() << "Continue...";;
+    connect(connection, &SolaxModbusTcpConnection::checkReachabilityFailed, this, [this, connection, address](){
+        qCDebug(dcSolax()) << "Discovery: Check reachability failed on" << address.toString() << "Continue...";;
         cleanupConnection(connection);
     });
 
@@ -154,10 +155,15 @@ void SolaxDiscovery::finishDiscovery()
 {
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
 
+    // Fill in all network device infos we have
+    for (int i = 0; i < m_discoveryResults.count(); i++)
+        m_discoveryResults[i].networkDeviceInfo = m_networkDeviceInfos.get(m_discoveryResults.at(i).address);
+
     // Cleanup any leftovers...we don't care any more
     foreach (SolaxModbusTcpConnection *connection, m_connections)
         cleanupConnection(connection);
 
-    qCInfo(dcSolax()) << "Discovery: Finished the discovery process. Found" << m_discoveryResults.count() << "Solax Inverters in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
+    qCInfo(dcSolax()) << "Discovery: Finished the discovery process. Found" << m_discoveryResults.count()
+                      << "Solax Inverters in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
     emit discoveryFinished();
 }

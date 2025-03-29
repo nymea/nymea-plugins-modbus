@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2023, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -47,6 +47,7 @@ public:
         QString productName;
         QString manufacturerName;
         QString serialNumber;
+        QHostAddress address;
         NetworkDeviceInfo networkDeviceInfo;
     } SolaxDiscoveryResult;
 
@@ -61,13 +62,12 @@ private:
     NetworkDeviceDiscovery *m_networkDeviceDiscovery = nullptr;
     quint16 m_port;
     quint16 m_modbusAddress;
-
     QDateTime m_startDateTime;
-
     QList<SolaxModbusTcpConnection *> m_connections;
     QList<SolaxDiscoveryResult> m_discoveryResults;
+    NetworkDeviceInfos m_networkDeviceInfos;
 
-    void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
+    void checkNetworkDevice(const QHostAddress &address);
     void cleanupConnection(SolaxModbusTcpConnection *connection);
 
     void finishDiscovery();
