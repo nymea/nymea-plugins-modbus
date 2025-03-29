@@ -39,7 +39,7 @@
                             "displayName": "Phases connected",
                             "type": "QString",
                             "allowedValues": ["A", "B", "C", "AB", "BC", "AC", "ABC"],
-                            "defaultValue": "A"
+                            "defaultValue": "ABC"
                         }
                     ],
                     "stateTypes": [
