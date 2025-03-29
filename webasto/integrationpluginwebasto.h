@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2023, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -69,6 +69,7 @@ private:
     QHash<Thing *, Webasto *> m_webastoLiveConnections;
     QHash<Thing *, WebastoNextModbusTcpConnection *> m_webastoNextConnections;
     QHash<Thing *, EVC04ModbusTcpConnection *> m_evc04Connections;
+
     QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
 
     void setupWebastoNextConnection(ThingSetupInfo *info);
@@ -88,7 +89,6 @@ private:
     void executeWebastoUnitePhaseCountAction(ThingActionInfo *info);
 
 private slots:
-    void onConnectionChanged(bool connected);
     void onWriteRequestExecuted(const QUuid &requestId, bool success);
     void onWriteRequestError(const QUuid &requestId, const QString &error);
 
