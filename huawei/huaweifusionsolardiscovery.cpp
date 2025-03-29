@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2022, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -45,9 +45,11 @@ void HuaweiFusionSolarDiscovery::startDiscovery()
     qCInfo(dcHuawei()) << "Discovery: Start searching for Huawei FusionSolar SmartDongle in the network...";
     m_startDateTime = QDateTime::currentDateTime();
     NetworkDeviceDiscoveryReply *discoveryReply = m_networkDeviceDiscovery->discover();
-    connect(discoveryReply, &NetworkDeviceDiscoveryReply::networkDeviceInfoAdded, this, &HuaweiFusionSolarDiscovery::checkNetworkDevice);
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::hostAddressDiscovered, this, &HuaweiFusionSolarDiscovery::checkNetworkDevice);
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
-    connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [this, discoveryReply](){
+        m_networkDeviceInfos = discoveryReply->networkDeviceInfos();
+
         // Finish with some delay so the last added network device information objects still can be checked.
         QTimer::singleShot(3000, this, [this](){
             qCDebug(dcHuawei()) << "Discovery: Grace period timer triggered.";
@@ -82,15 +84,15 @@ void HuaweiFusionSolarDiscovery::testNextConnection(const QHostAddress &address)
     }
 }
 
-void HuaweiFusionSolarDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo)
+void HuaweiFusionSolarDiscovery::checkNetworkDevice(const QHostAddress &address)
 {
     QQueue<HuaweiFusionSolar *> connectionQueue;
     foreach (quint16 slaveId, m_slaveIds) {
-        HuaweiFusionSolar *connection = new HuaweiFusionSolar(networkDeviceInfo.address(), m_port, slaveId, this);
+        HuaweiFusionSolar *connection = new HuaweiFusionSolar(address, m_port, slaveId, this);
         m_connections.append(connection);
         connectionQueue.enqueue(connection);
 
-        connect(connection, &HuaweiFusionSolar::reachableChanged, this, [=](bool reachable){
+        connect(connection, &HuaweiFusionSolar::reachableChanged, this, [this, connection](bool reachable){
             if (!reachable) {
                 // Disconnected ... done with this connection
                 cleanupConnection(connection);
@@ -98,10 +100,10 @@ void HuaweiFusionSolarDiscovery::checkNetworkDevice(const NetworkDeviceInfo &net
             }
 
             // Todo: initialize and check if available
-            connect(connection, &HuaweiFusionSolar::initializationFinished, this, [=](bool success){
+            connect(connection, &HuaweiFusionSolar::initializationFinished, this, [this, connection](bool success){
                 Result result;
-                result.networkDeviceInfo = networkDeviceInfo;
-                result.slaveId = slaveId;
+                result.address = connection->modbusTcpMaster()->hostAddress();
+                result.slaveId = connection->slaveId();
 
                 if (success) {
                     qCDebug(dcHuawei()) << "Huawei init finished successfully:" << connection->model() << connection->serialNumber() << connection->productNumber();
@@ -109,7 +111,7 @@ void HuaweiFusionSolarDiscovery::checkNetworkDevice(const NetworkDeviceInfo &net
                     result.serialNumber = connection->serialNumber();
                 }
 
-                qCInfo(dcHuawei()) << "Discovery: --> Found" << networkDeviceInfo << "slave ID:" << slaveId;
+                qCInfo(dcHuawei()) << "Discovery: --> Found" << result.address.toString() << "slave ID:" << result.slaveId;
                 m_results.append(result);
             });
 
@@ -117,23 +119,22 @@ void HuaweiFusionSolarDiscovery::checkNetworkDevice(const NetworkDeviceInfo &net
         });
 
         // If we get any error...skip this host...
-        connect(connection->modbusTcpMaster(), &ModbusTcpMaster::connectionErrorOccurred, this, [=](QModbusDevice::Error error){
+        connect(connection->modbusTcpMaster(), &ModbusTcpMaster::connectionErrorOccurred, this, [this, connection](QModbusDevice::Error error){
             if (error != QModbusDevice::NoError) {
-                qCDebug(dcHuawei()) << "Discovery: Connection error on" << networkDeviceInfo.address().toString() << "Continue...";;
+                qCDebug(dcHuawei()) << "Discovery: Connection error on" << connection->modbusTcpMaster()->hostAddress().toString() << "Continue...";;
                 cleanupConnection(connection);
             }
         });
 
         // If check reachability failed...skip this host...
-        connect(connection, &HuaweiFusionSolar::checkReachabilityFailed, this, [=](){
-            qCDebug(dcHuawei()) << "Discovery: Check reachability failed on" << networkDeviceInfo.address().toString() << "Continue...";;
+        connect(connection, &HuaweiFusionSolar::checkReachabilityFailed, this, [this, connection](){
+            qCDebug(dcHuawei()) << "Discovery: Check reachability failed on" << connection->modbusTcpMaster()->hostAddress().toString() << "Continue...";;
             cleanupConnection(connection);
         });
-
     }
 
-    m_pendingConnectionAttempts[networkDeviceInfo.address()] = connectionQueue;
-    testNextConnection(networkDeviceInfo.address());
+    m_pendingConnectionAttempts[address] = connectionQueue;
+    testNextConnection(address);
 }
 
 void HuaweiFusionSolarDiscovery::cleanupConnection(HuaweiFusionSolar *connection)
@@ -150,6 +151,10 @@ void HuaweiFusionSolarDiscovery::cleanupConnection(HuaweiFusionSolar *connection
 void HuaweiFusionSolarDiscovery::finishDiscovery()
 {
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
+
+    // Fill in finished network device information
+    for (int i = 0; i < m_results.count(); i++)
+        m_results[i].networkDeviceInfo = m_networkDeviceInfos.get(m_results.value(i).address);
 
     // Cleanup any leftovers...we don't care any more
     foreach (HuaweiFusionSolar *connection, m_connections)
