@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2022, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -96,7 +96,6 @@ void SpeedwireDiscovery::startMulticastDiscovery()
     sendDiscoveryRequest();
 }
 
-
 void SpeedwireDiscovery::startUnicastDiscovery()
 {
     qCDebug(dcSma()) << "SpeedwireDiscovery: Start discovering network...";
@@ -104,13 +103,12 @@ void SpeedwireDiscovery::startUnicastDiscovery()
 
     NetworkDeviceDiscoveryReply *discoveryReply = m_networkDeviceDiscovery->discover();
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
-    connect(discoveryReply, &NetworkDeviceDiscoveryReply::networkDeviceInfoAdded, this, [this](const NetworkDeviceInfo &networkDeviceInfo){
-        m_networkDeviceInfos.append(networkDeviceInfo);
-        sendUnicastDiscoveryRequest(networkDeviceInfo.address());
-    });
-
-    connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::hostAddressDiscovered, this, &SpeedwireDiscovery::sendUnicastDiscoveryRequest);
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [this, discoveryReply](){
         qCDebug(dcSma()) << "Discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "network devices for unicast requests.";
+
+        m_networkDeviceInfos = discoveryReply->networkDeviceInfos();
+
         // Wait some extra second in otder to give the last hosts joined some time to respond.
         QTimer::singleShot(3000, this, [this](){
             m_multicastSearchRequestTimer.stop();
@@ -178,10 +176,6 @@ void SpeedwireDiscovery::processDatagram(const QHostAddress &senderAddress, quin
             m_resultMeters.insert(senderAddress, result);
         }
 
-        if (m_networkDeviceInfos.hasHostAddress(senderAddress)) {
-            m_resultMeters[senderAddress].networkDeviceInfo = m_networkDeviceInfos.get(senderAddress);
-        }
-
         m_resultMeters[senderAddress].modelId = modelId;
         m_resultMeters[senderAddress].serialNumber = serialNumber;
     } else if (header.protocolId == Speedwire::ProtocolIdInverter) {
@@ -194,10 +188,6 @@ void SpeedwireDiscovery::processDatagram(const QHostAddress &senderAddress, quin
             result.address = senderAddress;
             result.deviceType = Speedwire::DeviceTypeInverter;
             m_resultInverters.insert(senderAddress, result);
-        }
-
-        if (m_networkDeviceInfos.hasHostAddress(senderAddress)) {
-            m_resultInverters[senderAddress].networkDeviceInfo = m_networkDeviceInfos.get(senderAddress);
         }
 
         m_resultInverters[senderAddress].modelId = inverterPacket.sourceModelId;
@@ -218,11 +208,11 @@ void SpeedwireDiscovery::processDatagram(const QHostAddress &senderAddress, quin
         connect(reply, &SpeedwireInverterReply::finished, this, [/*this, inverter,*/ senderAddress, reply](){
             qCDebug(dcSma()) << "SpeedwireDiscovery: Identify request finished from" << senderAddress.toString() << reply->error();
 
-//            SpeedwireInverterReply *loginReply = inverter->sendLoginRequest();
-//            qCDebug(dcSma()) << "SpeedwireDiscovery: make login attempt using the default password.";
-//            connect(loginReply, &SpeedwireInverterReply::finished, this, [loginReply, senderAddress](){
-//                qCDebug(dcSma()) << "SpeedwireDiscovery: login attempt finished" << senderAddress.toString() << loginReply->error();
-//            });
+            // SpeedwireInverterReply *loginReply = inverter->sendLoginRequest();
+            // qCDebug(dcSma()) << "SpeedwireDiscovery: make login attempt using the default password.";
+            // connect(loginReply, &SpeedwireInverterReply::finished, this, [loginReply, senderAddress](){
+            //     qCDebug(dcSma()) << "SpeedwireDiscovery: login attempt finished" << senderAddress.toString() << loginReply->error();
+            // });
         });
 
     } else {
@@ -248,6 +238,10 @@ void SpeedwireDiscovery::finishDiscovery()
 {
     m_results = m_resultMeters.values() + m_resultInverters.values();
 
+    // Fill in all network device infos we have
+    for (int i = 0; i < m_results.count(); i++)
+        m_results[i].networkDeviceInfo = m_networkDeviceInfos.get(m_results.at(i).address);
+
     qCDebug(dcSma()) << "SpeedwireDiscovery: Discovey finished. Found" << m_results.count() << "SMA devices in the network";
     m_multicastSearchRequestTimer.stop();
 
@@ -255,13 +249,11 @@ void SpeedwireDiscovery::finishDiscovery()
         qCDebug(dcSma()) << "SpeedwireDiscovery: ============================================";
         qCDebug(dcSma()) << "SpeedwireDiscovery: Device type:" << result.deviceType;
         qCDebug(dcSma()) << "SpeedwireDiscovery: Address:" << result.address.toString();
-        if (result.networkDeviceInfo.isValid()) {
-            qCDebug(dcSma()) << "SpeedwireDiscovery: Hostname:" << result.networkDeviceInfo.hostName();
-            qCDebug(dcSma()) << "SpeedwireDiscovery: MAC:" << result.networkDeviceInfo.macAddress();
-            qCDebug(dcSma()) << "SpeedwireDiscovery: MAC manufacturer:" << result.networkDeviceInfo.macAddressManufacturer();
-        }
         qCDebug(dcSma()) << "SpeedwireDiscovery: Model ID:" << result.modelId;
         qCDebug(dcSma()) << "SpeedwireDiscovery: Serial number:" << result.serialNumber;
+        if (result.networkDeviceInfo.isValid()) {
+            qCDebug(dcSma()) << "SpeedwireDiscovery:" << result.networkDeviceInfo;
+        }
     }
 
     emit discoveryFinished();

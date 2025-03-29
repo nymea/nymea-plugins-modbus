@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2022, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -50,6 +50,7 @@ public:
         quint16 port;
         quint16 modbusAddress;
         QString softwareVersion;
+        QHostAddress address;
         NetworkDeviceInfo networkDeviceInfo;
     } SmaModbusDiscoveryResult;
 
@@ -64,15 +65,13 @@ private:
     NetworkDeviceDiscovery *m_networkDeviceDiscovery = nullptr;
     quint16 m_port;
     quint16 m_modbusAddress;
-
     QDateTime m_startDateTime;
-    NetworkDeviceInfos m_verifiedNetworkDeviceInfos;
 
+    NetworkDeviceInfos m_networkDeviceInfos;
     QList<SmaSolarInverterModbusTcpConnection *> m_connections;
-
     QList<SmaModbusDiscoveryResult> m_discoveryResults;
 
-    void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
+    void checkNetworkDevice(const QHostAddress &address);
     void cleanupConnection(SmaSolarInverterModbusTcpConnection *connection);
 
     void finishDiscovery();
