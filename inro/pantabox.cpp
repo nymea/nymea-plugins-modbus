@@ -34,7 +34,8 @@
 Pantabox::Pantabox(const QHostAddress &hostAddress, uint port, quint16 slaveId, QObject *parent) :
     PantaboxModbusTcpConnection(hostAddress, port, slaveId, parent)
 {
-
+    modbusTcpMaster()->setNumberOfRetries(3);
+    modbusTcpMaster()->setTimeout(500);
 }
 
 QString Pantabox::modbusVersionToString(quint32 value)

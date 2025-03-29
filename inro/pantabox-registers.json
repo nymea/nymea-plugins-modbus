@@ -3,7 +3,7 @@
     "protocol": "TCP",
     "endianness": "LittleEndian",
     "stringEndianness": "LittleEndian",
-    "errorLimitUntilNotReachable": 2,
+    "errorLimitUntilNotReachable": 10,
     "checkReachableRegister": "chargingState",
     "blocks": [ ],
     "enums": [
