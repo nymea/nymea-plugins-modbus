@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2022, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -49,24 +49,34 @@ void IntegrationPluginKostal::discoverThings(ThingDiscoveryInfo *info)
     }
 
     // Create a discovery with the info as parent for auto deleting the object once the discovery info is done
-    KostalDiscovery *discovery = new KostalDiscovery(hardwareManager()->networkDeviceDiscovery(), 1502, 71, info);
+    KostalDiscovery *discovery = new KostalDiscovery(hardwareManager()->networkDeviceDiscovery(),
+                                                     info->params().paramValue(kostalInverterDiscoveryPortParamTypeId).toUInt(),
+                                                     info->params().paramValue(kostalInverterDiscoverySlaveIdParamTypeId).toUInt(), info);
+
     connect(discovery, &KostalDiscovery::discoveryFinished, info, [=](){
         foreach (const KostalDiscovery::KostalDiscoveryResult &result, discovery->discoveryResults()) {
 
-            ThingDescriptor descriptor(kostalInverterThingClassId, result.manufacturerName + " " + result.productName, "Serial: " + result.serialNumber + " - " + result.networkDeviceInfo.address().toString());
+            ThingDescriptor descriptor(kostalInverterThingClassId, result.manufacturerName + " " + result.productName,
+                                       "Serial: " + result.serialNumber + " - " + result.networkDeviceInfo.address().toString());
+
             qCDebug(dcKostal()) << "Discovered:" << descriptor.title() << descriptor.description();
+            ParamList params;
+            params << Param(kostalInverterThingSerialNumberParamTypeId, result.serialNumber);
+            params << Param(kostalInverterThingMacAddressParamTypeId, result.networkDeviceInfo.thingParamValueMacAddress());
+            params << Param(kostalInverterThingHostNameParamTypeId, result.networkDeviceInfo.thingParamValueHostName());
+            params << Param(kostalInverterThingAddressParamTypeId, result.networkDeviceInfo.thingParamValueAddress());
+            // Note: if we discover also the port and modbusaddress, we must fill them in from the discovery here, for now everywhere the defaults...
+            descriptor.setParams(params);
 
             // Check if we already have set up this device
-            Things existingThings = myThings().filterByParam(kostalInverterThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
+
+            // Note: we introduced the serial number later, if the current thing has no serialnumber, we use the mac
+            Things existingThings = myThings().filterByParam(kostalInverterThingSerialNumberParamTypeId, result.serialNumber);
             if (existingThings.count() == 1) {
-                qCDebug(dcKostal()) << "This Kostal inverter already exists in the system:" << result.networkDeviceInfo;
+                qCDebug(dcKostal()) << "This Kostal inverter with this serial number already exists in the system:" << result.networkDeviceInfo;
                 descriptor.setThingId(existingThings.first()->id());
             }
 
-            ParamList params;
-            params << Param(kostalInverterThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
-            // Note: if we discover also the port and modbusaddress, we must fill them in from the discovery here, for now everywhere the defaults...
-            descriptor.setParams(params);
             info->addThingDescriptor(descriptor);
         }
 
@@ -103,7 +113,7 @@ void IntegrationPluginKostal::setupThing(ThingSetupInfo *info)
         }
 
         // Create the monitor
-        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(macAddress);
+        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(thing);
         m_monitors.insert(thing, monitor);
 
         QHostAddress address = monitor->networkDeviceInfo().address();

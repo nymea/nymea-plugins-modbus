@@ -1,8 +1,8 @@
 {
     "name": "Kostal",
-        "displayName": "Kostal",
-        "id": "51a2c7d5-084d-4474-a65a-e0447ab9ac45",
-        "vendors": [
+    "displayName": "Kostal",
+    "id": "51a2c7d5-084d-4474-a65a-e0447ab9ac45",
+    "vendors": [
         {
             "name": "kostal",
             "displayName": "KOSTAL Solar Electric",
@@ -13,8 +13,24 @@
                     "displayName": "KOSTAL Inverter",
                     "id": "7dc6db14-6f5a-4ac8-9684-4c6a526bd0de",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": ["solarinverter", "connectable"],
+                    "interfaces": ["solarinverter", "connectable", "networkdevice"],
                     "providedInterfaces": [ "energymeter", "energystorage"],
+                    "discoveryParamTypes": [
+                        {
+                            "id": "6cf2cb34-dc61-4ad1-9ae1-1177785f2d4a",
+                            "name":"port",
+                            "displayName": "Port",
+                            "type": "int",
+                            "defaultValue": 1502
+                        },
+                        {
+                            "id": "2a6d75d9-286d-48cb-83fd-acfb99258ba7",
+                            "name":"slaveId",
+                            "displayName": "Slave ID",
+                            "type": "int",
+                            "defaultValue": 71
+                        }
+                    ],
                     "paramTypes": [
                         {
                             "id": "906f6099-d0e1-4297-a2b3-f8ec4482c578",
@@ -22,6 +38,29 @@
                             "displayName": "MAC address",
                             "type": "QString",
                             "inputType": "MacAddress",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "c922c2ec-40d9-40cd-81dd-68141b178a0c",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "b8aeb35e-06e9-4e52-90ce-dd8712fb7527",
+                            "name": "address",
+                            "displayName": "IP address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "7c701af9-a172-47a0-bb7b-30f37f63ac95",
+                            "name": "serialNumber",
+                            "displayName": "serialNumber",
+                            "type": "QString",
                             "defaultValue": ""
                         },
                         {

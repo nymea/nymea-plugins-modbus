@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2022, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -44,22 +44,16 @@ void KostalDiscovery::startDiscovery()
 {
     qCInfo(dcKostal()) << "Discovery: Start searching for Kostal inverters in the network...";
     NetworkDeviceDiscoveryReply *discoveryReply = m_networkDeviceDiscovery->discover();
+    m_startDateTime = QDateTime::currentDateTime();
 
     // Imedialty check any new device gets discovered
-    connect(discoveryReply, &NetworkDeviceDiscoveryReply::networkDeviceInfoAdded, this, &KostalDiscovery::checkNetworkDevice);
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::hostAddressDiscovered, this, &KostalDiscovery::checkNetworkDevice);
 
     // Check what might be left on finished
-        connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
         qCDebug(dcKostal()) << "Discovery: Network discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "network devices";
         m_networkDeviceInfos = discoveryReply->networkDeviceInfos();
-
-        // Send a report request to nework device info not sent already...
-        foreach (const NetworkDeviceInfo &networkDeviceInfo, m_networkDeviceInfos) {
-            if (!m_verifiedNetworkDeviceInfos.contains(networkDeviceInfo)) {
-                checkNetworkDevice(networkDeviceInfo);
-            }
-        }
 
         // Give the last connections added right before the network discovery finished a chance to check the device...
         QTimer::singleShot(3000, this, [this](){
@@ -74,19 +68,15 @@ QList<KostalDiscovery::KostalDiscoveryResult> KostalDiscovery::discoveryResults(
     return m_discoveryResults;
 }
 
-void KostalDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo)
+void KostalDiscovery::checkNetworkDevice(const QHostAddress &address)
 {
     // Create a kostal connection and try to initialize it.
     // Only if initialized successfully and all information have been fetched correctly from
     // the device we can assume this is what we are locking for (ip, port, modbus address, correct registers).
     // We cloud tough also filter the result only for certain software versions, manufactueres or whatever...
 
-    if (m_verifiedNetworkDeviceInfos.contains(networkDeviceInfo))
-        return;
-
-    KostalModbusTcpConnection *connection = new KostalModbusTcpConnection(networkDeviceInfo.address(), m_port, m_modbusAddress, this);
+    KostalModbusTcpConnection *connection = new KostalModbusTcpConnection(address, m_port, m_modbusAddress, this);
     m_connections.append(connection);
-    m_verifiedNetworkDeviceInfos.append(networkDeviceInfo);
 
     connect(connection, &KostalModbusTcpConnection::reachableChanged, this, [=](bool reachable){
         if (!reachable) {
@@ -98,7 +88,7 @@ void KostalDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceI
         // Modbus TCP connected...ok, let's try to initialize it!
         connect(connection, &KostalModbusTcpConnection::initializationFinished, this, [=](bool success){
             if (!success) {
-                qCDebug(dcKostal()) << "Discovery: Initialization failed on" << networkDeviceInfo.address().toString() << "Continue...";;
+                qCDebug(dcKostal()) << "Discovery: Initialization failed on" << address.toString() << "Continue...";;
                 cleanupConnection(connection);
                 return;
             }
@@ -110,7 +100,7 @@ void KostalDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceI
             result.articleNumber = connection->inverterArticleNumber();
             result.softwareVersionIoController = connection->softwareVersionIoController();
             result.softwareVersionMainController = connection->softwareVersionMainController();
-            result.networkDeviceInfo = networkDeviceInfo;
+            result.address = address;
             m_discoveryResults.append(result);
 
             qCDebug(dcKostal()) << "Discovery: --> Found" << result.manufacturerName << result.productName
@@ -118,7 +108,7 @@ void KostalDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceI
                                 << "Serial number:" << result.serialNumber
                                 << "Software version main controller:" << result.softwareVersionMainController
                                 << "Software version IO controller:" << result.softwareVersionIoController
-                                << result.networkDeviceInfo;
+                                << result.address.toString();
 
 
             // Done with this connection
@@ -127,7 +117,7 @@ void KostalDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceI
 
         // Initializing...
         if (!connection->initialize()) {
-            qCDebug(dcKostal()) << "Discovery: Unable to initialize connection on" << networkDeviceInfo.address().toString() << "Continue...";;
+            qCDebug(dcKostal()) << "Discovery: Unable to initialize connection on" << address.toString() << "Continue...";;
             cleanupConnection(connection);
         }
     });
@@ -135,14 +125,14 @@ void KostalDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceI
     // If we get any error...skip this host...
     connect(connection->modbusTcpMaster(), &ModbusTcpMaster::connectionErrorOccurred, this, [=](QModbusDevice::Error error){
         if (error != QModbusDevice::NoError) {
-            qCDebug(dcKostal()) << "Discovery: Connection error on" << networkDeviceInfo.address().toString() << "Continue...";;
+            qCDebug(dcKostal()) << "Discovery: Connection error on" << address.toString() << "Continue...";;
             cleanupConnection(connection);
         }
     });
 
     // If check reachability failed...skip this host...
     connect(connection, &KostalModbusTcpConnection::checkReachabilityFailed, this, [=](){
-        qCDebug(dcKostal()) << "Discovery: Check reachability failed on" << networkDeviceInfo.address().toString() << "Continue...";;
+        qCDebug(dcKostal()) << "Discovery: Check reachability failed on" << address.toString() << "Continue...";;
         cleanupConnection(connection);
     });
 
@@ -161,11 +151,15 @@ void KostalDiscovery::finishDiscovery()
 {
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
 
+    // Fill in all network device infos we have
+    for (int i = 0; i < m_discoveryResults.count(); i++)
+        m_discoveryResults[i].networkDeviceInfo = m_networkDeviceInfos.get(m_discoveryResults.at(i).address);
+
     // Cleanup any leftovers...we don't care any more
     foreach (KostalModbusTcpConnection *connection, m_connections)
         cleanupConnection(connection);
 
-    qCInfo(dcKostal()) << "Discovery: Finished the discovery process. Found" << m_discoveryResults.count() << "Kostal Inverters in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
-
+    qCInfo(dcKostal()) << "Discovery: Finished the discovery process. Found" << m_discoveryResults.count()
+                       << "Kostal Inverters in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
     emit discoveryFinished();
 }
