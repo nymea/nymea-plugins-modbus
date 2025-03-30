@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2020, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -66,16 +66,24 @@ void IntegrationPluginPhoenixConnect::discoverThings(ThingDiscoveryInfo *info)
             ThingDescriptor descriptor(info->thingClassId(), name, description);
             qCDebug(dcPhoenixConnect()) << "Discovered:" << descriptor.title() << descriptor.description();
 
-            ParamTypeId macParamTypeId = supportedThings().findById(info->thingClassId()).paramTypes().findByName("mac").id();
-            Things existingThings = myThings().filterByParam(macParamTypeId, result.networkDeviceInfo.macAddress());
-            if (existingThings.count() == 1) {
-                qCDebug(dcPhoenixConnect()) << "This wallbox already exists in the system:" << result.networkDeviceInfo;
-                descriptor.setThingId(existingThings.first()->id());
-            }
+            ParamTypeId macAddressParamTypeId = supportedThings().findById(info->thingClassId()).paramTypes().findByName("macAddress").id();
+            ParamTypeId hostNameParamTypeId = supportedThings().findById(info->thingClassId()).paramTypes().findByName("hostName").id();
+            ParamTypeId addressParamTypeId = supportedThings().findById(info->thingClassId()).paramTypes().findByName("address").id();
 
             ParamList params;
-            params << Param(macParamTypeId, result.networkDeviceInfo.macAddress());
+            params << Param(macAddressParamTypeId, result.networkDeviceInfo.thingParamValueMacAddress());
+            params << Param(hostNameParamTypeId, result.networkDeviceInfo.thingParamValueHostName());
+            params << Param(addressParamTypeId, result.networkDeviceInfo.thingParamValueAddress());
             descriptor.setParams(params);
+
+            // Check if we already have set up this device
+            // FIXME: maybe we should save the serialnumber as parameter in order to identify already known devices
+            Thing *existingThing = myThings().findByParams(params);
+            if (existingThing) {
+                qCDebug(dcPhoenixConnect()) << "This wallbox already exists in the system:" << result.networkDeviceInfo;
+                descriptor.setThingId(existingThing->id());
+            }
+
             info->addThingDescriptor(descriptor);
         }
 
@@ -96,13 +104,12 @@ void IntegrationPluginPhoenixConnect::setupThing(ThingSetupInfo *info)
         qCDebug(dcPhoenixConnect()) << "Setting up a new device:" << thing->params();
     }
 
-
-    MacAddress mac = MacAddress(thing->paramValue("mac").toString());
-    if (!mac.isValid()) {
-        info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The given MAC address is not valid."));
+    NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(thing);
+    if (!monitor) {
+        qCWarning(dcPhoenixConnect()) << "Unable to create monitor with the given parameters" << thing->params();
+        info->finish(Thing::ThingErrorInvalidParameter);
         return;
     }
-    NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(mac);
 
     PhoenixModbusTcpConnection *connection = new PhoenixModbusTcpConnection(monitor->networkDeviceInfo().address(), 502, 255, this);
     connect(info, &ThingSetupInfo::aborted, connection, &PhoenixModbusTcpConnection::deleteLater);

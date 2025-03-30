@@ -14,15 +14,32 @@
                     "name": "wallbeEco2",
                     "createMethods": ["discovery", "user"],
                     "discoveryType": "weak",
-                    "interfaces": ["evcharger", "connectable"],
+                    "interfaces": ["evcharger", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "551b03f0-dd70-4463-929b-3668dbd3290f",
                             "displayName": "MAC address",
-                            "name": "mac",
+                            "name": "macAddress",
                             "type": "QString",
+                            "inputType": "MacAddress",
                             "defaultValue": "",
                             "readOnly": true
+                        },
+                        {
+                            "id": "cdddb9c0-b243-4b51-8e27-7c323eb4866f",
+                            "name": "address",
+                            "displayName": "Host address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "191faa5b-09dc-47ae-8ebe-39301ecdaf87",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
                         }
                     ],
                     "settingsTypes": [
@@ -120,15 +137,32 @@
                     "name": "wallbePro",
                     "createMethods": ["discovery", "user"],
                     "discoveryType": "weak",
-                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable"],
+                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "71a147c7-a87c-45e0-9e91-657d5c7fd0cd",
                             "displayName": "MAC address",
-                            "name": "mac",
+                            "name": "macAddress",
                             "type": "QString",
+                            "inputType": "MacAddress",
                             "defaultValue": "",
                             "readOnly": true
+                        },
+                        {
+                            "id": "996dfe24-c15f-460d-ab83-cc924024171c",
+                            "name": "address",
+                            "displayName": "Host address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "b142f726-8d1f-4e50-aee3-5725c1ddd4e0",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
                         }
                     ],
                     "stateTypes":[
@@ -242,15 +276,32 @@
                     "name": "compleoEcoS",
                     "createMethods": ["discovery", "user"],
                     "discoveryType": "weak",
-                    "interfaces": ["evcharger", "connectable"],
+                    "interfaces": ["evcharger", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "d65aa536-e60d-4e0d-986c-80c1023e0e81",
                             "displayName": "MAC address",
-                            "name": "mac",
+                            "name": "macAddress",
                             "type": "QString",
+                            "inputType": "MacAddress",
                             "defaultValue": "",
                             "readOnly": true
+                        },
+                        {
+                            "id": "01eb59fd-7022-4511-999d-16b87e68b6b5",
+                            "name": "address",
+                            "displayName": "Host address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "89d358bf-d072-4b83-92ff-c6a46a4b5e6d",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
                         }
                     ],
                     "settingsTypes": [
@@ -348,15 +399,32 @@
                     "name": "compleoPro",
                     "createMethods": ["discovery", "user"],
                     "discoveryType": "weak",
-                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable"],
+                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "e7ca8712-4a4a-44e8-a36b-233486acd687",
                             "displayName": "MAC address",
-                            "name": "mac",
+                            "name": "macAddress",
                             "type": "QString",
+                            "inputType": "MacAddress",
                             "defaultValue": "",
                             "readOnly": true
+                        },
+                        {
+                            "id": "26769f5b-8c10-4bf1-a1e4-d20ef6ebd588",
+                            "name": "address",
+                            "displayName": "Host address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "d4c00762-dd9b-43c9-8d8c-a1ffd435a46a",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
                         }
                     ],
                     "stateTypes":[
@@ -470,15 +538,32 @@
                     "name": "scapoEco",
                     "createMethods": ["discovery", "user"],
                     "discoveryType": "weak",
-                    "interfaces": ["evcharger", "connectable"],
+                    "interfaces": ["evcharger", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "2b544329-4d59-4974-8c3d-8b6aadf26c2c",
                             "displayName": "MAC address",
-                            "name": "mac",
+                            "name": "macAddress",
                             "type": "QString",
+                            "inputType": "MacAddress",
                             "defaultValue": "",
                             "readOnly": true
+                        },
+                        {
+                            "id": "9a7bd593-c8c7-4108-816b-8122fca097dd",
+                            "name": "address",
+                            "displayName": "Host address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "cbe4f47c-1fda-4283-a393-be479fd40caa",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
                         }
                     ],
                     "settingsTypes": [
@@ -576,15 +661,32 @@
                     "name": "scapoVision",
                     "createMethods": ["discovery", "user"],
                     "discoveryType": "weak",
-                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable"],
+                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "8a0a3c7c-1197-4c55-8a7d-ee87587235bd",
                             "displayName": "MAC address",
-                            "name": "mac",
+                            "name": "macAddress",
                             "type": "QString",
+                            "inputType": "MacAddress",
                             "defaultValue": "",
                             "readOnly": true
+                        },
+                        {
+                            "id": "02e91e87-2509-4ae3-97ef-2d12280bab1b",
+                            "name": "address",
+                            "displayName": "Host address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "7785006e-1fe0-450a-a10a-7f619c50b028",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
                         }
                     ],
                     "stateTypes":[

@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2022, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -46,14 +46,15 @@ PhoenixDiscovery::PhoenixDiscovery(NetworkDeviceDiscovery *networkDeviceDiscover
 void PhoenixDiscovery::startDiscovery()
 {
     qCInfo(dcPhoenixConnect()) << "Discovery: Searching for PhoenixConnect wallboxes in the network...";
+    m_startDateTime = QDateTime::currentDateTime();
+
     NetworkDeviceDiscoveryReply *discoveryReply = m_networkDeviceDiscovery->discover();
-
-    connect(discoveryReply, &NetworkDeviceDiscoveryReply::networkDeviceInfoAdded, this, &PhoenixDiscovery::checkNetworkDevice);
-
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::hostAddressDiscovered, this, &PhoenixDiscovery::checkNetworkDevice);
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
         qCDebug(dcPhoenixConnect()) << "Discovery: Network discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "network devices";
-        m_gracePeriodTimer.start();
+        m_networkDeviceInfos = discoveryReply->networkDeviceInfos();
         discoveryReply->deleteLater();
+        m_gracePeriodTimer.start();
     });
 }
 
@@ -62,17 +63,14 @@ QList<PhoenixDiscovery::Result> PhoenixDiscovery::discoveryResults() const
     return m_discoveryResults;
 }
 
-void PhoenixDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo)
+void PhoenixDiscovery::checkNetworkDevice(const QHostAddress &address)
 {
-//    if (networkDeviceInfo.macAddressManufacturer() != "wallbe GmbH" && networkDeviceInfo.macAddressManufacturer() != "Phoenix") {
-//        return;
-//    }
-
     int port = 502;
     int slaveId = 0xff;
-    qCDebug(dcPhoenixConnect()) << "Checking network device:" << networkDeviceInfo << "Port:" << port << "Slave ID:" << slaveId;
 
-    PhoenixModbusTcpConnection *connection = new PhoenixModbusTcpConnection(networkDeviceInfo.address(), port, slaveId, this);
+    qCDebug(dcPhoenixConnect()) << "Discovery: Checking network device:" << address << "Port:" << port << "Slave ID:" << slaveId;
+
+    PhoenixModbusTcpConnection *connection = new PhoenixModbusTcpConnection(address, port, slaveId, this);
     m_connections.append(connection);
 
     connect(connection, &PhoenixModbusTcpConnection::reachableChanged, this, [=](bool reachable){
@@ -83,7 +81,7 @@ void PhoenixDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevice
 
         connect(connection, &PhoenixModbusTcpConnection::initializationFinished, this, [=](bool success){
             if (!success) {
-                qCDebug(dcPhoenixConnect()) << "Discovery: Initialization failed on" << networkDeviceInfo.address().toString();
+                qCDebug(dcPhoenixConnect()) << "Discovery: Initialization failed on" << address.toString();
                 cleanupConnection(connection);
                 return;
             }
@@ -91,7 +89,7 @@ void PhoenixDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevice
             result.firmwareVersion = connection->firmwareVersion();
             result.model = connection->deviceName();
             result.serialNumber = connection->serial();
-            result.networkDeviceInfo = networkDeviceInfo;
+            result.address = address;
             m_discoveryResults.append(result);
 
             qCDebug(dcPhoenixConnect()) << "Discovery: Found wallbox with firmware version:" << result.firmwareVersion << result.networkDeviceInfo;
@@ -100,13 +98,13 @@ void PhoenixDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevice
         });
 
         if (!connection->initialize()) {
-            qCDebug(dcPhoenixConnect()) << "Discovery: Unable to initialize connection on" << networkDeviceInfo.address().toString();
+            qCDebug(dcPhoenixConnect()) << "Discovery: Unable to initialize connection on" << address.toString();
             cleanupConnection(connection);
         }
     });
 
     connect(connection, &PhoenixModbusTcpConnection::checkReachabilityFailed, this, [=](){
-        qCDebug(dcPhoenixConnect()) << "Discovery: Checking reachability failed on" << networkDeviceInfo.address().toString();
+        qCDebug(dcPhoenixConnect()) << "Discovery: Checking reachability failed on" << address.toString();
         cleanupConnection(connection);
     });
 
@@ -124,6 +122,10 @@ void PhoenixDiscovery::finishDiscovery()
 {
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
 
+    // Fill in all network device infos we have
+    for (int i = 0; i < m_discoveryResults.count(); i++)
+        m_discoveryResults[i].networkDeviceInfo = m_networkDeviceInfos.get(m_discoveryResults.at(i).address);
+
     // Cleanup any leftovers...we don't care any more
     foreach (PhoenixModbusTcpConnection *connection, m_connections)
         cleanupConnection(connection);
@@ -131,6 +133,5 @@ void PhoenixDiscovery::finishDiscovery()
     qCInfo(dcPhoenixConnect()) << "Discovery: Finished the discovery process. Found" << m_discoveryResults.count()
                        << "Phoenix connect wallboxes in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
     m_gracePeriodTimer.stop();
-
     emit discoveryFinished();
 }
