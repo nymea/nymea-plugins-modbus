@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2023, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -50,12 +50,12 @@ void AmtronECUDiscovery::startDiscovery()
 
     NetworkDeviceDiscoveryReply *discoveryReply = m_networkDeviceDiscovery->discover();
 
-    connect(discoveryReply, &NetworkDeviceDiscoveryReply::networkDeviceInfoAdded, this, &AmtronECUDiscovery::checkNetworkDevice);
-
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::hostAddressDiscovered, this, &AmtronECUDiscovery::checkNetworkDevice);
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
         qCDebug(dcMennekes()) << "Discovery: Network discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "network devices";
+        m_networkDeviceInfos = discoveryReply->networkDeviceInfos();
         m_gracePeriodTimer.start();
-        discoveryReply->deleteLater();
     });
 }
 
@@ -64,16 +64,16 @@ QList<AmtronECUDiscovery::Result> AmtronECUDiscovery::discoveryResults() const
     return m_discoveryResults;
 }
 
-void AmtronECUDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo)
+void AmtronECUDiscovery::checkNetworkDevice(const QHostAddress &address)
 {
     int port = 502;
     int slaveId = 0xff;
-    qCDebug(dcMennekes()) << "Discovery: Checking network device:" << networkDeviceInfo << "Port:" << port << "Slave ID:" << slaveId;
+    qCDebug(dcMennekes()) << "Discovery: Checking network device:" << address.toString() << "Port:" << port << "Slave ID:" << slaveId;
 
-    AmtronECU *connection = new AmtronECU(networkDeviceInfo.address(), port, slaveId, this);
+    AmtronECU *connection = new AmtronECU(address, port, slaveId, this);
     m_connections.append(connection);
 
-    connect(connection, &AmtronECU::reachableChanged, this, [=](bool reachable){
+    connect(connection, &AmtronECU::reachableChanged, this, [this, connection, address](bool reachable){
         if (!reachable) {
             cleanupConnection(connection);
             return;
@@ -81,7 +81,7 @@ void AmtronECUDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevi
 
         connect(connection, &AmtronECU::initializationFinished, this, [=](bool success){
             if (!success) {
-                qCDebug(dcMennekes()) << "Discovery: Initialization failed on" << networkDeviceInfo.address().toString();
+                qCDebug(dcMennekes()) << "Discovery: Initialization failed on" << address.toString();
                 cleanupConnection(connection);
                 return;
             }
@@ -90,18 +90,18 @@ void AmtronECUDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevi
             result.detectedVersion = connection->detectedVersion();
             result.firmwareVersion = QString::fromUtf8(QByteArray::fromHex(QByteArray::number(connection->firmwareVersion(), 16)));
             result.model = connection->model();
-            result.networkDeviceInfo = networkDeviceInfo;
+            result.address = address;
 
             // Note: the model is only known in firmware >= 5.22
             // Some useres have to stay on 5.12 due to calibration law which is not available on 5.22
             switch(connection->detectedVersion()) {
             case AmtronECU::VersionOld:
-                qCDebug(dcMennekes()) << "Discovery: Found wallbox with old firmware version:" << result.firmwareVersion << result.networkDeviceInfo;
+                qCDebug(dcMennekes()) << "Discovery: Found wallbox with old firmware version:" << result.firmwareVersion << address.toString();
                 m_discoveryResults.append(result);
                 break;
             case AmtronECU::VersionNew:
                 if (connection->model().isEmpty()) {
-                    qCDebug(dcMennekes()) << "Discovery: Firmware version is >= 5.22 but the model could not be fetched. Skipping" << networkDeviceInfo.address();
+                    qCDebug(dcMennekes()) << "Discovery: Firmware version is >= 5.22 but the model could not be fetched. Skipping" << address.toString();
                     break;
                 }
 
@@ -109,7 +109,7 @@ void AmtronECUDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevi
                 m_discoveryResults.append(result);
                 break;
             case AmtronECU::VersionUnknown:
-                qCDebug(dcMennekes()) << "Discovery: Firmware version or model invalid. Skipping" << networkDeviceInfo.address();
+                qCDebug(dcMennekes()) << "Discovery: Firmware version or model invalid. Skipping" << address.toString();
                 break;
             }
 
@@ -117,13 +117,13 @@ void AmtronECUDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevi
         });
 
         if (!connection->initialize()) {
-            qCDebug(dcMennekes()) << "Discovery: Unable to initialize connection on" << networkDeviceInfo.address().toString();
+            qCDebug(dcMennekes()) << "Discovery: Unable to initialize connection on" << address.toString();
             cleanupConnection(connection);
         }
     });
 
     connect(connection, &AmtronECU::checkReachabilityFailed, this, [=](){
-        qCDebug(dcMennekes()) << "Discovery: Checking reachability failed on" << networkDeviceInfo.address().toString();
+        qCDebug(dcMennekes()) << "Discovery: Checking reachability failed on" << address.toString();
         cleanupConnection(connection);
     });
 
@@ -140,6 +140,10 @@ void AmtronECUDiscovery::cleanupConnection(AmtronECU *connection)
 void AmtronECUDiscovery::finishDiscovery()
 {
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
+
+    // Fill in all network device infos we have
+    for (int i = 0; i < m_discoveryResults.count(); i++)
+        m_discoveryResults[i].networkDeviceInfo = m_networkDeviceInfos.get(m_discoveryResults.at(i).address);
 
     // Cleanup any leftovers...we don't care any more
     foreach (AmtronECU *connection, m_connections)

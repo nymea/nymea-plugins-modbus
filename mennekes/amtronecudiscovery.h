@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2023, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -42,13 +42,15 @@ class AmtronECUDiscovery : public QObject
 {
     Q_OBJECT
 public:
-    explicit AmtronECUDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, QObject *parent = nullptr);
     struct Result {
         AmtronECU::Version detectedVersion;
         QString firmwareVersion;
         QString model;
+        QHostAddress address;
         NetworkDeviceInfo networkDeviceInfo;
     };
+
+    explicit AmtronECUDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, QObject *parent = nullptr);
 
     void startDiscovery();
 
@@ -59,15 +61,13 @@ signals:
 
 private:
     NetworkDeviceDiscovery *m_networkDeviceDiscovery = nullptr;
-
     QTimer m_gracePeriodTimer;
     QDateTime m_startDateTime;
-
+    NetworkDeviceInfos m_networkDeviceInfos;
     QList<AmtronECU *> m_connections;
-
     QList<Result> m_discoveryResults;
 
-    void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
+    void checkNetworkDevice(const QHostAddress &address);
     void cleanupConnection(AmtronECU *connection);
 
     void finishDiscovery();
