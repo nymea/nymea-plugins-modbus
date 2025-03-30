@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2023, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -64,28 +64,39 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
             webBoxDiscovery->deleteLater();
             ThingDescriptors descriptors;
             foreach (const NetworkDeviceInfo &networkDeviceInfo, webBoxDiscovery->discoveryResults()) {
-                QString title = "SMA Sunny WebBox (" + networkDeviceInfo.address().toString() + ")";
+                QString title = "SMA Sunny WebBox";
                 QString description;
-                if (networkDeviceInfo.macAddressManufacturer().isEmpty()) {
-                    description = networkDeviceInfo.macAddress();
-                } else {
-                    description = networkDeviceInfo.macAddress() + " (" + networkDeviceInfo.macAddressManufacturer() + ")";
+                MacAddressInfo macInfo;
+                switch (networkDeviceInfo.monitorMode()) {
+                case NetworkDeviceInfo::MonitorModeMac:
+                    macInfo = networkDeviceInfo.macAddressInfos().constFirst();
+                    description = networkDeviceInfo.address().toString();
+                    if (!macInfo.vendorName().isEmpty())
+                        description += " - " + networkDeviceInfo.macAddressInfos().constFirst().vendorName();
+                break;
+                case NetworkDeviceInfo::MonitorModeHostName:
+                    description = networkDeviceInfo.address().toString();
+                    break;
+                case NetworkDeviceInfo::MonitorModeIp:
+                    description = "Interface: " + networkDeviceInfo.networkInterface().name();
+                    break;
                 }
 
                 ThingDescriptor descriptor(sunnyWebBoxThingClassId, title, description);
 
-                // Check for reconfiguration
-                foreach (Thing *existingThing, myThings()) {
-                    if (existingThing->paramValue(sunnyWebBoxThingMacAddressParamTypeId).toString() == networkDeviceInfo.macAddress()) {
-                        descriptor.setThingId(existingThing->id());
-                        break;
-                    }
+                ParamList params;
+                params << Param(sunnyWebBoxThingAddressParamTypeId, networkDeviceInfo.thingParamValueAddress());
+                params << Param(sunnyWebBoxThingHostNameParamTypeId, networkDeviceInfo.thingParamValueHostName());
+                params << Param(sunnyWebBoxThingMacAddressParamTypeId, networkDeviceInfo.thingParamValueMacAddress());
+                descriptor.setParams(params);
+
+                // Check if we already have set up this device
+                Thing *existingThing = myThings().findByParams(params);
+                if (existingThing) {
+                    qCDebug(dcSma()) << "This thing already exists in the system:" << networkDeviceInfo;
+                    descriptor.setThingId(existingThing->id());
                 }
 
-                ParamList params;
-                params << Param(sunnyWebBoxThingHostParamTypeId, networkDeviceInfo.address().toString());
-                params << Param(sunnyWebBoxThingMacAddressParamTypeId, networkDeviceInfo.macAddress());
-                descriptor.setParams(params);
                 descriptors.append(descriptor);
             }
             info->addThingDescriptors(descriptors);
@@ -163,8 +174,6 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
         connect(speedwireDiscovery, &SpeedwireDiscovery::discoveryFinished, this, [=](){
             qCDebug(dcSma()) << "Speed wire discovery finished.";
             speedwireDiscovery->deleteLater();
-
-            ThingDescriptors descriptors;
             foreach (const SpeedwireDiscovery::SpeedwireDiscoveryResult &result, speedwireDiscovery->discoveryResult()) {
 
                 if (result.deviceType != Speedwire::DeviceTypeInverter)
@@ -188,15 +197,16 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
                 }
 
                 ParamList params;
-                params << Param(speedwireInverterThingHostParamTypeId, result.address.toString());
-                params << Param(speedwireInverterThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
+                params << Param(speedwireInverterThingMacAddressParamTypeId, result.networkDeviceInfo.thingParamValueMacAddress());
+                params << Param(speedwireInverterThingHostNameParamTypeId, result.networkDeviceInfo.thingParamValueHostName());
+                params << Param(speedwireInverterThingAddressParamTypeId, result.networkDeviceInfo.thingParamValueAddress());
                 params << Param(speedwireInverterThingSerialNumberParamTypeId, result.serialNumber);
                 params << Param(speedwireInverterThingModelIdParamTypeId, result.modelId);
                 descriptor.setParams(params);
-                descriptors.append(descriptor);
+
+                info->addThingDescriptor(descriptor);
             }
 
-            info->addThingDescriptors(descriptors);
             info->finish(Thing::ThingErrorNoError);
         });
 
@@ -225,7 +235,9 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
                 }
 
                 ParamList params;
-                params << Param(modbusSolarInverterThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
+                params << Param(modbusSolarInverterThingMacAddressParamTypeId, result.networkDeviceInfo.thingParamValueMacAddress());
+                params << Param(modbusSolarInverterThingHostNameParamTypeId, result.networkDeviceInfo.thingParamValueHostName());
+                params << Param(modbusSolarInverterThingAddressParamTypeId, result.networkDeviceInfo.thingParamValueAddress());
                 params << Param(modbusSolarInverterThingPortParamTypeId, result.port);
                 params << Param(modbusSolarInverterThingSlaveIdParamTypeId, result.modbusAddress);
                 params << Param(modbusSolarInverterThingSerialNumberParamTypeId, result.serialNumber);
@@ -259,7 +271,9 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
                 }
 
                 ParamList params;
-                params << Param(modbusBatteryInverterThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
+                params << Param(modbusBatteryInverterThingMacAddressParamTypeId, result.networkDeviceInfo.thingParamValueMacAddress());
+                params << Param(modbusBatteryInverterThingAddressParamTypeId, result.networkDeviceInfo.thingParamValueAddress());
+                params << Param(modbusBatteryInverterThingHostNameParamTypeId, result.networkDeviceInfo.thingParamValueHostName());
                 params << Param(modbusBatteryInverterThingPortParamTypeId, result.port);
                 params << Param(modbusBatteryInverterThingSlaveIdParamTypeId, result.modbusAddress);
                 params << Param(modbusBatteryInverterThingSerialNumberParamTypeId, result.serialNumber);
@@ -305,25 +319,42 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
     qCDebug(dcSma()) << "Setup thing" << thing << thing->params();
 
     if (thing->thingClassId() == sunnyWebBoxThingClassId) {
-        // Check if a Sunny WebBox is already added with this mac address
-        foreach (SunnyWebBox *sunnyWebBox, m_sunnyWebBoxes.values()) {
-            if (sunnyWebBox->macAddress() == thing->paramValue(sunnyWebBoxThingMacAddressParamTypeId).toString()){
-                qCWarning(dcSma()) << "Thing with mac address" << thing->paramValue(sunnyWebBoxThingMacAddressParamTypeId).toString() << " already added!";
-                info->finish(Thing::ThingErrorThingInUse);
-                return;
-            }
-        }
 
         if (m_sunnyWebBoxes.contains(thing)) {
             qCDebug(dcSma()) << "Setup after reconfiguration, cleaning up...";
             m_sunnyWebBoxes.take(thing)->deleteLater();
+
+            if (m_monitors.contains(thing)) {
+                hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+            }
         }
 
-        SunnyWebBox *sunnyWebBox = new SunnyWebBox(hardwareManager()->networkManager(), QHostAddress(thing->paramValue(sunnyWebBoxThingHostParamTypeId).toString()), this);
-        sunnyWebBox->setMacAddress(thing->paramValue(sunnyWebBoxThingMacAddressParamTypeId).toString());
+        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(thing);
+        if (!monitor) {
+            qCWarning(dcSma()) << "Unable to register monitor with the given params" << thing << thing->params();
+            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("Unable to set up the connection with this configuration, please reconfigure the connection."));
+            return;
+        }
 
+        m_monitors.insert(thing, monitor);
+
+        // Make sure the monitor gets cleaned up when setup gets aborted
+        connect(info, &ThingSetupInfo::aborted, monitor, [this, thing](){
+            if (m_monitors.contains(thing)) {
+                qCDebug(dcSma()) << "Unregistering monitor because setup has been aborted.";
+                hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+            }
+        });
+
+        SunnyWebBox *sunnyWebBox = new SunnyWebBox(hardwareManager()->networkManager(), monitor->networkDeviceInfo().address(), this);
         connect(info, &ThingSetupInfo::aborted, sunnyWebBox, &SunnyWebBox::deleteLater);
         connect(sunnyWebBox, &SunnyWebBox::destroyed, this, [thing, this] { m_sunnyWebBoxes.remove(thing);});
+        connect(monitor, &NetworkDeviceMonitor::reachableChanged, this, [sunnyWebBox, monitor](bool reachable){
+            qCDebug(dcSma()) << "SunnyWebBox: monitor reachable changed" << monitor;
+            if (reachable) {
+                sunnyWebBox->setHostAddress(monitor->networkDeviceInfo().address());
+            }
+        });
 
         QString requestId = sunnyWebBox->getPlantOverview();
         connect(sunnyWebBox, &SunnyWebBox::plantOverviewReceived, info, [=] (const QString &messageId, SunnyWebBox::Overview overview) {
@@ -388,18 +419,36 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
 
     } else if (thing->thingClassId() == speedwireInverterThingClassId) {
 
-        QHostAddress address = QHostAddress(thing->paramValue(speedwireInverterThingHostParamTypeId).toString());
+        if (m_speedwireInverters.contains(thing)) {
+            qCDebug(dcSma()) << "Reconfiguring existing thing" << thing->name();
+            m_speedwireInverters.take(thing)->deleteLater();
 
-        // FIXME: use the monitor here since the IP might change
+            if (m_monitors.contains(thing)) {
+                hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+            }
+        }
+
+        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(thing);
+        if (!monitor) {
+            qCWarning(dcSma()) << "Unable to register monitor with the given params" << thing << thing->params();
+            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("Unable to set up the connection with this configuration, please reconfigure the connection."));
+            return;
+        }
+
+        m_monitors.insert(thing, monitor);
+
+        // Make sure the monitor gets cleaned up when setup gets aborted
+        connect(info, &ThingSetupInfo::aborted, monitor, [this, thing](){
+            if (m_monitors.contains(thing)) {
+                qCDebug(dcSma()) << "Unregistering monitor because setup has been aborted.";
+                hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+            }
+        });
 
         quint32 serialNumber = static_cast<quint32>(thing->paramValue(speedwireInverterThingSerialNumberParamTypeId).toUInt());
         quint16 modelId = static_cast<quint16>(thing->paramValue(speedwireInverterThingModelIdParamTypeId).toUInt());
 
-        if (m_speedwireInverters.contains(thing)) {
-            m_speedwireInverters.take(thing)->deleteLater();
-        }
-
-        SpeedwireInverter *inverter = new SpeedwireInverter(getSpeedwireInterface(), address, modelId, serialNumber, this);
+        SpeedwireInverter *inverter = new SpeedwireInverter(getSpeedwireInterface(), monitor, modelId, serialNumber, this);
         qCDebug(dcSma()) << "Inverter: Interface initialized successfully.";
 
         QString password;
@@ -519,15 +568,14 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
             }
         }
 
-        MacAddress macAddress = MacAddress(thing->paramValue(modbusSolarInverterThingMacAddressParamTypeId).toString());
-        if (!macAddress.isValid()) {
-            qCWarning(dcSma()) << "The configured mac address is not valid" << thing->params();
-            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The MAC address is not known. Please reconfigure the thing."));
+        // Create the monitor
+        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(thing);
+        if (!monitor) {
+            qCWarning(dcSma()) << "Unable to register monitor with the given params" << thing << thing->params();
+            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("Unable to set up the connection with this configuration, please reconfigure the connection."));
             return;
         }
 
-        // Create the monitor
-        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(macAddress);
         m_monitors.insert(thing, monitor);
 
         QHostAddress address = monitor->networkDeviceInfo().address();
@@ -571,15 +619,14 @@ void IntegrationPluginSma::setupThing(ThingSetupInfo *info)
             }
         }
 
-        MacAddress macAddress = MacAddress(thing->paramValue(modbusBatteryInverterThingMacAddressParamTypeId).toString());
-        if (!macAddress.isValid()) {
-            qCWarning(dcSma()) << "The configured mac address is not valid" << thing->params();
-            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The MAC address is not known. Please reconfigure the thing."));
+        // Create the monitor
+        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(thing);
+        if (!monitor) {
+            qCWarning(dcSma()) << "Unable to register monitor with the given params" << thing << thing->params();
+            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("Unable to set up the connection with this configuration, please reconfigure the connection."));
             return;
         }
 
-        // Create the monitor
-        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(macAddress);
         m_monitors.insert(thing, monitor);
 
         QHostAddress address = monitor->networkDeviceInfo().address();

@@ -33,15 +33,41 @@
 
 #include <QDateTime>
 
-SpeedwireInverter::SpeedwireInverter(SpeedwireInterface *speedwireInterface, const QHostAddress &address, quint16 modelId, quint32 serialNumber, QObject *parent) :
-    QObject(parent),
-    m_speedwireInterface(speedwireInterface),
-    m_address(address),
-    m_modelId(modelId),
-    m_serialNumber(serialNumber)
+SpeedwireInverter::SpeedwireInverter(SpeedwireInterface *speedwireInterface, NetworkDeviceMonitor *monitor, quint16 modelId, quint32 serialNumber, QObject *parent)
+    : QObject{parent},
+    m_speedwireInterface{speedwireInterface},
+    m_monitor{monitor},
+    m_modelId{modelId},
+    m_serialNumber{serialNumber}
+{
+    if (!m_monitor->networkDeviceInfo().address().isNull())
+        m_address = m_monitor->networkDeviceInfo().address();
+
+    qCDebug(dcSma()) << "Inverter: setup interface on" << m_monitor;
+    connect(m_monitor, &NetworkDeviceMonitor::reachableChanged, this, [this](bool reachable){
+        qCDebug(dcSma()) << "Inverter: reachable changed" << m_monitor;
+        if (reachable) {
+            m_address = m_monitor->networkDeviceInfo().address();
+        }
+    });
+
+    connect(m_speedwireInterface, &SpeedwireInterface::dataReceived, this, &SpeedwireInverter::processData);
+}
+
+SpeedwireInverter::SpeedwireInverter(SpeedwireInterface *speedwireInterface, const QHostAddress &address, quint16 modelId, quint32 serialNumber, QObject *parent)
+    : QObject{parent},
+    m_speedwireInterface{speedwireInterface},
+    m_address{address},
+    m_modelId{modelId},
+    m_serialNumber{serialNumber}
 {
     qCDebug(dcSma()) << "Inverter: setup interface on" << m_address.toString();
     connect(m_speedwireInterface, &SpeedwireInterface::dataReceived, this, &SpeedwireInverter::processData);
+}
+
+NetworkDeviceMonitor *SpeedwireInverter::monitor() const
+{
+    return m_monitor;
 }
 
 SpeedwireInverter::State SpeedwireInverter::state() const

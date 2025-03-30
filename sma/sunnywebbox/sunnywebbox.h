@@ -31,8 +31,8 @@
 #ifndef SUNNYWEBBOX_H
 #define SUNNYWEBBOX_H
 
-#include "integrations/thing.h"
-#include "network/networkaccessmanager.h"
+#include <integrations/thing.h>
+#include <network/networkaccessmanager.h>
 
 #include <QObject>
 #include <QJsonObject>
@@ -88,9 +88,6 @@ public:
     QHostAddress hostAddress() const;
     void setHostAddress(const QHostAddress &address);
 
-    QString macAddress() const;
-    void setMacAddress(const QString &macAddress);
-
     QNetworkReply *sendRequest(const QHostAddress &address, const QString &procedure, const QJsonObject &params = QJsonObject(), const QString &requestId = QString());
 
     static QString generateRequestId();
@@ -99,7 +96,6 @@ private:
     NetworkAccessManager *m_networkManager = nullptr;
     bool m_connected = false;
     QHostAddress m_hostAddresss;
-    QString m_macAddress;
     QDateTime m_lastRequest;
 
     QString sendMessage(const QHostAddress &address, const QString &procedure);

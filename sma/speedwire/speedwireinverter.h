@@ -34,11 +34,14 @@
 #include <QObject>
 #include <QQueue>
 
+#include <network/networkdevicemonitor.h>
+
 #include "sma.h"
 #include "speedwire.h"
 #include "speedwireinterface.h"
 #include "speedwireinverterreply.h"
 #include "speedwireinverterrequest.h"
+
 
 class SpeedwireInverter : public QObject
 {
@@ -54,7 +57,10 @@ public:
     };
     Q_ENUM(State)
 
+    explicit SpeedwireInverter(SpeedwireInterface *speedwireInterface, NetworkDeviceMonitor *monitor, quint16 modelId, quint32 serialNumber, QObject *parent = nullptr);
     explicit SpeedwireInverter(SpeedwireInterface *speedwireInterface, const QHostAddress &address, quint16 modelId, quint32 serialNumber, QObject *parent = nullptr);
+
+    NetworkDeviceMonitor *monitor() const;
 
     State state() const;
 
@@ -122,6 +128,7 @@ signals:
 
 private:
     SpeedwireInterface *m_speedwireInterface = nullptr;
+    NetworkDeviceMonitor *m_monitor = nullptr;
     QHostAddress m_address;
     QString m_password;
 

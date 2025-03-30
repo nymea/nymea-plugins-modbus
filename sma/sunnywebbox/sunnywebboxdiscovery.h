@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2022, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -50,7 +50,7 @@ signals:
     void discoveryFinished();
 
 private slots:
-    void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
+    void checkNetworkDevice(const QHostAddress &address);
     void cleanupPendingReplies();
     void finishDiscovery();
 
@@ -59,9 +59,9 @@ private:
     NetworkDeviceDiscovery *m_networkDeviceDiscovery = nullptr;
     NetworkDeviceDiscoveryReply *m_discoveryReply = nullptr;
 
+    QList<QHostAddress> m_discoveredHosts;
     NetworkDeviceInfos m_discoveryResults;
-    NetworkDeviceInfos m_discoveredNetworkDeviceInfos;
-    NetworkDeviceInfos m_verifiedNetworkDeviceInfos;
+    NetworkDeviceInfos m_networkDeviceInfos;
 
     QDateTime m_startDateTime;
     QList<QNetworkReply *> m_pendingReplies;
