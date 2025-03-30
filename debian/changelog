@@ -1,3 +1,28 @@
+nymea-plugins-modbus (1.11.0) jammy; urgency=medium
+
+  [ Simon Stürz ]
+  * Alphainnotec: Update to networkdevice interface
+  * Amperfied: Update to networkdevice interface
+  * Huawei: Update to networkdevice interface
+  * IDM: Update to networkdevice interface
+  * Kostal: Update to networkdevice interface
+  * Mennekes: Update to networkdevice interface
+  * Modbuscommander: Update network device discovery
+  * MTec: Update to networkdevice interface
+  * PC-Electric: Update to networkdevice interface
+  * PhoenixConnect: Update to networkdevice interface
+  * SMA: Update to networkdevice interface
+  * Solax: Update to networkdevice interface
+  * Stiebeleltron: Update to the networkdevice interface
+  * Sungrow: Update to networkdevice interface
+  * SunSpec: Update to networkdevice interface
+  * Vestel: Update to networkdevice interface
+  * Webasto: Update to networkdevice interface
+  * Inro: Pantabox improve connected handling
+  * Schrack: Default to 3-phase connection
+
+ -- jenkins <developer@nymea.io>  Sun, 30 Mar 2025 20:37:37 +0200
+
 nymea-plugins-modbus (1.10.0) jammy; urgency=medium
 
   [ Simon Stürz ]
