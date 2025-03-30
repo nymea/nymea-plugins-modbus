@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2023, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -65,16 +65,16 @@ void SunSpecDiscovery::startDiscovery()
     m_startDateTime = QDateTime::currentDateTime();
 
     // Imedialty check any new device gets discovered
-    connect(discoveryReply, &NetworkDeviceDiscoveryReply::networkDeviceInfoAdded, this, &SunSpecDiscovery::checkNetworkDevice);
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::hostAddressDiscovered, this, &SunSpecDiscovery::checkNetworkDevice);
 
     // Check what might be left on finished
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
-    connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [this, discoveryReply](){
         qCDebug(dcSunSpec()) << "Discovery: Network discovery finished. Give some time for pending discovery checks to finish...";
+        m_networkDeviceInfos = discoveryReply->networkDeviceInfos();
 
         // Give the last connections added right before the network discovery finished a chance to check the device...
         QTimer::singleShot(3000, this, [this](){
-            qCDebug(dcSunSpec()) << "Discovery: Grace period timer triggered";
             finishDiscovery();
         });
     });
@@ -121,7 +121,7 @@ void SunSpecDiscovery::testNextConnection(const QHostAddress &address)
     connectionTimer->start();
 }
 
-void SunSpecDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo)
+void SunSpecDiscovery::checkNetworkDevice(const QHostAddress &address)
 {
     // Create a connection queue for this network device
 
@@ -132,13 +132,13 @@ void SunSpecDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevice
 
         foreach (quint16 slaveId, m_slaveIds) {
 
-            SunSpecConnection *connection = new SunSpecConnection(networkDeviceInfo.address(), port, slaveId, m_byteOrder, this);
+            SunSpecConnection *connection = new SunSpecConnection(address, port, slaveId, m_byteOrder, this);
             connection->setNumberOfRetries(1);
             connection->setTimeout(500);
             m_connections.append(connection);
             connectionQueue.enqueue(connection);
 
-            connect(connection, &SunSpecConnection::connectedChanged, this, [=](bool connected){
+            connect(connection, &SunSpecConnection::connectedChanged, this, [this, connection, connectionQueue, address](bool connected){
                 if (!connected) {
                     // Disconnected ... done with this connection
                     cleanupConnection(connection);
@@ -155,7 +155,9 @@ void SunSpecDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevice
                 // Modbus TCP connected, try to discovery sunspec models...
                 connect(connection, &SunSpecConnection::discoveryFinished, this, [=](bool success){
                     if (!success) {
-                        qCDebug(dcSunSpec()) << "Discovery: SunSpec discovery failed on" << QString("%1:%2").arg(networkDeviceInfo.address().toString()).arg(port) << "slave ID:" << slaveId << "Continue...";;
+                        qCDebug(dcSunSpec()) << "Discovery: SunSpec discovery failed on"
+                                             << QString("%1:%2").arg(address.toString()).arg(connection->port())
+                                             << "slave ID:" << connection->slaveId() << "Continue...";
                         cleanupConnection(connection);
                         return;
                     }
@@ -163,7 +165,7 @@ void SunSpecDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevice
                     // Success, we found some sunspec models here, let's read some infomation from the models
 
                     Result result;
-                    result.networkDeviceInfo = networkDeviceInfo;
+                    result.address = address;
                     result.port = connection->port();
                     result.slaveId = connection->slaveId();
 
@@ -186,7 +188,9 @@ void SunSpecDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevice
 
                 // Run SunSpec discovery on connection...
                 if (!connection->startDiscovery()) {
-                    qCDebug(dcSunSpec()) << "Discovery: Unable to discover SunSpec data on connection" << QString("%1:%2").arg(networkDeviceInfo.address().toString()).arg(port) << "slave ID:" << slaveId << "Continue...";;
+                    qCDebug(dcSunSpec()) << "Discovery: Unable to discover SunSpec data on connection"
+                                         << QString("%1:%2").arg(address.toString()).arg(connection->port())
+                                         << "slave ID:" << connection->slaveId() << "Continue...";
                     cleanupConnection(connection);
                 }
             });
@@ -194,15 +198,17 @@ void SunSpecDiscovery::checkNetworkDevice(const NetworkDeviceInfo &networkDevice
             // If we get any error...skip this host...
             connect(connection->modbusTcpClient(), &QModbusTcpClient::errorOccurred, this, [=](QModbusDevice::Error error){
                 if (error != QModbusDevice::NoError) {
-                    qCDebug(dcSunSpec()) << "Discovery: Connection error on" << QString("%1:%2").arg(networkDeviceInfo.address().toString()).arg(port) << "slave ID:" << slaveId << "Continue...";;
+                    qCDebug(dcSunSpec()) << "Discovery: Connection error on"
+                                         << QString("%1:%2").arg(address.toString()).arg(connection->port())
+                                         << "slave ID:" << connection->slaveId() << "Continue...";
                     cleanupConnection(connection);
                 }
             });
         }
     }
 
-    m_pendingConnectionAttempts[networkDeviceInfo.address()] = connectionQueue;
-    testNextConnection(networkDeviceInfo.address());
+    m_pendingConnectionAttempts[address] = connectionQueue;
+    testNextConnection(address);
 }
 
 void SunSpecDiscovery::cleanupConnection(SunSpecConnection *connection)
@@ -223,10 +229,15 @@ void SunSpecDiscovery::finishDiscovery()
 {
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
 
+    // Fill in all network device infos we have
+    for (int i = 0; i < m_results.count(); i++)
+        m_results[i].networkDeviceInfo = m_networkDeviceInfos.get(m_results.at(i).address);
+
     // Cleanup any leftovers...we don't care any more
     foreach (SunSpecConnection *connection, m_connections)
         cleanupConnection(connection);
 
-    qCInfo(dcSunSpec()) << "Discovery: Finished the discovery process. Found" << m_results.count() << "SunSpec devices in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
+    qCInfo(dcSunSpec()) << "Discovery: Finished the discovery process. Found" << m_results.count()
+                        << "SunSpec devices in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
     emit discoveryFinished();
 }
