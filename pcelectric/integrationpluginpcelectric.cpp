@@ -62,14 +62,16 @@ void IntegrationPluginPcElectric::discoverThings(ThingDiscoveryInfo *info)
             qCDebug(dcPcElectric()) << "Discovered:" << descriptor.title() << descriptor.description();
 
             // Check if we already have set up this device
-            Things existingThings = myThings().filterByParam(ev11ThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
+            Things existingThings = myThings().filterByParam(ev11ThingSerialNumberParamTypeId, result.serialNumber);
             if (existingThings.count() == 1) {
-                qCDebug(dcPcElectric()) << "This PCE wallbox already exists in the system:" << result.networkDeviceInfo;
+                qCDebug(dcPcElectric()) << "This PCE wallbox already exists in the system:" << result.serialNumber << result.networkDeviceInfo;
                 descriptor.setThingId(existingThings.first()->id());
             }
 
             ParamList params;
-            params << Param(ev11ThingMacAddressParamTypeId, result.networkDeviceInfo.macAddress());
+            params << Param(ev11ThingMacAddressParamTypeId, result.networkDeviceInfo.thingParamValueMacAddress());
+            params << Param(ev11ThingHostNameParamTypeId, result.networkDeviceInfo.thingParamValueHostName());
+            params << Param(ev11ThingAddressParamTypeId, result.networkDeviceInfo.thingParamValueAddress());
             params << Param(ev11ThingSerialNumberParamTypeId, result.serialNumber);
             // Note: if we discover also the port and modbusaddress, we must fill them in from the discovery here, for now everywhere the defaults...
             descriptor.setParams(params);
@@ -97,14 +99,13 @@ void IntegrationPluginPcElectric::setupThing(ThingSetupInfo *info)
         }
     }
 
-    MacAddress macAddress = MacAddress(thing->paramValue(ev11ThingMacAddressParamTypeId).toString());
-    if (!macAddress.isValid()) {
-        qCWarning(dcPcElectric()) << "The configured mac address is not valid" << thing->params();
-        info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The MAC address is not known. Please reconfigure the thing."));
+    NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(thing);
+    if (!monitor) {
+        qCWarning(dcPcElectric()) << "Could not create a valid network device monitor for the given parameters" << thing->params();
+        info->finish(Thing::ThingErrorInvalidParameter);
         return;
     }
 
-    NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(macAddress);
     m_monitors.insert(thing, monitor);
 
     connect(info, &ThingSetupInfo::aborted, monitor, [=](){
@@ -285,7 +286,7 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
     Thing *thing = info->thing();
     NetworkDeviceMonitor *monitor = m_monitors.value(thing);
 
-    qCDebug(dcPcElectric()) << "Setting up PCE wallbox finished successfully" << monitor->networkDeviceInfo().address().toString();
+    qCDebug(dcPcElectric()) << "Setting up PCE wallbox using" << monitor->networkDeviceInfo().address().toString();
 
     PceWallbox *connection = new PceWallbox(monitor->networkDeviceInfo().address(), 502, 1, this);
     connect(info, &ThingSetupInfo::aborted, connection, &PceWallbox::deleteLater);
