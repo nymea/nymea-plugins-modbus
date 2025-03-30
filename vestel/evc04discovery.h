@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2022, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -49,6 +49,7 @@ public:
         QString firmwareVersion;
         QString brand;
         QString model;
+        QHostAddress address;
         NetworkDeviceInfo networkDeviceInfo;
     };
 
@@ -66,11 +67,12 @@ private:
     QTimer m_gracePeriodTimer;
     QDateTime m_startDateTime;
 
-    QList<EVC04ModbusTcpConnection*> m_connections;
+    NetworkDeviceInfos m_networkDeviceInfos;
+    QList<EVC04ModbusTcpConnection *> m_connections;
 
     QList<Result> m_discoveryResults;
 
-    void checkNetworkDevice(const NetworkDeviceInfo &networkDeviceInfo);
+    void checkNetworkDevice(const QHostAddress &address);
     void cleanupConnection(EVC04ModbusTcpConnection *connection);
 
     void finishDiscovery();
