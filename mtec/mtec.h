@@ -55,7 +55,10 @@ public:
     explicit MTec(const QHostAddress &address, QObject *parent = nullptr);
     ~MTec();
 
+    ModbusTcpMaster *modbusTcpMaster() const;
+
     QHostAddress hostAddress() const;
+
     bool connected() const;
 
     QModbusReply *setTargetRoomTemperature(double targetRoomTemperature);

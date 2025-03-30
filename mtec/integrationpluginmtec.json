@@ -13,15 +13,23 @@
                     "displayName": "MTec",
                     "id": "451e38d8-50d5-4ae9-8d9f-21af9347128d",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": ["thermostat", "connectable"],
+                    "interfaces": ["thermostat", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "f1c43b1e-cffe-4d30-bda0-c23ed648dd71",
-                            "name": "ipAddress",
+                            "name": "address",
                             "displayName": "IP address",
                             "type": "QString",
                             "inputType": "IPv4Address",
-                            "defaultValue": "127.0.0.1"
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "544348c3-485d-4fba-bb9b-a64031241ac8",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
                         },
                         {
                             "id": "906f6099-d0e1-4297-a2b3-f8ec4482c578",
