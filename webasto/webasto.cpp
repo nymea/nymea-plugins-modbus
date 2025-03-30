@@ -50,15 +50,9 @@ Webasto::Webasto(const QHostAddress &address, uint port, QObject *parent) :
     });
 }
 
-void Webasto::setAddress(const QHostAddress &address)
+ModbusTcpMaster *Webasto::modbusTcpMaster() const
 {
-    qCDebug(dcWebasto()) << "Webasto: set address" << address;
-    m_modbusConnection->setHostAddress(address);
-}
-
-QHostAddress Webasto::address() const
-{
-    return m_modbusConnection->hostAddress();
+    return m_modbusConnection;
 }
 
 bool Webasto::connected()

@@ -12,23 +12,33 @@
                     "id": "48472124-3199-4827-990a-b72069bd5658",
                     "displayName": "Webasto Live",
                     "name": "webastoLive",
-                    "createMethods": ["discovery"],
-                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable"],
+                    "createMethods": ["discovery", "user"],
+                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "51fa3ea8-e819-46ca-b975-1bee6285441c",
-                            "name": "ipAddress",
+                            "name": "address",
                             "displayName": "IP address",
                             "type": "QString",
-                            "defaultValue": "0.0.0.0"
+                            "inputType": "IPv4Address",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "8ff1cc86-e0b4-4887-ae2a-95de0f9cb24c",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
                         },
                         {
                             "id": "4aa97965-fc1c-488a-92a6-848c214564bc",
                             "name": "macAddress",
                             "displayName": "MAC address",
                             "type": "QString",
-                            "defaultValue": "",
-                            "readOnly": true
+                            "inputType": "MacAddress",
+                            "readOnly": true,
+                            "defaultValue": ""
                         }
                     ],
                     "stateTypes":[
@@ -200,8 +210,8 @@
                     "id": "1dddfbf4-a49d-4e28-8cbc-108547a369a2",
                     "displayName": "Webasto NEXT",
                     "name": "webastoNext",
-                    "createMethods": ["discovery"],
-                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable"],
+                    "createMethods": ["discovery", "user"],
+                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable", "networkdevice"],
                     "settingsTypes": [
                         {
                             "id": "5292e079-515c-47ae-9117-6a70d5c02566",
@@ -225,12 +235,29 @@
                     ],
                     "paramTypes": [
                         {
+                            "id": "3e971569-dd28-4031-a5bc-86b58c9b9096",
+                            "name": "address",
+                            "displayName": "IP address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "eddebfc7-28ee-479d-b528-6837ed974d27",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
+                        },
+                        {
                             "id": "882b662f-ec7c-4134-be31-5d36567b9fc2",
                             "name": "macAddress",
                             "displayName": "MAC address",
                             "type": "QString",
-                            "defaultValue": "",
-                            "readOnly": true
+                            "readOnly": true,
+                            "inputType": "MacAddress",
+                            "defaultValue": ""
                         },
                         {
                             "id": "be5a0c50-f3ba-4562-b6c0-a0208e2ab118",
@@ -437,8 +464,24 @@
                     "displayName": "Webasto Unite",
                     "id": "f7598439-a794-44d4-ae51-47ab40189d61",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable"],
+                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable", "networkdevice"],
                     "paramTypes": [
+                        {
+                            "id": "41d713fb-4658-4797-ab0f-a978f5677eb9",
+                            "name": "address",
+                            "displayName": "IP address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "fb98c75c-fb6b-4043-8794-d941017d471e",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
+                        },
                         {
                             "id": "99aedef2-1b23-4ab8-bee4-7e8b57b8fa18",
                             "name":"macAddress",
