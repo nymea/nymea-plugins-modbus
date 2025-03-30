@@ -130,10 +130,15 @@ void IntegrationPluginModbusCommander::discoverThings(ThingDiscoveryInfo *info)
                 }
 
                 QString description;
-                if (networkDeviceInfo.macAddressManufacturer().isEmpty()) {
-                    description = networkDeviceInfo.macAddress();
+                MacAddressInfo macInfo = networkDeviceInfo.macAddressInfos().constFirst();
+                description = networkDeviceInfo.address().toString();
+                if (!macInfo.vendorName().isEmpty())
+                    description += " - " + networkDeviceInfo.macAddressInfos().constFirst().vendorName();
+
+                if (networkDeviceInfo.hostName().isEmpty()) {
+                    title = macInfo.macAddress().toString();
                 } else {
-                    description = networkDeviceInfo.macAddress() + " (" + networkDeviceInfo.macAddressManufacturer() + ")";
+                    title = networkDeviceInfo.hostName() + " (" + macInfo.macAddress().toString() + ")";
                 }
 
                 ThingDescriptor descriptor(modbusTCPClientThingClassId, title, description);
