@@ -488,25 +488,42 @@ void IntegrationPluginSunSpec::executeAction(ThingActionInfo *info)
                 }
                 info->finish(Thing::ThingErrorNoError);
             });
-        } else if (action.actionTypeId() == sunspecStorageEnableChargingActionTypeId || action.actionTypeId() == sunspecStorageEnableDischargingActionTypeId) {
-            SunSpecStorageModel::Storctl_modFlags controlModeFlags;
-            if (action.param(sunspecStorageEnableChargingActionEnableChargingParamTypeId).value().toBool())
-                controlModeFlags.setFlag(SunSpecStorageModel::Storctl_modCharge);
-
-            if (thing->stateValue(sunspecStorageEnableDischargingStateTypeId).toBool())
-                controlModeFlags.setFlag(SunSpecStorageModel::Storctl_modDiScharge);
-
+        } else if (action.actionTypeId() == sunspecStorageEnableChargingActionTypeId) {
+            SunSpecStorageModel::Storctl_modFlags controlModeFlags = storage->storCtlMod();
+            bool enabled = action.param(sunspecStorageEnableChargingActionEnableChargingParamTypeId).value().toBool();
+            controlModeFlags.setFlag(SunSpecStorageModel::Storctl_modCharge, enabled);
             QModbusReply *reply = storage->setStorCtlMod(controlModeFlags);
             if (!reply) {
                 info->finish(Thing::ThingErrorHardwareFailure);
                 return;
             }
             connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
-            connect(reply, &QModbusReply::finished, info, [info, reply]{
+            connect(reply, &QModbusReply::finished, info, [info, reply, enabled]{
                 if (reply->error() != QModbusDevice::NoError) {
                     info->finish(Thing::ThingErrorHardwareFailure);
                     return;
                 }
+
+                info->thing()->setStateValue(sunspecStorageEnableChargingStateTypeId, enabled);
+                info->finish(Thing::ThingErrorNoError);
+            });
+        } else if (action.actionTypeId() == sunspecStorageEnableDischargingActionTypeId) {
+            SunSpecStorageModel::Storctl_modFlags controlModeFlags = storage->storCtlMod();
+            bool enabled = action.param(sunspecStorageEnableDischargingActionEnableDischargingParamTypeId).value().toBool();
+            controlModeFlags.setFlag(SunSpecStorageModel::Storctl_modDiScharge, enabled);
+            QModbusReply *reply = storage->setStorCtlMod(controlModeFlags);
+            if (!reply) {
+                info->finish(Thing::ThingErrorHardwareFailure);
+                return;
+            }
+            connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+            connect(reply, &QModbusReply::finished, info, [info, reply, enabled]{
+                if (reply->error() != QModbusDevice::NoError) {
+                    info->finish(Thing::ThingErrorHardwareFailure);
+                    return;
+                }
+
+                info->thing()->setStateValue(sunspecStorageEnableDischargingStateTypeId, enabled);
                 info->finish(Thing::ThingErrorNoError);
             });
         } else if (action.actionTypeId() == sunspecStorageChargingRateActionTypeId) {
