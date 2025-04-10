@@ -1,3 +1,10 @@
+nymea-plugins-modbus (1.13.0) jammy; urgency=medium
+
+  [ Simon Stürz ]
+  * SunSpec: Fix enable charging/discharging actions for energy storages
+
+ -- jenkins <developer@nymea.io>  Thu, 10 Apr 2025 17:13:37 +0200
+
 nymea-plugins-modbus (1.11.0) jammy; urgency=medium
 
   [ Simon Stürz ]
