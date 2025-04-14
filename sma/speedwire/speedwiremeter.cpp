@@ -152,7 +152,7 @@ void SpeedwireMeter::evaluateReachable()
     // Note: the meter sends every second the data on the multicast
     // If the meter has not sent data within the last 5 seconds it seems not to be reachable
     bool reachable = false;
-    if (QDateTime::currentDateTime().toMSecsSinceEpoch() - m_lastSeenTimestamp < 5000) {
+    if (QDateTime::currentMSecsSinceEpoch() - m_lastSeenTimestamp < 5000) {
         reachable = true;
     }
 
@@ -200,7 +200,7 @@ void SpeedwireMeter::processData(const QHostAddress &senderAddress, quint16 send
     qCDebug(dcSma()).noquote() << "Meter: Measurements received from" << QString("%1:%2").arg(senderAddress.toString()).arg(senderPort) <<  "Serial number:" << serialNumber << "Model ID:" << modelId;
 
     // Make sure the rate is at max 1Hz, some meters send much more data, which creates an uneccessary load
-    if (QDateTime::currentDateTime().toMSecsSinceEpoch() - m_lastSeenTimestamp < 1000)
+    if (QDateTime::currentMSecsSinceEpoch() - m_lastSeenTimestamp < 1000)
         return;
 
     // Parse the packet data
@@ -319,7 +319,7 @@ void SpeedwireMeter::processData(const QHostAddress &senderAddress, quint16 send
     }
 
     // Save the current timestamp for reachable evaluation
-    m_lastSeenTimestamp = QDateTime::currentDateTime().toMSecsSinceEpoch();
+    m_lastSeenTimestamp = QDateTime::currentMSecsSinceEpoch();
     evaluateReachable();
 
     emit valuesUpdated();
