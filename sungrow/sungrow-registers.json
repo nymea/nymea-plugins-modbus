@@ -310,7 +310,109 @@
             ]
         },
         {
-            "id": "energyValues2",
+            "id": "energyValues3",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "meterVoltagePhaseA",
+                    "address": 5740,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Meter voltage phase A",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "unit": "Volt",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterVoltagePhaseB",
+                    "address": 5741,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Meter voltage phase B",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "unit": "Volt",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterVoltagePhaseC",
+                    "address": 5742,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Meter voltage phase C",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -1,
+                    "unit": "Volt",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterCurrentPhaseA",
+                    "address": 5743,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Meter current phase A",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -2,
+                    "unit": "Amper",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterCurrentPhaseB",
+                    "address": 5744,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Meter current phase B",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -2,
+                    "unit": "Amper",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterCurrentPhaseC",
+                    "address": 5745,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Meter current phase C",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -2,
+                    "unit": "Amper",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterTotalEnergyImported",
+                    "address": 5746,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Meter totoal energy imported",
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -2,
+                    "access": "RO"
+                },
+                {
+                    "id": "meterTotalEnergyExported",
+                    "address": 5748,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Meter totoal energy exported",
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "staticScaleFactor": -2,
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "energyValues4",
             "readSchedule": "update",
             "registers": [
                 {
@@ -465,7 +567,7 @@
                     "id": "batteryPower",
                     "address": 13021,
                     "size": 1,
-                    "type": "uint16",
+                    "type": "int16",
                     "registerType": "inputRegister",
                     "description": "Battery power",
                     "unit": "W",

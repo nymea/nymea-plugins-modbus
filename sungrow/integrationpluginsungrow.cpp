@@ -214,7 +214,7 @@ void IntegrationPluginSungrow::setupThing(ThingSetupInfo *info)
             // Update the meter if available
             Thing *meterThing = getMeterThing(thing);
             if (meterThing) {
-                auto runningState = sungrowConnection->runningState();
+                quint16 runningState = sungrowConnection->runningState();
                 qCDebug(dcSungrow()) << "Power generated from PV:" << (runningState & (0x1 << 0) ? "true" : "false");
                 qCDebug(dcSungrow()) << "Battery charging:" << (runningState & (0x1 << 1) ? "true" : "false");
                 qCDebug(dcSungrow()) << "Battery discharging:" << (runningState & (0x1 << 2) ? "true" : "false");
@@ -245,7 +245,14 @@ void IntegrationPluginSungrow::setupThing(ThingSetupInfo *info)
                 batteryThing->setStateValue(sungrowBatteryBatteryLevelStateTypeId, sungrowConnection->batteryLevel());
                 batteryThing->setStateValue(sungrowBatteryBatteryCriticalStateTypeId, sungrowConnection->batteryLevel() < 5);
 
-                batteryThing->setStateValue(sungrowBatteryCurrentPowerStateTypeId, sungrowConnection->batteryPower());
+                // Note: since firmware 2024 this is a int16 value, and we can use the value directly without convertion
+                if (sungrowConnection->batteryPower() < 0) {
+                    batteryThing->setStateValue(sungrowBatteryCurrentPowerStateTypeId, sungrowConnection->batteryPower());
+                } else {
+                    qint16 batteryPower = (sungrowConnection->runningState() & (0x1 << 1) ? sungrowConnection->batteryPower() : sungrowConnection->batteryPower() * -1);
+                    batteryThing->setStateValue(sungrowBatteryCurrentPowerStateTypeId, batteryPower);
+                }
+
                 quint16 runningState = sungrowConnection->runningState();
                 if (runningState & (0x1 << 1)) { //Bit 1: Battery charging bit
                     batteryThing->setStateValue(sungrowBatteryChargingStateStateTypeId, "charging");
