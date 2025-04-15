@@ -52,12 +52,15 @@ void IntegrationPluginSungrow::discoverThings(ThingDiscoveryInfo *info)
     SungrowDiscovery *discovery = new SungrowDiscovery(hardwareManager()->networkDeviceDiscovery(), m_modbusTcpPort, m_modbusSlaveAddress, info);
     connect(discovery, &SungrowDiscovery::discoveryFinished, info, [=](){
         foreach (const SungrowDiscovery::SungrowDiscoveryResult &result, discovery->discoveryResults()) {
-            QString title = "Sungrow " + QString::number(result.nominalOutputPower) + "kW Inverter";
+            QString title = "Sungrow " + result.model;
 
             if (!result.serialNumber.isEmpty())
-                title.append(" " + result.serialNumber);
+                title.append(" - " + result.serialNumber);
 
-            ThingDescriptor descriptor(sungrowInverterTcpThingClassId, title, result.networkDeviceInfo.address().toString());
+            QString description(QString::number(result.nominalOutputPower)+ "kW Inverter - " + result.networkDeviceInfo.address().toString());
+
+
+            ThingDescriptor descriptor(sungrowInverterTcpThingClassId, title, description);
             qCInfo(dcSungrow()) << "Discovered:" << descriptor.title() << descriptor.description();
 
             ParamList params;
@@ -158,6 +161,9 @@ void IntegrationPluginSungrow::setupThing(ThingSetupInfo *info)
                     child->setStateValue(sungrowMeterCurrentPhaseAStateTypeId, 0);
                     child->setStateValue(sungrowMeterCurrentPhaseBStateTypeId, 0);
                     child->setStateValue(sungrowMeterCurrentPhaseCStateTypeId, 0);
+                    child->setStateValue(sungrowMeterVoltagePhaseAStateTypeId, 0);
+                    child->setStateValue(sungrowMeterVoltagePhaseBStateTypeId, 0);
+                    child->setStateValue(sungrowMeterVoltagePhaseCStateTypeId, 0);
                     child->setStateValue(sungrowMeterApparentPowerPhaseAStateTypeId, 0);
                     child->setStateValue(sungrowMeterApparentPowerPhaseBStateTypeId, 0);
                     child->setStateValue(sungrowMeterApparentPowerPhaseCStateTypeId, 0);
