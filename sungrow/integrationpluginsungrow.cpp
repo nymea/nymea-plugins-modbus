@@ -52,12 +52,15 @@ void IntegrationPluginSungrow::discoverThings(ThingDiscoveryInfo *info)
     SungrowDiscovery *discovery = new SungrowDiscovery(hardwareManager()->networkDeviceDiscovery(), m_modbusTcpPort, m_modbusSlaveAddress, info);
     connect(discovery, &SungrowDiscovery::discoveryFinished, info, [=](){
         foreach (const SungrowDiscovery::SungrowDiscoveryResult &result, discovery->discoveryResults()) {
-            QString title = "Sungrow " + QString::number(result.nominalOutputPower) + "kW Inverter";
+            QString title = "Sungrow " + result.model;
 
             if (!result.serialNumber.isEmpty())
-                title.append(" " + result.serialNumber);
+                title.append(" - " + result.serialNumber);
 
-            ThingDescriptor descriptor(sungrowInverterTcpThingClassId, title, result.networkDeviceInfo.address().toString());
+            QString description(QString::number(result.nominalOutputPower)+ "kW Inverter - " + result.networkDeviceInfo.address().toString());
+
+
+            ThingDescriptor descriptor(sungrowInverterTcpThingClassId, title, description);
             qCInfo(dcSungrow()) << "Discovered:" << descriptor.title() << descriptor.description();
 
             ParamList params;
@@ -158,6 +161,9 @@ void IntegrationPluginSungrow::setupThing(ThingSetupInfo *info)
                     child->setStateValue(sungrowMeterCurrentPhaseAStateTypeId, 0);
                     child->setStateValue(sungrowMeterCurrentPhaseBStateTypeId, 0);
                     child->setStateValue(sungrowMeterCurrentPhaseCStateTypeId, 0);
+                    child->setStateValue(sungrowMeterVoltagePhaseAStateTypeId, 0);
+                    child->setStateValue(sungrowMeterVoltagePhaseBStateTypeId, 0);
+                    child->setStateValue(sungrowMeterVoltagePhaseCStateTypeId, 0);
                     child->setStateValue(sungrowMeterApparentPowerPhaseAStateTypeId, 0);
                     child->setStateValue(sungrowMeterApparentPowerPhaseBStateTypeId, 0);
                     child->setStateValue(sungrowMeterApparentPowerPhaseCStateTypeId, 0);
@@ -214,7 +220,7 @@ void IntegrationPluginSungrow::setupThing(ThingSetupInfo *info)
             // Update the meter if available
             Thing *meterThing = getMeterThing(thing);
             if (meterThing) {
-                auto runningState = sungrowConnection->runningState();
+                quint16 runningState = sungrowConnection->runningState();
                 qCDebug(dcSungrow()) << "Power generated from PV:" << (runningState & (0x1 << 0) ? "true" : "false");
                 qCDebug(dcSungrow()) << "Battery charging:" << (runningState & (0x1 << 1) ? "true" : "false");
                 qCDebug(dcSungrow()) << "Battery discharging:" << (runningState & (0x1 << 2) ? "true" : "false");
@@ -245,7 +251,14 @@ void IntegrationPluginSungrow::setupThing(ThingSetupInfo *info)
                 batteryThing->setStateValue(sungrowBatteryBatteryLevelStateTypeId, sungrowConnection->batteryLevel());
                 batteryThing->setStateValue(sungrowBatteryBatteryCriticalStateTypeId, sungrowConnection->batteryLevel() < 5);
 
-                batteryThing->setStateValue(sungrowBatteryCurrentPowerStateTypeId, sungrowConnection->batteryPower());
+                // Note: since firmware 2024 this is a int16 value, and we can use the value directly without convertion
+                if (sungrowConnection->batteryPower() < 0) {
+                    batteryThing->setStateValue(sungrowBatteryCurrentPowerStateTypeId, sungrowConnection->batteryPower());
+                } else {
+                    qint16 batteryPower = (sungrowConnection->runningState() & (0x1 << 1) ? sungrowConnection->batteryPower() : sungrowConnection->batteryPower() * -1);
+                    batteryThing->setStateValue(sungrowBatteryCurrentPowerStateTypeId, batteryPower);
+                }
+
                 quint16 runningState = sungrowConnection->runningState();
                 if (runningState & (0x1 << 1)) { //Bit 1: Battery charging bit
                     batteryThing->setStateValue(sungrowBatteryChargingStateStateTypeId, "charging");
