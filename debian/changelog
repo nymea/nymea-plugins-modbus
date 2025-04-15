@@ -1,3 +1,12 @@
+nymea-plugins-modbus (1.13.0) jammy; urgency=medium
+
+  [ Simon Stürz ]
+  * SunSpec: Fix enable charging/discharging actions for energy storages
+  * SMA: Improve datetime performance
+  * Sungrow: Fix battery calculations and add device type string
+
+ -- jenkins <developer@nymea.io>  Tue, 15 Apr 2025 15:25:47 +0200
+
 nymea-plugins-modbus (1.11.0) jammy; urgency=medium
 
   [ Simon Stürz ]
