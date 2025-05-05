@@ -68,8 +68,36 @@
                             "allowedValues": [
                                 "0 | Charging allowed",
                                 "1 | Charging allowed inverted",
-                                "2 | PWM and S0 signaling"
+                                "2 | PWM and S0 signaling",
+                                "3 | Limit and S0 signaling"
                             ]
+                        },
+                        {
+                            "id": "a5354c66-0a7a-44a8-bea0-0305b91b63cf",
+                            "name": "phaseAutoSwitchPause",
+                            "displayName": "Phase autoswitch pause",
+                            "type": "int",
+                            "unit": "Seconds",
+                            "minValue": 5,
+                            "maxValue": 600,
+                            "defaultValue": 6
+                        },
+                        {
+                            "id": "7b0b5375-7980-4f99-9542-1dcb0390fb22",
+                            "name": "phaseAutoSwitchMinChargingTime",
+                            "displayName": "Phase autoswitch minimal charging time",
+                            "type": "int",
+                            "unit": "Seconds",
+                            "minValue": 5,
+                            "maxValue": 600,
+                            "defaultValue": 120
+                        },
+                        {
+                            "id": "5cece964-fe64-4e26-86ee-ba8fbbedd523",
+                            "name": "forceChargingResume",
+                            "displayName": "Force charging resume",
+                            "type": "bool",
+                            "defaultValue": false
                         }
                     ],
                     "stateTypes": [
@@ -143,6 +171,15 @@
                             "writable": true
                         },
                         {
+                            "id": "bbe97e15-8fa7-42e0-9023-1d41425ccbee",
+                            "name": "currentPower",
+                            "displayName": "Active power",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
                             "id": "3da3ee80-e9e7-4237-85a6-b4adcb2f483b",
                             "name": "sessionEnergy",
                             "displayName": "Session energy",
@@ -172,6 +209,13 @@
                             "id": "142b4276-e2e9-4149-adc4-89d9d3e31117",
                             "name": "currentVersion",
                             "displayName": "Firmware version",
+                            "type": "QString",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "c606c59b-6b3e-4de8-aaf8-aea4742200d9",
+                            "name": "digitalInputFlag",
+                            "displayName": "Digital input flag",
                             "type": "QString",
                             "defaultValue": ""
                         }
