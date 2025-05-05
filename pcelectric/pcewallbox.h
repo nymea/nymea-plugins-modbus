@@ -54,11 +54,14 @@ public:
 
     bool update() override;
 
-    QueuedModbusReply *setChargingCurrent(quint16 chargingCurrent); // mA
+    QueuedModbusReply *setChargingCurrentAsync(quint16 chargingCurrent); // mA
 
-    QueuedModbusReply *setLedBrightness(quint16 percentage);
+    QueuedModbusReply *setLedBrightnessAsync(quint16 percentage);
+    QueuedModbusReply *setPhaseAutoSwitchPauseAsync(quint16 seconds);
+    QueuedModbusReply *setPhaseAutoSwitchMinChargingTimeAsync(quint16 seconds);
+    QueuedModbusReply *setForceChargingResumeAsync(quint16 value);
 
-    QueuedModbusReply *setDigitalInputMode(DigitalInputMode digitalInputMode);
+    QueuedModbusReply *setDigitalInputModeAsync(DigitalInputMode digitalInputMode);
 
 
     // Note: the modbus implementation of the wallbox gets stuck if a Modbus request has been sent
