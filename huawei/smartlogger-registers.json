@@ -1,0 +1,265 @@
+{
+    "className": "HuaweiSmartLogger",
+    "protocol": "TCP",
+    "endianness": "BigEndian",
+    "errorLimitUntilNotReachable": 15,
+    "checkReachableRegister": "inverterTotalActivePower",
+    "enums": [ ],
+    "blocks": [
+        {
+            "id": "meterData",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "meterVoltagePhaseA",
+                    "address": 32260,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Voltage phase A",
+                    "staticScaleFactor": -2,
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterVoltagePhaseB",
+                    "address": 32262,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Voltage phase B",
+                    "staticScaleFactor": -2,
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterVoltagePhaseC",
+                    "address": 32264,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Voltage phase C",
+                    "staticScaleFactor": -2,
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterData1Dummy0",
+                    "address": 32266,
+                    "size": 6,
+                    "type": "raw",
+                    "registerType": "holdingRegister",
+                    "description": "none",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterCurrentPhaseA",
+                    "address": 32272,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Current phase A",
+                    "unit": "A",
+                    "staticScaleFactor": -1,
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterCurrentPhaseB",
+                    "address": 32274,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Current phase B",
+                    "unit": "A",
+                    "staticScaleFactor": -1,
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterCurrentPhaseC",
+                    "address": 32276,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Current phase C",
+                    "unit": "A",
+                    "staticScaleFactor": -1,
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterActivePower",
+                    "address": 32278,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "holdingRegister",
+                    "description": "Total active output power of all inverters",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterData1Dummy2",
+                    "address": 32280,
+                    "size": 55,
+                    "type": "raw",
+                    "registerType": "holdingRegister",
+                    "description": "none",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterPowerPhaseA",
+                    "address": 32335,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Active power phase A",
+                    "staticScaleFactor": -3,
+                    "unit": "kW",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterPowerPhaseB",
+                    "address": 32337,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Active power phase B",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterPowerPhaseC",
+                    "address": 32339,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Active power phase C",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterTotalActiveElectricity",
+                    "address": 32341,
+                    "size": 4,
+                    "type": "int64",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Total active electricity",
+                    "staticScaleFactor": -2,
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterTotalReactiveElectricity",
+                    "address": 32345,
+                    "size": 4,
+                    "type": "int64",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Total reactive electricity",
+                    "staticScaleFactor": -2,
+                    "unit": "kvarh",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterNegativeActiveElectricity",
+                    "address": 32349,
+                    "size": 4,
+                    "type": "int64",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Negatoive active electricity",
+                    "staticScaleFactor": -2,
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterNegativeReactiveElectricity",
+                    "address": 32353,
+                    "size": 4,
+                    "type": "int64",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Negative reactive electricity",
+                    "staticScaleFactor": -2,
+                    "unit": "kvarh",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterPositiveActiveElectricity",
+                    "address": 32357,
+                    "size": 4,
+                    "type": "int64",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Positive active electricity",
+                    "staticScaleFactor": -2,
+                    "unit": "kWh",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterPositiveReactiveElectricity",
+                    "address": 32361,
+                    "size": 4,
+                    "type": "int64",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Positive reactive electricity",
+                    "staticScaleFactor": -2,
+                    "unit": "kvarh",
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        }
+    ],
+    "registers": [
+        {
+            "id": "inverterTotalActivePower",
+            "address": 40525,
+            "size": 2,
+            "type": "int32",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "Total active output power of all inverters",
+            "unit": "W",
+            "access": "RO"
+        },
+        {
+            "id": "inverterTotalEnergyProduced",
+            "address": 40560,
+            "size": 2,
+            "type": "uint32",
+            "registerType": "holdingRegister",
+            "readSchedule": "update",
+            "description": "Total energy yield produced by all inverters",
+            "unit": "kWh",
+            "staticScaleFactor": -2,
+            "defaultValue": "0",
+            "access": "RO"
+        }
+    ]
+}
+

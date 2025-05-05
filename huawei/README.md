@@ -1,6 +1,6 @@
 # Huawei FusionSolar
 
-Connects to a Huawei FusionSolar using Modbus TCP.
+Connects to a Huawei Inverters and Meters using Modbus TCP/RTU.
 
 ## Huawei FusionSolar
 
@@ -23,5 +23,9 @@ with the Huawei Solar Inverter. In order to allow nymea to read from the device 
 
 You can also contact the [official Huawei support](mailto:eu_inverter_support@huawei.com) in order to get the update files and instructions, or get it from [here](https://support.huawei.com/enterprise/en/digital-power/sdongle-pid-23826585/software).
 
-## More
-https://solar.huawei.com/eu/
+## Huawei Smartlogger
+
+The Huawei Smartlogger can be connected if the Modbus TCP protocol has been enabled on the device. By default, this option is disabled.
+In order to connect to the Smartlogger, the Modbus slave ID of the Meter has to be known. The ID is the same as for the Modbus RTU network of the Meter.
+
+Once successfully connected, one meter and one inverter will show in the system summing up all individual inverters of the system.

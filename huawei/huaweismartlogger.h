@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2024, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This fileDescriptor is part of nymea.
@@ -28,49 +28,25 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef INTEGRATIONPLUGINHUAWEI_H
-#define INTEGRATIONPLUGINHUAWEI_H
+#ifndef HUAWEISMARTLOGGER_H
+#define HUAWEISMARTLOGGER_H
 
-#include <QHash>
-#include <plugintimer.h>
-#include <integrations/integrationplugin.h>
-#include <network/networkdevicediscovery.h>
+#include <QObject>
 
-#include "extern-plugininfo.h"
+#include "huaweismartloggermodbustcpconnection.h"
 
-#include "huaweifusionsolar.h"
-#include "huaweimodbusrtuconnection.h"
-#include "huaweismartlogger.h"
-
-class IntegrationPluginHuawei: public IntegrationPlugin
+class HuaweiSmartLogger : public HuaweiSmartLoggerModbusTcpConnection
 {
     Q_OBJECT
-
-    Q_PLUGIN_METADATA(IID "io.nymea.IntegrationPlugin" FILE "integrationpluginhuawei.json")
-    Q_INTERFACES(IntegrationPlugin)
-
 public:
-    explicit IntegrationPluginHuawei();
+    explicit HuaweiSmartLogger(const QHostAddress &hostAddress, uint port, quint16 meterSlaveId, QObject *parent = nullptr);
 
-    void discoverThings(ThingDiscoveryInfo *info) override;
-    void setupThing(ThingSetupInfo *info) override;
-    void postSetupThing(Thing *thing) override;
-    void thingRemoved(Thing *thing) override;
+    bool update() override;
+
+signals:
 
 private:
-    PluginTimer *m_pluginTimer = nullptr;
-
-    QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
-    QHash<Thing *, HuaweiFusionSolar *> m_connections;
-    QHash<Thing *, HuaweiSmartLogger *> m_smartLoggerConnections;
-    QHash<Thing *, HuaweiModbusRtuConnection *> m_rtuConnections;
-
-    void setupFusionSolar(ThingSetupInfo *info);
-    void setupSmartLogger(ThingSetupInfo *info);
-
-    QHash<Thing *, QList<float>> m_inverterEnergyProducedHistory;
-    void evaluateEnergyProducedValue(Thing *inverterThing, float energyProduced);
+    quint16 m_meterSlaveId = 5;
 };
 
-#endif // INTEGRATIONPLUGINHUAWEI_H
-
+#endif // HUAWEISMARTLOGGER_H

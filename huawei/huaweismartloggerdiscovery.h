@@ -1,9 +1,9 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2024, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
-* This fileDescriptor is part of nymea.
+* This file is part of nymea.
 * This project including source code and documentation is protected by
 * copyright law, and remains the property of nymea GmbH. All rights, including
 * reproduction, publication, editing and translation, are reserved. The use of
@@ -28,49 +28,48 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef INTEGRATIONPLUGINHUAWEI_H
-#define INTEGRATIONPLUGINHUAWEI_H
+#ifndef HUAWEISMARTLOGGERDISCOVERY_H
+#define HUAWEISMARTLOGGERDISCOVERY_H
 
-#include <QHash>
-#include <plugintimer.h>
-#include <integrations/integrationplugin.h>
+#include <QObject>
+
 #include <network/networkdevicediscovery.h>
 
-#include "extern-plugininfo.h"
-
-#include "huaweifusionsolar.h"
-#include "huaweimodbusrtuconnection.h"
 #include "huaweismartlogger.h"
 
-class IntegrationPluginHuawei: public IntegrationPlugin
+class HuaweiSmartLoggerDiscovery : public QObject
 {
     Q_OBJECT
-
-    Q_PLUGIN_METADATA(IID "io.nymea.IntegrationPlugin" FILE "integrationpluginhuawei.json")
-    Q_INTERFACES(IntegrationPlugin)
-
 public:
-    explicit IntegrationPluginHuawei();
+    explicit HuaweiSmartLoggerDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint16 port, QObject *parent = nullptr);
 
-    void discoverThings(ThingDiscoveryInfo *info) override;
-    void setupThing(ThingSetupInfo *info) override;
-    void postSetupThing(Thing *thing) override;
-    void thingRemoved(Thing *thing) override;
+    typedef struct Result {
+        QHostAddress address;
+        NetworkDeviceInfo networkDeviceInfo;
+    } Result;
+
+    QList<Result> results() const;
+
+    void startDiscovery();
+
+signals:
+    void discoveryFinished();
 
 private:
-    PluginTimer *m_pluginTimer = nullptr;
+    NetworkDeviceDiscovery *m_networkDeviceDiscovery = nullptr;
+    quint16 m_port = 502;
+    QDateTime m_startDateTime;
 
-    QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
-    QHash<Thing *, HuaweiFusionSolar *> m_connections;
-    QHash<Thing *, HuaweiSmartLogger *> m_smartLoggerConnections;
-    QHash<Thing *, HuaweiModbusRtuConnection *> m_rtuConnections;
+    QList<HuaweiSmartLogger *> m_connections;
+    QList<Result> m_results;
 
-    void setupFusionSolar(ThingSetupInfo *info);
-    void setupSmartLogger(ThingSetupInfo *info);
+    NetworkDeviceInfos m_networkDeviceInfos;
 
-    QHash<Thing *, QList<float>> m_inverterEnergyProducedHistory;
-    void evaluateEnergyProducedValue(Thing *inverterThing, float energyProduced);
+private slots:
+    void checkNetworkDevice(const QHostAddress &address);
+    void cleanupConnection(HuaweiSmartLogger *connection);
+
+    void finishDiscovery();
 };
 
-#endif // INTEGRATIONPLUGINHUAWEI_H
-
+#endif // HUAWEISMARTLOGGERDISCOVERY_H
