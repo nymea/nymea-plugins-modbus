@@ -1,4 +1,4 @@
-# Copyright 2021 - 2024, nymea GmbH
+# Copyright 2021 - 2025, nymea GmbH
 # Contact: contact@nymea.io
 #
 # This file is part of nymea.
@@ -57,7 +57,7 @@ def convertToCamelCase(text, capitalize = False):
         if len(camelCaseSplit) == 0:
             finalWords.append(words[i])  
         else:
-            logging.debug('Camel calse split words', camelCaseSplit)
+            logging.debug('Camel case split words', camelCaseSplit)
             for j in range(len(camelCaseSplit)):
                 finalWords.append(camelCaseSplit[j])  
 
@@ -260,6 +260,11 @@ def getConversionToValueMethod(registerDefinition):
             return ('ModbusDataUtils::convertFromUInt32(static_cast<%s>(%s  * 1.0 / pow(10, %s)), m_endianness)' % (propertyTyp, propertyName, scaleFactorProperty))
         elif registerDefinition['type'] == 'int32':
             return ('ModbusDataUtils::convertFromInt32(static_cast<%s>(%s  * 1.0 / pow(10, %s)), m_endianness)' % (propertyTyp, propertyName, scaleFactorProperty))
+        elif registerDefinition['type'] == 'uint64':
+            return ('ModbusDataUtils::convertFromUInt64(static_cast<%s>(%s  * 1.0 / pow(10, %s)), m_endianness)' % (propertyTyp, propertyName, scaleFactorProperty))
+        elif registerDefinition['type'] == 'int64':
+            return ('ModbusDataUtils::convertFromInt64(static_cast<%s>(%s  * 1.0 / pow(10, %s)), m_endianness)' % (propertyTyp, propertyName, scaleFactorProperty))
+
 
     elif 'staticScaleFactor' in registerDefinition:
         scaleFactor = registerDefinition['staticScaleFactor']
@@ -271,6 +276,11 @@ def getConversionToValueMethod(registerDefinition):
             return ('ModbusDataUtils::convertFromUInt32(static_cast<%s>(%s  * 1.0 / pow(10, %s)), m_endianness)' % (propertyTyp, propertyName, scaleFactor))
         elif registerDefinition['type'] == 'int32':
             return ('ModbusDataUtils::convertFromInt32(static_cast<%s>(%s  * 1.0 / pow(10, %s)), m_endianness)' % (propertyTyp, propertyName, scaleFactor))
+        elif registerDefinition['type'] == 'uint64':
+            return ('ModbusDataUtils::convertFromUInt64(static_cast<%s>(%s  * 1.0 / pow(10, %s)), m_endianness)' % (propertyTyp, propertyName, scaleFactor))
+        elif registerDefinition['type'] == 'int64':
+            return ('ModbusDataUtils::convertFromInt64(static_cast<%s>(%s  * 1.0 / pow(10, %s)), m_endianness)' % (propertyTyp, propertyName, scaleFactor))
+
 
     # Handle default types
     elif registerDefinition['type'] == 'uint16':
@@ -317,6 +327,10 @@ def getValueConversionMethod(registerDefinition):
             return ('ModbusDataUtils::convertToUInt32(values, m_endianness) * 1.0 * pow(10, %s)' % (scaleFactorProperty))
         elif registerDefinition['type'] == 'int32':
             return ('ModbusDataUtils::convertToInt32(values, m_endianness) * 1.0 * pow(10, %s)' % (scaleFactorProperty))
+        elif registerDefinition['type'] == 'uint64':
+            return ('ModbusDataUtils::convertToUInt64(values, m_endianness) * 1.0 * pow(10, %s)' % (scaleFactorProperty))
+        elif registerDefinition['type'] == 'int64':
+            return ('ModbusDataUtils::convertToInt64(values, m_endianness) * 1.0 * pow(10, %s)' % (scaleFactorProperty))
 
     elif 'staticScaleFactor' in registerDefinition:
         scaleFactor = registerDefinition['staticScaleFactor']
@@ -328,6 +342,11 @@ def getValueConversionMethod(registerDefinition):
             return ('ModbusDataUtils::convertToUInt32(values, m_endianness) * 1.0 * pow(10, %s)' % (scaleFactor))
         elif registerDefinition['type'] == 'int32':
             return ('ModbusDataUtils::convertToInt32(values, m_endianness) * 1.0 * pow(10, %s)' % (scaleFactor))
+        elif registerDefinition['type'] == 'uint64':
+            return ('ModbusDataUtils::convertToUInt64(values, m_endianness) * 1.0 * pow(10, %s)' % (scaleFactor))
+        elif registerDefinition['type'] == 'int64':
+            return ('ModbusDataUtils::convertToInt64(values, m_endianness) * 1.0 * pow(10, %s)' % (scaleFactor))
+
 
     # Handle default types
     elif registerDefinition['type'] == 'uint16':
@@ -394,10 +413,10 @@ def validateBlocks(blockDefinitions):
                 registerAccess = blockRegister['access']
                 registerType = blockRegister['registerType']
             else:
-                previouseRegisterAddress = blockRegisters[i - 1]['address']
-                previouseRegisterSize = blockRegisters[i - 1]['size']
-                previouseRegisterType = blockRegisters[i - 1]['registerType']
-                if previouseRegisterAddress + previouseRegisterSize != blockRegister['address']:
+                previousRegisterAddress = blockRegisters[i - 1]['address']
+                previousRegisterSize = blockRegisters[i - 1]['size']
+                #previousRegisterType = blockRegisters[i - 1]['registerType']
+                if previousRegisterAddress + previousRegisterSize != blockRegister['address']:
                     logger.warning('Error: block %s has invalid register order in register %s. There seems to be a gap between the registers.' % (blockName, blockRegister['id']))
                     exit(1)
 
@@ -431,7 +450,7 @@ def writeBlocksUpdateMethodDeclarations(fileDescriptor, blockDefinitions):
             blockSize += blockRegister['size']
 
         # Write the block update method
-        writeLine(fileDescriptor, '    /* Read block from start addess %s with size of %s registers containing following %s properties:' % (blockStartAddress, blockSize, registerCount))
+        writeLine(fileDescriptor, '    /* Read block from start address %s with size of %s registers containing following %s properties:' % (blockStartAddress, blockSize, registerCount))
         for i, registerDefinition in enumerate(blockRegisters):
             if 'unit' in registerDefinition and registerDefinition['unit'] != '':
                 writeLine(fileDescriptor, '      - %s [%s] - Address: %s, Size: %s' % (registerDefinition['description'], registerDefinition['unit'], registerDefinition['address'], registerDefinition['size']))
@@ -546,7 +565,7 @@ def writeBlockPropertiesProcessMethodDeclaration(fileDescriptor, blockDefinition
         blockSize = 0
         registerCount = 0
 
-        writeLine(fileDescriptor, '    /* Process block data from start addess %s with size of %s registers containing following %s properties:' % (blockStartAddress, blockSize, registerCount))
+        writeLine(fileDescriptor, '    /* Process block data from start address %s with size of %s registers containing following %s properties:' % (blockStartAddress, blockSize, registerCount))
         for i, registerDefinition in enumerate(blockRegisters):
             if 'unit' in registerDefinition and registerDefinition['unit'] != '':
                 writeLine(fileDescriptor, '     - %s [%s] - Address: %s, Size: %s' % (registerDefinition['description'], registerDefinition['unit'], registerDefinition['address'], registerDefinition['size']))
