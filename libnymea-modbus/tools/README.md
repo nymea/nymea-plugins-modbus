@@ -9,7 +9,7 @@ The basic workflow looks like this:
 * Include the modbus library project include file *after* the connections definition: `include(../modbus.pri)`
 * Run qmake on your project. The generated connection classes can be found in the build directory and will be included automatically into your project.
 
-The easiest way to see how to use the generated connection classes is to look at existing implemntations.
+The easiest way to see how to use the generated connection classes is to look at existing implementations.
 
 # JSON format
 
@@ -101,7 +101,7 @@ The class will be defined as
     
     * `<ClassName><Protocol>Connection`.
 
-The source code files will be calld:
+The source code files will be called:
 
     * `classnameprotocolconnection.h`
     * `classnameprotocolconnection.cpp`
@@ -124,9 +124,9 @@ If the modbus device supports both protocols and you want to generate a class fo
 
 # RTU reachable
 
-For modbus RTU it can be the case that the hardware resource is connected, but the target device is not connected on the serial line or does not respond. For those situations a mechanis has been introduce which will mark a device as not reachable if a certain amount of error occurred in a row without any successfull communication. Both, the RTU hardware resource `connected` state and the communication working state get represented by the `reachable` property of the RTU connection class.
+For modbus RTU it can be the case that the hardware resource is connected, but the target device is not connected on the serial line or does not respond. For those situations a mechanism, has been introduce which will mark a device as not reachable if a certain amount of error occurred in a row without any successful communication. Both, the RTU hardware resource `connected` state and the communication working state get represented by the `reachable` property of the RTU connection class.
 
-Depending on your device the amount of errors in a row can vary and can be specified using the `errorLimitUntilNotReachable` property. If not specified, a default of `10` will be assumend.
+Depending on your device the amount of errors in a row can vary and can be specified using the `errorLimitUntilNotReachable` property. If not specified, a default of `10` will be assumed.
 
 In order to check if the device is reachable, a register can be defined by the developer as a test register.
 For this purpose the `checkReachableRegister` property has been introduced. The property describes the `id` of the register which will be used for testing the communication. The register should be mandatory on the device
@@ -144,26 +144,26 @@ There are 2 possibilities:
 
 ## String endianness
 
-When converting multiple registers to a string, some modbus devices use a different endianess within a register.
-One register contains 2 bytes, miltiple registers in a row build up a string. The string endianess tells the generated class how to parse those strings. 
+When converting multiple registers to a string, some modbus devices use a different endianness within a register.
+One register contains 2 bytes, multiple registers in a row build up a string. The string endianness tells the generated class how to parse those strings. 
 
 There are 2 possibilities:
 
 * `BigEndian`: default if not specified: register bytes come in following order `[0, 1], [2, 3]`: `ABCD`
 * `LittleEndian`: register bytes come in following order `[1, 0] [3, 2]`: `BADC`
 
-Please not that the overall endianess of the device does not change the order of the register regarding strings since in modbus a normal register is definded as big endian. Only multiple registers combined to a numeric data type will be taken into account by the `endianess` property.
+Please not that the overall endianness of the device does not change the order of the register regarding strings since in modbus a normal register is defined as big endian. Only multiple registers combined to a numeric data type will be taken into account by the `endianness` property.
 
 ## Enums
 
-Many modbus devices provide inforation using `Enums`, indicating a special state trough a defined list of values. If a register implements an enum, you can define it in the `enums` section. The `name` property defines the name of the enum, and the script will generate a c++ enum definition from this section. Each enum value will then be generated using `<EnumName><EnumValueName> = <value>`.
+Many modbus devices provide information using `Enums`, indicating a special state trough a defined list of values. If a register implements an enum, you can define it in the `enums` section. The `name` property defines the name of the enum, and the script will generate a c++ enum definition from this section. Each enum value will then be generated using `<EnumName><EnumValueName> = <value>`.
 
-If a register represets an enum, you simply add the property `"enum": "NameOfEnum"` in the register map and the property will be defined using the resulting enum type. All convertion between enum and resulting modbus register value will be done automatically.
+If a register represents an enum, you simply add the property `"enum": "NameOfEnum"` in the register map and the property will be defined using the resulting enum type. All conversion between enum and resulting modbus register value will be done automatically.
 
 
 ## Queued requests
 
-Some modbus devices can process only one request at the time, and sometimes even require a delay between requests. For this purpose the boolean property `queuedRequests` and integer property `queuedRequestsDelay` (milliseconds) property hase been introdiced. By default, requests are not queued and the delay 0 ms.
+Some modbus devices can process only one request at the time, and sometimes even require a delay between requests. For this purpose the boolean property `queuedRequests` and integer property `queuedRequestsDelay` (milliseconds) property has been introduced. By default, requests are not queued and the delay 0 ms.
 
 ```
 {
@@ -178,15 +178,15 @@ Some modbus devices can process only one request at the time, and sometimes even
 
 ### init
 
-In most plugins you have the situation where you need to read some registers only once like serialnumbers or product identifiers right after beeing connected or even before you set up the thing in the plugin. 
+In most plugins you have the situation where you need to read some registers only once like serial numbers or product identifiers right after being connected or even before you set up the thing in the plugin. 
 
-For this purpose the `initialize()` method has been provided. If you call `initialize()` the connection will start reading all registers and blocks with `"readSchedule": "init"` defined and emits the signal `initializationFinished(bool success)` once all registers and blocks have been read successfully or on the first occured error. If the `success` parameter is `false`, something went wrong during intialization. Since any error will make the initialization process fail, it is important that the `init` registers are *mandatory* on the device.
+For this purpose the `initialize()` method has been provided. If you call `initialize()` the connection will start reading all registers and blocks with `"readSchedule": "init"` defined and emits the signal `initializationFinished(bool success)` once all registers and blocks have been read successfully or on the first occurred error. If the `success` parameter is `false`, something went wrong during initialization. Since any error will make the initialization process fail, it is important that the `init` registers are *mandatory* on the device.
 
 This method can also be used to identify the device if implemented properly, or to check if the device has the expected registers available with the given datatype.
 
 ### update
 
-In order to make the poll process as easy as possible, you can define the `readSchedule` as `update` for all registers and blocks you requier a preiodical update. If you call the `update()` method the connection will start reading all registers and blocks with `"readSchedule": "update"` and the properties will be updated internally. If a property value has changed, the `<propertyName>Changed()` signal will be emitted. If the property has been read (independet if changed or not) the `<propertyName>ReadFinished()` signal will be emitted.
+In order to make the poll process as easy as possible, you can define the `readSchedule` as `update` for all registers and blocks you require a periodical update. If you call the `update()` method the connection will start reading all registers and blocks with `"readSchedule": "update"` and the properties will be updated internally. If a property value has changed, the `<propertyName>Changed()` signal will be emitted. If the property has been read (independent if changed or not) the `<propertyName>ReadFinished()` signal will be emitted.
 
 
 ## Registers
@@ -208,8 +208,8 @@ Earch register will be defined as a property in the resulting class modbus TCP c
     * `string` : will be converted to `QString`
 * `readSchedule`: Optional. Defines when the register needs to be fetched. If no read schedule has been defined, the class will provide only the default access methods, but will not read the value during `initialize()` or `update()` calls. See [#read-schedules](Read schedules) for more information. Possible values are:
     * `init`: The register will be fetched during initialization.
-    * `update`: The register will be feched each time the `update()` method will be called.
-* `enum`: Optional: If the given data type represents an enum value, this propery can be set to the name of the used enum from the `enum` definition. The class will take care internally about the data convertion from and to the enum values.
+    * `update`: The register will be fetched each time the `update()` method will be called.
+* `enum`: Optional: If the given data type represents an enum value, this property can be set to the name of the used enum from the `enum` definition. The class will take care internally about the data conversion from and to the enum values.
 * `description`: Mandatory. A clear description of the register.
 * `unit`: Optional. Represents the unit of this register value.
 * `registerType`: Optional. Represents the type of the register and how to read/write it. Default is `holdingRegister`. Possible values are:
@@ -217,9 +217,9 @@ Earch register will be defined as a property in the resulting class modbus TCP c
     * `inputRegister`
     * `coils`
     * `discreteInputs`
-* `access`: Mandatory. Describes the access to this register. Possible valies are:
-    * `RO`: Read only access. Only the get method and the changed singal will be defined.
-    * `RW`: Read and write access. Also a set mehtod will be defined.
+* `access`: Mandatory. Describes the access to this register. Possible values are:
+    * `RO`: Read only access. Only the get method and the changed signal will be defined.
+    * `RW`: Read and write access. Also a set method will be defined.
     * `WO`: Write only. Only the set method will be defined.
 * `scaleFactor`: Optional. The name of the scale factor register to convert this value to float. `floatValue = intValue * 10^scaleFactor value`. The scale factor value is normally a `int16` value, i.e. -10 or 10
 * `staticScaleFactor`: Optional. Use this static scale factor to convert this register value to float. `floatValue = registerValue * 10^staticScaleFactor`. The scale factor value is normally a `int16` value, i.e. -10 or 10
@@ -229,14 +229,14 @@ Earch register will be defined as a property in the resulting class modbus TCP c
 
 On many device it is possible to read multiple registers in one modbus call. This can improve speed significantly when reading many register addresses which are in a row. 
 
-> Important: all registers within the block must exist, be in a row with no gaps inbetween and from the same function type!
+> Important: all registers within the block must exist, be in a row with no gaps in between and from the same function type!
 
-A block sequence looks like this and will define a read method for reading the entwire block. Writing multiple blocks is currently not supported since not needed so far, but could be added too. In any case, all registers must be read or written, never have combinations.
+A block sequence looks like this and will define a read method for reading the entire block. Writing multiple blocks is currently not supported since not needed so far, but could be added too. In any case, all registers must be read or written, never have combinations.
 
 * `id`: Mandatory. The id defines the name of the block used in the resulting class.
 * `readSchedule`: Optional. Defines when the register needs to be fetched. If no read schedule has been defined, the class will provide only the update methods, but will not read the value during `initialize()` or `update()` calls. Possible values are:
     * `init`: The register will be fetched during initialization. Once all `init `registers have been fetched, the `initializationFinished()` signal will be emitted.
-    * `update`: The register will be feched each time the `update()` method will be called.
+    * `update`: The register will be fetched each time the `update()` method will be called.
 * `registers`: Mandatory. The list of registers within the block. Please see the [Registers](#register) definition for more details about registers. The must be from the same register type, the same access type and there are no gaps allowed.
 
 Example block:
@@ -279,6 +279,6 @@ Assuming you have defined the registers in the `my-registers.json` within your p
     MODBUS_CONNECTIONS += my-registers.json
     include(../modbus.pri)
 
-If you want to get information about the autogenerating class process, you can add `MODBUS_TOOLS_CONFIG += VERBOSE` in order to get much more information of the process. 
+If you want to get information about the autogenerate class process, you can add `MODBUS_TOOLS_CONFIG += VERBOSE` in order to get much more information of the process. 
 
 Once you run qmake, in the build directory the autogenerated classes can be found. Also in your project you can find the generated classes for inspection.

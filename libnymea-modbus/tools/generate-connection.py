@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2021 - 2024, nymea GmbH
+# Copyright 2021 - 2025, nymea GmbH
 # Contact: contact@nymea.io
 #
 # This file is part of nymea.
@@ -208,7 +208,7 @@ def writeTcpHeaderFile():
 
     writeLine(headerFile, '    bool m_reachable = false;')
     writeLine(headerFile, '    bool m_initializing = false;')
-    writeLine(headerFile, '    QModbusReply *m_checkRechableReply = nullptr;')
+    writeLine(headerFile, '    QModbusReply *m_checkReachableReply = nullptr;')
     writeLine(headerFile, '    uint m_checkReachableRetries = 0;')
     writeLine(headerFile, '    uint m_checkReachableRetriesCount = 0;')
     writeLine(headerFile, '    bool m_communicationWorking = false;')
@@ -255,11 +255,12 @@ def writeTcpSourceFile():
     writeLine(sourceFile)
     writeLine(sourceFile, '#include "%s"' % headerFileName)
     writeLine(sourceFile)
-    writeLine(sourceFile, '#include <loggingcategories.h>')
     writeLine(sourceFile, '#include <math.h>')
     writeLine(sourceFile, '#include <QTimer>')
     writeLine(sourceFile, '#include <QModbusDevice>')
     writeLine(sourceFile, '#include <QModbusResponse>')
+    writeLine(sourceFile)
+    writeLine(sourceFile, '#include <loggingcategories.h>')
     writeLine(sourceFile)
     writeLine(sourceFile, 'NYMEA_LOGGING_CATEGORY(dc%s, "%s")' % (className, className))
     writeLine(sourceFile)
@@ -508,7 +509,7 @@ def writeTcpSourceFile():
     writeLine(sourceFile, '            m_checkReachableRetriesCount = 0;')
     writeLine(sourceFile, '            testReachability();')
     writeLine(sourceFile, '        } else {')
-    writeLine(sourceFile, '            qCWarning(dc%s()) << "Modbus TCP connection diconnected from" << m_modbusTcpMaster->hostAddress().toString() << ". The connection is not reachable any more.";' % (className))
+    writeLine(sourceFile, '            qCWarning(dc%s()) << "Modbus TCP connection disconnected from" << m_modbusTcpMaster->hostAddress().toString() << ". The connection is not reachable any more.";' % (className))
     writeLine(sourceFile, '            m_communicationWorking = false;')
     writeLine(sourceFile, '            m_communicationFailedCounter = 0;')
     writeLine(sourceFile, '            m_checkReachableRetriesCount = 0;')
@@ -605,7 +606,6 @@ def writeRtuHeaderFile():
     writeLine(headerFile)
     writeLine(headerFile, '#include <modbusdatautils.h>')
     writeLine(headerFile, '#include <hardware/modbus/modbusrtumaster.h>')
-
     writeLine(headerFile)
 
     # Begin of class
@@ -720,7 +720,7 @@ def writeRtuHeaderFile():
     writeLine(headerFile, '    quint16 m_slaveId = 1;')
     writeLine(headerFile)
     writeLine(headerFile, '    bool m_reachable = false;')
-    writeLine(headerFile, '    ModbusRtuReply *m_checkRechableReply = nullptr;')
+    writeLine(headerFile, '    ModbusRtuReply *m_checkReachableReply = nullptr;')
     writeLine(headerFile, '    uint m_checkReachableRetries = 0;')
     writeLine(headerFile, '    uint m_checkReachableRetriesCount = 0;')
     writeLine(headerFile, '    bool m_communicationWorking = false;')
@@ -758,9 +758,10 @@ def writeRtuSourceFile():
 
     writeLine(sourceFile, '#include "%s"' % headerFileName)
     writeLine(sourceFile)
-    writeLine(sourceFile, '#include <loggingcategories.h>')
     writeLine(sourceFile, '#include <math.h>')
     writeLine(sourceFile, '#include <QTimer>')
+    writeLine(sourceFile)
+    writeLine(sourceFile, '#include <loggingcategories.h>')
     writeLine(sourceFile)
     writeLine(sourceFile, 'NYMEA_LOGGING_CATEGORY(dc%s, "%s")' % (className, className))
     writeLine(sourceFile)
@@ -1075,7 +1076,7 @@ registerExists = False
 for registerDefinition in registerJson['registers']:
     if registerDefinition['id'] == checkReachableRegister:
         if not 'R' in registerDefinition['access']:
-            logger.warning('Error: The specified \"checkReachableRegister\" is not readable. Please select a manadtory readable register as checkReachableRegister.')
+            logger.warning('Error: The specified \"checkReachableRegister\" is not readable. Please select a mandatory readable register as checkReachableRegister.')
             exit(1)
 
         checkReachableRegister = registerDefinition
@@ -1087,7 +1088,7 @@ if 'blocks' in registerJson:
         for registerDefinition in blockDefinition['registers']:
             if registerDefinition['id'] == checkReachableRegister:
                 if not 'R' in registerDefinition['access']:
-                    logger.warning('Error: The specified \"checkReachableRegister\" is not readable. Please select a manadtory readable register as checkReachableRegister.')
+                    logger.warning('Error: The specified \"checkReachableRegister\" is not readable. Please select a mandatory readable register as checkReachableRegister.')
                     exit(1)
 
                 checkReachableRegister = registerDefinition
