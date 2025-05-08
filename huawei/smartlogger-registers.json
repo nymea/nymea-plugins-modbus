@@ -1,50 +1,11 @@
 {
-    "className": "Huawei",
+    "className": "HuaweiSmartLogger",
     "protocol": "TCP",
     "endianness": "BigEndian",
     "errorLimitUntilNotReachable": 15,
-    "checkReachableRegister": "inverterTotalEnergyProduced",
+    "checkReachableRegister": "inverterTotalActivePower",
     "enums": [ ],
     "blocks": [
-        {
-            "id": "inverterPower",
-            "readSchedule": "update",
-            "registers": [
-                {
-                    "id": "inverterTotalInputPower",
-                    "address": 40521,
-                    "size": 2,
-                    "type": "uint32",
-                    "registerType": "holdingRegister",
-                    "description": "Total input power of all inverters",
-                    "unit": "kW",
-                    "staticScaleFactor": -3,
-                    "access": "RO"
-                },
-                {
-                    "id": "co2Reduction",
-                    "address": 40523,
-                    "size": 2,
-                    "type": "uint32",
-                    "registerType": "holdingRegister",
-                    "description": "CO2 reduction",
-                    "unit": "kg",
-                    "staticScaleFactor": -1,
-                    "access": "RO"
-                },
-                {
-                    "id": "inverterTotalActivePower",
-                    "address": 40525,
-                    "size": 10,
-                    "type": "int32",
-                    "registerType": "holdingRegister",
-                    "description": "Total active output power of all inverters",
-                    "unit": "kW",
-                    "staticScaleFactor": -3,
-                    "access": "RO"
-                }
-            ]
-        },
         {
             "id": "meterData1",
             "readSchedule": "update",
@@ -111,7 +72,7 @@
                     "access": "RO"
                 },
                 {
-                    "id": "meterCurrentPhaseA",
+                    "id": "meterCurrentPhaseB",
                     "address": 32274,
                     "size": 2,
                     "type": "int32",
@@ -145,6 +106,7 @@
                     "description": "Total active output power of all inverters",
                     "unit": "kW",
                     "staticScaleFactor": -3,
+                    "defaultValue": "0",
                     "access": "RO"
                 }
             ]
@@ -274,6 +236,17 @@
         }
     ],
     "registers": [
+        {
+            "id": "inverterTotalActivePower",
+            "address": 40525,
+            "size": 2,
+            "type": "int32",
+            "registerType": "holdingRegister",
+            "description": "Total active output power of all inverters",
+            "unit": "kW",
+            "staticScaleFactor": -3,
+            "access": "RO"
+        },
         {
             "id": "inverterTotalEnergyProduced",
             "address": 40560,
