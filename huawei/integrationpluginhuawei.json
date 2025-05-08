@@ -99,6 +99,7 @@
                     "id": "32d3627b-c12c-4600-98e8-4808dc96a053",
                     "createMethods": ["discovery", "user"],
                     "interfaces": ["solarinverter", "connectable", "networkdevice"],
+                    "discoveryType": "weak",
                     "providedInterfaces": [ "solarinverter", "energymeter", "energystorage"],
                     "paramTypes": [
                         {

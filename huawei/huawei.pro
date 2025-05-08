@@ -10,13 +10,13 @@ MODBUS_CONNECTIONS += \
 include(../modbus.pri)
 
 HEADERS += \
-    huasweismartloggerdiscovery.h \
     huaweifusionsolar.h \
     huaweifusionsolardiscovery.h \
+    huaweismartloggerdiscovery.h \
     integrationpluginhuawei.h
 
 SOURCES += \
-    huasweismartloggerdiscovery.cpp \
     huaweifusionsolar.cpp \
     huaweifusionsolardiscovery.cpp \
+    huaweismartloggerdiscovery.cpp \
     integrationpluginhuawei.cpp

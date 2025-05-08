@@ -28,10 +28,10 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "huasweismartloggerdiscovery.h"
+#include "huaweismartloggerdiscovery.h"
 #include "extern-plugininfo.h"
 
-HuasweiSmartLoggerDiscovery::HuasweiSmartLoggerDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint16 port, quint16 slaveId, QObject *parent)
+HuaweiSmartLoggerDiscovery::HuaweiSmartLoggerDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint16 port, quint16 slaveId, QObject *parent)
     : QObject{parent},
     m_networkDeviceDiscovery{networkDeviceDiscovery},
     m_port{port},
@@ -40,12 +40,14 @@ HuasweiSmartLoggerDiscovery::HuasweiSmartLoggerDiscovery(NetworkDeviceDiscovery 
 
 }
 
-void HuasweiSmartLoggerDiscovery::startDiscovery()
+void HuaweiSmartLoggerDiscovery::startDiscovery()
 {
-    qCInfo(dcHuawei()) << "Discovery: Start searching for Huawei FusionSolar SmartDongle in the network...";
+    qCInfo(dcHuawei()) << "Discovery: Start searching for Huawei SmartLogger in the network...";
     m_startDateTime = QDateTime::currentDateTime();
+
     NetworkDeviceDiscoveryReply *discoveryReply = m_networkDeviceDiscovery->discover();
-    connect(discoveryReply, &NetworkDeviceDiscoveryReply::hostAddressDiscovered, this, &HuasweiSmartLoggerDiscovery::checkNetworkDevice);
+    connect(discoveryReply, &NetworkDeviceDiscoveryReply::hostAddressDiscovered, this, &HuaweiSmartLoggerDiscovery::checkNetworkDevice);
+
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [this, discoveryReply](){
         m_networkDeviceInfos = discoveryReply->networkDeviceInfos();
@@ -58,12 +60,12 @@ void HuasweiSmartLoggerDiscovery::startDiscovery()
     });
 }
 
-QList<HuasweiSmartLoggerDiscovery::Result> HuasweiSmartLoggerDiscovery::results() const
+QList<HuaweiSmartLoggerDiscovery::Result> HuaweiSmartLoggerDiscovery::results() const
 {
     return m_results;
 }
 
-void HuasweiSmartLoggerDiscovery::checkNetworkDevice(const QHostAddress &address)
+void HuaweiSmartLoggerDiscovery::checkNetworkDevice(const QHostAddress &address)
 {
     HuaweiSmartLoggerModbusTcpConnection *connection = new HuaweiSmartLoggerModbusTcpConnection(address, m_port, m_slaveId, this);
     m_connections.append(connection);
@@ -76,20 +78,19 @@ void HuasweiSmartLoggerDiscovery::checkNetworkDevice(const QHostAddress &address
         }
 
         // Todo: initialize and check if available
-        // connect(connection, &HuaweiSmartLoggerModbusTcpConnection::initializationFinished, this, [this, connection](bool success){
-        //     Result result;
-        //     result.address = connection->modbusTcpMaster()->hostAddress();
-        //     result.slaveId = connection->slaveId();
+        connect(connection, &HuaweiSmartLoggerModbusTcpConnection::initializationFinished, this, [this, connection](bool success){
+            Result result;
+            result.address = connection->modbusTcpMaster()->hostAddress();
+            result.slaveId = m_slaveId;
 
-        //     if (success) {
-        //         qCDebug(dcHuawei()) << "Huawei init finished successfully:" << connection->model() << connection->serialNumber() << connection->productNumber();
-        //         result.modelName = connection->model();
-        //         result.serialNumber = connection->serialNumber();
-        //     }
+            if (success) {
+                qCDebug(dcHuawei()) << "Huawei init finished successfully:" << connection->deviceName();
+                result.modelName = connection->deviceName();
+            }
 
-        //     qCInfo(dcHuawei()) << "Discovery: --> Found" << result.address.toString() << "slave ID:" << result.slaveId;
-        //     m_results.append(result);
-        // });
+            qCInfo(dcHuawei()) << "Discovery: --> Found" << result.address.toString() << "slave ID:" << m_slaveId;
+            m_results.append(result);
+        });
 
         connection->initialize();
     });
@@ -107,14 +108,33 @@ void HuasweiSmartLoggerDiscovery::checkNetworkDevice(const QHostAddress &address
         qCDebug(dcHuawei()) << "Discovery: Check reachability failed on" << connection->modbusTcpMaster()->hostAddress().toString() << "Continue...";;
         cleanupConnection(connection);
     });
+
+    connection->connectDevice();
 }
 
-void HuasweiSmartLoggerDiscovery::cleanupConnection(HuaweiSmartLoggerModbusTcpConnection *connection)
+void HuaweiSmartLoggerDiscovery::cleanupConnection(HuaweiSmartLoggerModbusTcpConnection *connection)
 {
-
+    if (m_connections.contains(connection)) {
+        m_connections.removeAll(connection);
+        connection->disconnectDevice();
+        connection->deleteLater();
+    }
 }
 
-void HuasweiSmartLoggerDiscovery::finishDiscovery()
+void HuaweiSmartLoggerDiscovery::finishDiscovery()
 {
+    qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
 
+    // Fill in finished network device information
+    for (int i = 0; i < m_results.count(); i++)
+        m_results[i].networkDeviceInfo = m_networkDeviceInfos.get(m_results.value(i).address);
+
+    // Cleanup any leftovers...we don't care any more
+    foreach (HuaweiSmartLoggerModbusTcpConnection *connection, m_connections)
+        cleanupConnection(connection);
+
+    qCInfo(dcHuawei()) << "Discovery: Finished the discovery process. Found" << m_results.count()
+                       << "inverters in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
+
+    emit discoveryFinished();
 }

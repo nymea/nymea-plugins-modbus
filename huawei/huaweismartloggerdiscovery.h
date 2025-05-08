@@ -28,8 +28,8 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef HUASWEISMARTLOGGERDISCOVERY_H
-#define HUASWEISMARTLOGGERDISCOVERY_H
+#ifndef HUAWEISMARTLOGGERDISCOVERY_H
+#define HUAWEISMARTLOGGERDISCOVERY_H
 
 #include <QObject>
 
@@ -37,16 +37,16 @@
 
 #include "huaweismartloggermodbustcpconnection.h"
 
-class HuasweiSmartLoggerDiscovery : public QObject
+class HuaweiSmartLoggerDiscovery : public QObject
 {
     Q_OBJECT
 public:
-    explicit HuasweiSmartLoggerDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint16 port, quint16 slaveId, QObject *parent = nullptr);
+    explicit HuaweiSmartLoggerDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint16 port, quint16 slaveId, QObject *parent = nullptr);
 
     typedef struct Result {
         QString modelName;
-        QString serialNumber;
         QHostAddress address;
+        quint16 slaveId;
         NetworkDeviceInfo networkDeviceInfo;
     } Result;
 
@@ -75,4 +75,4 @@ private slots:
     void finishDiscovery();
 };
 
-#endif // HUASWEISMARTLOGGERDISCOVERY_H
+#endif // HUAWEISMARTLOGGERDISCOVERY_H

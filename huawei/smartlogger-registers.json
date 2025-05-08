@@ -237,11 +237,32 @@
     ],
     "registers": [
         {
+            "id": "deviceName",
+            "address": 65524,
+            "size": 10,
+            "type": "string",
+            "registerType": "holdingRegister",
+            "readSchedule": "init",
+            "description": "Device name",
+            "access": "RO"
+        },
+        {
+            "id": "numberOfInverters",
+            "address": 40206,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "readSchedule": "init",
+            "description": "Quantity of available inverters",
+            "access": "RO"
+        },
+        {
             "id": "inverterTotalActivePower",
             "address": 40525,
             "size": 2,
             "type": "int32",
             "registerType": "holdingRegister",
+            "readSchedule": "update",
             "description": "Total active output power of all inverters",
             "unit": "kW",
             "staticScaleFactor": -3,

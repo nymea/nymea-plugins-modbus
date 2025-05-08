@@ -29,6 +29,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "huaweifusionsolardiscovery.h"
+#include "huaweismartloggerdiscovery.h"
 #include "integrationpluginhuawei.h"
 #include "plugininfo.h"
 
@@ -43,6 +44,7 @@ IntegrationPluginHuawei::IntegrationPluginHuawei()
 void IntegrationPluginHuawei::discoverThings(ThingDiscoveryInfo *info)
 {
     if (info->thingClassId() == huaweiFusionSolarInverterThingClassId) {
+
         if (!hardwareManager()->networkDeviceDiscovery()->available()) {
             qCWarning(dcHuawei()) << "The network discovery is not available on this platform.";
             info->finish(Thing::ThingErrorUnsupportedFeature, QT_TR_NOOP("The network device discovery is not available."));
@@ -92,6 +94,65 @@ void IntegrationPluginHuawei::discoverThings(ThingDiscoveryInfo *info)
                 Thing *existingThing = myThings().findByParams(params);
                 if (existingThing) {
                     qCDebug(dcHuawei()) << "This inverter already exists in the system:" << result.networkDeviceInfo;
+                    descriptor.setThingId(existingThing->id());
+                }
+
+                info->addThingDescriptor(descriptor);
+            }
+
+            info->finish(Thing::ThingErrorNoError);
+        });
+
+        // Start the discovery process
+        discovery->startDiscovery();
+
+    } else if (info->thingClassId() == huaweiSmartLoggerThingClassId) {
+
+        if (!hardwareManager()->networkDeviceDiscovery()->available()) {
+            qCWarning(dcHuawei()) << "The network discovery is not available on this platform.";
+            info->finish(Thing::ThingErrorUnsupportedFeature, QT_TR_NOOP("The network device discovery is not available."));
+            return;
+        }
+
+        // Create a discovery with the info as parent for auto deleting the object once the discovery info is done
+        HuaweiSmartLoggerDiscovery *discovery = new HuaweiSmartLoggerDiscovery(hardwareManager()->networkDeviceDiscovery(), 502, 1, info);
+        connect(discovery, &HuaweiSmartLoggerDiscovery::discoveryFinished, info, [this, info, discovery](){
+            foreach (const HuaweiSmartLoggerDiscovery::Result &result, discovery->results()) {
+
+                QString name = QT_TR_NOOP("Huawei Solar Inverter");
+                if (!result.modelName.isEmpty())
+                    name = "Huawei SmartLogger (" + result.modelName + ")";
+
+                QString description;
+
+                switch (result.networkDeviceInfo.monitorMode()) {
+                case NetworkDeviceInfo::MonitorModeMac:
+                    description += " MAC: " + result.networkDeviceInfo.macAddressInfos().constFirst().macAddress().toString() +
+                                   " - " + result.networkDeviceInfo.address().toString();
+                    break;
+                case NetworkDeviceInfo::MonitorModeHostName:
+                    description += " Host name: " + result.networkDeviceInfo.hostName() +
+                                   " - " + result.networkDeviceInfo.address().toString();
+                    break;
+                case NetworkDeviceInfo::MonitorModeIp:
+                    description += " IP: " + result.networkDeviceInfo.address().toString();
+                    break;
+                }
+
+                ThingDescriptor descriptor(huaweiSmartLoggerThingClassId, name, description) ;
+                qCDebug(dcHuawei()) << "Discovered:" << descriptor.title() << descriptor.description();
+
+                ParamList params;
+                params << Param(huaweiSmartLoggerThingMacAddressParamTypeId, result.networkDeviceInfo.thingParamValueMacAddress());
+                params << Param(huaweiSmartLoggerThingHostNameParamTypeId, result.networkDeviceInfo.thingParamValueHostName());
+                params << Param(huaweiSmartLoggerThingAddressParamTypeId, result.networkDeviceInfo.thingParamValueAddress());
+                params << Param(huaweiSmartLoggerThingSlaveIdParamTypeId, result.slaveId);
+                descriptor.setParams(params);
+
+                // Check if we already have set up this device
+                Thing *existingThing = myThings().findByParams(params);
+                if (existingThing) {
+                    qCDebug(dcHuawei()) << "This smartlogger already exists in the system:" << result.networkDeviceInfo;
                     descriptor.setThingId(existingThing->id());
                 }
 
@@ -177,6 +238,49 @@ void IntegrationPluginHuawei::setupThing(ThingSetupInfo *info)
             }
         } else {
             setupFusionSolar(info);
+        }
+
+        return;
+    }
+
+    if (thing->thingClassId() == huaweiSmartLoggerThingClassId) {
+
+        // Handle reconfigure
+        if (m_smartLoggerConnections.contains(thing))
+            m_smartLoggerConnections.take(thing)->deleteLater();
+
+        if (m_monitors.contains(thing))
+            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+
+        // Create a monitor so we always get the correct IP in the network and see if the device is reachable without polling on our own
+        NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(thing);
+        if (!monitor) {
+            qCWarning(dcHuawei()) << "Failed to set up SmartLogger because the params are incomplete for creating a monitor:" << thing->params();
+            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The parameters are incomplete. Please reconfigure the device to fix this."));
+            return;
+        }
+
+        m_monitors.insert(thing, monitor);
+        connect(info, &ThingSetupInfo::aborted, monitor, [=](){
+            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+        });
+
+        // Continue with setup only if we know that the network device is reachable
+        if (info->isInitialSetup()) {
+            if (monitor->reachable()) {
+                setupSmartLogger(info);
+            } else {
+                // otherwise wait until we reach the networkdevice before setting up the device
+                qCDebug(dcHuawei()) << "Network device" << thing->name() << "is not reachable yet. Continue with the setup once reachable.";
+                connect(monitor, &NetworkDeviceMonitor::reachableChanged, info, [=](bool reachable){
+                    if (reachable) {
+                        qCDebug(dcHuawei()) << "Network device" << thing->name() << "is now reachable. Continue with the setup...";
+                        setupSmartLogger(info);
+                    }
+                });
+            }
+        } else {
+            setupSmartLogger(info);
         }
 
         return;
@@ -399,11 +503,20 @@ void IntegrationPluginHuawei::setupThing(ThingSetupInfo *info)
 
 void IntegrationPluginHuawei::postSetupThing(Thing *thing)
 {
-    if (thing->thingClassId() == huaweiFusionSolarInverterThingClassId || thing->thingClassId() == huaweiRtuInverterThingClassId) {
+    if (thing->thingClassId() == huaweiFusionSolarInverterThingClassId ||
+        thing->thingClassId() == huaweiRtuInverterThingClassId ||
+        thing->thingClassId() == huaweiSmartLoggerThingClassId) {
+
         if (!m_pluginTimer) {
             m_pluginTimer = hardwareManager()->pluginTimerManager()->registerTimer(2);
             connect(m_pluginTimer, &PluginTimer::timeout, this, [this] {
                 foreach(HuaweiFusionSolar *connection, m_connections) {
+                    if (connection->reachable()) {
+                        connection->update();
+                    }
+                }
+
+                foreach(HuaweiSmartLoggerModbusTcpConnection *connection, m_smartLoggerConnections) {
                     if (connection->reachable()) {
                         connection->update();
                     }
@@ -434,6 +547,12 @@ void IntegrationPluginHuawei::thingRemoved(Thing *thing)
 
     if (m_connections.contains(thing)) {
         HuaweiFusionSolar *connection = m_connections.take(thing);
+        connection->disconnectDevice();
+        delete connection;
+    }
+
+    if (m_smartLoggerConnections.contains(thing)) {
+        HuaweiSmartLoggerModbusTcpConnection *connection = m_smartLoggerConnections.take(thing);
         connection->disconnectDevice();
         delete connection;
     }
@@ -658,6 +777,81 @@ void IntegrationPluginHuawei::setupFusionSolar(ThingSetupInfo *info)
             batteryThings.first()->setStateValue(huaweiBatteryBatteryCriticalStateTypeId, lunaBattery2Soc < 10);
         }
     });
+
+    connection->connectDevice();
+}
+
+void IntegrationPluginHuawei::setupSmartLogger(ThingSetupInfo *info)
+{
+    Thing *thing = info->thing();
+    NetworkDeviceMonitor *monitor = m_monitors.value(thing);
+    uint port = thing->paramValue(huaweiSmartLoggerThingPortParamTypeId).toUInt();
+    quint16 slaveId = thing->paramValue(huaweiSmartLoggerThingSlaveIdParamTypeId).toUInt();
+
+    qCDebug(dcHuawei()) << "Setup connection to fusion solar dongle" << monitor->networkDeviceInfo().address().toString() << port << slaveId;
+
+    HuaweiSmartLoggerModbusTcpConnection *connection = new HuaweiSmartLoggerModbusTcpConnection(monitor->networkDeviceInfo().address(), port, slaveId, this);
+    connect(info, &ThingSetupInfo::aborted, connection, [this, connection, thing](){
+        connection->deleteLater();
+        m_smartLoggerConnections.remove(thing);
+    });
+
+    m_smartLoggerConnections.insert(thing, connection);
+    info->finish(Thing::ThingErrorNoError);
+
+    qCDebug(dcHuawei()) << "Setup huawei fusion solar smart dongle finished successfully" << monitor->networkDeviceInfo().address().toString() << port << slaveId;
+
+    // Reset history, just incase
+    m_inverterEnergyProducedHistory[thing].clear();
+
+    // Add the current value to the history
+    evaluateEnergyProducedValue(thing, thing->stateValue(huaweiSmartLoggerTotalEnergyProducedStateTypeId).toFloat());
+
+    connect(connection, &HuaweiFusionSolar::reachableChanged, thing, [=](bool reachable){
+        qCDebug(dcHuawei()) << "Reachable changed to" << reachable << "for" << thing;
+        thing->setStateValue("connected", reachable);
+        foreach (Thing *childThing, myThings().filterByParentId(thing->id())) {
+            childThing->setStateValue("connected", reachable);
+
+            if (!reachable) {
+                // Set power values to 0 since we don't know what the current value is
+                if (childThing->thingClassId() == huaweiSmartLoggerThingClassId) {
+                    thing->setStateValue(huaweiSmartLoggerCurrentPowerStateTypeId, 0);
+                }
+
+                if (childThing->thingClassId() == huaweiMeterThingClassId) {
+                    thing->setStateValue(huaweiMeterCurrentPowerStateTypeId, 0);
+                }
+
+                if (childThing->thingClassId() == huaweiBatteryThingClassId) {
+                    thing->setStateValue(huaweiBatteryCurrentPowerStateTypeId, 0);
+                }
+            }
+        }
+    });
+
+    connect(monitor, &NetworkDeviceMonitor::reachableChanged, thing, [=](bool reachable){
+        if (!thing->setupComplete())
+            return;
+
+        qCDebug(dcHuawei()) << "Network device monitor for" << thing->name() << (reachable ? "is now reachable" : "is not reachable any more" );
+
+        if (reachable && !thing->stateValue("connected").toBool()) {
+            connection->modbusTcpMaster()->setHostAddress(monitor->networkDeviceInfo().address());
+            connection->connectDevice();
+        } else if (!reachable) {
+            // Note: We disable autoreconnect explicitly and we will
+            // connect the device once the monitor says it is reachable again
+            connection->disconnectDevice();
+        }
+    });
+
+    connect(connection, &HuaweiSmartLoggerModbusTcpConnection::updateFinished, thing, [thing, connection](){
+        qCDebug(dcHuawei()) << "Smartlogger update finished" << thing << connection;
+
+
+    });
+
 
     connection->connectDevice();
 }

@@ -37,8 +37,10 @@
 #include <network/networkdevicediscovery.h>
 
 #include "extern-plugininfo.h"
+
 #include "huaweifusionsolar.h"
 #include "huaweimodbusrtuconnection.h"
+#include "huaweismartloggermodbustcpconnection.h"
 
 class IntegrationPluginHuawei: public IntegrationPlugin
 {
@@ -60,9 +62,11 @@ private:
 
     QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
     QHash<Thing *, HuaweiFusionSolar *> m_connections;
+    QHash<Thing *, HuaweiSmartLoggerModbusTcpConnection *> m_smartLoggerConnections;
     QHash<Thing *, HuaweiModbusRtuConnection *> m_rtuConnections;
 
     void setupFusionSolar(ThingSetupInfo *info);
+    void setupSmartLogger(ThingSetupInfo *info);
 
     QHash<Thing *, QList<float>> m_inverterEnergyProducedHistory;
     void evaluateEnergyProducedValue(Thing *inverterThing, float energyProduced);
