@@ -28,45 +28,55 @@
 *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef WATTSONICDISCOVERY_H
-#define WATTSONICDISCOVERY_H
+#ifndef WATTSONICINVERTER_H
+#define WATTSONICINVERTER_H
 
 #include <QObject>
 
-#include <hardware/modbus/modbusrtuhardwareresource.h>
+#include "wattsonicmodbusrtuconnection.h"
 
-#include "wattsonicinverter.h"
-
-class WattsonicDiscovery : public QObject
+class WattsonicInverter : public WattsonicModbusRtuConnection
 {
     Q_OBJECT
 public:
-    explicit WattsonicDiscovery(ModbusRtuHardwareResource *modbusRtuResource, QObject *parent = nullptr);
-
-    struct Result {
-        QUuid modbusRtuMasterId;
-        QString serialNumber;
-        quint16 slaveId;
-        WattsonicInverter::Generation generation;
-        WattsonicInverter::Info inverterInfo;
+    struct Info {
+        QString type;
+        QString model;
     };
 
-    void startDiscovery(quint16 slaveId);
+    enum Generation {
+        GenerationUnknwon,
+        Generation2,
+        Generation3
+    };
+    Q_ENUM(Generation)
 
-    QList<Result> discoveryResults() const;
+    explicit WattsonicInverter(ModbusRtuMaster *modbusRtuMaster, quint16 slaveId, QObject *parent = nullptr);
 
+    Generation generation() const;
+    WattsonicInverter::Info inverterInfo() const;
+
+    // Generation specific registers
+    float batteryVoltageDc() const;
+    BatteryMode batteryMode() const;
+    qint32 batteryPower() const;
+    float totalEnergyInjectedToGrid() const;
+    float totalEnergyPurchasedFromGrid() const;
+    float SOC() const;
+    float SOH() const;
+
+    bool update() override;
+
+    static WattsonicInverter::Info getInverterInfo(quint16 equipmentInfo);
 
 signals:
-    void discoveryFinished(bool modbusRtuMasterAvailable);
-
-private slots:
-    void tryConnect(ModbusRtuMaster *master, quint16 slaveId);
+    void generationChanged();
+    void customInitializationFinished(bool success);
 
 private:
-    ModbusRtuHardwareResource *m_modbusRtuResource = nullptr;
-    QList<ModbusRtuMaster *> m_candidateMasters;
-    QList<ModbusRtuMaster *> m_verifiedMasters;
-    QList<Result> m_discoveryResults;
+    WattsonicInverter::Info m_inverterInfo;
+    Generation m_generation = GenerationUnknwon;
+
 };
 
-#endif // WATTSONICDISCOVERY_H
+#endif // WATTSONICINVERTER_H
