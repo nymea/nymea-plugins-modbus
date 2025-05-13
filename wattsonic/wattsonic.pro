@@ -8,8 +8,10 @@ include(../modbus.pri)
 
 HEADERS += \
     wattsonicdiscovery.h \
-    integrationpluginwattsonic.h
+    integrationpluginwattsonic.h \
+    wattsonicinverter.h
 
 SOURCES += \
     wattsonicdiscovery.cpp \
-    integrationpluginwattsonic.cpp
+    integrationpluginwattsonic.cpp \
+    wattsonicinverter.cpp

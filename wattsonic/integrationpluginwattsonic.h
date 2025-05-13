@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2024, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -36,8 +36,7 @@
 #include <network/networkdevicemonitor.h>
 
 #include "extern-plugininfo.h"
-
-#include "wattsonicmodbusrtuconnection.h"
+#include "wattsonicinverter.h"
 
 class IntegrationPluginWattsonic: public IntegrationPlugin
 {
@@ -58,7 +57,7 @@ private:
     void setupWattsonicConnection(ThingSetupInfo *info);
 
     PluginTimer *m_pluginTimer = nullptr;
-    QHash<Thing *, WattsonicModbusRtuConnection *> m_connections;
+    QHash<Thing *, WattsonicInverter *> m_connections;
 
     void setConnectedStates(Thing * thing, bool connected);
 };
