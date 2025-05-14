@@ -66,6 +66,7 @@ private:
 
     Thing *getMeterThing(Thing *parentThing);
     Thing *getBatteryThing(Thing *parentThing);
+
 };
 
 #endif // INTEGRATIONPLUGINSUNGROW_H
