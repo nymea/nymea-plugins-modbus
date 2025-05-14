@@ -48,8 +48,7 @@
             ]
         }
     ],
-    "blocks": [
-    ],
+    "blocks": [ ],
     "registers": [
         {
             "id": "serialNumber",
@@ -59,6 +58,16 @@
             "readSchedule": "init",
             "registerType": "holdingRegister",
             "description": "Serial number",
+            "access": "RO"
+        },
+        {
+            "id": "equipmentInfo",
+            "address": 10008,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "init",
+            "registerType": "holdingRegister",
+            "description": "EquipmentInfo",
             "access": "RO"
         },
         {
@@ -140,7 +149,8 @@
             "registerType": "holdingRegister",
             "description": "Total grid injection energy on meter",
             "defaultValue": 0,
-            "unit": "1/100 kWh",
+            "staticScaleFactor": -2,
+            "unit": "kWh",
             "access": "RO"
         },
         {
@@ -152,7 +162,8 @@
             "registerType": "holdingRegister",
             "description": "Total purchasing energy from grid on meter",
             "defaultValue": 0,
-            "unit": "1/100 kWh",
+            "staticScaleFactor": -2,
+            "unit": "kWh",
             "access": "RO"
         },
         {
@@ -164,7 +175,8 @@
             "registerType": "holdingRegister",
             "description": "Grid Phase A Voltage",
             "defaultValue": 0,
-            "unit": "1/10 V",
+            "staticScaleFactor": -1,
+            "unit": "V",
             "access": "RO"
         },
         {
@@ -176,7 +188,8 @@
             "registerType": "holdingRegister",
             "description": "Grid Phase A Current",
             "defaultValue": 0,
-            "unit": "1/10 A",
+            "staticScaleFactor": -1,
+            "unit": "A",
             "access": "RO"
         },
         {
@@ -188,7 +201,8 @@
             "registerType": "holdingRegister",
             "description": "Grid Phase B Voltage",
             "defaultValue": 0,
-            "unit": "1/10 V",
+            "staticScaleFactor": -1,
+            "unit": "V",
             "access": "RO"
         },
         {
@@ -200,7 +214,8 @@
             "registerType": "holdingRegister",
             "description": "Grid Phase B Current",
             "defaultValue": 0,
-            "unit": "1/10 A",
+            "staticScaleFactor": -1,
+            "unit": "A",
             "access": "RO"
         },
         {
@@ -212,7 +227,8 @@
             "registerType": "holdingRegister",
             "description": "Grid Phase C Voltage",
             "defaultValue": 0,
-            "unit": "1/10 V",
+            "staticScaleFactor": -1,
+            "unit": "V",
             "access": "RO"
         },
         {
@@ -224,7 +240,8 @@
             "registerType": "holdingRegister",
             "description": "Grid Phase C Current",
             "defaultValue": 0,
-            "unit": "1/10 A",
+            "staticScaleFactor": -1,
+            "unit": "A",
             "access": "RO"
         },
         {
@@ -248,7 +265,8 @@
             "registerType": "holdingRegister",
             "description": "Total PV Generation from installation",
             "defaultValue": 0,
-            "unit": "1/10 kWh",
+            "staticScaleFactor": -1,
+            "unit": "kWh",
             "access": "RO"
         },
         {
@@ -263,111 +281,180 @@
             "unit": "W",
             "access": "RO"
         },
+
+
         {
-            "id": "totalBackupP",
-            "address": 30230,
-            "size": 2,
-            "type": "int32",
-            "readSchedule": "update",
-            "registerType": "holdingRegister",
-            "description": "Total_Backup_P/AC Active Power",
-            "unit": "W",
-            "defaultValue": 0,
-            "access": "RO"
-        },
-        {
-            "id": "batteryVoltageDc",
+            "id": "batteryVoltageDcGen3",
             "address": 30254,
             "size": 1,
             "type": "uint16",
             "readSchedule": "update",
             "registerType": "holdingRegister",
-            "description": "Battery voltage DC",
+            "description": "Battery voltage DC (gen3)",
             "defaultValue": 0,
-            "unit": "1/10 V",
+            "staticScaleFactor": -1,
+            "unit": "V",
             "access": "RO"
         },
         {
-            "id": "batteryMode",
+            "id": "batteryModeGen3",
             "address": 30256,
             "size": 1,
             "type": "uint16",
             "readSchedule": "update",
             "registerType": "holdingRegister",
-            "description": "Battery mode",
+            "description": "Battery mode (gen3)",
             "enum": "BatteryMode",
             "defaultValue": "BatteryModeDischarge",
             "access": "RO"
         },
         {
-            "id": "batteryPower",
+            "id": "batteryPowerGen3",
             "address": 30258,
             "size": 2,
             "type": "int32",
             "readSchedule": "update",
             "registerType": "holdingRegister",
-            "description": "Battery power",
+            "description": "Battery power (gen3)",
             "defaultValue": 0,
             "unit": "W",
             "access": "RO"
         },
         {
-            "id": "totalEnergyInjectedToGrid",
+            "id": "totalEnergyInjectedToGridGen3",
             "address": 31102,
             "size": 2,
             "type": "uint32",
             "readSchedule": "update",
             "registerType": "holdingRegister",
-            "description": "Total energy injected to grid",
+            "description": "Total energy injected to grid (gen3)",
             "defaultValue": 0,
-            "unit": "1/10 kWh",
+            "staticScaleFactor": -1,
+            "unit": "kWh",
             "access": "RO"
         },
         {
-            "id": "totalEnergyPurchasedFromGrid",
+            "id": "totalEnergyPurchasedFromGridGen3",
             "address": 31104,
             "size": 2,
             "type": "uint32",
             "readSchedule": "update",
             "registerType": "holdingRegister",
-            "description": "Total energy purchased from grid",
+            "description": "Total energy purchased from grid (gen3)",
             "defaultValue": 0,
-            "unit": "1/10 kWh",
+            "staticScaleFactor": -1,
+            "unit": "kWh",
             "access": "RO"
         },
         {
-            "id": "batteryStrings",
-            "address": 32001,
-            "size": 1,
-            "type": "uint16",
-            "readSchedule": "update",
-            "registerType": "holdingRegister",
-            "description": "Battery strings",
-            "defaultValue": 0,
-            "access": "RO"
-        },
-        {
-            "id": "SOC",
+            "id": "SOCGen3",
             "address": 33000,
             "size": 1,
             "type": "uint16",
             "readSchedule": "update",
             "registerType": "holdingRegister",
-            "description": "SOC",
+            "description": "SOC (gen3)",
             "defaultValue": 0,
-            "unit": "% * 100",
+            "staticScaleFactor": -2,
+            "unit": "%",
             "access": "RO"
         },
         {
-            "id": "SOH",
+            "id": "SOHGen3",
             "address": 33001,
             "size": 1,
             "type": "uint16",
             "readSchedule": "update",
             "registerType": "holdingRegister",
-            "description": "SOH",
+            "description": "SOH (gen3)",
             "defaultValue": 0,
-            "unit": "% * 100",
+            "staticScaleFactor": -2,
+            "unit": "%",
+            "access": "RO"
+        },
+
+
+        {
+            "id": "batteryVoltageDcGen2",
+            "address": 40254,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Battery voltage DC (gen2)",
+            "defaultValue": 0,
+            "staticScaleFactor": -1,
+            "unit": "V",
+            "access": "RO"
+        },
+        {
+            "id": "batteryModeGen2",
+            "address": 40256,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "description": "Battery mode (gen2)",
+            "enum": "BatteryMode",
+            "defaultValue": "BatteryModeDischarge",
+            "access": "RO"
+        },
+        {
+            "id": "batteryPowerGen2",
+            "address": 40258,
+            "size": 2,
+            "type": "int32",
+            "registerType": "holdingRegister",
+            "description": "Battery power (gen2)",
+            "defaultValue": 0,
+            "unit": "W",
+            "access": "RO"
+        },
+        {
+            "id": "totalEnergyInjectedToGridGen2",
+            "address": 41102,
+            "size": 2,
+            "type": "uint32",
+            "registerType": "holdingRegister",
+            "description": "Total energy injected to grid (gen2)",
+            "defaultValue": 0,
+            "staticScaleFactor": -1,
+            "unit": "kWh",
+            "access": "RO"
+        },
+        {
+            "id": "totalEnergyPurchasedFromGridGen2",
+            "address": 41104,
+            "size": 2,
+            "type": "uint32",
+            "registerType": "holdingRegister",
+            "description": "Total energy purchased from grid (gen2)",
+            "defaultValue": 0,
+            "staticScaleFactor": -1,
+            "unit": "kWh",
+            "access": "RO"
+        },
+        {
+            "id": "SOCGen2",
+            "address": 43000,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "description": "SOC (gen2)",
+            "defaultValue": 0,
+            "staticScaleFactor": -2,
+            "unit": "%",
+            "access": "RO"
+        },
+        {
+            "id": "SOHGen2",
+            "address": 43001,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "description": "SOH (gen2)",
+            "defaultValue": 0,
+            "staticScaleFactor": -2,
+            "unit": "%",
             "access": "RO"
         }
     ]

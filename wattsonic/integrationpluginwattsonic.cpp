@@ -54,8 +54,8 @@ void IntegrationPluginWattsonic::discoverThings(ThingDiscoveryInfo *info)
 
             foreach (const WattsonicDiscovery::Result &result, discovery->discoveryResults()) {
 
-                QString name = "Wattsonic inverter (" + result.serialNumber + ")";
-                ThingDescriptor descriptor(inverterThingClassId, name, QString("Modbus ID: %1").arg(result.slaveId));
+                QString name = "Wattsonic " + result.inverterInfo.type + + " " + result.inverterInfo.model;
+                ThingDescriptor descriptor(inverterThingClassId, name, QString("Serial number: %1").arg(result.serialNumber));
                 qCDebug(dcWattsonic()) << "Discovered:" << descriptor.title() << descriptor.description();
 
                 ParamList params {
@@ -157,16 +157,16 @@ void IntegrationPluginWattsonic::setupWattsonicConnection(ThingSetupInfo *info)
         return;
     }
 
-    WattsonicModbusRtuConnection *connection = new WattsonicModbusRtuConnection(hardwareManager()->modbusRtuResource()->getModbusRtuMaster(uuid), slaveId, this);
+    WattsonicInverter *connection = new WattsonicInverter(hardwareManager()->modbusRtuResource()->getModbusRtuMaster(uuid), slaveId, this);
     m_connections.insert(thing, connection);
 
     // Only for setup
-    connect(info, &ThingSetupInfo::aborted, connection, &WattsonicModbusRtuConnection::deleteLater);
+    connect(info, &ThingSetupInfo::aborted, connection, &WattsonicInverter::deleteLater);
     connect(info, &ThingSetupInfo::aborted, this, [=](){
         m_connections.take(info->thing())->deleteLater();
     });
 
-    connect(connection, &WattsonicModbusRtuConnection::initializationFinished, info, [=](bool success){
+    connect(connection, &WattsonicInverter::customInitializationFinished, info, [=](bool success){
         qCDebug(dcWattsonic()) << "Initialization finished" << success;
         if (info->isInitialSetup() && !success) {
             m_connections.take(info->thing())->deleteLater();
@@ -179,7 +179,7 @@ void IntegrationPluginWattsonic::setupWattsonicConnection(ThingSetupInfo *info)
     });
 
     // Runtime connections
-    connect(connection, &WattsonicModbusRtuConnection::reachableChanged, thing, [connection, thing, this](bool reachable){
+    connect(connection, &WattsonicInverter::reachableChanged, thing, [connection, thing, this](bool reachable){
         qCDebug(dcWattsonic()) << "Reachable state changed" << reachable;
         if (reachable) {
             connection->initialize();
@@ -188,11 +188,11 @@ void IntegrationPluginWattsonic::setupWattsonicConnection(ThingSetupInfo *info)
         setConnectedStates(thing, reachable);
     });
 
-    connect(connection, &WattsonicModbusRtuConnection::reachableChanged, thing, [this, thing](bool reachable){
+    connect(connection, &WattsonicInverter::reachableChanged, thing, [this, thing](bool reachable){
         setConnectedStates(thing, reachable);
     });
 
-    connect(connection, &WattsonicModbusRtuConnection::updateFinished, thing, [this, connection, thing](){
+    connect(connection, &WattsonicInverter::updateFinished, thing, [this, connection, thing](){
         qCDebug(dcWattsonic()) << "Update finished:" << thing->name() << connection;
 
         // We received an update, make sure we are connected
@@ -207,7 +207,13 @@ void IntegrationPluginWattsonic::setupWattsonicConnection(ThingSetupInfo *info)
 
         // Check if a meter is connected or not. We detect a meter by reading the totalEnergyPurchasedFromGrid totalEnergyInjectedToGrid registers,
         // As of now, there is no other way to detect the presence of the meter. Voltage is always there, even if there is no meter connected.
-        bool meterDetected = connection->totalEnergyPurchasedFromGrid() != 0 || connection->totalEnergyInjectedToGrid() != 0;
+
+        // Some meters do not have the total counters, for whatever reason...
+        bool meterDetected = connection->totalEnergyInjectedToGrid() != 0 ||
+                             connection->totalEnergyPurchasedFromGrid() != 0 ||
+                             connection->phaseAPower() != 0 ||
+                             connection->phaseBPower() != 0 ||
+                             connection->phaseCPower() != 0;
 
         if (meterDetected) {
             if (meters.isEmpty()) {
@@ -232,21 +238,21 @@ void IntegrationPluginWattsonic::setupWattsonicConnection(ThingSetupInfo *info)
         if (!meters.isEmpty()) {
             Thing *meter = meters.first();
             meter->setStateValue(meterCurrentPowerStateTypeId, connection->totalPowerOnMeter() * -1.0);
-            meter->setStateValue(meterTotalEnergyConsumedStateTypeId, connection->totalEnergyPurchasedFromGrid() / 10.0);
-            meter->setStateValue(meterTotalEnergyProducedStateTypeId, connection->totalEnergyInjectedToGrid() / 10.0);
+            meter->setStateValue(meterTotalEnergyConsumedStateTypeId, connection->totalEnergyPurchasedFromGrid());
+            meter->setStateValue(meterTotalEnergyProducedStateTypeId, connection->totalEnergyInjectedToGrid());
             meter->setStateValue(meterCurrentPowerPhaseAStateTypeId, connection->phaseAPower() * -1.0);
             meter->setStateValue(meterCurrentPowerPhaseBStateTypeId, connection->phaseBPower() * -1.0);
             meter->setStateValue(meterCurrentPowerPhaseCStateTypeId, connection->phaseCPower() * -1.0);
-            meter->setStateValue(meterVoltagePhaseAStateTypeId, connection->gridPhaseAVoltage() / 10.0);
-            meter->setStateValue(meterVoltagePhaseBStateTypeId, connection->gridPhaseBVoltage() / 10.0);
-            meter->setStateValue(meterVoltagePhaseCStateTypeId, connection->gridPhaseCVoltage() / 10.0);
+            meter->setStateValue(meterVoltagePhaseAStateTypeId, connection->gridPhaseAVoltage());
+            meter->setStateValue(meterVoltagePhaseBStateTypeId, connection->gridPhaseBVoltage());
+            meter->setStateValue(meterVoltagePhaseCStateTypeId, connection->gridPhaseCVoltage());
             // The phase current registers don't seem to contain proper values. Calculating ourselves instead
-            // meter->setStateValue(meterCurrentPhaseAStateTypeId, connection->gridPhaseACurrent() / 10.0);
-            // meter->setStateValue(meterCurrentPhaseBStateTypeId, connection->gridPhaseBCurrent() / 10.0);
-            // meter->setStateValue(meterCurrentPhaseCStateTypeId, connection->gridPhaseCCurrent() / 10.0);
-            meter->setStateValue(meterCurrentPhaseAStateTypeId, (connection->phaseAPower() * -1.0) / (connection->gridPhaseAVoltage() / 10.0));
-            meter->setStateValue(meterCurrentPhaseBStateTypeId, (connection->phaseBPower() * -1.0) / (connection->gridPhaseBVoltage() / 10.0));
-            meter->setStateValue(meterCurrentPhaseCStateTypeId, (connection->phaseCPower() * -1.0) / (connection->gridPhaseCVoltage() / 10.0));
+            // meter->setStateValue(meterCurrentPhaseAStateTypeId, connection->gridPhaseACurrent());
+            // meter->setStateValue(meterCurrentPhaseBStateTypeId, connection->gridPhaseBCurrent());
+            // meter->setStateValue(meterCurrentPhaseCStateTypeId, connection->gridPhaseCCurrent());
+            meter->setStateValue(meterCurrentPhaseAStateTypeId, (connection->phaseAPower() * -1.0) / connection->gridPhaseAVoltage());
+            meter->setStateValue(meterCurrentPhaseBStateTypeId, (connection->phaseBPower() * -1.0) / connection->gridPhaseBVoltage());
+            meter->setStateValue(meterCurrentPhaseCStateTypeId, (connection->phaseCPower() * -1.0) / connection->gridPhaseCVoltage());
             qCInfo(dcWattsonic()) << "Updating meter:" << meter->stateValue(meterCurrentPowerStateTypeId).toDouble() << "W" << meter->stateValue(meterTotalEnergyProducedStateTypeId).toDouble() << "kWh";
         }
 
@@ -273,14 +279,15 @@ void IntegrationPluginWattsonic::setupWattsonicConnection(ThingSetupInfo *info)
 
         if (!batteries.isEmpty() && connection->SOC() > 0) {
             Thing *battery = batteries.first();
-            QHash<WattsonicModbusRtuConnection::BatteryMode, QString> map {
-                {WattsonicModbusRtuConnection::BatteryModeDischarge, "discharging"},
-                {WattsonicModbusRtuConnection::BatteryModeCharge, "charging"}
+            QHash<WattsonicInverter::BatteryMode, QString> map {
+                {WattsonicInverter::BatteryModeDischarge, "discharging"},
+                {WattsonicInverter::BatteryModeCharge, "charging"}
             };
+
             battery->setStateValue(batteryChargingStateStateTypeId, map.value(connection->batteryMode()));
             battery->setStateValue(batteryCurrentPowerStateTypeId, connection->batteryPower() * -1.0);
-            battery->setStateValue(batteryBatteryLevelStateTypeId, connection->SOC() / 100.0);
-            battery->setStateValue(batteryBatteryCriticalStateTypeId, connection->SOC() < 500);
+            battery->setStateValue(batteryBatteryLevelStateTypeId, connection->SOC());
+            battery->setStateValue(batteryBatteryCriticalStateTypeId, connection->SOC() < 5);
         }
     });
 }
