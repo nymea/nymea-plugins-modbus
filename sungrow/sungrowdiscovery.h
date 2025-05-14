@@ -44,6 +44,7 @@ class SungrowDiscovery : public QObject
 public:
     explicit SungrowDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint16 port = 502, quint16 modbusAddress = 1, QObject *parent = nullptr);
     typedef struct SungrowDiscoveryResult {
+        QString model;
         QString serialNumber;
         QHostAddress address;
         NetworkDeviceInfo networkDeviceInfo;
@@ -54,6 +55,8 @@ public:
     void startDiscovery();
 
     QList<SungrowDiscoveryResult> discoveryResults() const;
+
+    static QString deviceCodeToString(quint16 deviceTypeCode);
 
 signals:
     void discoveryFinished();
