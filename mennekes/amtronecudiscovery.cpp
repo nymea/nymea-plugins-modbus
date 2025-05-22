@@ -93,7 +93,7 @@ void AmtronECUDiscovery::checkNetworkDevice(const QHostAddress &address)
             result.address = address;
 
             // Note: the model is only known in firmware >= 5.22
-            // Some useres have to stay on 5.12 due to calibration law which is not available on 5.22
+            // Some users have to stay on 5.12 due to calibration law which is not available on 5.22
             switch(connection->detectedVersion()) {
             case AmtronECU::VersionOld:
                 qCDebug(dcMennekes()) << "Discovery: Found wallbox with old firmware version:" << result.firmwareVersion << address.toString();
