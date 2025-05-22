@@ -54,7 +54,7 @@ QString SunnyWebBox::getPlantOverview()
 
     if (!m_lastRequest.isNull()) {
         // According to the documentation, the interval between 2 requests should not be less than 30 seconds.
-        if (QDateTime::currentDateTime().toMSecsSinceEpoch() - m_lastRequest.toMSecsSinceEpoch() < 30000) {
+        if (QDateTime::currentMSecsSinceEpoch() - m_lastRequest.toMSecsSinceEpoch() < 30000) {
             return QString();
         }
     }
