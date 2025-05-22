@@ -43,21 +43,22 @@ WattsonicDiscovery::WattsonicDiscovery(ModbusRtuHardwareResource *modbusRtuResou
 void WattsonicDiscovery::startDiscovery(quint16 slaveId)
 {
     qCInfo(dcWattsonic()) << "Discovery: Searching for Wattsonic device on modbus RTU...";
+    m_candidateMasters.clear();
+    m_verifiedMasters.clear();
 
-    QList<ModbusRtuMaster*> candidateMasters;
     foreach (ModbusRtuMaster *master, m_modbusRtuResource->modbusRtuMasters()) {
         if (master->baudrate() == 9600 && master->dataBits() == 8 && master->stopBits() == 1 && master->parity() == QSerialPort::NoParity) {
-            candidateMasters.append(master);
+            m_candidateMasters.append(master);
         }
     }
 
-    if (candidateMasters.isEmpty()) {
+    if (m_candidateMasters.isEmpty()) {
         qCWarning(dcWattsonic()) << "Discovery: No usable modbus RTU master found.";
         emit discoveryFinished(false);
         return;
     }
 
-    foreach (ModbusRtuMaster *master, candidateMasters) {
+    foreach (ModbusRtuMaster *master, m_candidateMasters) {
         if (master->connected()) {
             tryConnect(master, slaveId);
         } else {
@@ -74,18 +75,35 @@ QList<WattsonicDiscovery::Result> WattsonicDiscovery::discoveryResults() const
 void WattsonicDiscovery::tryConnect(ModbusRtuMaster *master, quint16 slaveId)
 {
     qCDebug(dcWattsonic()) << "Discovery: Scanning modbus RTU master" << master->modbusUuid() << "Slave ID:" << slaveId;
+    m_verifiedMasters.append(master);
 
-    ModbusRtuReply *reply = master->readHoldingRegister(slaveId, 10000, 8);
-    connect(reply, &ModbusRtuReply::finished, this, [this, master, reply, slaveId](){
+    WattsonicInverter *connection = new WattsonicInverter(master, slaveId, this);
+    connect(connection, &WattsonicInverter::reachableChanged, this, [connection](bool reachable){
+        if (reachable) {
+            qCDebug(dcWattsonic()) << "Discovery: The connection is now reachable. Starting the initialization";
+            connection->initialize();
+        } else {
+            connection->deleteLater();
+        }
+    });
 
-        if (reply->error() == ModbusRtuReply::NoError) {
-            QString serialNumber = ModbusDataUtils::convertToString(reply->result(), ModbusDataUtils::ByteOrderBigEndian);
-            qCDebug(dcWattsonic()) << "Discovery: Test reply finished!" << reply->error() << reply->result() << serialNumber;
 
-            Result result {master->modbusUuid(), serialNumber, slaveId};
-            m_discoveryResults.append(result);
+    connect(connection, &WattsonicInverter::customInitializationFinished, this, [this, connection, master, slaveId](bool success){
+
+        if (!success) {
+            qCDebug(dcWattsonic()) << "Initialization failed on" << master << "skip ";
+            return;
         }
 
-        emit discoveryFinished(true);
+        qCDebug(dcWattsonic()) << "Discovery: Init finished successfully:" << connection->serialNumber()
+                               << connection->inverterInfo().type << connection->inverterInfo().model << connection->generation();
+
+        Result result {master->modbusUuid(), connection->serialNumber(), slaveId, connection->generation(), connection->inverterInfo()};
+        m_discoveryResults.append(result);
+
+        if (m_verifiedMasters.count() == m_candidateMasters.count()) {
+            qCDebug(dcWattsonic()) << "Discovery: Verified all masters. Finish discovery with" << m_discoveryResults.count() << "discovered inverters.";
+            emit discoveryFinished(true);
+        }
     });
 }
