@@ -60,6 +60,115 @@ void SungrowDiscovery::startDiscovery()
     });
 }
 
+QString SungrowDiscovery::deviceCodeToString(quint16 deviceTypeCode)
+{
+    QString deviceType;
+    switch (deviceTypeCode) {
+        // SH3.0-6.0RS
+    case 0xD17:
+        deviceType = "SH3.0RS";
+        break;
+    case 0xD0D:
+        deviceType = "SH3.6RS";
+        break;
+    case 0xD18:
+        deviceType = "SH4.0RS";
+        break;
+    case 0xD0F:
+        deviceType = "SH5.0RS";
+        break;
+    case 0xD10:
+        deviceType = "SH5.0RS";
+        break;
+
+        // SH8.0-10RS
+    case 0xD1A:
+        deviceType = "SH8.0RS";
+        break;
+    case 0xD1B:
+        deviceType = "SH10RS";
+        break;
+
+        // SH5.0-10RT
+    case 0xE00:
+        deviceType = "SH5.0RT";
+        break;
+    case 0xE01:
+        deviceType = "SH6.0RT";
+        break;
+    case 0xE02:
+        deviceType = "SH8.0RT";
+        break;
+    case 0xE03:
+        deviceType = "SH10RT";
+        break;
+    case 0xE10:
+        deviceType = "SH5.0RT-20";
+        break;
+    case 0xE11:
+        deviceType = "SH6.0RT-20";
+        break;
+    case 0xE12:
+        deviceType = "SH8.0RT-20";
+        break;
+    case 0xE13:
+        deviceType = "SH10RT-20";
+        break;
+    case 0xE0C:
+        deviceType = "SH5.0RT-V112";
+        break;
+    case 0xE0D:
+        deviceType = "SH6.0RT-V112";
+        break;
+    case 0xE0E:
+        deviceType = "SH8.0RT-V112";
+        break;
+    case 0xE0F:
+        deviceType = "SH10RT-V112";
+        break;
+    case 0xE08:
+        deviceType = "SH5.0RT-V122";
+        break;
+    case 0xE09:
+        deviceType = "SH6.0RT-V122";
+        break;
+    case 0xE0A:
+        deviceType = "SH8.0RT-V122";
+        break;
+    case 0xE0B:
+        deviceType = "SH10RT-V122";
+        break;
+
+        // SH5-25T
+    case 0xE20:
+        deviceType = "SH5T-V11";
+        break;
+    case 0xE21:
+        deviceType = "SH6T-V11";
+        break;
+    case 0xE22:
+        deviceType = "SH8T-V11";
+        break;
+    case 0xE23:
+        deviceType = "SH10T-V11";
+        break;
+    case 0xE24:
+        deviceType = "SH12T-V11";
+        break;
+    case 0xE25:
+        deviceType = "SH15T-V11";
+        break;
+    case 0xE26:
+        deviceType = "SH20T-V11";
+        break;
+    case 0xE28:
+        deviceType = "SH25T-V11";
+        break;
+    }
+
+    return deviceType;
+}
+
 QList<SungrowDiscovery::SungrowDiscoveryResult> SungrowDiscovery::discoveryResults() const
 {
     return m_discoveryResults;
@@ -93,14 +202,19 @@ void SungrowDiscovery::checkNetworkDevice(const QHostAddress &address)
                 return;
             }
 
-            qCDebug(dcSungrow()) << "Discovery: Initialized successfully" << address.toString() << connection->serialNumber();
-            qCDebug(dcSungrow()) << "    - Protocol number:" << connection->protocolNumber();
-            qCDebug(dcSungrow()) << "    - Protocol version:" << connection->protocolVersion();
-            qCDebug(dcSungrow()) << "    - ARM software version:" << connection->armSoftwareVersion();
-            qCDebug(dcSungrow()) << "    - DSP software version:" << connection->dspSoftwareVersion();
 
             if (connection->deviceTypeCode() >= 0xd00 &&  connection->deviceTypeCode() <= 0xeff) {
+
+                qCDebug(dcSungrow()) << "Discovery: Initialized successfully" << address.toString() << connection->serialNumber();
+                qCDebug(dcSungrow()) << "    - Model:" << deviceCodeToString(connection->deviceTypeCode());
+                qCDebug(dcSungrow()) << "    - Protocol number:" << connection->protocolNumber();
+                qCDebug(dcSungrow()) << "    - Protocol version:" << connection->protocolVersion();
+                qCDebug(dcSungrow()) << "    - ARM software version:" << connection->armSoftwareVersion();
+                qCDebug(dcSungrow()) << "    - DSP software version:" << connection->dspSoftwareVersion();
+
+
                 SungrowDiscoveryResult result;
+                result.model = deviceCodeToString(connection->deviceTypeCode());
                 result.address = address;
                 result.serialNumber = connection->serialNumber();
                 result.nominalOutputPower = connection->nominalOutputPower();
