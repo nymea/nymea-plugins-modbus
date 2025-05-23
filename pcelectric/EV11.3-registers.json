@@ -118,6 +118,10 @@
                 {
                     "key": "PwmS0Enabled",
                     "value": 2
+                },
+                {
+                    "key": "LimitS0Enabled",
+                    "value": 3
                 }
             ]
         }
@@ -295,6 +299,31 @@
                     "access": "R"
                 }
             ]
+        },
+        {
+            "id": "update2",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "currentPower",
+                    "address": 144,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Actual charging power (Since firmware version: 0.22)",
+                    "unit": "W",
+                    "access": "RO"
+                },
+                {
+                    "id": "digitalInputFlag",
+                    "address": 145,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Actual digital input (Since firmware version: 0.22)",
+                    "access": "RO"
+                }
+            ]
         }
     ],
     "registers": [
@@ -355,6 +384,38 @@
             "registerType": "holdingRegister",
             "description": "Digital input mode",
             "enum": "DigitalInputMode",
+            "access": "RW"
+        },
+        {
+            "id": "phaseAutoSwitchPause",
+            "address": 206,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "description": "Phase auto switch pause (Since firmware version: 0.22)",
+            "unit": "s",
+            "defaultValue": "6",
+            "access": "RW"
+        },
+        {
+            "id": "phaseAutoSwitchMinChargingTime",
+            "address": 207,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "description": "Phase auto switch min charging time (Since firmware version: 0.22)",
+            "unit": "s",
+            "defaultValue": "120",
+            "access": "RW"
+        },
+        {
+            "id": "forceChargingResume",
+            "address": 208,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "description": "Force charging resume (Since firmware version: 0.22)",
+            "defaultValue": "0",
             "access": "RW"
         }
     ]
