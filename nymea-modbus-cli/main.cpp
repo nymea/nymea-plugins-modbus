@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     QCoreApplication application(argc, argv);
     application.setApplicationName("nymea-modbus-cli");
     application.setOrganizationName("nymea");
-    application.setApplicationVersion("1.2.0");
+    application.setApplicationVersion("1.3.0");
 
     QString description = QString("\nTool for testing and reading Modbus TCP or RTU registers.\n\n");
     description.append(QString("Copyright %1 2016 - 2023 nymea GmbH <contact@nymea.io>\n\n").arg(QChar(0xA9)));
@@ -138,6 +138,10 @@ int main(int argc, char *argv[])
     QCommandLineOption debugOption(QStringList() << "d" << "debug", QString("Print more information."));
     parser.addOption(debugOption);
 
+    QCommandLineOption broadcastOption(QStringList() << "broadcast", QString("Send the request to modbus slave ID 0 aka broadcast"));
+    parser.addOption(broadcastOption);
+
+
     parser.process(application);
 
     bool verbose = parser.isSet(debugOption);
@@ -176,11 +180,26 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    if (parser.isSet(broadcastOption) && parser.isSet(modbusServerAddressOption)) {
+        qCritical() << "Error: broadcast and modbus address specified. Please use one or the other option.";
+        exit(EXIT_FAILURE);
+    }
+
     bool valueOk = false;
     quint16 modbusServerAddress = parser.value(modbusServerAddressOption).toUInt(&valueOk);
-    if (modbusServerAddress < 1 || !valueOk) {
-        qCritical() << "Error: invalid modbus server address (slave ID):" << parser.value(modbusServerAddressOption);
-        exit(EXIT_FAILURE);
+
+    if (parser.isSet(broadcastOption)) {
+        modbusServerAddress = 0;
+    } else {
+        modbusServerAddress = parser.value(modbusServerAddressOption).toUInt(&valueOk);
+        if (!valueOk) {
+            qCritical() << "Error: invalid modbus server address (slave ID):" << parser.value(modbusServerAddressOption);
+            exit(EXIT_FAILURE);
+        } else if (modbusServerAddress == 0) {
+            qCritical() << "Error: invalid modbus server address (slave ID):" << parser.value(modbusServerAddressOption);
+            qCritical() << "Please use the broadcast parameter for sending broadcast requests.";
+            exit(EXIT_FAILURE);
+        }
     }
 
     quint16 registerAddress = parser.value(registerOption).toUInt(&valueOk);
