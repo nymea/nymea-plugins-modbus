@@ -29,12 +29,14 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "wattsonicinverter.h"
+#include "extern-plugininfo.h"
 
 #include <QLoggingCategory>
 Q_DECLARE_LOGGING_CATEGORY(dcWattsonicModbusRtuConnection)
 
-WattsonicInverter::WattsonicInverter(ModbusRtuMaster *modbusRtuMaster, quint16 slaveId, QObject *parent)
-    : WattsonicModbusRtuConnection{modbusRtuMaster, slaveId, parent}
+WattsonicInverter::WattsonicInverter(ModbusRtuMaster *modbusRtuMaster, quint16 slaveId, InverterGenerationMode generationMode, QObject *parent)
+    : WattsonicModbusRtuConnection{modbusRtuMaster, slaveId, parent},
+    m_generationMode{generationMode}
 {
     connect(this, &WattsonicInverter::initializationFinished, this, [this](bool success){
 
@@ -58,26 +60,43 @@ WattsonicInverter::WattsonicInverter(ModbusRtuMaster *modbusRtuMaster, quint16 s
         qCDebug(dcWattsonicModbusRtuConnection()) << "Internal init finished successfully" << serialNumber() << inverterInfo.type << inverterInfo.model;
         m_inverterInfo = inverterInfo;
 
-        // Verify which generation this is by testing one generation dependent register.
-        ModbusRtuReply *reply = readBatteryVoltageDcGen2();
-        if (!reply) {
-            qCWarning(dcWattsonicModbusRtuConnection()) << "Unable to test the generation request on the modbus master. Something might be wrong with the connection.";
-            emit customInitializationFinished(false);
-            return;
+        if (m_generationMode == InverterGenerationModeAuto) {
+
+            // Verify which generation this is by testing one generation dependent register.
+            // On Gen3 this request returns with an exception response
+
+            // Note: The DC voltage returns in both generations valid data, don't use that one
+            qCDebug(dcWattsonic()) << "Inverter generation autodetection active. Checking the inverter generation...";
+            ModbusRtuReply *reply = readSOCGen2();
+            if (!reply) {
+                qCWarning(dcWattsonicModbusRtuConnection()) << "Unable to test the generation request on the modbus master. Something might be wrong with the connection.";
+                emit customInitializationFinished(false);
+                return;
+            }
+
+            connect(reply, &ModbusRtuReply::finished, this, [this, reply](){
+                if (reply->error() != ModbusRtuReply::NoError) {
+                    qCWarning(dcWattsonicModbusRtuConnection()) << "Reply finished with error after reading a Gen2 register. Assuming this is a Gen3 inverter.";
+                    m_generation = Generation3;
+                    emit customInitializationFinished(true);
+                    return;
+                } else {
+                    qCDebug(dcWattsonicModbusRtuConnection()) << "Successfully read gen2 register. Assuming this is a Gen2 inverter.";
+                    m_generation = Generation2;
+                    emit customInitializationFinished(true);
+                }
+            });
+        } else {
+            if (m_generationMode == InverterGenerationModeGen2) {
+                m_generation = Generation2;
+            } else {
+                m_generation = Generation3;
+            }
+
+            emit customInitializationFinished(true);
+            qCDebug(dcWattsonic()) << "Inverter generation forced to" << m_generation;
         }
 
-        connect(reply, &ModbusRtuReply::finished, this, [this, reply](){
-            if (reply->error() != ModbusRtuReply::NoError) {
-                qCWarning(dcWattsonicModbusRtuConnection()) << "Reply finished with error after reading gen 2 register. Assuming this is a gen 3 device.";
-                m_generation = Generation3;
-                emit customInitializationFinished(true);
-                return;
-            } else {
-                qCDebug(dcWattsonicModbusRtuConnection()) << "Successfully read gen2 register. Assuming this is a gen 2 device.";
-                m_generation = Generation2;
-                emit customInitializationFinished(true);
-            }
-        });
     });
 }
 
@@ -163,7 +182,7 @@ float WattsonicInverter::SOH() const
 
 bool WattsonicInverter::update()
 {
-    if (m_generation == GenerationUnknwon) {
+    if (m_generation == GenerationUnknown) {
         qCDebug(dcWattsonicModbusRtuConnection()) << "Tried to update but we don't know yet if this is a gen2 or gen3 inverter. Waiting for the information.";
         return false;
     }

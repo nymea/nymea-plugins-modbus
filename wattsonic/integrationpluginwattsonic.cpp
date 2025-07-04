@@ -157,7 +157,17 @@ void IntegrationPluginWattsonic::setupWattsonicConnection(ThingSetupInfo *info)
         return;
     }
 
-    WattsonicInverter *connection = new WattsonicInverter(hardwareManager()->modbusRtuResource()->getModbusRtuMaster(uuid), slaveId, this);
+    QString inverterGenerationModeString = thing->paramValue(inverterThingInverterGenerationParamTypeId).toString();
+    WattsonicInverter::InverterGenerationMode inverterGenerationMode;
+    if (inverterGenerationModeString == "Gen2") {
+        inverterGenerationMode = WattsonicInverter::InverterGenerationModeGen2;
+    } else if (inverterGenerationModeString == "Gen3") {
+        inverterGenerationMode = WattsonicInverter::InverterGenerationModeGen3;
+    } else {
+        inverterGenerationMode = WattsonicInverter::InverterGenerationModeAuto;
+    }
+
+    WattsonicInverter *connection = new WattsonicInverter(hardwareManager()->modbusRtuResource()->getModbusRtuMaster(uuid), slaveId, inverterGenerationMode, this);
     m_connections.insert(thing, connection);
 
     // Only for setup
