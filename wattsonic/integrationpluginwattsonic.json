@@ -44,6 +44,14 @@
                             "displayName": "Serial number",
                             "type": "QString",
                             "defaultValue": ""
+                        },
+                        {
+                            "id": "388032f7-80c6-4410-8f7b-367cd06cb40a",
+                            "name": "inverterGeneration",
+                            "displayName": "Inverter generation",
+                            "type": "QString",
+                            "allowedValues": ["Auto", "Gen2", "Gen3"],
+                            "defaultValue": "Auto"
                         }
                     ],
                     "stateTypes": [
