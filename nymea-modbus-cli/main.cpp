@@ -366,7 +366,8 @@ void sendRequest(quint16 modbusServerAddress, QModbusDataUnit::RegisterType regi
             }
 
             const QModbusDataUnit unit = reply->result();
-            for (uint i = 0; i < unit.valueCount(); i++) {
+            // Note: we need the cast in since the valueCount() type changes with different Qt versions
+            for (int i = 0; i < static_cast<int>(unit.valueCount()); i++) {
                 quint16 registerValue = unit.values().at(i);
                 quint16 registerNumber = unit.startAddress() + i;
                 qInfo() << "-->" << registerNumber << ":" << QString("0x%1").arg(registerValue, 4, 16, QLatin1Char('0')) << registerValue;
@@ -416,7 +417,8 @@ void sendRequest(quint16 modbusServerAddress, QModbusDataUnit::RegisterType regi
             }
 
             const QModbusDataUnit unit = reply->result();
-            for (uint i = 0; i < unit.valueCount(); i++) {
+            // Note: we need the cast in since the valueCount() type changes with different Qt versions
+            for (int i = 0; i < static_cast<int>(unit.valueCount()); i++) {
                 quint16 registerValue = unit.values().at(i);
                 quint16 registerNumber = unit.startAddress() + i;
                 qInfo() << "-->" << registerNumber << ":" << QString("0x%1").arg(registerValue, 4, 16, QLatin1Char('0')) << registerValue;
