@@ -257,17 +257,6 @@ Description: nymea integration plugin for SunSpec Modbus devices
  This package contains the nymea integration plugin for SunSpec compatible solar inverters.
 
 
-Package: nymea-plugin-unipi2
-Architecture: any
-Multi-Arch: same
-Section: libs
-Depends: ${shlibs:Depends},
-         ${misc:Depends},
-Replaces: nymea-plugin-unipi
-Description: nymea integration plugin for UniPi devices
- This package contains the nymea integration plugin for UniPi devices.
-
-
 Package: nymea-plugin-pcelectric
 Architecture: any
 Section: libs
