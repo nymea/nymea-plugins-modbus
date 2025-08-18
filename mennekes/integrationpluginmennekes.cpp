@@ -148,7 +148,7 @@ void IntegrationPluginMennekes::discoverThings(ThingDiscoveryInfo *info)
                 return;
             }
 
-            qCInfo(dcMennekes()) << "Discovery results:" << discovery->discoveryResults().count();
+            qCInfo(dcMennekes()) << "Discovery results:" << discovery->discoveryResults().length();
 
             foreach (const AmtronCompact20Discovery::Result &result, discovery->discoveryResults()) {
                 ThingDescriptor descriptor(amtronCompact20ThingClassId, "AMTRON Compact 2.0s", QString("Slave ID: %1, Serial: %2").arg(result.slaveId).arg(result.serialNumber));

@@ -51,7 +51,7 @@ void PhoenixDiscovery::startDiscovery()
     NetworkDeviceDiscoveryReply *discoveryReply = m_networkDeviceDiscovery->discover();
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::hostAddressDiscovered, this, &PhoenixDiscovery::checkNetworkDevice);
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
-        qCDebug(dcPhoenixConnect()) << "Discovery: Network discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "network devices";
+        qCDebug(dcPhoenixConnect()) << "Discovery: Network discovery finished. Found" << discoveryReply->networkDeviceInfos().length() << "network devices";
         m_networkDeviceInfos = discoveryReply->networkDeviceInfos();
         discoveryReply->deleteLater();
         m_gracePeriodTimer.start();
@@ -123,14 +123,14 @@ void PhoenixDiscovery::finishDiscovery()
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
 
     // Fill in all network device infos we have
-    for (int i = 0; i < m_discoveryResults.count(); i++)
+    for (int i = 0; i < m_discoveryResults.length(); i++)
         m_discoveryResults[i].networkDeviceInfo = m_networkDeviceInfos.get(m_discoveryResults.at(i).address);
 
     // Cleanup any leftovers...we don't care any more
     foreach (PhoenixModbusTcpConnection *connection, m_connections)
         cleanupConnection(connection);
 
-    qCInfo(dcPhoenixConnect()) << "Discovery: Finished the discovery process. Found" << m_discoveryResults.count()
+    qCInfo(dcPhoenixConnect()) << "Discovery: Finished the discovery process. Found" << m_discoveryResults.length()
                        << "Phoenix connect wallboxes in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
     m_gracePeriodTimer.stop();
     emit discoveryFinished();

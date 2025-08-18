@@ -230,14 +230,14 @@ void SunSpecDiscovery::finishDiscovery()
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
 
     // Fill in all network device infos we have
-    for (int i = 0; i < m_results.count(); i++)
+    for (int i = 0; i < m_results.length(); i++)
         m_results[i].networkDeviceInfo = m_networkDeviceInfos.get(m_results.at(i).address);
 
     // Cleanup any leftovers...we don't care any more
     foreach (SunSpecConnection *connection, m_connections)
         cleanupConnection(connection);
 
-    qCInfo(dcSunSpec()) << "Discovery: Finished the discovery process. Found" << m_results.count()
+    qCInfo(dcSunSpec()) << "Discovery: Finished the discovery process. Found" << m_results.length()
                         << "SunSpec devices in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
     emit discoveryFinished();
 }

@@ -69,7 +69,7 @@ void IntegrationPluginWebasto::discoverThings(ThingDiscoveryInfo *info)
         connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
         connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [this, discoveryReply, info](){
             ThingDescriptors descriptors;
-            qCDebug(dcWebasto()) << "Discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "devices";
+            qCDebug(dcWebasto()) << "Discovery finished. Found" << discoveryReply->networkDeviceInfos().length() << "devices";
             foreach (const NetworkDeviceInfo &networkDeviceInfo, discoveryReply->networkDeviceInfos()) {
                 qCDebug(dcWebasto()) << networkDeviceInfo;
                 if (!networkDeviceInfo.hostName().contains("webasto", Qt::CaseSensitivity::CaseInsensitive))
@@ -665,7 +665,7 @@ void IntegrationPluginWebasto::executeAction(ThingActionInfo *info)
                     QDateTime accessTokenExpireDateTime = QDateTime::fromString(responseMap.value("access_token_exp").toString(), Qt::ISODate);
 
                     QStringList tokenParts = accessToken.split('.');
-                    if (tokenParts.count() != 3) {
+                    if (tokenParts.length() != 3) {
                         qCWarning(dcWebasto()) << "HTTP: Could not read expiration timestamp. Invalid JWT token formatting. Does not contain 3 parts separated by dot.";
                         return;
                     }
@@ -1131,14 +1131,14 @@ void IntegrationPluginWebasto::onReceivedRegister(Webasto::TqModbusRegister modb
             evaluatePhaseCount(thing);
             break;
         case Webasto::TqActivePower: {
-            if (data.count() < 2)
+            if (data.length() < 2)
                 return;
             int power = (static_cast<quint32>(data[0])<<16 | data[1]);
             qCDebug(dcWebasto()) << "   - Active power:" << power;
             thing->setStateValue(webastoLiveCurrentPowerStateTypeId, power);
         } break;
         case Webasto::TqEnergyMeter: {
-            if (data.count() < 2)
+            if (data.length() < 2)
                 return;
             int energy = (static_cast<quint32>(data[0])<<16 | data[1]);
             qCDebug(dcWebasto()) << "   - Energy meter:" << energy << "Wh";
@@ -1167,7 +1167,7 @@ void IntegrationPluginWebasto::onReceivedRegister(Webasto::TqModbusRegister modb
             qCDebug(dcWebasto()) << "   - Battery state" << data[0];
             break;
         case Webasto::TqEVBatteryCapacity: {
-            if (data.count() < 2)
+            if (data.length() < 2)
                 return;
             uint batteryCapacity = (static_cast<quint32>(data[0])<<16 | data[1]);
             qCDebug(dcWebasto()) << "   - Battery capacity" << batteryCapacity << "Wh";
@@ -1176,7 +1176,7 @@ void IntegrationPluginWebasto::onReceivedRegister(Webasto::TqModbusRegister modb
             qCDebug(dcWebasto()) << "   - Schedule type" << data[0];
             break;
         case Webasto::TqRequiredEnergy: {
-            if (data.count() < 2)
+            if (data.length() < 2)
                 return;
             uint requiredEnergy = (static_cast<quint32>(data[0])<<16 | data[1]);
             qCDebug(dcWebasto()) << "   - Required energy" << requiredEnergy;
@@ -1198,14 +1198,14 @@ void IntegrationPluginWebasto::onReceivedRegister(Webasto::TqModbusRegister modb
             qCDebug(dcWebasto()) << "   - Start time" << (static_cast<quint32>(data[0])<<16 | data[1]);
             break;
         case Webasto::TqChargingTime: {
-            if (data.count() < 2)
+            if (data.length() < 2)
                 return;
             uint seconds = (static_cast<quint32>(data[0])<<16 | data[1]);
             qCDebug(dcWebasto()) << "   - Charging time" << seconds << "s";
             thing->setStateValue(webastoLiveSessionTimeStateTypeId, seconds/60.00); // Charging time in minutes
         } break;
         case Webasto::TqEndTime: {
-            if (data.count() < 2)
+            if (data.length() < 2)
                 return;
             uint hour =    ((static_cast<quint32>(data[0])<<16 | data[1])&0xff0000)>>16;
             uint minutes = ((static_cast<quint32>(data[0])<<16 | data[1])&0x00ff00)>>8;
@@ -1213,7 +1213,7 @@ void IntegrationPluginWebasto::onReceivedRegister(Webasto::TqModbusRegister modb
             qCDebug(dcWebasto()) << "   - End time" << hour << "h" << minutes << "m" << seconds << "s";
         } break;
         case Webasto::TqUserId: {
-            if (data.count() < 10)
+            if (data.length() < 10)
                 return;
             QByteArray userID;
             Q_FOREACH(quint16 i, data) {

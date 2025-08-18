@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2020, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -31,9 +31,10 @@
 #ifndef SUNSPECDATAPOINT_H
 #define SUNSPECDATAPOINT_H
 
-#include <QObject>
 #include <QVector>
 #include <QDebug>
+#include <QString>
+#include <QMetaObject>
 
 class SunSpecDataPoint
 {
