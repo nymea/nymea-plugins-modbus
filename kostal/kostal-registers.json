@@ -3,6 +3,8 @@
     "protocol": "TCP",
     "endianness": "LittleEndian",
     "errorLimitUntilNotReachable": 20,
+    "queuedRequests": true,
+    "queuedRequestsDelay": 100,
     "checkReachableRegister": "inverterState",
     "enums": [
         {
@@ -740,40 +742,6 @@
         }
     ],
     "registers": [
-        {
-            "id": "bidirectionalConverterNumber",
-            "address": 30,
-            "size": 1,
-            "type": "uint16",
-            "readSchedule": "init",
-            "registerType": "holdingRegister",
-            "description": "Number of bidirectional converter",
-            "defaultValue": "0",
-            "access": "RO"
-        },
-        {
-            "id": "acPhasesNumber",
-            "address": 32,
-            "size": 1,
-            "type": "uint16",
-            "readSchedule": "init",
-            "registerType": "holdingRegister",
-            "description": "Number of bidirectional converter",
-            "defaultValue": "0",
-            "access": "RO"
-        },
-        {
-            "id": "numberPvStrings",
-            "address": 34,
-            "size": 1,
-            "type": "uint16",
-            "readSchedule": "init",
-            "registerType": "holdingRegister",
-            "description": "Number of PV strings",
-            "unit": "",
-            "defaultValue": "0",
-            "access": "RO"
-        },
         {
             "id": "inverterState",
             "address": 56,

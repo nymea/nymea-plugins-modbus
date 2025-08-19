@@ -449,7 +449,7 @@ void IntegrationPluginKostal::setupKostalConnection(ThingSetupInfo *info)
             if (meterThings.count() == 1) {
                 Thing *meterThing = meterThings.first();
 
-                // Power
+                // Current
                 meterThing->setStateValue(kostalMeterCurrentPhaseAStateTypeId, kostalConnection->powerMeterCurrentPhase1());
                 meterThing->setStateValue(kostalMeterCurrentPhaseBStateTypeId, kostalConnection->powerMeterCurrentPhase2());
                 meterThing->setStateValue(kostalMeterCurrentPhaseCStateTypeId, kostalConnection->powerMeterCurrentPhase3());
@@ -459,18 +459,50 @@ void IntegrationPluginKostal::setupKostalConnection(ThingSetupInfo *info)
                 meterThing->setStateValue(kostalMeterVoltagePhaseBStateTypeId, kostalConnection->powerMeterVoltagePhase2());
                 meterThing->setStateValue(kostalMeterVoltagePhaseCStateTypeId, kostalConnection->powerMeterVoltagePhase3());
 
-                // Current
-                meterThing->setStateValue(kostalMeterCurrentPowerPhaseAStateTypeId, kostalConnection->powerMeterActivePowerPhase1());
-                meterThing->setStateValue(kostalMeterCurrentPowerPhaseBStateTypeId, kostalConnection->powerMeterActivePowerPhase2());
-                meterThing->setStateValue(kostalMeterCurrentPowerPhaseCStateTypeId, kostalConnection->powerMeterActivePowerPhase3());
-
                 meterThing->setStateValue(kostalMeterFrequencyStateTypeId, kostalConnection->gridFrequencyPowerMeter());
 
                 meterThing->setStateValue(kostalMeterTotalEnergyConsumedStateTypeId, kostalConnection->totalHomeConsumptionFromGrid() / 1000.0); // kWh
                 meterThing->setStateValue(kostalMeterTotalEnergyProducedStateTypeId, kostalConnection->totalEnergyAcToGrid() / 1000.0); // kWh
 
-                // Set the power as last value
-                meterThing->setStateValue(kostalMeterCurrentPowerStateTypeId, kostalConnection->powerMeterTotalActivePower());
+                // Note: there is a special case with the Kostal KSEM G2 meter, which communicates voltage and current, but no power data
+                // Therefore we have to calculate them on our own and set the states accordingly.
+
+                bool currentNotZero = kostalConnection->powerMeterCurrentPhase1() != 0 &&
+                                      kostalConnection->powerMeterCurrentPhase2() != 0 &&
+                                      kostalConnection->powerMeterCurrentPhase3() != 0;
+
+                bool voltageNotZero = kostalConnection->powerMeterVoltagePhase1() != 0 &&
+                                      kostalConnection->powerMeterVoltagePhase2() != 0 &&
+                                      kostalConnection->powerMeterVoltagePhase3() != 0;
+
+                bool powerZero = kostalConnection->powerMeterActivePowerPhase1() == 0 &&
+                                 kostalConnection->powerMeterActivePowerPhase2() == 0 &&
+                                 kostalConnection->powerMeterActivePowerPhase3() == 0 &&
+                                 kostalConnection->powerMeterTotalActivePower() == 0;
+
+                if (currentNotZero && voltageNotZero && powerZero) {
+
+                    // P = U * I
+                    float powerPhase1 = kostalConnection->powerMeterCurrentPhase1() * kostalConnection->powerMeterVoltagePhase1() * -1.0;
+                    float powerPhase2 = kostalConnection->powerMeterCurrentPhase2() * kostalConnection->powerMeterVoltagePhase2() * -1.0;
+                    float powerPhase3 = kostalConnection->powerMeterCurrentPhase3() * kostalConnection->powerMeterVoltagePhase3() * -1.0;
+
+                    meterThing->setStateValue(kostalMeterCurrentPowerPhaseAStateTypeId, powerPhase1);
+                    meterThing->setStateValue(kostalMeterCurrentPowerPhaseBStateTypeId, powerPhase2);
+                    meterThing->setStateValue(kostalMeterCurrentPowerPhaseCStateTypeId, powerPhase3);
+
+                    // Set the total power as last value
+                    meterThing->setStateValue(kostalMeterCurrentPowerStateTypeId, powerPhase1 + powerPhase2 + powerPhase3);
+
+                } else {
+                    // Power
+                    meterThing->setStateValue(kostalMeterCurrentPowerPhaseAStateTypeId, kostalConnection->powerMeterActivePowerPhase1());
+                    meterThing->setStateValue(kostalMeterCurrentPowerPhaseBStateTypeId, kostalConnection->powerMeterActivePowerPhase2());
+                    meterThing->setStateValue(kostalMeterCurrentPowerPhaseCStateTypeId, kostalConnection->powerMeterActivePowerPhase3());
+
+                    // Set the total power as last value
+                    meterThing->setStateValue(kostalMeterCurrentPowerStateTypeId, kostalConnection->powerMeterTotalActivePower());
+                }
             }
         });
 
