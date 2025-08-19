@@ -105,7 +105,7 @@ void SpeedwireDiscovery::startUnicastDiscovery()
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::hostAddressDiscovered, this, &SpeedwireDiscovery::sendUnicastDiscoveryRequest);
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [this, discoveryReply](){
-        qCDebug(dcSma()) << "Discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "network devices for unicast requests.";
+        qCDebug(dcSma()) << "Discovery finished. Found" << discoveryReply->networkDeviceInfos().length() << "network devices for unicast requests.";
 
         m_networkDeviceInfos = discoveryReply->networkDeviceInfos();
 
@@ -239,10 +239,10 @@ void SpeedwireDiscovery::finishDiscovery()
     m_results = m_resultMeters.values() + m_resultInverters.values();
 
     // Fill in all network device infos we have
-    for (int i = 0; i < m_results.count(); i++)
+    for (int i = 0; i < m_results.length(); i++)
         m_results[i].networkDeviceInfo = m_networkDeviceInfos.get(m_results.at(i).address);
 
-    qCDebug(dcSma()) << "SpeedwireDiscovery: Discovey finished. Found" << m_results.count() << "SMA devices in the network";
+    qCDebug(dcSma()) << "SpeedwireDiscovery: Discovey finished. Found" << m_results.length() << "SMA devices in the network";
     m_multicastSearchRequestTimer.stop();
 
     foreach (const SpeedwireDiscoveryResult &result, m_results) {

@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2022, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -58,7 +58,11 @@ public:
 
         // Software version
         QByteArray rawData;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        QDataStream stream(&rawData, QDataStream::ReadWrite);
+#else
         QDataStream stream(&rawData, QIODevice::ReadWrite);
+#endif
         stream << versionData;
 
         quint8 major = static_cast<quint8>(rawData.at(0));

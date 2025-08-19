@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2021, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -34,6 +34,7 @@
 #include <QVector>
 #include <QObject>
 #include <QModbusPdu>
+#include <QMetaObject>
 #include <QModbusDataUnit>
 
 class ModbusDataUtils

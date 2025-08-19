@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2022, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -34,11 +34,16 @@
 
 #include <QDebug>
 #include <QObject>
+#include <QVariant>
 #include <QSerialPort>
 #include <QHostAddress>
 #include <QSerialPortInfo>
 #include <QModbusTcpClient>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QModbusRtuSerialClient>
+#else
 #include <QModbusRtuSerialMaster>
+#endif
 
 void sendRequest(quint16 modbusServerAddress, QModbusDataUnit::RegisterType registerType, quint16 registerAddress, quint16 length, const QByteArray &writeData, QModbusClient *client);
 QString exceptionCodeToString(QModbusPdu::ExceptionCode exception);
@@ -51,7 +56,7 @@ int main(int argc, char *argv[])
     application.setApplicationVersion("1.3.0");
 
     QString description = QString("\nTool for testing and reading Modbus TCP or RTU registers.\n\n");
-    description.append(QString("Copyright %1 2016 - 2023 nymea GmbH <contact@nymea.io>\n\n").arg(QChar(0xA9)));
+    description.append(QString("Copyright %1 2016 - 2025 nymea GmbH <contact@nymea.io>\n\n").arg(QChar(0xA9)));
 
 
 
@@ -309,7 +314,11 @@ int main(int argc, char *argv[])
             exit(EXIT_FAILURE);
         }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        QModbusRtuSerialClient *client = new QModbusRtuSerialClient(nullptr);
+#else
         QModbusRtuSerialMaster *client = new QModbusRtuSerialMaster(nullptr);
+#endif
         client->setConnectionParameter(QModbusDevice::SerialPortNameParameter, serialPortName);
         client->setConnectionParameter(QModbusDevice::SerialBaudRateParameter, baudrate);
         client->setConnectionParameter(QModbusDevice::SerialDataBitsParameter, dataBits);
@@ -327,7 +336,11 @@ int main(int argc, char *argv[])
             sendRequest(modbusServerAddress, registerType, registerAddress, length, writeData, client);
         });
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        QObject::connect(client, &QModbusRtuSerialClient::errorOccurred, &application, [=](QModbusDevice::Error error){
+#else
         QObject::connect(client, &QModbusRtuSerialMaster::errorOccurred, &application, [=](QModbusDevice::Error error){
+#endif
             if (error != QModbusDevice::NoError) {
                 exit(EXIT_FAILURE);
             }
@@ -372,7 +385,8 @@ void sendRequest(quint16 modbusServerAddress, QModbusDataUnit::RegisterType regi
             }
 
             const QModbusDataUnit unit = reply->result();
-            for (uint i = 0; i < unit.valueCount(); i++) {
+            // Note: we need the cast in since the valueCount() type changes with different Qt versions
+            for (int i = 0; i < static_cast<int>(unit.valueCount()); i++) {
                 quint16 registerValue = unit.values().at(i);
                 quint16 registerNumber = unit.startAddress() + i;
                 qInfo() << "-->" << registerNumber << ":" << QString("0x%1").arg(registerValue, 4, 16, QLatin1Char('0')) << registerValue;
@@ -422,7 +436,8 @@ void sendRequest(quint16 modbusServerAddress, QModbusDataUnit::RegisterType regi
             }
 
             const QModbusDataUnit unit = reply->result();
-            for (uint i = 0; i < unit.valueCount(); i++) {
+            // Note: we need the cast in since the valueCount() type changes with different Qt versions
+            for (int i = 0; i < static_cast<int>(unit.valueCount()); i++) {
                 quint16 registerValue = unit.values().at(i);
                 quint16 registerNumber = unit.startAddress() + i;
                 qInfo() << "-->" << registerNumber << ":" << QString("0x%1").arg(registerValue, 4, 16, QLatin1Char('0')) << registerValue;

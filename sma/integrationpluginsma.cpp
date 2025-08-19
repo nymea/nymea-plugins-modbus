@@ -229,7 +229,7 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
 
                 // Note: use the serial and not the mac address as identifier because more than one inverter might be behind a network device
                 Things existingThings = myThings().filterByParam(modbusSolarInverterThingSerialNumberParamTypeId, result.serialNumber);
-                if (existingThings.count() == 1) {
+                if (existingThings.length() == 1) {
                     qCDebug(dcSma()) << "This SMA inverter already exists in the system:" << result.serialNumber;
                     descriptor.setThingId(existingThings.first()->id());
                 }
@@ -265,7 +265,7 @@ void IntegrationPluginSma::discoverThings(ThingDiscoveryInfo *info)
                 ThingDescriptor descriptor(modbusBatteryInverterThingClassId, "SMA battery inverter", QT_TR_NOOP("Serial: ") + result.serialNumber + " (" + result.networkDeviceInfo.address().toString() + ")");
 
                 Things existingThings = myThings().filterByParam(modbusBatteryInverterThingSerialNumberParamTypeId, result.serialNumber);
-                if (existingThings.count() == 1) {
+                if (existingThings.length() == 1) {
                     qCInfo(dcSma()) << "This SMA inverter already exists in the system:" << result.serialNumber;
                     descriptor.setThingId(existingThings.first()->id());
                 }
@@ -299,7 +299,7 @@ void IntegrationPluginSma::confirmPairing(ThingPairingInfo *info, const QString 
 
     if (info->thingClassId() == speedwireInverterThingClassId) {
         // On speedwire the password length has a maximum of 12 characters
-        if (secret.count() > 12) {
+        if (secret.length() > 12) {
             info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("The password can not be longer than 12 characters."));
             return;
         }

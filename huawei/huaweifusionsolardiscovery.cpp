@@ -153,14 +153,14 @@ void HuaweiFusionSolarDiscovery::finishDiscovery()
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
 
     // Fill in finished network device information
-    for (int i = 0; i < m_results.count(); i++)
+    for (int i = 0; i < m_results.length(); i++)
         m_results[i].networkDeviceInfo = m_networkDeviceInfos.get(m_results.value(i).address);
 
     // Cleanup any leftovers...we don't care any more
     foreach (HuaweiFusionSolar *connection, m_connections)
         cleanupConnection(connection);
 
-    qCInfo(dcHuawei()) << "Discovery: Finished the discovery process. Found" << m_results.count()
+    qCInfo(dcHuawei()) << "Discovery: Finished the discovery process. Found" << m_results.length()
                        << "inverters in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
 
     emit discoveryFinished();

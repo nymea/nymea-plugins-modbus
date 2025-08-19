@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2023, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -32,6 +32,8 @@
 #include "extern-plugininfo.h"
 
 #include <modbusdatautils.h>
+
+#include <QRegularExpression>
 
 QList<int> slaveIdCandidates = {50, 11, 12, 13, 14};
 
@@ -83,7 +85,7 @@ void AmtronCompact20Discovery::tryConnect(ModbusRtuMaster *master, quint16 slave
 
         if (reply->error() == ModbusRtuReply::NoError) {
 
-            QString serialNumber = ModbusDataUtils::convertToString(reply->result(), ModbusDataUtils::ByteOrderBigEndian).remove(QRegExp("^_*"));
+            QString serialNumber = ModbusDataUtils::convertToString(reply->result(), ModbusDataUtils::ByteOrderBigEndian).remove(QRegularExpression("^_*"));
             qCDebug(dcMennekes()) << "Test reply finished!" << reply->error() << serialNumber;
 
             Result result {master->modbusUuid(), serialNumber, slaveId};
@@ -91,7 +93,7 @@ void AmtronCompact20Discovery::tryConnect(ModbusRtuMaster *master, quint16 slave
 
         }
 
-        if (slaveIdIndex < slaveIdCandidates.count() - 1) {
+        if (slaveIdIndex < slaveIdCandidates.length() - 1) {
             tryConnect(master, slaveIdIndex+1);
         } else {
             emit discoveryFinished(true);

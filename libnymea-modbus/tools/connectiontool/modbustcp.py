@@ -80,9 +80,9 @@ def writePropertyGetSetDataUnitImplementationsTcp(fileDescriptor, className, reg
 
             writeLine(fileDescriptor, '    QVector<quint16> values = %s;' % getConversionToValueMethod(registerDefinition))
             if registerDefinition['registerType'] == 'holdingRegister':
-                writeLine(fileDescriptor, '    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, %s, values.count());' % (registerDefinition['address']))
+                writeLine(fileDescriptor, '    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::HoldingRegisters, %s, values.length());' % (registerDefinition['address']))
             elif registerDefinition['registerType'] == 'coils':
-                writeLine(fileDescriptor, '    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, %s, values.count());' % (registerDefinition['address']))
+                writeLine(fileDescriptor, '    QModbusDataUnit request = QModbusDataUnit(QModbusDataUnit::RegisterType::Coils, %s, values.length());' % (registerDefinition['address']))
             else:
                 logger.warning('Error: invalid register type for writing.')
                 exit(1)
@@ -831,7 +831,7 @@ def writeUpdateMethodTcp(fileDescriptor, className, registerDefinitions, blockDe
             writeLine(fileDescriptor)
 
             writeLine(fileDescriptor, '    if (!m_updateRequestQueue.isEmpty()) {')
-            writeLine(fileDescriptor, '        qCDebug(dc%s()) << "Tried to update but there are still some update requests pending. Waiting for them to be finished..." << m_updateRequestQueue.count();' % className)
+            writeLine(fileDescriptor, '        qCDebug(dc%s()) << "Tried to update but there are still some update requests pending. Waiting for them to be finished..." << m_updateRequestQueue.length();' % className)
             writeLine(fileDescriptor, '        sendNextQueuedRequest();')
             writeLine(fileDescriptor, '        return true;')
             writeLine(fileDescriptor, '    }')

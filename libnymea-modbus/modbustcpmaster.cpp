@@ -44,7 +44,7 @@ ModbusTcpMaster::ModbusTcpMaster(const QHostAddress &hostAddress, uint port, QOb
     m_modbusTcpClient->setNumberOfRetries(m_numberOfRetries);
 
     connect(m_modbusTcpClient, &QModbusTcpClient::stateChanged, this, &ModbusTcpMaster::onModbusStateChanged);
-    connect(m_modbusTcpClient, &QModbusRtuSerialMaster::errorOccurred, this, &ModbusTcpMaster::onModbusErrorOccurred);
+    connect(m_modbusTcpClient, &QModbusTcpClient::errorOccurred, this, &ModbusTcpMaster::onModbusErrorOccurred);
 
     m_reconnectTimer = new QTimer(this);
     m_reconnectTimer->setSingleShot(true);

@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2023, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -29,11 +29,11 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "ciondiscovery.h"
-
 #include "extern-plugininfo.h"
 
 #include <modbusdatautils.h>
 
+#include <QRegularExpression>
 
 CionDiscovery::CionDiscovery(ModbusRtuHardwareResource *modbusRtuResource, QObject *parent)
     : QObject{parent},
@@ -90,8 +90,7 @@ void CionDiscovery::tryConnect(ModbusRtuMaster *master, quint16 slaveId)
             // Examples of how this looks like:
             // EBE 1.2: "V1.2    15.02.2021"
             // ICC:     "003090056-01          20220913"
-            QRegExp re = QRegExp("[A-Z0-9\\.- ]{18,32}");
-            if (re.exactMatch(firmwareVersion)) {
+            if (QRegularExpression("[A-Z0-9\\.- ]{18,32}").match(firmwareVersion).hasMatch()) {
                 Result result {master->modbusUuid(), firmwareVersion, slaveId};
                 m_discoveryResults.append(result);
             }

@@ -54,7 +54,7 @@ void IntegrationPluginSenseAir::discoverThings(ThingDiscoveryInfo *info)
     }
 
     QString displayMessage;
-    if (info->thingDescriptors().count() == 0) {
+    if (info->thingDescriptors().length() == 0) {
         displayMessage = QT_TR_NOOP("Please set up a Modbus RTU master with baudrate 9600, 8 data bits, 1 stop bits and no parity first.");
     }
 

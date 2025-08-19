@@ -132,7 +132,7 @@ void HuaweiFusionSolar::readNextRegister()
             handleModbusError(reply->error());
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Inverter active power\" register" << 32080 << "size:" << 2 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().count();
+                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Inverter active power\" register" << 32080 << "size:" << 2 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().length();
                 if (!valuesAreVaild(unit.values(), 2)) {
                     qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values. Requested" << 2 << "but received" << unit.values();
                 } else {
@@ -177,7 +177,7 @@ void HuaweiFusionSolar::readNextRegister()
             handleModbusError(reply->error());
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Inverter input power\" register" << 32064 << "size:" << 2 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().count();
+                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Inverter input power\" register" << 32064 << "size:" << 2 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().length();
                 if (!valuesAreVaild(unit.values(), 2)) {
                     qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values. Requested" << 2 << "but received" << unit.values();
                 } else {
@@ -222,7 +222,7 @@ void HuaweiFusionSolar::readNextRegister()
             handleModbusError(reply->error());
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Inverter device status\" register" << 32089 << "size:" << 1 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().count();
+                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Inverter device status\" register" << 32089 << "size:" << 1 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().length();
                 if (!valuesAreVaild(unit.values(), 1)) {
                     qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values. Requested" << 1 << "but received" << unit.values();
                 } else {
@@ -266,7 +266,7 @@ void HuaweiFusionSolar::readNextRegister()
             handleModbusError(reply->error());
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Inverter energy produced\" register" << 32106 << "size:" << 2 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().count();
+                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Inverter energy produced\" register" << 32106 << "size:" << 2 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().length();
                 if (!valuesAreVaild(unit.values(), 2)) {
                     qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values. Requested" << 2 << "but received" << unit.values();
                 } else {
@@ -309,7 +309,7 @@ void HuaweiFusionSolar::readNextRegister()
             handleModbusError(reply->error());
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Power meter active power\" register" << 37113 << "size:" << 2 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().count();
+                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Power meter active power\" register" << 37113 << "size:" << 2 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().length();
                 if (!valuesAreVaild(unit.values(), 2)) {
                     qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values. Requested" << 2 << "but received" << unit.values();
                 } else {
@@ -353,7 +353,7 @@ void HuaweiFusionSolar::readNextRegister()
             handleModbusError(reply->error());
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Power meter  Positive active electricity\" register" << 37119 << "size:" << 2 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().count();
+                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Power meter  Positive active electricity\" register" << 37119 << "size:" << 2 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().length();
                 if (!valuesAreVaild(unit.values(), 2)) {
                     qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values. Requested" << 2 << "but received" << unit.values();
                 } else {
@@ -398,7 +398,7 @@ void HuaweiFusionSolar::readNextRegister()
             handleModbusError(reply->error());
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Power meter Reverse active power\" register" << 37121 << "size:" << 2 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().count();
+                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Power meter Reverse active power\" register" << 37121 << "size:" << 2 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().length();
                 if (!valuesAreVaild(unit.values(), 2)) {
                     qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values. Requested" << 2 << "but received" << unit.values();
                 } else {
@@ -443,7 +443,7 @@ void HuaweiFusionSolar::readNextRegister()
             handleModbusError(reply->error());
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 1 status\" register" << 37000 << "size:" << 1 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().count();
+                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 1 status\" register" << 37000 << "size:" << 1 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().length();
                 if (!valuesAreVaild(unit.values(), 1)) {
                     qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values. Requested" << 1 << "but received" << unit.values();
                 } else {
@@ -499,7 +499,7 @@ void HuaweiFusionSolar::readNextRegister()
             handleModbusError(reply->error());
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 1 power\" register" << 37001 << "size:" << 2 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().count();
+                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 1 power\" register" << 37001 << "size:" << 2 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().length();
                 if (!valuesAreVaild(unit.values(), 2)) {
                     qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values. Requested" << 2 << "but received" << unit.values();
                 } else {
@@ -542,7 +542,7 @@ void HuaweiFusionSolar::readNextRegister()
             handleModbusError(reply->error());
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 1 state of charge\" register" << 37004 << "size:" << 1 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().count();
+                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 1 state of charge\" register" << 37004 << "size:" << 1 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().length();
                 if (!valuesAreVaild(unit.values(), 1)) {
                     qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values. Requested" << 1 << "but received" << unit.values();
                 } else {
@@ -586,7 +586,7 @@ void HuaweiFusionSolar::readNextRegister()
             handleModbusError(reply->error());
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 2 status\" register" << 37741 << "size:" << 1 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().count();
+                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 2 status\" register" << 37741 << "size:" << 1 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().length();
                 if (!valuesAreVaild(unit.values(), 1)) {
                     qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values count. Requested" << 1 << "but received" << unit.values();
                 } else {
@@ -642,7 +642,7 @@ void HuaweiFusionSolar::readNextRegister()
             handleModbusError(reply->error());
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 2 power\" register" << 37743 << "size:" << 2 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().count();
+                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 2 power\" register" << 37743 << "size:" << 2 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().length();
                 if (!valuesAreVaild(unit.values(), 2)) {
                     qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values count. Requested" << 2 << "but received" << unit.values();
                 } else {
@@ -685,7 +685,7 @@ void HuaweiFusionSolar::readNextRegister()
             handleModbusError(reply->error());
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
-                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 2 state of charge\" register" << 37738 << "size:" << 1 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().count();
+                qCDebug(dcHuaweiFusionSolar()) << "<-- Response from \"Luna 2000 Battery 2 state of charge\" register" << 37738 << "size:" << 1 << "valueCount:" << unit.valueCount() << unit.values() << unit.values().length();
                 if (!valuesAreVaild(unit.values(), 1)) {
                     qCWarning(dcHuaweiFusionSolar()) << "<-- Received invalid values. Requested" << 1 << "but received" << unit.values();
                 } else {
@@ -712,7 +712,7 @@ void HuaweiFusionSolar::readNextRegister()
 
 bool HuaweiFusionSolar::valuesAreVaild(const QVector<quint16> &values, int readSize)
 {
-    if (values.count() != readSize) {
+    if (values.length() != readSize) {
         qCDebug(dcHuaweiFusionSolar()) << "Invalid values. The received values count does not match the requested" << readSize << "registers.";
         return false;
     }
@@ -722,7 +722,7 @@ bool HuaweiFusionSolar::valuesAreVaild(const QVector<quint16> &values, int readS
     // 0xFFFF: invalid value of a type other than the floating point type returned by one register
     // 0xFFFFFFFF: invalid value returned by two registers
 
-    if (values.count() == 2) {
+    if (values.length() == 2) {
         bool floatingPointValid = (values != QVector<quint16>() << 0x7fff << 0xffff);
         if (!floatingPointValid)
             qCDebug(dcHuaweiFusionSolar()) << "Invalid values. The received values match the invalid for floating pointer:" << values;
@@ -734,7 +734,7 @@ bool HuaweiFusionSolar::valuesAreVaild(const QVector<quint16> &values, int readS
         return floatingPointValid && otherTypesValid;
     }
 
-    if (values.count() == 1)
+    if (values.length() == 1)
         return values.at(0) != 0x7fff && values.at(0) != 0xffff;
 
     return true;

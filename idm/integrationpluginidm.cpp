@@ -51,7 +51,7 @@ void IntegrationPluginIdm::discoverThings(ThingDiscoveryInfo *info)
     NetworkDeviceDiscoveryReply *discoveryReply = hardwareManager()->networkDeviceDiscovery()->discover();
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [this, discoveryReply, info](){
-        qCDebug(dcIdm()) << "Discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "devices";
+        qCDebug(dcIdm()) << "Discovery finished. Found" << discoveryReply->networkDeviceInfos().length() << "devices";
         foreach (const NetworkDeviceInfo &networkDeviceInfo, discoveryReply->networkDeviceInfos()) {
             qCDebug(dcIdm()) << networkDeviceInfo;
             QString title;

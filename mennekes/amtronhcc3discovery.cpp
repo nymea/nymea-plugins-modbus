@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2024, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -51,7 +51,7 @@ void AmtronHCC3Discovery::startDiscovery()
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::hostAddressDiscovered, this, &AmtronHCC3Discovery::checkNetworkDevice);
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
-        qCDebug(dcMennekes()) << "Discovery: Network discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "network devices";
+        qCDebug(dcMennekes()) << "Discovery: Network discovery finished. Found" << discoveryReply->networkDeviceInfos().length() << "network devices";
         m_networkDeviceInfos = discoveryReply->networkDeviceInfos();
         m_gracePeriodTimer.start();
     });
@@ -93,7 +93,7 @@ void AmtronHCC3Discovery::checkNetworkDevice(const QHostAddress &address)
 
             AmtronDiscoveryResult result;
             result.wallboxName = connection->name();
-            result.serialNumber = connection->serialNumber();
+            result.serialNumber = QString::number(connection->serialNumber());
             result.address = address;
             m_discoveryResults.append(result);
 
@@ -133,14 +133,14 @@ void AmtronHCC3Discovery::finishDiscovery()
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
 
     // Fill in all network device infos we have
-    for (int i = 0; i < m_discoveryResults.count(); i++)
+    for (int i = 0; i < m_discoveryResults.length(); i++)
         m_discoveryResults[i].networkDeviceInfo = m_networkDeviceInfos.get(m_discoveryResults.at(i).address);
 
     // Cleanup any leftovers...we don't care any more
     foreach (AmtronHCC3ModbusTcpConnection *connection, m_connections)
         cleanupConnection(connection);
 
-    qCInfo(dcMennekes()) << "Discovery: Finished the discovery process. Found" << m_discoveryResults.count()
+    qCInfo(dcMennekes()) << "Discovery: Finished the discovery process. Found" << m_discoveryResults.length()
                        << "AMTRON HCC3 wallboxes in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
     m_gracePeriodTimer.stop();
 

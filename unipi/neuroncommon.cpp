@@ -134,7 +134,7 @@ QList<QString> NeuronCommon::userLEDs()
 NeuronCommon::RegisterDescriptor NeuronCommon::registerDescriptorFromStringList(const QStringList &data)
 {
     RegisterDescriptor descriptor;
-    if (data.count() < 7) {
+    if (data.length() < 7) {
         return descriptor;
     }
     descriptor.address = data[0].toInt();
@@ -235,7 +235,7 @@ QUuid NeuronCommon::setDigitalOutput(const QString &circuit, bool value)
 {
     if (!m_modbusDigitalOutputRegisters.contains(circuit)) {
         qCWarning(dcUniPi()) << "Neuron: Digital output circuit not found" << circuit;
-        return "";
+        return QUuid();
     }
     int modbusAddress = m_modbusDigitalOutputRegisters.value(circuit);
     //qDebug(dcUniPi()) << "Neuron: Setting digital ouput" << circuit << modbusAddress << value;
@@ -248,7 +248,7 @@ QUuid NeuronCommon::setDigitalOutput(const QString &circuit, bool value)
     if (m_writeRequestQueue.isEmpty()) {
         modbusWriteRequest(request);
     } else if (m_writeRequestQueue.length() > 100) {
-        return "";
+        return QUuid();
     } else {
         m_writeRequestQueue.append(request);
     }
@@ -297,7 +297,7 @@ QUuid NeuronCommon::setAnalogOutput(const QString &circuit, double value)
             if (m_writeRequestQueue.isEmpty()) {
                 modbusWriteRequest(request);
             } else if (m_writeRequestQueue.length() > 100) {
-                return "";
+                return QUuid();
             } else {
                 m_writeRequestQueue.append(request);
             }
@@ -305,7 +305,7 @@ QUuid NeuronCommon::setAnalogOutput(const QString &circuit, double value)
         }
     }
     qCWarning(dcUniPi()) << "Neuron: Analog output circuit not found" << circuit;
-    return "";
+    return QUuid();
 }
 
 
@@ -327,7 +327,7 @@ QUuid NeuronCommon::setUserLED(const QString &circuit, bool value)
     //qDebug(dcUniPi()) << "Neuron: Setting user led" << circuit << modbusAddress << value;
 
     if (!m_modbusInterface)
-        return "";
+        return QUuid();
 
     Request request;
     request.id = QUuid::createUuid();
@@ -337,10 +337,10 @@ QUuid NeuronCommon::setUserLED(const QString &circuit, bool value)
 
     if (m_writeRequestQueue.isEmpty()) {
         if (!modbusWriteRequest(request)) {
-            return "";
+            return QUuid();
         }
     } else if (m_writeRequestQueue.length() > 100) {
-        return "";
+        return QUuid();
     } else {
         m_writeRequestQueue.append(request);
     }

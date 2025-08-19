@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2022, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -57,7 +57,11 @@ SpeedwireInterface::SpeedwireInterface(quint32 sourceSerialNumber, QObject *pare
         qCDebug(dcSma()) << "SpeedwireInterface: Unicast socket state changed" << socketState;
     });
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    connect(m_unicast, &QUdpSocket::errorOccurred, this, [=](QAbstractSocket::SocketError error){
+#else
     connect(m_unicast, static_cast<void (QUdpSocket::*)( QAbstractSocket::SocketError )>(&QAbstractSocket::error), this, [=](QAbstractSocket::SocketError error){
+#endif
         qCWarning(dcSma()) << "SpeedwireInterface: Unicast socket error occurred" << error << m_unicast->errorString();
     });
 
@@ -85,7 +89,11 @@ SpeedwireInterface::SpeedwireInterface(quint32 sourceSerialNumber, QObject *pare
     connect(m_multicast, &QUdpSocket::stateChanged, this, [=](QAbstractSocket::SocketState socketState){
         qCDebug(dcSma()) << "SpeedwireInterface: Multicast socket state changed" << socketState;
     });
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    connect(m_multicast, &QUdpSocket::errorOccurred, this, [=](QAbstractSocket::SocketError error){
+#else
     connect(m_multicast, static_cast<void (QUdpSocket::*)( QAbstractSocket::SocketError )>(&QAbstractSocket::error), this, [=](QAbstractSocket::SocketError error){
+#endif
         qCWarning(dcSma()) << "SpeedwireInterface: Multicast socket error occurred" << error << m_multicast->errorString();
     });
 

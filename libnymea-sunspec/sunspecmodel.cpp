@@ -126,12 +126,12 @@ void SunSpecModel::readBlockData()
         }
 
         const QModbusDataUnit unit = reply->result();
-        qCDebug(dcSunSpecModelData()) << "-->" << "Received block data" << this << unit.values().count() << SunSpecDataPoint::registersToString(unit.values());
+        qCDebug(dcSunSpecModelData()) << "-->" << "Received block data" << this << unit.values().length() << SunSpecDataPoint::registersToString(unit.values());
         m_blockData = unit.values();
         emit blockDataChanged(m_blockData);
 
-        if (m_blockData.count() != m_modelLength + 2) {
-            qCWarning(dcSunSpecModelData()) << "Received invalid block data count from read block data request. Model lenght:" << m_modelLength << "Response block count:" << m_blockData.count();
+        if (m_blockData.length() != m_modelLength + 2) {
+            qCWarning(dcSunSpecModelData()) << "Received invalid block data count from read block data request. Model lenght:" << m_modelLength << "Response block count:" << m_blockData.length();
             return;
         }
 

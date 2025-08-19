@@ -313,7 +313,7 @@ void SunSpecConnection::processDiscoveryResult()
                 qCDebug(dcSunSpec()) << "Sorted model list:";
                 SunSpecCommonModel *currentCommonModel = nullptr;
                 SunSpecModel::CommonModelInfo commonModelInfo;
-                for (int i = 0; i < m_models.count(); i++) {
+                for (int i = 0; i < m_models.length(); i++) {
                     SunSpecModel *model = m_models.at(i);
                     qCDebug(dcSunSpec()) << "-->" << model;
                     if (model->modelId() == SunSpecModelFactory::ModelIdCommon) {
@@ -467,7 +467,7 @@ void SunSpecConnection::scanModelsOnBaseRegister(quint16 offset)
         } else {
             qCWarning(dcSunSpec()) << "Error occurred while reading model header from" << this << "using offset" << offset << m_modbusTcpClient->errorString();
             if (!m_modelDiscoveryResult.isEmpty()) {
-                qCWarning(dcSunSpec()) << "Error occurred but already discovered" << m_modelDiscoveryResult.count() << "models. Continue with the discovered models, but the discovery may be incomplete due to header reading errors.";
+                qCWarning(dcSunSpec()) << "Error occurred but already discovered" << m_modelDiscoveryResult.length() << "models. Continue with the discovered models, but the discovery may be incomplete due to header reading errors.";
                 qCDebug(dcSunSpec()) << "Scan for SunSpec models on" << this << m_baseRegister << "finished successfully";
                 processDiscoveryResult();
             } else {

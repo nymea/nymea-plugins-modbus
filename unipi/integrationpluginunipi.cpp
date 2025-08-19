@@ -895,7 +895,7 @@ void IntegrationPluginUniPi::onRequestExecuted(const QUuid &requestId, bool succ
 {
     if (m_asyncActions.contains(requestId)){
         ThingActionInfo *info = m_asyncActions.take(requestId);
-        qCDebug(dcUniPi()) << "Request executed, pending requests:" << m_asyncActions.count();
+        qCDebug(dcUniPi()) << "Request executed, pending requests:" << m_asyncActions.size();
         if (success){
             info->finish(Thing::ThingErrorNoError);
         } else {
