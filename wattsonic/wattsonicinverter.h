@@ -44,14 +44,21 @@ public:
         QString model;
     };
 
+    enum InverterGenerationMode {
+        InverterGenerationModeAuto,
+        InverterGenerationModeGen2,
+        InverterGenerationModeGen3
+    };
+    Q_ENUM(InverterGenerationMode)
+
     enum Generation {
-        GenerationUnknwon,
+        GenerationUnknown,
         Generation2,
         Generation3
     };
     Q_ENUM(Generation)
 
-    explicit WattsonicInverter(ModbusRtuMaster *modbusRtuMaster, quint16 slaveId, QObject *parent = nullptr);
+    explicit WattsonicInverter(ModbusRtuMaster *modbusRtuMaster, quint16 slaveId, InverterGenerationMode generationMode = InverterGenerationModeAuto, QObject *parent = nullptr);
 
     Generation generation() const;
     WattsonicInverter::Info inverterInfo() const;
@@ -75,7 +82,8 @@ signals:
 
 private:
     WattsonicInverter::Info m_inverterInfo;
-    Generation m_generation = GenerationUnknwon;
+    InverterGenerationMode m_generationMode = InverterGenerationModeAuto;
+    Generation m_generation = GenerationUnknown;
 
 };
 

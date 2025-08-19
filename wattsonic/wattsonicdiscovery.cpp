@@ -77,7 +77,7 @@ void WattsonicDiscovery::tryConnect(ModbusRtuMaster *master, quint16 slaveId)
     qCDebug(dcWattsonic()) << "Discovery: Scanning modbus RTU master" << master->modbusUuid() << "Slave ID:" << slaveId;
     m_verifiedMasters.append(master);
 
-    WattsonicInverter *connection = new WattsonicInverter(master, slaveId, this);
+    WattsonicInverter *connection = new WattsonicInverter(master, slaveId, WattsonicInverter::InverterGenerationModeAuto, this);
     connect(connection, &WattsonicInverter::reachableChanged, this, [connection](bool reachable){
         if (reachable) {
             qCDebug(dcWattsonic()) << "Discovery: The connection is now reachable. Starting the initialization";
