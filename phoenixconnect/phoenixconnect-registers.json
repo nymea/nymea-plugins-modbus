@@ -3,6 +3,8 @@
     "protocol": "TCP",
     "endianness": "LittleEndian",
     "errorLimitUntilNotReachable": 20,
+    "queuedRequests": true,
+    "queuedRequestsDelay": 250,
     "checkReachableRegister": "chargingCurrent",
     "enums": [
         {
