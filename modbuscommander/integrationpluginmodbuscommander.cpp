@@ -119,7 +119,7 @@ void IntegrationPluginModbusCommander::discoverThings(ThingDiscoveryInfo *info)
         connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
         connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
             ThingDescriptors descriptors;
-            qCDebug(dcModbusCommander()) << "Discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "devices";
+            qCDebug(dcModbusCommander()) << "Discovery finished. Found" << discoveryReply->networkDeviceInfos().length() << "devices";
             foreach (const NetworkDeviceInfo &networkDeviceInfo, discoveryReply->networkDeviceInfos()) {
                 qCDebug(dcModbusCommander()) << networkDeviceInfo;
                 QString title;
@@ -145,7 +145,7 @@ void IntegrationPluginModbusCommander::discoverThings(ThingDiscoveryInfo *info)
 
                 // Check if we already have set up this device
                 Things existingThings = myThings().filterByParam(modbusTCPClientThingIpAddressParamTypeId, networkDeviceInfo.address().toString());
-                if (existingThings.count() == 1) {
+                if (existingThings.length() == 1) {
                     qCDebug(dcModbusCommander()) << "This thing already exists in the system." << existingThings.first() << networkDeviceInfo;
                     descriptor.setThingId(existingThings.first()->id());
                 }

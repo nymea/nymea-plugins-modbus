@@ -53,7 +53,7 @@ void IntegrationPluginAmperfied::discoverThings(ThingDiscoveryInfo *info)
                 return;
             }
 
-            qCInfo(dcAmperfied()) << "Discovery results:" << discovery->discoveryResults().count();
+            qCInfo(dcAmperfied()) << "Discovery results:" << discovery->discoveryResults().length();
 
             foreach (const EnergyControlDiscovery::Result &result, discovery->discoveryResults()) {
                 ThingDescriptor descriptor(energyControlThingClassId, "Amperfied Energy Control", QString("Slave ID: %1").arg(result.slaveId));
@@ -82,7 +82,7 @@ void IntegrationPluginAmperfied::discoverThings(ThingDiscoveryInfo *info)
     if (info->thingClassId() == connectHomeThingClassId || info->thingClassId() == connectBusinessThingClassId || info->thingClassId() == connectSolarThingClassId) {
         AmperfiedConnectDiscovery *discovery = new AmperfiedConnectDiscovery(hardwareManager()->networkDeviceDiscovery(), info);
         connect(discovery, &AmperfiedConnectDiscovery::discoveryFinished, info, [this, info, discovery](){
-            qCInfo(dcAmperfied()) << "Discovery results:" << discovery->discoveryResults().count();
+            qCInfo(dcAmperfied()) << "Discovery results:" << discovery->discoveryResults().length();
 
             foreach (const AmperfiedConnectDiscovery::Result &result, discovery->discoveryResults()) {
                 QString description;

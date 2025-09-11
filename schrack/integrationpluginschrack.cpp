@@ -54,7 +54,7 @@ void IntegrationPluginSchrack::discoverThings(ThingDiscoveryInfo *info)
             return;
         }
 
-        qCInfo(dcSchrack()) << "Discovery results:" << discovery->discoveryResults().count();
+        qCInfo(dcSchrack()) << "Discovery results:" << discovery->discoveryResults().length();
 
         foreach (const CionDiscovery::Result &result, discovery->discoveryResults()) {
             ThingDescriptor descriptor(cionThingClassId, "Schrack CION", QString("Slave ID: %1, Version: %2").arg(result.slaveId).arg(result.firmwareVersion));

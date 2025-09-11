@@ -170,7 +170,7 @@ void PantaboxDiscovery::finishDiscovery()
     foreach (Pantabox *connection, m_connections)
         cleanupConnection(connection);
 
-    qCInfo(dcInro()) << "Discovery: Finished the discovery process. Found" << m_results.count()
+    qCInfo(dcInro()) << "Discovery: Finished the discovery process. Found" << m_results.length()
                      << "PANTABOXE wallboxes in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
 
     emit discoveryFinished();

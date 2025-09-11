@@ -1,0 +1,308 @@
+Source: nymea-plugins-modbus
+Section: utils
+Priority: optional
+Maintainer: nymea GmbH <developer@nymea.io>
+Standards-Version: 4.7.2
+Build-depends: debhelper,
+               libnymea-dev,
+               libnymea-gpio-dev,
+               qt6-base-dev,
+               qt6-base-dev-tools,
+               qt6-serialport-dev,
+               qt6-serialbus-dev,
+               nymea-dev-tools:native,
+               pkg-config,
+               libi2c-dev,
+               python3:native
+
+
+Package: libnymea-sunspec1
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
+Description: nymea.io sunspec library
+ This package contains the nymea sunspec library.
+
+
+Package: libnymea-sunspec-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         libnymea-sunspec1 (= ${binary:Version}),
+         pkg-config,
+         qt6-base-dev,
+         qt6-base-dev-tools,
+Description: The main libraries and header files for developing with nymea sunspec.
+ This package contains the nymea sunspec library - development files.
+
+
+Package: libnymea-modbus
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
+Description: nymea modbus integration plugins library
+ This package contains the nymea modbus library for integration plugins.
+
+
+Package: libnymea-modbus-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         libnymea-modbus (= ${binary:Version}),
+         pkg-config,
+         qt6-base-dev,
+         qt6-base-dev-tools,
+         python3,
+Description: The main libraries and header files for developing with modbus based nymea integration plugins.
+ This package contains the nymea modbus integration plugin library - development files.
+
+
+Package: nymea-modbus-cli
+Architecture: any
+Section: utils
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
+Description: nymea modbus command line tool for testing modbus TCP communication
+ This package contains the nymea modbus command line tool for testing modbus TCP communication.
+
+
+Package: nymea-plugin-alphainnotec
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for alpha innotec heat pumps
+ This package contains the nymea integration plugin for alpha innotec head pumps.
+
+
+Package: nymea-plugin-amperfied
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for Amperfeid/Heidelberg wallboxes
+ This package contains the nymea integration plugin for Amperfeid/Heidelberg wallboxes.
+
+
+Package: nymea-plugin-bgetech
+Architecture: any
+Multi-Arch: same
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for B+G E-Tech Modbus based energy meters
+ This package contains the nymea integration plugin for Modbus based energy meters
+ made by B+G E-Tech.
+
+
+Package: nymea-plugin-drexelundweiss
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for Drexel & Weiss heat pumps
+ This package contains the nymea integration plugin for Drexel & Weiss heat pumps.
+
+
+Package: nymea-plugin-idm
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for iDM heat pumps
+ This package contains the nymea integration plugin for iDM heat pumps.
+
+
+Package: nymea-plugin-inepro
+Architecture: any
+Multi-Arch: same
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for inepro Metering Modbus based energy meters
+ This package contains the nymea integration plugin for Modbus based energy meters
+ made by inepro Metering.
+
+
+Package: nymea-plugin-inro
+Architecture: any
+Multi-Arch: same
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for INRO PANTABOX chargers
+ This package contains the nymea integration plugin for Modbus based PANTABOX 
+ support.
+
+
+Package: nymea-plugin-huawei      
+Architecture: any
+Multi-Arch: same 
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends}   
+Description: nymea integration plugin for Huawei FusionSolar energy devices
+ This package contains the nymea integration plugin for Huawei FusionSolar devices
+ based on Modbus TCP.
+
+
+Package: nymea-plugin-kostal
+Architecture: any
+Multi-Arch: same
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
+Description: nymea.io plugin for Kostal Solar inverters
+ This package contains the nymea.io plugin for Kostal Solar inverters
+
+
+Package: nymea-plugin-mennekes
+Architecture: any
+Multi-Arch: same
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
+Description: nymea.io plugin for Mennekes wallboxes
+ This package contains the nymea.io plugin for Mennekes wallboxes
+
+
+Package: nymea-plugin-modbuscommander
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin to send and receive generic modbus commands
+ This package contains a nymea integration plugin which allows to send and receive
+ generic Modbus commands to/from a Modbus device.
+ 
+
+Package: nymea-plugin-mypv
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for my-pv heating rods
+ This package contains the nymea integration plugin for my-pv solar inverters.
+
+
+Package: nymea-plugin-mtec
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for M-TEC heat pumps
+ This package contains the nymea integration plugin for M-TEC heat pumps.
+
+
+Package: nymea-plugin-schrack
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for Schrack wallboxes
+ This package contains the nymea integration plugin for Schrack wallboxes.
+
+
+Package: nymea-plugin-senseair
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for Senseair sensors
+ This package contains the nymea integration plugin for Senseair sensors.
+
+
+Package: nymea-plugin-sma
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
+Description: nymea integration plugin for SMA solar inverters and meters
+ This package contains the nymea integration plugin for SMA solar inverters and meters.
+
+
+Package: nymea-plugin-solax
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for Solax modbus devices
+ This package contains the nymea integration plugin for solax compatible solar inverters, meters and batteries.
+
+
+Package: nymea-plugin-stiebeleltron
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea.io plugin for Stiebel Eltron heat pumps
+  This package will install the nymea.io plugin for Stiebel Eltron heat pumps.
+
+
+Package: nymea-plugin-sungrow
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for Sungrow devices
+ This package contains the nymea integration plugin for Sungrow solar inverters, meters and batteries.
+
+
+Package: nymea-plugin-sunspec
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for SunSpec Modbus devices
+ This package contains the nymea integration plugin for SunSpec compatible solar inverters.
+
+
+Package: nymea-plugin-pcelectric
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for PCE wallboxes
+ This package contains the nymea integration plugin for wallboxes made by PC Electric.
+
+
+Package: nymea-plugin-phoenixconnect
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Conflicts: nymea-plugin-wallbe
+Replaces: nymea-plugin-wallbe
+Description: nymea integration plugin for PhoenixConnect wallboxes
+ This package contains the nymea integration plugin for wallboxes made
+ by PhonenixConnect and rebranded as Wallbe, Compleo and Scapo.
+
+
+Package: nymea-plugin-vestel
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for Vestel wallboxes
+ This package contains the nymea integration plugin for wallboxes made
+ by Vestel.
+
+
+Package: nymea-plugin-wattsonic
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for Wattsonic hybrid inverters
+ This package contains the nymea integration plugin for hybrid inverters made
+ by Wattsonic.
+
+
+Package: nymea-plugin-webasto
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: nymea integration plugin for Webasto Live wallboxes
+ This package contains the nymea integration plugin for wallboxes made
+ by Webasto.

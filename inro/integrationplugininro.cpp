@@ -53,7 +53,7 @@ void IntegrationPluginInro::discoverThings(ThingDiscoveryInfo *info)
 
             // Check if we already have set up this device
             Things existingThings = myThings().filterByParam(pantaboxThingSerialNumberParamTypeId, result.deviceInfo.serialNumber);
-            if (existingThings.count() == 1) {
+            if (existingThings.length() == 1) {
                 qCDebug(dcInro()) << "This PANTABOX already exists in the system:" << result.deviceInfo.serialNumber << result.deviceInfo.ipAddress.toString();
                 descriptor.setThingId(existingThings.first()->id());
             }

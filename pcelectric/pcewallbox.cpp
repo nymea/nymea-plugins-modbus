@@ -571,10 +571,10 @@ void PceWallbox::sendNextRequest()
     if (!m_writeQueue.isEmpty()) {
         // Prioritize write requests
         m_currentReply = m_writeQueue.dequeue();
-        qCDebug(dcPcElectric()) << "Dequeued write request. Queue count: W" << m_writeQueue.count() << "| R:" << m_readQueue.count();
+        qCDebug(dcPcElectric()) << "Dequeued write request. Queue count: W" << m_writeQueue.length() << "| R:" << m_readQueue.length();
     } else {
         m_currentReply = m_readQueue.dequeue();
-        qCDebug(dcPcElectric()) << "Dequeued read request. Queue count: W" << m_writeQueue.count() << "| R:" << m_readQueue.count();
+        qCDebug(dcPcElectric()) << "Dequeued read request. Queue count: W" << m_writeQueue.length() << "| R:" << m_readQueue.length();
     }
 
     switch(m_currentReply->requestType()) {

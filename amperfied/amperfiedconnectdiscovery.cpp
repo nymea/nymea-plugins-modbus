@@ -52,7 +52,7 @@ void AmperfiedConnectDiscovery::startDiscovery(const QString &nameFilter)
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::hostAddressDiscovered, this, &AmperfiedConnectDiscovery::checkNetworkDevice);
 
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [=](){
-        qCDebug(dcAmperfied()) << "Discovery: Network discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "network devices";
+        qCDebug(dcAmperfied()) << "Discovery: Network discovery finished. Found" << discoveryReply->networkDeviceInfos().length() << "network devices";
         m_networkDeviceInfos = discoveryReply->networkDeviceInfos();
         m_gracePeriodTimer.start();
         discoveryReply->deleteLater();
@@ -144,14 +144,14 @@ void AmperfiedConnectDiscovery::finishDiscovery()
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
 
     // Fill in finished network device information
-    for (int i = 0; i < m_discoveryResults.count(); i++)
+    for (int i = 0; i < m_discoveryResults.length(); i++)
         m_discoveryResults[i].networkDeviceInfo = m_networkDeviceInfos.get(m_discoveryResults.value(i).address);
 
     // Cleanup any leftovers...we don't care any more
     foreach (AmperfiedModbusTcpConnection *connection, m_connections)
         cleanupConnection(connection);
 
-    qCInfo(dcAmperfied()) << "Discovery: Finished the discovery process. Found" << m_discoveryResults.count()
+    qCInfo(dcAmperfied()) << "Discovery: Finished the discovery process. Found" << m_discoveryResults.length()
                        << "Amperfied wallboxes in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
     m_gracePeriodTimer.stop();
 

@@ -235,12 +235,12 @@ SpeedwireInverterReply *SpeedwireInverter::sendLoginRequest(const QString &passw
     // Encode password
     QByteArray passwordData = password.toUtf8();
     QByteArray encodedPassword(12, loginAsUser ? 0x88 : 0xBB);
-    for (int i = 0; i < password.count(); i++) {
+    for (int i = 0; i < password.length(); i++) {
         encodedPassword[i] = (passwordData.at(i) + (loginAsUser ? 0x88 : 0xBB) % 0xff);
     }
 
     // Add encoded password
-    for (int i = 0; i < encodedPassword.count(); i++) {
+    for (int i = 0; i < encodedPassword.length(); i++) {
         stream << static_cast<quint8>(encodedPassword.at(i));
     }
 

@@ -63,7 +63,7 @@ void IntegrationPluginPcElectric::discoverThings(ThingDiscoveryInfo *info)
 
             // Check if we already have set up this device
             Things existingThings = myThings().filterByParam(ev11ThingSerialNumberParamTypeId, result.serialNumber);
-            if (existingThings.count() == 1) {
+            if (existingThings.length() == 1) {
                 qCDebug(dcPcElectric()) << "This PCE wallbox already exists in the system:" << result.serialNumber << result.networkDeviceInfo;
                 descriptor.setThingId(existingThings.first()->id());
             }

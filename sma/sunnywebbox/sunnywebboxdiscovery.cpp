@@ -142,7 +142,7 @@ void SunnyWebBoxDiscovery::finishDiscovery()
     foreach (const QHostAddress &address, m_discoveredHosts)
         m_discoveryResults.append(m_networkDeviceInfos.get(address));
 
-    qCInfo(dcSma()) << "Discovery: SunnyWebBox: Finished the discovery process. Found" << m_discoveryResults.count()
+    qCInfo(dcSma()) << "Discovery: SunnyWebBox: Finished the discovery process. Found" << m_discoveryResults.length()
                     << "Sunny WebBoxes in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
 
     cleanupPendingReplies();

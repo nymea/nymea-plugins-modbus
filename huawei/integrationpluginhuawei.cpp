@@ -884,7 +884,7 @@ void IntegrationPluginHuawei::evaluateEnergyProducedValue(Thing *inverterThing, 
 
     int historyMaxSize  = 3;
     int absurdlyHighValueLimit= 25000000;
-    int historySize = m_inverterEnergyProducedHistory.value(inverterThing).count();
+    int historySize = m_inverterEnergyProducedHistory.value(inverterThing).length();
 
     if (historySize > historyMaxSize) {
         m_inverterEnergyProducedHistory[inverterThing].removeFirst();

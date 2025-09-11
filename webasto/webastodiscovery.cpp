@@ -53,7 +53,7 @@ void WebastoDiscovery::startDiscovery()
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::hostAddressDiscovered, this, &WebastoDiscovery::checkNetworkDevice);
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, discoveryReply, &NetworkDeviceDiscoveryReply::deleteLater);
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::finished, this, [this, discoveryReply](){
-        qCDebug(dcWebasto()) << "Discovery: Network discovery finished. Found" << discoveryReply->networkDeviceInfos().count() << "network devices";
+        qCDebug(dcWebasto()) << "Discovery: Network discovery finished. Found" << discoveryReply->networkDeviceInfos().length() << "network devices";
         m_networkDeviceInfos = discoveryReply->networkDeviceInfos();
 
         // Give the last connections added right before the network discovery finished a chance to check the device...
@@ -190,7 +190,7 @@ void WebastoDiscovery::finishDiscovery()
 {
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
 
-    for (int i = 0; i < m_temporaryResults.count(); i++) {
+    for (int i = 0; i < m_temporaryResults.length(); i++) {
         // Fill in all network device infos we have
         m_temporaryResults[i].networkDeviceInfo = m_networkDeviceInfos.get(m_temporaryResults.at(i).address);
 
@@ -215,6 +215,6 @@ void WebastoDiscovery::finishDiscovery()
     foreach (WebastoNextModbusTcpConnection *connection, m_connections)
         cleanupConnection(connection);
 
-    qCInfo(dcWebasto()) << "Discovery: Finished the discovery process. Found" << m_results.count() << "Webasto NEXT wallboxes in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
+    qCInfo(dcWebasto()) << "Discovery: Finished the discovery process. Found" << m_results.length() << "Webasto NEXT wallboxes in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
     emit discoveryFinished();
 }

@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2021, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -39,21 +39,25 @@ ModbusDataUtils::ModbusDataUtils()
 
 quint16 ModbusDataUtils::convertToUInt16(const QVector<quint16> &registers)
 {
-    Q_ASSERT_X(registers.count() == 1,  "ModbusDataUtils", "invalid raw data size for converting value to quint16");
+    Q_ASSERT_X(registers.length() == 1,  "ModbusDataUtils", "invalid raw data size for converting value to quint16");
     return registers.at(0);
 }
 
 qint16 ModbusDataUtils::convertToInt16(const QVector<quint16> &registers)
 {
-    Q_ASSERT_X(registers.count() == 1,  "ModbusDataUtils", "invalid raw data size for converting value to qint16");
+    Q_ASSERT_X(registers.length() == 1,  "ModbusDataUtils", "invalid raw data size for converting value to qint16");
     return static_cast<qint16>(registers.at(0));
 }
 
 quint32 ModbusDataUtils::convertToUInt32(const QVector<quint16> &registers, ByteOrder byteOrder)
 {
-    Q_ASSERT_X(registers.count() == 2,  "ModbusDataUtils", "invalid raw data size for converting value to quint32");
+    Q_ASSERT_X(registers.length() == 2,  "ModbusDataUtils", "invalid raw data size for converting value to quint32");
     QByteArray data;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QDataStream inputStream(&data, QDataStream::WriteOnly);
+#else
     QDataStream inputStream(&data, QIODevice::WriteOnly);
+#endif
     if (byteOrder == ByteOrderBigEndian) {
         inputStream << registers.at(0);
         inputStream << registers.at(1);
@@ -62,7 +66,11 @@ quint32 ModbusDataUtils::convertToUInt32(const QVector<quint16> &registers, Byte
         inputStream << registers.at(0);
     }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QDataStream outputStream(&data, QDataStream::ReadOnly);
+#else
     QDataStream outputStream(&data, QIODevice::ReadOnly);
+#endif
     quint32 result = 0;
     outputStream >> result;
     return result;
@@ -70,9 +78,13 @@ quint32 ModbusDataUtils::convertToUInt32(const QVector<quint16> &registers, Byte
 
 qint32 ModbusDataUtils::convertToInt32(const QVector<quint16> &registers, ByteOrder byteOrder)
 {
-    Q_ASSERT_X(registers.count() == 2,  "ModbusDataUtils", "invalid raw data size for converting value to quint32");
+    Q_ASSERT_X(registers.length() == 2,  "ModbusDataUtils", "invalid raw data size for converting value to quint32");
     QByteArray data;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QDataStream inputStream(&data, QDataStream::WriteOnly);
+#else
     QDataStream inputStream(&data, QIODevice::WriteOnly);
+#endif
     if (byteOrder == ByteOrderBigEndian) {
         inputStream << registers.at(0);
         inputStream << registers.at(1);
@@ -81,7 +93,11 @@ qint32 ModbusDataUtils::convertToInt32(const QVector<quint16> &registers, ByteOr
         inputStream << registers.at(0);
     }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QDataStream outputStream(&data, QDataStream::ReadOnly);
+#else
     QDataStream outputStream(&data, QIODevice::ReadOnly);
+#endif
     qint32 result = 0;
     outputStream >> result;
     return result;
@@ -89,9 +105,13 @@ qint32 ModbusDataUtils::convertToInt32(const QVector<quint16> &registers, ByteOr
 
 quint64 ModbusDataUtils::convertToUInt64(const QVector<quint16> &registers, ByteOrder byteOrder)
 {
-    Q_ASSERT_X(registers.count() == 4,  "ModbusDataUtils", "invalid raw data size for converting value to quint64");
+    Q_ASSERT_X(registers.length() == 4,  "ModbusDataUtils", "invalid raw data size for converting value to quint64");
     QByteArray data;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QDataStream inputStream(&data, QDataStream::WriteOnly);
+#else
     QDataStream inputStream(&data, QIODevice::WriteOnly);
+#endif
     if (byteOrder == ByteOrderBigEndian) {
         inputStream << registers.at(0);
         inputStream << registers.at(1);
@@ -104,7 +124,11 @@ quint64 ModbusDataUtils::convertToUInt64(const QVector<quint16> &registers, Byte
         inputStream << registers.at(0);
     }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QDataStream outputStream(&data, QDataStream::ReadOnly);
+#else
     QDataStream outputStream(&data, QIODevice::ReadOnly);
+#endif
     quint64 result = 0;
     outputStream >> result;
     return result;
@@ -112,9 +136,13 @@ quint64 ModbusDataUtils::convertToUInt64(const QVector<quint16> &registers, Byte
 
 qint64 ModbusDataUtils::convertToInt64(const QVector<quint16> &registers, ByteOrder byteOrder)
 {
-    Q_ASSERT_X(registers.count() == 4,  "ModbusDataUtils", "invalid raw data size for converting value to qint64");
+    Q_ASSERT_X(registers.length() == 4,  "ModbusDataUtils", "invalid raw data size for converting value to qint64");
     QByteArray data;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QDataStream inputStream(&data, QDataStream::WriteOnly);
+#else
     QDataStream inputStream(&data, QIODevice::WriteOnly);
+#endif
     if (byteOrder == ByteOrderBigEndian) {
         inputStream << registers.at(0);
         inputStream << registers.at(1);
@@ -127,7 +155,12 @@ qint64 ModbusDataUtils::convertToInt64(const QVector<quint16> &registers, ByteOr
         inputStream << registers.at(0);
     }
 
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QDataStream outputStream(&data, QDataStream::ReadOnly);
+#else
     QDataStream outputStream(&data, QIODevice::ReadOnly);
+#endif
     qint64 result = 0;
     outputStream >> result;
     return result;
@@ -136,10 +169,14 @@ qint64 ModbusDataUtils::convertToInt64(const QVector<quint16> &registers, ByteOr
 QString ModbusDataUtils::convertToString(const QVector<quint16> &registers, ByteOrder characterByteOrder)
 {
     QByteArray bytes;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QDataStream stream(&bytes, QDataStream::WriteOnly);
+#else
     QDataStream stream(&bytes, QIODevice::WriteOnly);
+#endif
     // Note: some devices use little endian within the register uint16 representation of the 2 characters.
     stream.setByteOrder(characterByteOrder == ByteOrderBigEndian ? QDataStream::BigEndian : QDataStream::LittleEndian);
-    for (int i = 0; i < registers.count(); i++) {
+    for (int i = 0; i < registers.length(); i++) {
         stream << registers.at(i);
     }
 
@@ -149,8 +186,12 @@ QString ModbusDataUtils::convertToString(const QVector<quint16> &registers, Byte
 QByteArray ModbusDataUtils::convertToByteArray(const QVector<quint16> &registers)
 {
     QByteArray bytes;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QDataStream stream(&bytes, QDataStream::WriteOnly);
+#else
     QDataStream stream(&bytes, QIODevice::WriteOnly);
-    for (int i = 0; i < registers.count(); i++) {
+#endif
+    for (int i = 0; i < registers.length(); i++) {
         stream << registers.at(i);
     }
     return bytes;
@@ -158,7 +199,7 @@ QByteArray ModbusDataUtils::convertToByteArray(const QVector<quint16> &registers
 
 float ModbusDataUtils::convertToFloat32(const QVector<quint16> &registers, ByteOrder byteOrder)
 {
-    Q_ASSERT_X(registers.count() == 2,  "ModbusDataUtils", "invalid raw data size for converting value to float32");
+    Q_ASSERT_X(registers.length() == 2,  "ModbusDataUtils", "invalid raw data size for converting value to float32");
     quint32 rawValue = ModbusDataUtils::convertToUInt32(registers, byteOrder);
     float value = 0;
     memcpy(&value, &rawValue, sizeof(quint32));
@@ -168,7 +209,7 @@ float ModbusDataUtils::convertToFloat32(const QVector<quint16> &registers, ByteO
 double ModbusDataUtils::convertToFloat64(const QVector<quint16> &registers, ByteOrder byteOrder)
 {
 
-    Q_ASSERT_X(registers.count() == 4,  "ModbusDataUtils", "invalid raw data size for converting value to float64");
+    Q_ASSERT_X(registers.length() == 4,  "ModbusDataUtils", "invalid raw data size for converting value to float64");
     quint64 rawValue = ModbusDataUtils::convertToUInt64(registers, byteOrder);
     double value = 0;
     memcpy(&value, &rawValue, sizeof(quint64));
@@ -188,10 +229,18 @@ QVector<quint16> ModbusDataUtils::convertFromInt16(qint16 value)
 QVector<quint16> ModbusDataUtils::convertFromUInt32(quint32 value, ByteOrder byteOrder)
 {
     QByteArray data;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QDataStream inputStream(&data, QDataStream::WriteOnly);
+#else
     QDataStream inputStream(&data, QIODevice::WriteOnly);
+#endif
     inputStream << value;
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QDataStream outputStream(&data, QDataStream::ReadOnly);
+#else
     QDataStream outputStream(&data, QIODevice::ReadOnly);
+#endif
     QVector<quint16> values;
     for (int i = 0; i < 2; i++) {
         quint16 registerValue = 0;
@@ -214,10 +263,18 @@ QVector<quint16> ModbusDataUtils::convertFromInt32(qint32 value, ByteOrder byteO
 QVector<quint16> ModbusDataUtils::convertFromUInt64(quint64 value, ByteOrder byteOrder)
 {
     QByteArray data;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QDataStream inputStream(&data, QDataStream::WriteOnly);
+#else
     QDataStream inputStream(&data, QIODevice::WriteOnly);
+#endif
     inputStream << value;
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QDataStream outputStream(&data, QDataStream::ReadOnly);
+#else
     QDataStream outputStream(&data, QIODevice::ReadOnly);
+#endif
     QVector<quint16> values;
     for (int i = 0; i < 4; i++) {
         quint16 registerValue = 0;
@@ -234,10 +291,18 @@ QVector<quint16> ModbusDataUtils::convertFromUInt64(quint64 value, ByteOrder byt
 QVector<quint16> ModbusDataUtils::convertFromInt64(qint64 value, ByteOrder byteOrder)
 {
     QByteArray data;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QDataStream inputStream(&data, QDataStream::WriteOnly);
+#else
     QDataStream inputStream(&data, QIODevice::WriteOnly);
+#endif
     inputStream << value;
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QDataStream outputStream(&data, QDataStream::ReadOnly);
+#else
     QDataStream outputStream(&data, QIODevice::ReadOnly);
+#endif
     QVector<quint16> values;
     for (int i = 0; i < 4; i++) {
         quint16 registerValue = 0;
@@ -254,8 +319,12 @@ QVector<quint16> ModbusDataUtils::convertFromInt64(qint64 value, ByteOrder byteO
 QVector<quint16> ModbusDataUtils::convertFromString(const QString &value, quint16 stringLength, ByteOrder characterByteOrder)
 {
     Q_ASSERT_X(value.length() <= stringLength, "ModbusDataUtils", "cannot convert a string which is bigger than the desired register vector.");
-    QByteArray data = value.toLatin1() + QByteArray('\0', stringLength - value.count());
+    QByteArray data = value.toLatin1() + QByteArray('\0', stringLength - value.length());
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QDataStream stream(&data, QDataStream::ReadOnly);
+#else
     QDataStream stream(&data, QIODevice::ReadOnly);
+#endif
     // Note: some devices use little endian within the register uint16 representation of the 2 characters.
     stream.setByteOrder(characterByteOrder == ByteOrderBigEndian ? QDataStream::BigEndian : QDataStream::LittleEndian);
     QVector<quint16> values;

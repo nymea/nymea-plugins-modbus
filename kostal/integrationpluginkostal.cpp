@@ -72,7 +72,7 @@ void IntegrationPluginKostal::discoverThings(ThingDiscoveryInfo *info)
 
             // Note: we introduced the serial number later, if the current thing has no serialnumber, we use the mac
             Things existingThings = myThings().filterByParam(kostalInverterThingSerialNumberParamTypeId, result.serialNumber);
-            if (existingThings.count() == 1) {
+            if (existingThings.length() == 1) {
                 qCDebug(dcKostal()) << "This Kostal inverter with this serial number already exists in the system:" << result.networkDeviceInfo;
                 descriptor.setThingId(existingThings.first()->id());
             }
@@ -422,7 +422,7 @@ void IntegrationPluginKostal::setupKostalConnection(ThingSetupInfo *info)
 
             // Update the battery if available
             Things batteryThings = myThings().filterByParentId(thing->id()).filterByThingClassId(kostalBatteryThingClassId);
-            if (batteryThings.count() == 1) {
+            if (batteryThings.length() == 1) {
                 Thing *batteryThing = batteryThings.first();
 
                 batteryThing->setStateValue(kostalBatteryVoltageStateTypeId, kostalConnection->batteryVoltage());
@@ -446,7 +446,7 @@ void IntegrationPluginKostal::setupKostalConnection(ThingSetupInfo *info)
 
             // Update the meter if available
             Things meterThings = myThings().filterByParentId(thing->id()).filterByThingClassId(kostalMeterThingClassId);
-            if (meterThings.count() == 1) {
+            if (meterThings.length() == 1) {
                 Thing *meterThing = meterThings.first();
 
                 // Current

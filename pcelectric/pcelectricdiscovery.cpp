@@ -91,7 +91,7 @@ void PcElectricDiscovery::checkNetworkDevice(const QHostAddress &address)
 
             QByteArray macRawData;
             QDataStream stream(&macRawData, QIODevice::WriteOnly);
-            for (int i = 0; i < connection->macAddress().count(); i++)
+            for (int i = 0; i < connection->macAddress().length(); i++)
                 stream << connection->macAddress().at(i);
 
             MacAddress registerMacAddress(macRawData);
@@ -104,7 +104,7 @@ void PcElectricDiscovery::checkNetworkDevice(const QHostAddress &address)
                 QByteArray serialRawData;
                 QDataStream stream(&serialRawData, QIODevice::ReadWrite);
                 stream << static_cast<quint16>(0);
-                for (int i = 0; i < connection->serialNumber().count(); i++)
+                for (int i = 0; i < connection->serialNumber().length(); i++)
                     stream << connection->serialNumber().at(i);
 
                 quint64 serialNumber = serialRawData.toHex().toULongLong(nullptr, 16);
@@ -158,7 +158,7 @@ void PcElectricDiscovery::finishDiscovery()
 {
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
 
-    for (int i = 0; i < m_potentialResults.count(); i++) {
+    for (int i = 0; i < m_potentialResults.length(); i++) {
         const NetworkDeviceInfo networkDeviceInfo = m_networkDeviceInfos.get(m_potentialResults.at(i).address);
         m_potentialResults[i].networkDeviceInfo = networkDeviceInfo;
 
@@ -184,7 +184,7 @@ void PcElectricDiscovery::finishDiscovery()
     foreach (EV11ModbusTcpConnection *connection, m_connections)
         cleanupConnection(connection);
 
-    qCInfo(dcPcElectric()) << "Discovery: Finished the discovery process. Found" << m_results.count()
+    qCInfo(dcPcElectric()) << "Discovery: Finished the discovery process. Found" << m_results.length()
                            << "PCE wallboxes in" << QTime::fromMSecsSinceStartOfDay(durationMilliSeconds).toString("mm:ss.zzz");
     emit discoveryFinished();
 }

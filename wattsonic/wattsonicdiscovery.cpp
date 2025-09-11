@@ -101,8 +101,8 @@ void WattsonicDiscovery::tryConnect(ModbusRtuMaster *master, quint16 slaveId)
         Result result {master->modbusUuid(), connection->serialNumber(), slaveId, connection->generation(), connection->inverterInfo()};
         m_discoveryResults.append(result);
 
-        if (m_verifiedMasters.count() == m_candidateMasters.count()) {
-            qCDebug(dcWattsonic()) << "Discovery: Verified all masters. Finish discovery with" << m_discoveryResults.count() << "discovered inverters.";
+        if (m_verifiedMasters.length() == m_candidateMasters.length()) {
+            qCDebug(dcWattsonic()) << "Discovery: Verified all masters. Finish discovery with" << m_discoveryResults.length() << "discovered inverters.";
             emit discoveryFinished(true);
         }
     });
