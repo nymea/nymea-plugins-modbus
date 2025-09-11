@@ -1,3 +1,15 @@
+nymea-plugins-modbus (1.12.0) jammy; urgency=medium
+
+  [ Simon Stürz ]
+  * Huawei: Add smart logger 3000 support
+  * Kostal: Switch to queued requests and add PIKO CI support
+  * Wattsonic: Improve inverter generation detection and provide
+    fallback mechanism
+  * PhoenixConnect: Send requests sequential instead of parallel
+  * Add Qt6 support
+
+ -- jenkins <developer@nymea.io>  Thu, 11 Sep 2025 14:25:48 +0200
+
 nymea-plugins-modbus (1.11.1) jammy; urgency=medium
 
   [ Simon Stürz ]
