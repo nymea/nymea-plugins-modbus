@@ -714,7 +714,7 @@ QVector<quint16> SunSpecDataPoint::convertFromFloatWithSSF(float value, qint16 s
         break;
     }
     case Int16: {
-        quint16 rawValue = static_cast<quint16>(value * pow(10, -1 * scaleFactor));
+        quint16 rawValue = static_cast<qint16>(value * pow(10, -1 * scaleFactor));
         rawData << rawValue;
         break;
     }
