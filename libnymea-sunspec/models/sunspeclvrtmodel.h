@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2021, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This fileDescriptor is part of nymea.
@@ -50,7 +50,7 @@ public:
     };
     Q_ENUM(Readonly)
 
-    explicit SunSpecLvrtModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecLvrtModel *parent = nullptr);
+    explicit SunSpecLvrtModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecLvrtModel *parent);
     ~SunSpecLvrtModelRepeatingBlock() override = default;
 
     SunSpecLvrtModel *parentModel() const;
@@ -228,7 +228,7 @@ public:
     /* Enumerated value indicates if curve is read-only or can be modified. */
     Readonly readOnly() const;
 
-    void processBlockData(const QVector<quint16> blockData) override;
+    void processBlockData() override;
 
 protected:
     void initDataPoints() override;
@@ -341,6 +341,9 @@ protected:
     void processBlockData() override;
 
 private:
+
+    void setupRepeatingBlocks();
+
     quint16 m_actCrv = 0;
     ModenaFlags m_modEna;
     quint16 m_winTms = 0;

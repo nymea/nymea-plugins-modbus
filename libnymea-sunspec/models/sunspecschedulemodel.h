@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2021, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This fileDescriptor is part of nymea.
@@ -83,7 +83,7 @@ public:
     };
     Q_ENUM(Ytyp)
 
-    explicit SunSpecScheduleModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecScheduleModel *parent = nullptr);
+    explicit SunSpecScheduleModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecScheduleModel *parent);
     ~SunSpecScheduleModelRepeatingBlock() override = default;
 
     SunSpecScheduleModel *parentModel() const;
@@ -217,7 +217,7 @@ public:
     /* Index of active entry in the active schedule. */
     quint16 actIndx() const;
 
-    void processBlockData(const QVector<quint16> blockData) override;
+    void processBlockData() override;
 
 protected:
     void initDataPoints() override;
@@ -340,6 +340,9 @@ protected:
     void processBlockData() override;
 
 private:
+
+    void setupRepeatingBlocks();
+
     ActschdFlags m_actSchd;
     ModenaFlags m_modEna;
     quint16 m_nSchd = 0;

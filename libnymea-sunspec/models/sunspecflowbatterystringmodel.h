@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2021, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This fileDescriptor is part of nymea.
@@ -167,7 +167,7 @@ public:
     Q_DECLARE_FLAGS(Modevt2Flags, Modevt2)
     Q_FLAG(Modevt2)
 
-    explicit SunSpecFlowBatteryStringModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecFlowBatteryStringModel *parent = nullptr);
+    explicit SunSpecFlowBatteryStringModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecFlowBatteryStringModel *parent);
     ~SunSpecFlowBatteryStringModelRepeatingBlock() override = default;
 
     SunSpecFlowBatteryStringModel *parentModel() const;
@@ -219,7 +219,7 @@ public:
     /* Reason why the module is currently disabled. */
     Moddisrsn disabledReason() const;
 
-    void processBlockData(const QVector<quint16> blockData) override;
+    void processBlockData() override;
 
 protected:
     void initDataPoints() override;
@@ -378,6 +378,9 @@ protected:
     void processBlockData() override;
 
 private:
+
+    void setupRepeatingBlocks();
+
     quint16 m_stringIndex = 0;
     quint16 m_moduleCount = 0;
     quint16 m_connectedModuleCount = 0;

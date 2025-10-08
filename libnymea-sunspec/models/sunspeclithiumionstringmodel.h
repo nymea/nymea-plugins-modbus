@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2021, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This fileDescriptor is part of nymea.
@@ -44,7 +44,7 @@ class SunSpecLithiumIonStringModelRepeatingBlock : public SunSpecModelRepeatingB
     Q_OBJECT
 public:
 
-    explicit SunSpecLithiumIonStringModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecLithiumIonStringModel *parent = nullptr);
+    explicit SunSpecLithiumIonStringModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecLithiumIonStringModel *parent);
     ~SunSpecLithiumIonStringModelRepeatingBlock() override = default;
 
     SunSpecLithiumIonStringModel *parentModel() const;
@@ -83,7 +83,7 @@ public:
     /* Pad register. */
     quint16 pad7() const;
 
-    void processBlockData(const QVector<quint16> blockData) override;
+    void processBlockData() override;
 
 protected:
     void initDataPoints() override;
@@ -313,6 +313,9 @@ protected:
     void processBlockData() override;
 
 private:
+
+    void setupRepeatingBlocks();
+
     quint16 m_stringIndex = 0;
     quint16 m_moduleCount = 0;
     StFlags m_stringStatus;

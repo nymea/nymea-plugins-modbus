@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2021, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This fileDescriptor is part of nymea.
@@ -50,7 +50,7 @@ public:
     Q_DECLARE_FLAGS(CellstFlags, Cellst)
     Q_FLAG(Cellst)
 
-    explicit SunSpecLithiumIonModuleModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecLithiumIonModuleModel *parent = nullptr);
+    explicit SunSpecLithiumIonModuleModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecLithiumIonModuleModel *parent);
     ~SunSpecLithiumIonModuleModelRepeatingBlock() override = default;
 
     SunSpecLithiumIonModuleModel *parentModel() const;
@@ -63,7 +63,7 @@ public:
     /* Status of the cell. */
     CellstFlags cellStatus() const;
 
-    void processBlockData(const QVector<quint16> blockData) override;
+    void processBlockData() override;
 
 protected:
     void initDataPoints() override;
@@ -152,6 +152,9 @@ protected:
     void processBlockData() override;
 
 private:
+
+    void setupRepeatingBlocks();
+
     quint16 m_stringIndex = 0;
     quint16 m_moduleIndex = 0;
     quint16 m_moduleCellCount = 0;

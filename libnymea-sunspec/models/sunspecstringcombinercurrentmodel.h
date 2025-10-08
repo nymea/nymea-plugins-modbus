@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2021, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This fileDescriptor is part of nymea.
@@ -68,7 +68,7 @@ public:
     Q_DECLARE_FLAGS(InevtFlags, Inevt)
     Q_FLAG(Inevt)
 
-    explicit SunSpecStringCombinerCurrentModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecStringCombinerCurrentModel *parent = nullptr);
+    explicit SunSpecStringCombinerCurrentModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecStringCombinerCurrentModel *parent);
     ~SunSpecStringCombinerCurrentModelRepeatingBlock() override = default;
 
     SunSpecStringCombinerCurrentModel *parentModel() const;
@@ -85,7 +85,7 @@ public:
     /* String Input Amp-Hours [Ah] */
     quint32 ampHours() const;
 
-    void processBlockData(const QVector<quint16> blockData) override;
+    void processBlockData() override;
 
 protected:
     void initDataPoints() override;
@@ -174,6 +174,9 @@ protected:
     void processBlockData() override;
 
 private:
+
+    void setupRepeatingBlocks();
+
     qint16 m_dCA_SF = 0;
     qint16 m_dCAhr_SF = 0;
     qint16 m_dCV_SF = 0;
