@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2021, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This fileDescriptor is part of nymea.
@@ -44,7 +44,7 @@ class SunSpecFlowBatteryStackModelRepeatingBlock : public SunSpecModelRepeatingB
     Q_OBJECT
 public:
 
-    explicit SunSpecFlowBatteryStackModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecFlowBatteryStackModel *parent = nullptr);
+    explicit SunSpecFlowBatteryStackModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecFlowBatteryStackModel *parent);
     ~SunSpecFlowBatteryStackModelRepeatingBlock() override = default;
 
     SunSpecFlowBatteryStackModel *parentModel() const;
@@ -53,7 +53,7 @@ public:
     /* Cell Points To Be Determined */
     quint16 cellPointsToBeDetermined() const;
 
-    void processBlockData(const QVector<quint16> blockData) override;
+    void processBlockData() override;
 
 protected:
     void initDataPoints() override;
@@ -90,6 +90,9 @@ protected:
     void processBlockData() override;
 
 private:
+
+    void setupRepeatingBlocks();
+
     quint16 m_stackPointsToBeDetermined = 0;
 
 

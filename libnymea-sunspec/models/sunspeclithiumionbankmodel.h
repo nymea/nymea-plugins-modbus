@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2021, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This fileDescriptor is part of nymea.
@@ -156,7 +156,7 @@ public:
     Q_DECLARE_FLAGS(Strevt1Flags, Strevt1)
     Q_FLAG(Strevt1)
 
-    explicit SunSpecLithiumIonBankModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecLithiumIonBankModel *parent = nullptr);
+    explicit SunSpecLithiumIonBankModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecLithiumIonBankModel *parent);
     ~SunSpecLithiumIonBankModelRepeatingBlock() override = default;
 
     SunSpecLithiumIonBankModel *parentModel() const;
@@ -220,7 +220,7 @@ public:
     /* Pad register. */
     quint16 pad2() const;
 
-    void processBlockData(const QVector<quint16> blockData) override;
+    void processBlockData() override;
 
 protected:
     void initDataPoints() override;
@@ -332,6 +332,9 @@ protected:
     void processBlockData() override;
 
 private:
+
+    void setupRepeatingBlocks();
+
     quint16 m_stringCount = 0;
     quint16 m_connectedStringCount = 0;
     float m_maxModuleTemperature = 0;

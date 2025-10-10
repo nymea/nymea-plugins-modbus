@@ -810,6 +810,35 @@ def writeProcessDataImplementation(fileDescriptor, className, dataPoints, parent
     writeLine(fileDescriptor, '    qCDebug(dcSunSpecModelData()) << this;')
 
 
+def writeSetupRepeatingBlocksImplementation(fileDescriptor, className):
+    print('Write setupRepeatingBlocks() implementation')
+    blockClassName = ("%sRepeatingBlock" % className)
+    writeLine(fileDescriptor, '    if (!m_repeatingBlocks.isEmpty()) {')
+    writeLine(fileDescriptor, '        foreach (SunSpecModelRepeatingBlock *block, m_repeatingBlocks) {')
+    writeLine(fileDescriptor, '            block->deleteLater();')
+    writeLine(fileDescriptor, '        }')
+    writeLine(fileDescriptor, '        m_repeatingBlocks.clear();')
+    writeLine(fileDescriptor, '    }')
+    writeLine(fileDescriptor)
+    writeLine(fileDescriptor, '    const auto headerLength = 2;')
+    writeLine(fileDescriptor, '    const auto repeatingBlocksDataSize = m_blockData.size() - headerLength - m_fixedBlockLength;')
+    writeLine(fileDescriptor, '    if (repeatingBlocksDataSize % m_repeatingBlockLength != 0) {')
+    writeLine(fileDescriptor, '            qCWarning(dcSunSpecModelData()) << "Unexpected repeating block data size:"')
+    writeLine(fileDescriptor, '                                            << repeatingBlocksDataSize')
+    writeLine(fileDescriptor, '                                            << "(repeating block size:"')
+    writeLine(fileDescriptor, '                                            << m_repeatingBlockLength')
+    writeLine(fileDescriptor, '                                            << "), extra bytes:"')
+    writeLine(fileDescriptor, '                                            << repeatingBlocksDataSize % m_repeatingBlockLength;')
+    writeLine(fileDescriptor, '    }')
+    writeLine(fileDescriptor, '    const auto numberOfBlocks = repeatingBlocksDataSize / m_repeatingBlockLength;')
+    writeLine(fileDescriptor, '    const auto repeatingBlocksOffset = m_fixedBlockLength + headerLength;')
+    writeLine(fileDescriptor, '    for (int i = 0; i < numberOfBlocks; ++i) {')
+    writeLine(fileDescriptor, '        const auto blockStartRegister = static_cast<quint16>(modbusStartRegister() + repeatingBlocksOffset + m_repeatingBlockLength * i);')
+    writeLine(fileDescriptor, '        const auto block = new %s(i, m_repeatingBlockLength, blockStartRegister, this);' % blockClassName)
+    writeLine(fileDescriptor, '        m_repeatingBlocks.append(block);')
+    writeLine(fileDescriptor, '    }')
+
+
 def writePropertyDebugLine(fileDescriptor, className, modelId):
     print('Write class debug properties')
     modelData = models[modelId]
@@ -868,7 +897,7 @@ def writeRepeatingBlockClassDefinition(fileDescriptor, className, modelId):
     writeClassFlags(fileDescriptor, className, dataPoints)
 
    # Constructor
-    writeLine(fileDescriptor, '    explicit %s(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, %s *parent = nullptr);' % (blockClassName, className))
+    writeLine(fileDescriptor, '    explicit %s(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, %s *parent);' % (blockClassName, className))
     writeLine(fileDescriptor, '    ~%s() override = default;' % blockClassName)
     writeLine(fileDescriptor)
 
@@ -880,7 +909,7 @@ def writeRepeatingBlockClassDefinition(fileDescriptor, className, modelId):
     addPropertiesMethodDeclaration(fileDescriptor, dataPoints)
 
     writeLine(fileDescriptor)
-    writeLine(fileDescriptor, '    void processBlockData(const QVector<quint16> blockData) override;')
+    writeLine(fileDescriptor, '    void processBlockData() override;')
 
     # Protected members
     writeLine(fileDescriptor)
@@ -925,6 +954,7 @@ def writeRepeatingBlockClassImplementation(fileDescriptor, className, modelId):
     writeLine(fileDescriptor, '%s::%s(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, %s *parent) :' % (blockClassName, blockClassName, className))
     writeLine(fileDescriptor, '    SunSpecModelRepeatingBlock(blockIndex, blockSize, modbusStartRegister, parent)')
     writeLine(fileDescriptor, '{')
+    writeLine(fileDescriptor, '    m_parentModel = parent;')
     writeLine(fileDescriptor, '    m_byteOrder = parent->byteOrder();')
     writeLine(fileDescriptor, '    initDataPoints();')
     writeLine(fileDescriptor, '}')
@@ -964,10 +994,8 @@ def writeRepeatingBlockClassImplementation(fileDescriptor, className, modelId):
     writeLine(fileDescriptor)
 
     # Process data 
-    writeLine(fileDescriptor, 'void %s::processBlockData(const QVector<quint16> blockData)' % blockClassName)
+    writeLine(fileDescriptor, 'void %s::processBlockData()' % blockClassName)
     writeLine(fileDescriptor, '{')
-    writeLine(fileDescriptor, '    m_blockData = blockData;')
-    writeLine(fileDescriptor)
     writeProcessDataImplementation(fileDescriptor, blockClassName, dataPoints, modelData['group']['points'])
     writeLine(fileDescriptor, '}')
     writeLine(fileDescriptor)
@@ -1063,6 +1091,10 @@ def writeHeaderFile(headerFileName, className, modelId):
     # Private members
     writeLine(fileDescriptor)
     writeLine(fileDescriptor, 'private:')
+    if containingRepeatingBlock:
+        writeLine(fileDescriptor)
+        writeLine(fileDescriptor, '    void setupRepeatingBlocks();')
+        writeLine(fileDescriptor)
     addPropertiesDeclaration(fileDescriptor, dataPoints)
     writeLine(fileDescriptor)
 
@@ -1112,6 +1144,9 @@ def writeSourceFile(sourceFileName, className, modelId):
     #writeLine(fileDescriptor, '    if (modelLength != m_modelLengthSunSpec)')
     #writeLine(fileDescriptor, '        qCWarning(dcSunSpecModelData()) << qobject_cast<SunSpecModel *>(this) << "does not have the same length as specified from SunSpec" << m_modelLengthSunSpec;')
     writeLine(fileDescriptor, '    initDataPoints();')
+    if containingRepeatingBlock:
+        writeLine(fileDescriptor)
+        writeLine(fileDescriptor, '    connect(this, &SunSpecModel::initFinished, this, &%s::setupRepeatingBlocks);' % className)
     writeLine(fileDescriptor, '}')
     writeLine(fileDescriptor)
 
@@ -1174,10 +1209,18 @@ def writeSourceFile(sourceFileName, className, modelId):
 
     # Process data 
     writeLine(fileDescriptor, 'void %s::processBlockData()' % className)
-    writeLine(fileDescriptor, '{')  
+    writeLine(fileDescriptor, '{')
     writeProcessDataImplementation(fileDescriptor, className, dataPoints)
     writeLine(fileDescriptor, '}')
     writeLine(fileDescriptor)
+
+    if containingRepeatingBlock:
+        # Setup repeating blocks
+        writeLine(fileDescriptor, 'void %s::setupRepeatingBlocks()' % className)
+        writeLine(fileDescriptor, '{')
+        writeSetupRepeatingBlocksImplementation(fileDescriptor, className)
+        writeLine(fileDescriptor, '}')
+        writeLine(fileDescriptor)
 
     # Debug operator
     writeLine(fileDescriptor, 'QDebug operator<<(QDebug debug, %s *model)' % className)

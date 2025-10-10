@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2021, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This fileDescriptor is part of nymea.
@@ -59,7 +59,7 @@ public:
     Q_DECLARE_FLAGS(AlmFlags, Alm)
     Q_FLAG(Alm)
 
-    explicit SunSpecTrackerControllerModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecTrackerControllerModel *parent = nullptr);
+    explicit SunSpecTrackerControllerModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecTrackerControllerModel *parent);
     ~SunSpecTrackerControllerModelRepeatingBlock() override = default;
 
     SunSpecTrackerControllerModel *parentModel() const;
@@ -91,7 +91,7 @@ public:
     /* Tracker alarm conditions */
     AlmFlags alarm() const;
 
-    void processBlockData(const QVector<quint16> blockData) override;
+    void processBlockData() override;
 
 protected:
     void initDataPoints() override;
@@ -189,6 +189,9 @@ protected:
     void processBlockData() override;
 
 private:
+
+    void setupRepeatingBlocks();
+
     QString m_controller;
     Typ m_type;
     QString m_date;
