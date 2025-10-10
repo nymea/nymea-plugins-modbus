@@ -41,6 +41,7 @@
 Q_DECLARE_LOGGING_CATEGORY(dcSunSpecModelData)
 
 class SunSpecConnection;
+class SunSpecModelRepeatingBlock;
 
 class SunSpecModel : public QObject
 {
@@ -86,6 +87,8 @@ public:
 
     CommonModelInfo commonModelInfo() const;
 
+    QList<SunSpecModelRepeatingBlock *> repeatingBlocks() const;
+
     virtual void init();
     virtual void readBlockData();
 
@@ -108,6 +111,8 @@ protected:
     QHash<QString, SunSpecDataPoint> m_dataPoints;
 
     CommonModelInfo m_commonModelInfo;
+
+    QList<SunSpecModelRepeatingBlock *> m_repeatingBlocks;
 
     void setInitializedFinished();
 
