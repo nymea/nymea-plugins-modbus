@@ -897,7 +897,7 @@ def writeRepeatingBlockClassDefinition(fileDescriptor, className, modelId):
     writeClassFlags(fileDescriptor, className, dataPoints)
 
    # Constructor
-    writeLine(fileDescriptor, '    explicit %s(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, %s *parent);' % (blockClassName, className))
+    writeLine(fileDescriptor, '    explicit %s(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, %s *parent = nullptr);' % (blockClassName, className))
     writeLine(fileDescriptor, '    ~%s() override = default;' % blockClassName)
     writeLine(fileDescriptor)
 
