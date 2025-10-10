@@ -83,7 +83,7 @@ public:
     };
     Q_ENUM(Ytyp)
 
-    explicit SunSpecScheduleModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecScheduleModel *parent);
+    explicit SunSpecScheduleModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecScheduleModel *parent = nullptr);
     ~SunSpecScheduleModelRepeatingBlock() override = default;
 
     SunSpecScheduleModel *parentModel() const;

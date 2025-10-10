@@ -86,7 +86,7 @@ public:
     Q_DECLARE_FLAGS(DcevtFlags, Dcevt)
     Q_FLAG(Dcevt)
 
-    explicit SunSpecMpptModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecMpptModel *parent);
+    explicit SunSpecMpptModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecMpptModel *parent = nullptr);
     ~SunSpecMpptModelRepeatingBlock() override = default;
 
     SunSpecMpptModel *parentModel() const;

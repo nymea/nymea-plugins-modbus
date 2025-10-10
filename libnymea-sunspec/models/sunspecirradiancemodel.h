@@ -44,7 +44,7 @@ class SunSpecIrradianceModelRepeatingBlock : public SunSpecModelRepeatingBlock
     Q_OBJECT
 public:
 
-    explicit SunSpecIrradianceModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecIrradianceModel *parent);
+    explicit SunSpecIrradianceModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecIrradianceModel *parent = nullptr);
     ~SunSpecIrradianceModelRepeatingBlock() override = default;
 
     SunSpecIrradianceModel *parentModel() const;

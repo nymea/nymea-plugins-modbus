@@ -68,7 +68,7 @@ public:
     Q_DECLARE_FLAGS(InevtFlags, Inevt)
     Q_FLAG(Inevt)
 
-    explicit SunSpecStringCombinerCurrentModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecStringCombinerCurrentModel *parent);
+    explicit SunSpecStringCombinerCurrentModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecStringCombinerCurrentModel *parent = nullptr);
     ~SunSpecStringCombinerCurrentModelRepeatingBlock() override = default;
 
     SunSpecStringCombinerCurrentModel *parentModel() const;

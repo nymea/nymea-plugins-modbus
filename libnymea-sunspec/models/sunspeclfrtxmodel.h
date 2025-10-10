@@ -50,7 +50,7 @@ public:
     };
     Q_ENUM(Readonly)
 
-    explicit SunSpecLfrtxModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecLfrtxModel *parent);
+    explicit SunSpecLfrtxModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecLfrtxModel *parent = nullptr);
     ~SunSpecLfrtxModelRepeatingBlock() override = default;
 
     SunSpecLfrtxModel *parentModel() const;

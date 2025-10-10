@@ -50,7 +50,7 @@ public:
     Q_DECLARE_FLAGS(CellstFlags, Cellst)
     Q_FLAG(Cellst)
 
-    explicit SunSpecLithiumIonModuleModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecLithiumIonModuleModel *parent);
+    explicit SunSpecLithiumIonModuleModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecLithiumIonModuleModel *parent = nullptr);
     ~SunSpecLithiumIonModuleModelRepeatingBlock() override = default;
 
     SunSpecLithiumIonModuleModel *parentModel() const;

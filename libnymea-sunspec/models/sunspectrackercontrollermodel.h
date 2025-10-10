@@ -59,7 +59,7 @@ public:
     Q_DECLARE_FLAGS(AlmFlags, Alm)
     Q_FLAG(Alm)
 
-    explicit SunSpecTrackerControllerModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecTrackerControllerModel *parent);
+    explicit SunSpecTrackerControllerModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecTrackerControllerModel *parent = nullptr);
     ~SunSpecTrackerControllerModelRepeatingBlock() override = default;
 
     SunSpecTrackerControllerModel *parentModel() const;

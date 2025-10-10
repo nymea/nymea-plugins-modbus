@@ -156,7 +156,7 @@ public:
     Q_DECLARE_FLAGS(Strevt1Flags, Strevt1)
     Q_FLAG(Strevt1)
 
-    explicit SunSpecLithiumIonBankModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecLithiumIonBankModel *parent);
+    explicit SunSpecLithiumIonBankModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecLithiumIonBankModel *parent = nullptr);
     ~SunSpecLithiumIonBankModelRepeatingBlock() override = default;
 
     SunSpecLithiumIonBankModel *parentModel() const;

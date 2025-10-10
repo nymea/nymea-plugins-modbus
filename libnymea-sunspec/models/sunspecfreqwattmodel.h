@@ -50,7 +50,7 @@ public:
     };
     Q_ENUM(Readonly)
 
-    explicit SunSpecFreqWattModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecFreqWattModel *parent);
+    explicit SunSpecFreqWattModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecFreqWattModel *parent = nullptr);
     ~SunSpecFreqWattModelRepeatingBlock() override = default;
 
     SunSpecFreqWattModel *parentModel() const;

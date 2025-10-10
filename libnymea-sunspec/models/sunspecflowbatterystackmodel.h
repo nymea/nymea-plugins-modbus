@@ -44,7 +44,7 @@ class SunSpecFlowBatteryStackModelRepeatingBlock : public SunSpecModelRepeatingB
     Q_OBJECT
 public:
 
-    explicit SunSpecFlowBatteryStackModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecFlowBatteryStackModel *parent);
+    explicit SunSpecFlowBatteryStackModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecFlowBatteryStackModel *parent = nullptr);
     ~SunSpecFlowBatteryStackModelRepeatingBlock() override = default;
 
     SunSpecFlowBatteryStackModel *parentModel() const;

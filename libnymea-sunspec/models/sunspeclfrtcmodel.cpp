@@ -1809,12 +1809,14 @@ void SunSpecLfrtcModel::setupRepeatingBlocks()
     const auto headerLength = 2;
     const auto repeatingBlocksDataSize = m_blockData.size() - headerLength - m_fixedBlockLength;
     if (repeatingBlocksDataSize % m_repeatingBlockLength != 0) {
-            qCWarning(dcSunSpecModelData()) << "Unexpected repeating block data size:"
-                                            << repeatingBlocksDataSize
-                                            << "(repeating block size:"
-                                            << m_repeatingBlockLength
-                                            << "), extra bytes:"
-                                            << repeatingBlocksDataSize % m_repeatingBlockLength;
+        qCWarning(dcSunSpecModelData()) << "Unexpected repeating block data size:"
+                                        << repeatingBlocksDataSize
+                                        << "(repeating block size:"
+                                        << m_repeatingBlockLength
+                                        << ", extra bytes:"
+                                        << repeatingBlocksDataSize % m_repeatingBlockLength
+                                        << "). Repeating blocks will not be handled!";
+        return;
     }
     const auto numberOfBlocks = repeatingBlocksDataSize / m_repeatingBlockLength;
     const auto repeatingBlocksOffset = m_fixedBlockLength + headerLength;

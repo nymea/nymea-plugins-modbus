@@ -56,7 +56,7 @@ public:
     };
     Q_ENUM(Readonly)
 
-    explicit SunSpecVoltWattModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecVoltWattModel *parent);
+    explicit SunSpecVoltWattModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecVoltWattModel *parent = nullptr);
     ~SunSpecVoltWattModelRepeatingBlock() override = default;
 
     SunSpecVoltWattModel *parentModel() const;

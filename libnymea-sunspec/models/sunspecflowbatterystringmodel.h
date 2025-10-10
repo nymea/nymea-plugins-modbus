@@ -167,7 +167,7 @@ public:
     Q_DECLARE_FLAGS(Modevt2Flags, Modevt2)
     Q_FLAG(Modevt2)
 
-    explicit SunSpecFlowBatteryStringModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecFlowBatteryStringModel *parent);
+    explicit SunSpecFlowBatteryStringModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecFlowBatteryStringModel *parent = nullptr);
     ~SunSpecFlowBatteryStringModelRepeatingBlock() override = default;
 
     SunSpecFlowBatteryStringModel *parentModel() const;

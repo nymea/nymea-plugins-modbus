@@ -44,7 +44,7 @@ class SunSpecLithiumIonStringModelRepeatingBlock : public SunSpecModelRepeatingB
     Q_OBJECT
 public:
 
-    explicit SunSpecLithiumIonStringModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecLithiumIonStringModel *parent);
+    explicit SunSpecLithiumIonStringModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecLithiumIonStringModel *parent = nullptr);
     ~SunSpecLithiumIonStringModelRepeatingBlock() override = default;
 
     SunSpecLithiumIonStringModel *parentModel() const;
