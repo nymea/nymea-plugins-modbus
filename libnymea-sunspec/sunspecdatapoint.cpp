@@ -755,7 +755,7 @@ QDebug operator<<(QDebug debug, const SunSpecDataPoint &dataPoint)
 {
     debug.nospace().noquote() << "DataPoint(";
     if (dataPoint.description().isEmpty()) {
-        debug.nospace().noquote() << dataPoint.name();
+        debug.nospace().noquote() << dataPoint.name() << ", ";
     } else {
         debug.nospace().noquote() << dataPoint.description() << ", " << dataPoint.name() << ", ";
     }
