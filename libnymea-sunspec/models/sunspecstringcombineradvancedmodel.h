@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2021, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This fileDescriptor is part of nymea.
@@ -95,7 +95,7 @@ public:
     /* Number of modules in this input string */
     quint16 n() const;
 
-    void processBlockData(const QVector<quint16> blockData) override;
+    void processBlockData() override;
 
 protected:
     void initDataPoints() override;
@@ -205,6 +205,9 @@ protected:
     void processBlockData() override;
 
 private:
+
+    void setupRepeatingBlocks();
+
     qint16 m_dCA_SF = 0;
     qint16 m_dCAhr_SF = 0;
     qint16 m_dCV_SF = 0;

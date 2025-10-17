@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2021, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This fileDescriptor is part of nymea.
@@ -91,7 +91,7 @@ public:
     /* Tracker alarm conditions */
     AlmFlags alarm() const;
 
-    void processBlockData(const QVector<quint16> blockData) override;
+    void processBlockData() override;
 
 protected:
     void initDataPoints() override;
@@ -189,6 +189,9 @@ protected:
     void processBlockData() override;
 
 private:
+
+    void setupRepeatingBlocks();
+
     QString m_controller;
     Typ m_type;
     QString m_date;

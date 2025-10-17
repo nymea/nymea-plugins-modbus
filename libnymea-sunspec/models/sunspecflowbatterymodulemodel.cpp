@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2021, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This fileDescriptor is part of nymea.
@@ -34,6 +34,7 @@
 SunSpecFlowBatteryModuleModelRepeatingBlock::SunSpecFlowBatteryModuleModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecFlowBatteryModuleModel *parent) :
     SunSpecModelRepeatingBlock(blockIndex, blockSize, modbusStartRegister, parent)
 {
+    m_parentModel = parent;
     m_byteOrder = parent->byteOrder();
     initDataPoints();
 }
@@ -67,10 +68,8 @@ void SunSpecFlowBatteryModuleModelRepeatingBlock::initDataPoints()
 
 }
 
-void SunSpecFlowBatteryModuleModelRepeatingBlock::processBlockData(const QVector<quint16> blockData)
+void SunSpecFlowBatteryModuleModelRepeatingBlock::processBlockData()
 {
-    m_blockData = blockData;
-
     // Update properties according to the data point type
     if (m_dataPoints.value("StackTBD").isValid())
         m_stackPointsToBeDetermined = m_dataPoints.value("StackTBD").toUInt16();
@@ -86,6 +85,8 @@ SunSpecFlowBatteryModuleModel::SunSpecFlowBatteryModuleModel(SunSpecConnection *
     m_modelBlockType = SunSpecModel::ModelBlockTypeFixedAndRepeating;
 
     initDataPoints();
+
+    connect(this, &SunSpecModel::initFinished, this, &SunSpecFlowBatteryModuleModel::setupRepeatingBlocks);
 }
 
 SunSpecFlowBatteryModuleModel::~SunSpecFlowBatteryModuleModel()
@@ -157,6 +158,36 @@ void SunSpecFlowBatteryModuleModel::processBlockData()
 
 
     qCDebug(dcSunSpecModelData()) << this;
+}
+
+void SunSpecFlowBatteryModuleModel::setupRepeatingBlocks()
+{
+    if (!m_repeatingBlocks.isEmpty()) {
+        foreach (SunSpecModelRepeatingBlock *block, m_repeatingBlocks) {
+            block->deleteLater();
+        }
+        m_repeatingBlocks.clear();
+    }
+
+    const auto headerLength = 2;
+    const auto repeatingBlocksDataSize = m_blockData.size() - headerLength - m_fixedBlockLength;
+    if (repeatingBlocksDataSize % m_repeatingBlockLength != 0) {
+        qCWarning(dcSunSpecModelData()) << "Unexpected repeating block data size:"
+                                        << repeatingBlocksDataSize
+                                        << "(repeating block size:"
+                                        << m_repeatingBlockLength
+                                        << ", extra bytes:"
+                                        << repeatingBlocksDataSize % m_repeatingBlockLength
+                                        << "). Repeating blocks will not be handled!";
+        return;
+    }
+    const auto numberOfBlocks = repeatingBlocksDataSize / m_repeatingBlockLength;
+    const auto repeatingBlocksOffset = m_fixedBlockLength + headerLength;
+    for (int i = 0; i < numberOfBlocks; ++i) {
+        const auto blockStartRegister = static_cast<quint16>(modbusStartRegister() + repeatingBlocksOffset + m_repeatingBlockLength * i);
+        const auto block = new SunSpecFlowBatteryModuleModelRepeatingBlock(i, m_repeatingBlockLength, blockStartRegister, this);
+        m_repeatingBlocks.append(block);
+    }
 }
 
 QDebug operator<<(QDebug debug, SunSpecFlowBatteryModuleModel *model)
