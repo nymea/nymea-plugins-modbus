@@ -34,10 +34,10 @@
 #include <models/sunspecmodelfactory.h>
 #include <models/sunspeccommonmodel.h>
 
-SunSpecDiscovery::SunSpecDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, const QList<quint16> &slaveIds, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent)
+SunSpecDiscovery::SunSpecDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint16 slaveId, SunSpecDataPoint::ByteOrder byteOrder, QObject *parent)
     : QObject{parent},
     m_networkDeviceDiscovery{networkDeviceDiscovery},
-    m_slaveIds{slaveIds},
+    m_slaveId{slaveId},
     m_byteOrder{byteOrder}
 {
     m_scanPorts.append(502);
@@ -130,81 +130,79 @@ void SunSpecDiscovery::checkNetworkDevice(const QHostAddress &address)
     // Check all ports for this host
     foreach (quint16 port, m_scanPorts) {
 
-        foreach (quint16 slaveId, m_slaveIds) {
 
-            SunSpecConnection *connection = new SunSpecConnection(address, port, slaveId, m_byteOrder, this);
-            connection->setNumberOfRetries(1);
-            connection->setTimeout(500);
-            m_connections.append(connection);
-            connectionQueue.enqueue(connection);
+        SunSpecConnection *connection = new SunSpecConnection(address, port, m_slaveId, m_byteOrder, this);
+        connection->setNumberOfRetries(1);
+        connection->setTimeout(500);
+        m_connections.append(connection);
+        connectionQueue.enqueue(connection);
 
-            connect(connection, &SunSpecConnection::connectedChanged, this, [this, connection, connectionQueue, address](bool connected){
-                if (!connected) {
-                    // Disconnected ... done with this connection
+        connect(connection, &SunSpecConnection::connectedChanged, this, [this, connection, connectionQueue, address](bool connected){
+            if (!connected) {
+                // Disconnected ... done with this connection
+                cleanupConnection(connection);
+                return;
+            }
+
+            // Successfully connected, we can stop the connection timer which takes care about blocking connection attempts
+            if (m_connectionTimers.contains(connection)) {
+                QTimer *connectionTimer = m_connectionTimers.take(connection);
+                connectionTimer->stop();
+                connectionTimer->deleteLater();
+            }
+
+            // Modbus TCP connected, try to discovery sunspec models...
+            connect(connection, &SunSpecConnection::discoveryFinished, this, [=](bool success){
+                if (!success) {
+                    qCDebug(dcSunSpec()) << "Discovery: SunSpec discovery failed on"
+                                         << QString("%1:%2").arg(address.toString()).arg(connection->port())
+                                         << "slave ID:" << connection->slaveId() << "Continue...";
                     cleanupConnection(connection);
                     return;
                 }
 
-                // Successfully connected, we can stop the connection timer which takes care about blocking connection attempts
-                if (m_connectionTimers.contains(connection)) {
-                    QTimer *connectionTimer = m_connectionTimers.take(connection);
-                    connectionTimer->stop();
-                    connectionTimer->deleteLater();
-                }
+                // Success, we found some sunspec models here, let's read some infomation from the models
 
-                // Modbus TCP connected, try to discovery sunspec models...
-                connect(connection, &SunSpecConnection::discoveryFinished, this, [=](bool success){
-                    if (!success) {
-                        qCDebug(dcSunSpec()) << "Discovery: SunSpec discovery failed on"
-                                             << QString("%1:%2").arg(address.toString()).arg(connection->port())
-                                             << "slave ID:" << connection->slaveId() << "Continue...";
-                        cleanupConnection(connection);
-                        return;
-                    }
+                Result result;
+                result.address = address;
+                result.port = connection->port();
+                result.slaveId = connection->slaveId();
 
-                    // Success, we found some sunspec models here, let's read some infomation from the models
-
-                    Result result;
-                    result.address = address;
-                    result.port = connection->port();
-                    result.slaveId = connection->slaveId();
-
-                    qCDebug(dcSunSpec()) << "Discovery: --> Found SunSpec devices on" << result.networkDeviceInfo << "port" << result.port << "slave ID:" << result.slaveId;
-                    foreach (SunSpecModel *model, connection->models()) {
-                        if (model->modelId() == SunSpecModelFactory::ModelIdCommon) {
-                            SunSpecCommonModel *commonModel = qobject_cast<SunSpecCommonModel *>(model);
-                            QString manufacturer = commonModel->manufacturer();
-                            if (!manufacturer.isEmpty() && !result.modelManufacturers.contains(manufacturer)) {
-                                result.modelManufacturers.append(manufacturer);
-                            }
+                qCDebug(dcSunSpec()) << "Discovery: --> Found SunSpec devices on" << result.networkDeviceInfo << "port" << result.port << "slave ID:" << result.slaveId;
+                foreach (SunSpecModel *model, connection->models()) {
+                    if (model->modelId() == SunSpecModelFactory::ModelIdCommon) {
+                        SunSpecCommonModel *commonModel = qobject_cast<SunSpecCommonModel *>(model);
+                        QString manufacturer = commonModel->manufacturer();
+                        if (!manufacturer.isEmpty() && !result.modelManufacturers.contains(manufacturer)) {
+                            result.modelManufacturers.append(manufacturer);
                         }
                     }
-
-                    m_results.append(result);
-
-                    // Done with this connection
-                    cleanupConnection(connection);
-                });
-
-                // Run SunSpec discovery on connection...
-                if (!connection->startDiscovery()) {
-                    qCDebug(dcSunSpec()) << "Discovery: Unable to discover SunSpec data on connection"
-                                         << QString("%1:%2").arg(address.toString()).arg(connection->port())
-                                         << "slave ID:" << connection->slaveId() << "Continue...";
-                    cleanupConnection(connection);
                 }
+
+                m_results.append(result);
+
+                // Done with this connection
+                cleanupConnection(connection);
             });
 
-            // If we get any error...skip this host...
-            connect(connection->modbusTcpClient(), &QModbusTcpClient::errorOccurred, this, [=](QModbusDevice::Error error){
-                if (error != QModbusDevice::NoError) {
-                    qCDebug(dcSunSpec()) << "Discovery: Connection error on"
-                                         << QString("%1:%2").arg(address.toString()).arg(connection->port())
-                                         << "slave ID:" << connection->slaveId() << "Continue...";
-                    cleanupConnection(connection);
-                }
-            });
-        }
+            // Run SunSpec discovery on connection...
+            if (!connection->startDiscovery()) {
+                qCDebug(dcSunSpec()) << "Discovery: Unable to discover SunSpec data on connection"
+                                     << QString("%1:%2").arg(address.toString()).arg(connection->port())
+                                     << "slave ID:" << connection->slaveId() << "Continue...";
+                cleanupConnection(connection);
+            }
+        });
+
+        // If we get any error...skip this host...
+        connect(connection->modbusTcpClient(), &QModbusTcpClient::errorOccurred, this, [=](QModbusDevice::Error error){
+            if (error != QModbusDevice::NoError) {
+                qCDebug(dcSunSpec()) << "Discovery: Connection error on"
+                                     << QString("%1:%2").arg(address.toString()).arg(connection->port())
+                                     << "slave ID:" << connection->slaveId() << "Continue...";
+                cleanupConnection(connection);
+            }
+        });
     }
 
     m_pendingConnectionAttempts[address] = connectionQueue;

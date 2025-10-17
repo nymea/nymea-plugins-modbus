@@ -42,7 +42,7 @@ class SunSpecDiscovery : public QObject
 {
     Q_OBJECT
 public:
-    explicit SunSpecDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, const QList<quint16> &slaveIds, SunSpecDataPoint::ByteOrder byteOrder = SunSpecDataPoint::ByteOrderLittleEndian, QObject *parent = nullptr);
+    explicit SunSpecDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint16 slaveId, SunSpecDataPoint::ByteOrder byteOrder = SunSpecDataPoint::ByteOrderLittleEndian, QObject *parent = nullptr);
     typedef struct Result {
         QHostAddress address;
         NetworkDeviceInfo networkDeviceInfo;
@@ -62,7 +62,7 @@ signals:
 private:
     NetworkDeviceDiscovery *m_networkDeviceDiscovery = nullptr;
     QList<quint16> m_scanPorts;
-    QList<quint16> m_slaveIds;
+    quint16 m_slaveId = 1;
     SunSpecDataPoint::ByteOrder m_byteOrder;
 
     QDateTime m_startDateTime;
