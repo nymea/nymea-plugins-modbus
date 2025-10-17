@@ -1,3 +1,15 @@
+nymea-plugins-modbus (1.12.1) jammy; urgency=medium
+
+  [ Michael Schwarz ]
+  * libnymea-sunspec: Fix conversion from float to quint16 in
+    SunSpecDataPoint::convertFromFloatWithSSF
+  * libnymea-sunspec: Implement handling of SunSpec repeating blocks.
+
+  [ Simon Stürz ]
+  * SolarEdge: Update gateway thing classes and discovery
+
+ -- jenkins <developer@nymea.io>  Fri, 17 Oct 2025 11:28:20 +0200
+
 nymea-plugins-modbus (1.12.0) jammy; urgency=medium
 
   [ Simon Stürz ]
