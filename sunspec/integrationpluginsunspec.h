@@ -62,6 +62,7 @@ public:
 
 private:
     // SunSpec Connection params map
+    QHash<ThingClassId, ParamTypeId> m_connectionDiscoverySlaveIdParamTypeIds;
     QHash<ThingClassId, ParamTypeId> m_connectionMacAddressParamTypeIds;
     QHash<ThingClassId, ParamTypeId> m_connectionAddressParamTypeIds;
     QHash<ThingClassId, ParamTypeId> m_connectionHostNameParamTypeIds;

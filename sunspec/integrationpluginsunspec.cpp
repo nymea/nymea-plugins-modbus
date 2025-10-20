@@ -70,6 +70,9 @@ IntegrationPluginSunSpec::IntegrationPluginSunSpec()
 void IntegrationPluginSunSpec::init()
 {
     // SunSpec connection params
+    m_connectionDiscoverySlaveIdParamTypeIds.insert(sunspecConnectionThingClassId, sunspecConnectionDiscoverySlaveIdParamTypeId);
+    m_connectionDiscoverySlaveIdParamTypeIds.insert(solarEdgeConnectionThingClassId, solarEdgeConnectionDiscoverySlaveIdParamTypeId);
+
     m_connectionMacAddressParamTypeIds.insert(sunspecConnectionThingClassId, sunspecConnectionThingMacAddressParamTypeId);
     m_connectionMacAddressParamTypeIds.insert(solarEdgeConnectionThingClassId, solarEdgeConnectionThingMacAddressParamTypeId);
 
@@ -139,13 +142,14 @@ void IntegrationPluginSunSpec::discoverThings(ThingDiscoveryInfo *info)
         return;
     }
 
-    QList<quint16> slaveIds = {1, 2};
-    SunSpecDataPoint::ByteOrder byteOrder = SunSpecDataPoint::ByteOrderLittleEndian;
-    if (info->thingClassId() == solarEdgeConnectionThingClassId) {
-        byteOrder = SunSpecDataPoint::ByteOrderBigEndian;
-    }
 
-    SunSpecDiscovery *discovery = new SunSpecDiscovery(hardwareManager()->networkDeviceDiscovery(), slaveIds, byteOrder, info);
+    SunSpecDataPoint::ByteOrder byteOrder = SunSpecDataPoint::ByteOrderLittleEndian;
+    if (info->thingClassId() == solarEdgeConnectionThingClassId)
+        byteOrder = SunSpecDataPoint::ByteOrderBigEndian;
+
+    quint16 discoverySlaveId = info->params().paramValue(m_connectionDiscoverySlaveIdParamTypeIds.value(info->thingClassId())).toUInt();
+
+    SunSpecDiscovery *discovery = new SunSpecDiscovery(hardwareManager()->networkDeviceDiscovery(), discoverySlaveId, byteOrder, info);
     // Note: we could add here more
     connect(discovery, &SunSpecDiscovery::discoveryFinished, info, [this, info, discovery](){
         foreach (const SunSpecDiscovery::Result &result, discovery->results()) {
@@ -246,7 +250,6 @@ void IntegrationPluginSunSpec::setupThing(ThingSetupInfo *info)
                 hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
             }
         }
-
 
         // Create the monitor
         NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(thing);
