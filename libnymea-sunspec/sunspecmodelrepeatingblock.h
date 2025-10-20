@@ -40,6 +40,9 @@ class SunSpecModel;
 class SunSpecModelRepeatingBlock : public QObject
 {
     Q_OBJECT
+
+    friend class SunSpecModel;
+
 public:
     explicit SunSpecModelRepeatingBlock(quint16 blockIndex, quint16 blockSize, quint16 modbusStartRegister, SunSpecModel *parent = nullptr);
     virtual ~SunSpecModelRepeatingBlock() = default;
@@ -49,7 +52,7 @@ public:
     quint16 blockIndex() const;
     quint16 blockSize() const;
 
-    virtual void processBlockData(const QVector<quint16> blockData) = 0;
+    virtual void processBlockData() = 0;
 
 protected:
     quint16 m_blockIndex;
@@ -57,7 +60,6 @@ protected:
     quint16 m_modbusStartRegister;
 
     SunSpecDataPoint::ByteOrder m_byteOrder = SunSpecDataPoint::ByteOrderLittleEndian;
-    QVector<quint16> m_blockData;
     QHash<QString, SunSpecDataPoint> m_dataPoints;
 
     virtual void initDataPoints() = 0;

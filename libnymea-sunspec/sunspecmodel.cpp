@@ -30,6 +30,7 @@
 
 #include "sunspecmodel.h"
 #include "sunspecconnection.h"
+#include "sunspecmodelrepeatingblock.h"
 
 Q_LOGGING_CATEGORY(dcSunSpecModelData, "SunSpecModelData")
 
@@ -95,6 +96,11 @@ SunSpecModel::CommonModelInfo SunSpecModel::commonModelInfo() const
     return m_commonModelInfo;
 }
 
+QList<SunSpecModelRepeatingBlock *> SunSpecModel::repeatingBlocks() const
+{
+    return m_repeatingBlocks;
+}
+
 void SunSpecModel::init()
 {
     m_initialized = false;
@@ -144,6 +150,37 @@ void SunSpecModel::readBlockData()
 
         // Fill the private member data using the data points
         processBlockData();
+
+        // Handle repeating blocks
+        if (!m_repeatingBlocks.isEmpty()) {
+            auto repeatingBlocksTotalSize = 0;
+            foreach (SunSpecModelRepeatingBlock *block, m_repeatingBlocks) {
+                repeatingBlocksTotalSize += block->blockSize();
+            }
+            const auto repeatingBlocksDataOffset = m_blockData.size() - repeatingBlocksTotalSize;
+            foreach (SunSpecModelRepeatingBlock *block, m_repeatingBlocks) {
+                qCDebug(dcSunSpecModelData()) << "Block" << block->blockIndex();
+                // Fill the data points
+                const auto blockOffset = repeatingBlocksDataOffset + block->blockIndex() * block->blockSize();
+                foreach (const QString &dataPointName, block->m_dataPoints.keys()) {
+                    const auto dataPointOffset = blockOffset + block->m_dataPoints[dataPointName].addressOffset();
+                    QVector<quint16> rawData = m_blockData.mid(dataPointOffset, block->m_dataPoints[dataPointName].size());
+                    block->m_dataPoints[dataPointName].setRawData(rawData);
+                    qCDebug(dcSunSpecModelData())
+                            << "Set raw data (offset:"
+                            << dataPointOffset
+                            << ", size:"
+                            << block->m_dataPoints[dataPointName].size()
+                            << "):"
+                            << block->m_dataPoints[dataPointName]
+                            << SunSpecDataPoint::registersToString(rawData)
+                            << (block->m_dataPoints[dataPointName].isValid() ? "Valid" : "Invalid");
+                }
+
+                // Fill the private member data using the data points
+                block->processBlockData();
+            }
+        }
 
         // Make sure initialized gets called
         setInitializedFinished();
