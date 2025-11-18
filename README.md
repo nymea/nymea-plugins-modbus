@@ -40,4 +40,8 @@ If you don't have any developer skills at all, still feel free to bring the topi
 
 ## License
 --------------------------------------------
-> nymea is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 3 of the License.
+The nymea plug-ins inside this repository are licensed under the GNU General Public License, version 3 or (at your option) any later version. The reusable libraries `libnymea-modbus` and `libnymea-sunspec` are licensed under the GNU Lesser General Public License, version 3 or (at your option) any later version. Every C++ source and header file now carries the appropriate SPDX identifier (`GPL-3.0-or-later` for the plug-ins and `LGPL-3.0-or-later` for the libraries) together with the full boilerplate describing the terms.
+
+The full license texts can be found in [`LICENSE.GPL3`](LICENSE.GPL3) for the GPL components and [`LICENSE.LGPL3`](LICENSE.LGPL3) for the LGPL libraries. Copyright (C) 2013-2024 nymea GmbH and (C) 2024-2025 chargebyte austria GmbH. See `debian/copyright` for the authoritative overview and exact file listings.
+
+If you distribute a modified version of this project you must follow the respective GPL or LGPL requirements, including providing source code to recipients and keeping the copyright notices intact.
