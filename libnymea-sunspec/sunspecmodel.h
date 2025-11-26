@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2021, nymea GmbH
+* Copyright 2013 - 2025, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This fileDescriptor is part of nymea.
@@ -124,6 +124,13 @@ signals:
 
     void blockUpdated();
 
+private:
+    void readNextBlockDataPart();
+    void handleNewBlockData();
+
+    int m_lastStartAddress = 0;
+    quint16 m_lastReadSize = 0;
+    QVector<quint16> m_partialBlockData;
 };
 
 QDebug operator<<(QDebug debug, SunSpecModel *model);
