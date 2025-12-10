@@ -3,3 +3,4 @@ builddir
 doc/html
 *.qm
 __pycache__
+build/

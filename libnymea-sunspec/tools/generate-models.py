@@ -1,20 +1,28 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2021  nymea GmbH <developer@nymea.io>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation; either version 2
-# of the License, or (at your option) any later version.
+# Copyright (C) 2013 - 2024, nymea GmbH
+# Copyright (C) 2024 - 2025, chargebyte austria GmbH
 #
-# This program is distributed in the hope that it will be useful,
+# This file is part of nymea-plugins-modbus.
+#
+# nymea-plugins-modbus is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# nymea-plugins-modbus is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# along with nymea-plugins-modbus. If not, see <https://www.gnu.org/licenses/>.
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import os
 import re
@@ -146,35 +154,29 @@ def writeLine(fileDescriptor, line = ''):
 
 
 def writeLicenseHeader(fileDescriptor):
+    writeLine(fileDescriptor, '// SPDX-License-Identifier: LGPL-3.0-or-later')
+    writeLine(fileDescriptor)
     writeLine(fileDescriptor, '/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *')
     writeLine(fileDescriptor, '*')
-    writeLine(fileDescriptor, '* Copyright 2013 - %s, nymea GmbH' % datetime.datetime.now().year)
-    writeLine(fileDescriptor, '* Contact: contact@nymea.io')
+    writeLine(fileDescriptor, '* Copyright (C) 2013 - 2024, nymea GmbH')
+    writeLine(fileDescriptor, '* Copyright (C) 2024 - %s, chargebyte austria GmbH' % datetime.datetime.now().year)
     writeLine(fileDescriptor, '*')
-    writeLine(fileDescriptor, '* This fileDescriptor is part of nymea.')
-    writeLine(fileDescriptor, '* This project including source code and documentation is protected by')
-    writeLine(fileDescriptor, '* copyright law, and remains the property of nymea GmbH. All rights, including')
-    writeLine(fileDescriptor, '* reproduction, publication, editing and translation, are reserved. The use of')
-    writeLine(fileDescriptor, '* this project is subject to the terms of a license agreement to be concluded')
-    writeLine(fileDescriptor, '* with nymea GmbH in accordance with the terms of use of nymea GmbH, available')
-    writeLine(fileDescriptor, '* under https://nymea.io/license')
+    writeLine(fileDescriptor, '* This file is part of libnymea-sunspec.')
     writeLine(fileDescriptor, '*')
-    writeLine(fileDescriptor, '* GNU Lesser General Public License Usage')
-    writeLine(fileDescriptor, '* Alternatively, this project may be redistributed and/or modified under the')
-    writeLine(fileDescriptor, '* terms of the GNU Lesser General Public License as published by the Free')
-    writeLine(fileDescriptor, '* Software Foundation; version 3. This project is distributed in the hope that')
-    writeLine(fileDescriptor, '* it will be useful, but WITHOUT ANY WARRANTY; without even the implied')
-    writeLine(fileDescriptor, '* warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU')
-    writeLine(fileDescriptor, '* Lesser General Public License for more details.')
+    writeLine(fileDescriptor, '* libnymea-sunspec is free software: you can redistribute it and/or')
+    writeLine(fileDescriptor, '* modify it under the terms of the GNU Lesser General Public License')
+    writeLine(fileDescriptor, '* as published by the Free Software Foundation, either version 3')
+    writeLine(fileDescriptor, '* of the License, or (at your option) any later version.')
+    writeLine(fileDescriptor, '*')
+    writeLine(fileDescriptor, '* libnymea-sunspec is distributed in the hope that it will be useful,')
+    writeLine(fileDescriptor, '* but WITHOUT ANY WARRANTY; without even the implied warranty of')
+    writeLine(fileDescriptor, '* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the')
+    writeLine(fileDescriptor, '* GNU Lesser General Public License for more details.')
     writeLine(fileDescriptor, '*')
     writeLine(fileDescriptor, '* You should have received a copy of the GNU Lesser General Public License')
-    writeLine(fileDescriptor, '* along with this project. If not, see <https://www.gnu.org/licenses/>.')
+    writeLine(fileDescriptor, '* along with libnymea-sunspec. If not, see <https://www.gnu.org/licenses/>.')
     writeLine(fileDescriptor, '*')
-    writeLine(fileDescriptor, '* For any further details and any questions please contact us under')
-    writeLine(fileDescriptor, '* contact@nymea.io or see our FAQ/Licensing Information on')
-    writeLine(fileDescriptor, '* https://nymea.io/license/faq')
-    writeLine(fileDescriptor, '*')
-    writeLine(fileDescriptor, '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */')
+    writeLine(fileDescriptor, '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */')
     writeLine(fileDescriptor)
 
 
