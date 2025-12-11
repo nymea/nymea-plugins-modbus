@@ -340,6 +340,33 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
             thing->setStateValue(ev11PhaseCountStateTypeId, connection->chargingRelayState() == EV11ModbusTcpConnection::ChargingRelayStateSinglePhase ? 1 : 3);
         }
 
+        switch (connection->chargingState()) {
+        case PceWallbox::ChargingStateInitializing:
+            thing->setStateMinValue(ev11StatusStateTypeId, "Init");
+            break;
+        case PceWallbox::ChargingStateA1:
+            thing->setStateMinValue(ev11StatusStateTypeId, "A1");
+            break;
+        case PceWallbox::ChargingStateA2:
+            thing->setStateMinValue(ev11StatusStateTypeId, "A2");
+            break;
+        case PceWallbox::ChargingStateB1:
+            thing->setStateMinValue(ev11StatusStateTypeId, "B1");
+            break;
+        case PceWallbox::ChargingStateB2:
+            thing->setStateMinValue(ev11StatusStateTypeId, "B2");
+            break;
+        case PceWallbox::ChargingStateC1:
+            thing->setStateMinValue(ev11StatusStateTypeId, "C1");
+            break;
+        case PceWallbox::ChargingStateC2:
+            thing->setStateMinValue(ev11StatusStateTypeId, "C2");
+            break;
+        case PceWallbox::ChargingStateError:
+            thing->setStateMinValue(ev11StatusStateTypeId, "F");
+            break;
+        }
+
         thing->setStateValue(ev11CurrentVersionStateTypeId, connection->firmwareRevision());
         thing->setStateValue(ev11SessionEnergyStateTypeId, connection->powerMeter0());
         thing->setStateValue(ev11TemperatureStateTypeId, connection->temperature());
