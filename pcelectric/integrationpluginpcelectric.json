@@ -218,6 +218,32 @@
                             "displayName": "Digital input flag",
                             "type": "QString",
                             "defaultValue": ""
+                        },
+                        {
+                            "id": "a10967b9-4a32-49cf-a6ae-885b3153d601",
+                            "name": "status",
+                            "displayName": "Status",
+                            "type": "QString",
+                            "possibleValues": [
+                                "Init",
+                                "A1",
+                                "A2",
+                                "B1",
+                                "B2",
+                                "C1",
+                                "C2",
+                                "F"
+                            ],
+                            "defaultValue": "Init"
+                        },
+                        {
+                            "id": "63639947-5e91-442f-858b-378b5bc5f1bc",
+                            "name": "digitalInputMode",
+                            "displayName": "Digital input mode",
+                            "type": "uint",
+                            "defaultValue": 0,
+                            "minValue": 0,
+                            "maxValue": 3
                         }
                     ]
                 }
