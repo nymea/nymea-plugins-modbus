@@ -1,3 +1,13 @@
+nymea-plugins-modbus (1.14.0) jammy; urgency=medium
+
+  [ Michael Schwarz ]
+  * SunSpec: Fix reading data of large SunSpec models
+
+  [ Simon Stürz ]
+  * PCE: Add status state representing the EV state
+
+ -- jenkins <developer@nymea.io>  Fri, 12 Dec 2025 15:08:37 +0100
+
 nymea-plugins-modbus (1.13.0) jammy; urgency=medium
 
   [ Simon Stürz ]
