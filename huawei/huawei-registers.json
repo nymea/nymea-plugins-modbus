@@ -146,6 +146,19 @@
                     "value": 4
                 }
             ]
+        },
+        {
+            "name": "MeterDeviceStatus",
+            "values": [
+                {
+                    "key": "Offline",
+                    "value": 0
+                },
+                {
+                    "key": "Normal",
+                    "value": 1
+                }
+            ]
         }
     ],
     "blocks": [
@@ -273,6 +286,101 @@
                     "description": "Maximum reactive power (Q max) - absorbed from grid",
                     "unit": "kVar",
                     "staticScaleFactor": -3,
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "meterInformation",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "meterStatus",
+                    "address": 37100,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Meter device status",
+                    "enum": "MeterDeviceStatus",
+                    "defaultValue": "MeterDeviceStatusOffline",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterGridVoltagePhaseA",
+                    "address": 37101,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Meter grid voltage phase A",
+                    "staticScaleFactor": -1,
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterGridVoltagePhaseB",
+                    "address": 37103,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Meter grid voltage phase B",
+                    "staticScaleFactor": -1,
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterGridVoltagePhaseC",
+                    "address": 37105,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Meter grid voltage phase C",
+                    "staticScaleFactor": -1,
+                    "unit": "V",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterGridCurrentPhaseA",
+                    "address": 37107,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Meter grid current phase A",
+                    "staticScaleFactor": -2,
+                    "unit": "A",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterGridCurrentPhaseB",
+                    "address": 37109,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Meter grid current phase B",
+                    "staticScaleFactor": -2,
+                    "unit": "A",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterGridCurrentPhaseC",
+                    "address": 37111,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "holdingRegister",
+                    "readSchedule": "update",
+                    "description": "Meter grid current phase C",
+                    "staticScaleFactor": -2,
+                    "unit": "A",
                     "defaultValue": "0",
                     "access": "RO"
                 }
