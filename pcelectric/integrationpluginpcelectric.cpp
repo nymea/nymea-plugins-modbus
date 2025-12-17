@@ -340,6 +340,33 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
             thing->setStateValue(ev11PhaseCountStateTypeId, connection->chargingRelayState() == EV11ModbusTcpConnection::ChargingRelayStateSinglePhase ? 1 : 3);
         }
 
+        switch (connection->chargingState()) {
+        case PceWallbox::ChargingStateInitializing:
+            thing->setStateValue(ev11StatusStateTypeId, "Init");
+            break;
+        case PceWallbox::ChargingStateA1:
+            thing->setStateValue(ev11StatusStateTypeId, "A1");
+            break;
+        case PceWallbox::ChargingStateA2:
+            thing->setStateValue(ev11StatusStateTypeId, "A2");
+            break;
+        case PceWallbox::ChargingStateB1:
+            thing->setStateValue(ev11StatusStateTypeId, "B1");
+            break;
+        case PceWallbox::ChargingStateB2:
+            thing->setStateValue(ev11StatusStateTypeId, "B2");
+            break;
+        case PceWallbox::ChargingStateC1:
+            thing->setStateValue(ev11StatusStateTypeId, "C1");
+            break;
+        case PceWallbox::ChargingStateC2:
+            thing->setStateValue(ev11StatusStateTypeId, "C2");
+            break;
+        case PceWallbox::ChargingStateError:
+            thing->setStateValue(ev11StatusStateTypeId, "F");
+            break;
+        }
+
         thing->setStateValue(ev11CurrentVersionStateTypeId, connection->firmwareRevision());
         thing->setStateValue(ev11SessionEnergyStateTypeId, connection->powerMeter0());
         thing->setStateValue(ev11TemperatureStateTypeId, connection->temperature());
@@ -411,6 +438,8 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
                 thing->setSettingValue(ev11SettingsDigitalInputModeParamTypeId, "3 | Limit and S0 signaling");
                 break;
             }
+            thing->setStateValue(ev11DigitalInputModeStateTypeId, connection->digitalInputMode());
+
 
             if (connection->firmwareRevision() >= "0022") {
                 thing->setSettingValue(ev11SettingsPhaseAutoSwitchPauseParamTypeId, connection->phaseAutoSwitchPause());
@@ -460,13 +489,14 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
             }
 
             QueuedModbusReply *reply = connection->setDigitalInputModeAsync(modeValue);
-            connect(reply, &QueuedModbusReply::finished, thing, [reply, modeValue](){
+            connect(reply, &QueuedModbusReply::finished, thing, [thing, reply, modeValue](){
                 if (reply->error() != QModbusDevice::NoError) {
                     qCWarning(dcPcElectric()) << "Could not set digital input mode to" << modeValue << reply->errorString();
                     return;
                 }
 
                 qCDebug(dcPcElectric()) << "Successfully set digital input mode to" << modeValue;
+                thing->setStateValue(ev11DigitalInputModeStateTypeId, modeValue);
             });
         } else if (paramTypeId == ev11SettingsPhaseAutoSwitchPauseParamTypeId) {
             quint16 registerValue = value.toUInt();
