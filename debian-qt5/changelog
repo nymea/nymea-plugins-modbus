@@ -1,3 +1,10 @@
+nymea-plugins-modbus (1.14.0) jammy; urgency=medium
+
+  [ Simon Stürz ]
+  * PCE: Add status state representing the EV state
+
+ -- jenkins <developer@nymea.io>  Wed, 17 Dec 2025 09:36:37 +0100
+
 nymea-plugins-modbus (1.13.0) jammy; urgency=medium
 
   [ Simon Stürz ]
