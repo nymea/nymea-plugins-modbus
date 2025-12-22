@@ -139,7 +139,7 @@ void IntegrationPluginSchrack::setupThing(ThingSetupInfo *info)
         qCDebug(dcSchrack()) << "Charge control enabled changed:" << charging;
         // If this register goes 0->1 it means charging has been started. This could be because of an RFID tag.
         // As we have may set charging current to 0 ourselves, we'll want to activate it again here
-        uint maxSetPoint = thing->stateValue(cionMaxChargingCurrentStateTypeId).toUInt();
+        quint16 maxSetPoint = static_cast<quint16>(qRound(thing->stateValue(cionMaxChargingCurrentStateTypeId).toDouble()));
         if (cionConnection->chargingCurrentSetpoint() != maxSetPoint) {
             cionConnection->setChargingCurrentSetpoint(maxSetPoint);
         }
@@ -293,7 +293,7 @@ void IntegrationPluginSchrack::executeAction(ThingActionInfo *info)
     CionModbusRtuConnection *cionConnection = m_cionConnections.value(info->thing());
     if (info->action().actionTypeId() == cionPowerActionTypeId) {
         bool enabled = info->action().paramValue(cionPowerActionPowerParamTypeId).toBool();
-        int maxChargingCurrent = enabled ? info->thing()->stateValue(cionMaxChargingCurrentStateTypeId).toUInt() : 0;
+        int maxChargingCurrent = enabled ? static_cast<quint16>(qRound(info->thing()->stateValue(cionMaxChargingCurrentStateTypeId).toDouble())) : 0;
         qCDebug(dcSchrack()) << "Setting charging enabled:" << (enabled ? 1 : 0) << "(charging current setpoint:" << maxChargingCurrent << ")";
 
         // Note: If the wallbox has an RFID reader connected, writing register 100 (chargingEnabled) won't work as the RFID
@@ -321,7 +321,7 @@ void IntegrationPluginSchrack::executeAction(ThingActionInfo *info)
 
     } else if (info->action().actionTypeId() == cionMaxChargingCurrentActionTypeId) {
         // If charging is set to enabled, we'll write the value to the wallbox
-        uint maxChargingCurrent = info->action().paramValue(cionMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toUInt();
+        quint16 maxChargingCurrent = static_cast<quint16>(qRound(info->action().paramValue(cionMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toDouble()));
         if (info->thing()->stateValue(cionPowerStateTypeId).toBool()) {
             qCDebug(dcSchrack) << "Charging is enabled. Applying max charging current setpoint of" << maxChargingCurrent << "to wallbox";
             ModbusRtuReply *reply = cionConnection->setChargingCurrentSetpoint(maxChargingCurrent);
