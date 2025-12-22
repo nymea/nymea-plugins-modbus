@@ -187,7 +187,7 @@ void IntegrationPluginVestel::executeAction(ThingActionInfo *info)
             // Note: only write the register if power is true, otherwise we would start charging. The state represents the desired current,
             // once the power is true, the current will be written to the corresponding current.
 
-            int maxChargingCurrent = info->action().paramValue(evc04MaxChargingCurrentActionMaxChargingCurrentParamTypeId).toInt();
+            quint16 maxChargingCurrent = static_cast<quint16>(qRound(info->action().paramValue(evc04MaxChargingCurrentActionMaxChargingCurrentParamTypeId).toDouble()));
 
             if (info->thing()->stateValue(evc04PowerStateTypeId).toBool()) {
                 qCDebug(dcVestel()) << "Write max charging current" << maxChargingCurrent;
