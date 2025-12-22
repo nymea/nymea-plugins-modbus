@@ -217,7 +217,7 @@ void IntegrationPluginInro::executeAction(ThingActionInfo *info)
         }
 
         if (info->action().actionTypeId() == pantaboxMaxChargingCurrentActionTypeId) {
-            quint16 chargingCurrent = info->action().paramValue(pantaboxMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toUInt();
+            quint16 chargingCurrent = static_cast<quint16>(qRound(info->action().paramValue(pantaboxMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toDouble()));
             qCDebug(dcInro()) << "PANTABOX: Set max charging current" << chargingCurrent << "A";
 
             QModbusReply *reply = connection->setMaxChargingCurrent(chargingCurrent);
