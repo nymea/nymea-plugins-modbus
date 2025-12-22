@@ -186,7 +186,7 @@ void IntegrationPluginPhoenixConnect::setupThing(ThingSetupInfo *info)
 
     connect(connection, &PhoenixModbusTcpConnection::maximumChargingCurrentChanged, thing, [thing](quint16 maxChargingCurrent) {
         qCDebug(dcPhoenixConnect()) << "Max charging current changed" << maxChargingCurrent;
-        thing->setStateValue("maxChargingCurrent", 1.0 * maxChargingCurrent / 10); // 100mA -> 1A
+        thing->setStateValue("maxChargingCurrent", maxChargingCurrent / 10.0); // 100mA -> 1A
     });
 
     connect(connection, &PhoenixModbusTcpConnection::activePowerChanged, thing, [thing](quint32 activePower) {
@@ -262,7 +262,8 @@ void IntegrationPluginPhoenixConnect::executeAction(ThingActionInfo *info)
         });
 
     } else if (actionType.name() == "maxChargingCurrent") {
-        uint16_t current = action.param(actionType.id()).value().toUInt();
+        double current = qRound(action.param(actionType.id()).value().toDouble() * 10) / 10.0;
+
         qCDebug(dcPhoenixConnect()) << "Charging power set to" << current;
         QModbusReply *reply = connection->setMaximumChargingCurrent(current * 10);
         connect(reply, &QModbusReply::finished, info, [info, thing, reply, current](){

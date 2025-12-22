@@ -320,8 +320,8 @@ void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
 
         if (info->action().actionTypeId() == amtronECUPowerActionTypeId) {
             bool power = info->action().paramValue(amtronECUPowerActionPowerParamTypeId).toBool();
-            int maxChargingCurrent = info->thing()->stateValue(amtronECUMaxChargingCurrentStateTypeId).toUInt();
-            int effectiveCurrent = power ? maxChargingCurrent : 0;
+            double maxChargingCurrent = info->thing()->stateValue(amtronECUMaxChargingCurrentStateTypeId).toDouble();
+            int effectiveCurrent = power ? qRound(maxChargingCurrent) : 0;
             qCInfo(dcMennekes()) << "Executing power action:" << power << "max current:" << maxChargingCurrent << "-> effective current" << effectiveCurrent;
             QModbusReply *reply = amtronECUConnection->setHemsCurrentLimit(effectiveCurrent);
             if (!reply) {
@@ -344,7 +344,7 @@ void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
 
         if (info->action().actionTypeId() == amtronECUMaxChargingCurrentActionTypeId) {
             bool power = info->thing()->stateValue(amtronECUPowerStateTypeId).toBool();
-            int maxChargingCurrent = info->action().paramValue(amtronECUMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toInt();
+            int maxChargingCurrent = qRound(info->action().paramValue(amtronECUMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toDouble());
             int effectiveCurrent = power ? maxChargingCurrent : 0;
             qCInfo(dcMennekes()) << "Executing max current action:" << maxChargingCurrent << "Power is" << power << "-> effective:" << effectiveCurrent;
             QModbusReply *reply = amtronECUConnection->setHemsCurrentLimit(effectiveCurrent);
@@ -443,8 +443,8 @@ void IntegrationPluginMennekes::executeAction(ThingActionInfo *info)
             });
         }
         if (info->action().actionTypeId() == amtronCompact20MaxChargingCurrentActionTypeId) {
-            int maxChargingCurrent = info->action().paramValue(amtronCompact20MaxChargingCurrentActionMaxChargingCurrentParamTypeId).toInt();
-            float value = maxChargingCurrent;
+            double maxChargingCurrent = info->action().paramValue(amtronCompact20MaxChargingCurrentActionMaxChargingCurrentParamTypeId).toDouble();
+            float value = static_cast<float>(maxChargingCurrent);
 
             // Note: in firmwares up to 1.0.2 there's an issue that it cannot be exactly 6A, must be 6.01 or so
             if (maxChargingCurrent == 6) {

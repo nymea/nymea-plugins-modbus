@@ -98,12 +98,20 @@
                             "name": "maxChargingCurrent",
                             "displayName": "Maximum charging current",
                             "displayNameAction": "Set maximum charging current",
-                            "type": "uint",
+                            "type": "double",
                             "unit": "Ampere",
                             "minValue": 6,
                             "maxValue": 32,
                             "defaultValue": 6,
                             "writable": true
+                        },
+                        {
+                            "id": "e66a6e34-f3c5-4e19-9223-dedf1bc05bab",
+                            "name": "chargingCurrentStep",
+                            "displayName": "Charging Current step size",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0.1
                         },
                         {
                             "id": "6fa264a2-96f4-43d1-b89f-06494830f225",
@@ -212,12 +220,20 @@
                             "name": "maxChargingCurrent",
                             "displayName": "Maximum charging current",
                             "displayNameAction": "Set maximum charging current",
-                            "type": "uint",
+                            "type": "double",
                             "unit": "Ampere",
                             "minValue": 6,
                             "maxValue": 32,
                             "defaultValue": 6,
                             "writable": true
+                        },
+                        {
+                            "id": "3e843af4-c3ea-4737-bb6d-77c26cd6c0b2",
+                            "name": "chargingCurrentStep",
+                            "displayName": "Charging Current step size",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0.1
                         },
                         {
                             "id": "0a3fd1a6-b952-4dd1-95d1-25dfe3b0ce2f",
@@ -337,12 +353,20 @@
                             "name": "maxChargingCurrent",
                             "displayName": "Maximum charging current",
                             "displayNameAction": "Set maximum charging current",
-                            "type": "uint",
+                            "type": "double",
                             "unit": "Ampere",
                             "minValue": 6,
                             "maxValue": 32,
                             "defaultValue": 6,
                             "writable": true
+                        },
+                        {
+                            "id": "dd92b45f-1b3d-4386-b78d-df45fe009a7c",
+                            "name": "chargingCurrentStep",
+                            "displayName": "Charging Current step size",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0.1
                         },
                         {
                             "id": "55fe77bf-db76-40e2-955b-8afc62cfe19a",
@@ -462,12 +486,20 @@
                             "name": "maxChargingCurrent",
                             "displayName": "Maximum charging current",
                             "displayNameAction": "Set maximum charging current",
-                            "type": "uint",
+                            "type": "double",
                             "unit": "Ampere",
                             "minValue": 6,
                             "maxValue": 32,
                             "defaultValue": 6,
                             "writable": true
+                        },
+                        {
+                            "id": "e0b33540-3cab-4588-9ca7-c0e619518f14",
+                            "name": "chargingCurrentStep",
+                            "displayName": "Charging Current step size",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0.1
                         },
                         {
                             "id": "4098c11e-e085-4a92-97f2-f5116a2011f2",

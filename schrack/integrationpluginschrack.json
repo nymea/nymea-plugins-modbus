@@ -68,12 +68,20 @@
                             "displayName": "Maximum charging current",
                             "displayNameEvent": "Maximum charging current changed",
                             "displayNameAction": "Set maximum charging current",
-                            "type": "uint",
+                            "type": "double",
                             "unit": "Ampere",
                             "defaultValue": 6,
                             "minValue": 1,
                             "maxValue": 32,
                             "writable": true
+                        },
+                        {
+                            "id": "f4e7e0ab-7fec-43df-b47c-731bac6b56f7",
+                            "name": "chargingCurrentStep",
+                            "displayName": "Charging Current step size",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 1.0
                         },
                         {
                             "id": "13423618-4314-49be-b48c-42d9415199a8",
