@@ -104,12 +104,20 @@
                             "displayName": "Charging current",
                             "displayNameEvent": "Charging current changed",
                             "displayNameAction": "Set charging current",
-                            "type": "uint",
+                            "type": "double",
                             "unit": "Ampere",
                             "minValue": 6,
                             "maxValue": 16,
                             "defaultValue": 6,
                             "writable": true
+                        },
+                        {
+                            "id": "cb360c9c-febb-4ced-86cf-bebd2200c7c6",
+                            "name": "chargingCurrentStep",
+                            "displayName": "Charging Current step size",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0.1
                         },
                         {
                             "id": "f4c822a0-454b-4782-85d2-8c60bacb4fe8",
@@ -217,12 +225,20 @@
                             "displayName": "Charging current",
                             "displayNameEvent": "Charging current changed",
                             "displayNameAction": "Set charging current",
-                            "type": "uint",
+                            "type": "double",
                             "unit": "Ampere",
                             "minValue": 6,
                             "maxValue": 32,
                             "defaultValue": 6,
                             "writable": true
+                        },
+                        {
+                            "id": "75b21923-6a9d-4038-bd14-53e639f276b9",
+                            "name": "chargingCurrentStep",
+                            "displayName": "Charging Current step size",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0.1
                         },
                         {
                             "id": "6449f171-2152-435f-854a-58d07f99b6f9",
@@ -366,12 +382,20 @@
                             "displayName": "Charging current",
                             "displayNameEvent": "Charging current changed",
                             "displayNameAction": "Set charging current",
-                            "type": "uint",
+                            "type": "double",
                             "unit": "Ampere",
                             "minValue": 6,
                             "maxValue": 16,
                             "defaultValue": 6,
                             "writable": true
+                        },
+                        {
+                            "id": "b81c257d-94db-4fff-a0de-3c37f07e9bfe",
+                            "name": "chargingCurrentStep",
+                            "displayName": "Charging Current step size",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0.1
                         },
                         {
                             "id": "9d4900eb-b16b-4881-ae68-f198cfc8b768",
@@ -479,12 +503,20 @@
                             "displayName": "Charging current",
                             "displayNameEvent": "Charging current changed",
                             "displayNameAction": "Set charging current",
-                            "type": "uint",
+                            "type": "double",
                             "unit": "Ampere",
                             "minValue": 6,
                             "maxValue": 32,
                             "defaultValue": 6,
                             "writable": true
+                        },
+                        {
+                            "id": "b12d605e-420b-4c7a-9db6-bd8ea050726f",
+                            "name": "chargingCurrentStep",
+                            "displayName": "Charging Current step size",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0.1
                         },
                         {
                             "id": "62f8294e-f35d-4b90-a8fe-1cd41106fc2b",
@@ -628,12 +660,20 @@
                             "displayName": "Charging current",
                             "displayNameEvent": "Charging current changed",
                             "displayNameAction": "Set charging current",
-                            "type": "uint",
+                            "type": "double",
                             "unit": "Ampere",
                             "minValue": 6,
                             "maxValue": 16,
                             "defaultValue": 6,
                             "writable": true
+                        },
+                        {
+                            "id": "a46787e4-3484-4c27-bf2f-e18e1c28313c",
+                            "name": "chargingCurrentStep",
+                            "displayName": "Charging Current step size",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0.1
                         },
                         {
                             "id": "3b7200b0-852e-44ba-b3c6-08d454ab6137",
@@ -731,12 +771,20 @@
                             "displayName": "Charging current",
                             "displayNameEvent": "Charging current changed",
                             "displayNameAction": "Set charging current",
-                            "type": "uint",
+                            "type": "double",
                             "unit": "Ampere",
                             "minValue": 6,
                             "maxValue": 32,
                             "defaultValue": 6,
                             "writable": true
+                        },
+                        {
+                            "id": "98061676-c7bb-45ff-82da-f8136f87e2a7",
+                            "name": "chargingCurrentStep",
+                            "displayName": "Charging Current step size",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0.1
                         },
                         {
                             "id": "c275e21d-6ecb-432e-924e-96ebf804abe1",
