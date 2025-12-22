@@ -513,7 +513,7 @@ void IntegrationPluginWebasto::executeAction(ThingActionInfo *info)
                 m_asyncActions.insert(requestId, info);
             }
         } else if (action.actionTypeId() == webastoLiveMaxChargingCurrentActionTypeId) {
-            int ampere = action.paramValue(webastoLiveMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toUInt();
+            quint16 ampere = static_cast<quint16>(qRound(action.paramValue(webastoLiveMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toDouble()));
             thing->setStateValue(webastoLiveMaxChargingCurrentStateTypeId, ampere);
             QUuid requestId = connection->setChargeCurrent(ampere);
             if (requestId.isNull()) {
@@ -571,7 +571,7 @@ void IntegrationPluginWebasto::executeAction(ThingActionInfo *info)
                 executeWebastoNextPowerAction(info, power);
             }
         } else if (action.actionTypeId() == webastoNextMaxChargingCurrentActionTypeId) {
-            quint16 chargingCurrent = action.paramValue(webastoNextMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toUInt();
+            quint16 chargingCurrent = static_cast<quint16>(qRound(action.paramValue(webastoNextMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toDouble()));
             qCDebug(dcWebasto()) << "Set max charging current of" << thing << "to" << chargingCurrent << "ampere";
             QModbusReply *reply = connection->setChargeCurrent(chargingCurrent);
             connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
@@ -620,7 +620,7 @@ void IntegrationPluginWebasto::executeAction(ThingActionInfo *info)
             });
         }
         if (info->action().actionTypeId() == webastoUniteMaxChargingCurrentActionTypeId) {
-            int maxChargingCurrent = info->action().paramValue(webastoUniteMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toInt();
+            quint16 maxChargingCurrent = static_cast<quint16>(qRound(info->action().paramValue(webastoUniteMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toDouble()));
             QModbusReply *reply = evc04Connection->setChargingCurrent(maxChargingCurrent);
             connect(reply, &QModbusReply::finished, info, [info, reply, maxChargingCurrent](){
                 if (reply->error() == QModbusDevice::NoError) {
