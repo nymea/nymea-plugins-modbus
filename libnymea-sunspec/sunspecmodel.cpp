@@ -139,9 +139,6 @@ void SunSpecModel::readNextBlockDataPart()
     // Model header has length 2.
     const auto readSize = static_cast<quint16>(std::min(125, static_cast<int>(m_modelLength + 2 - m_partialBlockData.size())));
 
-Still in progress?
-
-
     if (startAddress == m_lastStartAddress && readSize == m_lastReadSize) {
         qCWarning(dcSunSpecModelData()) << "Last read yielded no data. Not trying to read the same data again.";
         return;
