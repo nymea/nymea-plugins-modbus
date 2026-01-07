@@ -201,7 +201,7 @@ void IntegrationPluginAmperfied::executeAction(ThingActionInfo *info)
 
         if (info->action().actionTypeId() == energyControlPowerActionTypeId) {
             bool power = info->action().paramValue(energyControlPowerActionPowerParamTypeId).toBool();
-            ModbusRtuReply *reply = connection->setChargingCurrent(power ? info->thing()->stateValue(energyControlMaxChargingCurrentStateTypeId).toUInt() * 10 : 0);
+            ModbusRtuReply *reply = connection->setChargingCurrent(power ? static_cast<quint16>(qRound(info->thing()->stateValue(energyControlMaxChargingCurrentStateTypeId).toDouble() * 10)) : 0);
             connect(reply, &ModbusRtuReply::finished, info, [info, reply, power](){
                 if (reply->error() == ModbusRtuReply::NoError) {
                     info->thing()->setStateValue(energyControlPowerStateTypeId, power);
@@ -216,11 +216,11 @@ void IntegrationPluginAmperfied::executeAction(ThingActionInfo *info)
 
         if (info->action().actionTypeId() == energyControlMaxChargingCurrentActionTypeId) {
             bool power = info->thing()->stateValue(energyControlPowerStateTypeId).toBool();
-            uint max = info->action().paramValue(energyControlMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toUInt() * 10;
-            ModbusRtuReply *reply = connection->setChargingCurrent(power ? max : 0);
-            connect(reply, &ModbusRtuReply::finished, info, [info, reply, max](){
+            double current = qRound(info->action().paramValue(energyControlMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toDouble() * 10) / 10.0;
+            ModbusRtuReply *reply = connection->setChargingCurrent(power ? static_cast<quint16>(qRound(current * 10)) : 0);
+            connect(reply, &ModbusRtuReply::finished, info, [info, reply, current](){
                 if (reply->error() == ModbusRtuReply::NoError) {
-                    info->thing()->setStateValue(energyControlMaxChargingCurrentStateTypeId, max / 10);
+                    info->thing()->setStateValue(energyControlMaxChargingCurrentStateTypeId, current);
                     info->finish(Thing::ThingErrorNoError);
                 } else {
                     qCWarning(dcAmperfied()) << "Error setting power:" << reply->error() << reply->errorString();
@@ -241,8 +241,8 @@ void IntegrationPluginAmperfied::executeAction(ThingActionInfo *info)
 
         if (actionType.name() == "power") {
             bool power = info->action().paramValue(actionType.paramTypes().findByName("power").id()).toBool();
-            uint max = info->thing()->stateValue("maxChargingCurrent").toUInt();
-            QModbusReply *reply = connection->setChargingCurrent(power ? max * 10 : 0);
+            double current = info->thing()->stateValue("maxChargingCurrent").toDouble();
+            QModbusReply *reply = connection->setChargingCurrent(power ? static_cast<quint16>(qRound(current * 10)) : 0);
             connect(reply, &QModbusReply::finished, info, [info, reply, power](){
                 if (reply->error() == QModbusDevice::NoError) {
                     info->thing()->setStateValue("power", power);
@@ -254,11 +254,11 @@ void IntegrationPluginAmperfied::executeAction(ThingActionInfo *info)
             });
         } else if (actionType.name() == "maxChargingCurrent") {
             bool power = info->thing()->stateValue("power").toBool();
-            uint max = info->action().paramValue(actionType.paramTypes().findByName("maxChargingCurrent").id()).toUInt();
-            QModbusReply *reply = connection->setChargingCurrent(power ? max * 10 : 0);
-            connect(reply, &QModbusReply::finished, info, [info, reply, max](){
+            double current = info->action().paramValue(actionType.paramTypes().findByName("maxChargingCurrent").id()).toDouble();
+            QModbusReply *reply = connection->setChargingCurrent(power ?static_cast<quint16>(qRound(current * 10)): 0);
+            connect(reply, &QModbusReply::finished, info, [info, reply, current](){
                 if (reply->error() == QModbusDevice::NoError) {
-                    info->thing()->setStateValue("maxChargingCurrent", max / 10);
+                    info->thing()->setStateValue("maxChargingCurrent", current);
                     info->finish(Thing::ThingErrorNoError);
                 } else {
                     qCWarning(dcAmperfied()) << "Error setting power:" << reply->error() << reply->errorString();
@@ -357,7 +357,7 @@ void IntegrationPluginAmperfied::setupRtuConnection(ThingSetupInfo *info)
             thing->setStateValue(energyControlPowerStateTypeId, false);
         } else {
             thing->setStateValue(energyControlPowerStateTypeId, true);
-            thing->setStateValue(energyControlMaxChargingCurrentStateTypeId, connection->chargingCurrent() / 10);
+            thing->setStateValue(energyControlMaxChargingCurrentStateTypeId, connection->chargingCurrent() / 10.0);
         }
         thing->setStateMinMaxValues(energyControlMaxChargingCurrentStateTypeId, connection->minChargingCurrent(), connection->maxChargingCurrent());
         thing->setStateValue(energyControlCurrentPowerStateTypeId, connection->currentPower());
@@ -446,7 +446,7 @@ void IntegrationPluginAmperfied::setupTcpConnection(ThingSetupInfo *info)
             thing->setStateValue("power", false);
         } else {
             thing->setStateValue("power", true);
-            thing->setStateValue("maxChargingCurrent", connection->chargingCurrent() / 10);
+            thing->setStateValue("maxChargingCurrent", connection->chargingCurrent() / 10.0);
         }
         thing->setStateMinMaxValues("maxChargingCurrent", connection->minChargingCurrent(), connection->maxChargingCurrent());
         thing->setStateValue("currentPower", connection->currentPower());
