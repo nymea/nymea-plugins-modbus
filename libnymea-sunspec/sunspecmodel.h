@@ -118,6 +118,13 @@ signals:
 
     void blockUpdated();
 
+private:
+    void readNextBlockDataPart();
+    void handleNewBlockData();
+
+    int m_lastStartAddress = 0;
+    quint16 m_lastReadSize = 0;
+    QVector<quint16> m_partialBlockData;
 };
 
 QDebug operator<<(QDebug debug, SunSpecModel *model);
