@@ -1,3 +1,14 @@
+nymea-plugins-modbus (1.15.0) noble; urgency=medium
+
+  [ Michael Schwarz ]
+  * SunSpec: Fix reading data of large SunSpec models
+
+  [ Simon Stürz ]
+  * PCE: Add status state representing the EV state
+  * Update EV charger interface and add full charging current resolution
+
+ -- jenkins <developer@nymea.io>  Fri, 09 Jan 2026 15:35:44 +0100
+
 nymea-plugins-modbus (1.13.0) jammy; urgency=medium
 
   [ Simon Stürz ]
