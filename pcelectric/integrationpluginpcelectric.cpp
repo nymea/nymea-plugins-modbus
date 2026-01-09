@@ -223,7 +223,7 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
 
     } else if (info->action().actionTypeId() == ev11MaxChargingCurrentActionTypeId) {
 
-        uint desiredChargingCurrent = info->action().paramValue(ev11MaxChargingCurrentActionMaxChargingCurrentParamTypeId).toUInt();
+        double desiredChargingCurrent = info->action().paramValue(ev11MaxChargingCurrentActionMaxChargingCurrentParamTypeId).toDouble();
         qCDebug(dcPcElectric()) << "Set max charging current to" << desiredChargingCurrent << "A";
 
         // Update buffer
