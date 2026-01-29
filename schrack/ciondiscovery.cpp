@@ -84,7 +84,8 @@ void CionDiscovery::tryConnect(ModbusRtuMaster *master, quint16 slaveId)
             // Examples of how this looks like:
             // EBE 1.2: "V1.2    15.02.2021"
             // ICC:     "003090056-01          20220913"
-            if (QRegularExpression("[A-Z0-9\\.- ]{18,32}").match(firmwareVersion).hasMatch()) {
+            // Regex accepts uppercase letters, digits, dots, spaces and dashes; dash is escaped to avoid invalid range
+            if (QRegularExpression(QStringLiteral("[A-Z0-9. \\-]{18,32}")).match(firmwareVersion).hasMatch()) {
                 Result result {master->modbusUuid(), firmwareVersion, slaveId};
                 m_discoveryResults.append(result);
             }
