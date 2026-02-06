@@ -189,7 +189,7 @@ bool PceWallbox::update()
             const QVector<quint16> values = unit.values();
             processLedBrightnessRegisterValues(values);
 
-            if (firmwareRevision() < "0022")
+            if (firmwareRevision() < "0025")
                 emit updateFinished();
 
             QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
@@ -198,11 +198,11 @@ bool PceWallbox::update()
         enqueueRequest(reply);
     }
 
-    if (firmwareRevision() < "0022")
+    if (firmwareRevision() < "0025")
         return true;
 
     // ---------------------------------------------------------------------------------------
-    // Registers since 0022 (V 0.22)
+    // Registers since 0025 (V 0.25)
 
     // Make sure we only have one update 2 call in the queue
     bool update2Queued = false;
@@ -266,7 +266,7 @@ bool PceWallbox::update()
         enqueueRequest(reply);
     }
 
-    // Phase auto switch pause (since firmware version 0.22 ...)
+    // Phase auto switch pause (since firmware version 0.25 ...)
     bool phaseAutoSwitchMinChargingTimeQueued = false;
     foreach (QueuedModbusReply *r, m_readQueue) {
         if (r->dataUnit().startAddress() == phaseAutoSwitchMinChargingTimeDataUnit().startAddress()) {
@@ -297,7 +297,7 @@ bool PceWallbox::update()
         enqueueRequest(reply);
     }
 
-    // Phase auto switch pause (since firmware version 0.22 ...)
+    // Phase auto switch pause (since firmware version 0.25 ...)
     bool forceChargingResumeQueued = false;
     foreach (QueuedModbusReply *r, m_readQueue) {
         if (r->dataUnit().startAddress() == forceChargingResumeDataUnit().startAddress()) {
