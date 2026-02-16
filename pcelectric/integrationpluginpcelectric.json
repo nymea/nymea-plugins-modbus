@@ -4,7 +4,7 @@
     "id": "aa7ff833-a8e0-45cc-a1ef-65f05871f272",
     "paramTypes":[ ],
     "vendors": [
-    	{
+        {
             "name": "PcElectric",
             "displayName": "PC Electric GmbH",
             "id": "b365937b-f1d6-46bf-9ff1-e787373b8aa6",
@@ -14,7 +14,7 @@
                     "displayName": "PCE EV11.3",
                     "id": "88d96940-a940-4a07-8176-5e6aba7ca832",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": ["evcharger", "connectable", "networkdevice"],
+                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "aa18f1ae-e2d5-4918-9230-ab3f6fb49010",
@@ -105,7 +105,6 @@
                             "id": "ca8d680c-c2f8-456a-a246-9c6cd64e25a7",
                             "name": "connected",
                             "displayName": "Connected",
-                            "displayNameEvent": "Connected changed",
                             "type": "bool",
                             "cached": false,
                             "defaultValue": false
@@ -114,7 +113,6 @@
                             "id": "c12a7a27-fa56-450c-a1ec-717c868554f2",
                             "name": "power",
                             "displayName": "Charging enabled",
-                            "displayNameEvent": "Charging enabled or disabled",
                             "displayNameAction": "Enable or disable charging",
                             "type": "bool",
                             "defaultValue": false,
@@ -124,7 +122,6 @@
                             "id": "b5bbf23c-06db-463b-bb5c-3aea38e18818",
                             "name": "maxChargingCurrent",
                             "displayName": "Maximum charging current",
-                            "displayNameEvent": "Maximum charging current changed",
                             "displayNameAction": "Set maximum charging current",
                             "type": "double",
                             "unit": "Ampere",
@@ -138,7 +135,6 @@
                             "id": "50164bbd-9802-4cf6-82de-626b74293a1b",
                             "name": "pluggedIn",
                             "displayName": "Plugged in",
-                            "displayNameEvent": "Plugged or unplugged",
                             "type": "bool",
                             "defaultValue": false
                         },
@@ -146,7 +142,6 @@
                             "id": "b7972cd7-471a-46bd-ab99-f49997f12309",
                             "name": "charging",
                             "displayName": "Charging",
-                            "displayNameEvent": "Charging started or stopped",
                             "type": "bool",
                             "defaultValue": false
                         },
@@ -192,7 +187,6 @@
                             "id": "bb092562-377e-458e-bb8a-735af9036652",
                             "name": "temperature",
                             "displayName": "Onboard temperature",
-                            "displayNameEvent": "Onboard temperature changed",
                             "unit": "DegreeCelsius",
                             "type": "double",
                             "defaultValue": 0,
@@ -236,6 +230,307 @@
                             "defaultValue": 0,
                             "minValue": 0,
                             "maxValue": 3
+                        },
+                        {
+                            "id": "d95dc0b1-9701-42e9-bb16-10b9ded0f047",
+                            "name": "modeR37",
+                            "displayName": "R37 mode",
+                            "type": "int",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "67beed69-4b94-4811-99ae-377b77823e39",
+                            "name": "totalEnergyConsumed",
+                            "displayName": "Total energy consumed",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "968cd121-3143-459d-a13b-a23ec299a327",
+                            "name": "currentPowerPhaseA",
+                            "displayName": "Current power phase A",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "6397ee1e-846e-4537-b7f2-cc1439610157",
+                            "name": "currentPowerPhaseB",
+                            "displayName": "Current power phase B",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "9422af4a-2ef1-46c7-bca7-2b8f36647433",
+                            "name": "currentPowerPhaseC",
+                            "displayName": "Current power phase C",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "b530105a-8c3a-450e-912b-d10241c0dda1",
+                            "name": "voltagePhaseA",
+                            "displayName": "Voltage phase A",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "7109b933-a55d-46ea-b7a6-30b079c566a4",
+                            "name": "voltagePhaseB",
+                            "displayName": "Voltage phase B",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "0aa1c7f9-006e-497f-97f5-9fd929e56588",
+                            "name": "voltagePhaseC",
+                            "displayName": "Voltage phase C",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "30e28350-40ab-4524-b77d-28218cd7332a",
+                            "name": "currentPhaseA",
+                            "displayName": "Current phase A",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "0145c095-666f-4a7c-a783-312631d73a33",
+                            "name": "currentPhaseB",
+                            "displayName": "Current phase B",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "50f6bded-9e2e-4892-9ac7-a1cc279ac0b0",
+                            "name": "currentPhaseC",
+                            "displayName": "Current phase C",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0
+                        }
+                    ]
+                },
+                {
+                    "name": "ev11NoMeter",
+                    "displayName": "PCE EV11.3 (no meter)",
+                    "id": "28b16b8e-9b3f-4afe-a1d9-70ff042b02d0",
+                    "createMethods": ["discovery", "user"],
+                    "interfaces": ["evcharger", "connectable", "networkdevice"],
+                    "paramTypes": [
+                        {
+                            "id": "eed37247-0ea7-4778-ac7d-d9460b158973",
+                            "name": "address",
+                            "displayName": "Host address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "266d3149-c5b5-4606-8bcb-3cdc231e8126",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "a8260c51-2935-4f54-8d87-c9b7e925055d",
+                            "name":"macAddress",
+                            "displayName": "MAC address",
+                            "type": "QString",
+                            "inputType": "MacAddress",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "175f768e-c141-43ac-ac64-09fbd80a7e28",
+                            "name":"serialNumber",
+                            "displayName": "Serial number",
+                            "type": "QString",
+                            "defaultValue": ""
+                        }
+                    ],
+                    "settingsTypes": [
+                        {
+                            "id": "5a9917cd-be90-4e8f-993b-8eb24d8acca9",
+                            "name": "ledBrightness",
+                            "displayName": "LED brightness",
+                            "type": "uint",
+                            "minValue": 0,
+                            "maxValue": 100,
+                            "unit": "Percentage",
+                            "defaultValue": 100
+                        },
+                        {
+                            "id": "8cb287fa-e4ab-47c3-9f74-47ad3fd96854",
+                            "name": "digitalInputMode",
+                            "displayName": "Digital input mode",
+                            "type": "QString",
+                            "defaultValue": "0 | Charging allowed",
+                            "allowedValues": [
+                                "0 | Charging allowed",
+                                "1 | Charging allowed inverted",
+                                "2 | PWM and S0 signaling",
+                                "3 | Limit and S0 signaling"
+                            ]
+                        },
+                        {
+                            "id": "897dbfed-ead0-4ea8-b1b0-8f3b7f834e06",
+                            "name": "phaseAutoSwitchPause",
+                            "displayName": "Phase autoswitch pause",
+                            "type": "int",
+                            "unit": "Seconds",
+                            "minValue": 5,
+                            "maxValue": 600,
+                            "defaultValue": 6
+                        },
+                        {
+                            "id": "c50e28f4-c815-4090-b91a-296513e9a5b2",
+                            "name": "phaseAutoSwitchMinChargingTime",
+                            "displayName": "Phase autoswitch minimal charging time",
+                            "type": "int",
+                            "unit": "Seconds",
+                            "minValue": 5,
+                            "maxValue": 600,
+                            "defaultValue": 120
+                        },
+                        {
+                            "id": "af4469df-b5dd-48b8-9d1a-83098dcacb3f",
+                            "name": "forceChargingResume",
+                            "displayName": "Force charging resume",
+                            "type": "bool",
+                            "defaultValue": false
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "d3a811c4-6251-45d7-9b83-913b71d2e9d1",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "type": "bool",
+                            "cached": false,
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "9f296c91-db62-44ab-adf3-b126227d2f38",
+                            "name": "power",
+                            "displayName": "Charging enabled",
+                            "displayNameAction": "Enable or disable charging",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "writable": true
+                        },
+                        {
+                            "id": "b33400a0-a573-4aeb-9c44-f3543e71b1e0",
+                            "name": "maxChargingCurrent",
+                            "displayName": "Maximum charging current",
+                            "displayNameAction": "Set maximum charging current",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 6,
+                            "minValue": 6,
+                            "maxValue": 16,
+                            "stepSize": 0.01,
+                            "writable": true
+                        },
+                        {
+                            "id": "000ac265-69dd-4d82-88aa-29f51de10628",
+                            "name": "pluggedIn",
+                            "displayName": "Plugged in",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "ad3f09e7-60eb-42cd-ad27-1b35b7252c46",
+                            "name": "charging",
+                            "displayName": "Charging",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "67f6f5f8-969e-40c2-8754-e955fb9f12f3",
+                            "name": "phaseCount",
+                            "displayName": "Active phases",
+                            "type": "uint",
+                            "minValue": 1,
+                            "maxValue": 3,
+                            "defaultValue": 3
+                        },
+                        {
+                            "id": "8bc866da-2309-4c89-b7e2-5772c42e2f24",
+                            "name": "desiredPhaseCount",
+                            "displayName": "Desired phase count",
+                            "displayNameAction": "Set desired phase count",
+                            "type": "uint",
+                            "minValue": 1,
+                            "maxValue": 3,
+                            "possibleValues": [1, 3],
+                            "defaultValue": 3,
+                            "writable": true
+                        },
+                        {
+                            "id": "ad442399-3780-4125-8a63-b594305bfe62",
+                            "name": "temperature",
+                            "displayName": "Onboard temperature",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "c5152a81-7611-4329-ac3b-5db23524a94c",
+                            "name": "error",
+                            "displayName": "Error",
+                            "type": "QString",
+                            "defaultValue": "Kein Fehler",
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "2efaa685-fa25-4a66-81eb-e873175705ce",
+                            "name": "currentVersion",
+                            "displayName": "Firmware version",
+                            "type": "QString",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "53dc2a2b-ce62-40ea-aada-2d42831c9910",
+                            "name": "digitalInputFlag",
+                            "displayName": "Digital input flag",
+                            "type": "QString",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "4f654b1e-7b66-4fbc-9e01-bbf981447fc8",
+                            "name": "status",
+                            "displayName": "Status",
+                            "type": "QString",
+                            "defaultValue": "Init",
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "967bf32b-1a94-44b5-a76b-98866aa826ef",
+                            "name": "digitalInputMode",
+                            "displayName": "Digital input mode",
+                            "type": "uint",
+                            "defaultValue": 0,
+                            "minValue": 0,
+                            "maxValue": 3
+                        },
+                        {
+                            "id": "b667bee2-fd10-4a1d-adbe-11227feefef9",
+                            "name": "modeR37",
+                            "displayName": "R37 mode",
+                            "type": "int",
+                            "defaultValue": 0
                         }
                     ]
                 }

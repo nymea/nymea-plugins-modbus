@@ -66,6 +66,12 @@ private:
     // (set power to false and then set charging current would always enable charging in the end).
     QHash<Thing *, PceWallbox::ChargingCurrentState> m_chargingCurrentStateBuffer;
 
+    QHash<ThingClassId, ParamTypeId> m_addressParamTypes;
+    QHash<ThingClassId, ParamTypeId> m_hostNameParamTypes;
+    QHash<ThingClassId, ParamTypeId> m_macParamTypes;
+    QHash<ThingClassId, ParamTypeId> m_serialNumberParamTypes;
+
+
     void setupConnection(ThingSetupInfo *info);
 };
 

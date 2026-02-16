@@ -3,7 +3,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
 * Copyright (C) 2013 - 2024, nymea GmbH
-* Copyright (C) 2024 - 2025, chargebyte austria GmbH
+* Copyright (C) 2024 - 2026, chargebyte austria GmbH
 *
 * This file is part of nymea-plugins-modbus.
 *
@@ -39,11 +39,14 @@ public:
 
     typedef struct Result
     {
+        ThingClassId thingClassId;
         QString serialNumber;
         QString firmwareRevision;
         QHostAddress address;
         MacAddress registerMacAddress;
         NetworkDeviceInfo networkDeviceInfo;
+        EV11ModbusTcpConnection::DigitalInputMode digitalInputMode;
+        EV11ModbusTcpConnection::R37Mode r37Mode = EV11ModbusTcpConnection::R37ModeNoMonitoring;
     } Result;
 
     QList<PcElectricDiscovery::Result> results() const;
@@ -65,6 +68,8 @@ private:
     QList<Result> m_potentialResults;
 
     QList<Result> m_results;
+
+    QHash<EV11ModbusTcpConnection *, PcElectricDiscovery::Result> m_runningVerifications;
 
     void checkNetworkDevice(const QHostAddress &address);
     void cleanupConnection(EV11ModbusTcpConnection *connection);

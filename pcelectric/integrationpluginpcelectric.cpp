@@ -34,6 +34,18 @@ IntegrationPluginPcElectric::IntegrationPluginPcElectric() {}
 void IntegrationPluginPcElectric::init()
 {
     //qCCritical(dcPcElectric()) << QString("%1").arg(QString::number(49155, 2));
+
+    m_addressParamTypes[ev11ThingClassId] = ev11ThingAddressParamTypeId;
+    m_addressParamTypes[ev11NoMeterThingClassId] = ev11NoMeterThingAddressParamTypeId;
+
+    m_hostNameParamTypes[ev11ThingClassId] = ev11ThingHostNameParamTypeId;
+    m_hostNameParamTypes[ev11NoMeterThingClassId] = ev11NoMeterThingHostNameParamTypeId;
+
+    m_macParamTypes[ev11ThingClassId] = ev11ThingMacAddressParamTypeId;
+    m_macParamTypes[ev11NoMeterThingClassId] = ev11NoMeterThingMacAddressParamTypeId;
+
+    m_serialNumberParamTypes[ev11ThingClassId] = ev11ThingSerialNumberParamTypeId;
+    m_serialNumberParamTypes[ev11NoMeterThingClassId] = ev11NoMeterThingSerialNumberParamTypeId;
 }
 
 void IntegrationPluginPcElectric::discoverThings(ThingDiscoveryInfo *info)
@@ -48,23 +60,27 @@ void IntegrationPluginPcElectric::discoverThings(ThingDiscoveryInfo *info)
     PcElectricDiscovery *discovery = new PcElectricDiscovery(hardwareManager()->networkDeviceDiscovery(), 502, 1, info);
     connect(discovery, &PcElectricDiscovery::discoveryFinished, info, [=]() {
         foreach (const PcElectricDiscovery::Result &result, discovery->results()) {
-            ThingDescriptor descriptor(ev11ThingClassId,
+
+            if (info->thingClassId() != result.thingClassId)
+                continue;
+
+            ThingDescriptor descriptor(result.thingClassId,
                                        "PCE EV11.3 (" + result.serialNumber + ")",
                                        "Version: " + result.firmwareRevision + " - " + result.networkDeviceInfo.address().toString());
             qCDebug(dcPcElectric()) << "Discovered:" << descriptor.title() << descriptor.description();
 
             // Check if we already have set up this device
-            Things existingThings = myThings().filterByParam(ev11ThingSerialNumberParamTypeId, result.serialNumber);
+            Things existingThings = myThings().filterByParam(m_serialNumberParamTypes.value(result.thingClassId), result.serialNumber);
             if (existingThings.length() == 1) {
                 qCDebug(dcPcElectric()) << "This PCE wallbox already exists in the system:" << result.serialNumber << result.networkDeviceInfo;
                 descriptor.setThingId(existingThings.first()->id());
             }
 
             ParamList params;
-            params << Param(ev11ThingMacAddressParamTypeId, result.networkDeviceInfo.thingParamValueMacAddress());
-            params << Param(ev11ThingHostNameParamTypeId, result.networkDeviceInfo.thingParamValueHostName());
-            params << Param(ev11ThingAddressParamTypeId, result.networkDeviceInfo.thingParamValueAddress());
-            params << Param(ev11ThingSerialNumberParamTypeId, result.serialNumber);
+            params << Param(m_macParamTypes.value(result.thingClassId), result.networkDeviceInfo.thingParamValueMacAddress());
+            params << Param(m_hostNameParamTypes.value(result.thingClassId), result.networkDeviceInfo.thingParamValueHostName());
+            params << Param(m_addressParamTypes.value(result.thingClassId), result.networkDeviceInfo.thingParamValueAddress());
+            params << Param(m_serialNumberParamTypes.value(result.thingClassId), result.serialNumber);
             // Note: if we discover also the port and modbusaddress, we must fill them in from the discovery here, for now everywhere the defaults...
             descriptor.setParams(params);
             info->addThingDescriptor(descriptor);
@@ -148,9 +164,9 @@ void IntegrationPluginPcElectric::postSetupThing(Thing *thing)
     }
 
     PceWallbox::ChargingCurrentState chargingCurrentState;
-    chargingCurrentState.power = thing->stateValue(ev11PowerStateTypeId).toBool();
-    chargingCurrentState.maxChargingCurrent = thing->stateValue(ev11MaxChargingCurrentStateTypeId).toDouble();
-    chargingCurrentState.desiredPhaseCount = thing->stateValue(ev11DesiredPhaseCountStateTypeId).toDouble();
+    chargingCurrentState.power = thing->stateValue("power").toBool();
+    chargingCurrentState.maxChargingCurrent = thing->stateValue("maxChargingCurrent").toDouble();
+    chargingCurrentState.desiredPhaseCount = thing->stateValue("desiredPhaseCount").toUInt();
     qCDebug(dcPcElectric()) << "Initialize charging current state with cached values" << chargingCurrentState;
     m_chargingCurrentStateBuffer[thing] = chargingCurrentState;
 }
@@ -193,10 +209,15 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
         return;
     }
 
-    if (info->action().actionTypeId() == ev11PowerActionTypeId) {
-        bool power = info->action().paramValue(ev11PowerActionPowerParamTypeId).toBool();
-        qCDebug(dcPcElectric()) << "Set charging enabled to" << power;
+    if (info->action().actionTypeId() == ev11PowerActionTypeId || info->action().actionTypeId() == ev11NoMeterPowerActionTypeId) {
+        bool power = false;
+        if (info->action().actionTypeId() == ev11PowerActionTypeId) {
+            power = info->action().paramValue(ev11PowerActionPowerParamTypeId).toBool();
+        } else if (info->action().actionTypeId() == ev11NoMeterPowerActionTypeId) {
+            power = info->action().paramValue(ev11NoMeterPowerActionPowerParamTypeId).toBool();
+        }
 
+        qCDebug(dcPcElectric()) << "Set charging enabled to" << power;
         // Update buffer
         m_chargingCurrentStateBuffer[thing].power = power;
 
@@ -211,14 +232,20 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
             }
 
             qCDebug(dcPcElectric()) << "Successfully set power state to" << power << "(" << registerValue << ")";
-            thing->setStateValue(ev11PowerStateTypeId, power);
+            thing->setStateValue("power", power);
             info->finish(Thing::ThingErrorNoError);
         });
 
         return;
 
-    } else if (info->action().actionTypeId() == ev11MaxChargingCurrentActionTypeId) {
-        double desiredChargingCurrent = info->action().paramValue(ev11MaxChargingCurrentActionMaxChargingCurrentParamTypeId).toDouble();
+    } else if (info->action().actionTypeId() == ev11MaxChargingCurrentActionTypeId || info->action().actionTypeId() == ev11NoMeterMaxChargingCurrentActionTypeId) {
+        double desiredChargingCurrent = 6;
+        if (info->action().actionTypeId() == ev11MaxChargingCurrentActionTypeId) {
+            desiredChargingCurrent = info->action().paramValue(ev11MaxChargingCurrentActionMaxChargingCurrentParamTypeId).toDouble();
+        } else if (info->action().actionTypeId() == ev11NoMeterMaxChargingCurrentActionTypeId) {
+            desiredChargingCurrent = info->action().paramValue(ev11NoMeterMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toDouble();
+        }
+
         qCDebug(dcPcElectric()) << "Set max charging current to" << desiredChargingCurrent << "A";
 
         // Update buffer
@@ -235,14 +262,22 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
             }
 
             qCDebug(dcPcElectric()) << "Successfully set charging current (" << desiredChargingCurrent << ")";
-            thing->setStateValue(ev11MaxChargingCurrentStateTypeId, desiredChargingCurrent);
+            thing->setStateValue("maxChargingCurrent", desiredChargingCurrent);
             info->finish(Thing::ThingErrorNoError);
         });
 
         return;
 
-    } else if (info->action().actionTypeId() == ev11DesiredPhaseCountActionTypeId) {
-        uint desiredPhaseCount = info->action().paramValue(ev11DesiredPhaseCountActionDesiredPhaseCountParamTypeId).toUInt();
+    } else if (info->action().actionTypeId() == ev11DesiredPhaseCountActionTypeId || info->action().actionTypeId() == ev11NoMeterDesiredPhaseCountActionTypeId) {
+        uint desiredPhaseCount = 1;
+        if (info->action().actionTypeId() == ev11DesiredPhaseCountActionTypeId) {
+            desiredPhaseCount = info->action().paramValue(ev11DesiredPhaseCountActionDesiredPhaseCountParamTypeId).toUInt();
+            ;
+        } else if (info->action().actionTypeId() == ev11NoMeterDesiredPhaseCountActionTypeId) {
+            desiredPhaseCount = info->action().paramValue(ev11NoMeterDesiredPhaseCountActionDesiredPhaseCountParamTypeId).toUInt();
+            ;
+        }
+
         qCDebug(dcPcElectric()) << "Set desried phase count to" << desiredPhaseCount;
 
         // Update buffer
@@ -259,7 +294,7 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
             }
 
             qCDebug(dcPcElectric()) << "Successfully set phase count (" << desiredPhaseCount << ")";
-            thing->setStateValue(ev11DesiredPhaseCountStateTypeId, desiredPhaseCount);
+            thing->setStateValue("desiredPhaseCount", desiredPhaseCount);
             info->finish(Thing::ThingErrorNoError);
         });
 
@@ -303,97 +338,114 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
         qCInfo(dcPcElectric()) << "Reachable changed to" << reachable << "for" << thing;
         m_initialUpdate[thing] = true;
         thing->setStateValue("connected", reachable);
+
+        // Reset energy related information if not reachable
+        if (!reachable && thing->thingClassId() == ev11ThingClassId) {
+            thing->setStateValue("currentPower", 0);
+            thing->setStateValue("currentPowerPhaseA", 0);
+            thing->setStateValue("currentPowerPhaseB", 0);
+            thing->setStateValue("currentPowerPhaseC", 0);
+            thing->setStateValue("voltagePhaseA", 0);
+            thing->setStateValue("voltagePhaseB", 0);
+            thing->setStateValue("voltagePhaseC", 0);
+            thing->setStateValue("currentPhaseA", 0);
+            thing->setStateValue("currentPhaseB", 0);
+            thing->setStateValue("currentPhaseC", 0);
+        }
     });
 
     connect(connection, &PceWallbox::updateFinished, thing, [this, thing, connection]() {
         qCDebug(dcPcElectric()) << "Update finished for" << thing;
         qCDebug(dcPcElectric()) << connection;
+
         if (!connection->phaseAutoSwitch()) {
             // Note: if auto phase switching is disabled, the wallbox forces 3 phase charging
-            thing->setStatePossibleValues(ev11DesiredPhaseCountStateTypeId, {3}); // Disable phase switching (default 3)
-            thing->setStateValue(ev11DesiredPhaseCountStateTypeId, 3);
-            thing->setStateValue(ev11PhaseCountStateTypeId, 3);
+            thing->setStatePossibleValues("desiredPhaseCount", {3}); // Disable phase switching (default 3)
+            thing->setStateValue("desiredPhaseCount", 3);
+            thing->setStateValue("phaseCount", 3);
         } else {
-            thing->setStatePossibleValues(ev11DesiredPhaseCountStateTypeId, {1, 3}); // Enable phase switching
+            thing->setStatePossibleValues("desiredPhaseCount", {1, 3}); // Enable phase switching
         }
 
         if (connection->chargingRelayState() != EV11ModbusTcpConnection::ChargingRelayStateNoCharging) {
             if (connection->chargingRelayState() == EV11ModbusTcpConnection::ChargingRelayStateSinglePhase) {
-                thing->setStateValue(ev11PhaseCountStateTypeId, 1);
+                thing->setStateValue("phaseCount", 1);
             } else if (connection->chargingRelayState() == EV11ModbusTcpConnection::ChargingRelayStateTheePhase) {
-                thing->setStateValue(ev11PhaseCountStateTypeId, 3);
+                thing->setStateValue("phaseCount", 3);
             }
         }
 
-        thing->setStateMaxValue(ev11MaxChargingCurrentStateTypeId, connection->maxChargingCurrentDip() / 1000);
-        thing->setStateValue(ev11PluggedInStateTypeId, connection->chargingState() >= PceWallbox::ChargingStateB1 && connection->chargingState() < PceWallbox::ChargingStateError);
+        thing->setStateMaxValue("maxChargingCurrent", connection->maxChargingCurrentDip() / 1000);
+        thing->setStateValue("pluggedIn", connection->chargingState() >= PceWallbox::ChargingStateB1 && connection->chargingState() < PceWallbox::ChargingStateError);
 
-        thing->setStateValue(ev11ChargingStateTypeId, connection->chargingState() == PceWallbox::ChargingStateC2);
+        thing->setStateValue("charging", connection->chargingState() == PceWallbox::ChargingStateC2);
         if (connection->chargingRelayState() != EV11ModbusTcpConnection::ChargingRelayStateNoCharging) {
-            thing->setStateValue(ev11PhaseCountStateTypeId, connection->chargingRelayState() == EV11ModbusTcpConnection::ChargingRelayStateSinglePhase ? 1 : 3);
+            thing->setStateValue("phaseCount", connection->chargingRelayState() == EV11ModbusTcpConnection::ChargingRelayStateSinglePhase ? 1 : 3);
         }
 
         switch (connection->chargingState()) {
         case PceWallbox::ChargingStateInitializing:
-            thing->setStateValue(ev11StatusStateTypeId, "Init");
+            thing->setStateValue("status", "Init");
             break;
         case PceWallbox::ChargingStateA1:
-            thing->setStateValue(ev11StatusStateTypeId, "A1");
+            thing->setStateValue("status", "A1");
             break;
         case PceWallbox::ChargingStateA2:
-            thing->setStateValue(ev11StatusStateTypeId, "A2");
+            thing->setStateValue("status", "A2");
             break;
         case PceWallbox::ChargingStateB1:
-            thing->setStateValue(ev11StatusStateTypeId, "B1");
+            thing->setStateValue("status", "B1");
             break;
         case PceWallbox::ChargingStateB2:
-            thing->setStateValue(ev11StatusStateTypeId, "B2");
+            thing->setStateValue("status", "B2");
             break;
         case PceWallbox::ChargingStateC1:
-            thing->setStateValue(ev11StatusStateTypeId, "C1");
+            thing->setStateValue("status", "C1");
             break;
         case PceWallbox::ChargingStateC2:
-            thing->setStateValue(ev11StatusStateTypeId, "C2");
+            thing->setStateValue("status", "C2");
             break;
         case PceWallbox::ChargingStateError:
-            thing->setStateValue(ev11StatusStateTypeId, "F");
+            thing->setStateValue("status", "F");
             break;
         }
 
-        thing->setStateValue(ev11CurrentVersionStateTypeId, connection->firmwareRevision());
-        thing->setStateValue(ev11SessionEnergyStateTypeId, connection->powerMeter0());
-        thing->setStateValue(ev11TemperatureStateTypeId, connection->temperature());
+        thing->setStateValue("currentVersion", connection->firmwareRevision());
+        thing->setStateValue("temperature", connection->temperature());
 
         switch (connection->error()) {
         case EV11ModbusTcpConnection::ErrorNoError:
-            thing->setStateValue(ev11ErrorStateTypeId, "Kein Fehler aktiv");
+            thing->setStateValue("error", "Kein Fehler aktiv");
             break;
         case EV11ModbusTcpConnection::ErrorOverheating:
-            thing->setStateValue(ev11ErrorStateTypeId, "1: Übertemperatur. Ladevorgang wird automatisch fortgesetzt.");
+            thing->setStateValue("error", "1: Übertemperatur. Ladevorgang wird automatisch fortgesetzt.");
             break;
         case EV11ModbusTcpConnection::ErrorDCFaultCurrent:
-            thing->setStateValue(ev11ErrorStateTypeId, "2: DC Fehlerstromsensor ausgelöst.");
+            thing->setStateValue("error", "2: DC Fehlerstromsensor ausgelöst.");
             break;
         case EV11ModbusTcpConnection::ErrorChargingWithVentilation:
-            thing->setStateValue(ev11ErrorStateTypeId, "3: Ladeanforderung mit Belüftung.");
+            thing->setStateValue("error", "3: Ladeanforderung mit Belüftung.");
             break;
         case EV11ModbusTcpConnection::ErrorCPErrorEF:
-            thing->setStateValue(ev11ErrorStateTypeId, "4: CP Signal, Fehlercode E oder F.");
+            thing->setStateValue("error", "4: CP Signal, Fehlercode E oder F.");
             break;
         case EV11ModbusTcpConnection::ErrorCPErrorBypass:
-            thing->setStateValue(ev11ErrorStateTypeId, "5: CP Signal, bypass.");
+            thing->setStateValue("error", "5: CP Signal, bypass.");
             break;
         case EV11ModbusTcpConnection::ErrorCPErrorDiodFault:
-            thing->setStateValue(ev11ErrorStateTypeId, "6: CP Signal, Diode defekt.");
+            thing->setStateValue("error", "6: CP Signal, Diode defekt.");
             break;
         case EV11ModbusTcpConnection::ErrorDCFaultCurrentCalibrating:
-            thing->setStateValue(ev11ErrorStateTypeId, "7: DC Fehlerstromsensor, Kalibrirung.");
+            thing->setStateValue("error", "7: DC Fehlerstromsensor, Kalibrirung.");
             break;
         case EV11ModbusTcpConnection::ErrorDCFaultCurrentCommunication:
-            thing->setStateValue(ev11ErrorStateTypeId, "8: DC Fehlerstromsensor, Kommunikationsfehler.");
+            thing->setStateValue("error", "8: DC Fehlerstromsensor, Kommunikationsfehler.");
             break;
         case EV11ModbusTcpConnection::ErrorDCFaultCurrentError:
-            thing->setStateValue(ev11ErrorStateTypeId, "9: DC Fehlerstromsensor, Fehler.");
+            thing->setStateValue("error", "9: DC Fehlerstromsensor, Fehler.");
+            break;
+        case EV11ModbusTcpConnection::ErrorGridMonitoringError:
+            thing->setStateValue("error", "11: Netzüberwachung ausgelöst.");
             break;
         }
 
@@ -404,62 +456,81 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
 
             PceWallbox::ChargingCurrentState chargingCurrentState = PceWallbox::deriveStatesFromRegister(connection->chargingCurrent());
             qCDebug(dcPcElectric()) << chargingCurrentState;
-            thing->setStateValue(ev11PowerStateTypeId, chargingCurrentState.power);
-            thing->setStateValue(ev11DesiredPhaseCountStateTypeId, chargingCurrentState.desiredPhaseCount);
-            if (chargingCurrentState.power) {
-                thing->setStateValue(ev11MaxChargingCurrentStateTypeId, chargingCurrentState.maxChargingCurrent);
-            }
+            thing->setStateValue("power", chargingCurrentState.power);
+            thing->setStateValue("desiredPhaseCount", chargingCurrentState.desiredPhaseCount);
+            if (chargingCurrentState.power)
+                thing->setStateValue("maxChargingCurrent", chargingCurrentState.maxChargingCurrent);
 
             m_chargingCurrentStateBuffer[thing] = chargingCurrentState;
 
             qCDebug(dcPcElectric()) << "Updating initial settings after connecting...";
 
-            thing->setSettingValue(ev11SettingsLedBrightnessParamTypeId, connection->ledBrightness());
+            thing->setSettingValue("ledBrightness", connection->ledBrightness());
 
             switch (connection->digitalInputMode()) {
             case EV11ModbusTcpConnection::DigitalInputModeEnableCharging:
-                thing->setSettingValue(ev11SettingsDigitalInputModeParamTypeId, "0 | Charging allowed");
+                thing->setSettingValue("digitalInputMode", "0 | Charging allowed");
                 break;
             case EV11ModbusTcpConnection::DigitalInputModeEnableChargingInverted:
-                thing->setSettingValue(ev11SettingsDigitalInputModeParamTypeId, "1 | Charging allowed inverted");
+                thing->setSettingValue("digitalInputMode", "1 | Charging allowed inverted");
                 break;
             case EV11ModbusTcpConnection::DigitalInputModePwmS0Enabled:
-                thing->setSettingValue(ev11SettingsDigitalInputModeParamTypeId, "2 | PWM and S0 signaling");
+                thing->setSettingValue("digitalInputMode", "2 | PWM and S0 signaling");
                 break;
             case EV11ModbusTcpConnection::DigitalInputModeLimitS0Enabled:
-                thing->setSettingValue(ev11SettingsDigitalInputModeParamTypeId, "3 | Limit and S0 signaling");
+                thing->setSettingValue("digitalInputMode", "3 | Limit and S0 signaling");
                 break;
             }
-            thing->setStateValue(ev11DigitalInputModeStateTypeId, connection->digitalInputMode());
 
-            if (connection->firmwareRevision() >= "0022") {
-                thing->setSettingValue(ev11SettingsPhaseAutoSwitchPauseParamTypeId, connection->phaseAutoSwitchPause());
-                thing->setStateValue(ev11SettingsPhaseAutoSwitchMinChargingTimeParamTypeId, connection->phaseAutoSwitchMinChargingTime());
-                thing->setStateValue(ev11SettingsForceChargingResumeParamTypeId, connection->forceChargingResume() == 1 ? true : false);
+            thing->setStateValue("digitalInputMode", connection->digitalInputMode());
+
+            if (connection->firmwareRevision() >= "0025") {
+                thing->setSettingValue("phaseAutoSwitchPause", connection->phaseAutoSwitchPause());
+                thing->setSettingValue("phaseAutoSwitchMinChargingTime", connection->phaseAutoSwitchMinChargingTime());
+                thing->setSettingValue("forceChargingResume", connection->forceChargingResume() == 1 ? true : false);
             }
         }
 
-        if (connection->firmwareRevision() >= "0022") {
-            thing->setStateValue(ev11CurrentPowerStateTypeId, connection->currentPower());
-            thing->setStateValue(ev11DigitalInputFlagStateTypeId, QString("0b%1").arg(connection->digitalInputFlag(), 16, 2, QLatin1Char('0')));
+        if (connection->firmwareRevision() >= "0025") {
+            thing->setStateValue("digitalInputFlag", QString("0b%1").arg(connection->digitalInputFlag(), 16, 2, QLatin1Char('0')));
+            thing->setStateValue("modeR37", connection->modeR37());
+
+            // Energy information only available with meter and 0025
+            if (thing->thingClassId() == ev11ThingClassId) {
+                thing->setStateValue("currentPower", connection->currentPower());
+                thing->setStateValue("sessionEnergy", connection->powerMeter0());
+                thing->setStateValue("totalEnergyConsumed", connection->totalEnergyConsumed());
+                thing->setStateValue("currentPowerPhaseA", connection->activePowerL1());
+                thing->setStateValue("currentPowerPhaseB", connection->activePowerL2());
+                thing->setStateValue("currentPowerPhaseC", connection->activePowerL3());
+                thing->setStateValue("voltagePhaseA", connection->voltageL1());
+                thing->setStateValue("voltagePhaseB", connection->voltageL2());
+                thing->setStateValue("voltagePhaseC", connection->voltageL3());
+                thing->setStateValue("currentPhaseA", connection->currentL1());
+                thing->setStateValue("currentPhaseB", connection->currentL2());
+                thing->setStateValue("currentPhaseC", connection->currentL3());
+            }
+
         } else {
             // In firmware 0019 there is no current power register, depending on the CP state we can assume the car is consuming the amount
             // we adjusted, if the car is full, the CP state will change back to B2
-
-            if (connection->chargingState() == PceWallbox::ChargingStateC2 && connection->currentPower() == 0) {
-                // We are currently chargin, but the wallbox reports 0 W (which is expected), let's calculate the theoretical power...
-                double assumedCurrentPower = thing->stateValue(ev11PhaseCountStateTypeId).toInt() * 230 * thing->stateValue(ev11MaxChargingCurrentStateTypeId).toDouble();
-                qCDebug(dcPcElectric()) << "Assuming current power" << assumedCurrentPower << "W (" << thing->stateValue(ev11PhaseCountStateTypeId).toInt() << "phases * 230 V *"
-                                        << thing->stateValue(ev11MaxChargingCurrentStateTypeId).toDouble() << "A )";
-                thing->setStateValue(ev11CurrentPowerStateTypeId, assumedCurrentPower);
-            } else {
-                thing->setStateValue(ev11CurrentPowerStateTypeId, 0);
+            if (thing->thingClassId() == ev11ThingClassId) {
+                thing->setStateValue("sessionEnergy", connection->powerMeter0());
+                if (connection->chargingState() == PceWallbox::ChargingStateC2 && connection->currentPower() == 0) {
+                    // We are currently chargin, but the wallbox reports 0 W (which is expected), let's calculate the theoretical power...
+                    double assumedCurrentPower = thing->stateValue("phaseCount").toInt() * 230 * thing->stateValue("maxChargingCurrent").toDouble();
+                    qCDebug(dcPcElectric()) << "Assuming current power" << assumedCurrentPower << "W (" << thing->stateValue("phaseCount").toInt() << "phases * 230 V *"
+                                            << thing->stateValue("maxChargingCurrent").toDouble() << "A )";
+                    thing->setStateValue("currentPower", assumedCurrentPower);
+                } else {
+                    thing->setStateValue("currentPower", 0);
+                }
             }
         }
     });
 
     connect(thing, &Thing::settingChanged, connection, [thing, connection](const ParamTypeId &paramTypeId, const QVariant &value) {
-        if (paramTypeId == ev11SettingsLedBrightnessParamTypeId) {
+        if (paramTypeId == ev11SettingsLedBrightnessParamTypeId || paramTypeId == ev11NoMeterSettingsLedBrightnessParamTypeId) {
             quint16 percentage = value.toUInt();
 
             qCDebug(dcPcElectric()) << "Setting LED brightness to" << percentage << "%";
@@ -472,7 +543,7 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
 
                 qCDebug(dcPcElectric()) << "Successfully set led brightness to" << percentage << "%";
             });
-        } else if (paramTypeId == ev11SettingsDigitalInputModeParamTypeId) {
+        } else if (paramTypeId == ev11SettingsDigitalInputModeParamTypeId || paramTypeId == ev11NoMeterSettingsDigitalInputModeParamTypeId) {
             QString mode = value.toString();
             qCDebug(dcPcElectric()) << "Setting Digital input mode to" << mode;
 
@@ -498,9 +569,9 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
                 }
 
                 qCDebug(dcPcElectric()) << "Successfully set digital input mode to" << modeValue;
-                thing->setStateValue(ev11DigitalInputModeStateTypeId, modeValue);
+                thing->setStateValue("digitalInputMode", modeValue);
             });
-        } else if (paramTypeId == ev11SettingsPhaseAutoSwitchPauseParamTypeId) {
+        } else if (paramTypeId == ev11SettingsPhaseAutoSwitchPauseParamTypeId || paramTypeId == ev11NoMeterSettingsPhaseAutoSwitchPauseParamTypeId) {
             quint16 registerValue = value.toUInt();
 
             qCDebug(dcPcElectric()) << "Setting phase auto switch pause to" << registerValue << "s";
@@ -513,7 +584,7 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
 
                 qCDebug(dcPcElectric()) << "Successfully set phase auto switch pause to" << registerValue << "s";
             });
-        } else if (paramTypeId == ev11SettingsPhaseAutoSwitchMinChargingTimeParamTypeId) {
+        } else if (paramTypeId == ev11SettingsPhaseAutoSwitchMinChargingTimeParamTypeId || paramTypeId == ev11NoMeterSettingsPhaseAutoSwitchMinChargingTimeParamTypeId) {
             quint16 registerValue = value.toUInt();
 
             qCDebug(dcPcElectric()) << "Setting phase auto switch min charging current" << registerValue << "s";
@@ -525,8 +596,9 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
                 }
 
                 qCDebug(dcPcElectric()) << "Successfully set phase auto switch min charging current to" << registerValue << "s";
+                //thing->setSettingValue("phaseAutoSwitchMinChargingTime", registerValue);
             });
-        } else if (paramTypeId == ev11SettingsForceChargingResumeParamTypeId) {
+        } else if (paramTypeId == ev11SettingsForceChargingResumeParamTypeId || paramTypeId == ev11NoMeterSettingsForceChargingResumeParamTypeId) {
             quint16 registerValue = value.toBool() ? 1 : 0;
 
             qCDebug(dcPcElectric()) << "Setting force charging resume to" << registerValue;
@@ -538,6 +610,7 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
                 }
 
                 qCDebug(dcPcElectric()) << "Successfully set force charging resume to" << registerValue;
+                //thing->setSettingValue("forceChargingResume", registerValue == 1 ? true : false);
             });
         }
     });
