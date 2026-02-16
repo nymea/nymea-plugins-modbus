@@ -35,7 +35,7 @@ PceWallbox::PceWallbox(const QHostAddress &hostAddress, uint port, quint16 slave
     m_timer.setSingleShot(false);
     connect(&m_timer, &QTimer::timeout, this, &PceWallbox::sendHeartbeat);
 
-    connect(this, &EV11ModbusTcpConnection::reachableChanged, this, [this](bool reachable){
+    connect(this, &EV11ModbusTcpConnection::reachableChanged, this, [this](bool reachable) {
         if (!reachable) {
             m_timer.stop();
 
@@ -50,7 +50,7 @@ PceWallbox::PceWallbox(const QHostAddress &hostAddress, uint port, quint16 slave
         }
     });
 
-    connect(this, &EV11ModbusTcpConnection::initializationFinished, this, [this](bool success){
+    connect(this, &EV11ModbusTcpConnection::initializationFinished, this, [this](bool success) {
         if (success) {
             qCDebug(dcPcElectric()) << "Connection initialized successfully" << m_modbusTcpMaster->hostAddress().toString();
             m_timer.start();
@@ -81,8 +81,7 @@ bool PceWallbox::update()
 
     QueuedModbusReply *reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeRead, readBlockStatusDataUnit(), this);
     connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
-    connect(reply, &QueuedModbusReply::finished, this, [this, reply](){
-
+    connect(reply, &QueuedModbusReply::finished, this, [this, reply]() {
         if (m_currentReply == reply)
             m_currentReply = nullptr;
 
@@ -100,7 +99,6 @@ bool PceWallbox::update()
 
     enqueueRequest(reply);
 
-
     // charging current register. Contains
     // - power state
     // - chargingcurrent (if power is true)
@@ -116,8 +114,7 @@ bool PceWallbox::update()
     if (!chargingCurrentQueued) {
         reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeRead, chargingCurrentDataUnit(), this);
         connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
-        connect(reply, &QueuedModbusReply::finished, this, [this, reply](){
-
+        connect(reply, &QueuedModbusReply::finished, this, [this, reply]() {
             if (m_currentReply == reply)
                 m_currentReply = nullptr;
 
@@ -148,8 +145,7 @@ bool PceWallbox::update()
     if (!digitalInputAlreadyQueued) {
         reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeRead, digitalInputModeDataUnit(), this);
         connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
-        connect(reply, &QueuedModbusReply::finished, this, [this, reply](){
-
+        connect(reply, &QueuedModbusReply::finished, this, [this, reply]() {
             if (m_currentReply == reply)
                 m_currentReply = nullptr;
 
@@ -168,7 +164,6 @@ bool PceWallbox::update()
         enqueueRequest(reply);
     }
 
-
     // Led brightness
     bool ledBrightnessAlreadyQueued = false;
     foreach (QueuedModbusReply *r, m_readQueue) {
@@ -181,8 +176,7 @@ bool PceWallbox::update()
     if (!ledBrightnessAlreadyQueued) {
         reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeRead, ledBrightnessDataUnit(), this);
         connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
-        connect(reply, &QueuedModbusReply::finished, this, [this, reply](){
-
+        connect(reply, &QueuedModbusReply::finished, this, [this, reply]() {
             if (m_currentReply == reply)
                 m_currentReply = nullptr;
 
@@ -204,10 +198,8 @@ bool PceWallbox::update()
         enqueueRequest(reply);
     }
 
-
     if (firmwareRevision() < "0022")
         return true;
-
 
     // ---------------------------------------------------------------------------------------
     // Registers since 0022 (V 0.22)
@@ -224,8 +216,7 @@ bool PceWallbox::update()
     if (!update2Queued) {
         reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeRead, readBlockUpdate2DataUnit(), this);
         connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
-        connect(reply, &QueuedModbusReply::finished, this, [this, reply](){
-
+        connect(reply, &QueuedModbusReply::finished, this, [this, reply]() {
             if (m_currentReply == reply)
                 m_currentReply = nullptr;
 
@@ -245,7 +236,6 @@ bool PceWallbox::update()
         enqueueRequest(reply);
     }
 
-
     bool phaseAutoSwitchPauseQueued = false;
     foreach (QueuedModbusReply *r, m_readQueue) {
         if (r->dataUnit().startAddress() == phaseAutoSwitchPauseDataUnit().startAddress()) {
@@ -257,8 +247,7 @@ bool PceWallbox::update()
     if (!phaseAutoSwitchPauseQueued) {
         reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeRead, phaseAutoSwitchPauseDataUnit(), this);
         connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
-        connect(reply, &QueuedModbusReply::finished, this, [this, reply](){
-
+        connect(reply, &QueuedModbusReply::finished, this, [this, reply]() {
             if (m_currentReply == reply)
                 m_currentReply = nullptr;
 
@@ -289,8 +278,7 @@ bool PceWallbox::update()
     if (!phaseAutoSwitchMinChargingTimeQueued) {
         reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeRead, phaseAutoSwitchMinChargingTimeDataUnit(), this);
         connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
-        connect(reply, &QueuedModbusReply::finished, this, [this, reply](){
-
+        connect(reply, &QueuedModbusReply::finished, this, [this, reply]() {
             if (m_currentReply == reply)
                 m_currentReply = nullptr;
 
@@ -321,8 +309,7 @@ bool PceWallbox::update()
     if (!forceChargingResumeQueued) {
         reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeRead, forceChargingResumeDataUnit(), this);
         connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
-        connect(reply, &QueuedModbusReply::finished, this, [this, reply](){
-
+        connect(reply, &QueuedModbusReply::finished, this, [this, reply]() {
             if (m_currentReply == reply)
                 m_currentReply = nullptr;
 
@@ -354,7 +341,7 @@ QueuedModbusReply *PceWallbox::setChargingCurrentAsync(quint16 chargingCurrent)
     QueuedModbusReply *reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeWrite, setChargingCurrentDataUnit(chargingCurrent), this);
 
     connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
-    connect(reply, &QueuedModbusReply::finished, this, [this, reply](){
+    connect(reply, &QueuedModbusReply::finished, this, [this, reply]() {
         if (m_currentReply == reply)
             m_currentReply = nullptr;
 
@@ -374,7 +361,7 @@ QueuedModbusReply *PceWallbox::setLedBrightnessAsync(quint16 percentage)
     QueuedModbusReply *reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeWrite, setLedBrightnessDataUnit(percentage), this);
 
     connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
-    connect(reply, &QueuedModbusReply::finished, this, [this, reply](){
+    connect(reply, &QueuedModbusReply::finished, this, [this, reply]() {
         if (m_currentReply == reply)
             m_currentReply = nullptr;
 
@@ -394,7 +381,7 @@ QueuedModbusReply *PceWallbox::setPhaseAutoSwitchPauseAsync(quint16 seconds)
     QueuedModbusReply *reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeWrite, setPhaseAutoSwitchPauseDataUnit(seconds), this);
 
     connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
-    connect(reply, &QueuedModbusReply::finished, this, [this, reply](){
+    connect(reply, &QueuedModbusReply::finished, this, [this, reply]() {
         if (m_currentReply == reply)
             m_currentReply = nullptr;
 
@@ -414,7 +401,7 @@ QueuedModbusReply *PceWallbox::setPhaseAutoSwitchMinChargingTimeAsync(quint16 se
     QueuedModbusReply *reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeWrite, setPhaseAutoSwitchMinChargingTimeDataUnit(seconds), this);
 
     connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
-    connect(reply, &QueuedModbusReply::finished, this, [this, reply](){
+    connect(reply, &QueuedModbusReply::finished, this, [this, reply]() {
         if (m_currentReply == reply)
             m_currentReply = nullptr;
 
@@ -434,7 +421,7 @@ QueuedModbusReply *PceWallbox::setForceChargingResumeAsync(quint16 value)
     QueuedModbusReply *reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeWrite, setForceChargingResumeDataUnit(value), this);
 
     connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
-    connect(reply, &QueuedModbusReply::finished, this, [this, reply](){
+    connect(reply, &QueuedModbusReply::finished, this, [this, reply]() {
         if (m_currentReply == reply)
             m_currentReply = nullptr;
 
@@ -454,7 +441,7 @@ QueuedModbusReply *PceWallbox::setDigitalInputModeAsync(DigitalInputMode digital
     QueuedModbusReply *reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeWrite, setDigitalInputModeDataUnit(digitalInputMode), this);
 
     connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
-    connect(reply, &QueuedModbusReply::finished, this, [this, reply](){
+    connect(reply, &QueuedModbusReply::finished, this, [this, reply]() {
         if (m_currentReply == reply)
             m_currentReply = nullptr;
 
@@ -506,7 +493,6 @@ PceWallbox::ChargingCurrentState PceWallbox::deriveStatesFromRegister(quint16 re
 
     // Only set max charging current if power, otherwise we use default 6A
     if (chargingCurrentState.power) {
-
         bool threePhaseCharging = (registerValue & (1 << 15));
         chargingCurrentState.desiredPhaseCount = (threePhaseCharging ? 3 : 1);
 
@@ -516,7 +502,6 @@ PceWallbox::ChargingCurrentState PceWallbox::deriveStatesFromRegister(quint16 re
     return chargingCurrentState;
 }
 
-
 void PceWallbox::sendHeartbeat()
 {
     if (m_aboutToDelete)
@@ -525,7 +510,7 @@ void PceWallbox::sendHeartbeat()
     QueuedModbusReply *reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeWrite, setHeartbeatDataUnit(m_heartbeat++), this);
 
     connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
-    connect(reply, &QueuedModbusReply::finished, this, [this, reply](){
+    connect(reply, &QueuedModbusReply::finished, this, [this, reply]() {
         if (m_currentReply == reply)
             m_currentReply = nullptr;
 
@@ -571,28 +556,43 @@ void PceWallbox::sendNextRequest()
         qCDebug(dcPcElectric()) << "Dequeued read request. Queue count: W" << m_writeQueue.length() << "| R:" << m_readQueue.length();
     }
 
-    switch(m_currentReply->requestType()) {
+    switch (m_currentReply->requestType()) {
     case QueuedModbusReply::RequestTypeRead:
-        qCDebug(dcPcElectric()) << "--> Reading" << ModbusDataUtils::registerTypeToString(m_currentReply->dataUnit().registerType())
-                                << "register:" << m_currentReply->dataUnit().startAddress()
-                                << "length" << m_currentReply->dataUnit().valueCount();
+        qCDebug(dcPcElectric())
+            << "--> Reading"
+            << ModbusDataUtils::registerTypeToString(m_currentReply->dataUnit().registerType())
+            << "register:"
+            << m_currentReply->dataUnit().startAddress()
+            << "length"
+            << m_currentReply->dataUnit().valueCount();
         m_currentReply->setReply(m_modbusTcpMaster->sendReadRequest(m_currentReply->dataUnit(), m_slaveId));
         break;
     case QueuedModbusReply::RequestTypeWrite:
-        qCDebug(dcPcElectric()) << "--> Writing" << ModbusDataUtils::registerTypeToString(m_currentReply->dataUnit().registerType())
-                                << "register:" << m_currentReply->dataUnit().startAddress()
-                                << "length:" << m_currentReply->dataUnit().valueCount()
-                                << "values:" << m_currentReply->dataUnit().values();
+        qCDebug(dcPcElectric())
+            << "--> Writing"
+            << ModbusDataUtils::registerTypeToString(m_currentReply->dataUnit().registerType())
+            << "register:"
+            << m_currentReply->dataUnit().startAddress()
+            << "length:"
+            << m_currentReply->dataUnit().valueCount()
+            << "values:"
+            << m_currentReply->dataUnit().values();
         m_currentReply->setReply(m_modbusTcpMaster->sendWriteRequest(m_currentReply->dataUnit(), m_slaveId));
         break;
     }
 
     if (!m_currentReply->reply()) {
-        qCWarning(dcPcElectric()) << "Error occurred while sending" << m_currentReply->requestType()
-        << ModbusDataUtils::registerTypeToString(m_currentReply->dataUnit().registerType())
-        << "register:" << m_currentReply->dataUnit().startAddress()
-        << "length:" << m_currentReply->dataUnit().valueCount()
-        << "to" << m_modbusTcpMaster->hostAddress().toString() << m_modbusTcpMaster->errorString();
+        qCWarning(dcPcElectric())
+            << "Error occurred while sending"
+            << m_currentReply->requestType()
+            << ModbusDataUtils::registerTypeToString(m_currentReply->dataUnit().registerType())
+            << "register:"
+            << m_currentReply->dataUnit().startAddress()
+            << "length:"
+            << m_currentReply->dataUnit().valueCount()
+            << "to"
+            << m_modbusTcpMaster->hostAddress().toString()
+            << m_modbusTcpMaster->errorString();
         m_currentReply->deleteLater();
         m_currentReply = nullptr;
         QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
@@ -634,6 +634,13 @@ void PceWallbox::cleanupQueues()
 QDebug operator<<(QDebug debug, const PceWallbox::ChargingCurrentState &chargingCurrentState)
 {
     QDebugStateSaver saver(debug);
-    debug.nospace() << "ChargingCurrentState(" << chargingCurrentState.power << ", " << chargingCurrentState.maxChargingCurrent << " [A], " << chargingCurrentState.desiredPhaseCount << ')';
+    debug.nospace()
+        << "ChargingCurrentState("
+        << chargingCurrentState.power
+        << ", "
+        << chargingCurrentState.maxChargingCurrent
+        << " [A], "
+        << chargingCurrentState.desiredPhaseCount
+        << ')';
     return debug;
 }

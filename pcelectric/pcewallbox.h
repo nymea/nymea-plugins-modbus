@@ -25,10 +25,10 @@
 #ifndef PCEWALLBOX_H
 #define PCEWALLBOX_H
 
-#include <QTimer>
-#include <QQueue>
 #include <QDebug>
 #include <QObject>
+#include <QQueue>
+#include <QTimer>
 
 #include <queuedmodbusreply.h>
 
@@ -38,7 +38,8 @@ class PceWallbox : public EV11ModbusTcpConnection
 {
     Q_OBJECT
 public:
-    typedef struct ChargingCurrentState {
+    typedef struct ChargingCurrentState
+    {
         bool power = false;
         double maxChargingCurrent = 6;
         uint desiredPhaseCount = 3;
@@ -56,7 +57,6 @@ public:
     QueuedModbusReply *setForceChargingResumeAsync(quint16 value);
 
     QueuedModbusReply *setDigitalInputModeAsync(DigitalInputMode digitalInputMode);
-
 
     // Note: the modbus implementation of the wallbox gets stuck if a Modbus request has been sent
     // and we disconnect the socket before the response has arrived. Only a reboot of the wallbox
@@ -86,6 +86,5 @@ private:
 };
 
 QDebug operator<<(QDebug debug, const PceWallbox::ChargingCurrentState &chargingCurrentState);
-
 
 #endif // PCEWALLBOX_H

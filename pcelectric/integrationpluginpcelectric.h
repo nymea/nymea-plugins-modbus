@@ -3,7 +3,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
 * Copyright (C) 2013 - 2024, nymea GmbH
-* Copyright (C) 2024 - 2025, chargebyte austria GmbH
+* Copyright (C) 2024 - 2026, chargebyte austria GmbH
 *
 * This file is part of nymea-plugins-modbus.
 *
@@ -25,15 +25,15 @@
 #ifndef INTEGRATIONPLUGINPCELECTRIC_H
 #define INTEGRATIONPLUGINPCELECTRIC_H
 
-#include <QObject>
 #include <QDebug>
+#include <QObject>
 
 #include <integrations/integrationplugin.h>
 #include <network/networkdevicediscovery.h>
 #include <plugintimer.h>
 
-#include "pcewallbox.h"
 #include "extern-plugininfo.h"
+#include "pcewallbox.h"
 
 class IntegrationPluginPcElectric : public IntegrationPlugin
 {
@@ -67,9 +67,6 @@ private:
     QHash<Thing *, PceWallbox::ChargingCurrentState> m_chargingCurrentStateBuffer;
 
     void setupConnection(ThingSetupInfo *info);
-
 };
-
-
 
 #endif // INTEGRATIONPLUGINPCELECTRIC_H

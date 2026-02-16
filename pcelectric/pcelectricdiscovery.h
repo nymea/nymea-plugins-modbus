@@ -37,7 +37,8 @@ class PcElectricDiscovery : public QObject
 public:
     explicit PcElectricDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint16 port, quint16 modbusAddress, QObject *parent = nullptr);
 
-    typedef struct Result {
+    typedef struct Result
+    {
         QString serialNumber;
         QString firmwareRevision;
         QHostAddress address;
