@@ -1,3 +1,10 @@
+nymea-plugins-modbus (1.14.2) noble; urgency=medium
+
+  [ Simon Stürz ]
+  * PCE: Set propper modbus defaults and phaseCount state handling
+
+ -- jenkins <developer@nymea.io>  Thu, 19 Feb 2026 16:28:04 +0100
+
 nymea-plugins-modbus (1.14.1) noble; urgency=medium
 
   [ Simon Stürz ]
