@@ -331,9 +331,10 @@
                     "size": 1,
                     "type": "uint16",
                     "registerType": "holdingRegister",
-                    "description": "Actual charging power (Since firmware version: 0.25)",
+                    "description": "Actual charging power (>= 0.25)",
                     "unit": "W",
-                    "access": "RO"
+                    "access": "RO",
+                    "defaultValue": "0"
                 },
                 {
                     "id": "digitalInputFlag",
@@ -341,8 +342,9 @@
                     "size": 1,
                     "type": "uint16",
                     "registerType": "holdingRegister",
-                    "description": "Actual digital input (Since firmware version: 0.25)",
-                    "access": "RO"
+                    "description": "Actual digital input (>= 0.25)",
+                    "access": "RO",
+                    "defaultValue": "0"
                 },
                 {
                     "id": "modeR37",
@@ -351,8 +353,9 @@
                     "type": "uint16",
                     "enum": "R37Mode",
                     "registerType": "holdingRegister",
-                    "description": "Monitoring mode for the R37 regulation (Since firmware version: 0.25)",
-                    "access": "RO"
+                    "description": "Monitoring mode for the R37 regulation (>= 0.25)",
+                    "access": "RO",
+                    "defaultValue": "R37ModeNoMonitoring"
                 },
                 {
                     "id": "phasesR37",
@@ -360,8 +363,9 @@
                     "size": 1,
                     "type": "uint16",
                     "registerType": "holdingRegister",
-                    "description": "1 or 3 phases which get monitored, depends on the DIP switch (Since firmware version: 0.25)",
-                    "access": "RO"
+                    "description": "1 or 3 phases which get monitored, depends on the DIP switch (>= 0.25)",
+                    "access": "RO",
+                    "defaultValue": "0"
                 },
                 {
                     "id": "deplayR37",
@@ -370,8 +374,9 @@
                     "type": "uint16",
                     "unit": "s",
                     "registerType": "holdingRegister",
-                    "description": "Delay until undevoltage error triggers in R37 meter monitoring mode, default 3 seconds (Since firmware version: 0.25)",
-                    "access": "RO"
+                    "description": "Delay until undevoltage error triggers in R37 meter monitoring mode, default 3 seconds (>= 0.25)",
+                    "access": "RO",
+                    "defaultValue": "3"
                 },
                 {
                     "id": "undervoltageLimitR37",
@@ -380,8 +385,9 @@
                     "type": "uint16",
                     "unit": "V",
                     "registerType": "holdingRegister",
-                    "description": "Undevoltage limit for the error trigger in R37 meter monitoring mode, default 184 V (Since firmware version: 0.25)",
-                    "access": "RO"
+                    "description": "Undevoltage limit for the error trigger in R37 meter monitoring mode, default 184 V (>= 0.25)",
+                    "access": "RO",
+                    "defaultValue": "184"
                 },
                 {
                     "id": "voltageL1",
@@ -391,8 +397,9 @@
                     "unit": "V",
                     "staticScaleFactor": -1,
                     "registerType": "holdingRegister",
-                    "description": "Voltage L1 (Since firmware version: 0.25)",
-                    "access": "RO"
+                    "description": "Voltage L1 (>= 0.25)",
+                    "access": "RO",
+                    "defaultValue": "0"
                 },
                 {
                     "id": "voltageL2",
@@ -402,8 +409,9 @@
                     "unit": "V",
                     "staticScaleFactor": -1,
                     "registerType": "holdingRegister",
-                    "description": "Voltage L2 (Since firmware version: 0.25)",
-                    "access": "RO"
+                    "description": "Voltage L2 (>= 0.25)",
+                    "access": "RO",
+                    "defaultValue": "0"
                 },
                 {
                     "id": "voltageL3",
@@ -413,8 +421,9 @@
                     "unit": "V",
                     "staticScaleFactor": -1,
                     "registerType": "holdingRegister",
-                    "description": "Voltage L3 (Since firmware version: 0.25)",
-                    "access": "RO"
+                    "description": "Voltage L3 (>= 0.25)",
+                    "access": "RO",
+                    "defaultValue": "0"
                 },
                 {
                     "id": "currentL1",
@@ -424,8 +433,9 @@
                     "unit": "A",
                     "staticScaleFactor": -3,
                     "registerType": "holdingRegister",
-                    "description": "Current L1 (Since firmware version: 0.25)",
-                    "access": "RO"
+                    "description": "Current L1 (>= 0.25)",
+                    "access": "RO",
+                    "defaultValue": "0"
                 },
                 {
                     "id": "currentL2",
@@ -435,8 +445,9 @@
                     "unit": "A",
                     "staticScaleFactor": -3,
                     "registerType": "holdingRegister",
-                    "description": "Current L2 (Since firmware version: 0.25)",
-                    "access": "RO"
+                    "description": "Current L2 (>= 0.25)",
+                    "access": "RO",
+                    "defaultValue": "0"
                 },
                 {
                     "id": "currentL3",
@@ -446,8 +457,9 @@
                     "unit": "A",
                     "staticScaleFactor": -3,
                     "registerType": "holdingRegister",
-                    "description": "Current L3 (Since firmware version: 0.25)",
-                    "access": "RO"
+                    "description": "Current L3 (>= 0.25)",
+                    "access": "RO",
+                    "defaultValue": "0"
                 },
                 {
                     "id": "activePowerL1",
@@ -457,8 +469,9 @@
                     "unit": "W",
                     "staticScaleFactor": -1,
                     "registerType": "holdingRegister",
-                    "description": "Active power L1 (Since firmware version: 0.25)",
-                    "access": "RO"
+                    "description": "Active power L1 (>= 0.25)",
+                    "access": "RO",
+                    "defaultValue": "0"
                 },
                 {
                     "id": "activePowerL2",
@@ -468,8 +481,9 @@
                     "unit": "W",
                     "staticScaleFactor": -1,
                     "registerType": "holdingRegister",
-                    "description": "Active power L2 (Since firmware version: 0.25)",
-                    "access": "RO"
+                    "description": "Active power L2 (>= 0.25)",
+                    "access": "RO",
+                    "defaultValue": "0"
                 },
                 {
                     "id": "activePowerL3",
@@ -479,8 +493,9 @@
                     "unit": "W",
                     "staticScaleFactor": -1,
                     "registerType": "holdingRegister",
-                    "description": "Active power L3 (Since firmware version: 0.25)",
-                    "access": "RO"
+                    "description": "Active power L3 (>= 0.25)",
+                    "access": "RO",
+                    "defaultValue": "0"
                 },
                 {
                     "id": "totalEnergyConsumed",
@@ -490,8 +505,9 @@
                     "unit": "kWh",
                     "staticScaleFactor": -1,
                     "registerType": "holdingRegister",
-                    "description": "Total energy consumed (Since firmware version: 0.25)",
-                    "access": "RO"
+                    "description": "Total energy consumed (>= 0.25)",
+                    "access": "RO",
+                    "defaultValue": "0"
                 }
             ]
         }
@@ -544,7 +560,8 @@
             "registerType": "holdingRegister",
             "description": "LED brightness",
             "unit": "%",
-            "access": "RW"
+            "access": "RW",
+            "defaultValue": "50"
         },
         {
             "id": "digitalInputMode",
@@ -554,7 +571,8 @@
             "registerType": "holdingRegister",
             "description": "Digital input mode",
             "enum": "DigitalInputMode",
-            "access": "RW"
+            "access": "RW",
+            "defaultValue": "DigitalInputModeEnableCharging"
         },
         {
             "id": "phaseAutoSwitchPause",
@@ -562,7 +580,7 @@
             "size": 1,
             "type": "uint16",
             "registerType": "holdingRegister",
-            "description": "Phase auto switch pause (Since firmware version: 0.25)",
+            "description": "Phase auto switch pause (>= 0.25)",
             "unit": "s",
             "defaultValue": "6",
             "access": "RW"
@@ -573,7 +591,7 @@
             "size": 1,
             "type": "uint16",
             "registerType": "holdingRegister",
-            "description": "Phase auto switch min charging time (Since firmware version: 0.25)",
+            "description": "Phase auto switch min charging time (>= 0.25)",
             "unit": "s",
             "defaultValue": "120",
             "access": "RW"
@@ -584,7 +602,7 @@
             "size": 1,
             "type": "uint16",
             "registerType": "holdingRegister",
-            "description": "Force charging resume (Since firmware version: 0.25)",
+            "description": "Force charging resume (>= 0.25)",
             "defaultValue": "0",
             "access": "RW"
         }

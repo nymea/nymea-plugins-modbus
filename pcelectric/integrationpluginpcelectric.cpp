@@ -60,7 +60,6 @@ void IntegrationPluginPcElectric::discoverThings(ThingDiscoveryInfo *info)
     PcElectricDiscovery *discovery = new PcElectricDiscovery(hardwareManager()->networkDeviceDiscovery(), 502, 1, info);
     connect(discovery, &PcElectricDiscovery::discoveryFinished, info, [=]() {
         foreach (const PcElectricDiscovery::Result &result, discovery->results()) {
-
             if (info->thingClassId() != result.thingClassId)
                 continue;
 
@@ -116,7 +115,7 @@ void IntegrationPluginPcElectric::setupThing(ThingSetupInfo *info)
 
     m_monitors.insert(thing, monitor);
 
-    connect(info, &ThingSetupInfo::aborted, monitor, [=]() {
+    connect(info, &ThingSetupInfo::aborted, monitor, [this, thing]() {
         if (m_monitors.contains(thing)) {
             qCDebug(dcPcElectric()) << "Unregistering monitor because setup has been aborted.";
             hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
@@ -272,10 +271,9 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
         uint desiredPhaseCount = 1;
         if (info->action().actionTypeId() == ev11DesiredPhaseCountActionTypeId) {
             desiredPhaseCount = info->action().paramValue(ev11DesiredPhaseCountActionDesiredPhaseCountParamTypeId).toUInt();
-            ;
+
         } else if (info->action().actionTypeId() == ev11NoMeterDesiredPhaseCountActionTypeId) {
             desiredPhaseCount = info->action().paramValue(ev11NoMeterDesiredPhaseCountActionDesiredPhaseCountParamTypeId).toUInt();
-            ;
         }
 
         qCDebug(dcPcElectric()) << "Set desried phase count to" << desiredPhaseCount;
@@ -318,7 +316,7 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
         connection->modbusTcpMaster()->setHostAddress(monitor->networkDeviceInfo().address());
 
     // Monitor reachability
-    connect(monitor, &NetworkDeviceMonitor::reachableChanged, thing, [=](bool reachable) {
+    connect(monitor, &NetworkDeviceMonitor::reachableChanged, thing, [thing, connection, monitor](bool reachable) {
         if (!thing->setupComplete())
             return;
 
@@ -618,7 +616,7 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
     m_connections.insert(thing, connection);
     info->finish(Thing::ThingErrorNoError);
 
-    // Connect reight the way if the monitor indicates reachable, otherwise the connect will handle the connect later
+    // Connect right the way if the monitor indicates reachable, otherwise the connect will handle the connect later
     if (monitor->reachable())
         connection->connectDevice();
 }

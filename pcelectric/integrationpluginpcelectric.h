@@ -71,7 +71,6 @@ private:
     QHash<ThingClassId, ParamTypeId> m_macParamTypes;
     QHash<ThingClassId, ParamTypeId> m_serialNumberParamTypes;
 
-
     void setupConnection(ThingSetupInfo *info);
 };
 
