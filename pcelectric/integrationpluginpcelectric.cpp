@@ -356,30 +356,31 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
         qCDebug(dcPcElectric()) << "Update finished for" << thing;
         qCDebug(dcPcElectric()) << connection;
 
-        if (!connection->phaseAutoSwitch()) {
+        if (connection->phaseAutoSwitch()) {
+            thing->setStatePossibleValues("desiredPhaseCount", {1, 3}); // Enable phase switching
+
+            switch (connection->chargingRelayState()) {
+            case EV11ModbusTcpConnection::ChargingRelayStateNoCharging:
+                // Not charging, assuming phase count matches the desired phase count...
+                thing->setStateValue("phaseCount", thing->stateValue("desiredPhaseCount"));
+                break;
+            case EV11ModbusTcpConnection::ChargingRelayStateSinglePhase:
+                thing->setStateValue("phaseCount", 1);
+                break;
+            case EV11ModbusTcpConnection::ChargingRelayStateTheePhase:
+                thing->setStateValue("phaseCount", 3);
+                break;
+            }
+        } else {
             // Note: if auto phase switching is disabled, the wallbox forces 3 phase charging
             thing->setStatePossibleValues("desiredPhaseCount", {3}); // Disable phase switching (default 3)
             thing->setStateValue("desiredPhaseCount", 3);
             thing->setStateValue("phaseCount", 3);
-        } else {
-            thing->setStatePossibleValues("desiredPhaseCount", {1, 3}); // Enable phase switching
-        }
-
-        if (connection->chargingRelayState() != EV11ModbusTcpConnection::ChargingRelayStateNoCharging) {
-            if (connection->chargingRelayState() == EV11ModbusTcpConnection::ChargingRelayStateSinglePhase) {
-                thing->setStateValue("phaseCount", 1);
-            } else if (connection->chargingRelayState() == EV11ModbusTcpConnection::ChargingRelayStateTheePhase) {
-                thing->setStateValue("phaseCount", 3);
-            }
         }
 
         thing->setStateMaxValue("maxChargingCurrent", connection->maxChargingCurrentDip() / 1000);
         thing->setStateValue("pluggedIn", connection->chargingState() >= PceWallbox::ChargingStateB1 && connection->chargingState() < PceWallbox::ChargingStateError);
-
         thing->setStateValue("charging", connection->chargingState() == PceWallbox::ChargingStateC2);
-        if (connection->chargingRelayState() != EV11ModbusTcpConnection::ChargingRelayStateNoCharging) {
-            thing->setStateValue("phaseCount", connection->chargingRelayState() == EV11ModbusTcpConnection::ChargingRelayStateSinglePhase ? 1 : 3);
-        }
 
         switch (connection->chargingState()) {
         case PceWallbox::ChargingStateInitializing:
@@ -447,6 +448,49 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
             break;
         }
 
+        if (connection->firmwareRevision() >= "0025") {
+            thing->setStateValue("digitalInputFlag", QString("0b%1").arg(connection->digitalInputFlag(), 16, 2, QLatin1Char('0')));
+            thing->setStateValue("modeR37", connection->modeR37());
+
+            // Energy information only available with meter and 0025
+            if (thing->thingClassId() == ev11ThingClassId) {
+                thing->setStateValue("currentPower", connection->currentPower());
+                thing->setStateValue("sessionEnergy", connection->powerMeter0());
+                thing->setStateValue("totalEnergyConsumed", connection->totalEnergyConsumed());
+                thing->setStateValue("currentPowerPhaseA", connection->activePowerL1());
+                thing->setStateValue("currentPowerPhaseB", connection->activePowerL2());
+                thing->setStateValue("currentPowerPhaseC", connection->activePowerL3());
+                thing->setStateValue("voltagePhaseA", connection->voltageL1());
+                thing->setStateValue("voltagePhaseB", connection->voltageL2());
+                thing->setStateValue("voltagePhaseC", connection->voltageL3());
+                thing->setStateValue("currentPhaseA", connection->currentL1());
+                thing->setStateValue("currentPhaseB", connection->currentL2());
+                thing->setStateValue("currentPhaseC", connection->currentL3());
+            }
+
+        } else {
+            // In firmware 0019 there is no current power register, depending on the CP state we can assume the car is consuming the amount
+            // we adjusted, if the car is full, the CP state will change back to B2
+            if (thing->thingClassId() == ev11ThingClassId) {
+                thing->setStateValue("sessionEnergy", connection->powerMeter0());
+                if (connection->chargingState() == PceWallbox::ChargingStateC2 && connection->currentPower() == 0) {
+                    // We are currently chargin, but the wallbox reports 0 W (which is expected), let's calculate the theoretical power...
+                    double assumedCurrentPower = thing->stateValue("phaseCount").toInt() * 230 * thing->stateValue("maxChargingCurrent").toDouble();
+                    qCDebug(dcPcElectric())
+                        << "Assuming current power"
+                        << assumedCurrentPower
+                        << "W ("
+                        << thing->stateValue("phaseCount").toInt()
+                        << "phases * 230 V *"
+                        << thing->stateValue("maxChargingCurrent").toDouble()
+                        << "A )";
+                    thing->setStateValue("currentPower", assumedCurrentPower);
+                } else {
+                    thing->setStateValue("currentPower", 0);
+                }
+            }
+        }
+
         if (m_initialUpdate.value(thing)) {
             m_initialUpdate[thing] = false;
 
@@ -486,43 +530,6 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
                 thing->setSettingValue("phaseAutoSwitchPause", connection->phaseAutoSwitchPause());
                 thing->setSettingValue("phaseAutoSwitchMinChargingTime", connection->phaseAutoSwitchMinChargingTime());
                 thing->setSettingValue("forceChargingResume", connection->forceChargingResume() == 1 ? true : false);
-            }
-        }
-
-        if (connection->firmwareRevision() >= "0025") {
-            thing->setStateValue("digitalInputFlag", QString("0b%1").arg(connection->digitalInputFlag(), 16, 2, QLatin1Char('0')));
-            thing->setStateValue("modeR37", connection->modeR37());
-
-            // Energy information only available with meter and 0025
-            if (thing->thingClassId() == ev11ThingClassId) {
-                thing->setStateValue("currentPower", connection->currentPower());
-                thing->setStateValue("sessionEnergy", connection->powerMeter0());
-                thing->setStateValue("totalEnergyConsumed", connection->totalEnergyConsumed());
-                thing->setStateValue("currentPowerPhaseA", connection->activePowerL1());
-                thing->setStateValue("currentPowerPhaseB", connection->activePowerL2());
-                thing->setStateValue("currentPowerPhaseC", connection->activePowerL3());
-                thing->setStateValue("voltagePhaseA", connection->voltageL1());
-                thing->setStateValue("voltagePhaseB", connection->voltageL2());
-                thing->setStateValue("voltagePhaseC", connection->voltageL3());
-                thing->setStateValue("currentPhaseA", connection->currentL1());
-                thing->setStateValue("currentPhaseB", connection->currentL2());
-                thing->setStateValue("currentPhaseC", connection->currentL3());
-            }
-
-        } else {
-            // In firmware 0019 there is no current power register, depending on the CP state we can assume the car is consuming the amount
-            // we adjusted, if the car is full, the CP state will change back to B2
-            if (thing->thingClassId() == ev11ThingClassId) {
-                thing->setStateValue("sessionEnergy", connection->powerMeter0());
-                if (connection->chargingState() == PceWallbox::ChargingStateC2 && connection->currentPower() == 0) {
-                    // We are currently chargin, but the wallbox reports 0 W (which is expected), let's calculate the theoretical power...
-                    double assumedCurrentPower = thing->stateValue("phaseCount").toInt() * 230 * thing->stateValue("maxChargingCurrent").toDouble();
-                    qCDebug(dcPcElectric()) << "Assuming current power" << assumedCurrentPower << "W (" << thing->stateValue("phaseCount").toInt() << "phases * 230 V *"
-                                            << thing->stateValue("maxChargingCurrent").toDouble() << "A )";
-                    thing->setStateValue("currentPower", assumedCurrentPower);
-                } else {
-                    thing->setStateValue("currentPower", 0);
-                }
             }
         }
     });
