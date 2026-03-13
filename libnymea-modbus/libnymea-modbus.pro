@@ -13,8 +13,8 @@ greaterThan(QT_MAJOR_VERSION, 5) {
     DEFINES += QT_DISABLE_DEPRECATED_UP_TO=0x050F00
 }
 
-QMAKE_CXXFLAGS += -Werror -z defs
-QMAKE_LFLAGS += -z defs
+QMAKE_CXXFLAGS += -Werror
+unix:!macx: QMAKE_LFLAGS += -Wl,-z,defs
 
 CONFIG += link_pkgconfig
 PKGCONFIG += nymea

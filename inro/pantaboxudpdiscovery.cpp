@@ -25,9 +25,11 @@
 #include "pantaboxudpdiscovery.h"
 #include "extern-plugininfo.h"
 
+#include <QVariant>
 #include <QJsonDocument>
 #include <QJsonParseError>
 #include <QNetworkDatagram>
+
 #include "crclookuptable.h"
 
 #define PANTABOX_DISCOVERY_PORT 52001
