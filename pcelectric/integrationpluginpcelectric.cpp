@@ -66,7 +66,7 @@ void IntegrationPluginPcElectric::discoverThings(ThingDiscoveryInfo *info)
             ThingDescriptor descriptor(result.thingClassId,
                                        "PCE EV11.3 (" + result.serialNumber + ")",
                                        "Version: " + result.firmwareRevision + " - " + result.networkDeviceInfo.address().toString());
-            qCDebug(dcPcElectric()) << "Discovered:" << descriptor.title() << descriptor.description();
+            qCInfo(dcPcElectric()) << "Discovered:" << descriptor.title() << descriptor.description();
 
             // Check if we already have set up this device
             Things existingThings = myThings().filterByParam(m_serialNumberParamTypes.value(result.thingClassId), result.serialNumber);
@@ -95,15 +95,24 @@ void IntegrationPluginPcElectric::discoverThings(ThingDiscoveryInfo *info)
 void IntegrationPluginPcElectric::setupThing(ThingSetupInfo *info)
 {
     Thing *thing = info->thing();
-    qCDebug(dcPcElectric()) << "Setup thing" << thing << thing->params();
+    qCInfo(dcPcElectric()) << "Setup thing" << thing << thing->params();
 
     if (m_connections.contains(thing)) {
-        qCDebug(dcPcElectric()) << "Reconfiguring existing thing" << thing->name();
+        qCInfo(dcPcElectric()) << "Reconfiguring existing thing" << thing->name();
         m_connections.take(thing)->deleteLater();
 
         if (m_monitors.contains(thing)) {
             hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
         }
+    } else {
+        connect(thing, &Thing::stateValueChanged, this, [thing](const StateTypeId &stateTypeId, const QVariant &value, const QVariant &minValue, const QVariant &maxValue, const QVariantList &possibleValues){
+            Q_UNUSED(minValue)
+            Q_UNUSED(maxValue)
+            Q_UNUSED(possibleValues)
+
+            StateType stateType = thing->thingClass().getStateType(stateTypeId);
+            qCInfo(dcPcElectric()) << "State changed of" << thing->name() << "->" << stateType.name() << value;
+        });
     }
 
     NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(thing);
@@ -172,7 +181,7 @@ void IntegrationPluginPcElectric::postSetupThing(Thing *thing)
 
 void IntegrationPluginPcElectric::thingRemoved(Thing *thing)
 {
-    qCDebug(dcPcElectric()) << "Thing removed" << thing->name();
+    qCInfo(dcPcElectric()) << "Thing removed" << thing->name();
 
     if (m_connections.contains(thing)) {
         PceWallbox *connection = m_connections.take(thing);
@@ -216,7 +225,10 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
             power = info->action().paramValue(ev11NoMeterPowerActionPowerParamTypeId).toBool();
         }
 
-        qCDebug(dcPcElectric()) << "Set charging enabled to" << power;
+        if (info->action().triggeredBy() == Action::TriggeredByUser)
+            qCInfo(dcPcElectric()) << "User: Set charging enabled of" << thing->name() << "to" << power;
+
+        qCDebug(dcPcElectric()) << "Setting charging enabled to" << power;
         // Update buffer
         m_chargingCurrentStateBuffer[thing].power = power;
 
@@ -245,7 +257,10 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
             desiredChargingCurrent = info->action().paramValue(ev11NoMeterMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toDouble();
         }
 
-        qCDebug(dcPcElectric()) << "Set max charging current to" << desiredChargingCurrent << "A";
+        if (info->action().triggeredBy() == Action::TriggeredByUser)
+            qCInfo(dcPcElectric()) << "User: Set max charging current of" << thing->name() << "to" << desiredChargingCurrent << "A";
+
+        qCDebug(dcPcElectric()) << "Setting max charging current to" << desiredChargingCurrent << "A";
 
         // Update buffer
         m_chargingCurrentStateBuffer[thing].maxChargingCurrent = desiredChargingCurrent;
@@ -276,7 +291,10 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
             desiredPhaseCount = info->action().paramValue(ev11NoMeterDesiredPhaseCountActionDesiredPhaseCountParamTypeId).toUInt();
         }
 
-        qCDebug(dcPcElectric()) << "Set desried phase count to" << desiredPhaseCount;
+        if (info->action().triggeredBy() == Action::TriggeredByUser)
+            qCInfo(dcPcElectric()) << "User: Set desried phase count of" << thing->name() << "to" << desiredPhaseCount;
+
+        qCDebug(dcPcElectric()) << "Setting desried phase count to" << desiredPhaseCount;
 
         // Update buffer
         m_chargingCurrentStateBuffer[thing].desiredPhaseCount = desiredPhaseCount;
