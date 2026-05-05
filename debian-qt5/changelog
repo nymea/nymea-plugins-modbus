@@ -1,3 +1,11 @@
+nymea-plugins-modbus (1.15.0) noble; urgency=medium
+
+  [ Simon Stürz ]
+  * Fix Qt 6 Clang build issues
+  * PCE: Improve info log level informatio
+
+ -- jenkins <developer@nymea.io>  Tue, 05 May 2026 14:46:50 +0200
+
 nymea-plugins-modbus (1.14.2) noble; urgency=medium
 
   [ Simon Stürz ]
