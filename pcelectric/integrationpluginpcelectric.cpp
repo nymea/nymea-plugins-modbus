@@ -110,8 +110,13 @@ void IntegrationPluginPcElectric::setupThing(ThingSetupInfo *info)
             Q_UNUSED(maxValue)
             Q_UNUSED(possibleValues)
 
+            QStringList blackList;
+            blackList << "temperature";
+
             StateType stateType = thing->thingClass().getStateType(stateTypeId);
-            qCInfo(dcPcElectric()) << "State changed of" << thing->name() << "->" << stateType.name() << value;
+            if (!blackList.contains(stateType.name())) {
+                qCInfo(dcPcElectric()) << "State changed of" << thing->name() << "->" << stateType.name() << value;
+            }
         });
     }
 
