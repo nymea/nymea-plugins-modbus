@@ -28,6 +28,11 @@ from .toolcommon import *
 
 ##############################################################
 
+def isReadableRegister(registerDefinition):
+    return 'access' in registerDefinition and 'R' in registerDefinition['access']
+
+##############################################################
+
 def writePropertyGetSetMethodDeclarationsRtu(fileDescriptor, registerDefinitions):
     for registerDefinition in registerDefinitions:
         propertyName = registerDefinition['id']
@@ -87,7 +92,7 @@ def writePropertyGetSetMethodImplementationsRtu(fileDescriptor, className, regis
 
 def writePropertyUpdateMethodImplementationsRtu(fileDescriptor, className, registerDefinitions):
     for registerDefinition in registerDefinitions:
-        if not 'readSchedule' in registerDefinition or registerDefinition['readSchedule'] == 'init':
+        if not isReadableRegister(registerDefinition):
             continue
 
         propertyName = registerDefinition['id']
@@ -171,7 +176,7 @@ def writeBlockUpdateMethodImplementationsRtu(fileDescriptor, className, blockDef
         offset = 0
         for i, blockRegister in enumerate(blockRegisters):
             propertyName = blockRegister['id']
-            writeLine(fileDescriptor, '                    process%sRegisterValues(blockValues.mid(%s, %s));' % (propertyName[0].upper() + propertyName[1:], offset, blockSize))
+            writeLine(fileDescriptor, '                    process%sRegisterValues(blockValues.mid(%s, %s));' % (propertyName[0].upper() + propertyName[1:], offset, blockRegister['size']))
             offset += blockRegister['size']
 
         writeLine(fileDescriptor, '                } else {')
@@ -191,12 +196,16 @@ def writeBlockUpdateMethodImplementationsRtu(fileDescriptor, className, blockDef
 
 def writeInternalPropertyReadMethodDeclarationsRtu(fileDescriptor, registerDefinitions):
     for registerDefinition in registerDefinitions:
+        if not isReadableRegister(registerDefinition):
+            continue
         propertyName = registerDefinition['id']
         writeLine(fileDescriptor, '    ModbusRtuReply *read%s();' % (propertyName[0].upper() + propertyName[1:]))
 
 
 def writeInternalPropertyReadMethodImplementationsRtu(fileDescriptor, className, registerDefinitions):
     for registerDefinition in registerDefinitions:
+        if not isReadableRegister(registerDefinition):
+            continue
         propertyName = registerDefinition['id']
         writeLine(fileDescriptor, 'ModbusRtuReply *%s::read%s()' % (className, propertyName[0].upper() + propertyName[1:]))
         writeLine(fileDescriptor, '{')
@@ -335,7 +344,7 @@ def writeInitMethodImplementationRtu(fileDescriptor, className, registerDefiniti
     # First check if there are any init registers
     initRequired = False
     for registerDefinition in registerDefinitions:
-        if registerDefinition['readSchedule'] == 'init':
+        if isReadableRegister(registerDefinition) and 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'init':
             initRequired = True
             break
 
@@ -360,7 +369,7 @@ def writeInitMethodImplementationRtu(fileDescriptor, className, registerDefiniti
             propertyName = registerDefinition['id']
             propertyTyp = getCppDataType(registerDefinition)
 
-            if 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'init':
+            if isReadableRegister(registerDefinition) and 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'init':
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '    // Read %s' % registerDefinition['description'])
                 writeLine(fileDescriptor, '    qCDebug(dc%s()) << "--> Read init \\"%s\\" register:" << %s << "size:" << %s;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
@@ -478,7 +487,7 @@ def writeUpdateMethodRtu(fileDescriptor, className, registerDefinitions, blockDe
     # First check if there are any init registers
     updateRequired = False
     for registerDefinition in registerDefinitions:
-        if registerDefinition['readSchedule'] == 'update':
+        if isReadableRegister(registerDefinition) and 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'update':
             updateRequired = True
             break
 
@@ -514,7 +523,7 @@ def writeUpdateMethodRtu(fileDescriptor, className, registerDefinitions, blockDe
             propertyName = registerDefinition['id']
             propertyTyp = getCppDataType(registerDefinition)
 
-            if 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'update':
+            if isReadableRegister(registerDefinition) and 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'update':
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '    // Read %s' % registerDefinition['description'])
                 writeLine(fileDescriptor, '    qCDebug(dc%s()) << "--> Read \\"%s\\" register:" << %s << "size:" << %s;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
