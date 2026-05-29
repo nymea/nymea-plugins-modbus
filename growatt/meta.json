@@ -1,0 +1,13 @@
+{
+    "title": "Growatt",
+    "tagline": "Connect to Growatt inverters.",
+    "icon": "",
+    "stability": "consumer",
+    "offline": true,
+    "technologies": [
+        "modbus"
+    ],
+    "categories": [
+        "energy"
+    ]
+}

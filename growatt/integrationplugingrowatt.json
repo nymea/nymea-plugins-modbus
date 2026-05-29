@@ -1,0 +1,255 @@
+{
+    "name": "growatt",
+    "displayName": "Growatt WIT",
+    "id": "cb680606-c446-4556-b2ac-839a0ae4da38",
+    "vendors": [
+        {
+            "name": "growatt",
+            "displayName": "Growatt",
+            "id": "a15921c8-669e-4303-a9cb-6429338df503",
+            "thingClasses": [
+                {
+                    "name": "growattWitInverter",
+                    "displayName": "Growatt WIT Inverter (Modbus RTU)",
+                    "id": "de84376f-bbf3-487f-993f-aca63055de24",
+                    "createMethods": ["discovery"],
+                    "interfaces": ["solarinverter", "connectable"],
+                    "providedInterfaces": ["energymeter", "energystorage"],
+                    "discoveryParamTypes": [
+                        {
+                            "id": "8851fc36-c44d-40fc-b09b-301d6e1bed2a",
+                            "name": "slaveAddress",
+                            "displayName": "Modbus slave address",
+                            "type": "uint",
+                            "defaultValue": 1
+                        }
+                    ],
+                    "paramTypes": [
+                        {
+                            "id": "3cef0587-af36-4513-9f65-3da19b6911c9",
+                            "name": "modbusMasterUuid",
+                            "displayName": "Modbus RTU master",
+                            "type": "QUuid",
+                            "defaultValue": "",
+                            "readOnly": true
+                        },
+                        {
+                            "id": "14e1711c-9ff8-4fe8-ae17-01a327f26346",
+                            "name": "slaveAddress",
+                            "displayName": "Modbus slave address",
+                            "type": "uint",
+                            "defaultValue": 1
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "d8453889-d1ea-4f2b-bc20-adc050bc8e51",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "6e98e5bf-a55e-4b7f-9955-06f85ac94e88",
+                            "name": "currentPower",
+                            "displayName": "Current power",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "08e779b0-f64b-4396-89d9-f162e1496695",
+                            "name": "totalEnergyProduced",
+                            "displayName": "Total energy produced",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0,
+                            "cached": true
+                        },
+                        {
+                            "id": "9c66c8ac-84b4-4fca-803d-2547c7aef534",
+                            "name": "temperature",
+                            "displayName": "Temperature",
+                            "type": "double",
+                            "unit": "DegreeCelsius",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "ab2be9be-4f4a-44ee-bcb5-4b0277ef8983",
+                            "name": "frequency",
+                            "displayName": "Frequency",
+                            "type": "double",
+                            "unit": "Hertz",
+                            "defaultValue": 0,
+                            "cached": false
+                        }
+                    ],
+                    "actionTypes": []
+                },
+                {
+                    "name": "growattMeter",
+                    "displayName": "Growatt Energy Meter",
+                    "id": "343d1e88-d784-447a-ad40-1cbd7d590e95",
+                    "createMethods": ["auto"],
+                    "interfaces": ["energymeter", "connectable"],
+                    "stateTypes": [
+                        {
+                            "id": "10cb5ca7-7440-4e93-8d8b-49c99f314fd6",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "4bb0195a-0279-4e8a-b725-5ace0d8a47d4",
+                            "name": "currentPower",
+                            "displayName": "Current power",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "1b4c7bf9-3969-4bd1-8d1f-2375a269ce04",
+                            "name": "totalEnergyConsumed",
+                            "displayName": "Total imported energy",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0,
+                            "cached": true
+                        },
+                        {
+                            "id": "cde4d889-5f26-404b-b55e-e3d9f9790255",
+                            "name": "totalEnergyProduced",
+                            "displayName": "Total returned energy",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0,
+                            "cached": true
+                        },
+                        {
+                            "id": "2628aa0b-e89e-45ee-bb8c-045b9b56d8c6",
+                            "name": "voltagePhaseA",
+                            "displayName": "Voltage phase A",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "c3b25df2-f0e9-4ecd-9647-b1409d086952",
+                            "name": "voltagePhaseB",
+                            "displayName": "Voltage phase B",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "f996e1f9-42ee-4d66-aa64-0067652f244e",
+                            "name": "voltagePhaseC",
+                            "displayName": "Voltage phase C",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "a2575a51-9991-46c0-87d3-9dd6dfcc9fd1",
+                            "name": "currentPhaseA",
+                            "displayName": "Current phase A",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "1c25785e-b2e1-4145-a405-1592c86a8c5f",
+                            "name": "currentPhaseB",
+                            "displayName": "Current phase B",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "4980e8be-8256-4de2-a18a-45892f0a991d",
+                            "name": "currentPhaseC",
+                            "displayName": "Current phase C",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0,
+                            "cached": false
+                        }
+                    ],
+                    "actionTypes": []
+                },
+                {
+                    "name": "growattBattery",
+                    "displayName": "Growatt Energy Storage",
+                    "id": "a8cc3415-c724-47f2-a0fd-3cf564a6e142",
+                    "createMethods": ["auto"],
+                    "interfaces": ["energystorage", "connectable"],
+                    "stateTypes": [
+                        {
+                            "id": "c251e344-3d52-46c7-bf5d-d087f7584346",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "a7530bbc-4363-436c-8cad-ec3eeab74910",
+                            "name": "batteryCritical",
+                            "displayName": "Battery critical",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "0d082094-1bef-44b1-812b-bbc7d6a2af70",
+                            "name": "batteryLevel",
+                            "displayName": "Battery level",
+                            "type": "int",
+                            "unit": "Percentage",
+                            "minValue": 0,
+                            "maxValue": 100,
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "8d4768b9-fc45-4b59-83b8-ce3da3c82280",
+                            "name": "chargingState",
+                            "displayName": "Charging state",
+                            "type": "QString",
+                            "possibleValues": ["idle", "charging", "discharging"],
+                            "defaultValue": "idle"
+                        },
+                        {
+                            "id": "a50f5712-60e7-4e02-9af4-8efebb702798",
+                            "name": "currentPower",
+                            "displayName": "Current power",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "fa1f59e4-dfaf-4659-84a8-62abb6616538",
+                            "name": "capacity",
+                            "displayName": "Capacity",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0
+                        }
+                    ],
+                    "actionTypes": []
+                }
+            ]
+        }
+    ]
+}

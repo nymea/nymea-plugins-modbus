@@ -1,0 +1,512 @@
+{
+    "className": "Growatt",
+    "protocol": "RTU",
+    "endianness": "BigEndian",
+    "stringEndianness": "BigEndian",
+    "errorLimitUntilNotReachable": 15,
+    "checkReachableRegister": "deviceTypeCode",
+    "queuedRequests": false,
+    "queuedRequestsDelay": 0,
+    "registers": [
+        {
+            "id": "serialNumber",
+            "address": 23,
+            "size": 5,
+            "type": "string",
+            "readSchedule": "init",
+            "registerType": "holdingRegister",
+            "description": "Inverter serial number",
+            "access": "RO"
+        },
+        {
+            "id": "deviceTypeCode",
+            "address": 43,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "init",
+            "registerType": "holdingRegister",
+            "description": "Device type code",
+            "defaultValue": 0,
+            "access": "RO"
+        },
+        {
+            "id": "batteryType",
+            "address": 119,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "inputRegister",
+            "description": "Battery type",
+            "defaultValue": 0,
+            "access": "RO"
+        }
+    ],
+    "blocks": [
+        {
+            "id": "inverterMetrics",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "inverterOutputPower",
+                    "address": 35,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Output power",
+                    "unit": "W",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "gridFrequency",
+                    "address": 37,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Grid frequency",
+                    "unit": "Hz",
+                    "staticScaleFactor": -2,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "gridPhaseRVoltage",
+                    "address": 38,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Grid phase R voltage",
+                    "unit": "V",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "gridPhaseRCurrent",
+                    "address": 39,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Grid phase R current",
+                    "unit": "A",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "unusedGridPowerPhaseA",
+                    "address": 40,
+                    "size": 2,
+                    "type": "raw",
+                    "registerType": "inputRegister",
+                    "description": "Unused phase A power registers",
+                    "access": "RO"
+                },
+                {
+                    "id": "gridPhaseSVoltage",
+                    "address": 42,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Grid phase S voltage",
+                    "unit": "V",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "gridPhaseSCurrent",
+                    "address": 43,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Grid phase S current",
+                    "unit": "A",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "unusedGridPowerPhaseB",
+                    "address": 44,
+                    "size": 2,
+                    "type": "raw",
+                    "registerType": "inputRegister",
+                    "description": "Unused phase B power registers",
+                    "access": "RO"
+                },
+                {
+                    "id": "gridPhaseTVoltage",
+                    "address": 46,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Grid phase T voltage",
+                    "unit": "V",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "gridPhaseTCurrent",
+                    "address": 47,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Grid phase T current",
+                    "unit": "A",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "energyTotals",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "todayGeneratedEnergy",
+                    "address": 53,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Today generated energy",
+                    "unit": "kWh",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "totalGeneratedEnergy",
+                    "address": 55,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Total generated energy",
+                    "unit": "kWh",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "thermalAndBatteryMetrics",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "inverterTemperature",
+                    "address": 93,
+                    "size": 1,
+                    "type": "int16",
+                    "registerType": "inputRegister",
+                    "description": "Inverter temperature",
+                    "unit": "C",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "unusedInverterTemperature2",
+                    "address": 94,
+                    "size": 3,
+                    "type": "raw",
+                    "registerType": "inputRegister",
+                    "description": "Unused temperature and boost registers",
+                    "access": "RO"
+                },
+                {
+                    "id": "inverterBatteryVoltage",
+                    "address": 97,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Battery voltage from inverter DSP",
+                    "unit": "V",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "unusedPowerFactorAndOutputPercent",
+                    "address": 98,
+                    "size": 4,
+                    "type": "raw",
+                    "registerType": "inputRegister",
+                    "description": "Unused bus voltage and output percentage registers",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "storageGridMetrics",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "gridPhaseRCurrentStorage",
+                    "address": 8030,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Grid phase R current",
+                    "unit": "A",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "gridPhaseSCurrentStorage",
+                    "address": 8031,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Grid phase S current",
+                    "unit": "A",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "gridPhaseTCurrentStorage",
+                    "address": 8032,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Grid phase T current",
+                    "unit": "A",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "gridSideTotalPower",
+                    "address": 8033,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "inputRegister",
+                    "description": "Grid side total power",
+                    "unit": "W",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "loadSideTotalPower",
+                    "address": 8035,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Load side total power",
+                    "unit": "W",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "gridPhaseRVoltageStorage",
+                    "address": 8036,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Grid phase R voltage",
+                    "unit": "V",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "gridPhaseSVoltageStorage",
+                    "address": 8037,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Grid phase S voltage",
+                    "unit": "V",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "gridPhaseTVoltageStorage",
+                    "address": 8038,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Grid phase T voltage",
+                    "unit": "V",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "storageEnergyAndBatteryMetrics",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "energyToUserToday",
+                    "address": 8067,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Energy to user today",
+                    "unit": "kWh",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "energyToUserTotal",
+                    "address": 8069,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Energy to user total",
+                    "unit": "kWh",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "energyToGridToday",
+                    "address": 8071,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Energy to grid today",
+                    "unit": "kWh",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "energyToGridTotal",
+                    "address": 8073,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Energy to grid total",
+                    "unit": "kWh",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "unusedLoadEnergy",
+                    "address": 8075,
+                    "size": 4,
+                    "type": "raw",
+                    "registerType": "inputRegister",
+                    "description": "Unused load energy registers",
+                    "access": "RO"
+                },
+                {
+                    "id": "loadTotalPowerStorage",
+                    "address": 8079,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Total load power",
+                    "unit": "W",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "powerToUserTotal",
+                    "address": 8081,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Total forward power",
+                    "unit": "W",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "powerToGridTotal",
+                    "address": 8083,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "Total reverse power",
+                    "unit": "W",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "systemOutputPower",
+                    "address": 8085,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "inputRegister",
+                    "description": "System output power",
+                    "unit": "W",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "unusedRuntimeCounters",
+                    "address": 8087,
+                    "size": 4,
+                    "type": "raw",
+                    "registerType": "inputRegister",
+                    "description": "Unused bus capacitor and runtime counters",
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryPower",
+                    "address": 8091,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "inputRegister",
+                    "description": "Battery power",
+                    "unit": "W",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "batterySoc",
+                    "address": 8093,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Battery state of charge",
+                    "unit": "%",
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "batterySoh",
+                    "address": 8094,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Battery state of health",
+                    "unit": "%",
+                    "defaultValue": 0,
+                    "access": "RO"
+                },
+                {
+                    "id": "batteryVoltage",
+                    "address": 8095,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "inputRegister",
+                    "description": "Battery voltage",
+                    "unit": "V",
+                    "staticScaleFactor": -1,
+                    "defaultValue": 0,
+                    "access": "RO"
+                }
+            ]
+        }
+    ]
+}
