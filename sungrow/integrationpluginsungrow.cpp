@@ -222,18 +222,50 @@ void IntegrationPluginSungrow::setupThing(ThingSetupInfo *info)
                 qCDebug(dcSungrow()) << "Feed-in power:" << (runningState & (0x1 << 4) ? "true" : "false");
                 qCDebug(dcSungrow()) << "Import power from grid:" << (runningState & (0x1 << 5) ? "true" : "false");
                 qCDebug(dcSungrow()) << "Negative load power:" << (runningState & (0x1 << 7) ? "true" : "false");
-                meterThing->setStateValue(sungrowMeterCurrentPowerStateTypeId, sungrowConnection->totalActivePower() * -1);
+
+                double meterCurrentPower = sungrowConnection->meterActivePower();
+                if (meterCurrentPower == 0 && sungrowConnection->exportPower() != 0) {
+                    double fallbackPower = qAbs(sungrowConnection->exportPower());
+                    if (runningState & (0x1 << 4)) { // Bit 4: Feed-in power
+                        meterCurrentPower = -fallbackPower;
+                    } else if (runningState & (0x1 << 5)) { // Bit 5: Import power from grid
+                        meterCurrentPower = fallbackPower;
+                    } else {
+                        meterCurrentPower = sungrowConnection->exportPower() * -1;
+                    }
+                }
+
+                auto fixValueSign = [](double targetValue, double powerValue) {
+                    bool sameSign = ((targetValue < 0) == (powerValue < 0));
+                    return (sameSign ? targetValue : -targetValue);
+                };
+
+                auto valueOrFallback = [](double value, double fallback) {
+                    return (value != 0 ? value : fallback);
+                };
+
+                double meterVoltagePhaseA = valueOrFallback(sungrowConnection->meterVoltagePhaseA(), sungrowConnection->phaseAVoltage());
+                double meterVoltagePhaseB = valueOrFallback(sungrowConnection->meterVoltagePhaseB(), sungrowConnection->phaseBVoltage());
+                double meterVoltagePhaseC = valueOrFallback(sungrowConnection->meterVoltagePhaseC(), sungrowConnection->phaseCVoltage());
+                double meterActivePowerPhaseA = valueOrFallback(sungrowConnection->meterActivePowerPhaseA(), meterCurrentPower);
+                double meterActivePowerPhaseB = valueOrFallback(sungrowConnection->meterActivePowerPhaseB(), meterCurrentPower);
+                double meterActivePowerPhaseC = valueOrFallback(sungrowConnection->meterActivePowerPhaseC(), meterCurrentPower);
+                double meterCurrentPhaseA = fixValueSign(valueOrFallback(sungrowConnection->meterCurrentPhaseA(), sungrowConnection->phaseACurrent()), meterActivePowerPhaseA);
+                double meterCurrentPhaseB = fixValueSign(valueOrFallback(sungrowConnection->meterCurrentPhaseB(), sungrowConnection->phaseBCurrent()), meterActivePowerPhaseB);
+                double meterCurrentPhaseC = fixValueSign(valueOrFallback(sungrowConnection->meterCurrentPhaseC(), sungrowConnection->phaseCCurrent()), meterActivePowerPhaseC);
+
+                meterThing->setStateValue(sungrowMeterCurrentPowerStateTypeId, meterCurrentPower);
                 meterThing->setStateValue(sungrowMeterTotalEnergyConsumedStateTypeId, sungrowConnection->totalImportEnergy());
                 meterThing->setStateValue(sungrowMeterTotalEnergyProducedStateTypeId, sungrowConnection->totalExportEnergy());
-                meterThing->setStateValue(sungrowMeterCurrentPhaseAStateTypeId, sungrowConnection->phaseACurrent() * -1);
-                meterThing->setStateValue(sungrowMeterCurrentPhaseBStateTypeId, sungrowConnection->phaseBCurrent() * -1);
-                meterThing->setStateValue(sungrowMeterCurrentPhaseCStateTypeId, sungrowConnection->phaseCCurrent() * -1);
-                meterThing->setStateValue(sungrowMeterVoltagePhaseAStateTypeId, sungrowConnection->phaseAVoltage());
-                meterThing->setStateValue(sungrowMeterVoltagePhaseBStateTypeId, sungrowConnection->phaseBVoltage());
-                meterThing->setStateValue(sungrowMeterVoltagePhaseCStateTypeId, sungrowConnection->phaseCVoltage());
-                meterThing->setStateValue(sungrowMeterApparentPowerPhaseAStateTypeId, sungrowConnection->phaseAVoltage() * sungrowConnection->phaseACurrent() * -1);
-                meterThing->setStateValue(sungrowMeterApparentPowerPhaseBStateTypeId, sungrowConnection->phaseBVoltage() * sungrowConnection->phaseBCurrent() * -1);
-                meterThing->setStateValue(sungrowMeterApparentPowerPhaseCStateTypeId, sungrowConnection->phaseCVoltage() * sungrowConnection->phaseCCurrent() * -1);
+                meterThing->setStateValue(sungrowMeterCurrentPhaseAStateTypeId, meterCurrentPhaseA);
+                meterThing->setStateValue(sungrowMeterCurrentPhaseBStateTypeId, meterCurrentPhaseB);
+                meterThing->setStateValue(sungrowMeterCurrentPhaseCStateTypeId, meterCurrentPhaseC);
+                meterThing->setStateValue(sungrowMeterVoltagePhaseAStateTypeId, meterVoltagePhaseA);
+                meterThing->setStateValue(sungrowMeterVoltagePhaseBStateTypeId, meterVoltagePhaseB);
+                meterThing->setStateValue(sungrowMeterVoltagePhaseCStateTypeId, meterVoltagePhaseC);
+                meterThing->setStateValue(sungrowMeterApparentPowerPhaseAStateTypeId, meterVoltagePhaseA * meterCurrentPhaseA);
+                meterThing->setStateValue(sungrowMeterApparentPowerPhaseBStateTypeId, meterVoltagePhaseB * meterCurrentPhaseB);
+                meterThing->setStateValue(sungrowMeterApparentPowerPhaseCStateTypeId, meterVoltagePhaseC * meterCurrentPhaseC);
                 meterThing->setStateValue(sungrowMeterFrequencyStateTypeId, sungrowConnection->gridFrequency());
             }
 

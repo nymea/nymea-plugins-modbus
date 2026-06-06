@@ -304,7 +304,57 @@
                     "description": "Grid frequency",
                     "defaultValue": "0",
                     "unit": "Hz",
-                    "staticScaleFactor": -2,
+                    "staticScaleFactor": -1,
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "meterPowerValues",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "meterActivePower",
+                    "address": 5600,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "inputRegister",
+                    "description": "Meter active power",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterActivePowerPhaseA",
+                    "address": 5602,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "inputRegister",
+                    "description": "Meter active power phase A",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterActivePowerPhaseB",
+                    "address": 5604,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "inputRegister",
+                    "description": "Meter active power phase B",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "meterActivePowerPhaseC",
+                    "address": 5606,
+                    "size": 2,
+                    "type": "int32",
+                    "registerType": "inputRegister",
+                    "description": "Meter active power phase C",
+                    "unit": "W",
+                    "defaultValue": "0",
                     "access": "RO"
                 }
             ]
@@ -666,14 +716,12 @@
                     "access": "RO"
                 },
                 {
-                    "id": "totalActivePower",
+                    "id": "dummyTotalActivePower",
                     "address": 13033,
                     "size": 2,
-                    "type": "int32",
+                    "type": "raw",
                     "registerType": "inputRegister",
-                    "description": "Total active power",
-                    "unit": "W",
-                    "defaultValue": "0",
+                    "description": "none",
                     "access": "RO"
                 },
                 {
