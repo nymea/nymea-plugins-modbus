@@ -108,15 +108,13 @@ void IntegrationPluginKostal::setupThing(ThingSetupInfo *info)
 
         // Create the monitor
         NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(thing);
-        m_monitors.insert(thing, monitor);
-
-        QHostAddress address = monitor->networkDeviceInfo().address();
-        if (address.isNull()) {
-            qCWarning(dcKostal()) << "Cannot set up thing. The host address is not known yet. Maybe it will be available in the next run...";
-            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
-            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("The host address is not known yet. Trying later again."));
+        if (!monitor) {
+            qCWarning(dcKostal()) << "Unable to register monitor with the given params" << thing->params();
+            info->finish(Thing::ThingErrorInvalidParameter, QT_TR_NOOP("Unable to set up the connection with this configuration, please reconfigure the connection."));
             return;
         }
+
+        m_monitors.insert(thing, monitor);
 
         // Clean up in case the setup gets aborted
         connect(info, &ThingSetupInfo::aborted, monitor, [=](){
@@ -126,18 +124,36 @@ void IntegrationPluginKostal::setupThing(ThingSetupInfo *info)
             }
         });
 
-        // Wait for the monitor to be ready
-        if (monitor->reachable()) {
-            // Thing already reachable...let's continue with the setup
-            setupKostalConnection(info);
-        } else {
-            qCDebug(dcKostal()) << "Waiting for the network monitor to get reachable before continue to set up the connection" << thing->name() << address.toString() << "...";
-            connect(monitor, &NetworkDeviceMonitor::reachableChanged, info, [=](bool reachable){
-                if (reachable) {
-                    qCDebug(dcKostal()) << "The monitor for thing setup" << thing->name() << "is now reachable. Continue setup...";
-                    setupKostalConnection(info);
+        // If this is the initial setup, wait for the monitor to be reachable and make sure
+        // we have an IP address, otherwise let the monitor do his work.
+        if (info->isInitialSetup()) {
+            if (monitor->reachable()) {
+                if (monitor->networkDeviceInfo().address().isNull()) {
+                    qCWarning(dcKostal()) << "Cannot set up thing. The host address is not known yet.";
+                    hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+                    info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("The host address is not known yet. Trying later again."));
+                    return;
                 }
-            });
+
+                setupKostalConnection(info);
+            } else {
+                qCDebug(dcKostal()) << "Waiting for the network monitor to get reachable before continue to set up the connection" << thing->name() << "...";
+                connect(monitor, &NetworkDeviceMonitor::reachableChanged, info, [=](bool reachable){
+                    if (reachable) {
+                        if (monitor->networkDeviceInfo().address().isNull()) {
+                            qCWarning(dcKostal()) << "Cannot set up thing. The host address is not known yet.";
+                            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+                            info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("The host address is not known yet. Trying later again."));
+                            return;
+                        }
+
+                        qCDebug(dcKostal()) << "The monitor for thing setup" << thing->name() << "is now reachable. Continue setup...";
+                        setupKostalConnection(info);
+                    }
+                });
+            }
+        } else {
+            setupKostalConnection(info);
         }
 
         return;
@@ -317,14 +333,33 @@ void IntegrationPluginKostal::setupKostalConnection(ThingSetupInfo *info)
 
     // Reconnect on monitor reachable changed
     NetworkDeviceMonitor *monitor = m_monitors.value(thing);
+    connect(monitor, &NetworkDeviceMonitor::networkDeviceInfoChanged, thing, [=](const NetworkDeviceInfo &networkDeviceInfo){
+        qCDebug(dcKostal()) << "Network device info changed for" << thing->name() << networkDeviceInfo;
+
+        QHostAddress address = networkDeviceInfo.address();
+        kostalConnection->modbusTcpMaster()->setHostAddress(address);
+
+        if (!thing->setupComplete())
+            return;
+
+        if (!address.isNull() && monitor->reachable() && !thing->stateValue("connected").toBool()) {
+            kostalConnection->reconnectDevice();
+        } else if (address.isNull()) {
+            kostalConnection->disconnectDevice();
+        }
+    });
+
     connect(monitor, &NetworkDeviceMonitor::reachableChanged, thing, [=](bool reachable){
         qCDebug(dcKostal()) << "Network device monitor reachable changed for" << thing->name() << reachable;
         if (!thing->setupComplete())
             return;
 
         if (reachable && !thing->stateValue("connected").toBool()) {
-            kostalConnection->modbusTcpMaster()->setHostAddress(monitor->networkDeviceInfo().address());
-            kostalConnection->connectDevice();
+            QHostAddress address = monitor->networkDeviceInfo().address();
+            if (!address.isNull()) {
+                kostalConnection->modbusTcpMaster()->setHostAddress(address);
+                kostalConnection->reconnectDevice();
+            }
         } else if (!reachable) {
             // Note: We disable autoreconnect explicitly and we will
             // connect the device once the monitor says it is reachable again
@@ -354,16 +389,144 @@ void IntegrationPluginKostal::setupKostalConnection(ThingSetupInfo *info)
             childThing->setStateValue("connected", success);
         }
 
-        if (!success) {
+        if (success) {
+            // Make sure we use the same endianness as the inverter (register size 1, so independent from endianess)
+            switch (kostalConnection->modbusByteOrder()) {
+            case KostalModbusTcpConnection::ByteOrderBigEndian:
+                kostalConnection->setEndianness(ModbusDataUtils::ByteOrderBigEndian);
+                break;
+            case KostalModbusTcpConnection::ByteOrderLittleEndian:
+                kostalConnection->setEndianness(ModbusDataUtils::ByteOrderLittleEndian);
+                break;
+            }
+        } else {
             // Try once to reconnect the device
             kostalConnection->reconnectDevice();
         }
     });
 
+    connect(kostalConnection, &KostalModbusTcpConnection::updateFinished, thing, [=](){
+        qCDebug(dcKostal()) << "Updated" << kostalConnection;
+
+        // Current
+        thing->setStateValue(kostalInverterPhaseACurrentStateTypeId, kostalConnection->currentPhase1());
+        thing->setStateValue(kostalInverterPhaseBCurrentStateTypeId, kostalConnection->currentPhase2());
+        thing->setStateValue(kostalInverterPhaseCCurrentStateTypeId, kostalConnection->currentPhase3());
+
+        // Voltage
+        thing->setStateValue(kostalInverterVoltagePhaseAStateTypeId, kostalConnection->voltagePhase1());
+        thing->setStateValue(kostalInverterVoltagePhaseBStateTypeId, kostalConnection->voltagePhase2());
+        thing->setStateValue(kostalInverterVoltagePhaseCStateTypeId, kostalConnection->voltagePhase3());
+
+        // Phase power
+        thing->setStateValue(kostalInverterCurrentPowerPhaseAStateTypeId, kostalConnection->activePowerPhase1());
+        thing->setStateValue(kostalInverterCurrentPowerPhaseBStateTypeId, kostalConnection->activePowerPhase2());
+        thing->setStateValue(kostalInverterCurrentPowerPhaseCStateTypeId, kostalConnection->activePowerPhase3());
+
+        // Others
+        thing->setStateValue(kostalInverterFrequencyStateTypeId, kostalConnection->gridFrequencyInverter());
+        thing->setStateValue(kostalInverterTotalEnergyProducedStateTypeId, kostalConnection->totalYield() / 1000.0); // kWh
+
+        // Power
+        thing->setStateValue(kostalInverterCurrentPowerStateTypeId, - (kostalConnection->totalAcPower() - kostalConnection->batteryActualPower()));
+
+        // Update the battery if available
+        Things batteryThings = myThings().filterByParentId(thing->id()).filterByThingClassId(kostalBatteryThingClassId);
+        if (batteryThings.length() == 1) {
+            Thing *batteryThing = batteryThings.first();
+
+            batteryThing->setStateValue(kostalBatteryVoltageStateTypeId, kostalConnection->batteryVoltage());
+            batteryThing->setStateValue(kostalBatteryTemperatureStateTypeId, kostalConnection->batteryTemperature());
+            batteryThing->setStateValue(kostalBatteryBatteryLevelStateTypeId, kostalConnection->batteryStateOfCharge());
+            batteryThing->setStateValue(kostalBatteryBatteryCriticalStateTypeId, kostalConnection->batteryStateOfCharge() < 5);
+
+            // Note: this is the wrong capacity, as of now not known.
+            //batteryThing->setStateValue(kostalBatteryCapacityStateTypeId, kostalConnection->batteryWorkCapacity() / 1000.0); // kWh
+
+            double batteryPower = -kostalConnection->batteryActualPower();
+            batteryThing->setStateValue(kostalBatteryCurrentPowerStateTypeId, batteryPower);
+            if (batteryPower == 0) {
+                batteryThing->setStateValue(kostalBatteryChargingStateStateTypeId, "idle");
+            } else if (batteryPower < 0) {
+                batteryThing->setStateValue(kostalBatteryChargingStateStateTypeId, "discharging");
+            } else if (batteryPower > 0) {
+                batteryThing->setStateValue(kostalBatteryChargingStateStateTypeId, "charging");
+            }
+        }
+
+        // Update the meter if available
+        Things meterThings = myThings().filterByParentId(thing->id()).filterByThingClassId(kostalMeterThingClassId);
+        if (meterThings.length() == 1) {
+            Thing *meterThing = meterThings.first();
+
+            // Current
+            meterThing->setStateValue(kostalMeterCurrentPhaseAStateTypeId, kostalConnection->powerMeterCurrentPhase1());
+            meterThing->setStateValue(kostalMeterCurrentPhaseBStateTypeId, kostalConnection->powerMeterCurrentPhase2());
+            meterThing->setStateValue(kostalMeterCurrentPhaseCStateTypeId, kostalConnection->powerMeterCurrentPhase3());
+
+            // Voltage
+            meterThing->setStateValue(kostalMeterVoltagePhaseAStateTypeId, kostalConnection->powerMeterVoltagePhase1());
+            meterThing->setStateValue(kostalMeterVoltagePhaseBStateTypeId, kostalConnection->powerMeterVoltagePhase2());
+            meterThing->setStateValue(kostalMeterVoltagePhaseCStateTypeId, kostalConnection->powerMeterVoltagePhase3());
+
+            meterThing->setStateValue(kostalMeterFrequencyStateTypeId, kostalConnection->gridFrequencyPowerMeter());
+
+            meterThing->setStateValue(kostalMeterTotalEnergyConsumedStateTypeId, kostalConnection->totalHomeConsumptionFromGrid() / 1000.0); // kWh
+            meterThing->setStateValue(kostalMeterTotalEnergyProducedStateTypeId, kostalConnection->totalEnergyAcToGrid() / 1000.0); // kWh
+
+            // Note: there is a special case with the Kostal KSEM G2 meter, which communicates voltage and current, but no power data
+            // Therefore we have to calculate them on our own and set the states accordingly.
+
+            bool currentNotZero = kostalConnection->powerMeterCurrentPhase1() != 0 &&
+                                  kostalConnection->powerMeterCurrentPhase2() != 0 &&
+                                  kostalConnection->powerMeterCurrentPhase3() != 0;
+
+            bool voltageNotZero = kostalConnection->powerMeterVoltagePhase1() != 0 &&
+                                  kostalConnection->powerMeterVoltagePhase2() != 0 &&
+                                  kostalConnection->powerMeterVoltagePhase3() != 0;
+
+            bool powerZero = kostalConnection->powerMeterActivePowerPhase1() == 0 &&
+                             kostalConnection->powerMeterActivePowerPhase2() == 0 &&
+                             kostalConnection->powerMeterActivePowerPhase3() == 0 &&
+                             kostalConnection->powerMeterTotalActivePower() == 0;
+
+            if (currentNotZero && voltageNotZero && powerZero) {
+
+                // P = U * I
+                float powerPhase1 = kostalConnection->powerMeterCurrentPhase1() * kostalConnection->powerMeterVoltagePhase1() * -1.0;
+                float powerPhase2 = kostalConnection->powerMeterCurrentPhase2() * kostalConnection->powerMeterVoltagePhase2() * -1.0;
+                float powerPhase3 = kostalConnection->powerMeterCurrentPhase3() * kostalConnection->powerMeterVoltagePhase3() * -1.0;
+
+                meterThing->setStateValue(kostalMeterCurrentPowerPhaseAStateTypeId, powerPhase1);
+                meterThing->setStateValue(kostalMeterCurrentPowerPhaseBStateTypeId, powerPhase2);
+                meterThing->setStateValue(kostalMeterCurrentPowerPhaseCStateTypeId, powerPhase3);
+
+                // Set the total power as last value
+                meterThing->setStateValue(kostalMeterCurrentPowerStateTypeId, powerPhase1 + powerPhase2 + powerPhase3);
+
+            } else {
+                // Power
+                meterThing->setStateValue(kostalMeterCurrentPowerPhaseAStateTypeId, kostalConnection->powerMeterActivePowerPhase1());
+                meterThing->setStateValue(kostalMeterCurrentPowerPhaseBStateTypeId, kostalConnection->powerMeterActivePowerPhase2());
+                meterThing->setStateValue(kostalMeterCurrentPowerPhaseCStateTypeId, kostalConnection->powerMeterActivePowerPhase3());
+
+                // Set the total power as last value
+                meterThing->setStateValue(kostalMeterCurrentPowerStateTypeId, kostalConnection->powerMeterTotalActivePower());
+            }
+        }
+    });
+
     connect(kostalConnection, &KostalModbusTcpConnection::initializationFinished, info, [=](bool success){
+        if (!info->isInitialSetup())
+            return;
+
         if (!success) {
             qCWarning(dcKostal()) << "Connection init finished with errors" << thing->name() << kostalConnection->modbusTcpMaster()->hostAddress().toString();
-            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(monitor);
+            if (m_monitors.value(thing) == monitor) {
+                hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+            } else {
+                hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(monitor);
+            }
             kostalConnection->deleteLater();
             info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Could not initialize the communication with the inverter."));
             return;
@@ -389,120 +552,18 @@ void IntegrationPluginKostal::setupKostalConnection(ThingSetupInfo *info)
             break;
         }
 
-        connect(kostalConnection, &KostalModbusTcpConnection::updateFinished, thing, [=](){
-            qCDebug(dcKostal()) << "Updated" << kostalConnection;
-
-            // Current
-            thing->setStateValue(kostalInverterPhaseACurrentStateTypeId, kostalConnection->currentPhase1());
-            thing->setStateValue(kostalInverterPhaseBCurrentStateTypeId, kostalConnection->currentPhase2());
-            thing->setStateValue(kostalInverterPhaseCCurrentStateTypeId, kostalConnection->currentPhase3());
-
-            // Voltage
-            thing->setStateValue(kostalInverterVoltagePhaseAStateTypeId, kostalConnection->voltagePhase1());
-            thing->setStateValue(kostalInverterVoltagePhaseBStateTypeId, kostalConnection->voltagePhase2());
-            thing->setStateValue(kostalInverterVoltagePhaseCStateTypeId, kostalConnection->voltagePhase3());
-
-            // Phase power
-            thing->setStateValue(kostalInverterCurrentPowerPhaseAStateTypeId, kostalConnection->activePowerPhase1());
-            thing->setStateValue(kostalInverterCurrentPowerPhaseBStateTypeId, kostalConnection->activePowerPhase2());
-            thing->setStateValue(kostalInverterCurrentPowerPhaseCStateTypeId, kostalConnection->activePowerPhase3());
-
-            // Others
-            thing->setStateValue(kostalInverterFrequencyStateTypeId, kostalConnection->gridFrequencyInverter());
-            thing->setStateValue(kostalInverterTotalEnergyProducedStateTypeId, kostalConnection->totalYield() / 1000.0); // kWh
-
-            // Power
-            thing->setStateValue(kostalInverterCurrentPowerStateTypeId, - (kostalConnection->totalAcPower() - kostalConnection->batteryActualPower()));
-
-            // Update the battery if available
-            Things batteryThings = myThings().filterByParentId(thing->id()).filterByThingClassId(kostalBatteryThingClassId);
-            if (batteryThings.length() == 1) {
-                Thing *batteryThing = batteryThings.first();
-
-                batteryThing->setStateValue(kostalBatteryVoltageStateTypeId, kostalConnection->batteryVoltage());
-                batteryThing->setStateValue(kostalBatteryTemperatureStateTypeId, kostalConnection->batteryTemperature());
-                batteryThing->setStateValue(kostalBatteryBatteryLevelStateTypeId, kostalConnection->batteryStateOfCharge());
-                batteryThing->setStateValue(kostalBatteryBatteryCriticalStateTypeId, kostalConnection->batteryStateOfCharge() < 5);
-
-                // Note: this is the wrong capacity, as of now not known.
-                //batteryThing->setStateValue(kostalBatteryCapacityStateTypeId, kostalConnection->batteryWorkCapacity() / 1000.0); // kWh
-
-                double batteryPower = -kostalConnection->batteryActualPower();
-                batteryThing->setStateValue(kostalBatteryCurrentPowerStateTypeId, batteryPower);
-                if (batteryPower == 0) {
-                    batteryThing->setStateValue(kostalBatteryChargingStateStateTypeId, "idle");
-                } else if (batteryPower < 0) {
-                    batteryThing->setStateValue(kostalBatteryChargingStateStateTypeId, "discharging");
-                } else if (batteryPower > 0) {
-                    batteryThing->setStateValue(kostalBatteryChargingStateStateTypeId, "charging");
-                }
-            }
-
-            // Update the meter if available
-            Things meterThings = myThings().filterByParentId(thing->id()).filterByThingClassId(kostalMeterThingClassId);
-            if (meterThings.length() == 1) {
-                Thing *meterThing = meterThings.first();
-
-                // Current
-                meterThing->setStateValue(kostalMeterCurrentPhaseAStateTypeId, kostalConnection->powerMeterCurrentPhase1());
-                meterThing->setStateValue(kostalMeterCurrentPhaseBStateTypeId, kostalConnection->powerMeterCurrentPhase2());
-                meterThing->setStateValue(kostalMeterCurrentPhaseCStateTypeId, kostalConnection->powerMeterCurrentPhase3());
-
-                // Voltage
-                meterThing->setStateValue(kostalMeterVoltagePhaseAStateTypeId, kostalConnection->powerMeterVoltagePhase1());
-                meterThing->setStateValue(kostalMeterVoltagePhaseBStateTypeId, kostalConnection->powerMeterVoltagePhase2());
-                meterThing->setStateValue(kostalMeterVoltagePhaseCStateTypeId, kostalConnection->powerMeterVoltagePhase3());
-
-                meterThing->setStateValue(kostalMeterFrequencyStateTypeId, kostalConnection->gridFrequencyPowerMeter());
-
-                meterThing->setStateValue(kostalMeterTotalEnergyConsumedStateTypeId, kostalConnection->totalHomeConsumptionFromGrid() / 1000.0); // kWh
-                meterThing->setStateValue(kostalMeterTotalEnergyProducedStateTypeId, kostalConnection->totalEnergyAcToGrid() / 1000.0); // kWh
-
-                // Note: there is a special case with the Kostal KSEM G2 meter, which communicates voltage and current, but no power data
-                // Therefore we have to calculate them on our own and set the states accordingly.
-
-                bool currentNotZero = kostalConnection->powerMeterCurrentPhase1() != 0 &&
-                                      kostalConnection->powerMeterCurrentPhase2() != 0 &&
-                                      kostalConnection->powerMeterCurrentPhase3() != 0;
-
-                bool voltageNotZero = kostalConnection->powerMeterVoltagePhase1() != 0 &&
-                                      kostalConnection->powerMeterVoltagePhase2() != 0 &&
-                                      kostalConnection->powerMeterVoltagePhase3() != 0;
-
-                bool powerZero = kostalConnection->powerMeterActivePowerPhase1() == 0 &&
-                                 kostalConnection->powerMeterActivePowerPhase2() == 0 &&
-                                 kostalConnection->powerMeterActivePowerPhase3() == 0 &&
-                                 kostalConnection->powerMeterTotalActivePower() == 0;
-
-                if (currentNotZero && voltageNotZero && powerZero) {
-
-                    // P = U * I
-                    float powerPhase1 = kostalConnection->powerMeterCurrentPhase1() * kostalConnection->powerMeterVoltagePhase1() * -1.0;
-                    float powerPhase2 = kostalConnection->powerMeterCurrentPhase2() * kostalConnection->powerMeterVoltagePhase2() * -1.0;
-                    float powerPhase3 = kostalConnection->powerMeterCurrentPhase3() * kostalConnection->powerMeterVoltagePhase3() * -1.0;
-
-                    meterThing->setStateValue(kostalMeterCurrentPowerPhaseAStateTypeId, powerPhase1);
-                    meterThing->setStateValue(kostalMeterCurrentPowerPhaseBStateTypeId, powerPhase2);
-                    meterThing->setStateValue(kostalMeterCurrentPowerPhaseCStateTypeId, powerPhase3);
-
-                    // Set the total power as last value
-                    meterThing->setStateValue(kostalMeterCurrentPowerStateTypeId, powerPhase1 + powerPhase2 + powerPhase3);
-
-                } else {
-                    // Power
-                    meterThing->setStateValue(kostalMeterCurrentPowerPhaseAStateTypeId, kostalConnection->powerMeterActivePowerPhase1());
-                    meterThing->setStateValue(kostalMeterCurrentPowerPhaseBStateTypeId, kostalConnection->powerMeterActivePowerPhase2());
-                    meterThing->setStateValue(kostalMeterCurrentPowerPhaseCStateTypeId, kostalConnection->powerMeterActivePowerPhase3());
-
-                    // Set the total power as last value
-                    meterThing->setStateValue(kostalMeterCurrentPowerStateTypeId, kostalConnection->powerMeterTotalActivePower());
-                }
-            }
-        });
-
         // Update registers
         kostalConnection->update();
     });
 
-    kostalConnection->connectDevice();
+    if (info->isInitialSetup()) {
+        kostalConnection->connectDevice();
+    } else {
+        m_kostalConnections.insert(thing, kostalConnection);
+        info->finish(Thing::ThingErrorNoError);
+
+        if (!address.isNull() && monitor->reachable()) {
+            kostalConnection->connectDevice();
+        }
+    }
 }
