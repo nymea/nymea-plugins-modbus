@@ -1,3 +1,11 @@
+nymea-plugins-modbus (1.15.1) noble; urgency=medium
+
+  [ Simon Stürz ]
+  * Sungrow: Update meter current power reading
+  * Kostal: Improve thing setup and monitor handling
+
+ -- jenkins <developer@nymea.io>  Wed, 10 Jun 2026 11:15:37 +0200
+
 nymea-plugins-modbus (1.15.0) noble; urgency=medium
 
   [ Simon Stürz ]
