@@ -255,6 +255,7 @@ def writeTcpSourceFile():
     writeLine(sourceFile)
     writeLine(sourceFile, '#include <math.h>')
     writeLine(sourceFile, '#include <QTimer>')
+    writeLine(sourceFile, '#include <QPointer>')
     writeLine(sourceFile, '#include <QModbusDevice>')
     writeLine(sourceFile, '#include <QModbusResponse>')
     writeLine(sourceFile)
