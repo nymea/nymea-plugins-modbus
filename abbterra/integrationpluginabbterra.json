@@ -1,0 +1,416 @@
+{
+    "name": "AbbTerra",
+    "displayName": "ABB Terra AC",
+    "id": "d7f1cb28-b18b-449e-8cd2-1d99b9d8f681",
+    "paramTypes": [],
+    "vendors": [
+        {
+            "id": "0369ebad-5186-437d-b520-041a0b9b7582",
+            "name": "abb",
+            "displayName": "ABB",
+            "thingClasses": [
+                {
+                    "id": "93ad828a-9a7a-4fca-be3f-88641317845f",
+                    "name": "terraAcTcp",
+                    "displayName": "Terra AC Charger (TCP)",
+                    "interfaces": [
+                        "evcharger",
+                        "connectable",
+                        "networkdevice"
+                    ],
+                    "createMethods": [
+                        "discovery",
+                        "user"
+                    ],
+                    "discoveryType": "weak",
+                    "paramTypes": [
+                        {
+                            "id": "9b3332aa-6c26-4399-b3dc-d7fdbe3f4420",
+                            "name": "macAddress",
+                            "displayName": "MAC address",
+                            "type": "QString",
+                            "inputType": "MacAddress",
+                            "defaultValue": "",
+                            "readOnly": true
+                        },
+                        {
+                            "id": "962ef9d9-30a2-4636-8ff2-2a28742277f4",
+                            "name": "address",
+                            "displayName": "Host address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "f9e6fed4-2a18-4f23-b70e-78919d4b01f8",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "153258dd-e81b-48e5-9ba7-46d59e854d85",
+                            "name": "port",
+                            "displayName": "Port",
+                            "type": "uint",
+                            "defaultValue": 502
+                        },
+                        {
+                            "id": "cc4c66c1-185f-4c97-88a0-2bc66319d157",
+                            "name": "slaveId",
+                            "displayName": "Slave ID",
+                            "type": "uint",
+                            "defaultValue": 1,
+                            "minValue": 1,
+                            "maxValue": 255
+                        }
+                    ],
+                    "settingsTypes": [
+                        {
+                            "id": "5a0e678a-ffc8-443a-9ae7-bb2243b0ec4b",
+                            "name": "communicationTimeout",
+                            "displayName": "Communication timeout",
+                            "type": "uint",
+                            "unit": "Seconds",
+                            "defaultValue": 60,
+                            "minValue": 10,
+                            "maxValue": 65535
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "21e1a2bb-0e05-462c-9909-4f9a0eada438",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "2fb30a0b-dc5a-4831-b5c6-de653c0c9ee1",
+                            "name": "pluggedIn",
+                            "displayName": "Plugged in",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "0c685ced-27fa-46ba-8c0b-c49af82054f0",
+                            "name": "charging",
+                            "displayName": "Charging",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "207e2074-0147-4617-9a8b-3f326dcd6a0b",
+                            "name": "power",
+                            "displayName": "Charging enabled",
+                            "displayNameAction": "Set charging enabled",
+                            "type": "bool",
+                            "defaultValue": true,
+                            "writable": true
+                        },
+                        {
+                            "id": "e3d27f8a-73d0-493a-b99a-29e7dc184485",
+                            "name": "maxChargingCurrent",
+                            "displayName": "Maximum charging current",
+                            "displayNameAction": "Set maximum charging current",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "minValue": 6,
+                            "maxValue": 32,
+                            "stepSize": 0.1,
+                            "defaultValue": 6,
+                            "writable": true
+                        },
+                        {
+                            "id": "0764bce9-fd26-4da8-8d92-f6a5ce73e81e",
+                            "name": "phaseCount",
+                            "displayName": "Phase count",
+                            "type": "uint",
+                            "minValue": 1,
+                            "maxValue": 3,
+                            "defaultValue": 1
+                        },
+                        {
+                            "id": "59b486a3-aa44-4a94-8478-1077af124441",
+                            "name": "currentPower",
+                            "displayName": "Active power",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "953ce672-a9a2-4cd6-bf87-ccfe720c7595",
+                            "name": "currentPhase1",
+                            "displayName": "Current phase 1",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "e4f97cde-191c-4c84-9668-169c5e648338",
+                            "name": "currentPhase2",
+                            "displayName": "Current phase 2",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "c1cead50-9894-4b12-9211-c5bc84109b1d",
+                            "name": "currentPhase3",
+                            "displayName": "Current phase 3",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "bcff4c2d-5567-40ff-adef-5b47dc5ace76",
+                            "name": "voltagePhase1",
+                            "displayName": "Voltage phase 1",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "db7af25a-cb7b-4640-9515-a7af345bd770",
+                            "name": "voltagePhase2",
+                            "displayName": "Voltage phase 2",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "fe67e1bf-6871-45a6-a253-819cb70c5ec4",
+                            "name": "voltagePhase3",
+                            "displayName": "Voltage phase 3",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "be2cc28e-79c2-4eaf-91ad-8131ac1f87e2",
+                            "name": "sessionEnergy",
+                            "displayName": "Session energy",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "6d9b38a7-c6eb-47bc-8929-5a875d0fd5d0",
+                            "name": "firmwareVersion",
+                            "displayName": "Firmware version",
+                            "type": "QString",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "69c9f4e2-ec8c-4d65-9cf4-ce8b7a3f8c3b",
+                            "name": "serialNumber",
+                            "displayName": "Serial number",
+                            "type": "QString",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "ce98bfda-b27a-4f69-bd4e-49eb3e722245",
+                            "name": "errorCode",
+                            "displayName": "Error code",
+                            "type": "uint",
+                            "defaultValue": 0
+                        }
+                    ],
+                    "actionTypes": []
+                },
+                {
+                    "id": "a385801e-600c-4e27-ad73-5184a7516860",
+                    "name": "terraAcRtu",
+                    "displayName": "Terra AC Charger (RTU)",
+                    "interfaces": [
+                        "evcharger",
+                        "connectable"
+                    ],
+                    "createMethods": [
+                        "discovery",
+                        "user"
+                    ],
+                    "paramTypes": [
+                        {
+                            "id": "deb19a6b-33b3-417e-abf1-a1fb18585fe4",
+                            "name": "rtuMaster",
+                            "displayName": "Modbus RTU master",
+                            "type": "QString",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "23dbb93d-6605-435c-9a41-b8a8e8242ea0",
+                            "name": "slaveId",
+                            "displayName": "Modbus slave ID",
+                            "type": "uint",
+                            "defaultValue": 1,
+                            "minValue": 1,
+                            "maxValue": 247
+                        }
+                    ],
+                    "settingsTypes": [
+                        {
+                            "id": "c4e0a515-270e-403e-8453-02002859938e",
+                            "name": "communicationTimeout",
+                            "displayName": "Communication timeout",
+                            "type": "uint",
+                            "unit": "Seconds",
+                            "defaultValue": 60,
+                            "minValue": 10,
+                            "maxValue": 65535
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "c43068ca-dddc-4c43-9149-68927afae5e7",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "14fcf045-52d7-4f47-b64e-2bf3f87c242f",
+                            "name": "pluggedIn",
+                            "displayName": "Plugged in",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "64708d42-bbfe-44a5-82ae-c8e66e25c5a5",
+                            "name": "charging",
+                            "displayName": "Charging",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "e35fd4fa-bf5a-45a1-8a39-f0d3d9efa4c6",
+                            "name": "power",
+                            "displayName": "Charging enabled",
+                            "displayNameAction": "Set charging enabled",
+                            "type": "bool",
+                            "defaultValue": true,
+                            "writable": true
+                        },
+                        {
+                            "id": "ea933a77-a098-4303-bbdb-15c72dfd3634",
+                            "name": "maxChargingCurrent",
+                            "displayName": "Maximum charging current",
+                            "displayNameAction": "Set maximum charging current",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "minValue": 6,
+                            "maxValue": 32,
+                            "stepSize": 0.1,
+                            "defaultValue": 6,
+                            "writable": true
+                        },
+                        {
+                            "id": "cd1add95-18d9-46b5-a3d5-f0f29d5160c9",
+                            "name": "phaseCount",
+                            "displayName": "Phase count",
+                            "type": "uint",
+                            "minValue": 1,
+                            "maxValue": 3,
+                            "defaultValue": 1
+                        },
+                        {
+                            "id": "152a58cb-0bf1-4d4a-aac2-233d3c68f81b",
+                            "name": "currentPower",
+                            "displayName": "Active power",
+                            "type": "double",
+                            "unit": "Watt",
+                            "defaultValue": 0,
+                            "cached": false
+                        },
+                        {
+                            "id": "a8e2e2cf-b2ca-48c5-a702-9226062c43e3",
+                            "name": "currentPhase1",
+                            "displayName": "Current phase 1",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "210ff017-ea75-4705-9f23-f73e324601ef",
+                            "name": "currentPhase2",
+                            "displayName": "Current phase 2",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "3a5d6ce5-d3ed-4ba5-996f-15a2b3124faf",
+                            "name": "currentPhase3",
+                            "displayName": "Current phase 3",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "52ebc781-a527-4641-b768-3a0bd0209f96",
+                            "name": "voltagePhase1",
+                            "displayName": "Voltage phase 1",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "bb513653-70ca-4ee1-a913-aab3d2881708",
+                            "name": "voltagePhase2",
+                            "displayName": "Voltage phase 2",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "c84a5e75-121d-4af8-a203-23f586613cf2",
+                            "name": "voltagePhase3",
+                            "displayName": "Voltage phase 3",
+                            "type": "double",
+                            "unit": "Volt",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "7a9a6ec3-7572-42d8-833d-5b434ca95765",
+                            "name": "sessionEnergy",
+                            "displayName": "Session energy",
+                            "type": "double",
+                            "unit": "KiloWattHour",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "071d7408-fa96-49da-b56b-f5564bee9b5d",
+                            "name": "firmwareVersion",
+                            "displayName": "Firmware version",
+                            "type": "QString",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "c95ea476-4ce3-4c04-bc23-238bdee496ee",
+                            "name": "serialNumber",
+                            "displayName": "Serial number",
+                            "type": "QString",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "1f7d2791-c23e-47fe-8512-850ea25e09b3",
+                            "name": "errorCode",
+                            "displayName": "Error code",
+                            "type": "uint",
+                            "defaultValue": 0
+                        }
+                    ],
+                    "actionTypes": []
+                }
+            ]
+        }
+    ]
+}
