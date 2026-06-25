@@ -333,6 +333,8 @@ def writePropertyUpdateMethodImplementationsTcp(fileDescriptor, className, regis
                 writeLine(fileDescriptor, '    });')
                 writeLine(fileDescriptor)
             else:
+                writeLine(fileDescriptor, '    const QString requestId = QStringLiteral("register:%s");' % propertyName)
+                writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '    if (m_currentUpdateReply)')
                 writeLine(fileDescriptor, '        return;')
                 writeLine(fileDescriptor)
@@ -359,7 +361,7 @@ def writePropertyUpdateMethodImplementationsTcp(fileDescriptor, className, regis
                 writeLine(fileDescriptor, '    m_currentUpdateReply = reply;')
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);')
-                writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, this, [this, reply](){')
+                writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, this, [this, reply, requestId](){')
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '        m_currentUpdateReply = nullptr;')
                 writeLine(fileDescriptor)
@@ -368,6 +370,9 @@ def writePropertyUpdateMethodImplementationsTcp(fileDescriptor, className, regis
                 writeLine(fileDescriptor, '        if (reply->error() == QModbusDevice::NoError) {')
                 writeLine(fileDescriptor, '            const QModbusDataUnit unit = reply->result();')
                 writeLine(fileDescriptor, '            process%sRegisterValues(unit.values());' % (propertyName[0].upper() + propertyName[1:]))
+                writeLine(fileDescriptor, '        }')
+                writeLine(fileDescriptor, '        else if (isIllegalDataAddressError(reply)) {')
+                writeLine(fileDescriptor, '            markUnsupportedUpdateRequest(requestId, QStringLiteral("%s"));' % registerDefinition['description'])
                 writeLine(fileDescriptor, '        }')
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '        if (!verifyUpdateFinished())')
@@ -384,6 +389,11 @@ def writePropertyUpdateMethodImplementationsTcp(fileDescriptor, className, regis
                 writeLine(fileDescriptor, '        }')
                 writeLine(fileDescriptor, '    });')
         else:
+            writeLine(fileDescriptor, '    const QString requestId = QStringLiteral("register:%s");' % propertyName)
+            if 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'update':
+                writeLine(fileDescriptor, '    if (m_unsupportedUpdateRequests.contains(requestId))')
+                writeLine(fileDescriptor, '        return;')
+                writeLine(fileDescriptor)
             writeLine(fileDescriptor, '    // Update registers from %s' % registerDefinition['description'])
             writeLine(fileDescriptor, '    qCDebug(dc%s()) << "--> Read \\"%s\\" register:" << %s << "size:" << %s;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
             writeLine(fileDescriptor, '    QModbusReply *reply = read%s();' % (propertyName[0].upper() + propertyName[1:]))
@@ -398,12 +408,16 @@ def writePropertyUpdateMethodImplementationsTcp(fileDescriptor, className, regis
             writeLine(fileDescriptor, '    }')
             writeLine(fileDescriptor)
             writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);')
-            writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, this, [this, reply](){')
+            writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, this, [this, reply, requestId](){')
             writeLine(fileDescriptor, '        handleModbusError(reply->error());')
             writeLine(fileDescriptor, '        if (reply->error() == QModbusDevice::NoError) {')
             writeLine(fileDescriptor, '            const QModbusDataUnit unit = reply->result();')
             writeLine(fileDescriptor, '            process%sRegisterValues(unit.values());' % (propertyName[0].upper() + propertyName[1:]))
             writeLine(fileDescriptor, '        }')
+            if 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'update':
+                writeLine(fileDescriptor, '        else if (isIllegalDataAddressError(reply)) {')
+                writeLine(fileDescriptor, '            markUnsupportedUpdateRequest(requestId, QStringLiteral("%s"));' % registerDefinition['description'])
+                writeLine(fileDescriptor, '        }')
             writeLine(fileDescriptor, '    });')
             writeLine(fileDescriptor)
             writeLine(fileDescriptor, '    connect(reply, &QModbusReply::errorOccurred, this, [this, reply] (QModbusDevice::Error error){')
@@ -493,6 +507,8 @@ def writeBlockUpdateMethodImplementationsTcp(fileDescriptor, className, blockDef
                 writeLine(fileDescriptor)
             else:
 
+                writeLine(fileDescriptor, '    const QString requestId = QStringLiteral("block:%s");' % blockName)
+                writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '    // Update register block \"%s\"' % blockName)
                 writeLine(fileDescriptor, '    qCDebug(dc%s()) << "--> Read block \\"%s\\" registers from:" << %s << "size:" << %s;' % (className, blockName, blockStartAddress, blockSize))
                 writeLine(fileDescriptor, '    QModbusReply *reply = readBlock%s();' % (blockName[0].upper() + blockName[1:]))
@@ -515,7 +531,7 @@ def writeBlockUpdateMethodImplementationsTcp(fileDescriptor, className, blockDef
                 writeLine(fileDescriptor, '    m_currentUpdateReply = reply;')
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);')
-                writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, this, [this, reply](){')
+                writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, this, [this, reply, requestId](){')
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '        m_currentUpdateReply = nullptr;')
                 writeLine(fileDescriptor)
@@ -529,6 +545,13 @@ def writeBlockUpdateMethodImplementationsTcp(fileDescriptor, className, blockDef
                 writeLine(fileDescriptor, '                QTimer::singleShot(%s, this, &%s::sendNextQueuedRequest);' % (queuedRequestsDelay, className))
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '        }')
+                writeLine(fileDescriptor, '        else {')
+                writeLine(fileDescriptor, '            if (isIllegalDataAddressError(reply))')
+                writeLine(fileDescriptor, '                markUnsupportedUpdateRequest(requestId, QStringLiteral("%s"));' % blockName)
+                writeLine(fileDescriptor)
+                writeLine(fileDescriptor, '            if (!verifyUpdateFinished())')
+                writeLine(fileDescriptor, '                QTimer::singleShot(%s, this, &%s::sendNextQueuedRequest);' % (queuedRequestsDelay, className))
+                writeLine(fileDescriptor, '        }')
                 writeLine(fileDescriptor, '    });')
                 writeLine(fileDescriptor)
                 writeLine(fileDescriptor, '    connect(reply, &QModbusReply::errorOccurred, this, [reply] (QModbusDevice::Error error){')
@@ -540,6 +563,11 @@ def writeBlockUpdateMethodImplementationsTcp(fileDescriptor, className, blockDef
                 writeLine(fileDescriptor, '        }')
                 writeLine(fileDescriptor, '    });')
         else:
+            if 'readSchedule' in blockDefinition and blockDefinition['readSchedule'] == 'update':
+                writeLine(fileDescriptor, '    const QString requestId = QStringLiteral("block:%s");' % blockName)
+                writeLine(fileDescriptor, '    if (m_unsupportedUpdateRequests.contains(requestId))')
+                writeLine(fileDescriptor, '        return;')
+                writeLine(fileDescriptor)
             writeLine(fileDescriptor, '    // Update register block \"%s\"' % blockName)
             writeLine(fileDescriptor, '    qCDebug(dc%s()) << "--> Read block \\"%s\\" registers from:" << %s << "size:" << %s;' % (className, blockName, blockStartAddress, blockSize))
             writeLine(fileDescriptor, '    QModbusReply *reply = readBlock%s();' % (blockName[0].upper() + blockName[1:]))
@@ -554,13 +582,20 @@ def writeBlockUpdateMethodImplementationsTcp(fileDescriptor, className, blockDef
             writeLine(fileDescriptor, '    }')
             writeLine(fileDescriptor)
             writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);')
-            writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, this, [this, reply](){')
+            if 'readSchedule' in blockDefinition and blockDefinition['readSchedule'] == 'update':
+                writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, this, [this, reply, requestId](){')
+            else:
+                writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, this, [this, reply](){')
             writeLine(fileDescriptor, '        handleModbusError(reply->error());')
             writeLine(fileDescriptor, '        if (reply->error() == QModbusDevice::NoError) {')
             writeLine(fileDescriptor, '            const QModbusDataUnit unit = reply->result();')
             writeLine(fileDescriptor, '            const QVector<quint16> blockValues = unit.values();')
             writeLine(fileDescriptor, '            processBlock%sRegisterValues(blockValues);' % (blockName[0].upper() + blockName[1:]))
             writeLine(fileDescriptor, '        }')
+            if 'readSchedule' in blockDefinition and blockDefinition['readSchedule'] == 'update':
+                writeLine(fileDescriptor, '        else if (isIllegalDataAddressError(reply)) {')
+                writeLine(fileDescriptor, '            markUnsupportedUpdateRequest(requestId, QStringLiteral("%s"));' % blockName)
+                writeLine(fileDescriptor, '        }')
             writeLine(fileDescriptor, '    });')
             writeLine(fileDescriptor)
             writeLine(fileDescriptor, '    connect(reply, &QModbusReply::errorOccurred, this, [reply] (QModbusDevice::Error error){')
@@ -840,15 +875,20 @@ def writeUpdateMethodTcp(fileDescriptor, className, registerDefinitions, blockDe
                 propertyName = registerDefinition['id']
                 
                 if 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'update':
-                    writeLine(fileDescriptor, '    enqueueRequest(&%s::update%s);' % (className, propertyName[0].upper() + propertyName[1:]))
+                    writeLine(fileDescriptor, '    enqueueRequest(&%s::update%s, QStringLiteral("register:%s"));' % (className, propertyName[0].upper() + propertyName[1:], propertyName))
 
             # Read init blocks
             writeLine(fileDescriptor)
             for blockDefinition in blockDefinitions:
                 blockName = blockDefinition['id']
                 if 'readSchedule' in blockDefinition and blockDefinition['readSchedule'] == 'update':
-                    writeLine(fileDescriptor, '    enqueueRequest(&%s::update%sBlock);' % (className, blockName[0].upper() + blockName[1:]))
+                    writeLine(fileDescriptor, '    enqueueRequest(&%s::update%sBlock, QStringLiteral("block:%s"));' % (className, blockName[0].upper() + blockName[1:], blockName))
 
+            writeLine(fileDescriptor, '    if (m_updateRequestQueue.isEmpty()) {')
+            writeLine(fileDescriptor, '        emit updateFinished();')
+            writeLine(fileDescriptor, '        return true;')
+            writeLine(fileDescriptor, '    }')
+            writeLine(fileDescriptor)
             writeLine(fileDescriptor, '    sendNextQueuedRequest();');
         else:
             writeLine(fileDescriptor, '    if (!m_modbusTcpMaster->connected())')
@@ -870,6 +910,10 @@ def writeUpdateMethodTcp(fileDescriptor, className, registerDefinitions, blockDe
                 if 'readSchedule' in registerDefinition and registerDefinition['readSchedule'] == 'update':
                     writeLine(fileDescriptor)
                     writeLine(fileDescriptor, '    // Read %s' % registerDefinition['description'])
+                    writeLine(fileDescriptor, '    const QString %sRequestId = QStringLiteral("register:%s");' % (propertyName, propertyName))
+                    writeLine(fileDescriptor, '    if (m_unsupportedUpdateRequests.contains(%sRequestId))' % propertyName)
+                    writeLine(fileDescriptor, '        goto skip%s;' % (propertyName[0].upper() + propertyName[1:]))
+                    writeLine(fileDescriptor)
                     writeLine(fileDescriptor, '    qCDebug(dc%s()) << "--> Read \\"%s\\" register:" << %s << "size:" << %s;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
                     writeLine(fileDescriptor, '    reply = read%s();' % (propertyName[0].upper() + propertyName[1:]))
                     writeLine(fileDescriptor, '    if (!reply) {')
@@ -884,10 +928,12 @@ def writeUpdateMethodTcp(fileDescriptor, className, registerDefinitions, blockDe
                     writeLine(fileDescriptor)
                     writeLine(fileDescriptor, '    m_pendingUpdateReplies.append(reply);')
                     writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);')
-                    writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, this, [this, reply](){')
+                    writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, this, [this, reply, %sRequestId](){' % propertyName)
                     writeLine(fileDescriptor, '        m_pendingUpdateReplies.removeAll(reply);')
                     writeLine(fileDescriptor, '        handleModbusError(reply->error());')
                     writeLine(fileDescriptor, '        if (reply->error() != QModbusDevice::NoError) {')
+                    writeLine(fileDescriptor, '            if (isIllegalDataAddressError(reply))')
+                    writeLine(fileDescriptor, '                markUnsupportedUpdateRequest(%sRequestId, QStringLiteral("%s"));' % (propertyName, registerDefinition['description']))
                     writeLine(fileDescriptor, '            verifyUpdateFinished();')
                     writeLine(fileDescriptor, '            return;')
                     writeLine(fileDescriptor, '        }')
@@ -905,6 +951,8 @@ def writeUpdateMethodTcp(fileDescriptor, className, registerDefinitions, blockDe
                     writeLine(fileDescriptor, '            qCWarning(dc%s()) << "Modbus reply error occurred while reading \\"%s\\" registers from" << m_modbusTcpMaster->hostAddress().toString() << error << reply->errorString();' % (className, registerDefinition['description']))
                     writeLine(fileDescriptor, '        }')
                     writeLine(fileDescriptor, '    });')
+                    writeLine(fileDescriptor, 'skip%s:' % (propertyName[0].upper() + propertyName[1:]))
+                    writeLine(fileDescriptor, '    ;')
 
             # Read init blocks
             for blockDefinition in blockDefinitions:
@@ -927,6 +975,10 @@ def writeUpdateMethodTcp(fileDescriptor, className, registerDefinitions, blockDe
 
                     writeLine(fileDescriptor)
                     writeLine(fileDescriptor, '    // Read %s' % blockName)
+                    writeLine(fileDescriptor, '    const QString %sRequestId = QStringLiteral("block:%s");' % (blockName, blockName))
+                    writeLine(fileDescriptor, '    if (m_unsupportedUpdateRequests.contains(%sRequestId))' % blockName)
+                    writeLine(fileDescriptor, '        goto skip%sBlock;' % (blockName[0].upper() + blockName[1:]))
+                    writeLine(fileDescriptor)
                     writeLine(fileDescriptor, '    reply = readBlock%s();' % (blockName[0].upper() + blockName[1:]))
                     writeLine(fileDescriptor, '    qCDebug(dc%s()) << "--> Read block \\"%s\\" registers from:" << %s << "size:" << %s;' % (className, blockName, blockStartAddress, blockSize))
                     writeLine(fileDescriptor, '    if (!reply) {')
@@ -941,10 +993,12 @@ def writeUpdateMethodTcp(fileDescriptor, className, registerDefinitions, blockDe
                     writeLine(fileDescriptor)
                     writeLine(fileDescriptor, '    m_pendingUpdateReplies.append(reply);')
                     writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);')
-                    writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, this, [this, reply](){')
+                    writeLine(fileDescriptor, '    connect(reply, &QModbusReply::finished, this, [this, reply, %sRequestId](){' % blockName)
                     writeLine(fileDescriptor, '        m_pendingUpdateReplies.removeAll(reply);')
                     writeLine(fileDescriptor, '        handleModbusError(reply->error());')
                     writeLine(fileDescriptor, '        if (reply->error() != QModbusDevice::NoError) {')
+                    writeLine(fileDescriptor, '            if (isIllegalDataAddressError(reply))')
+                    writeLine(fileDescriptor, '                markUnsupportedUpdateRequest(%sRequestId, QStringLiteral("%s"));' % (blockName, blockName))
                     writeLine(fileDescriptor, '            verifyUpdateFinished();')
                     writeLine(fileDescriptor, '            return;')
                     writeLine(fileDescriptor, '        }')
@@ -964,6 +1018,13 @@ def writeUpdateMethodTcp(fileDescriptor, className, registerDefinitions, blockDe
                     writeLine(fileDescriptor, '        }')
                     writeLine(fileDescriptor, '    });')
                     writeLine(fileDescriptor)
+                    writeLine(fileDescriptor, 'skip%sBlock:' % (blockName[0].upper() + blockName[1:]))
+                    writeLine(fileDescriptor, '    ;')
+                    writeLine(fileDescriptor)
+
+            writeLine(fileDescriptor, '    if (m_pendingUpdateReplies.isEmpty())')
+            writeLine(fileDescriptor, '        emit updateFinished();')
+            writeLine(fileDescriptor)
 
     else:
         writeLine(fileDescriptor, '    // No update registers defined. Nothing to be done and we are finished.')
