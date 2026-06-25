@@ -648,8 +648,11 @@ def writeSendNextQueuedRequestMethodImplementation(fileDescriptor, className):
 
 
 def writeEnqueueRequestMethodImplementation(fileDescriptor, className):
-    writeLine(fileDescriptor, 'void %s::enqueueRequest(%s::Function function)' % (className, className))
+    writeLine(fileDescriptor, 'void %s::enqueueRequest(%s::Function function, const QString &requestId)' % (className, className))
     writeLine(fileDescriptor, '{')
+    writeLine(fileDescriptor, '    if (m_unsupportedUpdateRequests.contains(requestId))')
+    writeLine(fileDescriptor, '        return;')
+    writeLine(fileDescriptor)
     writeLine(fileDescriptor, '    if (m_updateRequestQueue.contains(function))')
     writeLine(fileDescriptor, '        return;')
     writeLine(fileDescriptor)
