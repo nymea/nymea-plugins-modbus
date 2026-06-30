@@ -174,6 +174,10 @@ QString ModbusDataUtils::convertToString(const QVector<quint16> &registers, Byte
         stream << registers.at(i);
     }
 
+    int terminatorIndex = bytes.indexOf('\0');
+    if (terminatorIndex >= 0)
+        bytes.truncate(terminatorIndex);
+
     return QString::fromUtf8(bytes).trimmed();
 }
 
