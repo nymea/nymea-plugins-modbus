@@ -1,0 +1,13 @@
+{
+    "title": "ABB Terra AC",
+    "tagline": "Connect ABB Terra AC chargers over Modbus TCP or Modbus RTU.",
+    "stability": "consumer",
+    "icon": "",
+    "offline": true,
+    "technologies": [
+        "network"
+    ],
+    "categories": [
+        "energy"
+    ]
+}

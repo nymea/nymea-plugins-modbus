@@ -1,0 +1,243 @@
+{
+    "className": "AbbTerra",
+    "protocol": "BOTH",
+    "endianness": "BigEndian",
+    "stringEndianness": "BigEndian",
+    "errorLimitUntilNotReachable": 3,
+    "checkReachableRegister": "serialNumber",
+    "queuedRequests": true,
+    "queuedRequestsDelay": 50,
+    "blocks": [
+        {
+            "id": "deviceInfo",
+            "readSchedule": "init",
+            "registers": [
+                {
+                    "id": "serialNumber",
+                    "address": 16384,
+                    "size": 4,
+                    "type": "uint64",
+                    "registerType": "holdingRegister",
+                    "description": "Product serial number",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "firmwareVersionRaw",
+                    "address": 16388,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Firmware version",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "userSettableMaxCurrent",
+                    "address": 16390,
+                    "size": 2,
+                    "type": "uint32",
+                    "unit": "mA",
+                    "registerType": "holdingRegister",
+                    "description": "Maximum user settable charging current",
+                    "defaultValue": "32000",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "status",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "errorCode",
+                    "address": 16392,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Last error code",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "socketLockState",
+                    "address": 16394,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Socket and cable lock state",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "chargingStateRaw",
+                    "address": 16396,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Charging state",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "chargingCurrentLimit",
+                    "address": 16398,
+                    "size": 2,
+                    "type": "uint32",
+                    "unit": "mA",
+                    "registerType": "holdingRegister",
+                    "description": "Current charging current limit",
+                    "defaultValue": "6000",
+                    "access": "RO"
+                },
+                {
+                    "id": "currentL1",
+                    "address": 16400,
+                    "size": 2,
+                    "type": "uint32",
+                    "unit": "mA",
+                    "registerType": "holdingRegister",
+                    "description": "Current L1",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "currentL2",
+                    "address": 16402,
+                    "size": 2,
+                    "type": "uint32",
+                    "unit": "mA",
+                    "registerType": "holdingRegister",
+                    "description": "Current L2",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "currentL3",
+                    "address": 16404,
+                    "size": 2,
+                    "type": "uint32",
+                    "unit": "mA",
+                    "registerType": "holdingRegister",
+                    "description": "Current L3",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "voltageL1",
+                    "address": 16406,
+                    "size": 2,
+                    "type": "uint32",
+                    "unit": "0.1V",
+                    "registerType": "holdingRegister",
+                    "description": "Voltage L1",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "voltageL2",
+                    "address": 16408,
+                    "size": 2,
+                    "type": "uint32",
+                    "unit": "0.1V",
+                    "registerType": "holdingRegister",
+                    "description": "Voltage L2",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "voltageL3",
+                    "address": 16410,
+                    "size": 2,
+                    "type": "uint32",
+                    "unit": "0.1V",
+                    "registerType": "holdingRegister",
+                    "description": "Voltage L3",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "activePower",
+                    "address": 16412,
+                    "size": 2,
+                    "type": "uint32",
+                    "unit": "W",
+                    "registerType": "holdingRegister",
+                    "description": "Measured active power",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "sessionEnergy",
+                    "address": 16414,
+                    "size": 2,
+                    "type": "uint32",
+                    "unit": "Wh",
+                    "registerType": "holdingRegister",
+                    "description": "Delivered energy of the current session",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "communicationTimeoutReadback",
+                    "address": 16416,
+                    "size": 1,
+                    "type": "uint16",
+                    "unit": "s",
+                    "registerType": "holdingRegister",
+                    "description": "Communication timeout",
+                    "defaultValue": "60",
+                    "access": "RO"
+                }
+            ]
+        }
+    ],
+    "registers": [
+        {
+            "id": "chargingCurrentLimitCommand",
+            "address": 16640,
+            "size": 2,
+            "type": "uint32",
+            "unit": "mA",
+            "readSchedule": "",
+            "registerType": "holdingRegister",
+            "description": "Set charging current limit",
+            "defaultValue": "6000",
+            "access": "WO"
+        },
+        {
+            "id": "socketLockCommand",
+            "address": 16642,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "",
+            "registerType": "holdingRegister",
+            "description": "Socket lock control",
+            "defaultValue": "0",
+            "access": "WO"
+        },
+        {
+            "id": "startStopChargingSession",
+            "address": 16645,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "",
+            "registerType": "holdingRegister",
+            "description": "Start or stop charging session",
+            "defaultValue": "0",
+            "access": "WO"
+        },
+        {
+            "id": "communicationTimeoutCommand",
+            "address": 16646,
+            "size": 1,
+            "type": "uint16",
+            "unit": "s",
+            "readSchedule": "",
+            "registerType": "holdingRegister",
+            "description": "Set communication timeout",
+            "defaultValue": "60",
+            "access": "WO"
+        }
+    ]
+}
