@@ -528,6 +528,130 @@
                             "defaultValue": 1
                         }
                     ]
+                },
+                {
+                    "id": "f2fe66d4-15c8-4b70-8cc1-2ac7061e765b",
+                    "displayName": "Compleo eBOX professional",
+                    "name": "compleoEBoxProfessional",
+                    "createMethods": ["discovery", "user"],
+                    "discoveryType": "weak",
+                    "interfaces": ["evchargerac", "connectable", "networkdevice"],
+                    "paramTypes": [
+                        {
+                            "id": "76aed273-6f16-4d34-b62b-88ee0391b659",
+                            "displayName": "MAC address",
+                            "name": "macAddress",
+                            "type": "QString",
+                            "inputType": "MacAddress",
+                            "defaultValue": "",
+                            "readOnly": true
+                        },
+                        {
+                            "id": "5d698403-3a44-4aeb-9faa-27589fa42a8a",
+                            "name": "address",
+                            "displayName": "Host address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "f15bc707-3f3f-4807-adf1-78f260182269",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "d0bef540-4ff9-418e-b791-e97e3d442232",
+                            "name": "port",
+                            "displayName": "Modbus TCP port",
+                            "type": "uint",
+                            "minValue": 1,
+                            "maxValue": 65535,
+                            "defaultValue": 502
+                        }
+                    ],
+                    "settingsTypes": [
+                        {
+                            "id": "8198623c-3d0a-47e9-b7a6-1172677352a3",
+                            "name": "phaseCount",
+                            "displayName": "Phase count",
+                            "type": "uint",
+                            "minValue": 1,
+                            "maxValue": 3,
+                            "defaultValue": 3
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "168ef818-8a32-4807-97d1-0d2790560c72",
+                            "displayName": "Connected",
+                            "displayNameEvent": "Connected changed",
+                            "name": "connected",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false
+                        },
+                        {
+                            "id": "182cdec6-c583-47b6-9888-c2b762d14afc",
+                            "name": "pluggedIn",
+                            "displayName": "Plugged in",
+                            "displayNameEvent": "Car plugged/unplugged",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "01898c36-88c0-4f3f-aaa8-06c86e35790f",
+                            "name": "power",
+                            "displayName": "Charging enabled",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "displayNameAction": "Enable/disable charging",
+                            "displayNameEvent": "Charging enabled changed",
+                            "writable": true
+                        },
+                        {
+                            "id": "d0cd2248-0927-41d3-baba-42b6f56994a9",
+                            "name": "charging",
+                            "displayName": "Charging",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "displayNameEvent": "Charging started/stopped"
+                        },
+                        {
+                            "id": "b52a85e5-2d4f-4339-960e-5566fb883dc9",
+                            "name": "maxChargingCurrent",
+                            "displayName": "Charging current",
+                            "displayNameEvent": "Charging current changed",
+                            "displayNameAction": "Set charging current",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "minValue": 6,
+                            "maxValue": 32,
+                            "stepSize": 0.1,
+                            "defaultValue": 6,
+                            "writable": true
+                        },
+                        {
+                            "id": "21c5b681-3874-43ac-8379-9515d42e3d86",
+                            "displayName": "Firmware version",
+                            "displayNameEvent": "Firmware version changed",
+                            "name": "firmwareVersion",
+                            "type": "QString",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "cc7d88a0-1fc8-4701-aafd-f9e33aebabc5",
+                            "name": "phaseCount",
+                            "displayName": "Phase count",
+                            "displayNameEvent": "Phase count changed",
+                            "type": "uint",
+                            "minValue": 1,
+                            "maxValue": 3,
+                            "defaultValue": 1
+                        }
+                    ]
                 }
             ]
         },
