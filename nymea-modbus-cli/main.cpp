@@ -25,6 +25,13 @@
 #include <QCoreApplication>
 #include <QCommandLineParser>
 #include <QCommandLineOption>
+#include <QCryptographicHash>
+#include <QElapsedTimer>
+#include <QSharedPointer>
+#include <QSslCertificateExtension>
+#include <QSslCipher>
+#include <QSslKey>
+#include <QSslSocket>
 
 #include <QDebug>
 #include <QObject>
@@ -33,6 +40,7 @@
 #include <QHostAddress>
 #include <QSerialPortInfo>
 #include <QModbusTcpClient>
+#include <modbustcpmaster.h>
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 #include <QModbusRtuSerialClient>
 #else
@@ -40,6 +48,8 @@
 #endif
 
 void sendRequest(quint16 modbusServerAddress, QModbusDataUnit::RegisterType registerType, quint16 registerAddress, quint16 length, const QByteArray &writeData, QModbusClient *client);
+void sendRequest(quint16 modbusServerAddress, QModbusDataUnit::RegisterType registerType, quint16 registerAddress, quint16 length, const QByteArray &writeData, ModbusTcpMaster *client);
+void printTlsInformation(ModbusTcpMaster *master, qint64 tcpConnectionTime, qint64 tlsHandshakeTime);
 QString exceptionCodeToString(QModbusPdu::ExceptionCode exception);
 
 int main(int argc, char *argv[])
@@ -47,7 +57,7 @@ int main(int argc, char *argv[])
     QCoreApplication application(argc, argv);
     application.setApplicationName("nymea-modbus-cli");
     application.setOrganizationName("nymea");
-    application.setApplicationVersion("1.3.0");
+    application.setApplicationVersion("1.4.0");
 
     QString description = QString("\nTool for testing and reading Modbus TCP or RTU registers.\n\n");
     description.append(QString("Copyright %1 2016 - 2025 nymea GmbH <contact@nymea.io>\n\n").arg(QChar(0xA9)));
@@ -58,6 +68,8 @@ int main(int argc, char *argv[])
     description.append("-----------------------------------------\n");
     description.append("Example reading 2 holding registers from address 1000:\n");
     description.append("nymea-modbus-cli -a 192.168.0.10 -p 502 -r 1000 -l 2\n\n");
+    description.append("Example inspecting a TLS 1.2 endpoint without sending Modbus traffic:\n");
+    description.append("nymea-modbus-cli -a 192.168.0.10 --tls-info --tls-version 1.2\n\n");
 
 
     description.append("RTU\n");
@@ -89,6 +101,17 @@ int main(int argc, char *argv[])
     QCommandLineOption portOption(QStringList() << "p" << "port", QString("TCP: The port of the modbus TCP server. Default is 502."), "port");
     portOption.setDefaultValue("502");
     parser.addOption(portOption);
+
+    QCommandLineOption tlsOption(QStringList() << "tls", QString("TCP: Use Modbus over TLS. The default port is 802."));
+    parser.addOption(tlsOption);
+    QCommandLineOption tlsVersionOption(QStringList() << "tls-version", QString("TCP: TLS protocol to use: auto or 1.2. Default is auto."), "version", "auto");
+    parser.addOption(tlsVersionOption);
+    QCommandLineOption tlsFingerprintOption(QStringList() << "tls-fingerprint", QString("TCP: Accepted SHA-256 server certificate fingerprint."), "sha256");
+    parser.addOption(tlsFingerprintOption);
+    QCommandLineOption tlsServerNameOption(QStringList() << "tls-server-name", QString("TCP: TLS server name used for SNI."), "name");
+    parser.addOption(tlsServerNameOption);
+    QCommandLineOption tlsInfoOption(QStringList() << "tls-info", QString("TCP: Print TLS handshake and server certificate information without sending Modbus traffic."));
+    parser.addOption(tlsInfoOption);
 
     // RTU
     QCommandLineOption serialPortOption(QStringList() << "serial", QString("RTU: The serial port to use for the RTU communication."), "port");
@@ -143,6 +166,9 @@ int main(int argc, char *argv[])
 
     parser.process(application);
 
+    const bool useTls = parser.isSet(tlsOption) || parser.isSet(tlsInfoOption);
+    const bool tlsInfo = parser.isSet(tlsInfoOption);
+
     bool verbose = parser.isSet(debugOption);
     if (verbose) qDebug() << "Verbose debug print enabled";
 
@@ -156,6 +182,11 @@ int main(int argc, char *argv[])
     // Make sure we have either RTU, or TCP, not both or none
     if (parser.isSet(addressOption) && parser.isSet(serialPortOption)) {
         qCritical() << "Error: invalid paramter combination. Use either TCP connection by defining the \"address\" or RTU by defining the \"serial\" paramter, not both.";
+        exit(EXIT_FAILURE);
+    }
+
+    if (tlsInfo && parser.isSet(serialPortOption)) {
+        qCritical() << "Error: --tls-info can only be used with a TCP address.";
         exit(EXIT_FAILURE);
     }
 
@@ -202,7 +233,7 @@ int main(int argc, char *argv[])
     }
 
     quint16 registerAddress = parser.value(registerOption).toUInt(&valueOk);
-    if (!valueOk) {
+    if (!tlsInfo && !valueOk) {
         qCritical() << "Error: invalid register number:" << parser.value(registerOption);
         exit(EXIT_FAILURE);
     }
@@ -228,27 +259,76 @@ int main(int argc, char *argv[])
             exit(EXIT_FAILURE);
         }
 
-        quint16 port = parser.value(portOption).toUInt();
+        quint16 port = parser.isSet(portOption) ? parser.value(portOption).toUInt() : (useTls ? 802 : 502);
 
         qInfo().noquote() << "Connecting to" << QString("%1:%2").arg(address.toString()).arg(port) << "modbus server address:" << modbusServerAddress;
-        QModbusTcpClient *client = new QModbusTcpClient(nullptr);
-        client->setConnectionParameter(QModbusDevice::NetworkAddressParameter, address.toString());
-        client->setConnectionParameter(QModbusDevice::NetworkPortParameter, port);
+        ModbusTcpMaster *client = new ModbusTcpMaster(address, port, &application);
         client->setTimeout(3000);
         client->setNumberOfRetries(3);
 
-        QObject::connect(client, &QModbusTcpClient::stateChanged, &application, [=](QModbusDevice::State state){
-            if (verbose) qDebug() << "Connection state changed" << state;
-            if (state != QModbusDevice::ConnectedState)
+        const QSharedPointer<QElapsedTimer> connectionTimer(new QElapsedTimer);
+        const QSharedPointer<QElapsedTimer> handshakeTimer(new QElapsedTimer);
+        const QSharedPointer<qint64> tcpConnectionTime(new qint64(-1));
+        connectionTimer->start();
+
+        if (useTls) {
+            client->setTransport(ModbusTcpMaster::TransportTls);
+            client->setTlsServerName(parser.value(tlsServerNameOption));
+            if (!parser.value(tlsFingerprintOption).isEmpty()
+                && !client->setAcceptedPeerCertificateFingerprint(parser.value(tlsFingerprintOption))) {
+                qCritical() << "Error: invalid SHA-256 TLS fingerprint.";
+                exit(EXIT_FAILURE);
+            }
+
+            QSslConfiguration configuration = QSslConfiguration::defaultConfiguration();
+            const QString tlsVersion = parser.value(tlsVersionOption).toLower();
+            if (tlsVersion == "1.2") {
+                configuration.setProtocol(QSsl::TlsV1_2);
+            } else if (tlsVersion != "auto") {
+                qCritical() << "Error: invalid TLS version. Use auto or 1.2.";
+                exit(EXIT_FAILURE);
+            }
+            if (tlsInfo)
+                configuration.setSslOption(QSsl::SslOptionDisableSessionPersistence, false);
+            client->setTlsConfiguration(configuration);
+
+            QObject::connect(client, &ModbusTcpMaster::peerCertificateAvailable, &application,
+                             [client](const QSslCertificate &, const QString &fingerprint) {
+                qInfo().noquote() << "TLS peer certificate SHA-256:" << fingerprint;
+                if (client->acceptedPeerCertificateFingerprint().isEmpty())
+                    qInfo().noquote() << "Use --tls-fingerprint" << fingerprint
+                                      << "to pin this certificate if it is not CA-trusted.";
+            });
+            QObject::connect(client, &ModbusTcpMaster::tlsErrors, &application, [](const QList<QSslError> &errors) {
+                for (const QSslError &error : errors)
+                    qWarning().noquote() << "TLS certificate error:" << error.errorString();
+            });
+            QObject::connect(client, &ModbusTcpMaster::tcpConnectionEstablished, &application, [=]() {
+                *tcpConnectionTime = connectionTimer->elapsed();
+                handshakeTimer->start();
+            });
+            QObject::connect(client, &ModbusTcpMaster::tlsHandshakeFinished, &application,
+                             [=](const QSslConfiguration &) {
+                const qint64 handshakeTime = handshakeTimer->isValid() ? handshakeTimer->elapsed() : -1;
+                if (tlsInfo) {
+                    printTlsInformation(client, *tcpConnectionTime, handshakeTime);
+                    QCoreApplication::exit(EXIT_SUCCESS);
+                }
+            });
+        }
+
+        QObject::connect(client, &ModbusTcpMaster::connectionStateChanged, &application, [=](bool connected){
+            if (verbose) qDebug() << "Connection state changed" << connected;
+            if (!connected || tlsInfo)
                 return;
 
             qDebug() << "Connected successfully to" << QString("%1:%2").arg(address.toString()).arg(port);
             sendRequest(modbusServerAddress, registerType, registerAddress, length, writeData, client);
         });
 
-        QObject::connect(client, &QModbusTcpClient::errorOccurred, &application, [=](QModbusDevice::Error error){
-            qWarning() << "Modbus error occurred:" << error << client->errorString();
-            exit(EXIT_FAILURE);
+        QObject::connect(client, &ModbusTcpMaster::connectionErrorOccurred, &application, [=](QModbusDevice::Error error){
+            qWarning() << "Modbus connection error occurred:" << error << client->errorString();
+            QCoreApplication::exit(EXIT_FAILURE);
         });
 
         if (!client->connectDevice()) {
@@ -349,7 +429,8 @@ int main(int argc, char *argv[])
     return application.exec();
 }
 
-void sendRequest(quint16 modbusServerAddress, QModbusDataUnit::RegisterType registerType, quint16 registerAddress, quint16 length, const QByteArray &writeData, QModbusClient *client)
+template <typename Client>
+void sendRequestInternal(quint16 modbusServerAddress, QModbusDataUnit::RegisterType registerType, quint16 registerAddress, quint16 length, const QByteArray &writeData, Client *client)
 {
     if (writeData.isEmpty()) {
         qDebug() << "Reading from modbus server address" << modbusServerAddress << registerType << "register:" << registerAddress << "Length:" << length;
@@ -448,6 +529,78 @@ void sendRequest(quint16 modbusServerAddress, QModbusDataUnit::RegisterType regi
                 qCritical()  << "Modbus reply error occurred" << error << reply->errorString();
             }
         });
+    }
+}
+
+void sendRequest(quint16 modbusServerAddress, QModbusDataUnit::RegisterType registerType, quint16 registerAddress, quint16 length, const QByteArray &writeData, QModbusClient *client)
+{
+    sendRequestInternal(modbusServerAddress, registerType, registerAddress, length, writeData, client);
+}
+
+void sendRequest(quint16 modbusServerAddress, QModbusDataUnit::RegisterType registerType, quint16 registerAddress, quint16 length, const QByteArray &writeData, ModbusTcpMaster *client)
+{
+    sendRequestInternal(modbusServerAddress, registerType, registerAddress, length, writeData, client);
+}
+
+static QString keyAlgorithmName(QSsl::KeyAlgorithm algorithm)
+{
+    switch (algorithm) {
+    case QSsl::Rsa: return QStringLiteral("RSA");
+    case QSsl::Dsa: return QStringLiteral("DSA");
+    case QSsl::Ec: return QStringLiteral("EC");
+    case QSsl::Dh: return QStringLiteral("DH");
+    case QSsl::Opaque: return QStringLiteral("opaque");
+    default: break;
+    }
+    return QStringLiteral("unknown");
+}
+
+void printTlsInformation(ModbusTcpMaster *master, qint64 tcpConnectionTime, qint64 tlsHandshakeTime)
+{
+    const QSslConfiguration configuration = master->negotiatedTlsConfiguration();
+    const QSslCipher cipher = configuration.sessionCipher();
+
+    qInfo().noquote() << "TLS information";
+    qInfo().noquote() << "  Endpoint:" << master->connectionUrl();
+    qInfo().noquote() << "  Server name (SNI):" << (master->tlsServerName().isEmpty() ? QStringLiteral("<none>") : master->tlsServerName());
+    qInfo().noquote() << "  TCP connection time:" << tcpConnectionTime << "ms";
+    qInfo().noquote() << "  TLS handshake time:" << tlsHandshakeTime << "ms";
+    qInfo().noquote() << "  TLS protocol:" << QSslSocket::sslLibraryVersionString() << "/ negotiated" << cipher.protocolString();
+    qInfo().noquote() << "  Cipher:" << cipher.name();
+    qInfo().noquote() << "  Cipher authentication:" << cipher.authenticationMethod();
+    qInfo().noquote() << "  Cipher key exchange:" << cipher.keyExchangeMethod();
+    qInfo().noquote() << "  Cipher encryption:" << cipher.encryptionMethod();
+    qInfo().noquote() << "  Cipher bits:" << cipher.usedBits() << "/" << cipher.supportedBits();
+    qInfo().noquote() << "  ALPN:" << (configuration.nextNegotiatedProtocol().isEmpty() ? QByteArray("<none>") : configuration.nextNegotiatedProtocol());
+    qInfo().noquote() << "  Session ticket received:" << !configuration.sessionTicket().isEmpty();
+    qInfo().noquote() << "  Session ticket lifetime hint:" << configuration.sessionTicketLifeTimeHint();
+    qInfo().noquote() << "  Qt TLS build library:" << QSslSocket::sslLibraryBuildVersionString();
+    qInfo().noquote() << "  Qt TLS runtime library:" << QSslSocket::sslLibraryVersionString();
+
+    const QSslKey ephemeralKey = configuration.ephemeralServerKey();
+    qInfo().noquote() << "  Ephemeral server key:"
+                      << (ephemeralKey.isNull() ? QStringLiteral("<not exposed>")
+                                                : QStringLiteral("%1 %2 bits").arg(keyAlgorithmName(ephemeralKey.algorithm())).arg(ephemeralKey.length()));
+
+    const QList<QSslCertificate> chain = configuration.peerCertificateChain();
+    qInfo().noquote() << "  Peer certificate chain entries:" << chain.size();
+    for (int i = 0; i < chain.size(); ++i) {
+        const QSslCertificate certificate = chain.at(i);
+        const QSslKey publicKey = certificate.publicKey();
+        qInfo().noquote() << QStringLiteral("  Certificate %1:").arg(i);
+        qInfo().noquote() << "    Subject CN:" << certificate.subjectInfo(QSslCertificate::CommonName).join(", ");
+        qInfo().noquote() << "    Subject organization:" << certificate.subjectInfo(QSslCertificate::Organization).join(", ");
+        qInfo().noquote() << "    Issuer CN:" << certificate.issuerInfo(QSslCertificate::CommonName).join(", ");
+        qInfo().noquote() << "    Serial:" << certificate.serialNumber();
+        qInfo().noquote() << "    Effective:" << certificate.effectiveDate().toString(Qt::ISODate);
+        qInfo().noquote() << "    Expires:" << certificate.expiryDate().toString(Qt::ISODate);
+        qInfo().noquote() << "    SHA-256:" << certificate.digest(QCryptographicHash::Sha256).toHex();
+        qInfo().noquote() << "    Public key:" << keyAlgorithmName(publicKey.algorithm()) << publicKey.length() << "bits";
+        const auto alternatives = certificate.subjectAlternativeNames();
+        for (auto it = alternatives.cbegin(); it != alternatives.cend(); ++it)
+            qInfo().noquote() << "    Subject alternative name:" << it.value();
+        for (const QSslCertificateExtension &extension : certificate.extensions())
+            qInfo().noquote() << "    Extension:" << extension.oid() << extension.name() << "critical:" << extension.isCritical();
     }
 }
 

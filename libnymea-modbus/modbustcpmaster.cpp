@@ -23,6 +23,9 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "modbustcpmaster.h"
+#include "modbustlstunnel_p.h"
+
+#include <QRegularExpression>
 
 Q_LOGGING_CATEGORY(dcModbusTcpMaster, "ModbusTcpMaster")
 
@@ -40,10 +43,18 @@ ModbusTcpMaster::ModbusTcpMaster(const QHostAddress &hostAddress, uint port, QOb
     connect(m_modbusTcpClient, &QModbusTcpClient::stateChanged, this, &ModbusTcpMaster::onModbusStateChanged);
     connect(m_modbusTcpClient, &QModbusTcpClient::errorOccurred, this, &ModbusTcpMaster::onModbusErrorOccurred);
 
+    setupTlsTunnel();
+
     m_reconnectTimer = new QTimer(this);
     m_reconnectTimer->setSingleShot(true);
     m_reconnectTimer->setInterval(4000);
-    connect(m_reconnectTimer, &QTimer::timeout, this, &ModbusTcpMaster::connectDevice);
+    connect(m_reconnectTimer, &QTimer::timeout, this, [this]() {
+        // QTimer::start(int) changes the persistent interval. Restore the
+        // normal backoff before attempting a connection after an immediate
+        // reconnect request.
+        m_reconnectTimer->setInterval(4000);
+        connectDevice();
+    });
 }
 
 ModbusTcpMaster::~ModbusTcpMaster()
@@ -72,7 +83,9 @@ void ModbusTcpMaster::setPort(uint port)
 
 QString ModbusTcpMaster::connectionUrl() const
 {
-    return QString("%1:%2").arg(m_hostAddress.toString()).arg(m_port);
+    return QString("%1%2:%3")
+        .arg(m_transport == TransportTls ? QStringLiteral("tls://") : QString())
+        .arg(m_hostAddress.toString()).arg(m_port);
 }
 
 void ModbusTcpMaster::setHostAddress(const QHostAddress &hostAddress)
@@ -80,43 +93,125 @@ void ModbusTcpMaster::setHostAddress(const QHostAddress &hostAddress)
     m_hostAddress = hostAddress;
 }
 
+ModbusTcpMaster::Transport ModbusTcpMaster::transport() const
+{
+    return m_transport;
+}
+
+void ModbusTcpMaster::setTransport(ModbusTcpMaster::Transport transport)
+{
+    m_transport = transport;
+}
+
+QSslConfiguration ModbusTcpMaster::tlsConfiguration() const
+{
+    return m_tlsConfiguration;
+}
+
+void ModbusTcpMaster::setTlsConfiguration(const QSslConfiguration &configuration)
+{
+    m_tlsConfiguration = configuration;
+}
+
+QString ModbusTcpMaster::tlsServerName() const
+{
+    return m_tlsServerName;
+}
+
+void ModbusTcpMaster::setTlsServerName(const QString &serverName)
+{
+    m_tlsServerName = serverName;
+}
+
+QString ModbusTcpMaster::acceptedPeerCertificateFingerprint() const
+{
+    return m_acceptedPeerCertificateFingerprint;
+}
+
+bool ModbusTcpMaster::setAcceptedPeerCertificateFingerprint(const QString &fingerprint)
+{
+    QString normalized = fingerprint.toLower();
+    normalized.remove(QRegularExpression(QStringLiteral("[:\\s]")));
+    if (!normalized.isEmpty() && !QRegularExpression(QStringLiteral("^[0-9a-f]{64}$")).match(normalized).hasMatch())
+        return false;
+
+    m_acceptedPeerCertificateFingerprint = normalized;
+    if (m_tlsTunnel)
+        m_tlsTunnel->setAcceptedFingerprint(normalized);
+    return true;
+}
+
+QString ModbusTcpMaster::peerCertificateFingerprint() const
+{
+    return m_peerCertificateFingerprint;
+}
+
+QSslCertificate ModbusTcpMaster::peerCertificate() const
+{
+    return m_peerCertificate;
+}
+
+QSslConfiguration ModbusTcpMaster::negotiatedTlsConfiguration() const
+{
+    return m_negotiatedTlsConfiguration;
+}
+
 bool ModbusTcpMaster::connectDevice()
 {
-    // TCP connection to target device
     if (!m_modbusTcpClient)
         return false;
 
-    // Only connect if we are in the unconnected state
-    if (m_modbusTcpClient->state() == QModbusDevice::UnconnectedState) {
-        qCDebug(dcModbusTcpMaster()) << "Connecting modbus TCP client to" << connectionUrl();
-        m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkPortParameter, m_port);
-        m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkAddressParameter, m_hostAddress.toString());
-        m_modbusTcpClient->setTimeout(m_timeout);
-        m_modbusTcpClient->setNumberOfRetries(m_numberOfRetries);
-        return m_modbusTcpClient->connectDevice();
-    } else if (m_modbusTcpClient->state() != QModbusDevice::ConnectedState && m_modbusTcpClient->state() != QModbusDevice::ConnectingState) {
-        // Restart the timer in case of connecting not finished yet or closing
-        qCDebug(dcModbusTcpMaster()) << "Starting the re-connect mechanism timer";
-        m_reconnectTimer->start();
-    } else {
+    m_connectionRequested = true;
+    m_tlsErrorString.clear();
+
+    if (m_tlsConnecting || m_modbusTcpClient->state() != QModbusDevice::UnconnectedState) {
         qCWarning(dcModbusTcpMaster()) << "Connect modbus TCP device" << connectionUrl() << "called, but the socket is currently in the" << m_modbusTcpClient->state();
+        return false;
     }
 
-    return false;
+    qCDebug(dcModbusTcpMaster()) << "Connecting modbus client to" << connectionUrl();
+    if (m_transport == TransportTls) {
+        m_tlsConnecting = true;
+        m_peerCertificate = QSslCertificate();
+        m_peerCertificateFingerprint.clear();
+        m_negotiatedTlsConfiguration = QSslConfiguration();
+        m_tlsTunnel->start(m_hostAddress, static_cast<quint16>(m_port), m_tlsServerName,
+                           m_tlsConfiguration, m_acceptedPeerCertificateFingerprint);
+        return true;
+    }
+
+    connectModbusClient(m_hostAddress, static_cast<quint16>(m_port));
+    return m_modbusTcpClient->connectDevice();
 }
 
 void ModbusTcpMaster::disconnectDevice()
 {
-    // Stop the reconnect timer since disconnect was explicitly called
+    m_connectionRequested = false;
+    m_tlsConnecting = false;
+    m_immediateReconnectRequested = false;
     m_reconnectTimer->stop();
+    m_reconnectTimer->setInterval(4000);
     m_modbusTcpClient->disconnectDevice();
+    if (m_tlsTunnel)
+        m_tlsTunnel->stop();
 }
 
 bool ModbusTcpMaster::reconnectDevice()
 {
     qCWarning(dcModbusTcpMaster()) << "Reconnecting modbus TCP device" << connectionUrl();
-    disconnectDevice();
-    return connectDevice();
+    m_connectionRequested = true;
+    m_tlsConnecting = false;
+    m_immediateReconnectRequested = true;
+    m_reconnectTimer->stop();
+    if (m_tlsTunnel)
+        m_tlsTunnel->stop();
+    if (m_modbusTcpClient->state() == QModbusDevice::UnconnectedState) {
+        m_immediateReconnectRequested = false;
+        scheduleReconnect(0);
+    } else {
+        m_modbusTcpClient->disconnectDevice();
+    }
+    return true;
 }
 
 bool ModbusTcpMaster::connected() const
@@ -148,11 +243,15 @@ void ModbusTcpMaster::setTimeout(int timeout)
 
 QString ModbusTcpMaster::errorString() const
 {
+    if (!m_tlsErrorString.isEmpty())
+        return m_tlsErrorString;
     return m_modbusTcpClient->errorString();
 }
 
 QModbusDevice::Error ModbusTcpMaster::error() const
 {
+    if (!m_tlsErrorString.isEmpty())
+        return QModbusDevice::ConnectionError;
     return m_modbusTcpClient->error();
 }
 
@@ -444,7 +543,86 @@ void ModbusTcpMaster::onModbusStateChanged(QModbusDevice::State state)
     // If the socket is unconnected (not connecting and not closing), start the reconnect timer
     if (m_connected) {
         m_reconnectTimer->stop();
-    } else if (state == QModbusDevice::UnconnectedState) {
-        m_reconnectTimer->start();
+        if (m_transport == TransportTcp)
+            emit tcpConnectionEstablished();
+    } else if (state == QModbusDevice::UnconnectedState && m_connectionRequested) {
+        const int delay = m_immediateReconnectRequested ? 0 : 4000;
+        m_immediateReconnectRequested = false;
+        scheduleReconnect(delay);
     }
+}
+
+void ModbusTcpMaster::setupTlsTunnel()
+{
+    m_tlsTunnel = new ModbusTlsTunnel(this);
+    connect(m_tlsTunnel, &ModbusTlsTunnel::tcpConnected, this, &ModbusTcpMaster::tcpConnectionEstablished);
+    connect(m_tlsTunnel, &ModbusTlsTunnel::peerCertificateAvailable, this,
+            [this](const QSslCertificate &certificate, const QString &fingerprint) {
+        m_peerCertificate = certificate;
+        m_peerCertificateFingerprint = fingerprint;
+        emit peerCertificateAvailable(certificate, fingerprint);
+    });
+    connect(m_tlsTunnel, &ModbusTlsTunnel::sslErrors, this, &ModbusTcpMaster::tlsErrors);
+    connect(m_tlsTunnel, &ModbusTlsTunnel::peerVerificationFailed, this,
+            [this](const QString &expected, const QString &actual) {
+        m_tlsErrorString = expected.isEmpty()
+            ? tr("The TLS peer certificate has not been accepted.")
+            : tr("The TLS peer certificate fingerprint does not match the accepted fingerprint.");
+        emit tlsPeerVerificationFailed(expected, actual);
+    });
+    connect(m_tlsTunnel, &ModbusTlsTunnel::encrypted, this,
+            [this](const QHostAddress &address, quint16 port, const QSslConfiguration &configuration) {
+        m_negotiatedTlsConfiguration = configuration;
+        emit tlsHandshakeFinished(configuration);
+        connectModbusClient(address, port);
+        const bool modbusConnectStarted = m_modbusTcpClient->connectDevice();
+        m_tlsConnecting = false;
+        if (!modbusConnectStarted) {
+            m_tlsErrorString = tr("Could not connect the Modbus client to the local TLS bridge.");
+            emit connectionErrorOccurred(QModbusDevice::ConnectionError);
+            m_tlsTunnel->stop();
+            scheduleReconnect();
+        }
+    });
+    connect(m_tlsTunnel, &ModbusTlsTunnel::tunnelError, this, [this](const QString &errorString) {
+        m_tlsConnecting = false;
+        if (m_tlsErrorString.isEmpty())
+            m_tlsErrorString = errorString;
+        emit connectionErrorOccurred(QModbusDevice::ConnectionError);
+        scheduleReconnect();
+    });
+    connect(m_tlsTunnel, &ModbusTlsTunnel::disconnected, this, &ModbusTcpMaster::handleTransportDisconnected);
+}
+
+void ModbusTcpMaster::connectModbusClient(const QHostAddress &address, quint16 port)
+{
+    m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkPortParameter, port);
+    m_modbusTcpClient->setConnectionParameter(QModbusDevice::NetworkAddressParameter, address.toString());
+    m_modbusTcpClient->setTimeout(m_timeout);
+    m_modbusTcpClient->setNumberOfRetries(m_numberOfRetries);
+}
+
+void ModbusTcpMaster::handleTransportDisconnected()
+{
+    m_tlsConnecting = false;
+    if (m_modbusTcpClient->state() != QModbusDevice::UnconnectedState) {
+        m_modbusTcpClient->disconnectDevice();
+        return;
+    }
+
+    if (m_connected) {
+        m_connected = false;
+        emit connectionStateChanged(false);
+    }
+    if (m_connectionRequested)
+        scheduleReconnect();
+}
+
+void ModbusTcpMaster::scheduleReconnect(int delay)
+{
+    if (!m_connectionRequested)
+        return;
+
+    m_reconnectTimer->setInterval(delay);
+    m_reconnectTimer->start();
 }

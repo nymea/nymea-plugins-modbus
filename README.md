@@ -10,6 +10,38 @@
 
 This repository contains modbus integrations for nymea. 
 
+## Modbus TCP over TLS
+
+`ModbusTcpMaster` supports plain TCP by default and an opt-in TLS transport. The
+existing API remains source-compatible, so current integrations keep using
+plain Modbus TCP until they explicitly select TLS.
+
+```cpp
+ModbusTcpMaster *master = new ModbusTcpMaster(address, 802, parent);
+master->setTransport(ModbusTcpMaster::TransportTls);
+
+QSslConfiguration tls = QSslConfiguration::defaultConfiguration();
+tls.setProtocol(QSsl::TlsV1_2);
+// tls.setLocalCertificate(clientCertificate); // Optional mutual TLS
+// tls.setPrivateKey(clientPrivateKey);
+master->setTlsConfiguration(tls);
+master->setAcceptedPeerCertificateFingerprint(serverCertificateSha256);
+master->connectDevice();
+```
+
+If no fingerprint is configured, Qt's normal CA-chain and hostname validation
+is used. A configured fingerprint pins the leaf certificate and intentionally
+overrides CA validation errors. `peerCertificateAvailable` is informational;
+an asynchronous consumer can verify and store the reported fingerprint, then
+call `reconnectDevice()` after applying it. The library never pauses a TLS
+handshake waiting for user interaction.
+
+Keeping the same client certificate and private key provides a stable client
+identity but does not by itself shorten a TLS 1.2 handshake. Session resumption
+would provide the relevant latency improvement; it is deliberately not enabled
+or persisted by the library yet. Callers should keep one connection open where
+possible instead of reconnecting for each Modbus operation.
+
 nymea (/[n'aiːmea:]/ - is an open source IoT edge server. The plug-in based architecture allows to integrate protocols and APIs. With the build-in rule engine you are able to interconnect devices or services available in the system and create individual scenes and behaviours for your environment.
 
 ## Documentation

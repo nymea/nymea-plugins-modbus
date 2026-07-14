@@ -30,5 +30,8 @@ gcc {
 SOURCES += \
         main.cpp
 
+INCLUDEPATH += $$PWD/../libnymea-modbus
+LIBS += -L$$shadowed($$PWD/../libnymea-modbus) -lnymea-modbus
+
 target.path = $$[QT_INSTALL_PREFIX]/bin
 INSTALLS += target

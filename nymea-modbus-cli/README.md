@@ -1,8 +1,31 @@
 # nymea-modbus-cli
 
-The nymea-modbus-cli tools is a command line tool for testing modbus TCP/RTU communication.
+The nymea-modbus-cli tool tests Modbus TCP, Modbus TCP over TLS, and Modbus RTU communication.
 
 The tool allows to read or write registers in a generic way.
+
+## TLS
+
+Use `--tls` for Modbus TCP over TLS. Port 802 is used when no explicit port is
+given. A server certificate can be pinned using its SHA-256 fingerprint:
+
+```
+nymea-modbus-cli -a 192.168.0.10 --tls --tls-version 1.2 \
+    --tls-fingerprint <sha256> -r 1000 -l 2
+```
+
+`--tls-info` performs one TLS handshake, prints the negotiated protocol and
+cipher, timing, certificate chain, public keys, SANs, and extensions, and exits
+without sending Modbus traffic:
+
+```
+nymea-modbus-cli -a 192.168.0.10 --tls-info --tls-version 1.2
+```
+
+Without `--tls-fingerprint`, normal CA and hostname validation is used. If that
+fails, the tool prints the observed leaf fingerprint so the operator can verify
+it out of band and retry with an explicit pin. It never saves certificates or
+TLS sessions and does not block the TLS handshake waiting for terminal input.
 
 Following options are available:
 

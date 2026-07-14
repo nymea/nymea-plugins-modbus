@@ -3,6 +3,14 @@ TEMPLATE = subdirs
 # Note: In the loop at the end of this file the plugin
 # dependency on the libs will be defined
 SUBDIRS += nymea-modbus-cli libnymea-modbus libnymea-sunspec
+nymea-modbus-cli.depends += libnymea-modbus
+
+disabletesting {
+    message("Building nymea-plugins-modbus without tests")
+} else {
+    SUBDIRS += tests
+    tests.depends += libnymea-modbus nymea-modbus-cli
+}
 
 PLUGIN_DIRS = \
     alphainnotec            \
