@@ -36,6 +36,58 @@ IntegrationPluginAmperfied::IntegrationPluginAmperfied()
 
 }
 
+IntegrationPluginAmperfied::ChargingCurrentControl &IntegrationPluginAmperfied::chargingCurrentControl(Thing *thing)
+{
+    if (!m_chargingCurrentControls.contains(thing)) {
+        ChargingCurrentControl control;
+        control.requestedCurrent = static_cast<quint16>(qRound(thing->stateValue("maxChargingCurrent").toDouble() * 10));
+        m_chargingCurrentControls.insert(thing, control);
+    }
+    return m_chargingCurrentControls[thing];
+}
+
+void IntegrationPluginAmperfied::setChargingCurrentError(Thing *thing, const QString &error)
+{
+    const QString value = error.isEmpty() ? QStringLiteral("No error") : error;
+    if (thing->stateValue("error").toString() != value)
+        thing->setStateValue("error", value);
+}
+
+void IntegrationPluginAmperfied::handleChargingCurrentUpdate(Thing *thing, quint16 chargingCurrent, quint16 watchdogTimeout, quint16 failSafeCurrent)
+{
+    ChargingCurrentControl &control = chargingCurrentControl(thing);
+    thing->setStateValue("power", chargingCurrent != 0);
+
+    if (!control.hasExpectedCurrent) {
+        // On the first update, adopt an active command from the wallbox. If charging is
+        // disabled, retain the cached current that will be applied when it is enabled.
+        if (chargingCurrent != 0) {
+            control.requestedCurrent = chargingCurrent;
+            thing->setStateValue("maxChargingCurrent", chargingCurrent / 10.0);
+        }
+        setChargingCurrentError(thing, QString());
+        return;
+    }
+
+    if (chargingCurrent == control.expectedCurrent) {
+        control.lastUnexpectedCurrent = -1;
+        setChargingCurrentError(thing, QString());
+        return;
+    }
+
+    if (control.lastUnexpectedCurrent == chargingCurrent)
+        return;
+
+    control.lastUnexpectedCurrent = chargingCurrent;
+    const QString error = QStringLiteral("Charging current command mismatch: requested %1 A, wallbox reports %2 A (watchdog %3 ms, fail-safe %4 A).")
+                              .arg(control.expectedCurrent / 10.0, 0, 'f', 1)
+                              .arg(chargingCurrent / 10.0, 0, 'f', 1)
+                              .arg(watchdogTimeout)
+                              .arg(failSafeCurrent / 10.0, 0, 'f', 1);
+    qCWarning(dcAmperfied()) << thing->name() << error;
+    setChargingCurrentError(thing, error);
+}
+
 void IntegrationPluginAmperfied::discoverThings(ThingDiscoveryInfo *info)
 {
     if (info->thingClassId() == energyControlThingClassId) {
@@ -201,15 +253,38 @@ void IntegrationPluginAmperfied::executeAction(ThingActionInfo *info)
 
         if (info->action().actionTypeId() == energyControlPowerActionTypeId) {
             bool power = info->action().paramValue(energyControlPowerActionPowerParamTypeId).toBool();
-            ModbusRtuReply *reply = connection->setChargingCurrent(power ? static_cast<quint16>(qRound(info->thing()->stateValue(energyControlMaxChargingCurrentStateTypeId).toDouble() * 10)) : 0);
-            connect(reply, &ModbusRtuReply::finished, info, [info, reply, power](){
-                if (reply->error() == ModbusRtuReply::NoError) {
-                    info->thing()->setStateValue(energyControlPowerStateTypeId, power);
-                    info->finish(Thing::ThingErrorNoError);
-                } else {
+            const quint16 expectedCurrent = power ? chargingCurrentControl(info->thing()).requestedCurrent : 0;
+            ModbusRtuReply *reply = connection->setChargingCurrent(expectedCurrent);
+            connect(reply, &ModbusRtuReply::finished, info, [this, info, connection, reply, power, expectedCurrent](){
+                if (reply->error() != ModbusRtuReply::NoError) {
                     qCWarning(dcAmperfied()) << "Error setting power:" << reply->error() << reply->errorString();
                     info->finish(Thing::ThingErrorHardwareFailure);
+                    return;
                 }
+
+                ModbusRtuReply *verificationReply = connection->readChargingCurrent();
+                connect(verificationReply, &ModbusRtuReply::finished, info, [this, info, verificationReply, power, expectedCurrent](){
+                    if (verificationReply->error() != ModbusRtuReply::NoError
+                            || verificationReply->result().isEmpty()
+                            || verificationReply->result().constFirst() != expectedCurrent) {
+                        const quint16 actualCurrent = verificationReply->result().isEmpty() ? 0 : verificationReply->result().constFirst();
+                        const QString error = QStringLiteral("Could not verify charging current command: expected %1 A, read %2 A.")
+                                                  .arg(expectedCurrent / 10.0, 0, 'f', 1)
+                                                  .arg(actualCurrent / 10.0, 0, 'f', 1);
+                        qCWarning(dcAmperfied()) << info->thing()->name() << error << verificationReply->errorString();
+                        setChargingCurrentError(info->thing(), error);
+                        info->finish(Thing::ThingErrorHardwareFailure);
+                        return;
+                    }
+
+                    ChargingCurrentControl &control = chargingCurrentControl(info->thing());
+                    control.expectedCurrent = expectedCurrent;
+                    control.hasExpectedCurrent = true;
+                    control.lastUnexpectedCurrent = -1;
+                    info->thing()->setStateValue(energyControlPowerStateTypeId, power);
+                    setChargingCurrentError(info->thing(), QString());
+                    info->finish(Thing::ThingErrorNoError);
+                });
             });
             return;
         }
@@ -217,16 +292,49 @@ void IntegrationPluginAmperfied::executeAction(ThingActionInfo *info)
         if (info->action().actionTypeId() == energyControlMaxChargingCurrentActionTypeId) {
             bool power = info->thing()->stateValue(energyControlPowerStateTypeId).toBool();
             double current = qRound(info->action().paramValue(energyControlMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toDouble() * 10) / 10.0;
-            ModbusRtuReply *reply = connection->setChargingCurrent(power ? static_cast<quint16>(qRound(current * 10)) : 0);
-            connect(reply, &ModbusRtuReply::finished, info, [info, reply, current](){
-                if (reply->error() == ModbusRtuReply::NoError) {
-                    info->thing()->setStateValue(energyControlMaxChargingCurrentStateTypeId, current);
-                    info->finish(Thing::ThingErrorNoError);
-                } else {
-                    qCWarning(dcAmperfied()) << "Error setting power:" << reply->error() << reply->errorString();
+            const quint16 expectedCurrent = static_cast<quint16>(qRound(current * 10));
+            if (!power) {
+                chargingCurrentControl(info->thing()).requestedCurrent = expectedCurrent;
+                qCInfo(dcAmperfied()) << info->thing()->name() << "Stored charging current" << current << "A; application is deferred because charging is disabled.";
+                info->thing()->setStateValue(energyControlMaxChargingCurrentStateTypeId, current);
+                info->finish(Thing::ThingErrorNoError);
+                return;
+            }
+
+            ModbusRtuReply *reply = connection->setChargingCurrent(expectedCurrent);
+            connect(reply, &ModbusRtuReply::finished, info, [this, info, connection, reply, current, expectedCurrent](){
+                if (reply->error() != ModbusRtuReply::NoError) {
+                    qCWarning(dcAmperfied()) << "Error setting charging current:" << reply->error() << reply->errorString();
                     info->finish(Thing::ThingErrorHardwareFailure);
+                    return;
                 }
+
+                ModbusRtuReply *verificationReply = connection->readChargingCurrent();
+                connect(verificationReply, &ModbusRtuReply::finished, info, [this, info, verificationReply, current, expectedCurrent](){
+                    if (verificationReply->error() != ModbusRtuReply::NoError
+                            || verificationReply->result().isEmpty()
+                            || verificationReply->result().constFirst() != expectedCurrent) {
+                        const quint16 actualCurrent = verificationReply->result().isEmpty() ? 0 : verificationReply->result().constFirst();
+                        const QString error = QStringLiteral("Could not verify charging current command: expected %1 A, read %2 A.")
+                                                  .arg(expectedCurrent / 10.0, 0, 'f', 1)
+                                                  .arg(actualCurrent / 10.0, 0, 'f', 1);
+                        qCWarning(dcAmperfied()) << info->thing()->name() << error << verificationReply->errorString();
+                        setChargingCurrentError(info->thing(), error);
+                        info->finish(Thing::ThingErrorHardwareFailure);
+                        return;
+                    }
+
+                    ChargingCurrentControl &control = chargingCurrentControl(info->thing());
+                    control.requestedCurrent = expectedCurrent;
+                    control.expectedCurrent = expectedCurrent;
+                    control.hasExpectedCurrent = true;
+                    control.lastUnexpectedCurrent = -1;
+                    info->thing()->setStateValue(energyControlMaxChargingCurrentStateTypeId, current);
+                    setChargingCurrentError(info->thing(), QString());
+                    info->finish(Thing::ThingErrorNoError);
+                });
             });
+            return;
         }
 
     }
@@ -241,29 +349,81 @@ void IntegrationPluginAmperfied::executeAction(ThingActionInfo *info)
 
         if (actionType.name() == "power") {
             bool power = info->action().paramValue(actionType.paramTypes().findByName("power").id()).toBool();
-            double current = info->thing()->stateValue("maxChargingCurrent").toDouble();
-            QModbusReply *reply = connection->setChargingCurrent(power ? static_cast<quint16>(qRound(current * 10)) : 0);
-            connect(reply, &QModbusReply::finished, info, [info, reply, power](){
-                if (reply->error() == QModbusDevice::NoError) {
-                    info->thing()->setStateValue("power", power);
-                    info->finish(Thing::ThingErrorNoError);
-                } else {
+            const quint16 expectedCurrent = power ? chargingCurrentControl(info->thing()).requestedCurrent : 0;
+            QModbusReply *reply = connection->setChargingCurrent(expectedCurrent);
+            connect(reply, &QModbusReply::finished, info, [this, info, connection, reply, power, expectedCurrent](){
+                if (reply->error() != QModbusDevice::NoError) {
                     qCWarning(dcAmperfied()) << "Error setting power:" << reply->error() << reply->errorString();
                     info->finish(Thing::ThingErrorHardwareFailure);
+                    return;
                 }
+
+                QModbusReply *verificationReply = connection->readChargingCurrent();
+                connect(verificationReply, &QModbusReply::finished, info, [this, info, verificationReply, power, expectedCurrent](){
+                    const QModbusDataUnit result = verificationReply->result();
+                    const quint16 actualCurrent = result.valueCount() > 0 ? result.value(0) : 0;
+                    if (verificationReply->error() != QModbusDevice::NoError || result.valueCount() == 0 || actualCurrent != expectedCurrent) {
+                        const QString error = QStringLiteral("Could not verify charging current command: expected %1 A, read %2 A.")
+                                                  .arg(expectedCurrent / 10.0, 0, 'f', 1)
+                                                  .arg(actualCurrent / 10.0, 0, 'f', 1);
+                        qCWarning(dcAmperfied()) << info->thing()->name() << error << verificationReply->errorString();
+                        setChargingCurrentError(info->thing(), error);
+                        info->finish(Thing::ThingErrorHardwareFailure);
+                        return;
+                    }
+
+                    ChargingCurrentControl &control = chargingCurrentControl(info->thing());
+                    control.expectedCurrent = expectedCurrent;
+                    control.hasExpectedCurrent = true;
+                    control.lastUnexpectedCurrent = -1;
+                    info->thing()->setStateValue("power", power);
+                    setChargingCurrentError(info->thing(), QString());
+                    info->finish(Thing::ThingErrorNoError);
+                });
             });
         } else if (actionType.name() == "maxChargingCurrent") {
             bool power = info->thing()->stateValue("power").toBool();
-            double current = info->action().paramValue(actionType.paramTypes().findByName("maxChargingCurrent").id()).toDouble();
-            QModbusReply *reply = connection->setChargingCurrent(power ?static_cast<quint16>(qRound(current * 10)): 0);
-            connect(reply, &QModbusReply::finished, info, [info, reply, current](){
-                if (reply->error() == QModbusDevice::NoError) {
-                    info->thing()->setStateValue("maxChargingCurrent", current);
-                    info->finish(Thing::ThingErrorNoError);
-                } else {
-                    qCWarning(dcAmperfied()) << "Error setting power:" << reply->error() << reply->errorString();
+            double current = qRound(info->action().paramValue(actionType.paramTypes().findByName("maxChargingCurrent").id()).toDouble() * 10) / 10.0;
+            const quint16 expectedCurrent = static_cast<quint16>(qRound(current * 10));
+            if (!power) {
+                chargingCurrentControl(info->thing()).requestedCurrent = expectedCurrent;
+                qCInfo(dcAmperfied()) << info->thing()->name() << "Stored charging current" << current << "A; application is deferred because charging is disabled.";
+                info->thing()->setStateValue("maxChargingCurrent", current);
+                info->finish(Thing::ThingErrorNoError);
+                return;
+            }
+
+            QModbusReply *reply = connection->setChargingCurrent(expectedCurrent);
+            connect(reply, &QModbusReply::finished, info, [this, info, connection, reply, current, expectedCurrent](){
+                if (reply->error() != QModbusDevice::NoError) {
+                    qCWarning(dcAmperfied()) << "Error setting charging current:" << reply->error() << reply->errorString();
                     info->finish(Thing::ThingErrorHardwareFailure);
+                    return;
                 }
+
+                QModbusReply *verificationReply = connection->readChargingCurrent();
+                connect(verificationReply, &QModbusReply::finished, info, [this, info, verificationReply, current, expectedCurrent](){
+                    const QModbusDataUnit result = verificationReply->result();
+                    const quint16 actualCurrent = result.valueCount() > 0 ? result.value(0) : 0;
+                    if (verificationReply->error() != QModbusDevice::NoError || result.valueCount() == 0 || actualCurrent != expectedCurrent) {
+                        const QString error = QStringLiteral("Could not verify charging current command: expected %1 A, read %2 A.")
+                                                  .arg(expectedCurrent / 10.0, 0, 'f', 1)
+                                                  .arg(actualCurrent / 10.0, 0, 'f', 1);
+                        qCWarning(dcAmperfied()) << info->thing()->name() << error << verificationReply->errorString();
+                        setChargingCurrentError(info->thing(), error);
+                        info->finish(Thing::ThingErrorHardwareFailure);
+                        return;
+                    }
+
+                    ChargingCurrentControl &control = chargingCurrentControl(info->thing());
+                    control.requestedCurrent = expectedCurrent;
+                    control.expectedCurrent = expectedCurrent;
+                    control.hasExpectedCurrent = true;
+                    control.lastUnexpectedCurrent = -1;
+                    info->thing()->setStateValue("maxChargingCurrent", current);
+                    setChargingCurrentError(info->thing(), QString());
+                    info->finish(Thing::ThingErrorNoError);
+                });
             });
         } else if (actionType.name() == "desiredPhaseCount") {
             uint desiredPhaseCount = info->thing()->stateValue("desiredPhaseCount").toBool();
@@ -299,6 +459,8 @@ void IntegrationPluginAmperfied::thingRemoved(Thing *thing)
 
     if (m_monitors.contains(thing))
         hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+
+    m_chargingCurrentControls.remove(thing);
 
     if (myThings().isEmpty() && m_pluginTimer) {
         hardwareManager()->pluginTimerManager()->unregisterTimer(m_pluginTimer);
@@ -350,15 +512,10 @@ void IntegrationPluginAmperfied::setupRtuConnection(ThingSetupInfo *info)
         }
     });
 
-    connect(connection, &AmperfiedModbusRtuConnection::updateFinished, thing, [connection, thing](){
+    connect(connection, &AmperfiedModbusRtuConnection::updateFinished, thing, [this, connection, thing](){
         qCDebug(dcAmperfied()) << "Updated:" << connection;
 
-        if (connection->chargingCurrent() == 0) {
-            thing->setStateValue(energyControlPowerStateTypeId, false);
-        } else {
-            thing->setStateValue(energyControlPowerStateTypeId, true);
-            thing->setStateValue(energyControlMaxChargingCurrentStateTypeId, connection->chargingCurrent() / 10.0);
-        }
+        handleChargingCurrentUpdate(thing, connection->chargingCurrent(), connection->watchdogTimeout(), connection->failSafeCurrent());
         thing->setStateMinMaxValues(energyControlMaxChargingCurrentStateTypeId, connection->minChargingCurrent(), connection->maxChargingCurrent());
         thing->setStateValue(energyControlCurrentPowerStateTypeId, connection->currentPower());
         thing->setStateValue(energyControlTotalEnergyConsumedStateTypeId, connection->totalEnergy() / 1000.0);
@@ -437,17 +594,12 @@ void IntegrationPluginAmperfied::setupTcpConnection(ThingSetupInfo *info)
         }
     });
 
-    connect(connection, &AmperfiedModbusTcpConnection::updateFinished, thing, [connection, thing](){
+    connect(connection, &AmperfiedModbusTcpConnection::updateFinished, thing, [this, connection, thing](){
         qCDebug(dcAmperfied()) << "Updated:" << connection;
 
         thing->setStateValue("connected", true);
 
-        if (connection->chargingCurrent() == 0) {
-            thing->setStateValue("power", false);
-        } else {
-            thing->setStateValue("power", true);
-            thing->setStateValue("maxChargingCurrent", connection->chargingCurrent() / 10.0);
-        }
+        handleChargingCurrentUpdate(thing, connection->chargingCurrent(), connection->watchdogTimeout(), connection->failSafeCurrent());
         thing->setStateMinMaxValues("maxChargingCurrent", connection->minChargingCurrent(), connection->maxChargingCurrent());
         thing->setStateValue("currentPower", connection->currentPower());
         thing->setStateValue("totalEnergyConsumed", connection->totalEnergy() / 1000.0);
@@ -494,5 +646,3 @@ void IntegrationPluginAmperfied::setupTcpConnection(ThingSetupInfo *info)
 
     connection->connectDevice();
 }
-
-
