@@ -237,6 +237,30 @@
     ],
     "registers": [
         {
+            "id": "watchdogTimeout",
+            "address": 257,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Modbus master watchdog timeout",
+            "unit": "ms",
+            "defaultValue": "0",
+            "access": "RW"
+        },
+        {
+            "id": "failSafeCurrent",
+            "address": 262,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Fail-safe charging current",
+            "unit": "1/10 A",
+            "defaultValue": "0",
+            "access": "RW"
+        },
+        {
             "id": "version",
             "address": 4,
             "size": 1,

@@ -107,6 +107,15 @@
                             "writable": true
                         },
                         {
+                            "id": "b17e6798-0581-49d9-83d8-0554c5e3d529",
+                            "name": "error",
+                            "displayName": "Control error",
+                            "type": "QString",
+                            "defaultValue": "No error",
+                            "cached": false,
+                            "suggestLogging": true
+                        },
+                        {
                             "id": "6fa264a2-96f4-43d1-b89f-06494830f225",
                             "name": "sessionEnergy",
                             "displayName": "Session energy",
@@ -220,6 +229,15 @@
                             "stepSize": 0.1,
                             "defaultValue": 6,
                             "writable": true
+                        },
+                        {
+                            "id": "7be4b173-1fc8-4e7a-bacf-49786bee6588",
+                            "name": "error",
+                            "displayName": "Control error",
+                            "type": "QString",
+                            "defaultValue": "No error",
+                            "cached": false,
+                            "suggestLogging": true
                         },
                         {
                             "id": "0a3fd1a6-b952-4dd1-95d1-25dfe3b0ce2f",
@@ -348,6 +366,15 @@
                             "writable": true
                         },
                         {
+                            "id": "495e321d-ce7f-4a7a-a17b-30e14024ddb6",
+                            "name": "error",
+                            "displayName": "Control error",
+                            "type": "QString",
+                            "defaultValue": "No error",
+                            "cached": false,
+                            "suggestLogging": true
+                        },
+                        {
                             "id": "55fe77bf-db76-40e2-955b-8afc62cfe19a",
                             "name": "sessionEnergy",
                             "displayName": "Session energy",
@@ -472,6 +499,15 @@
                             "stepSize": 0.1,
                             "defaultValue": 6,
                             "writable": true
+                        },
+                        {
+                            "id": "9fee12db-7f34-4aca-b850-a0841aabf5a9",
+                            "name": "error",
+                            "displayName": "Control error",
+                            "type": "QString",
+                            "defaultValue": "No error",
+                            "cached": false,
+                            "suggestLogging": true
                         },
                         {
                             "id": "4098c11e-e085-4a92-97f2-f5116a2011f2",

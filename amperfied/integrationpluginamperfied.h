@@ -51,17 +51,27 @@ public:
     void thingRemoved(Thing *thing) override;
 
 private:
+    struct ChargingCurrentControl {
+        quint16 requestedCurrent = 60;
+        quint16 expectedCurrent = 0;
+        int lastUnexpectedCurrent = -1;
+        bool hasExpectedCurrent = false;
+    };
+
     void setupRtuConnection(ThingSetupInfo *info);
     void setupTcpConnection(ThingSetupInfo *info);
+    ChargingCurrentControl &chargingCurrentControl(Thing *thing);
+    void handleChargingCurrentUpdate(Thing *thing, quint16 chargingCurrent, quint16 watchdogTimeout, quint16 failSafeCurrent);
+    void setChargingCurrentError(Thing *thing, const QString &error);
 
 private:
     PluginTimer *m_pluginTimer = nullptr;
     QHash<Thing *, AmperfiedModbusRtuConnection*> m_rtuConnections;
     QHash<Thing *, AmperfiedModbusTcpConnection*> m_tcpConnections;
     QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
+    QHash<Thing *, ChargingCurrentControl> m_chargingCurrentControls;
 
 };
 
 #endif // INTEGRATIONPLUGINHEIDELBERG_H
-
 
