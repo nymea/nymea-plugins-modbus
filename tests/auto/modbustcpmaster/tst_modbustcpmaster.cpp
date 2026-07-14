@@ -15,9 +15,10 @@
 class TlsModbusServer : public QTcpServer
 {
 public:
-    explicit TlsModbusServer(int handshakeDelay = 0, QObject *parent = nullptr)
+    explicit TlsModbusServer(int handshakeDelay = 0, bool requireClientCertificate = false, QObject *parent = nullptr)
         : QTcpServer(parent),
-          m_handshakeDelay(handshakeDelay)
+          m_handshakeDelay(handshakeDelay),
+          m_requireClientCertificate(requireClientCertificate)
     {
         QFile certificateFile(QStringLiteral(":/tls/test-cert.pem"));
         QFile keyFile(QStringLiteral(":/tls/test-key.pem"));
@@ -37,6 +38,7 @@ public:
     QSslCertificate certificate() const { return m_certificate; }
     int modbusRequests() const { return m_modbusRequests; }
     int connectionCount() const { return m_connectionCount; }
+    bool clientCertificateReceived() const { return m_clientCertificateReceived; }
 
 protected:
     void incomingConnection(qintptr socketDescriptor) override
@@ -48,8 +50,14 @@ protected:
         configuration.setProtocol(QSsl::TlsV1_2);
         configuration.setLocalCertificate(m_certificate);
         configuration.setPrivateKey(m_key);
+        if (m_requireClientCertificate) {
+            configuration.addCaCertificate(m_certificate);
+            configuration.setPeerVerifyMode(QSslSocket::VerifyPeer);
+        }
         socket->setSslConfiguration(configuration);
         connect(socket, &QSslSocket::encrypted, this, [this, socket]() {
+            if (!socket->peerCertificate().isNull())
+                m_clientCertificateReceived = true;
             connect(socket, &QSslSocket::readyRead, this, [this, socket]() {
                 m_buffers[socket].append(socket->readAll());
                 QByteArray &buffer = m_buffers[socket];
@@ -95,6 +103,8 @@ private:
     QSslKey m_key;
     QHash<QSslSocket *, QByteArray> m_buffers;
     int m_handshakeDelay = 0;
+    bool m_requireClientCertificate = false;
+    bool m_clientCertificateReceived = false;
     int m_connectionCount = 0;
     int m_modbusRequests = 0;
 };
@@ -317,6 +327,37 @@ private slots:
         QVERIFY2(output.contains("TLS handshake time:"), output.constData());
         QVERIFY2(output.contains("Peer certificate chain entries:"), output.constData());
         QCOMPARE(server.modbusRequests(), 0);
+    }
+
+    void cliPresentsTlsClientCertificate()
+    {
+        TlsModbusServer server(0, true);
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+        const QString fingerprint = QString::fromLatin1(server.certificate().digest(QCryptographicHash::Sha256).toHex());
+        const QString certificatePath = QFINDTESTDATA("test-cert.pem");
+        const QString keyPath = QFINDTESTDATA("test-key.pem");
+        QVERIFY(!certificatePath.isEmpty());
+        QVERIFY(!keyPath.isEmpty());
+
+        QProcess process;
+        process.setProcessChannelMode(QProcess::MergedChannels);
+        process.start(QStringLiteral("../../../nymea-modbus-cli/nymea-modbus-cli"),
+                      {QStringLiteral("--address"), QStringLiteral("127.0.0.1"),
+                       QStringLiteral("--port"), QString::number(server.serverPort()),
+                       QStringLiteral("--tls"), QStringLiteral("--tls-version"), QStringLiteral("1.2"),
+                       QStringLiteral("--tls-fingerprint"), fingerprint,
+                       QStringLiteral("--tls-client-certificate"), certificatePath,
+                       QStringLiteral("--tls-client-key"), keyPath,
+                       QStringLiteral("--register"), QStringLiteral("10")});
+        QVERIFY(process.waitForStarted());
+        while (!process.waitForFinished(50))
+            QCoreApplication::processEvents();
+
+        const QByteArray output = process.readAll();
+        QCOMPARE(process.exitCode(), 0);
+        QVERIFY2(server.clientCertificateReceived(), output.constData());
+        QCOMPARE(server.modbusRequests(), 1);
+        QVERIFY2(output.contains("Connected successfully"), output.constData());
     }
 };
 

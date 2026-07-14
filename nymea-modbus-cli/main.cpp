@@ -27,6 +27,7 @@
 #include <QCommandLineOption>
 #include <QCryptographicHash>
 #include <QElapsedTimer>
+#include <QFile>
 #include <QSharedPointer>
 #include <QSslCertificateExtension>
 #include <QSslCipher>
@@ -110,6 +111,12 @@ int main(int argc, char *argv[])
     parser.addOption(tlsFingerprintOption);
     QCommandLineOption tlsServerNameOption(QStringList() << "tls-server-name", QString("TCP: TLS server name used for SNI."), "name");
     parser.addOption(tlsServerNameOption);
+    QCommandLineOption tlsClientCertificateOption(QStringList() << "tls-client-certificate", QString("TCP: PEM client certificate (optionally followed by intermediate certificates)."), "file");
+    parser.addOption(tlsClientCertificateOption);
+    QCommandLineOption tlsClientKeyOption(QStringList() << "tls-client-key", QString("TCP: PEM EC or RSA client private key."), "file");
+    parser.addOption(tlsClientKeyOption);
+    QCommandLineOption tlsClientKeyPassphraseFileOption(QStringList() << "tls-client-key-passphrase-file", QString("TCP: File containing the client private-key passphrase."), "file");
+    parser.addOption(tlsClientKeyPassphraseFileOption);
     QCommandLineOption tlsInfoOption(QStringList() << "tls-info", QString("TCP: Print TLS handshake and server certificate information without sending Modbus traffic."));
     parser.addOption(tlsInfoOption);
 
@@ -168,6 +175,9 @@ int main(int argc, char *argv[])
 
     const bool useTls = parser.isSet(tlsOption) || parser.isSet(tlsInfoOption);
     const bool tlsInfo = parser.isSet(tlsInfoOption);
+    const bool hasTlsClientCertificate = parser.isSet(tlsClientCertificateOption);
+    const bool hasTlsClientKey = parser.isSet(tlsClientKeyOption);
+    const bool hasTlsClientKeyPassphraseFile = parser.isSet(tlsClientKeyPassphraseFileOption);
 
     bool verbose = parser.isSet(debugOption);
     if (verbose) qDebug() << "Verbose debug print enabled";
@@ -187,6 +197,21 @@ int main(int argc, char *argv[])
 
     if (tlsInfo && parser.isSet(serialPortOption)) {
         qCritical() << "Error: --tls-info can only be used with a TCP address.";
+        exit(EXIT_FAILURE);
+    }
+
+    if ((hasTlsClientCertificate || hasTlsClientKey || hasTlsClientKeyPassphraseFile) && !useTls) {
+        qCritical() << "Error: TLS client credentials require --tls or --tls-info.";
+        exit(EXIT_FAILURE);
+    }
+
+    if (hasTlsClientCertificate != hasTlsClientKey) {
+        qCritical() << "Error: --tls-client-certificate and --tls-client-key must be specified together.";
+        exit(EXIT_FAILURE);
+    }
+
+    if (hasTlsClientKeyPassphraseFile && !hasTlsClientKey) {
+        qCritical() << "Error: --tls-client-key-passphrase-file requires --tls-client-key.";
         exit(EXIT_FAILURE);
     }
 
@@ -290,6 +315,55 @@ int main(int argc, char *argv[])
             }
             if (tlsInfo)
                 configuration.setSslOption(QSsl::SslOptionDisableSessionPersistence, false);
+
+            if (hasTlsClientCertificate) {
+                QFile certificateFile(parser.value(tlsClientCertificateOption));
+                if (!certificateFile.open(QIODevice::ReadOnly)) {
+                    qCritical().noquote() << "Error: could not read TLS client certificate:"
+                                          << certificateFile.errorString();
+                    exit(EXIT_FAILURE);
+                }
+                const QList<QSslCertificate> certificateChain = QSslCertificate::fromData(certificateFile.readAll(), QSsl::Pem);
+                if (certificateChain.isEmpty()) {
+                    qCritical() << "Error: the TLS client certificate file does not contain a valid PEM certificate.";
+                    exit(EXIT_FAILURE);
+                }
+
+                QByteArray keyPassphrase;
+                if (hasTlsClientKeyPassphraseFile) {
+                    QFile passphraseFile(parser.value(tlsClientKeyPassphraseFileOption));
+                    if (!passphraseFile.open(QIODevice::ReadOnly)) {
+                        qCritical().noquote() << "Error: could not read TLS client key passphrase file:"
+                                              << passphraseFile.errorString();
+                        exit(EXIT_FAILURE);
+                    }
+                    keyPassphrase = passphraseFile.readAll();
+                    while (keyPassphrase.endsWith('\n') || keyPassphrase.endsWith('\r'))
+                        keyPassphrase.chop(1);
+                }
+
+                QFile keyFile(parser.value(tlsClientKeyOption));
+                if (!keyFile.open(QIODevice::ReadOnly)) {
+                    qCritical().noquote() << "Error: could not read TLS client private key:"
+                                          << keyFile.errorString();
+                    exit(EXIT_FAILURE);
+                }
+                const QByteArray encodedKey = keyFile.readAll();
+                QSslKey privateKey(encodedKey, QSsl::Ec, QSsl::Pem, QSsl::PrivateKey, keyPassphrase);
+                if (privateKey.isNull())
+                    privateKey = QSslKey(encodedKey, QSsl::Rsa, QSsl::Pem, QSsl::PrivateKey, keyPassphrase);
+                if (privateKey.isNull()) {
+                    qCritical() << "Error: the TLS client key is not a valid PEM EC or RSA private key, or its passphrase is incorrect.";
+                    exit(EXIT_FAILURE);
+                }
+                if (certificateChain.first().publicKey().algorithm() != privateKey.algorithm()) {
+                    qCritical() << "Error: the TLS client certificate and private key use different algorithms.";
+                    exit(EXIT_FAILURE);
+                }
+
+                configuration.setLocalCertificateChain(certificateChain);
+                configuration.setPrivateKey(privateKey);
+            }
             client->setTlsConfiguration(configuration);
 
             QObject::connect(client, &ModbusTcpMaster::peerCertificateAvailable, &application,

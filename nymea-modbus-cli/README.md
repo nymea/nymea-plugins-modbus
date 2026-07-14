@@ -14,6 +14,84 @@ nymea-modbus-cli -a 192.168.0.10 --tls --tls-version 1.2 \
     --tls-fingerprint <sha256> -r 1000 -l 2
 ```
 
+For a server requiring mutual TLS, provide the PEM client certificate and its
+private key. The certificate file may contain the leaf certificate followed by
+intermediate certificates:
+
+```
+nymea-modbus-cli -a 192.168.0.10 --tls --tls-version 1.2 \
+    --tls-server-name device.example.local \
+    --tls-fingerprint <sha256> \
+    --tls-client-certificate client-certificate.pem \
+    --tls-client-key client-key.pem \
+    -r 1000 -l 2
+```
+
+For an encrypted private key, put only its passphrase in a file readable by the
+current user and add `--tls-client-key-passphrase-file <file>`. Keeping the
+passphrase out of the command line prevents it from being exposed in process
+listings.
+
+### Self-signed certificate for TOFU
+
+The following commands create an EC P-256 private key and a self-signed client
+certificate using ECDSA with SHA-256. This is suitable for a server requesting
+an `ECDSA+SHA256` client certificate and enrolling it using trust on first use
+(TOFU):
+
+```
+umask 077
+openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-256 \
+    -out client-key.pem
+openssl pkey -in client-key.pem -pubout -out client-public-key.pem
+openssl req -new -x509 -sha256 -days 3650 \
+    -key client-key.pem \
+    -out client-certificate.pem \
+    -subj "/CN=nymea-modbus-client" \
+    -addext "basicConstraints=critical,CA:FALSE" \
+    -addext "keyUsage=critical,digitalSignature" \
+    -addext "extendedKeyUsage=clientAuth"
+```
+
+Keep both files stable after the device accepts the certificate for the first
+time. Replacing either the key or certificate changes the client identity and
+normally requires clearing or repeating the device's enrollment. Inspect the
+generated certificate with:
+
+```
+openssl x509 -in client-certificate.pem -noout -subject -issuer -dates -text
+openssl verify -CAfile client-certificate.pem client-certificate.pem
+```
+
+### CA-signed certificate
+
+If the server requires a certificate issued by an operator or manufacturer CA,
+generate the EC P-256 private key as above but create a certificate signing
+request instead of the self-signed certificate:
+
+```
+openssl req -new -sha256 \
+    -key client-key.pem \
+    -out client.csr \
+    -subj "/CN=nymea-modbus-client" \
+    -addext "basicConstraints=critical,CA:FALSE" \
+    -addext "keyUsage=critical,digitalSignature" \
+    -addext "extendedKeyUsage=clientAuth"
+```
+
+Send `client.csr` to the appropriate CA. Store the returned leaf certificate as
+`client-certificate.pem`; intermediate certificates may follow it in the same
+PEM file. Inspect and verify the returned certificate with:
+
+```
+openssl x509 -in client-certificate.pem -noout -subject -issuer -dates -text
+openssl verify -CAfile client-ca.pem client-certificate.pem
+```
+
+To generate an encrypted key instead, add `-aes-256-cbc` to the
+`openssl genpkey` command and use `--tls-client-key-passphrase-file` when invoking the
+CLI.
+
 `--tls-info` performs one TLS handshake, prints the negotiated protocol and
 cipher, timing, certificate chain, public keys, SANs, and extensions, and exits
 without sending Modbus traffic:
