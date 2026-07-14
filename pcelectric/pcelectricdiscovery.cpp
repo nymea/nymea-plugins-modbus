@@ -24,10 +24,18 @@
 
 #include "pcelectricdiscovery.h"
 #include "extern-plugininfo.h"
+#include <network/zeroconf/zeroconfservicebrowser.h>
 
-PcElectricDiscovery::PcElectricDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint16 port, quint16 modbusAddress, QObject *parent)
+PcElectricDiscovery::PcElectricDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery,
+                                         ZeroConfServiceBrowser *modbusServiceBrowser,
+                                         ZeroConfServiceBrowser *modbusTlsServiceBrowser,
+                                         quint16 port,
+                                         quint16 modbusAddress,
+                                         QObject *parent)
     : QObject{parent}
     , m_networkDeviceDiscovery{networkDeviceDiscovery}
+    , m_modbusServiceBrowser{modbusServiceBrowser}
+    , m_modbusTlsServiceBrowser{modbusTlsServiceBrowser}
     , m_port{port}
     , m_modbusAddress{modbusAddress}
 {}
@@ -41,6 +49,26 @@ void PcElectricDiscovery::startDiscovery()
 {
     qCInfo(dcPcElectric()) << "Discovery: Start searching for PCE wallboxes in the network...";
     m_startDateTime = QDateTime::currentDateTime();
+    m_discoveryRunning = true;
+
+    connect(m_modbusServiceBrowser, &ZeroConfServiceBrowser::serviceEntryAdded, this, [this](const ZeroConfServiceEntry &entry) {
+        checkZeroConfService(entry, false);
+    });
+    connect(m_modbusTlsServiceBrowser, &ZeroConfServiceBrowser::serviceEntryAdded, this, [this](const ZeroConfServiceEntry &entry) {
+        checkZeroConfService(entry, true);
+    });
+
+    foreach (const ZeroConfServiceEntry &entry, m_modbusServiceBrowser->serviceEntries())
+        checkZeroConfService(entry, false);
+    foreach (const ZeroConfServiceEntry &entry, m_modbusTlsServiceBrowser->serviceEntries())
+        checkZeroConfService(entry, true);
+
+    if (!m_networkDeviceDiscovery->available()) {
+        // ZeroConf does not depend on the subnet scanner. Give cached/new service
+        // entries enough time to complete their Modbus verification.
+        QTimer::singleShot(10000, this, &PcElectricDiscovery::finishDiscovery);
+        return;
+    }
 
     NetworkDeviceDiscoveryReply *discoveryReply = m_networkDeviceDiscovery->discover();
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::hostAddressDiscovered, this, &PcElectricDiscovery::checkNetworkDevice);
@@ -56,8 +84,42 @@ void PcElectricDiscovery::startDiscovery()
     });
 }
 
+void PcElectricDiscovery::checkZeroConfService(const ZeroConfServiceEntry &entry, bool tls)
+{
+    if (!m_discoveryRunning || entry.protocol() != QAbstractSocket::IPv4Protocol || !entry.name().startsWith("EV11.3-"))
+        return;
+
+    const QString serialNumber = entry.txt("serial");
+    const MacAddress macAddress(entry.txt("mac"));
+    const QString tlsValue = entry.txt("tls");
+    const quint16 expectedPort = tls ? 802 : 502;
+    const QString expectedServiceType = tls ? QStringLiteral("_modbus-tls._tcp") : QStringLiteral("_modbus._tcp");
+    const QString expectedTlsValue = tls ? QStringLiteral("1") : QStringLiteral("0");
+
+    if (entry.serviceType() != expectedServiceType || entry.port() != expectedPort || tlsValue != expectedTlsValue
+        || serialNumber.isEmpty() || macAddress.isNull()) {
+        qCDebug(dcPcElectric()) << "Discovery: Ignoring invalid PCE ZeroConf service" << entry;
+        return;
+    }
+
+    if (tls) {
+        // Keep the TLS endpoint associated with the serial number. A later change will use it
+        // when selecting the transport and configuring certificate verification.
+        m_zeroConfTlsEntries.insert(serialNumber, entry);
+        qCDebug(dcPcElectric()) << "Discovery: Found TLS-aware PCE ZeroConf endpoint" << entry;
+        return;
+    }
+
+    m_zeroConfEntries.insert(entry.hostAddress(), entry);
+    checkNetworkDevice(entry.hostAddress());
+}
+
 void PcElectricDiscovery::checkNetworkDevice(const QHostAddress &address)
 {
+    if (!m_discoveryRunning || address.isNull() || m_checkedAddresses.contains(address))
+        return;
+
+    m_checkedAddresses.insert(address);
     EV11ModbusTcpConnection *connection = new EV11ModbusTcpConnection(address, m_port, m_modbusAddress, this);
     m_connections.append(connection);
 
@@ -243,14 +305,33 @@ void PcElectricDiscovery::cleanupConnection(EV11ModbusTcpConnection *connection)
 
 void PcElectricDiscovery::finishDiscovery()
 {
+    m_discoveryRunning = false;
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
 
     for (int i = 0; i < m_potentialResults.length(); i++) {
-        const NetworkDeviceInfo networkDeviceInfo = m_networkDeviceInfos.get(m_potentialResults.at(i).address);
-        m_potentialResults[i].networkDeviceInfo = networkDeviceInfo;
+        NetworkDeviceInfo networkDeviceInfo = m_networkDeviceInfos.get(m_potentialResults.at(i).address);
 
         Result result = m_potentialResults.at(i);
-        if (networkDeviceInfo.macAddressInfos().hasMacAddress(result.registerMacAddress)) {
+        const ZeroConfServiceEntry tlsEntry = m_zeroConfTlsEntries.value(result.serialNumber);
+        result.tlsAvailable = tlsEntry.isValid() && MacAddress(tlsEntry.txt("mac")) == result.registerMacAddress;
+        bool zeroConfVerified = false;
+        const ZeroConfServiceEntry zeroConfEntry = m_zeroConfEntries.value(result.address);
+        if (zeroConfEntry.isValid()) {
+            const MacAddress advertisedMacAddress(zeroConfEntry.txt("mac"));
+            zeroConfVerified = advertisedMacAddress == result.registerMacAddress
+                               && zeroConfEntry.txt("serial") == result.serialNumber;
+            if (zeroConfVerified) {
+                if (networkDeviceInfo.address().isNull())
+                    networkDeviceInfo.setAddress(result.address);
+                networkDeviceInfo.setHostName(zeroConfEntry.hostName());
+                networkDeviceInfo.addMacAddress(advertisedMacAddress);
+                result.discoveredThroughZeroConf = true;
+            }
+        }
+
+        result.networkDeviceInfo = networkDeviceInfo;
+        const bool legacyVerified = networkDeviceInfo.macAddressInfos().hasMacAddress(result.registerMacAddress);
+        if (zeroConfVerified || legacyVerified) {
             qCInfo(dcPcElectric())
                 << "Discovery: --> Found EV11.3"
                 << (result.thingClassId == ev11NoMeterThingClassId ? "(No meter)" : "with meter")
@@ -258,10 +339,23 @@ void PcElectricDiscovery::finishDiscovery()
                 << result.serialNumber
                 << "Firmware revision:"
                 << result.firmwareRevision
+                << "TLS advertised:"
+                << result.tlsAvailable
                 << result.networkDeviceInfo
                 << result.digitalInputMode
                 << result.r37Mode;
-            m_results.append(result);
+            int existingResultIndex = -1;
+            for (int resultIndex = 0; resultIndex < m_results.size(); ++resultIndex) {
+                if (m_results.at(resultIndex).serialNumber == result.serialNumber) {
+                    existingResultIndex = resultIndex;
+                    break;
+                }
+            }
+            if (existingResultIndex < 0) {
+                m_results.append(result);
+            } else if (result.discoveredThroughZeroConf && !m_results.at(existingResultIndex).discoveredThroughZeroConf) {
+                m_results[existingResultIndex] = result;
+            }
         } else {
             qCWarning(dcPcElectric())
                 << "Discovery: --> Found potential EV11.3, but not adding to the results due to imcomplete MAC address check:"

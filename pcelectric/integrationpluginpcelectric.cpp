@@ -28,6 +28,8 @@
 
 #include <hardware/electricity.h>
 #include <hardwaremanager.h>
+#include <platform/platformzeroconfcontroller.h>
+#include <network/zeroconf/zeroconfservicebrowser.h>
 
 IntegrationPluginPcElectric::IntegrationPluginPcElectric() {}
 
@@ -46,18 +48,28 @@ void IntegrationPluginPcElectric::init()
 
     m_serialNumberParamTypes[ev11ThingClassId] = ev11ThingSerialNumberParamTypeId;
     m_serialNumberParamTypes[ev11NoMeterThingClassId] = ev11NoMeterThingSerialNumberParamTypeId;
+
+    m_modbusServiceBrowser = hardwareManager()->zeroConfController()->createServiceBrowser("_modbus._tcp");
+    m_modbusTlsServiceBrowser = hardwareManager()->zeroConfController()->createServiceBrowser("_modbus-tls._tcp");
+    connect(m_modbusServiceBrowser, &ZeroConfServiceBrowser::serviceEntryAdded, this, &IntegrationPluginPcElectric::handleZeroConfServiceAdded);
+    connect(m_modbusServiceBrowser, &ZeroConfServiceBrowser::serviceEntryRemoved, this, &IntegrationPluginPcElectric::handleZeroConfServiceRemoved);
 }
 
 void IntegrationPluginPcElectric::discoverThings(ThingDiscoveryInfo *info)
 {
-    if (!hardwareManager()->networkDeviceDiscovery()->available()) {
-        qCWarning(dcPcElectric()) << "The network discovery is not available on this platform.";
-        info->finish(Thing::ThingErrorUnsupportedFeature, QT_TR_NOOP("The network device discovery is not available."));
+    if (!hardwareManager()->networkDeviceDiscovery()->available() && !hardwareManager()->zeroConfController()->available()) {
+        qCWarning(dcPcElectric()) << "Neither network discovery nor ZeroConf is available on this platform.";
+        info->finish(Thing::ThingErrorUnsupportedFeature, QT_TR_NOOP("Network and ZeroConf discovery are not available."));
         return;
     }
 
     // Create a discovery with the info as parent for auto deleting the object once the discovery info is done
-    PcElectricDiscovery *discovery = new PcElectricDiscovery(hardwareManager()->networkDeviceDiscovery(), 502, 1, info);
+    PcElectricDiscovery *discovery = new PcElectricDiscovery(hardwareManager()->networkDeviceDiscovery(),
+                                                             m_modbusServiceBrowser,
+                                                             m_modbusTlsServiceBrowser,
+                                                             502,
+                                                             1,
+                                                             info);
     connect(discovery, &PcElectricDiscovery::discoveryFinished, info, [=]() {
         foreach (const PcElectricDiscovery::Result &result, discovery->results()) {
             if (info->thingClassId() != result.thingClassId)
@@ -76,9 +88,11 @@ void IntegrationPluginPcElectric::discoverThings(ThingDiscoveryInfo *info)
             }
 
             ParamList params;
-            params << Param(m_macParamTypes.value(result.thingClassId), result.networkDeviceInfo.thingParamValueMacAddress());
-            params << Param(m_hostNameParamTypes.value(result.thingClassId), result.networkDeviceInfo.thingParamValueHostName());
-            params << Param(m_addressParamTypes.value(result.thingClassId), result.networkDeviceInfo.thingParamValueAddress());
+            if (!result.discoveredThroughZeroConf) {
+                params << Param(m_macParamTypes.value(result.thingClassId), result.networkDeviceInfo.thingParamValueMacAddress());
+                params << Param(m_hostNameParamTypes.value(result.thingClassId), result.networkDeviceInfo.thingParamValueHostName());
+                params << Param(m_addressParamTypes.value(result.thingClassId), result.networkDeviceInfo.thingParamValueAddress());
+            }
             params << Param(m_serialNumberParamTypes.value(result.thingClassId), result.serialNumber);
             // Note: if we discover also the port and modbusaddress, we must fill them in from the discovery here, for now everywhere the defaults...
             descriptor.setParams(params);
@@ -120,6 +134,20 @@ void IntegrationPluginPcElectric::setupThing(ThingSetupInfo *info)
         });
     }
 
+    if (isZeroConfManaged(thing)) {
+        const ZeroConfServiceEntry entry = findZeroConfService(thing);
+        if (entry.isValid()) {
+            setupConnection(info, entry.hostAddress());
+        } else {
+            qCDebug(dcPcElectric()) << "Waiting for the ZeroConf service of" << thing->name();
+            connect(m_modbusServiceBrowser, &ZeroConfServiceBrowser::serviceEntryAdded, info, [this, info](const ZeroConfServiceEntry &entry) {
+                if (!m_connections.contains(info->thing()) && isMatchingZeroConfService(info->thing(), entry))
+                    setupConnection(info, entry.hostAddress());
+            });
+        }
+        return;
+    }
+
     NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(thing);
     if (!monitor) {
         qCWarning(dcPcElectric()) << "Could not create a valid network device monitor for the given parameters" << thing->params();
@@ -140,19 +168,19 @@ void IntegrationPluginPcElectric::setupThing(ThingSetupInfo *info)
     if (info->isInitialSetup()) {
         // Continue with setup only if we know that the network device is reachable
         if (monitor->reachable()) {
-            setupConnection(info);
+            setupConnection(info, monitor->networkDeviceInfo().address(), monitor);
         } else {
             // otherwise wait until we reach the networkdevice before setting up the device
             qCDebug(dcPcElectric()) << "Network device" << thing->name() << "is not reachable yet. Continue with the setup once reachable.";
             connect(monitor, &NetworkDeviceMonitor::reachableChanged, info, [=](bool reachable) {
                 if (reachable) {
                     qCDebug(dcPcElectric()) << "Network device" << thing->name() << "is now reachable. Continue with the setup...";
-                    setupConnection(info);
+                    setupConnection(info, monitor->networkDeviceInfo().address(), monitor);
                 }
             });
         }
     } else {
-        setupConnection(info);
+        setupConnection(info, monitor->networkDeviceInfo().address(), monitor);
     }
 
     return;
@@ -325,34 +353,35 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
     Q_ASSERT_X(false, "IntegrationPluginPcElectric::executeAction", QString("Unhandled action: %1").arg(info->action().actionTypeId().toString()).toLocal8Bit());
 }
 
-void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
+void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info, const QHostAddress &address, NetworkDeviceMonitor *monitor)
 {
     Thing *thing = info->thing();
-    NetworkDeviceMonitor *monitor = m_monitors.value(thing);
 
-    qCDebug(dcPcElectric()) << "Setting up PCE wallbox using" << monitor->networkDeviceInfo().address().toString();
+    qCDebug(dcPcElectric()) << "Setting up PCE wallbox using" << address.toString();
 
-    PceWallbox *connection = new PceWallbox(monitor->networkDeviceInfo().address(), 502, 1, this);
+    PceWallbox *connection = new PceWallbox(address, 502, 1, this);
     connect(info, &ThingSetupInfo::aborted, connection, &PceWallbox::deleteLater);
 
-    if (monitor->networkDeviceInfo().isComplete())
+    if (monitor && monitor->networkDeviceInfo().isComplete())
         connection->modbusTcpMaster()->setHostAddress(monitor->networkDeviceInfo().address());
 
     // Monitor reachability
-    connect(monitor, &NetworkDeviceMonitor::reachableChanged, thing, [thing, connection, monitor](bool reachable) {
-        if (!thing->setupComplete())
-            return;
+    if (monitor) {
+        connect(monitor, &NetworkDeviceMonitor::reachableChanged, thing, [thing, connection, monitor](bool reachable) {
+            if (!thing->setupComplete())
+                return;
 
-        qCDebug(dcPcElectric()) << "Network device monitor for" << thing->name() << (reachable ? "is now reachable" : "is not reachable any more");
-        if (reachable && !thing->stateValue("connected").toBool()) {
-            connection->modbusTcpMaster()->setHostAddress(monitor->networkDeviceInfo().address());
-            connection->connectDevice();
-        } else if (!reachable) {
-            // Note: We disable autoreconnect explicitly and we will
-            // connect the device once the monitor says it is reachable again
-            connection->disconnectDevice();
-        }
-    });
+            qCDebug(dcPcElectric()) << "Network device monitor for" << thing->name() << (reachable ? "is now reachable" : "is not reachable any more");
+            if (reachable && !thing->stateValue("connected").toBool()) {
+                connection->modbusTcpMaster()->setHostAddress(monitor->networkDeviceInfo().address());
+                connection->connectDevice();
+            } else if (!reachable) {
+                // Note: We disable autoreconnect explicitly and we will
+                // connect the device once the monitor says it is reachable again
+                connection->disconnectDevice();
+            }
+        });
+    }
 
     // Connection reachability
     connect(connection, &PceWallbox::reachableChanged, thing, [this, thing](bool reachable) {
@@ -374,6 +403,27 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
             thing->setStateValue("currentPhaseC", 0);
         }
     });
+
+    if (isZeroConfManaged(thing)) {
+        connect(connection, &PceWallbox::initializationFinished, thing, [this, thing, connection](bool success) {
+            if (!success)
+                return;
+
+            QByteArray serialRawData;
+            QDataStream stream(&serialRawData, QIODevice::WriteOnly);
+            stream << static_cast<quint16>(0);
+            for (int i = 0; i < connection->serialNumber().length(); ++i)
+                stream << connection->serialNumber().at(i);
+
+            const QString serialNumber = QString::number(serialRawData.toHex().toULongLong(nullptr, 16));
+            const QString expectedSerialNumber = thing->paramValue(m_serialNumberParamTypes.value(thing->thingClassId())).toString();
+            if (serialNumber != expectedSerialNumber) {
+                qCWarning(dcPcElectric()) << "The wallbox reached through ZeroConf has an unexpected serial number. Expected"
+                                          << expectedSerialNumber << "but received" << serialNumber;
+                connection->disconnectDevice();
+            }
+        });
+    }
 
     connect(connection, &PceWallbox::updateFinished, thing, [this, thing, connection]() {
         qCDebug(dcPcElectric()) << "Update finished for" << thing;
@@ -647,6 +697,64 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
     info->finish(Thing::ThingErrorNoError);
 
     // Connect right the way if the monitor indicates reachable, otherwise the connect will handle the connect later
-    if (monitor->reachable())
+    if (!monitor || monitor->reachable())
         connection->connectDevice();
+}
+
+bool IntegrationPluginPcElectric::isZeroConfManaged(Thing *thing) const
+{
+    return !thing->paramValue(m_serialNumberParamTypes.value(thing->thingClassId())).toString().isEmpty()
+           && thing->paramValue(m_addressParamTypes.value(thing->thingClassId())).toString().isEmpty()
+           && thing->paramValue(m_hostNameParamTypes.value(thing->thingClassId())).toString().isEmpty()
+           && thing->paramValue(m_macParamTypes.value(thing->thingClassId())).toString().isEmpty();
+}
+
+bool IntegrationPluginPcElectric::isMatchingZeroConfService(Thing *thing, const ZeroConfServiceEntry &entry) const
+{
+    return isZeroConfManaged(thing) && entry.protocol() == QAbstractSocket::IPv4Protocol
+           && entry.serviceType() == "_modbus._tcp" && entry.port() == 502
+           && entry.name().startsWith("EV11.3-") && entry.txt("tls") == "0"
+           && entry.txt("serial") == thing->paramValue(m_serialNumberParamTypes.value(thing->thingClassId())).toString();
+}
+
+ZeroConfServiceEntry IntegrationPluginPcElectric::findZeroConfService(Thing *thing) const
+{
+    foreach (const ZeroConfServiceEntry &entry, m_modbusServiceBrowser->serviceEntries()) {
+        if (isMatchingZeroConfService(thing, entry))
+            return entry;
+    }
+    return ZeroConfServiceEntry();
+}
+
+void IntegrationPluginPcElectric::handleZeroConfServiceAdded(const ZeroConfServiceEntry &entry)
+{
+    foreach (Thing *thing, myThings()) {
+        if (!isMatchingZeroConfService(thing, entry) || !m_connections.contains(thing))
+            continue;
+
+        PceWallbox *connection = m_connections.value(thing);
+        if (connection->modbusTcpMaster()->hostAddress() != entry.hostAddress()) {
+            qCInfo(dcPcElectric()) << "ZeroConf address changed for" << thing->name() << "to" << entry.hostAddress();
+            connection->modbusTcpMaster()->setHostAddress(entry.hostAddress());
+            connection->modbusTcpMaster()->reconnectDevice();
+        } else if (!connection->reachable()) {
+            connection->connectDevice();
+        }
+    }
+}
+
+void IntegrationPluginPcElectric::handleZeroConfServiceRemoved(const ZeroConfServiceEntry &entry)
+{
+    foreach (Thing *thing, myThings()) {
+        if (isMatchingZeroConfService(thing, entry) && m_connections.contains(thing)
+            && m_connections.value(thing)->modbusTcpMaster()->hostAddress() == entry.hostAddress()) {
+            const ZeroConfServiceEntry replacementEntry = findZeroConfService(thing);
+            if (replacementEntry.isValid()) {
+                handleZeroConfServiceAdded(replacementEntry);
+            } else {
+                qCInfo(dcPcElectric()) << "ZeroConf service disappeared for" << thing->name();
+                m_connections.value(thing)->disconnectDevice();
+            }
+        }
+    }
 }

@@ -28,14 +28,22 @@
 #include <QObject>
 
 #include <network/networkdevicediscovery.h>
+#include <network/zeroconf/zeroconfserviceentry.h>
 
 #include "ev11modbustcpconnection.h"
+
+class ZeroConfServiceBrowser;
 
 class PcElectricDiscovery : public QObject
 {
     Q_OBJECT
 public:
-    explicit PcElectricDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint16 port, quint16 modbusAddress, QObject *parent = nullptr);
+    explicit PcElectricDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery,
+                                 ZeroConfServiceBrowser *modbusServiceBrowser,
+                                 ZeroConfServiceBrowser *modbusTlsServiceBrowser,
+                                 quint16 port,
+                                 quint16 modbusAddress,
+                                 QObject *parent = nullptr);
 
     typedef struct Result
     {
@@ -47,6 +55,8 @@ public:
         NetworkDeviceInfo networkDeviceInfo;
         EV11ModbusTcpConnection::DigitalInputMode digitalInputMode;
         EV11ModbusTcpConnection::R37Mode r37Mode = EV11ModbusTcpConnection::R37ModeNoMonitoring;
+        bool discoveredThroughZeroConf = false;
+        bool tlsAvailable = false;
     } Result;
 
     QList<PcElectricDiscovery::Result> results() const;
@@ -59,6 +69,8 @@ signals:
 
 private:
     NetworkDeviceDiscovery *m_networkDeviceDiscovery = nullptr;
+    ZeroConfServiceBrowser *m_modbusServiceBrowser = nullptr;
+    ZeroConfServiceBrowser *m_modbusTlsServiceBrowser = nullptr;
     quint16 m_port;
     quint16 m_modbusAddress;
     QDateTime m_startDateTime;
@@ -68,10 +80,15 @@ private:
     QList<Result> m_potentialResults;
 
     QList<Result> m_results;
+    QSet<QHostAddress> m_checkedAddresses;
+    QHash<QHostAddress, ZeroConfServiceEntry> m_zeroConfEntries;
+    QHash<QString, ZeroConfServiceEntry> m_zeroConfTlsEntries;
+    bool m_discoveryRunning = false;
 
     QHash<EV11ModbusTcpConnection *, PcElectricDiscovery::Result> m_runningVerifications;
 
     void checkNetworkDevice(const QHostAddress &address);
+    void checkZeroConfService(const ZeroConfServiceEntry &entry, bool tls);
     void cleanupConnection(EV11ModbusTcpConnection *connection);
 
     void finishDiscovery();

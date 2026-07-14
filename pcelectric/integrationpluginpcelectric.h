@@ -35,6 +35,9 @@
 #include "extern-plugininfo.h"
 #include "pcewallbox.h"
 
+class ZeroConfServiceBrowser;
+class ZeroConfServiceEntry;
+
 class IntegrationPluginPcElectric : public IntegrationPlugin
 {
     Q_OBJECT
@@ -71,7 +74,15 @@ private:
     QHash<ThingClassId, ParamTypeId> m_macParamTypes;
     QHash<ThingClassId, ParamTypeId> m_serialNumberParamTypes;
 
-    void setupConnection(ThingSetupInfo *info);
+    ZeroConfServiceBrowser *m_modbusServiceBrowser = nullptr;
+    ZeroConfServiceBrowser *m_modbusTlsServiceBrowser = nullptr;
+
+    void setupConnection(ThingSetupInfo *info, const QHostAddress &address, NetworkDeviceMonitor *monitor = nullptr);
+    bool isZeroConfManaged(Thing *thing) const;
+    bool isMatchingZeroConfService(Thing *thing, const ZeroConfServiceEntry &entry) const;
+    ZeroConfServiceEntry findZeroConfService(Thing *thing) const;
+    void handleZeroConfServiceAdded(const ZeroConfServiceEntry &entry);
+    void handleZeroConfServiceRemoved(const ZeroConfServiceEntry &entry);
 };
 
 #endif // INTEGRATIONPLUGINPCELECTRIC_H
