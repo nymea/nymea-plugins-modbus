@@ -6,6 +6,7 @@
 #include <QModbusReply>
 #include <QProcess>
 #include <QSignalSpy>
+#include <QSslKey>
 #include <QSslSocket>
 #include <QTcpServer>
 #include <QTest>
