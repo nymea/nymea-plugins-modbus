@@ -1,7 +1,7 @@
 QT += core network serialbus testlib
 QT -= gui
 
-CONFIG += testcase console
+CONFIG += testcase console no_testcase_installs
 CONFIG -= app_bundle
 
 TARGET = tst_modbustcpmaster
