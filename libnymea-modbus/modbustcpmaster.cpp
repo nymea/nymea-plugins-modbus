@@ -59,9 +59,8 @@ ModbusTcpMaster::ModbusTcpMaster(const QHostAddress &hostAddress, uint port, QOb
 
 ModbusTcpMaster::~ModbusTcpMaster()
 {
-    if (m_reconnectTimer) {
+    if (m_reconnectTimer)
         m_reconnectTimer->stop();
-    }
 
     disconnectDevice();
 }
@@ -78,6 +77,10 @@ uint ModbusTcpMaster::port() const
 
 void ModbusTcpMaster::setPort(uint port)
 {
+    if (m_port == port)
+        return;
+
+    clearTlsSession();
     m_port = port;
 }
 
@@ -90,6 +93,10 @@ QString ModbusTcpMaster::connectionUrl() const
 
 void ModbusTcpMaster::setHostAddress(const QHostAddress &hostAddress)
 {
+    if (m_hostAddress == hostAddress)
+        return;
+
+    clearTlsSession();
     m_hostAddress = hostAddress;
 }
 
@@ -100,6 +107,10 @@ ModbusTcpMaster::Transport ModbusTcpMaster::transport() const
 
 void ModbusTcpMaster::setTransport(ModbusTcpMaster::Transport transport)
 {
+    if (m_transport == transport)
+        return;
+
+    clearTlsSession();
     m_transport = transport;
 }
 
@@ -110,6 +121,10 @@ QSslConfiguration ModbusTcpMaster::tlsConfiguration() const
 
 void ModbusTcpMaster::setTlsConfiguration(const QSslConfiguration &configuration)
 {
+    if (m_tlsConfiguration == configuration)
+        return;
+
+    clearTlsSession();
     m_tlsConfiguration = configuration;
 }
 
@@ -120,6 +135,10 @@ QString ModbusTcpMaster::tlsServerName() const
 
 void ModbusTcpMaster::setTlsServerName(const QString &serverName)
 {
+    if (m_tlsServerName == serverName)
+        return;
+
+    clearTlsSession();
     m_tlsServerName = serverName;
 }
 
@@ -130,14 +149,21 @@ QString ModbusTcpMaster::acceptedPeerCertificateFingerprint() const
 
 bool ModbusTcpMaster::setAcceptedPeerCertificateFingerprint(const QString &fingerprint)
 {
+    static const QRegularExpression separators(QStringLiteral("[:\\s]"));
+    static const QRegularExpression sha256(QStringLiteral("^[0-9a-f]{64}$"));
     QString normalized = fingerprint.toLower();
-    normalized.remove(QRegularExpression(QStringLiteral("[:\\s]")));
-    if (!normalized.isEmpty() && !QRegularExpression(QStringLiteral("^[0-9a-f]{64}$")).match(normalized).hasMatch())
+    normalized.remove(separators);
+    if (!normalized.isEmpty() && !sha256.match(normalized).hasMatch())
         return false;
 
+    if (m_acceptedPeerCertificateFingerprint == normalized)
+        return true;
+
+    clearTlsSession();
     m_acceptedPeerCertificateFingerprint = normalized;
     if (m_tlsTunnel)
         m_tlsTunnel->setAcceptedFingerprint(normalized);
+
     return true;
 }
 
@@ -154,6 +180,31 @@ QSslCertificate ModbusTcpMaster::peerCertificate() const
 QSslConfiguration ModbusTcpMaster::negotiatedTlsConfiguration() const
 {
     return m_negotiatedTlsConfiguration;
+}
+
+bool ModbusTcpMaster::tlsSessionResumptionEnabled() const
+{
+    return m_tlsSessionResumptionEnabled;
+}
+
+void ModbusTcpMaster::setTlsSessionResumptionEnabled(bool enabled)
+{
+    if (m_tlsSessionResumptionEnabled == enabled)
+        return;
+
+    m_tlsSessionResumptionEnabled = enabled;
+    if (!enabled)
+        clearTlsSession();
+}
+
+bool ModbusTcpMaster::tlsSessionAvailable() const
+{
+    return !m_tlsSessionTicket.isEmpty();
+}
+
+void ModbusTcpMaster::clearTlsSession()
+{
+    m_tlsSessionTicket.clear();
 }
 
 bool ModbusTcpMaster::connectDevice()
@@ -175,8 +226,15 @@ bool ModbusTcpMaster::connectDevice()
         m_peerCertificate = QSslCertificate();
         m_peerCertificateFingerprint.clear();
         m_negotiatedTlsConfiguration = QSslConfiguration();
+        QSslConfiguration configuration = m_tlsConfiguration;
+        configuration.setSslOption(QSsl::SslOptionDisableSessionPersistence,
+                                   !m_tlsSessionResumptionEnabled);
+
+        if (m_tlsSessionResumptionEnabled && !m_tlsSessionTicket.isEmpty())
+            configuration.setSessionTicket(m_tlsSessionTicket);
+
         m_tlsTunnel->start(m_hostAddress, static_cast<quint16>(m_port), m_tlsServerName,
-                           m_tlsConfiguration, m_acceptedPeerCertificateFingerprint);
+                           configuration, m_acceptedPeerCertificateFingerprint);
         return true;
     }
 
@@ -205,12 +263,14 @@ bool ModbusTcpMaster::reconnectDevice()
     m_reconnectTimer->stop();
     if (m_tlsTunnel)
         m_tlsTunnel->stop();
+
     if (m_modbusTcpClient->state() == QModbusDevice::UnconnectedState) {
         m_immediateReconnectRequested = false;
         scheduleReconnect(0);
     } else {
         m_modbusTcpClient->disconnectDevice();
     }
+
     return true;
 }
 
@@ -245,6 +305,7 @@ QString ModbusTcpMaster::errorString() const
 {
     if (!m_tlsErrorString.isEmpty())
         return m_tlsErrorString;
+
     return m_modbusTcpClient->errorString();
 }
 
@@ -563,6 +624,12 @@ void ModbusTcpMaster::setupTlsTunnel()
         emit peerCertificateAvailable(certificate, fingerprint);
     });
     connect(m_tlsTunnel, &ModbusTlsTunnel::sslErrors, this, &ModbusTcpMaster::tlsErrors);
+    connect(m_tlsTunnel, &ModbusTlsTunnel::sessionTicketReceived, this, [this](const QByteArray &ticket) {
+        if (!m_tlsSessionResumptionEnabled)
+            return;
+        m_tlsSessionTicket = ticket;
+        m_negotiatedTlsConfiguration.setSessionTicket(ticket);
+    });
     connect(m_tlsTunnel, &ModbusTlsTunnel::peerVerificationFailed, this,
             [this](const QString &expected, const QString &actual) {
         m_tlsErrorString = expected.isEmpty()
@@ -573,6 +640,8 @@ void ModbusTcpMaster::setupTlsTunnel()
     connect(m_tlsTunnel, &ModbusTlsTunnel::encrypted, this,
             [this](const QHostAddress &address, quint16 port, const QSslConfiguration &configuration) {
         m_negotiatedTlsConfiguration = configuration;
+        if (m_tlsSessionResumptionEnabled && !configuration.sessionTicket().isEmpty())
+            m_tlsSessionTicket = configuration.sessionTicket();
         emit tlsHandshakeFinished(configuration);
         connectModbusClient(address, port);
         const bool modbusConnectStarted = m_modbusTcpClient->connectDevice();
@@ -614,6 +683,7 @@ void ModbusTcpMaster::handleTransportDisconnected()
         m_connected = false;
         emit connectionStateChanged(false);
     }
+
     if (m_connectionRequested)
         scheduleReconnect();
 }

@@ -8,6 +8,7 @@
 #include <QSslConfiguration>
 #include <QSslError>
 #include <QTcpServer>
+#include <QTimer>
 
 class QSslSocket;
 class QTcpSocket;
@@ -29,6 +30,7 @@ signals:
     void sslErrors(const QList<QSslError> &errors);
     void peerVerificationFailed(const QString &expectedFingerprint, const QString &actualFingerprint);
     void encrypted(const QHostAddress &loopbackAddress, quint16 loopbackPort, const QSslConfiguration &configuration);
+    void sessionTicketReceived(const QByteArray &ticket);
     void tunnelError(const QString &errorString);
     void disconnected();
 
@@ -39,6 +41,7 @@ private:
     void acceptLoopbackConnection();
 
     QTcpServer m_server;
+    QTimer m_handshakeTimer;
     QSslSocket *m_sslSocket = nullptr;
     QTcpSocket *m_loopbackSocket = nullptr;
     QString m_acceptedFingerprint;

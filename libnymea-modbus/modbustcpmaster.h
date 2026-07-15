@@ -77,6 +77,11 @@ public:
     QSslCertificate peerCertificate() const;
     QSslConfiguration negotiatedTlsConfiguration() const;
 
+    bool tlsSessionResumptionEnabled() const;
+    void setTlsSessionResumptionEnabled(bool enabled);
+    bool tlsSessionAvailable() const;
+    void clearTlsSession();
+
     bool connected() const;
 
     int numberOfRetries() const;
@@ -127,6 +132,8 @@ protected:
     QString m_acceptedPeerCertificateFingerprint;
     QString m_peerCertificateFingerprint;
     QSslCertificate m_peerCertificate;
+    QByteArray m_tlsSessionTicket;
+    bool m_tlsSessionResumptionEnabled = true;
 
 private slots:
     void onModbusErrorOccurred(QModbusDevice::Error error);
