@@ -116,6 +116,7 @@ public:
 
     bool reconnectTimerActive() const { return m_reconnectTimer->isActive(); }
     int reconnectTimerInterval() const { return m_reconnectTimer->interval(); }
+    void installTestSession(const QByteArray &ticket) { m_tlsSessionTicket = ticket; }
 };
 
 class TestModbusTcpMaster : public QObject
@@ -123,6 +124,108 @@ class TestModbusTcpMaster : public QObject
     Q_OBJECT
 
 private slots:
+    void sessionResumptionDefaultsAndInvalidation()
+    {
+        InspectableModbusTcpMaster master(QHostAddress::LocalHost, 802);
+        QVERIFY(master.tlsSessionResumptionEnabled());
+        QVERIFY(!master.tlsSessionAvailable());
+
+        const auto seed = [&master]() {
+            master.installTestSession(QByteArrayLiteral("ticket"));
+            QVERIFY(master.tlsSessionAvailable());
+        };
+        seed();
+        master.setHostAddress(QHostAddress(QStringLiteral("127.0.0.2")));
+        QVERIFY(!master.tlsSessionAvailable());
+        seed();
+        master.setPort(803);
+        QVERIFY(!master.tlsSessionAvailable());
+        seed();
+        master.setTlsServerName(QStringLiteral("charger.local"));
+        QVERIFY(!master.tlsSessionAvailable());
+        seed();
+        QSslConfiguration configuration = QSslConfiguration::defaultConfiguration();
+        configuration.setProtocol(QSsl::TlsV1_2);
+        master.setTlsConfiguration(configuration);
+        QVERIFY(!master.tlsSessionAvailable());
+        seed();
+        master.setTransport(ModbusTcpMaster::TransportTls);
+        QVERIFY(!master.tlsSessionAvailable());
+        seed();
+        QVERIFY(master.setAcceptedPeerCertificateFingerprint(QString(64, QLatin1Char('a'))));
+        QVERIFY(!master.tlsSessionAvailable());
+        seed();
+        master.setTlsSessionResumptionEnabled(false);
+        QVERIFY(!master.tlsSessionResumptionEnabled());
+        QVERIFY(!master.tlsSessionAvailable());
+    }
+
+    void unusableSessionFallsBackToFullHandshake()
+    {
+        TlsModbusServer server;
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+
+        InspectableModbusTcpMaster master(QHostAddress::LocalHost, server.serverPort());
+        master.setTransport(ModbusTcpMaster::TransportTls);
+        QSslConfiguration configuration = QSslConfiguration::defaultConfiguration();
+        configuration.setProtocol(QSsl::TlsV1_2);
+        master.setTlsConfiguration(configuration);
+        QVERIFY(master.setAcceptedPeerCertificateFingerprint(
+            QString::fromLatin1(server.certificate().digest(QCryptographicHash::Sha256).toHex())));
+        master.installTestSession(QByteArrayLiteral("not-a-valid-session-ticket"));
+
+        QVERIFY(master.connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(master.connected(), 5000);
+        QCOMPARE(server.connectionCount(), 1);
+        QVERIFY(master.tlsSessionAvailable());
+        master.disconnectDevice();
+        QVERIFY(master.tlsSessionAvailable());
+
+        QVERIFY(master.connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(master.connected(), 5000);
+        QCOMPARE(server.connectionCount(), 2);
+        master.disconnectDevice();
+    }
+
+    void sessionTicketIsCaptured()
+    {
+        TlsModbusServer server;
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+
+        ModbusTcpMaster master(QHostAddress::LocalHost, server.serverPort());
+        master.setTransport(ModbusTcpMaster::TransportTls);
+        QSslConfiguration configuration = QSslConfiguration::defaultConfiguration();
+        configuration.setProtocol(QSsl::TlsV1_2);
+        master.setTlsConfiguration(configuration);
+        QVERIFY(master.setAcceptedPeerCertificateFingerprint(
+            QString::fromLatin1(server.certificate().digest(QCryptographicHash::Sha256).toHex())));
+
+        QVERIFY(master.connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(master.connected(), 5000);
+        QTRY_VERIFY_WITH_TIMEOUT(master.tlsSessionAvailable(), 5000);
+        master.disconnectDevice();
+    }
+
+    void disabledSessionResumptionDoesNotRetainTicket()
+    {
+        TlsModbusServer server;
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+
+        ModbusTcpMaster master(QHostAddress::LocalHost, server.serverPort());
+        master.setTransport(ModbusTcpMaster::TransportTls);
+        master.setTlsSessionResumptionEnabled(false);
+        QSslConfiguration configuration = QSslConfiguration::defaultConfiguration();
+        configuration.setProtocol(QSsl::TlsV1_2);
+        master.setTlsConfiguration(configuration);
+        QVERIFY(master.setAcceptedPeerCertificateFingerprint(
+            QString::fromLatin1(server.certificate().digest(QCryptographicHash::Sha256).toHex())));
+
+        QVERIFY(master.connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(master.connected(), 5000);
+        QVERIFY(!master.tlsSessionAvailable());
+        master.disconnectDevice();
+    }
+
     void fingerprintValidation()
     {
         ModbusTcpMaster master(QHostAddress::LocalHost, 802);
@@ -271,6 +374,21 @@ private slots:
 
         QTRY_VERIFY_WITH_TIMEOUT(master.reconnectTimerActive(), 5000);
         QCOMPARE(master.reconnectTimerInterval(), 4000);
+        master.disconnectDevice();
+    }
+
+    void stalledTlsHandshakeArmsBackoffTimer()
+    {
+        TlsModbusServer server(30000);
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+
+        InspectableModbusTcpMaster master(QHostAddress::LocalHost, server.serverPort());
+        master.setTransport(ModbusTcpMaster::TransportTls);
+        QVERIFY(master.connectDevice());
+
+        QTRY_VERIFY_WITH_TIMEOUT(master.reconnectTimerActive(), 12000);
+        QCOMPARE(master.reconnectTimerInterval(), 4000);
+        QVERIFY(master.errorString().contains(QStringLiteral("timed out")));
         master.disconnectDevice();
     }
 

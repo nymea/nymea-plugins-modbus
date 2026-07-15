@@ -49,6 +49,9 @@ public:
 
     bool update() override;
 
+    void setOperationalStartupEnabled(bool enabled);
+    void startOperationalMode();
+
     QueuedModbusReply *setChargingCurrentAsync(quint16 chargingCurrent); // mA
 
     QueuedModbusReply *setLedBrightnessAsync(quint16 percentage);
@@ -79,6 +82,7 @@ private:
     QQueue<QueuedModbusReply *> m_writeQueue;
     QQueue<QueuedModbusReply *> m_readQueue;
     bool m_aboutToDelete = false;
+    bool m_operationalStartupEnabled = true;
 
     void enqueueRequest(QueuedModbusReply *reply);
 

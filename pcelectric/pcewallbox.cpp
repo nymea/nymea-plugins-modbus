@@ -53,15 +53,29 @@ PceWallbox::PceWallbox(const QHostAddress &hostAddress, uint port, quint16 slave
     connect(this, &EV11ModbusTcpConnection::initializationFinished, this, [this](bool success) {
         if (success) {
             qCDebug(dcPcElectric()) << "Connection initialized successfully" << m_modbusTcpMaster->hostAddress().toString();
-            m_timer.start();
-
-            sendHeartbeat();
-            update();
+            if (m_operationalStartupEnabled)
+                startOperationalMode();
 
         } else {
             qCWarning(dcPcElectric()) << "Connection initialization failed for" << m_modbusTcpMaster->hostAddress().toString();
         }
     });
+}
+
+void PceWallbox::setOperationalStartupEnabled(bool enabled)
+{
+    m_operationalStartupEnabled = enabled;
+    if (!enabled)
+        m_timer.stop();
+}
+
+void PceWallbox::startOperationalMode()
+{
+    if (!reachable())
+        return;
+    m_timer.start();
+    sendHeartbeat();
+    update();
 }
 
 bool PceWallbox::update()
@@ -74,7 +88,7 @@ bool PceWallbox::update()
 
     // Make sure we only have one update call in the queue
     foreach (QueuedModbusReply *r, m_readQueue) {
-        if (r->dataUnit().startAddress() == readBlockInitInfosDataUnit().startAddress()) {
+        if (r->dataUnit().startAddress() == readBlockStatusDataUnit().startAddress()) {
             return true;
         }
     }

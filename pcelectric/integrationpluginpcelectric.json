@@ -2,7 +2,22 @@
     "name": "PcElectric",
     "displayName": "PC Electric",
     "id": "aa7ff833-a8e0-45cc-a1ef-65f05871f272",
-    "paramTypes":[ ],
+    "paramTypes":[
+        {
+            "id": "83362db4-6018-4e86-a827-cbb3aaedec63",
+            "name": "clientCertificatePath",
+            "displayName": "TLS client certificate path",
+            "type": "QString",
+            "defaultValue": "pcelectric/client-certificate.pem"
+        },
+        {
+            "id": "5a049452-c6e9-4033-909c-e5bd4cf3eebe",
+            "name": "clientKeyPath",
+            "displayName": "TLS client key path",
+            "type": "QString",
+            "defaultValue": "pcelectric/client-key.pem"
+        }
+    ],
     "vendors": [
         {
             "name": "PcElectric",
@@ -46,6 +61,14 @@
                             "displayName": "Serial number",
                             "type": "QString",
                             "defaultValue": ""
+                        },
+                        {
+                            "id": "f59fe845-c02c-47de-bd68-5a695fffd7c8",
+                            "name": "tlsAdvertised",
+                            "displayName": "TLS advertised",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "readOnly": true
                         }
                     ],
                     "settingsTypes": [
@@ -357,6 +380,14 @@
                             "displayName": "Serial number",
                             "type": "QString",
                             "defaultValue": ""
+                        },
+                        {
+                            "id": "d376b26e-c2c0-4344-a53e-a2ad3babb9c1",
+                            "name": "tlsAdvertised",
+                            "displayName": "TLS advertised",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "readOnly": true
                         }
                     ],
                     "settingsTypes": [

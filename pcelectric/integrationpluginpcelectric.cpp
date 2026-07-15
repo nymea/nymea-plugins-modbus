@@ -30,6 +30,28 @@
 #include <hardwaremanager.h>
 #include <platform/platformzeroconfcontroller.h>
 #include <network/zeroconf/zeroconfservicebrowser.h>
+#include <nymeasettings.h>
+
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
+#include <QProcess>
+#include <QSaveFile>
+#include <QTemporaryDir>
+
+namespace {
+bool certificateIsUsable(const QSslCertificate &certificate)
+{
+    const QDateTime now = QDateTime::currentDateTimeUtc();
+    return !certificate.isNull() && certificate.effectiveDate() <= now && certificate.expiryDate() > now;
+}
+
+bool pathExists(const QString &path)
+{
+    const QFileInfo info(path);
+    return info.exists() || info.isSymLink();
+}
+}
 
 IntegrationPluginPcElectric::IntegrationPluginPcElectric() {}
 
@@ -49,10 +71,22 @@ void IntegrationPluginPcElectric::init()
     m_serialNumberParamTypes[ev11ThingClassId] = ev11ThingSerialNumberParamTypeId;
     m_serialNumberParamTypes[ev11NoMeterThingClassId] = ev11NoMeterThingSerialNumberParamTypeId;
 
+    m_tlsAdvertisedParamTypes[ev11ThingClassId] = ev11ThingTlsAdvertisedParamTypeId;
+    m_tlsAdvertisedParamTypes[ev11NoMeterThingClassId] = ev11NoMeterThingTlsAdvertisedParamTypeId;
+
     m_modbusServiceBrowser = hardwareManager()->zeroConfController()->createServiceBrowser("_modbus._tcp");
     m_modbusTlsServiceBrowser = hardwareManager()->zeroConfController()->createServiceBrowser("_modbus-tls._tcp");
     connect(m_modbusServiceBrowser, &ZeroConfServiceBrowser::serviceEntryAdded, this, &IntegrationPluginPcElectric::handleZeroConfServiceAdded);
     connect(m_modbusServiceBrowser, &ZeroConfServiceBrowser::serviceEntryRemoved, this, &IntegrationPluginPcElectric::handleZeroConfServiceRemoved);
+    connect(m_modbusTlsServiceBrowser, &ZeroConfServiceBrowser::serviceEntryAdded, this, &IntegrationPluginPcElectric::handleZeroConfServiceAdded);
+    connect(m_modbusTlsServiceBrowser, &ZeroConfServiceBrowser::serviceEntryRemoved, this, &IntegrationPluginPcElectric::handleZeroConfServiceRemoved);
+    connect(this, &IntegrationPlugin::configValueChanged, this, [this](const ParamTypeId &paramTypeId) {
+        if (paramTypeId == pcElectricPluginClientCertificatePathParamTypeId
+            || paramTypeId == pcElectricPluginClientKeyPathParamTypeId) {
+            m_clientCertificate = QSslCertificate();
+            m_clientPrivateKey = QSslKey();
+        }
+    });
 }
 
 void IntegrationPluginPcElectric::discoverThings(ThingDiscoveryInfo *info)
@@ -94,6 +128,7 @@ void IntegrationPluginPcElectric::discoverThings(ThingDiscoveryInfo *info)
                 params << Param(m_addressParamTypes.value(result.thingClassId), result.networkDeviceInfo.thingParamValueAddress());
             }
             params << Param(m_serialNumberParamTypes.value(result.thingClassId), result.serialNumber);
+            params << Param(m_tlsAdvertisedParamTypes.value(result.thingClassId), result.tlsAvailable);
             // Note: if we discover also the port and modbusaddress, we must fill them in from the discovery here, for now everywhere the defaults...
             descriptor.setParams(params);
             info->addThingDescriptor(descriptor);
@@ -135,15 +170,21 @@ void IntegrationPluginPcElectric::setupThing(ThingSetupInfo *info)
     }
 
     if (isZeroConfManaged(thing)) {
-        const ZeroConfServiceEntry entry = findZeroConfService(thing);
+        const bool enrolled = !pluginStorage()->value(storagePrefix(thing) + "/serverFingerprint").toString().isEmpty();
+        const ZeroConfServiceEntry entry = findZeroConfService(thing, enrolled);
         if (entry.isValid()) {
-            setupConnection(info, entry.hostAddress());
+            setupConnection(info, entry.hostAddress(), nullptr, entry);
         } else {
             qCDebug(dcPcElectric()) << "Waiting for the ZeroConf service of" << thing->name();
-            connect(m_modbusServiceBrowser, &ZeroConfServiceBrowser::serviceEntryAdded, info, [this, info](const ZeroConfServiceEntry &entry) {
+            const auto setupAddedService = [this, info](const ZeroConfServiceEntry &entry) {
+                const bool enrolled = !pluginStorage()->value(storagePrefix(info->thing()) + "/serverFingerprint").toString().isEmpty();
+                if (entry.serviceType() == "_modbus-tls._tcp" && !enrolled)
+                    return;
                 if (!m_connections.contains(info->thing()) && isMatchingZeroConfService(info->thing(), entry))
-                    setupConnection(info, entry.hostAddress());
-            });
+                    setupConnection(info, entry.hostAddress(), nullptr, entry);
+            };
+            connect(m_modbusServiceBrowser, &ZeroConfServiceBrowser::serviceEntryAdded, info, setupAddedService);
+            connect(m_modbusTlsServiceBrowser, &ZeroConfServiceBrowser::serviceEntryAdded, info, setupAddedService);
         }
         return;
     }
@@ -227,6 +268,9 @@ void IntegrationPluginPcElectric::thingRemoved(Thing *thing)
 
     if (m_chargingCurrentStateBuffer.contains(thing))
         m_chargingCurrentStateBuffer.remove(thing);
+
+    pluginStorage()->remove(storagePrefix(thing));
+    pluginStorage()->sync();
 
     // Unregister related hardware resources
     if (m_monitors.contains(thing))
@@ -353,14 +397,44 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
     Q_ASSERT_X(false, "IntegrationPluginPcElectric::executeAction", QString("Unhandled action: %1").arg(info->action().actionTypeId().toString()).toLocal8Bit());
 }
 
-void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info, const QHostAddress &address, NetworkDeviceMonitor *monitor)
+void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info, const QHostAddress &address, NetworkDeviceMonitor *monitor,
+                                                  const ZeroConfServiceEntry &serviceEntry)
 {
     Thing *thing = info->thing();
 
     qCDebug(dcPcElectric()) << "Setting up PCE wallbox using" << address.toString();
 
+    ZeroConfServiceEntry selectedServiceEntry = serviceEntry;
+    const bool tlsEnrolled = !pluginStorage()->value(storagePrefix(thing) + "/serverFingerprint").toString().isEmpty();
+    if (tlsEnrolled && (!selectedServiceEntry.isValid() || selectedServiceEntry.serviceType() != "_modbus-tls._tcp"))
+        selectedServiceEntry = findZeroConfService(thing, true);
+    const bool tlsRequired = tlsEnrolled
+                             || (selectedServiceEntry.isValid() && selectedServiceEntry.serviceType() == "_modbus-tls._tcp");
+    if (tlsRequired && (m_clientCertificate.isNull() || m_clientPrivateKey.isNull())) {
+        QPointer<ThingSetupInfo> guardedInfo(info);
+        ensureClientIdentityAsync([this, guardedInfo, address, monitor, selectedServiceEntry](bool success, const QString &errorString) {
+            if (!guardedInfo)
+                return;
+            if (!success) {
+                qCWarning(dcPcElectric()) << errorString;
+                guardedInfo->finish(Thing::ThingErrorHardwareFailure,
+                                    QT_TR_NOOP("Could not configure the PCE Modbus TLS client identity."));
+                return;
+            }
+            setupConnection(guardedInfo, address, monitor, selectedServiceEntry);
+        });
+        return;
+    }
+
     PceWallbox *connection = new PceWallbox(address, 502, 1, this);
+    connection->setOperationalStartupEnabled(false);
     connect(info, &ThingSetupInfo::aborted, connection, &PceWallbox::deleteLater);
+
+    if (tlsRequired && !configureTls(thing, connection, selectedServiceEntry)) {
+        connection->deleteLater();
+        info->finish(Thing::ThingErrorHardwareFailure, QT_TR_NOOP("Could not configure the PCE Modbus TLS client identity."));
+        return;
+    }
 
     if (monitor && monitor->networkDeviceInfo().isComplete())
         connection->modbusTcpMaster()->setHostAddress(monitor->networkDeviceInfo().address());
@@ -404,26 +478,32 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info, const QH
         }
     });
 
-    if (isZeroConfManaged(thing)) {
-        connect(connection, &PceWallbox::initializationFinished, thing, [this, thing, connection](bool success) {
-            if (!success)
-                return;
+    connect(connection, &PceWallbox::initializationFinished, thing, [this, thing, connection](bool success) {
+        if (!success)
+            return;
 
-            QByteArray serialRawData;
-            QDataStream stream(&serialRawData, QIODevice::WriteOnly);
-            stream << static_cast<quint16>(0);
-            for (int i = 0; i < connection->serialNumber().length(); ++i)
-                stream << connection->serialNumber().at(i);
+        const QString expectedSerial = thing->paramValue(m_serialNumberParamTypes.value(thing->thingClassId())).toString();
+        if (!expectedSerial.isEmpty() && wallboxSerialNumber(connection) != expectedSerial) {
+            qCWarning(dcPcElectric()) << "Rejecting PCE endpoint with unexpected serial number";
+            if (pluginStorage()->value(storagePrefix(thing) + "/serverFingerprint").toString().isEmpty())
+                connection->modbusTcpMaster()->setAcceptedPeerCertificateFingerprint(QString());
+            connection->disconnectDevice();
+            return;
+        }
 
-            const QString serialNumber = QString::number(serialRawData.toHex().toULongLong(nullptr, 16));
-            const QString expectedSerialNumber = thing->paramValue(m_serialNumberParamTypes.value(thing->thingClassId())).toString();
-            if (serialNumber != expectedSerialNumber) {
-                qCWarning(dcPcElectric()) << "The wallbox reached through ZeroConf has an unexpected serial number. Expected"
-                                          << expectedSerialNumber << "but received" << serialNumber;
+        ModbusTcpMaster *master = connection->modbusTcpMaster();
+        if (master->transport() == ModbusTcpMaster::TransportTls) {
+            const QString fingerprint = master->peerCertificateFingerprint();
+            if (fingerprint.isEmpty()) {
                 connection->disconnectDevice();
+                return;
             }
-        });
-    }
+            pluginStorage()->setValue(storagePrefix(thing) + "/tlsRequired", true);
+            pluginStorage()->setValue(storagePrefix(thing) + "/serverFingerprint", fingerprint);
+            pluginStorage()->sync();
+        }
+        connection->startOperationalMode();
+    });
 
     connect(connection, &PceWallbox::updateFinished, thing, [this, thing, connection]() {
         qCDebug(dcPcElectric()) << "Update finished for" << thing;
@@ -711,14 +791,36 @@ bool IntegrationPluginPcElectric::isZeroConfManaged(Thing *thing) const
 
 bool IntegrationPluginPcElectric::isMatchingZeroConfService(Thing *thing, const ZeroConfServiceEntry &entry) const
 {
-    return isZeroConfManaged(thing) && entry.protocol() == QAbstractSocket::IPv4Protocol
-           && entry.serviceType() == "_modbus._tcp" && entry.port() == 502
-           && entry.name().startsWith("EV11.3-") && entry.txt("tls") == "0"
-           && entry.txt("serial") == thing->paramValue(m_serialNumberParamTypes.value(thing->thingClassId())).toString();
+    if (!isZeroConfManaged(thing) || entry.protocol() != QAbstractSocket::IPv4Protocol
+        || !entry.name().startsWith("EV11.3-")
+        || entry.txt("serial") != thing->paramValue(m_serialNumberParamTypes.value(thing->thingClassId())).toString())
+        return false;
+
+    if (entry.serviceType() == "_modbus._tcp")
+        return entry.port() == 502 && entry.txt("tls") == "0";
+    if (entry.serviceType() != "_modbus-tls._tcp" || entry.port() != 802 || entry.txt("tls") != "1")
+        return false;
+
+    const QString configuredMac = thing->paramValue(m_macParamTypes.value(thing->thingClassId())).toString();
+    if (!configuredMac.isEmpty())
+        return MacAddress(configuredMac) == MacAddress(entry.txt("mac"));
+    foreach (const ZeroConfServiceEntry &plainEntry, m_modbusServiceBrowser->serviceEntries()) {
+        if (plainEntry.txt("serial") == entry.txt("serial")
+            && MacAddress(plainEntry.txt("mac")) == MacAddress(entry.txt("mac"))
+            && plainEntry.hostAddress() == entry.hostAddress())
+            return true;
+    }
+    return !pluginStorage()->value(storagePrefix(thing) + "/serverFingerprint").toString().isEmpty();
 }
 
-ZeroConfServiceEntry IntegrationPluginPcElectric::findZeroConfService(Thing *thing) const
+ZeroConfServiceEntry IntegrationPluginPcElectric::findZeroConfService(Thing *thing, bool tlsPreferred) const
 {
+    if (tlsPreferred) {
+        foreach (const ZeroConfServiceEntry &entry, m_modbusTlsServiceBrowser->serviceEntries()) {
+            if (isMatchingZeroConfService(thing, entry))
+                return entry;
+        }
+    }
     foreach (const ZeroConfServiceEntry &entry, m_modbusServiceBrowser->serviceEntries()) {
         if (isMatchingZeroConfService(thing, entry))
             return entry;
@@ -733,9 +835,40 @@ void IntegrationPluginPcElectric::handleZeroConfServiceAdded(const ZeroConfServi
             continue;
 
         PceWallbox *connection = m_connections.value(thing);
+        const bool tlsEntry = entry.serviceType() == "_modbus-tls._tcp";
+        if (tlsEntry && connection->modbusTcpMaster()->transport() != ModbusTcpMaster::TransportTls) {
+            if (!connection->reachable()
+                || connection->modbusTcpMaster()->hostAddress() != entry.hostAddress())
+                continue;
+            if (m_clientCertificate.isNull() || m_clientPrivateKey.isNull()) {
+                QPointer<Thing> guardedThing(thing);
+                ensureClientIdentityAsync([this, guardedThing, entry](bool success, const QString &errorString) {
+                    if (!success) {
+                        qCWarning(dcPcElectric()) << errorString;
+                        return;
+                    }
+                    if (guardedThing && m_connections.contains(guardedThing))
+                        handleZeroConfServiceAdded(entry);
+                });
+                continue;
+            }
+            if (!configureTls(thing, connection, entry))
+                continue;
+            connection->disconnectDevice();
+            connection->modbusTcpMaster()->reconnectDevice();
+            continue;
+        }
+        if (!tlsEntry && connection->modbusTcpMaster()->transport() == ModbusTcpMaster::TransportTls)
+            continue;
+        const bool serverNameChanged = tlsEntry
+                                       && connection->modbusTcpMaster()->tlsServerName() != entry.hostName();
+        if (serverNameChanged)
+            connection->modbusTcpMaster()->setTlsServerName(entry.hostName());
         if (connection->modbusTcpMaster()->hostAddress() != entry.hostAddress()) {
             qCInfo(dcPcElectric()) << "ZeroConf address changed for" << thing->name() << "to" << entry.hostAddress();
             connection->modbusTcpMaster()->setHostAddress(entry.hostAddress());
+            connection->modbusTcpMaster()->reconnectDevice();
+        } else if (serverNameChanged) {
             connection->modbusTcpMaster()->reconnectDevice();
         } else if (!connection->reachable()) {
             connection->connectDevice();
@@ -748,13 +881,241 @@ void IntegrationPluginPcElectric::handleZeroConfServiceRemoved(const ZeroConfSer
     foreach (Thing *thing, myThings()) {
         if (isMatchingZeroConfService(thing, entry) && m_connections.contains(thing)
             && m_connections.value(thing)->modbusTcpMaster()->hostAddress() == entry.hostAddress()) {
-            const ZeroConfServiceEntry replacementEntry = findZeroConfService(thing);
+            const bool secured = m_connections.value(thing)->modbusTcpMaster()->transport() == ModbusTcpMaster::TransportTls;
+            const ZeroConfServiceEntry replacementEntry = findZeroConfService(thing, secured);
             if (replacementEntry.isValid()) {
-                handleZeroConfServiceAdded(replacementEntry);
+                if (!secured || replacementEntry.serviceType() == "_modbus-tls._tcp")
+                    handleZeroConfServiceAdded(replacementEntry);
+                else
+                    m_connections.value(thing)->disconnectDevice();
             } else {
                 qCInfo(dcPcElectric()) << "ZeroConf service disappeared for" << thing->name();
                 m_connections.value(thing)->disconnectDevice();
             }
         }
     }
+}
+
+QString IntegrationPluginPcElectric::storagePrefix(Thing *thing) const
+{
+    return QStringLiteral("pcelectric/%1").arg(thing->id().toString());
+}
+
+QString IntegrationPluginPcElectric::wallboxSerialNumber(PceWallbox *connection) const
+{
+    QByteArray serialRawData;
+    QDataStream stream(&serialRawData, QIODevice::WriteOnly);
+    stream << static_cast<quint16>(0);
+    for (int i = 0; i < connection->serialNumber().length(); ++i)
+        stream << connection->serialNumber().at(i);
+    return QString::number(serialRawData.toHex().toULongLong(nullptr, 16));
+}
+
+QString IntegrationPluginPcElectric::resolvedIdentityPath(const QString &configuredPath) const
+{
+    const QFileInfo info(configuredPath);
+    return info.isAbsolute() ? info.absoluteFilePath()
+                             : QDir(NymeaSettings::settingsPath()).absoluteFilePath(configuredPath);
+}
+
+bool IntegrationPluginPcElectric::ensureClientIdentity(QString *errorString)
+{
+    if (!m_clientCertificate.isNull() && !m_clientPrivateKey.isNull())
+        return true;
+
+    QString configuredCertificatePath = configValue(pcElectricPluginClientCertificatePathParamTypeId).toString();
+    QString configuredKeyPath = configValue(pcElectricPluginClientKeyPathParamTypeId).toString();
+    if (configuredCertificatePath.isEmpty())
+        configuredCertificatePath = QStringLiteral("pcelectric/client-certificate.pem");
+    if (configuredKeyPath.isEmpty())
+        configuredKeyPath = QStringLiteral("pcelectric/client-key.pem");
+    const QString certificatePath = resolvedIdentityPath(configuredCertificatePath);
+    const QString keyPath = resolvedIdentityPath(configuredKeyPath);
+    const bool certificateExists = pathExists(certificatePath);
+    const bool keyExists = pathExists(keyPath);
+    if (certificateExists != keyExists) {
+        if (errorString)
+            *errorString = tr("Only one PCE TLS identity file exists; refusing to replace it.");
+        return false;
+    }
+
+    if (!certificateExists)
+        return false;
+
+    QFile certificateFile(certificatePath);
+    QFile keyFile(keyPath);
+    if (!certificateFile.open(QIODevice::ReadOnly) || !keyFile.open(QIODevice::ReadOnly))
+        return false;
+    const QSslCertificate certificate(certificateFile.readAll(), QSsl::Pem);
+    const QByteArray keyData = keyFile.readAll();
+    QSslKey key(keyData, QSsl::Ec, QSsl::Pem, QSsl::PrivateKey);
+    if (key.isNull())
+        key = QSslKey(keyData, QSsl::Rsa, QSsl::Pem, QSsl::PrivateKey);
+    if (!certificateIsUsable(certificate) || key.isNull() || certificate.publicKey().algorithm() != key.algorithm()) {
+        if (errorString)
+            *errorString = tr("The PCE TLS certificate or key is invalid or uses a different algorithm.");
+        return false;
+    }
+    m_clientCertificate = certificate;
+    m_clientPrivateKey = key;
+    return true;
+}
+
+void IntegrationPluginPcElectric::ensureClientIdentityAsync(const std::function<void(bool, const QString &)> &callback)
+{
+    QString errorString;
+    if (ensureClientIdentity(&errorString)) {
+        callback(true, QString());
+        return;
+    }
+
+    QString configuredCertificatePath = configValue(pcElectricPluginClientCertificatePathParamTypeId).toString();
+    QString configuredKeyPath = configValue(pcElectricPluginClientKeyPathParamTypeId).toString();
+    if (configuredCertificatePath.isEmpty())
+        configuredCertificatePath = QStringLiteral("pcelectric/client-certificate.pem");
+    if (configuredKeyPath.isEmpty())
+        configuredKeyPath = QStringLiteral("pcelectric/client-key.pem");
+    const QString certificatePath = resolvedIdentityPath(configuredCertificatePath);
+    const QString keyPath = resolvedIdentityPath(configuredKeyPath);
+    if (pathExists(certificatePath) || pathExists(keyPath)) {
+        callback(false, errorString);
+        return;
+    }
+
+    m_identityCallbacks.append(callback);
+    if (m_identityProcess)
+        return;
+
+    m_identityTemporaryDirectory = new QTemporaryDir();
+    if (!m_identityTemporaryDirectory->isValid()) {
+        delete m_identityTemporaryDirectory;
+        m_identityTemporaryDirectory = nullptr;
+        const auto callbacks = m_identityCallbacks;
+        m_identityCallbacks.clear();
+        for (const auto &pendingCallback : callbacks)
+            pendingCallback(false, tr("Could not create temporary files for the PCE TLS identity."));
+        return;
+    }
+
+    const QString temporaryCertificate = m_identityTemporaryDirectory->filePath("client-certificate.pem");
+    const QString temporaryKey = m_identityTemporaryDirectory->filePath("client-key.pem");
+    m_identityProcess = new QProcess(this);
+    connect(m_identityProcess, &QProcess::errorOccurred, this, [this](QProcess::ProcessError processError) {
+        if (processError != QProcess::FailedToStart)
+            return;
+        const QString generationError = tr("OpenSSL could not be started: %1").arg(m_identityProcess->errorString());
+        m_identityProcess->deleteLater();
+        m_identityProcess = nullptr;
+        delete m_identityTemporaryDirectory;
+        m_identityTemporaryDirectory = nullptr;
+        const auto callbacks = m_identityCallbacks;
+        m_identityCallbacks.clear();
+        for (const auto &pendingCallback : callbacks)
+            pendingCallback(false, generationError);
+    });
+    connect(m_identityProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this,
+            [this, certificatePath, keyPath, temporaryCertificate, temporaryKey](int exitCode, QProcess::ExitStatus exitStatus) {
+        bool success = exitStatus == QProcess::NormalExit && exitCode == 0;
+        QString generationError;
+        if (!success) {
+            generationError = tr("OpenSSL could not generate the PCE TLS identity: %1")
+                                  .arg(QString::fromLocal8Bit(m_identityProcess->readAllStandardError()));
+        } else {
+            QFile generatedCertificate(temporaryCertificate);
+            QFile generatedKey(temporaryKey);
+            success = generatedCertificate.open(QIODevice::ReadOnly) && generatedKey.open(QIODevice::ReadOnly);
+            const QByteArray certificateData = success ? generatedCertificate.readAll() : QByteArray();
+            const QByteArray keyData = success ? generatedKey.readAll() : QByteArray();
+            const QSslCertificate certificate(certificateData, QSsl::Pem);
+            const QSslKey key(keyData, QSsl::Ec, QSsl::Pem, QSsl::PrivateKey);
+            success = success && certificateIsUsable(certificate) && !key.isNull()
+                      && certificate.publicKey().algorithm() == key.algorithm();
+            success = success && QDir().mkpath(QFileInfo(certificatePath).absolutePath())
+                      && QDir().mkpath(QFileInfo(keyPath).absolutePath());
+            if (success) {
+                QSaveFile keyFile(keyPath);
+                success = keyFile.open(QIODevice::WriteOnly) && keyFile.write(keyData) == keyData.size()
+                          && keyFile.commit();
+            }
+            if (success) {
+                QFile::setPermissions(keyPath, QFileDevice::ReadOwner | QFileDevice::WriteOwner);
+                QSaveFile certificateFile(certificatePath);
+                success = certificateFile.open(QIODevice::WriteOnly)
+                          && certificateFile.write(certificateData) == certificateData.size()
+                          && certificateFile.commit();
+                if (!success)
+                    QFile::remove(keyPath);
+            }
+            if (success) {
+                QFile::setPermissions(certificatePath, QFileDevice::ReadOwner | QFileDevice::WriteOwner);
+                success = ensureClientIdentity(&generationError);
+            }
+            if (!success && generationError.isEmpty())
+                generationError = tr("Could not store the generated PCE TLS identity.");
+        }
+
+        m_identityProcess->deleteLater();
+        m_identityProcess = nullptr;
+        delete m_identityTemporaryDirectory;
+        m_identityTemporaryDirectory = nullptr;
+        const auto callbacks = m_identityCallbacks;
+        m_identityCallbacks.clear();
+        for (const auto &pendingCallback : callbacks)
+            pendingCallback(success, generationError);
+    });
+    m_identityProcess->start(QStringLiteral("openssl"), {
+        QStringLiteral("req"), QStringLiteral("-x509"), QStringLiteral("-new"),
+        QStringLiteral("-newkey"), QStringLiteral("ec"), QStringLiteral("-pkeyopt"),
+        QStringLiteral("ec_paramgen_curve:P-256"), QStringLiteral("-nodes"),
+        QStringLiteral("-sha256"), QStringLiteral("-days"), QStringLiteral("3650"),
+        QStringLiteral("-subj"), QStringLiteral("/CN=nymea PCE Modbus client"),
+        QStringLiteral("-addext"), QStringLiteral("basicConstraints=critical,CA:FALSE"),
+        QStringLiteral("-addext"), QStringLiteral("keyUsage=critical,digitalSignature"),
+        QStringLiteral("-addext"), QStringLiteral("extendedKeyUsage=clientAuth"),
+        QStringLiteral("-keyout"), temporaryKey, QStringLiteral("-out"), temporaryCertificate
+    });
+}
+
+bool IntegrationPluginPcElectric::configureTls(Thing *thing, PceWallbox *connection, const ZeroConfServiceEntry &requestedEntry)
+{
+    QString errorString;
+    if (!ensureClientIdentity(&errorString)) {
+        qCWarning(dcPcElectric()) << errorString;
+        return false;
+    }
+
+    ZeroConfServiceEntry entry = requestedEntry;
+    if (!entry.isValid() || entry.serviceType() != "_modbus-tls._tcp") {
+        const ZeroConfServiceEntry liveEntry = findZeroConfService(thing, true);
+        if (liveEntry.serviceType() == "_modbus-tls._tcp")
+            entry = liveEntry;
+    }
+
+    ModbusTcpMaster *master = connection->modbusTcpMaster();
+    const QString storedFingerprint = pluginStorage()->value(storagePrefix(thing) + "/serverFingerprint").toString();
+    if (!storedFingerprint.isEmpty() && !master->setAcceptedPeerCertificateFingerprint(storedFingerprint))
+        return false;
+
+    master->setTransport(ModbusTcpMaster::TransportTls);
+    master->setPort(802);
+    if (entry.isValid() && entry.serviceType() == "_modbus-tls._tcp") {
+        master->setHostAddress(entry.hostAddress());
+        master->setTlsServerName(entry.hostName());
+    } else {
+        master->setTlsServerName(QString());
+    }
+    QSslConfiguration configuration = QSslConfiguration::defaultConfiguration();
+    configuration.setProtocol(QSsl::TlsV1_2);
+    configuration.setLocalCertificate(m_clientCertificate);
+    configuration.setPrivateKey(m_clientPrivateKey);
+    master->setTlsConfiguration(configuration);
+
+    if (storedFingerprint.isEmpty()) {
+        connect(master, &ModbusTcpMaster::peerCertificateAvailable, connection,
+                [master](const QSslCertificate &, const QString &fingerprint) {
+            if (master->acceptedPeerCertificateFingerprint().isEmpty())
+                master->setAcceptedPeerCertificateFingerprint(fingerprint);
+        }, Qt::DirectConnection);
+    }
+    return true;
 }

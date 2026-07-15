@@ -27,9 +27,14 @@
 
 #include <QDebug>
 #include <QObject>
+#include <QSslCertificate>
+#include <QSslKey>
+
+#include <functional>
 
 #include <integrations/integrationplugin.h>
 #include <network/networkdevicediscovery.h>
+#include <network/zeroconf/zeroconfserviceentry.h>
 #include <plugintimer.h>
 
 #include "extern-plugininfo.h"
@@ -37,6 +42,8 @@
 
 class ZeroConfServiceBrowser;
 class ZeroConfServiceEntry;
+class QProcess;
+class QTemporaryDir;
 
 class IntegrationPluginPcElectric : public IntegrationPlugin
 {
@@ -73,16 +80,30 @@ private:
     QHash<ThingClassId, ParamTypeId> m_hostNameParamTypes;
     QHash<ThingClassId, ParamTypeId> m_macParamTypes;
     QHash<ThingClassId, ParamTypeId> m_serialNumberParamTypes;
+    QHash<ThingClassId, ParamTypeId> m_tlsAdvertisedParamTypes;
 
     ZeroConfServiceBrowser *m_modbusServiceBrowser = nullptr;
     ZeroConfServiceBrowser *m_modbusTlsServiceBrowser = nullptr;
 
-    void setupConnection(ThingSetupInfo *info, const QHostAddress &address, NetworkDeviceMonitor *monitor = nullptr);
+    void setupConnection(ThingSetupInfo *info, const QHostAddress &address, NetworkDeviceMonitor *monitor = nullptr,
+                         const ZeroConfServiceEntry &serviceEntry = ZeroConfServiceEntry());
     bool isZeroConfManaged(Thing *thing) const;
     bool isMatchingZeroConfService(Thing *thing, const ZeroConfServiceEntry &entry) const;
-    ZeroConfServiceEntry findZeroConfService(Thing *thing) const;
+    ZeroConfServiceEntry findZeroConfService(Thing *thing, bool tlsPreferred = true) const;
+    bool configureTls(Thing *thing, PceWallbox *connection, const ZeroConfServiceEntry &entry = ZeroConfServiceEntry());
+    bool ensureClientIdentity(QString *errorString = nullptr);
+    void ensureClientIdentityAsync(const std::function<void(bool, const QString &)> &callback);
+    QString resolvedIdentityPath(const QString &configuredPath) const;
+    QString storagePrefix(Thing *thing) const;
+    QString wallboxSerialNumber(PceWallbox *connection) const;
     void handleZeroConfServiceAdded(const ZeroConfServiceEntry &entry);
     void handleZeroConfServiceRemoved(const ZeroConfServiceEntry &entry);
+
+    QSslCertificate m_clientCertificate;
+    QSslKey m_clientPrivateKey;
+    QProcess *m_identityProcess = nullptr;
+    QTemporaryDir *m_identityTemporaryDirectory = nullptr;
+    QList<std::function<void(bool, const QString &)>> m_identityCallbacks;
 };
 
 #endif // INTEGRATIONPLUGINPCELECTRIC_H
