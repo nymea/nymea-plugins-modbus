@@ -28,6 +28,7 @@
 #include <plugintimer.h>
 #include <integrations/integrationplugin.h>
 #include <network/networkdevicemonitor.h>
+#include <QSet>
 
 #include "extern-plugininfo.h"
 
@@ -51,6 +52,13 @@ public:
     void thingRemoved(Thing *thing) override;
 
 private:
+    struct ChargingCurrentState {
+        bool power = false;
+        quint16 maxChargingCurrent = 60;
+    };
+
+    ChargingCurrentState &chargingCurrentState(Thing *thing);
+
     void setupRtuConnection(ThingSetupInfo *info);
     void setupTcpConnection(ThingSetupInfo *info);
 
@@ -59,9 +67,9 @@ private:
     QHash<Thing *, AmperfiedModbusRtuConnection*> m_rtuConnections;
     QHash<Thing *, AmperfiedModbusTcpConnection*> m_tcpConnections;
     QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
+    QHash<Thing *, ChargingCurrentState> m_chargingCurrentStates;
+    QSet<Thing *> m_initialUpdates;
 
 };
 
 #endif // INTEGRATIONPLUGINHEIDELBERG_H
-
-
