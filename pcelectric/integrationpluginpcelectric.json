@@ -67,8 +67,7 @@
                             "name": "tlsAdvertised",
                             "displayName": "TLS advertised",
                             "type": "bool",
-                            "defaultValue": false,
-                            "readOnly": true
+                            "defaultValue": false
                         }
                     ],
                     "settingsTypes": [
@@ -386,8 +385,7 @@
                             "name": "tlsAdvertised",
                             "displayName": "TLS advertised",
                             "type": "bool",
-                            "defaultValue": false,
-                            "readOnly": true
+                            "defaultValue": false
                         }
                     ],
                     "settingsTypes": [

@@ -54,12 +54,14 @@ void PcElectricDiscovery::startDiscovery()
     connect(m_modbusServiceBrowser, &ZeroConfServiceBrowser::serviceEntryAdded, this, [this](const ZeroConfServiceEntry &entry) {
         checkZeroConfService(entry, false);
     });
+
     connect(m_modbusTlsServiceBrowser, &ZeroConfServiceBrowser::serviceEntryAdded, this, [this](const ZeroConfServiceEntry &entry) {
         checkZeroConfService(entry, true);
     });
 
     foreach (const ZeroConfServiceEntry &entry, m_modbusServiceBrowser->serviceEntries())
         checkZeroConfService(entry, false);
+
     foreach (const ZeroConfServiceEntry &entry, m_modbusTlsServiceBrowser->serviceEntries())
         checkZeroConfService(entry, true);
 
@@ -98,7 +100,7 @@ void PcElectricDiscovery::checkZeroConfService(const ZeroConfServiceEntry &entry
 
     if (entry.serviceType() != expectedServiceType || entry.port() != expectedPort || tlsValue != expectedTlsValue
         || serialNumber.isEmpty() || macAddress.isNull()) {
-        qCDebug(dcPcElectric()) << "Discovery: Ignoring invalid PCE ZeroConf service" << entry;
+        qCDebug(dcPcElectric()) << "Discovery: mDNS: Ignoring invalid PCE service" << entry;
         return;
     }
 
@@ -106,10 +108,11 @@ void PcElectricDiscovery::checkZeroConfService(const ZeroConfServiceEntry &entry
         // Keep the TLS endpoint associated with the serial number. A later change will use it
         // when selecting the transport and configuring certificate verification.
         m_zeroConfTlsEntries.insert(serialNumber, entry);
-        qCDebug(dcPcElectric()) << "Discovery: Found TLS-aware PCE ZeroConf endpoint" << entry;
+        qCDebug(dcPcElectric()) << "Discovery: mDNS: Found TLS-aware PCE endpoint" << entry;
         return;
     }
 
+    qCDebug(dcPcElectric()) << "Discovery: mDNS: Found TLS-unaware PCE endpoint" << entry;
     m_zeroConfEntries.insert(entry.hostAddress(), entry);
     checkNetworkDevice(entry.hostAddress());
 }
@@ -296,10 +299,19 @@ void PcElectricDiscovery::checkNetworkDevice(const QHostAddress &address)
 
 void PcElectricDiscovery::cleanupConnection(EV11ModbusTcpConnection *connection)
 {
-    m_connections.removeAll(connection);
+    // This method can be called from a QModbusReply::finished handler. Do not
+    // disconnect the device synchronously here: closing the client aborts its
+    // active replies, while the generated handler still accesses the reply
+    // after emitting checkReachabilityFailed(). Deleting the connection later
+    // lets the current signal unwind first; ModbusTcpMaster's destructor then
+    // disconnects the device.
+    if (!m_connections.removeOne(connection))
+        return;
+
     m_runningVerifications.remove(connection);
 
-    connection->disconnectDevice();
+    disconnect(connection, nullptr, this, nullptr);
+    disconnect(connection->modbusTcpMaster(), nullptr, this, nullptr);
     connection->deleteLater();
 }
 
