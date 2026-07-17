@@ -634,7 +634,7 @@ void ModbusTcpMaster::setupTlsTunnel()
             [this](const QString &expected, const QString &actual) {
         m_tlsErrorString = expected.isEmpty()
             ? tr("The TLS peer certificate has not been accepted.")
-            : tr("The TLS peer certificate fingerprint does not match the accepted fingerprint.");
+            : tr("The TLS peer SPKI fingerprint does not match the accepted fingerprint.");
         emit tlsPeerVerificationFailed(expected, actual);
     });
     connect(m_tlsTunnel, &ModbusTlsTunnel::encrypted, this,

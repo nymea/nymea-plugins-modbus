@@ -7,7 +7,8 @@ The tool allows to read or write registers in a generic way.
 ## TLS
 
 Use `--tls` for Modbus TCP over TLS. Port 802 is used when no explicit port is
-given. A server certificate can be pinned using its SHA-256 fingerprint:
+given. A server certificate can be pinned using the SHA-256 fingerprint of its
+DER-encoded SubjectPublicKeyInfo (SPKI):
 
 ```
 nymea-modbus-cli -a 192.168.0.10 --tls --tls-version 1.2 \
@@ -101,7 +102,7 @@ nymea-modbus-cli -a 192.168.0.10 --tls-info --tls-version 1.2
 ```
 
 Without `--tls-fingerprint`, normal CA and hostname validation is used. If that
-fails, the tool prints the observed leaf fingerprint so the operator can verify
+fails, the tool prints the observed leaf SPKI fingerprint so the operator can verify
 it out of band and retry with an explicit pin. It never saves certificates or
 TLS sessions and does not block the TLS handshake waiting for terminal input.
 

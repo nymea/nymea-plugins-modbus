@@ -144,7 +144,7 @@ signals:
     void connectionErrorOccurred(QModbusDevice::Error error);
     void tcpConnectionEstablished();
     void tlsHandshakeFinished(const QSslConfiguration &configuration);
-    void peerCertificateAvailable(const QSslCertificate &certificate, const QString &sha256Fingerprint);
+    void peerCertificateAvailable(const QSslCertificate &certificate, const QString &spkiSha256Fingerprint);
     void tlsErrors(const QList<QSslError> &errors);
     void tlsPeerVerificationFailed(const QString &expectedFingerprint, const QString &actualFingerprint);
 

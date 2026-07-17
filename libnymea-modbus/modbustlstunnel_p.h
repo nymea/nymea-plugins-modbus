@@ -26,7 +26,7 @@ public:
 
 signals:
     void tcpConnected();
-    void peerCertificateAvailable(const QSslCertificate &certificate, const QString &sha256Fingerprint);
+    void peerCertificateAvailable(const QSslCertificate &certificate, const QString &spkiSha256Fingerprint);
     void sslErrors(const QList<QSslError> &errors);
     void peerVerificationFailed(const QString &expectedFingerprint, const QString &actualFingerprint);
     void encrypted(const QHostAddress &loopbackAddress, quint16 loopbackPort, const QSslConfiguration &configuration);

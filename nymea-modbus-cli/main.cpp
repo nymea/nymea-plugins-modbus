@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
     parser.addOption(tlsOption);
     QCommandLineOption tlsVersionOption(QStringList() << "tls-version", QString("TCP: TLS protocol to use: auto or 1.2. Default is auto."), "version", "auto");
     parser.addOption(tlsVersionOption);
-    QCommandLineOption tlsFingerprintOption(QStringList() << "tls-fingerprint", QString("TCP: Accepted SHA-256 server certificate fingerprint."), "sha256");
+    QCommandLineOption tlsFingerprintOption(QStringList() << "tls-fingerprint", QString("TCP: Accepted SHA-256 server SPKI fingerprint."), "sha256");
     parser.addOption(tlsFingerprintOption);
     QCommandLineOption tlsServerNameOption(QStringList() << "tls-server-name", QString("TCP: TLS server name used for SNI."), "name");
     parser.addOption(tlsServerNameOption);
@@ -368,7 +368,7 @@ int main(int argc, char *argv[])
 
             QObject::connect(client, &ModbusTcpMaster::peerCertificateAvailable, &application,
                              [client](const QSslCertificate &, const QString &fingerprint) {
-                qInfo().noquote() << "TLS peer certificate SHA-256:" << fingerprint;
+                qInfo().noquote() << "TLS peer SPKI SHA-256:" << fingerprint;
                 if (client->acceptedPeerCertificateFingerprint().isEmpty())
                     qInfo().noquote() << "Use --tls-fingerprint" << fingerprint
                                       << "to pin this certificate if it is not CA-trusted.";

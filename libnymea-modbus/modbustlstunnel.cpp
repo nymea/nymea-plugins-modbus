@@ -4,6 +4,7 @@
 
 #include <QCryptographicHash>
 #include <QRandomGenerator>
+#include <QSslKey>
 #include <QSslSocket>
 #include <QTcpSocket>
 
@@ -127,7 +128,8 @@ QString ModbusTlsTunnel::certificateFingerprint() const
         return QString();
 
     const QSslCertificate certificate = m_sslSocket->peerCertificate();
-    return QString::fromLatin1(certificate.digest(QCryptographicHash::Sha256).toHex());
+    return QString::fromLatin1(QCryptographicHash::hash(certificate.publicKey().toDer(),
+                                                        QCryptographicHash::Sha256).toHex());
 }
 
 bool ModbusTlsTunnel::verifyPeerCertificate()
@@ -148,7 +150,7 @@ bool ModbusTlsTunnel::verifyPeerCertificate()
         if (m_acceptedFingerprint.isEmpty() && !m_sslErrorsEncountered)
             return true;
 
-        // A configured leaf-certificate pin deliberately overrides CA errors.
+        // A configured SubjectPublicKeyInfo pin deliberately overrides CA errors.
         if (!m_acceptedFingerprint.isEmpty() && fingerprint == m_acceptedFingerprint)
             return true;
     }
