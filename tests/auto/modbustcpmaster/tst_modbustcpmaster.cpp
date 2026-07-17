@@ -48,6 +48,8 @@ public:
     int modbusRequests() const { return m_modbusRequests; }
     int connectionCount() const { return m_connectionCount; }
     bool clientCertificateReceived() const { return m_clientCertificateReceived; }
+    quint16 lastWriteStartAddress() const { return m_lastWriteStartAddress; }
+    QVector<quint16> lastWriteValues() const { return m_lastWriteValues; }
 
 protected:
     void incomingConnection(qintptr socketDescriptor) override
@@ -80,17 +82,10 @@ protected:
                     if (buffer.size() < requestSize)
                         return;
 
-                    quint8 unitId = 0;
-                    quint8 function = 0;
-                    header >> unitId >> function;
+                    const QByteArray request = buffer.left(requestSize);
                     buffer.remove(0, requestSize);
                     ++m_modbusRequests;
-
-                    QByteArray response;
-                    QDataStream output(&response, QIODevice::WriteOnly);
-                    output << transactionId << quint16(0) << quint16(5) << unitId
-                           << function << quint8(2) << quint16(0x1234);
-                    socket->write(response);
+                    socket->write(processRequest(request));
                 }
             });
         });
@@ -108,6 +103,81 @@ protected:
     }
 
 private:
+    QByteArray processRequest(const QByteArray &request)
+    {
+        QDataStream input(request);
+        quint16 transactionId = 0;
+        quint16 protocolId = 0;
+        quint16 requestLength = 0;
+        quint8 unitId = 0;
+        quint8 function = 0;
+        input >> transactionId >> protocolId >> requestLength >> unitId >> function;
+
+        QByteArray response;
+        QDataStream output(&response, QIODevice::WriteOnly);
+        if (function == 3 || function == 4) {
+            quint16 startAddress = 0;
+            quint16 count = 0;
+            input >> startAddress >> count;
+            output << transactionId << quint16(0) << static_cast<quint16>(3 + count * 2)
+                   << unitId << function << static_cast<quint8>(count * 2);
+            for (quint16 i = 0; i < count; ++i)
+                output << static_cast<quint16>(0x1234 + i);
+        } else if (function == 1 || function == 2) {
+            quint16 startAddress = 0;
+            quint16 count = 0;
+            input >> startAddress >> count;
+            const quint8 byteCount = static_cast<quint8>((count + 7) / 8);
+            output << transactionId << quint16(0) << static_cast<quint16>(3 + byteCount)
+                   << unitId << function << byteCount;
+            for (quint8 byte = 0; byte < byteCount; ++byte)
+                output << static_cast<quint8>(0x55);
+        } else if (function == 6 || function == 5) {
+            quint16 startAddress = 0;
+            quint16 value = 0;
+            input >> startAddress >> value;
+            m_lastWriteStartAddress = startAddress;
+            m_lastWriteValues = {function == 5 ? static_cast<quint16>(value == 0xff00) : value};
+            response = request;
+        } else if (function == 16) {
+            quint16 startAddress = 0;
+            quint16 count = 0;
+            quint8 byteCount = 0;
+            input >> startAddress >> count >> byteCount;
+            Q_UNUSED(byteCount)
+            m_lastWriteStartAddress = startAddress;
+            m_lastWriteValues.clear();
+            for (quint16 i = 0; i < count; ++i) {
+                quint16 value = 0;
+                input >> value;
+                m_lastWriteValues.append(value);
+            }
+            output << transactionId << quint16(0) << quint16(6) << unitId << function
+                   << startAddress << count;
+        } else if (function == 15) {
+            quint16 startAddress = 0;
+            quint16 count = 0;
+            quint8 byteCount = 0;
+            input >> startAddress >> count >> byteCount;
+            m_lastWriteStartAddress = startAddress;
+            m_lastWriteValues.clear();
+            QByteArray packed;
+            for (quint8 i = 0; i < byteCount; ++i) {
+                quint8 value = 0;
+                input >> value;
+                packed.append(static_cast<char>(value));
+            }
+            for (quint16 i = 0; i < count; ++i)
+                m_lastWriteValues.append((static_cast<quint8>(packed.at(i / 8)) >> (i % 8)) & 1);
+            output << transactionId << quint16(0) << quint16(6) << unitId << function
+                   << startAddress << count;
+        } else {
+            output << transactionId << quint16(0) << quint16(3) << unitId
+                   << static_cast<quint8>(function | 0x80) << quint8(1);
+        }
+        return response;
+    }
+
     QSslCertificate m_certificate;
     QSslKey m_key;
     QHash<QSslSocket *, QByteArray> m_buffers;
@@ -116,6 +186,8 @@ private:
     bool m_clientCertificateReceived = false;
     int m_connectionCount = 0;
     int m_modbusRequests = 0;
+    quint16 m_lastWriteStartAddress = 0;
+    QVector<quint16> m_lastWriteValues;
 };
 
 class InspectableModbusTcpMaster : public ModbusTcpMaster
@@ -479,6 +551,75 @@ private slots:
         QVERIFY2(output.contains("TLS peer SPKI SHA-256:"), output.constData());
         QVERIFY2(output.contains("Connected successfully"), output.constData());
         QCOMPARE(server.modbusRequests(), 1);
+    }
+
+    void cliBulkRegisterReadAndWrite()
+    {
+        TlsModbusServer server;
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+        const QString fingerprint = spkiSha256Fingerprint(server.certificate());
+
+        QProcess readProcess;
+        readProcess.setProcessChannelMode(QProcess::MergedChannels);
+        readProcess.start(QStringLiteral("../../../nymea-modbus-cli/nymea-modbus-cli"),
+                          {QStringLiteral("--address"), QStringLiteral("127.0.0.1"),
+                           QStringLiteral("--port"), QString::number(server.serverPort()),
+                           QStringLiteral("--tls"), QStringLiteral("--tls-version"), QStringLiteral("1.2"),
+                           QStringLiteral("--tls-fingerprint"), fingerprint,
+                           QStringLiteral("--register"), QStringLiteral("100"),
+                           QStringLiteral("--length"), QStringLiteral("2"),
+                           QStringLiteral("--decode"), QStringLiteral("uint32")});
+        QVERIFY(readProcess.waitForStarted());
+        while (!readProcess.waitForFinished(50))
+            QCoreApplication::processEvents();
+        const QByteArray readOutput = readProcess.readAll();
+        QCOMPARE(readProcess.exitCode(), 0);
+        QVERIFY2(readOutput.contains("Bulk raw:   0x12341235"), readOutput.constData());
+        QVERIFY2(readOutput.contains("Decoded uint32"), readOutput.constData());
+
+        QProcess writeProcess;
+        writeProcess.setProcessChannelMode(QProcess::MergedChannels);
+        writeProcess.start(QStringLiteral("../../../nymea-modbus-cli/nymea-modbus-cli"),
+                           {QStringLiteral("--address"), QStringLiteral("127.0.0.1"),
+                            QStringLiteral("--port"), QString::number(server.serverPort()),
+                            QStringLiteral("--tls"), QStringLiteral("--tls-version"), QStringLiteral("1.2"),
+                            QStringLiteral("--tls-fingerprint"), fingerprint,
+                            QStringLiteral("--register"), QStringLiteral("100"),
+                            QStringLiteral("--write"), QStringLiteral("0x00010002")});
+        QVERIFY(writeProcess.waitForStarted());
+        while (!writeProcess.waitForFinished(50))
+            QCoreApplication::processEvents();
+        const QByteArray writeOutput = writeProcess.readAll();
+        QCOMPARE(writeProcess.exitCode(), 0);
+        QVERIFY2(writeOutput.contains("Wrote 2 holding registers"), writeOutput.constData());
+        QCOMPARE(server.lastWriteStartAddress(), quint16(100));
+        QCOMPARE(server.lastWriteValues(), QVector<quint16>({1, 2}));
+    }
+
+    void cliBulkCoilWrite()
+    {
+        TlsModbusServer server;
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+        const QString fingerprint = spkiSha256Fingerprint(server.certificate());
+
+        QProcess process;
+        process.setProcessChannelMode(QProcess::MergedChannels);
+        process.start(QStringLiteral("../../../nymea-modbus-cli/nymea-modbus-cli"),
+                      {QStringLiteral("--address"), QStringLiteral("127.0.0.1"),
+                       QStringLiteral("--port"), QString::number(server.serverPort()),
+                       QStringLiteral("--tls"), QStringLiteral("--tls-version"), QStringLiteral("1.2"),
+                       QStringLiteral("--tls-fingerprint"), fingerprint,
+                       QStringLiteral("--type"), QStringLiteral("coils"),
+                       QStringLiteral("--register"), QStringLiteral("20"),
+                       QStringLiteral("--write"), QStringLiteral("true,false,1,0")});
+        QVERIFY(process.waitForStarted());
+        while (!process.waitForFinished(50))
+            QCoreApplication::processEvents();
+        const QByteArray output = process.readAll();
+        QCOMPARE(process.exitCode(), 0);
+        QVERIFY2(output.contains("Wrote 4 coils"), output.constData());
+        QCOMPARE(server.lastWriteStartAddress(), quint16(20));
+        QCOMPARE(server.lastWriteValues(), QVector<quint16>({1, 0, 1, 0}));
     }
 
     void cliPresentsTlsClientCertificate()

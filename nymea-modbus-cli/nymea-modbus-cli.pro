@@ -28,7 +28,11 @@ gcc {
 }
 
 SOURCES += \
-        main.cpp
+        main.cpp \
+        registerdatautils.cpp
+
+HEADERS += \
+        registerdatautils.h
 
 INCLUDEPATH += $$PWD/../libnymea-modbus
 LIBS += -L$$shadowed($$PWD/../libnymea-modbus) -lnymea-modbus

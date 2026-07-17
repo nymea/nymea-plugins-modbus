@@ -41,15 +41,23 @@
 #include <QHostAddress>
 #include <QSerialPortInfo>
 #include <QModbusTcpClient>
+#include <QTextStream>
 #include <modbustcpmaster.h>
+#include "registerdatautils.h"
+
+#include <limits>
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 #include <QModbusRtuSerialClient>
 #else
 #include <QModbusRtuSerialMaster>
 #endif
 
-void sendRequest(quint16 modbusServerAddress, QModbusDataUnit::RegisterType registerType, quint16 registerAddress, quint16 length, const QByteArray &writeData, QModbusClient *client);
-void sendRequest(quint16 modbusServerAddress, QModbusDataUnit::RegisterType registerType, quint16 registerAddress, quint16 length, const QByteArray &writeData, ModbusTcpMaster *client);
+void sendRequest(quint16 modbusServerAddress, QModbusDataUnit::RegisterType registerType,
+                 quint16 registerAddress, quint16 length, const QVector<quint16> &writeValues,
+                 bool writeRequest, const RegisterOutputOptions &outputOptions, QModbusClient *client);
+void sendRequest(quint16 modbusServerAddress, QModbusDataUnit::RegisterType registerType,
+                 quint16 registerAddress, quint16 length, const QVector<quint16> &writeValues,
+                 bool writeRequest, const RegisterOutputOptions &outputOptions, ModbusTcpMaster *client);
 void printTlsInformation(ModbusTcpMaster *master, qint64 tcpConnectionTime, qint64 tlsHandshakeTime);
 QString exceptionCodeToString(QModbusPdu::ExceptionCode exception);
 
@@ -58,7 +66,7 @@ int main(int argc, char *argv[])
     QCoreApplication application(argc, argv);
     application.setApplicationName("nymea-modbus-cli");
     application.setOrganizationName("nymea");
-    application.setApplicationVersion("1.4.0");
+    application.setApplicationVersion("1.5.0");
 
     QString description = QString("\nTool for testing and reading Modbus TCP or RTU registers.\n\n");
     description.append(QString("Copyright %1 2016 - 2025 nymea GmbH <contact@nymea.io>\n\n").arg(QChar(0xA9)));
@@ -161,12 +169,24 @@ int main(int argc, char *argv[])
     QCommandLineOption registerOption(QStringList() << "r" << "register", QString("The number of the modbus register."), "register");
     parser.addOption(registerOption);
 
-    QCommandLineOption lengthOption(QStringList() << "l" << "length", QString("The number of registers to read. Default is 1."), "length");
+    QCommandLineOption lengthOption(QStringList() << "l" << "length", QString("The number of values to read, or the expected count for a write. Default read count is 1."), "length");
     lengthOption.setDefaultValue("1");
     parser.addOption(lengthOption);
 
-    QCommandLineOption writeOption(QStringList() << "w" << "write", QString("The data to be written to the given register."), "data");
+    QCommandLineOption writeOption(QStringList() << "w" << "write", QString("Write holding-register words or coil values. Accepts decimal/hex lists and compact hex register data."), "data");
     parser.addOption(writeOption);
+
+    QCommandLineOption outputOption(QStringList() << "output", QString("Output format: table, json, or legacy. Default is table."), "format", "table");
+    parser.addOption(outputOption);
+
+    QCommandLineOption decodeOption(QStringList() << "decode", QString("Decode register blocks as uint16, int16, uint32, int32, uint64, int64, float32, or float64. May be repeated."), "type");
+    parser.addOption(decodeOption);
+
+    QCommandLineOption byteOrderOption(QStringList() << "byte-order", QString("Byte order inside each register for --decode: big or little. Default is big."), "order", "big");
+    parser.addOption(byteOrderOption);
+
+    QCommandLineOption wordOrderOption(QStringList() << "word-order", QString("Word order inside each decoded value: forward or reverse. Default is forward."), "order", "forward");
+    parser.addOption(wordOrderOption);
 
     QCommandLineOption debugOption(QStringList() << "d" << "debug", QString("Print more information."));
     parser.addOption(debugOption);
@@ -196,7 +216,7 @@ int main(int argc, char *argv[])
 
     // Make sure we have either RTU, or TCP, not both or none
     if (parser.isSet(addressOption) && parser.isSet(serialPortOption)) {
-        qCritical() << "Error: invalid paramter combination. Use either TCP connection by defining the \"address\" or RTU by defining the \"serial\" paramter, not both.";
+        qCritical() << "Error: invalid parameter combination. Use either a TCP address or an RTU serial port, not both.";
         exit(EXIT_FAILURE);
     }
 
@@ -246,7 +266,8 @@ int main(int argc, char *argv[])
     } else if (registerTypeString.toLower() == "coils") {
         registerType = QModbusDataUnit::RegisterType::Coils;
     } else {
-        qCritical() << "Error: invalid register type:" << parser.value(registerTypeOption) << "Please select on of the valid register types: input, holding, discrete, coils";
+        qCritical() << "Error: invalid register type:" << parser.value(registerTypeOption)
+                    << "Use input, holding, discrete, or coils.";
         exit(EXIT_FAILURE);
     }
 
@@ -256,38 +277,116 @@ int main(int argc, char *argv[])
     }
 
     bool valueOk = false;
-    quint16 modbusServerAddress = parser.value(modbusServerAddressOption).toUInt(&valueOk);
+    quint16 modbusServerAddress = 0;
 
     if (parser.isSet(broadcastOption)) {
         modbusServerAddress = 0;
     } else {
-        modbusServerAddress = parser.value(modbusServerAddressOption).toUInt(&valueOk);
-        if (!valueOk) {
+        const uint parsedServerAddress = parser.value(modbusServerAddressOption).toUInt(&valueOk);
+        if (!valueOk || parsedServerAddress > 255) {
             qCritical() << "Error: invalid modbus server address (slave ID):" << parser.value(modbusServerAddressOption);
             exit(EXIT_FAILURE);
-        } else if (modbusServerAddress == 0) {
+        } else if (parsedServerAddress == 0) {
             qCritical() << "Error: invalid modbus server address (slave ID):" << parser.value(modbusServerAddressOption);
             qCritical() << "Please use the broadcast parameter for sending broadcast requests.";
             exit(EXIT_FAILURE);
         }
+        modbusServerAddress = static_cast<quint16>(parsedServerAddress);
     }
 
-    quint16 registerAddress = parser.value(registerOption).toUInt(&valueOk);
-    if (!tlsInfo && !valueOk) {
+    const uint parsedRegisterAddress = parser.value(registerOption).toUInt(&valueOk);
+    if (!tlsInfo && (!valueOk || parsedRegisterAddress > std::numeric_limits<quint16>::max())) {
         qCritical() << "Error: invalid register number:" << parser.value(registerOption);
         exit(EXIT_FAILURE);
     }
+    const quint16 registerAddress = static_cast<quint16>(parsedRegisterAddress);
 
-    quint16 length = parser.value(lengthOption).toUInt(&valueOk);
-    if (!valueOk) {
+    uint parsedLength = parser.value(lengthOption).toUInt(&valueOk);
+    if (!valueOk || parsedLength > std::numeric_limits<quint16>::max()) {
         qCritical() << "Error: invalid register length number:" << parser.value(lengthOption);
         exit(EXIT_FAILURE);
     }
+    quint16 length = static_cast<quint16>(parsedLength);
 
-    QByteArray writeData;
-    if (parser.isSet(writeOption)) {
-        writeData = parser.value(writeOption).toLocal8Bit();
-        qDebug() << "Write data:" << writeData;
+    RegisterOutputOptions outputOptions;
+    if (!parseRegisterOutputFormat(parser.value(outputOption), &outputOptions.format)) {
+        qCritical() << "Error: invalid output format. Use table, json, or legacy.";
+        exit(EXIT_FAILURE);
+    }
+    if (!parseRegisterByteOrder(parser.value(byteOrderOption), &outputOptions.byteOrder)) {
+        qCritical() << "Error: invalid byte order. Use big or little.";
+        exit(EXIT_FAILURE);
+    }
+    if (!parseRegisterWordOrder(parser.value(wordOrderOption), &outputOptions.wordOrder)) {
+        qCritical() << "Error: invalid word order. Use forward or reverse.";
+        exit(EXIT_FAILURE);
+    }
+    for (const QString &decodeName : parser.values(decodeOption)) {
+        RegisterDecodeType decodeType;
+        if (!parseRegisterDecodeType(decodeName, &decodeType)) {
+            qCritical() << "Error: invalid decode type:" << decodeName;
+            exit(EXIT_FAILURE);
+        }
+        if (!outputOptions.decodeTypes.contains(decodeType))
+            outputOptions.decodeTypes.append(decodeType);
+    }
+
+    const bool writeRequest = parser.isSet(writeOption);
+    QVector<quint16> writeValues;
+    QString requestError;
+    if (writeRequest) {
+        bool parsed = false;
+        if (registerType == QModbusDataUnit::HoldingRegisters)
+            parsed = parseHoldingWriteValues(parser.value(writeOption), &writeValues, &requestError);
+        else if (registerType == QModbusDataUnit::Coils)
+            parsed = parseCoilWriteValues(parser.value(writeOption), &writeValues, &requestError);
+        else
+            requestError = QStringLiteral("Only holding registers and coils can be written.");
+        if (!parsed) {
+            qCritical().noquote() << "Error:" << requestError;
+            exit(EXIT_FAILURE);
+        }
+        if (!outputOptions.decodeTypes.isEmpty()) {
+            qCritical() << "Error: --decode can only be used for register reads.";
+            exit(EXIT_FAILURE);
+        }
+        if (parser.isSet(lengthOption) && length != writeValues.size()) {
+            qCritical() << "Error: explicit length" << length << "does not match"
+                        << writeValues.size() << "write values.";
+            exit(EXIT_FAILURE);
+        }
+        if (writeValues.size() > std::numeric_limits<quint16>::max()) {
+            qCritical() << "Error: too many write values.";
+            exit(EXIT_FAILURE);
+        }
+        length = static_cast<quint16>(writeValues.size());
+        qDebug() << "Write values:" << writeValues;
+    }
+
+    if (!tlsInfo) {
+        if (parser.isSet(broadcastOption) && !writeRequest) {
+            qCritical() << "Error: broadcast reads are not supported.";
+            exit(EXIT_FAILURE);
+        }
+        if (!validateModbusRequest(registerType, registerAddress, length, writeRequest, &requestError)) {
+            qCritical().noquote() << "Error:" << requestError;
+            exit(EXIT_FAILURE);
+        }
+        if (!writeRequest && (registerType == QModbusDataUnit::Coils
+                              || registerType == QModbusDataUnit::DiscreteInputs)
+            && !outputOptions.decodeTypes.isEmpty()) {
+            qCritical() << "Error: --decode is only available for holding and input registers.";
+            exit(EXIT_FAILURE);
+        }
+        for (RegisterDecodeType decodeType : outputOptions.decodeTypes) {
+            const int wordCount = registerDecodeWordCount(decodeType);
+            if (length % wordCount != 0) {
+                qCritical() << "Error: read length" << length << "is not divisible by"
+                            << wordCount << "registers required for"
+                            << registerDecodeTypeName(decodeType) << "decoding.";
+                exit(EXIT_FAILURE);
+            }
+        }
     }
 
     // TCP
@@ -424,7 +523,8 @@ int main(int argc, char *argv[])
                 return;
 
             qDebug() << "Connected successfully to" << QString("%1:%2").arg(address.toString()).arg(port);
-            sendRequest(modbusServerAddress, registerType, registerAddress, length, writeData, client);
+            sendRequest(modbusServerAddress, registerType, registerAddress, length, writeValues,
+                        writeRequest, outputOptions, client);
         });
 
         QObject::connect(client, &ModbusTcpMaster::connectionErrorOccurred, &application, [=](QModbusDevice::Error error){
@@ -457,7 +557,8 @@ int main(int argc, char *argv[])
         } else if (parityString.toLower() == "mark") {
             parity = QSerialPort::MarkParity;
         } else {
-            qCritical() << "Error: invalid parit type:" << parser.value(parityOption) << "Please select on of the valid values: [none, even, odd, space, mark].";
+            qCritical() << "Error: invalid parity:" << parser.value(parityOption)
+                        << "Use none, even, odd, space, or mark.";
             exit(EXIT_FAILURE);
         }
 
@@ -470,7 +571,8 @@ int main(int argc, char *argv[])
         } else if (stopBitsString == "2") {
             stopBits = QSerialPort::TwoStop;
         } else {
-            qCritical() << "Error: invalid stop bits:" << parser.value(stopBitsOption) << "Please select on of the valid values: [1, 1.5, 2].";
+            qCritical() << "Error: invalid stop bits:" << parser.value(stopBitsOption)
+                        << "Use 1, 1.5, or 2.";
             exit(EXIT_FAILURE);
         }
 
@@ -485,7 +587,8 @@ int main(int argc, char *argv[])
         } else if (dataBitsString == "8") {
             dataBits = QSerialPort::Data8;
         } else {
-            qCritical() << "Error: invalid data bits:" << parser.value(dataBitsOption) << "Please select on of the valid values: [5, 6, 7, 8].";
+            qCritical() << "Error: invalid data bits:" << parser.value(dataBitsOption)
+                        << "Use 5, 6, 7, or 8.";
             exit(EXIT_FAILURE);
         }
 
@@ -508,7 +611,8 @@ int main(int argc, char *argv[])
                 return;
 
             qDebug() << "Connected successfully to" << serialPortName << baudrate << dataBits << stopBits << parity << "modbus server address:" << modbusServerAddress;
-            sendRequest(modbusServerAddress, registerType, registerAddress, length, writeData, client);
+            sendRequest(modbusServerAddress, registerType, registerAddress, length, writeValues,
+                        writeRequest, outputOptions, client);
         });
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -531,116 +635,109 @@ int main(int argc, char *argv[])
 }
 
 template <typename Client>
-void sendRequestInternal(quint16 modbusServerAddress, QModbusDataUnit::RegisterType registerType, quint16 registerAddress, quint16 length, const QByteArray &writeData, Client *client)
+void sendRequestInternal(quint16 modbusServerAddress,
+                         QModbusDataUnit::RegisterType registerType,
+                         quint16 registerAddress,
+                         quint16 length,
+                         const QVector<quint16> &writeValues,
+                         bool writeRequest,
+                         const RegisterOutputOptions &outputOptions,
+                         Client *client)
 {
-    if (writeData.isEmpty()) {
-        qDebug() << "Reading from modbus server address" << modbusServerAddress << registerType << "register:" << registerAddress << "Length:" << length;
-        QModbusDataUnit request = QModbusDataUnit(registerType, registerAddress, length);
+    if (!writeRequest) {
+        qDebug() << "Reading from modbus server address" << modbusServerAddress << registerType
+                 << "register:" << registerAddress << "Length:" << length;
+        const QModbusDataUnit request(registerType, registerAddress, length);
         QModbusReply *reply = client->sendReadRequest(request, modbusServerAddress);
         if (!reply) {
-            qCritical() << "Failed to read register" << client->errorString();
+            qCritical() << "Failed to send read request:" << client->errorString();
             exit(EXIT_FAILURE);
         }
-
         if (reply->isFinished()) {
-            reply->deleteLater(); // broadcast replies return immediately
-            qCritical() << "Reply finished immediatly. Something might have gone wrong:" << reply->errorString();
+            qCritical() << "Read reply finished immediately:" << reply->errorString();
+            reply->deleteLater();
             exit(EXIT_FAILURE);
         }
 
         QObject::connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
         QObject::connect(reply, &QModbusReply::finished, client, [=]() {
             if (reply->error() != QModbusDevice::NoError) {
-                QModbusResponse response = reply->rawResult();
-                if (reply->error() == QModbusDevice::ProtocolError && response.isException()) {
-                    qCritical()  << "Modbus reply finished with error" << reply->error() << reply->errorString() << exceptionCodeToString(response.exceptionCode());
-                } else {
-                    qCritical()  << "Modbus reply finished with error" << reply->error() << reply->errorString();
-                }
+                const QModbusResponse response = reply->rawResult();
+                if (reply->error() == QModbusDevice::ProtocolError && response.isException())
+                    qCritical() << "Modbus read failed:" << reply->errorString()
+                                << exceptionCodeToString(response.exceptionCode());
+                else
+                    qCritical() << "Modbus read failed:" << reply->errorString();
                 exit(EXIT_FAILURE);
             }
 
             const QModbusDataUnit unit = reply->result();
-            // Note: we need the cast in since the valueCount() type changes with different Qt versions
-            for (int i = 0; i < static_cast<int>(unit.valueCount()); i++) {
-                quint16 registerValue = unit.values().at(i);
-                quint16 registerNumber = unit.startAddress() + i;
-                qInfo() << "-->" << registerNumber << ":" << QString("0x%1").arg(registerValue, 4, 16, QLatin1Char('0')) << registerValue;
-            }
-
+            QTextStream output(stdout);
+            output << formatReadResult(registerType, unit.startAddress(), unit.values(),
+                                       modbusServerAddress, outputOptions);
+            output.flush();
             exit(EXIT_SUCCESS);
         });
-
-        QObject::connect(reply, &QModbusReply::errorOccurred, client, [=] (QModbusDevice::Error error){
-            QModbusResponse response = reply->rawResult();
-            if (reply->error() == QModbusDevice::ProtocolError && response.isException()) {
-                qCritical()  << "Modbus reply error occurred" << error << reply->errorString() << exceptionCodeToString(response.exceptionCode());
-            } else {
-                qCritical()  << "Modbus reply error occurred" << error << reply->errorString();
-            }
-        });
-    } else {
-        QModbusDataUnit request = QModbusDataUnit(registerType, registerAddress, length);
-        QDataStream stream(writeData);
-        qDebug() << "Reading write data" << writeData;
-        quint16 data = writeData.toUInt();
-        request.setValues({data});
-
-        qDebug() << "Writing" << request.values();
-        QModbusReply *reply = client->sendWriteRequest(request, modbusServerAddress);
-        if (!reply) {
-            qCritical() << "Failed to read register" << client->errorString();
-            exit(EXIT_FAILURE);
-        }
-
-        if (reply->isFinished()) {
-            reply->deleteLater(); // broadcast replies return immediately
-            qCritical() << "Reply finished immediatly. Something might have gone wrong:" << reply->errorString();
-            exit(EXIT_FAILURE);
-        }
-
-        QObject::connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
-        QObject::connect(reply, &QModbusReply::finished, client, [=]() {
-            if (reply->error() != QModbusDevice::NoError) {
-                QModbusResponse response = reply->rawResult();
-                if (reply->error() == QModbusDevice::ProtocolError && response.isException()) {
-                    qCritical()  << "Modbus reply finished with error" << reply->error() << reply->errorString() << exceptionCodeToString(response.exceptionCode());
-                } else {
-                    qCritical()  << "Modbus reply finished with error" << reply->error() << reply->errorString();
-                }
-                exit(EXIT_FAILURE);
-            }
-
-            const QModbusDataUnit unit = reply->result();
-            // Note: we need the cast in since the valueCount() type changes with different Qt versions
-            for (int i = 0; i < static_cast<int>(unit.valueCount()); i++) {
-                quint16 registerValue = unit.values().at(i);
-                quint16 registerNumber = unit.startAddress() + i;
-                qInfo() << "-->" << registerNumber << ":" << QString("0x%1").arg(registerValue, 4, 16, QLatin1Char('0')) << registerValue;
-            }
-
-            exit(EXIT_SUCCESS);
-        });
-
-        QObject::connect(reply, &QModbusReply::errorOccurred, client, [=] (QModbusDevice::Error error){
-            QModbusResponse response = reply->rawResult();
-            if (reply->error() == QModbusDevice::ProtocolError && response.isException()) {
-                qCritical()  << "Modbus reply error occurred" << error << reply->errorString() << exceptionCodeToString(response.exceptionCode());
-            } else {
-                qCritical()  << "Modbus reply error occurred" << error << reply->errorString();
-            }
-        });
+        return;
     }
+
+    QModbusDataUnit request(registerType, registerAddress, writeValues.size());
+    request.setValues(writeValues);
+    qDebug() << "Writing" << request.values();
+    QModbusReply *reply = client->sendWriteRequest(request, modbusServerAddress);
+    if (!reply) {
+        qCritical() << "Failed to send write request:" << client->errorString();
+        exit(EXIT_FAILURE);
+    }
+
+    const auto printWriteSuccess = [=]() {
+        QTextStream output(stdout);
+        output << formatWriteResult(registerType, registerAddress, writeValues,
+                                    modbusServerAddress, modbusServerAddress == 0, outputOptions);
+        output.flush();
+    };
+
+    if (reply->isFinished()) {
+        if (reply->error() == QModbusDevice::NoError && modbusServerAddress == 0) {
+            printWriteSuccess();
+            reply->deleteLater();
+            exit(EXIT_SUCCESS);
+        }
+        qCritical() << "Write reply finished immediately:" << reply->errorString();
+        reply->deleteLater();
+        exit(EXIT_FAILURE);
+    }
+
+    QObject::connect(reply, &QModbusReply::finished, reply, &QModbusReply::deleteLater);
+    QObject::connect(reply, &QModbusReply::finished, client, [=]() {
+        if (reply->error() != QModbusDevice::NoError) {
+            const QModbusResponse response = reply->rawResult();
+            if (reply->error() == QModbusDevice::ProtocolError && response.isException())
+                qCritical() << "Modbus write failed:" << reply->errorString()
+                            << exceptionCodeToString(response.exceptionCode());
+            else
+                qCritical() << "Modbus write failed:" << reply->errorString();
+            exit(EXIT_FAILURE);
+        }
+        printWriteSuccess();
+        exit(EXIT_SUCCESS);
+    });
 }
 
-void sendRequest(quint16 modbusServerAddress, QModbusDataUnit::RegisterType registerType, quint16 registerAddress, quint16 length, const QByteArray &writeData, QModbusClient *client)
+void sendRequest(quint16 modbusServerAddress, QModbusDataUnit::RegisterType registerType,
+                 quint16 registerAddress, quint16 length, const QVector<quint16> &writeValues,
+                 bool writeRequest, const RegisterOutputOptions &outputOptions, QModbusClient *client)
 {
-    sendRequestInternal(modbusServerAddress, registerType, registerAddress, length, writeData, client);
+    sendRequestInternal(modbusServerAddress, registerType, registerAddress, length, writeValues,
+                        writeRequest, outputOptions, client);
 }
 
-void sendRequest(quint16 modbusServerAddress, QModbusDataUnit::RegisterType registerType, quint16 registerAddress, quint16 length, const QByteArray &writeData, ModbusTcpMaster *client)
+void sendRequest(quint16 modbusServerAddress, QModbusDataUnit::RegisterType registerType,
+                 quint16 registerAddress, quint16 length, const QVector<quint16> &writeValues,
+                 bool writeRequest, const RegisterOutputOptions &outputOptions, ModbusTcpMaster *client)
 {
-    sendRequestInternal(modbusServerAddress, registerType, registerAddress, length, writeData, client);
+    sendRequestInternal(modbusServerAddress, registerType, registerAddress, length, writeValues,
+                        writeRequest, outputOptions, client);
 }
 
 static QString keyAlgorithmName(QSsl::KeyAlgorithm algorithm)

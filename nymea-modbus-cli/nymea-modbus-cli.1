@@ -1,4 +1,4 @@
-.TH NYMEA-MODBUS-CLI 1 "July 2026" "nymea-modbus-cli 1.4.0" "User Commands"
+.TH NYMEA-MODBUS-CLI 1 "July 2026" "nymea-modbus-cli 1.5.0" "User Commands"
 .SH NAME
 nymea-modbus-cli \- inspect, read, and write Modbus TCP, TLS, and RTU devices
 .SH SYNOPSIS
@@ -168,12 +168,71 @@ The default is
 Set the first Modbus register address.
 .TP
 .BR \-l , " --length " \fIcount\fR
-Set the number of registers or bits to read. The default is 1.
+Set the number of registers or bits to read. The default read count is 1. For
+a write, the count is inferred from the data; an explicitly supplied length
+must match it.
 .TP
 .BR \-w , " --write " \fIdata\fR
-Write the decimal value
-.I data
-instead of performing a read.
+Write holding registers or coils instead of reading. Holding-register data may
+be a decimal or hexadecimal word, a comma-separated word list, or compact hex.
+Compact value
+.B 0x00010002
+writes words
+.B 0x0001
+and
+.B 0x0002
+to consecutive addresses. Coil lists accept 0, 1, false, and true.
+.TP
+.BI --output " format"
+Select
+.BR table ,
+.BR json ,
+or
+.B legacy
+output. The default is
+.BR table .
+.TP
+.BI --decode " type"
+Decode register data as
+.BR uint16 ,
+.BR int16 ,
+.BR uint32 ,
+.BR int32 ,
+.BR uint64 ,
+.BR int64 ,
+.BR float32 ,
+or
+.BR float64 .
+This option may be repeated. The read length must be divisible by the selected
+type's register width.
+.TP
+.BI --byte-order " order"
+Set byte order inside each 16-bit register used by
+.B --decode
+to
+.B big
+or
+.BR little .
+The default is
+.BR big .
+.TP
+.BI --word-order " order"
+Set word order inside each decoded value to
+.B forward
+or
+.BR reverse .
+The default is
+.BR forward .
+.SH REGISTER REPRESENTATION
+The table output for holding and input registers shows raw hex, signed and
+unsigned 16-bit interpretations in both byte orders, and escaped ASCII. It also
+shows the complete response in bulk raw and ASCII forms. Coils and discrete
+inputs are shown as Boolean values.
+.PP
+Byte order affects the two bytes within each register. Word order affects the
+sequence of 16-bit registers within each decoded 32- or 64-bit value. Raw
+compact write data always uses wire order: the leftmost word is written to the
+lowest address.
 .SH TLS AUTHENTICATION
 Without
 .BR --tls-fingerprint ,
@@ -217,6 +276,26 @@ Write decimal value 16 to holding register 200:
 .PP
 .EX
 nymea-modbus-cli -a 192.168.0.10 -r 200 -w 16
+.EE
+.PP
+Write two holding registers using compact hexadecimal data:
+.PP
+.EX
+nymea-modbus-cli -a 192.168.0.10 -r 200 -w 0x00010002
+.EE
+.PP
+Decode two registers as both an unsigned integer and IEEE-754 float:
+.PP
+.EX
+nymea-modbus-cli -a 192.168.0.10 -r 200 -l 2 \\
+    --decode uint32 --decode float32
+.EE
+.PP
+Write four coils:
+.PP
+.EX
+nymea-modbus-cli -a 192.168.0.10 -t coils -r 20 \\
+    --write true,false,1,0
 .EE
 .SH EXIT STATUS
 Returns zero after a successful request, TLS inspection, or serial-port list.

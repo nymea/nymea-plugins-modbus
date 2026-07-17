@@ -39,6 +39,26 @@ _nymea_modbus_cli()
             COMPREPLY=( "${COMPREPLY[@]/#/--type=}" )
             return
             ;;
+        --output=*)
+            COMPREPLY=( $(compgen -W "table json legacy" -- "${cur#*=}") )
+            COMPREPLY=( "${COMPREPLY[@]/#/--output=}" )
+            return
+            ;;
+        --decode=*)
+            COMPREPLY=( $(compgen -W "uint16 int16 uint32 int32 uint64 int64 float32 float64" -- "${cur#*=}") )
+            COMPREPLY=( "${COMPREPLY[@]/#/--decode=}" )
+            return
+            ;;
+        --byte-order=*)
+            COMPREPLY=( $(compgen -W "big little" -- "${cur#*=}") )
+            COMPREPLY=( "${COMPREPLY[@]/#/--byte-order=}" )
+            return
+            ;;
+        --word-order=*)
+            COMPREPLY=( $(compgen -W "forward reverse" -- "${cur#*=}") )
+            COMPREPLY=( "${COMPREPLY[@]/#/--word-order=}" )
+            return
+            ;;
     esac
 
     case "$prev" in
@@ -60,6 +80,22 @@ _nymea_modbus_cli()
             ;;
         -t|--type)
             COMPREPLY=( $(compgen -W "input holding discrete coils" -- "$cur") )
+            return
+            ;;
+        --output)
+            COMPREPLY=( $(compgen -W "table json legacy" -- "$cur") )
+            return
+            ;;
+        --decode)
+            COMPREPLY=( $(compgen -W "uint16 int16 uint32 int32 uint64 int64 float32 float64" -- "$cur") )
+            return
+            ;;
+        --byte-order)
+            COMPREPLY=( $(compgen -W "big little" -- "$cur") )
+            return
+            ;;
+        --word-order)
+            COMPREPLY=( $(compgen -W "forward reverse" -- "$cur") )
             return
             ;;
         --baudrate)
@@ -93,7 +129,8 @@ _nymea_modbus_cli()
         --tls-client-key-passphrase-file --tls-info
         --serial --baudrate --parity --databits --stopbits --list-serials
         -m --modbus-address -t --type -r --register -l --length
-        -w --write -d --debug --broadcast
+        -w --write --output --decode --byte-order --word-order
+        -d --debug --broadcast
     "
 
     if [[ " ${words[*]} " == *" --serial "* ]]; then

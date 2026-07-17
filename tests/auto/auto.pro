@@ -1,2 +1,2 @@
 TEMPLATE = subdirs
-SUBDIRS += modbustcpmaster
+SUBDIRS += modbustcpmaster modbuscli
