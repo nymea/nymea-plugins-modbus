@@ -14,7 +14,7 @@
                     "displayName": "i-CHARGE CION",
                     "id": "075d389d-3330-4d0b-9649-9f085120ca40",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": ["evcharger", "connectable"],
+                    "interfaces": ["evchargerac", "connectable"],
                     "paramTypes": [
                         {
                             "id": "dac10e08-734c-4e71-a5d6-0d2a1f416ca6",

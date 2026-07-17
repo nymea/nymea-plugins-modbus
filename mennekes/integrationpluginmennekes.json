@@ -13,7 +13,7 @@
                     "displayName": "AMTRON Charge Control/Professional",
                     "id": "fb48e067-2237-4eaf-8d2c-681d406395fc",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable", "networkdevice"],
+                    "interfaces": ["evchargerac", "smartmeterconsumer", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "36d11ea0-524a-43d2-b157-f69a744ac5d8",
@@ -138,7 +138,7 @@
                     "displayName": "AMTRON XTRA/Premium",
                     "id": "01995c4f-a7b5-4bdd-9333-486390ff75fd",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable", "networkdevice"],
+                    "interfaces": ["evchargerac", "smartmeterconsumer", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "0dae61b0-5d2d-49df-bdac-93aec86b2085",
@@ -260,7 +260,7 @@
                     "displayName": "AMTRON Compact 2.0s",
                     "id": "5c9c3b51-26e0-4f92-b6cf-d77bcae3d47c",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable"],
+                    "interfaces": ["evchargerac", "smartmeterconsumer", "connectable"],
                     "paramTypes": [
                         {
                             "id": "f98609c4-c7e7-49df-aebf-34122974c019",

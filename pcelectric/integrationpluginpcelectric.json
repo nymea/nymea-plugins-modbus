@@ -14,7 +14,7 @@
                     "displayName": "PCE EV11.3",
                     "id": "88d96940-a940-4a07-8176-5e6aba7ca832",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable", "networkdevice"],
+                    "interfaces": ["evchargerac", "smartmeterconsumer", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "aa18f1ae-e2d5-4918-9230-ab3f6fb49010",
@@ -325,7 +325,7 @@
                     "displayName": "PCE EV11.3 (no meter)",
                     "id": "28b16b8e-9b3f-4afe-a1d9-70ff042b02d0",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": ["evcharger", "connectable", "networkdevice"],
+                    "interfaces": ["evchargerac", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "eed37247-0ea7-4778-ac7d-d9460b158973",

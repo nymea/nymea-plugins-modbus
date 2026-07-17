@@ -13,7 +13,7 @@
                     "displayName": "PANTABOX",
                     "id": "6de119fb-a579-4a88-9903-f05aac167b19",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable"],
+                    "interfaces": ["evchargerac", "smartmeterconsumer", "connectable"],
                     "paramTypes": [
                         {
                             "id": "a3bc042c-0613-40a9-867a-3482d4d0901e",
