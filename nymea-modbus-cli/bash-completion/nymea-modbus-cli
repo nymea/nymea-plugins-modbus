@@ -1,0 +1,115 @@
+# Bash completion for nymea-modbus-cli
+
+_nymea_modbus_cli()
+{
+    local cur prev words cword
+    if declare -F _init_completion >/dev/null; then
+        _init_completion || return
+    else
+        COMPREPLY=()
+        cword=$COMP_CWORD
+        cur=${COMP_WORDS[COMP_CWORD]}
+        prev=${COMP_WORDS[COMP_CWORD-1]}
+        words=("${COMP_WORDS[@]}")
+    fi
+
+    case "$cur" in
+        --tls-version=*)
+            COMPREPLY=( $(compgen -W "auto 1.2" -- "${cur#*=}") )
+            COMPREPLY=( "${COMPREPLY[@]/#/--tls-version=}" )
+            return
+            ;;
+        --parity=*)
+            COMPREPLY=( $(compgen -W "none even odd space mark" -- "${cur#*=}") )
+            COMPREPLY=( "${COMPREPLY[@]/#/--parity=}" )
+            return
+            ;;
+        --databits=*)
+            COMPREPLY=( $(compgen -W "5 6 7 8" -- "${cur#*=}") )
+            COMPREPLY=( "${COMPREPLY[@]/#/--databits=}" )
+            return
+            ;;
+        --stopbits=*)
+            COMPREPLY=( $(compgen -W "1 1.5 2" -- "${cur#*=}") )
+            COMPREPLY=( "${COMPREPLY[@]/#/--stopbits=}" )
+            return
+            ;;
+        --type=*)
+            COMPREPLY=( $(compgen -W "input holding discrete coils" -- "${cur#*=}") )
+            COMPREPLY=( "${COMPREPLY[@]/#/--type=}" )
+            return
+            ;;
+    esac
+
+    case "$prev" in
+        --tls-version)
+            COMPREPLY=( $(compgen -W "auto 1.2" -- "$cur") )
+            return
+            ;;
+        --parity)
+            COMPREPLY=( $(compgen -W "none even odd space mark" -- "$cur") )
+            return
+            ;;
+        --databits)
+            COMPREPLY=( $(compgen -W "5 6 7 8" -- "$cur") )
+            return
+            ;;
+        --stopbits)
+            COMPREPLY=( $(compgen -W "1 1.5 2" -- "$cur") )
+            return
+            ;;
+        -t|--type)
+            COMPREPLY=( $(compgen -W "input holding discrete coils" -- "$cur") )
+            return
+            ;;
+        --baudrate)
+            COMPREPLY=( $(compgen -W "1200 2400 4800 9600 19200 38400 57600 115200" -- "$cur") )
+            return
+            ;;
+        --tls-client-certificate|--tls-client-key|--tls-client-key-passphrase-file|--serial)
+            if declare -F _filedir >/dev/null; then
+                _filedir
+            else
+                COMPREPLY=( $(compgen -f -- "$cur") )
+            fi
+            return
+            ;;
+        --tls-server-name)
+            if declare -F _known_hosts_real >/dev/null; then
+                _known_hosts_real "$cur"
+            fi
+            return
+            ;;
+        -a|--address|-p|--port|--tls-fingerprint|-m|--modbus-address|-r|--register|-l|--length|-w|--write)
+            return
+            ;;
+    esac
+
+    local options="
+        -h --help --help-all -v --version
+        -a --address -p --port
+        --tls --tls-version --tls-fingerprint --tls-accept-any-fingerprint
+        --tls-server-name --tls-client-certificate --tls-client-key
+        --tls-client-key-passphrase-file --tls-info
+        --serial --baudrate --parity --databits --stopbits --list-serials
+        -m --modbus-address -t --type -r --register -l --length
+        -w --write -d --debug --broadcast
+    "
+
+    if [[ " ${words[*]} " == *" --serial "* ]]; then
+        options=${options// -a/}
+        options=${options// --address/}
+    elif [[ " ${words[*]} " == *" --address "* || " ${words[*]} " == *" -a "* ]]; then
+        options=${options// --serial/}
+    fi
+
+    if [[ " ${words[*]} " == *" --tls-fingerprint "* ]]; then
+        options=${options// --tls-accept-any-fingerprint/}
+    elif [[ " ${words[*]} " == *" --tls-accept-any-fingerprint "* ]]; then
+        options=${options// --tls-fingerprint/}
+    fi
+
+    COMPREPLY=( $(compgen -W "$options" -- "$cur") )
+}
+
+complete -F _nymea_modbus_cli nymea-modbus-cli

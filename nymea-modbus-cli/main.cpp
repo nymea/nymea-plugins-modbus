@@ -109,6 +109,10 @@ int main(int argc, char *argv[])
     parser.addOption(tlsVersionOption);
     QCommandLineOption tlsFingerprintOption(QStringList() << "tls-fingerprint", QString("TCP: Accepted SHA-256 server SPKI fingerprint."), "sha256");
     parser.addOption(tlsFingerprintOption);
+    QCommandLineOption tlsAcceptAnyFingerprintOption(
+        QStringList() << "tls-accept-any-fingerprint",
+        QString("TCP: Accept any TLS server SPKI fingerprint. Disables server identity verification."));
+    parser.addOption(tlsAcceptAnyFingerprintOption);
     QCommandLineOption tlsServerNameOption(QStringList() << "tls-server-name", QString("TCP: TLS server name used for SNI."), "name");
     parser.addOption(tlsServerNameOption);
     QCommandLineOption tlsClientCertificateOption(QStringList() << "tls-client-certificate", QString("TCP: PEM client certificate (optionally followed by intermediate certificates)."), "file");
@@ -175,6 +179,7 @@ int main(int argc, char *argv[])
 
     const bool useTls = parser.isSet(tlsOption) || parser.isSet(tlsInfoOption);
     const bool tlsInfo = parser.isSet(tlsInfoOption);
+    const bool tlsAcceptAnyFingerprint = parser.isSet(tlsAcceptAnyFingerprintOption);
     const bool hasTlsClientCertificate = parser.isSet(tlsClientCertificateOption);
     const bool hasTlsClientKey = parser.isSet(tlsClientKeyOption);
     const bool hasTlsClientKeyPassphraseFile = parser.isSet(tlsClientKeyPassphraseFileOption);
@@ -202,6 +207,16 @@ int main(int argc, char *argv[])
 
     if ((hasTlsClientCertificate || hasTlsClientKey || hasTlsClientKeyPassphraseFile) && !useTls) {
         qCritical() << "Error: TLS client credentials require --tls or --tls-info.";
+        exit(EXIT_FAILURE);
+    }
+
+    if (tlsAcceptAnyFingerprint && !useTls) {
+        qCritical() << "Error: --tls-accept-any-fingerprint requires --tls or --tls-info.";
+        exit(EXIT_FAILURE);
+    }
+
+    if (tlsAcceptAnyFingerprint && parser.isSet(tlsFingerprintOption)) {
+        qCritical() << "Error: --tls-accept-any-fingerprint and --tls-fingerprint cannot be used together.";
         exit(EXIT_FAILURE);
     }
 
@@ -299,6 +314,10 @@ int main(int argc, char *argv[])
         if (useTls) {
             client->setTransport(ModbusTcpMaster::TransportTls);
             client->setTlsServerName(parser.value(tlsServerNameOption));
+            if (tlsAcceptAnyFingerprint) {
+                qWarning().noquote()
+                    << "WARNING: TLS server identity verification is disabled; any server fingerprint will be accepted.";
+            }
             if (!parser.value(tlsFingerprintOption).isEmpty()
                 && !client->setAcceptedPeerCertificateFingerprint(parser.value(tlsFingerprintOption))) {
                 qCritical() << "Error: invalid SHA-256 TLS fingerprint.";
@@ -367,12 +386,20 @@ int main(int argc, char *argv[])
             client->setTlsConfiguration(configuration);
 
             QObject::connect(client, &ModbusTcpMaster::peerCertificateAvailable, &application,
-                             [client](const QSslCertificate &, const QString &fingerprint) {
+                             [client, tlsAcceptAnyFingerprint](const QSslCertificate &,
+                                                               const QString &fingerprint) {
                 qInfo().noquote() << "TLS peer SPKI SHA-256:" << fingerprint;
+                if (tlsAcceptAnyFingerprint) {
+                    // The TLS tunnel requires an accepted fingerprint to override
+                    // CA and hostname errors. Set the currently presented SPKI
+                    // synchronously, but do not retain it beyond this CLI process.
+                    client->setAcceptedPeerCertificateFingerprint(fingerprint);
+                    return;
+                }
                 if (client->acceptedPeerCertificateFingerprint().isEmpty())
                     qInfo().noquote() << "Use --tls-fingerprint" << fingerprint
                                       << "to pin this certificate if it is not CA-trusted.";
-            });
+            }, Qt::DirectConnection);
             QObject::connect(client, &ModbusTcpMaster::tlsErrors, &application, [](const QList<QSslError> &errors) {
                 for (const QSslError &error : errors)
                     qWarning().noquote() << "TLS certificate error:" << error.errorString();

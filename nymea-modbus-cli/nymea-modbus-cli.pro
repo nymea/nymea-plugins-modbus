@@ -34,4 +34,11 @@ INCLUDEPATH += $$PWD/../libnymea-modbus
 LIBS += -L$$shadowed($$PWD/../libnymea-modbus) -lnymea-modbus
 
 target.path = $$[QT_INSTALL_PREFIX]/bin
-INSTALLS += target
+
+manpage.files = $$PWD/nymea-modbus-cli.1
+manpage.path = $$[QT_INSTALL_PREFIX]/share/man/man1
+
+bashcompletion.files = $$PWD/bash-completion/nymea-modbus-cli
+bashcompletion.path = $$[QT_INSTALL_PREFIX]/share/bash-completion/completions
+
+INSTALLS += target manpage bashcompletion

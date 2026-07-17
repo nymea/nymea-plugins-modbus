@@ -456,6 +456,31 @@ private slots:
         QCOMPARE(server.modbusRequests(), 0);
     }
 
+    void cliAcceptsAnyTlsFingerprint()
+    {
+        TlsModbusServer server;
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+
+        QProcess process;
+        process.setProcessChannelMode(QProcess::MergedChannels);
+        process.start(QStringLiteral("../../../nymea-modbus-cli/nymea-modbus-cli"),
+                      {QStringLiteral("--address"), QStringLiteral("127.0.0.1"),
+                       QStringLiteral("--port"), QString::number(server.serverPort()),
+                       QStringLiteral("--tls"), QStringLiteral("--tls-version"), QStringLiteral("1.2"),
+                       QStringLiteral("--tls-accept-any-fingerprint"),
+                       QStringLiteral("--register"), QStringLiteral("10")});
+        QVERIFY(process.waitForStarted());
+        while (!process.waitForFinished(50))
+            QCoreApplication::processEvents();
+
+        const QByteArray output = process.readAll();
+        QCOMPARE(process.exitCode(), 0);
+        QVERIFY2(output.contains("server identity verification is disabled"), output.constData());
+        QVERIFY2(output.contains("TLS peer SPKI SHA-256:"), output.constData());
+        QVERIFY2(output.contains("Connected successfully"), output.constData());
+        QCOMPARE(server.modbusRequests(), 1);
+    }
+
     void cliPresentsTlsClientCertificate()
     {
         TlsModbusServer server(0, true);

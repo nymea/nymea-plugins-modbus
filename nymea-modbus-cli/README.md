@@ -15,6 +15,21 @@ nymea-modbus-cli -a 192.168.0.10 --tls --tls-version 1.2 \
     --tls-fingerprint <sha256> -r 1000 -l 2
 ```
 
+For diagnostics in a controlled network, server identity verification can be
+disabled explicitly:
+
+```
+nymea-modbus-cli -a 192.168.0.10 --tls --tls-version 1.2 \
+    --tls-accept-any-fingerprint -r 1000 -l 2
+```
+
+`--tls-accept-any-fingerprint` accepts the SPKI fingerprint presented during
+each handshake and ignores CA, hostname, and pin mismatches. It cannot be used
+together with `--tls-fingerprint`. This option still encrypts the connection,
+but it does not authenticate the server and is therefore vulnerable to a
+man-in-the-middle attack. Use it only for temporary diagnostics, never as a
+substitute for verifying and pinning the displayed fingerprint.
+
 For a server requiring mutual TLS, provide the PEM client certificate and its
 private key. The certificate file may contain the leaf certificate followed by
 intermediate certificates:
@@ -54,10 +69,10 @@ openssl req -new -x509 -sha256 -days 3650 \
     -addext "extendedKeyUsage=clientAuth"
 ```
 
-Keep both files stable after the device accepts the certificate for the first
-time. Replacing either the key or certificate changes the client identity and
-normally requires clearing or repeating the device's enrollment. Inspect the
-generated certificate with:
+Keep the private key stable after the device accepts it for the first time. A
+certificate may be renewed using that same key when the device pins SPKI, but
+replacing the key changes the client identity and normally requires clearing or
+repeating the device's enrollment. Inspect the generated certificate with:
 
 ```
 openssl x509 -in client-certificate.pem -noout -subject -issuer -dates -text
