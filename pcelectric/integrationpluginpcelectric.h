@@ -80,19 +80,17 @@ private:
     QHash<ThingClassId, ParamTypeId> m_hostNameParamTypes;
     QHash<ThingClassId, ParamTypeId> m_macParamTypes;
     QHash<ThingClassId, ParamTypeId> m_serialNumberParamTypes;
-    QHash<ThingClassId, ParamTypeId> m_tlsAdvertisedParamTypes;
 
     ZeroConfServiceBrowser *m_modbusServiceBrowser = nullptr;
-    ZeroConfServiceBrowser *m_modbusTlsServiceBrowser = nullptr;
+    QSet<PceWallbox *> m_tlsUpgradesInProgress;
 
-    void setupConnection(ThingSetupInfo *info, const QHostAddress &address, NetworkDeviceMonitor *monitor = nullptr,
-                         const ZeroConfServiceEntry &serviceEntry = ZeroConfServiceEntry());
+    void setupConnection(ThingSetupInfo *info, const QHostAddress &address, NetworkDeviceMonitor *monitor = nullptr);
     bool isZeroConfManaged(Thing *thing) const;
     bool isMatchingZeroConfService(Thing *thing, const ZeroConfServiceEntry &entry) const;
-    ZeroConfServiceEntry findZeroConfService(Thing *thing, bool tlsPreferred = true) const;
-    bool configureTls(Thing *thing, PceWallbox *connection, const ZeroConfServiceEntry &entry = ZeroConfServiceEntry());
+    ZeroConfServiceEntry findZeroConfService(Thing *thing) const;
+    bool configureTls(Thing *thing, PceWallbox *connection);
     bool ensureClientIdentity(QString *errorString = nullptr);
-    void ensureClientIdentityAsync(const std::function<void(bool, const QString &)> &callback);
+    void ensureClientIdentityAsync(const std::function<void(bool, const QString &)> &callback, bool refresh = false);
     QString resolvedIdentityPath(const QString &configuredPath) const;
     QString storagePrefix(Thing *thing) const;
     QString wallboxSerialNumber(PceWallbox *connection) const;
@@ -104,6 +102,7 @@ private:
     QProcess *m_identityProcess = nullptr;
     QTemporaryDir *m_identityTemporaryDirectory = nullptr;
     QList<std::function<void(bool, const QString &)>> m_identityCallbacks;
+    bool m_identityRefreshInProgress = false;
 };
 
 #endif // INTEGRATIONPLUGINPCELECTRIC_H

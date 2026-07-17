@@ -38,6 +38,7 @@ PceWallbox::PceWallbox(const QHostAddress &hostAddress, uint port, quint16 slave
     connect(this, &EV11ModbusTcpConnection::reachableChanged, this, [this](bool reachable) {
         if (!reachable) {
             m_timer.stop();
+            m_operational = false;
 
             cleanupQueues();
 
@@ -69,10 +70,16 @@ void PceWallbox::setOperationalStartupEnabled(bool enabled)
         m_timer.stop();
 }
 
+bool PceWallbox::operational() const
+{
+    return m_operational;
+}
+
 void PceWallbox::startOperationalMode()
 {
-    if (!reachable())
+    if (!reachable() || m_operational)
         return;
+    m_operational = true;
     m_timer.start();
     sendHeartbeat();
     update();
@@ -80,7 +87,7 @@ void PceWallbox::startOperationalMode()
 
 bool PceWallbox::update()
 {
-    if (m_aboutToDelete)
+    if (m_aboutToDelete || !m_operational)
         return false;
 
     if (!reachable())

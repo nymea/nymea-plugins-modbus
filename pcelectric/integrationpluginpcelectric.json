@@ -61,13 +61,6 @@
                             "displayName": "Serial number",
                             "type": "QString",
                             "defaultValue": ""
-                        },
-                        {
-                            "id": "f59fe845-c02c-47de-bd68-5a695fffd7c8",
-                            "name": "tlsAdvertised",
-                            "displayName": "TLS advertised",
-                            "type": "bool",
-                            "defaultValue": false
                         }
                     ],
                     "settingsTypes": [
@@ -340,6 +333,13 @@
                             "unit": "Ampere",
                             "defaultValue": 0
                         }
+                    ],
+                    "actionTypes": [
+                        {
+                            "id": "ebebca31-b6a5-4611-8fcd-d6bf386aa983",
+                            "name": "refreshClientCertificate",
+                            "displayName": "Refresh client certificate"
+                        }
                     ]
                 },
                 {
@@ -379,13 +379,6 @@
                             "displayName": "Serial number",
                             "type": "QString",
                             "defaultValue": ""
-                        },
-                        {
-                            "id": "d376b26e-c2c0-4344-a53e-a2ad3babb9c1",
-                            "name": "tlsAdvertised",
-                            "displayName": "TLS advertised",
-                            "type": "bool",
-                            "defaultValue": false
                         }
                     ],
                     "settingsTypes": [
@@ -560,6 +553,13 @@
                             "displayName": "R37 mode",
                             "type": "int",
                             "defaultValue": 0
+                        }
+                    ],
+                    "actionTypes": [
+                        {
+                            "id": "435dde86-1368-4402-9eab-31f893028dcc",
+                            "name": "refreshClientCertificate",
+                            "displayName": "Refresh client certificate"
                         }
                     ]
                 }

@@ -28,14 +28,12 @@
 
 PcElectricDiscovery::PcElectricDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery,
                                          ZeroConfServiceBrowser *modbusServiceBrowser,
-                                         ZeroConfServiceBrowser *modbusTlsServiceBrowser,
                                          quint16 port,
                                          quint16 modbusAddress,
                                          QObject *parent)
     : QObject{parent}
     , m_networkDeviceDiscovery{networkDeviceDiscovery}
     , m_modbusServiceBrowser{modbusServiceBrowser}
-    , m_modbusTlsServiceBrowser{modbusTlsServiceBrowser}
     , m_port{port}
     , m_modbusAddress{modbusAddress}
 {}
@@ -52,18 +50,11 @@ void PcElectricDiscovery::startDiscovery()
     m_discoveryRunning = true;
 
     connect(m_modbusServiceBrowser, &ZeroConfServiceBrowser::serviceEntryAdded, this, [this](const ZeroConfServiceEntry &entry) {
-        checkZeroConfService(entry, false);
-    });
-
-    connect(m_modbusTlsServiceBrowser, &ZeroConfServiceBrowser::serviceEntryAdded, this, [this](const ZeroConfServiceEntry &entry) {
-        checkZeroConfService(entry, true);
+        checkZeroConfService(entry);
     });
 
     foreach (const ZeroConfServiceEntry &entry, m_modbusServiceBrowser->serviceEntries())
-        checkZeroConfService(entry, false);
-
-    foreach (const ZeroConfServiceEntry &entry, m_modbusTlsServiceBrowser->serviceEntries())
-        checkZeroConfService(entry, true);
+        checkZeroConfService(entry);
 
     if (!m_networkDeviceDiscovery->available()) {
         // ZeroConf does not depend on the subnet scanner. Give cached/new service
@@ -86,7 +77,7 @@ void PcElectricDiscovery::startDiscovery()
     });
 }
 
-void PcElectricDiscovery::checkZeroConfService(const ZeroConfServiceEntry &entry, bool tls)
+void PcElectricDiscovery::checkZeroConfService(const ZeroConfServiceEntry &entry)
 {
     if (!m_discoveryRunning || entry.protocol() != QAbstractSocket::IPv4Protocol || !entry.name().startsWith("EV11.3-"))
         return;
@@ -94,25 +85,13 @@ void PcElectricDiscovery::checkZeroConfService(const ZeroConfServiceEntry &entry
     const QString serialNumber = entry.txt("serial");
     const MacAddress macAddress(entry.txt("mac"));
     const QString tlsValue = entry.txt("tls");
-    const quint16 expectedPort = tls ? 802 : 502;
-    const QString expectedServiceType = tls ? QStringLiteral("_modbus-tls._tcp") : QStringLiteral("_modbus._tcp");
-    const QString expectedTlsValue = tls ? QStringLiteral("1") : QStringLiteral("0");
-
-    if (entry.serviceType() != expectedServiceType || entry.port() != expectedPort || tlsValue != expectedTlsValue
+    if (entry.serviceType() != "_modbus._tcp" || entry.port() != 502 || tlsValue != "0"
         || serialNumber.isEmpty() || macAddress.isNull()) {
         qCDebug(dcPcElectric()) << "Discovery: mDNS: Ignoring invalid PCE service" << entry;
         return;
     }
 
-    if (tls) {
-        // Keep the TLS endpoint associated with the serial number. A later change will use it
-        // when selecting the transport and configuring certificate verification.
-        m_zeroConfTlsEntries.insert(serialNumber, entry);
-        qCDebug(dcPcElectric()) << "Discovery: mDNS: Found TLS-aware PCE endpoint" << entry;
-        return;
-    }
-
-    qCDebug(dcPcElectric()) << "Discovery: mDNS: Found TLS-unaware PCE endpoint" << entry;
+    qCDebug(dcPcElectric()) << "Discovery: mDNS: Found PCE bootstrap endpoint" << entry;
     m_zeroConfEntries.insert(entry.hostAddress(), entry);
     checkNetworkDevice(entry.hostAddress());
 }
@@ -324,8 +303,6 @@ void PcElectricDiscovery::finishDiscovery()
         NetworkDeviceInfo networkDeviceInfo = m_networkDeviceInfos.get(m_potentialResults.at(i).address);
 
         Result result = m_potentialResults.at(i);
-        const ZeroConfServiceEntry tlsEntry = m_zeroConfTlsEntries.value(result.serialNumber);
-        result.tlsAvailable = tlsEntry.isValid() && MacAddress(tlsEntry.txt("mac")) == result.registerMacAddress;
         bool zeroConfVerified = false;
         const ZeroConfServiceEntry zeroConfEntry = m_zeroConfEntries.value(result.address);
         if (zeroConfEntry.isValid()) {
@@ -351,8 +328,6 @@ void PcElectricDiscovery::finishDiscovery()
                 << result.serialNumber
                 << "Firmware revision:"
                 << result.firmwareRevision
-                << "TLS advertised:"
-                << result.tlsAvailable
                 << result.networkDeviceInfo
                 << result.digitalInputMode
                 << result.r37Mode;

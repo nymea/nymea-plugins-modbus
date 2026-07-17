@@ -50,6 +50,7 @@ public:
     bool update() override;
 
     void setOperationalStartupEnabled(bool enabled);
+    bool operational() const;
     void startOperationalMode();
 
     QueuedModbusReply *setChargingCurrentAsync(quint16 chargingCurrent); // mA
@@ -83,6 +84,7 @@ private:
     QQueue<QueuedModbusReply *> m_readQueue;
     bool m_aboutToDelete = false;
     bool m_operationalStartupEnabled = true;
+    bool m_operational = false;
 
     void enqueueRequest(QueuedModbusReply *reply);
 

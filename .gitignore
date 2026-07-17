@@ -4,3 +4,4 @@ doc/html
 *.qm
 __pycache__
 build/
+.build-env

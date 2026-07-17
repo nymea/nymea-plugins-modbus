@@ -13,6 +13,14 @@
 
 #include <modbustcpmaster.h>
 
+namespace {
+QString spkiSha256Fingerprint(const QSslCertificate &certificate)
+{
+    return QString::fromLatin1(QCryptographicHash::hash(certificate.publicKey().toDer(),
+                                                        QCryptographicHash::Sha256).toHex());
+}
+}
+
 class TlsModbusServer : public QTcpServer
 {
 public:
@@ -172,7 +180,7 @@ private slots:
         configuration.setProtocol(QSsl::TlsV1_2);
         master.setTlsConfiguration(configuration);
         QVERIFY(master.setAcceptedPeerCertificateFingerprint(
-            QString::fromLatin1(server.certificate().digest(QCryptographicHash::Sha256).toHex())));
+            spkiSha256Fingerprint(server.certificate())));
         master.installTestSession(QByteArrayLiteral("not-a-valid-session-ticket"));
 
         QVERIFY(master.connectDevice());
@@ -199,7 +207,7 @@ private slots:
         configuration.setProtocol(QSsl::TlsV1_2);
         master.setTlsConfiguration(configuration);
         QVERIFY(master.setAcceptedPeerCertificateFingerprint(
-            QString::fromLatin1(server.certificate().digest(QCryptographicHash::Sha256).toHex())));
+            spkiSha256Fingerprint(server.certificate())));
 
         QVERIFY(master.connectDevice());
         QTRY_VERIFY_WITH_TIMEOUT(master.connected(), 5000);
@@ -219,7 +227,7 @@ private slots:
         configuration.setProtocol(QSsl::TlsV1_2);
         master.setTlsConfiguration(configuration);
         QVERIFY(master.setAcceptedPeerCertificateFingerprint(
-            QString::fromLatin1(server.certificate().digest(QCryptographicHash::Sha256).toHex())));
+            spkiSha256Fingerprint(server.certificate())));
 
         QVERIFY(master.connectDevice());
         QTRY_VERIFY_WITH_TIMEOUT(master.connected(), 5000);
@@ -263,7 +271,7 @@ private slots:
 
         QCOMPARE(server.modbusRequests(), 0);
         QCOMPARE(master.peerCertificateFingerprint(),
-                 QString::fromLatin1(server.certificate().digest(QCryptographicHash::Sha256).toHex()));
+                 spkiSha256Fingerprint(server.certificate()));
     }
 
     void caTrustedCertificateDoesNotRequirePin()
@@ -297,7 +305,7 @@ private slots:
         configuration.setProtocol(QSsl::TlsV1_2);
         master.setTlsConfiguration(configuration);
         QVERIFY(master.setAcceptedPeerCertificateFingerprint(
-            QString::fromLatin1(server.certificate().digest(QCryptographicHash::Sha256).toHex())));
+            spkiSha256Fingerprint(server.certificate())));
 
         QSignalSpy tlsSpy(&master, &ModbusTcpMaster::tlsHandshakeFinished);
         QVERIFY(master.connectDevice());
@@ -347,7 +355,7 @@ private slots:
         configuration.setProtocol(QSsl::TlsV1_2);
         master.setTlsConfiguration(configuration);
         QVERIFY(master.setAcceptedPeerCertificateFingerprint(
-            QString::fromLatin1(server.certificate().digest(QCryptographicHash::Sha256).toHex())));
+            spkiSha256Fingerprint(server.certificate())));
 
         bool handshakeSignalReentryResult = true;
         connect(&master, &ModbusTcpMaster::tlsHandshakeFinished, &master,
@@ -427,7 +435,7 @@ private slots:
     {
         TlsModbusServer server;
         QVERIFY(server.listen(QHostAddress::LocalHost));
-        const QString fingerprint = QString::fromLatin1(server.certificate().digest(QCryptographicHash::Sha256).toHex());
+        const QString fingerprint = spkiSha256Fingerprint(server.certificate());
 
         QProcess process;
         process.setProcessChannelMode(QProcess::MergedChannels);
@@ -452,7 +460,7 @@ private slots:
     {
         TlsModbusServer server(0, true);
         QVERIFY(server.listen(QHostAddress::LocalHost));
-        const QString fingerprint = QString::fromLatin1(server.certificate().digest(QCryptographicHash::Sha256).toHex());
+        const QString fingerprint = spkiSha256Fingerprint(server.certificate());
         const QString certificatePath = QFINDTESTDATA("test-cert.pem");
         const QString keyPath = QFINDTESTDATA("test-key.pem");
         QVERIFY(!certificatePath.isEmpty());
