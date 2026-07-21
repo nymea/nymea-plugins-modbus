@@ -28,6 +28,7 @@
 #include <QDebug>
 #include <QObject>
 #include <QQueue>
+#include <QSet>
 #include <QTimer>
 
 #include <queuedmodbusreply.h>
@@ -77,16 +78,25 @@ private slots:
     void sendNextRequest();
 
 private:
+    static constexpr int RequestInterval = 300;
+    static constexpr int UpdateInterval = 1000;
+
     QTimer m_timer;
+    QTimer m_requestTimer;
+    QTimer m_updateTimer;
     quint16 m_heartbeat = 1;
     QueuedModbusReply *m_currentReply = nullptr;
     QQueue<QueuedModbusReply *> m_writeQueue;
     QQueue<QueuedModbusReply *> m_readQueue;
+    QSet<QueuedModbusReply *> m_updateReplies;
     bool m_aboutToDelete = false;
     bool m_operationalStartupEnabled = true;
     bool m_operational = false;
+    bool m_updateInProgress = false;
 
-    void enqueueRequest(QueuedModbusReply *reply);
+    void enqueueRequest(QueuedModbusReply *reply, bool updateRequest = false);
+    void requestFinished(QueuedModbusReply *reply);
+    void finishUpdateRound();
 
     void cleanupQueues();
 };

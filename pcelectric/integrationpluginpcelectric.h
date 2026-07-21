@@ -35,8 +35,6 @@
 #include <integrations/integrationplugin.h>
 #include <network/networkdevicediscovery.h>
 #include <network/zeroconf/zeroconfserviceentry.h>
-#include <plugintimer.h>
-
 #include "extern-plugininfo.h"
 #include "pcewallbox.h"
 
@@ -63,8 +61,6 @@ public:
     void executeAction(ThingActionInfo *info) override;
 
 private:
-    PluginTimer *m_refreshTimer = nullptr;
-
     QHash<Thing *, PceWallbox *> m_connections;
     QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
     QHash<Thing *, bool> m_initialUpdate;

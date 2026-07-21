@@ -247,20 +247,6 @@ void IntegrationPluginPcElectric::postSetupThing(Thing *thing)
 {
     qCDebug(dcPcElectric()) << "Post setup thing" << thing->name();
 
-    if (!m_refreshTimer) {
-        m_refreshTimer = hardwareManager()->pluginTimerManager()->registerTimer(1);
-        connect(m_refreshTimer, &PluginTimer::timeout, this, [this] {
-            foreach (PceWallbox *connection, m_connections) {
-                if (connection->reachable()) {
-                    connection->update();
-                }
-            }
-        });
-
-        qCDebug(dcPcElectric()) << "Starting refresh timer...";
-        m_refreshTimer->start();
-    }
-
     PceWallbox::ChargingCurrentState chargingCurrentState;
     chargingCurrentState.power = thing->stateValue("power").toBool();
     chargingCurrentState.maxChargingCurrent = thing->stateValue("maxChargingCurrent").toDouble();
@@ -292,11 +278,6 @@ void IntegrationPluginPcElectric::thingRemoved(Thing *thing)
     if (m_monitors.contains(thing))
         hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
 
-    if (myThings().isEmpty() && m_refreshTimer) {
-        qCDebug(dcPcElectric()) << "Stopping reconnect timer";
-        hardwareManager()->pluginTimerManager()->unregisterTimer(m_refreshTimer);
-        m_refreshTimer = nullptr;
-    }
 }
 
 void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)

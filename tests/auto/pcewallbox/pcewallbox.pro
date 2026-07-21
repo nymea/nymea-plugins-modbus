@@ -2,7 +2,10 @@ QT += core network serialbus testlib
 QT -= gui
 
 CONFIG += testcase console no_testcase_installs
+CONFIG += link_pkgconfig
 CONFIG -= app_bundle
+
+PKGCONFIG += nymea
 
 TARGET = tst_pcewallbox
 
