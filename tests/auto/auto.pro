@@ -1,2 +1,5 @@
 TEMPLATE = subdirs
-SUBDIRS += modbustcpmaster modbuscli
+SUBDIRS += \
+    modbustcpmaster \
+    modbuscli \
+    pcewallbox
