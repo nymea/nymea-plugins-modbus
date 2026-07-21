@@ -4,7 +4,10 @@
 #include <QDataStream>
 #include <QFile>
 #include <QModbusReply>
+#include <QMutex>
+#include <QMutexLocker>
 #include <QProcess>
+#include <QSet>
 #include <QSignalSpy>
 #include <QSslKey>
 #include <QSslSocket>
@@ -12,6 +15,18 @@
 #include <QTest>
 
 #include <modbustcpmaster.h>
+
+#ifdef HAVE_OPENSSL_TEST_SERVER
+#include <openssl/err.h>
+#include <openssl/pem.h>
+#include <openssl/ssl.h>
+
+#include <sys/socket.h>
+#include <unistd.h>
+
+#include <thread>
+#include <vector>
+#endif
 
 namespace {
 QString spkiSha256Fingerprint(const QSslCertificate &certificate)
@@ -190,6 +205,169 @@ private:
     QVector<quint16> m_lastWriteValues;
 };
 
+#ifdef HAVE_OPENSSL_TEST_SERVER
+class OpenSslTlsModbusServer : public QTcpServer
+{
+public:
+    explicit OpenSslTlsModbusServer(QObject *parent = nullptr)
+        : QTcpServer(parent)
+    {
+        QFile certificateFile(QStringLiteral(":/tls/test-cert.pem"));
+        QFile keyFile(QStringLiteral(":/tls/test-key.pem"));
+        if (!certificateFile.open(QIODevice::ReadOnly)
+                || !keyFile.open(QIODevice::ReadOnly)) {
+            m_error = QStringLiteral("Could not open the TLS test credentials");
+            return;
+        }
+
+        const QByteArray certificatePem = certificateFile.readAll();
+        const QByteArray keyPem = keyFile.readAll();
+        m_certificate = QSslCertificate(certificatePem, QSsl::Pem);
+        m_context = SSL_CTX_new(TLS_server_method());
+        if (!m_context) {
+            setOpenSslError(QStringLiteral("Could not create the OpenSSL server context"));
+            return;
+        }
+
+        SSL_CTX_set_min_proto_version(m_context, TLS1_2_VERSION);
+        SSL_CTX_set_max_proto_version(m_context, TLS1_2_VERSION);
+        static const unsigned char sessionIdContext[] = "nymea-modbus-test";
+        SSL_CTX_set_session_id_context(m_context, sessionIdContext,
+                                       sizeof(sessionIdContext) - 1);
+        SSL_CTX_set_session_cache_mode(m_context, SSL_SESS_CACHE_SERVER);
+
+        BIO *certificateBio = BIO_new_mem_buf(certificatePem.constData(), certificatePem.size());
+        BIO *keyBio = BIO_new_mem_buf(keyPem.constData(), keyPem.size());
+        X509 *certificate = certificateBio
+                ? PEM_read_bio_X509(certificateBio, nullptr, nullptr, nullptr) : nullptr;
+        EVP_PKEY *key = keyBio
+                ? PEM_read_bio_PrivateKey(keyBio, nullptr, nullptr, nullptr) : nullptr;
+        const bool credentialsLoaded = certificate && key
+                && SSL_CTX_use_certificate(m_context, certificate) == 1
+                && SSL_CTX_use_PrivateKey(m_context, key) == 1
+                && SSL_CTX_check_private_key(m_context) == 1;
+        X509_free(certificate);
+        EVP_PKEY_free(key);
+        BIO_free(certificateBio);
+        BIO_free(keyBio);
+        if (!credentialsLoaded)
+            setOpenSslError(QStringLiteral("Could not load the OpenSSL server credentials"));
+    }
+
+    ~OpenSslTlsModbusServer() override
+    {
+        close();
+        QList<int> sockets;
+        {
+            QMutexLocker locker(&m_mutex);
+            sockets = m_activeSockets.values();
+        }
+        for (int socket : sockets)
+            ::shutdown(socket, SHUT_RDWR);
+        for (std::thread &worker : m_workers) {
+            if (worker.joinable())
+                worker.join();
+        }
+        SSL_CTX_free(m_context);
+    }
+
+    bool isValid() const { return m_context && m_error.isEmpty(); }
+    QString errorString() const { return m_error; }
+    QSslCertificate certificate() const { return m_certificate; }
+
+    QList<bool> sessionReuseResults() const
+    {
+        QMutexLocker locker(&m_mutex);
+        return m_sessionReuseResults;
+    }
+
+    int modbusRequests() const
+    {
+        QMutexLocker locker(&m_mutex);
+        return m_modbusRequests;
+    }
+
+protected:
+    void incomingConnection(qintptr socketDescriptor) override
+    {
+        const int socket = int(socketDescriptor);
+        {
+            QMutexLocker locker(&m_mutex);
+            m_activeSockets.insert(socket);
+        }
+        m_workers.emplace_back([this, socket]() { serveConnection(socket); });
+    }
+
+private:
+    void setOpenSslError(const QString &prefix)
+    {
+        const unsigned long error = ERR_get_error();
+        char errorBuffer[256] = {};
+        ERR_error_string_n(error, errorBuffer, sizeof(errorBuffer));
+        m_error = prefix + QStringLiteral(": ") + QString::fromLatin1(errorBuffer);
+    }
+
+    void serveConnection(int socket)
+    {
+        SSL *ssl = SSL_new(m_context);
+        if (ssl && SSL_set_fd(ssl, socket) == 1 && SSL_accept(ssl) == 1) {
+            {
+                QMutexLocker locker(&m_mutex);
+                m_sessionReuseResults.append(SSL_session_reused(ssl) == 1);
+            }
+
+            QByteArray buffer;
+            char input[4096];
+            while (true) {
+                const int bytesRead = SSL_read(ssl, input, sizeof(input));
+                if (bytesRead <= 0)
+                    break;
+                buffer.append(input, bytesRead);
+                while (buffer.size() >= 7) {
+                    QDataStream header(buffer);
+                    quint16 transactionId = 0;
+                    quint16 protocolId = 0;
+                    quint16 length = 0;
+                    quint8 unitId = 0;
+                    quint8 function = 0;
+                    header >> transactionId >> protocolId >> length;
+                    const int requestSize = 6 + length;
+                    if (buffer.size() < requestSize)
+                        break;
+                    header >> unitId >> function;
+                    buffer.remove(0, requestSize);
+
+                    QByteArray response;
+                    QDataStream output(&response, QIODevice::WriteOnly);
+                    output << transactionId << quint16(0) << quint16(5) << unitId
+                           << function << quint8(2) << quint16(0x1234);
+                    if (SSL_write(ssl, response.constData(), response.size()) <= 0)
+                        break;
+                    QMutexLocker locker(&m_mutex);
+                    ++m_modbusRequests;
+                }
+            }
+        }
+        if (ssl) {
+            SSL_shutdown(ssl);
+            SSL_free(ssl);
+        }
+        ::close(socket);
+        QMutexLocker locker(&m_mutex);
+        m_activeSockets.remove(socket);
+    }
+
+    SSL_CTX *m_context = nullptr;
+    QSslCertificate m_certificate;
+    QString m_error;
+    mutable QMutex m_mutex;
+    QSet<int> m_activeSockets;
+    QList<bool> m_sessionReuseResults;
+    int m_modbusRequests = 0;
+    std::vector<std::thread> m_workers;
+};
+#endif
+
 class InspectableModbusTcpMaster : public ModbusTcpMaster
 {
 public:
@@ -205,6 +383,77 @@ class TestModbusTcpMaster : public QObject
     Q_OBJECT
 
 private slots:
+#ifdef HAVE_OPENSSL_TEST_SERVER
+    void tls12SessionIsReusedAndModbusStillWorks()
+    {
+        OpenSslTlsModbusServer server;
+        QVERIFY2(server.isValid(), qPrintable(server.errorString()));
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+
+        ModbusTcpMaster master(QHostAddress::LocalHost, server.serverPort());
+        master.setTransport(ModbusTcpMaster::TransportTls);
+        QSslConfiguration configuration = QSslConfiguration::defaultConfiguration();
+        configuration.setProtocol(QSsl::TlsV1_2);
+        master.setTlsConfiguration(configuration);
+        QVERIFY(master.setAcceptedPeerCertificateFingerprint(
+            spkiSha256Fingerprint(server.certificate())));
+
+        const auto sendRequest = [&master]() {
+            QModbusDataUnit request(QModbusDataUnit::HoldingRegisters, 10, 1);
+            QModbusReply *reply = master.sendReadRequest(request, 1);
+            QVERIFY(reply);
+            QSignalSpy finishedSpy(reply, &QModbusReply::finished);
+            if (!reply->isFinished())
+                QVERIFY(finishedSpy.wait(5000));
+            QCOMPARE(reply->error(), QModbusDevice::NoError);
+            QCOMPARE(reply->result().value(0), quint16(0x1234));
+            reply->deleteLater();
+        };
+
+        QVERIFY(master.connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(master.connected(), 5000);
+        QTRY_COMPARE_WITH_TIMEOUT(server.sessionReuseResults().size(), 1, 5000);
+        QCOMPARE(server.sessionReuseResults().at(0), false);
+        sendRequest();
+        QTRY_VERIFY_WITH_TIMEOUT(master.tlsSessionAvailable(), 5000);
+
+        QVERIFY(master.reconnectDevice());
+        QTRY_COMPARE_WITH_TIMEOUT(server.sessionReuseResults().size(), 2, 5000);
+        QTRY_VERIFY_WITH_TIMEOUT(master.connected(), 5000);
+        QCOMPARE(server.sessionReuseResults().at(1), true);
+        sendRequest();
+        QCOMPARE(server.modbusRequests(), 2);
+        master.disconnectDevice();
+        QTRY_VERIFY_WITH_TIMEOUT(!master.connected(), 5000);
+    }
+
+    void disabledSessionResumptionUsesTwoFullHandshakes()
+    {
+        OpenSslTlsModbusServer server;
+        QVERIFY2(server.isValid(), qPrintable(server.errorString()));
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+
+        ModbusTcpMaster master(QHostAddress::LocalHost, server.serverPort());
+        master.setTransport(ModbusTcpMaster::TransportTls);
+        master.setTlsSessionResumptionEnabled(false);
+        QSslConfiguration configuration = QSslConfiguration::defaultConfiguration();
+        configuration.setProtocol(QSsl::TlsV1_2);
+        master.setTlsConfiguration(configuration);
+        QVERIFY(master.setAcceptedPeerCertificateFingerprint(
+            spkiSha256Fingerprint(server.certificate())));
+
+        QVERIFY(master.connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(master.connected(), 5000);
+        QTRY_COMPARE_WITH_TIMEOUT(server.sessionReuseResults().size(), 1, 5000);
+        QVERIFY(master.reconnectDevice());
+        QTRY_COMPARE_WITH_TIMEOUT(server.sessionReuseResults().size(), 2, 5000);
+        QTRY_VERIFY_WITH_TIMEOUT(master.connected(), 5000);
+        QCOMPARE(server.sessionReuseResults(), QList<bool>({false, false}));
+        master.disconnectDevice();
+        QTRY_VERIFY_WITH_TIMEOUT(!master.connected(), 5000);
+    }
+#endif
+
     void sessionResumptionDefaultsAndInvalidation()
     {
         InspectableModbusTcpMaster master(QHostAddress::LocalHost, 802);

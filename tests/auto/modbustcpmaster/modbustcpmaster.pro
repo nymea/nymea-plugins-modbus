@@ -12,3 +12,9 @@ LIBS += -L$$shadowed($$PWD/../../../libnymea-modbus) -lnymea-modbus
 SOURCES += tst_modbustcpmaster.cpp
 
 RESOURCES += testdata.qrc
+
+packagesExist(openssl) {
+    CONFIG += link_pkgconfig
+    PKGCONFIG += openssl
+    DEFINES += HAVE_OPENSSL_TEST_SERVER
+}
