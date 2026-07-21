@@ -4,6 +4,7 @@
 #define MODBUSTLSTUNNEL_P_H
 
 #include <QHostAddress>
+#include <QElapsedTimer>
 #include <QSslCertificate>
 #include <QSslConfiguration>
 #include <QSslError>
@@ -42,6 +43,7 @@ private:
 
     QTcpServer m_server;
     QTimer m_handshakeTimer;
+    QElapsedTimer m_handshakeElapsedTimer;
     QSslSocket *m_sslSocket = nullptr;
     QTcpSocket *m_loopbackSocket = nullptr;
     QString m_acceptedFingerprint;

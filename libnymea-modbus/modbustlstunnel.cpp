@@ -3,10 +3,13 @@
 #include "modbustlstunnel_p.h"
 
 #include <QCryptographicHash>
+#include <QLoggingCategory>
 #include <QRandomGenerator>
 #include <QSslKey>
 #include <QSslSocket>
 #include <QTcpSocket>
+
+Q_LOGGING_CATEGORY(dcModbusTlsTunnel, "ModbusTlsTunnel")
 
 ModbusTlsTunnel::ModbusTlsTunnel(QObject *parent)
     : QObject(parent)
@@ -42,7 +45,11 @@ void ModbusTlsTunnel::start(const QHostAddress &address,
     if (!serverName.isEmpty())
         m_sslSocket->setPeerVerifyName(serverName);
 
-    connect(m_sslSocket, &QSslSocket::connected, this, &ModbusTlsTunnel::tcpConnected);
+    connect(m_sslSocket, &QSslSocket::connected, this, [this]() {
+        // Measure the TLS handshake itself rather than DNS and TCP setup.
+        m_handshakeElapsedTimer.start();
+        emit tcpConnected();
+    });
     connect(m_sslSocket,
             QOverload<const QList<QSslError> &>::of(&QSslSocket::sslErrors),
             this,
@@ -53,8 +60,32 @@ void ModbusTlsTunnel::start(const QHostAddress &address,
                     m_sslSocket->ignoreSslErrors(errors);
             });
 
-    connect(m_sslSocket, &QSslSocket::encrypted, this, [this]() {
+    const qsizetype offeredSessionSize = sslConfiguration.sessionTicket().size();
+#if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
+    const QString tlsBackend = QSslSocket::activeBackend();
+#else
+    const QString tlsBackend = QStringLiteral("not exposed by this Qt version");
+#endif
+    qCInfo(dcModbusTlsTunnel())
+        << "Starting TLS handshake with" << address.toString() << "port" << port
+        << "backend:" << tlsBackend
+        << "runtime:" << QSslSocket::sslLibraryVersionString()
+        << "cached serialized session offered:" << (offeredSessionSize > 0)
+        << "offered session bytes:" << offeredSessionSize
+        << "offered session lifetime hint:"
+        << sslConfiguration.sessionTicketLifeTimeHint();
+
+    connect(m_sslSocket, &QSslSocket::encrypted, this, [this, offeredSessionSize]() {
         m_handshakeTimer.stop();
+        const QSslConfiguration negotiatedConfiguration = m_sslSocket->sslConfiguration();
+        qCInfo(dcModbusTlsTunnel())
+            << "TLS handshake finished in" << m_handshakeElapsedTimer.elapsed() << "ms"
+            << "session resumption attempted:" << (offeredSessionSize > 0)
+            << "offered session bytes:" << offeredSessionSize
+            << "resulting serialized session bytes:"
+            << negotiatedConfiguration.sessionTicket().size()
+            << "resulting session lifetime hint:"
+            << negotiatedConfiguration.sessionTicketLifeTimeHint();
         if (!verifyPeerCertificate()) {
             emit tunnelError(tr("The TLS peer certificate was not accepted."));
             m_sslSocket->abort();
