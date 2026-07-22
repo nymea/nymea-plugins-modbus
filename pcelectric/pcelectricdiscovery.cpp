@@ -239,6 +239,11 @@ void PcElectricDiscovery::checkNetworkDevice(const QHostAddress &address)
                                         m_runningVerifications[connection].thingClassId = ev11ThingClassId;
                                     }
 
+                                    if (connection->firmwareRevision() > QStringLiteral("0025")
+                                        && m_runningVerifications[connection].thingClassId == ev11ThingClassId) {
+                                        m_runningVerifications[connection].thingClassId = ev11RfidThingClassId;
+                                    }
+
                                     // Done with this connection
                                     m_potentialResults.append(m_runningVerifications.take(connection));
                                     cleanupConnection(connection);
