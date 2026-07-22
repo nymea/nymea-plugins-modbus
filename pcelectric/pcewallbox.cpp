@@ -27,6 +27,8 @@
 
 #include <modbusdatautils.h>
 
+#include <algorithm>
+
 PceWallbox::PceWallbox(const QHostAddress &hostAddress, uint port, quint16 slaveId, QObject *parent)
     : EV11ModbusTcpConnection{hostAddress, port, slaveId, parent}
 {
@@ -50,6 +52,7 @@ PceWallbox::PceWallbox(const QHostAddress &hostAddress, uint port, quint16 slave
             m_requestTimer.stop();
             m_updateTimer.stop();
             m_operational = false;
+            resetRfidState();
 
             cleanupQueues();
 
@@ -96,6 +99,113 @@ void PceWallbox::startOperationalMode()
     update();
 }
 
+void PceWallbox::setRfidEnabled(bool enabled)
+{
+    m_rfidEnabled = enabled;
+    if (!enabled)
+        resetRfidState();
+}
+
+bool PceWallbox::rfidEnabled() const
+{
+    return m_rfidEnabled;
+}
+
+bool PceWallbox::rfidTransportAvailable() const
+{
+    return m_rfidEnabled && firmwareRevision() > QStringLiteral("0025")
+           && m_modbusTcpMaster->transport() == ModbusTcpMaster::TransportTls;
+}
+
+bool PceWallbox::initializeRfidOperatingMode(RfidOperatingMode mode)
+{
+    if (!reachable() || !rfidTransportAvailable() || m_rfidInitializing)
+        return false;
+
+    m_rfidInitializing = true;
+    m_rfidModeConfirmed = false;
+    QueuedModbusReply *modeReply = new QueuedModbusReply(
+        QueuedModbusReply::RequestTypeWrite,
+        setRfidOperatingModeDataUnit(mode), this);
+    connect(modeReply, &QueuedModbusReply::finished, modeReply, &QueuedModbusReply::deleteLater);
+    connect(modeReply, &QueuedModbusReply::finished, this, [this, modeReply, mode]() {
+        if (modeReply->error() != QModbusDevice::NoError) {
+            m_rfidInitializing = false;
+            emit rfidInitializationFinished(false);
+            return;
+        }
+
+        QueuedModbusReply *readReply = new QueuedModbusReply(
+            QueuedModbusReply::RequestTypeRead, rfidOperatingModeDataUnit(), this);
+        connect(readReply, &QueuedModbusReply::finished, readReply, &QueuedModbusReply::deleteLater);
+        connect(readReply, &QueuedModbusReply::finished, this, [this, readReply, mode]() {
+            bool success = false;
+            if (readReply->error() == QModbusDevice::NoError) {
+                const QVector<quint16> values = readReply->reply()->result().values();
+                if (values.size() == 1) {
+                    processRfidOperatingModeRegisterValues(values);
+                    success = rfidOperatingMode() == mode;
+                }
+            }
+            m_rfidModeConfirmed = success;
+            m_rfidInitializing = false;
+            emit rfidInitializationFinished(success);
+        });
+        enqueueRequest(readReply);
+    });
+    enqueueRequest(modeReply);
+    return true;
+}
+
+bool PceWallbox::hasPendingRfidTag() const
+{
+    return !m_pendingRfidToken.isEmpty() && !m_rfidDecisionInProgress;
+}
+
+bool PceWallbox::submitRfidDecision(bool approved)
+{
+    if (!rfidTransportAvailable() || !hasPendingRfidTag())
+        return false;
+
+    m_rfidDecisionInProgress = true;
+    const QVector<quint16> decisionToken = m_pendingRfidToken;
+    const auto finishDecision = [this, decisionToken](bool success) {
+        if (success) {
+            if (m_pendingRfidToken == decisionToken)
+                m_pendingRfidToken.clear();
+        }
+        m_rfidDecisionInProgress = false;
+        emit rfidDecisionFinished(success);
+    };
+
+    if (!approved) {
+        const quint64 generation = ++m_rfidLedGeneration;
+        writeRfidLed(RfidLedRejected, [this, generation, finishDecision](bool success) {
+            scheduleRfidLedReset(generation);
+            finishDecision(success);
+        });
+        return true;
+    }
+
+    QueuedModbusReply *sessionReply = new QueuedModbusReply(
+        QueuedModbusReply::RequestTypeWrite, setRfidSessionDataUnit(decisionToken), this);
+    connect(sessionReply, &QueuedModbusReply::finished, sessionReply, &QueuedModbusReply::deleteLater);
+    connect(sessionReply, &QueuedModbusReply::finished, this,
+            [this, sessionReply, finishDecision]() {
+        if (sessionReply->error() != QModbusDevice::NoError) {
+            finishDecision(false);
+            return;
+        }
+        const quint64 generation = ++m_rfidLedGeneration;
+        writeRfidLed(RfidLedAccepted, [this, generation, finishDecision](bool success) {
+            scheduleRfidLedReset(generation);
+            finishDecision(success);
+        });
+    });
+    enqueueRequest(sessionReply);
+    return true;
+}
+
 bool PceWallbox::update()
 {
     if (m_aboutToDelete || !m_operational)
@@ -128,6 +238,22 @@ bool PceWallbox::update()
     });
 
     enqueueRequest(reply, true);
+
+    // Keep the firmware mode synchronized and poll the complete credential block.
+    // The credential values are sensitive and must never be logged.
+    if (rfidTransportAvailable()) {
+        readRfidOperatingModeOnce(true);
+
+        reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeRead, rfidReadDataUnit(), this);
+        connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
+        connect(reply, &QueuedModbusReply::finished, this, [this, reply]() {
+            if (reply->error() != QModbusDevice::NoError)
+                return;
+            const QVector<quint16> values = reply->reply()->result().values();
+            processRfidRead(values);
+        });
+        enqueueRequest(reply, true);
+    }
 
     // charging current register. Contains
     // - power state
@@ -344,6 +470,133 @@ bool PceWallbox::update()
     return true;
 }
 
+void PceWallbox::processRfidRead(const QVector<quint16> &values)
+{
+    if (values.size() != 6)
+        return;
+
+    const bool nullBlock = std::all_of(values.cbegin(), values.cend(),
+                                       [](quint16 value) { return value == 0; });
+    if (nullBlock) {
+        m_observedRfidToken.clear();
+        return;
+    }
+
+    if (!m_rfidModeConfirmed || rfidOperatingMode() != RfidOperatingModeRemote)
+        return;
+
+    QString code;
+    if (!parseRfidToken(values, &code))
+        return;
+
+    if (values == m_observedRfidToken)
+        return;
+
+    m_observedRfidToken = values;
+    m_pendingRfidToken = values;
+    emit rfidTagDetected(code);
+}
+
+void PceWallbox::readRfidOperatingModeOnce(bool updateRequest)
+{
+    QueuedModbusReply *reply = new QueuedModbusReply(
+        QueuedModbusReply::RequestTypeRead, rfidOperatingModeDataUnit(), this);
+    connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
+    connect(reply, &QueuedModbusReply::finished, this, [this, reply]() {
+        if (reply->error() != QModbusDevice::NoError) {
+            m_rfidModeConfirmed = false;
+            return;
+        }
+
+        const QVector<quint16> values = reply->reply()->result().values();
+        if (values.size() == 1 && values.first() <= RfidOperatingModeLocal) {
+            processRfidOperatingModeRegisterValues(values);
+            m_rfidModeConfirmed = true;
+        } else {
+            m_rfidModeConfirmed = false;
+        }
+    });
+    enqueueRequest(reply, updateRequest);
+}
+
+void PceWallbox::writeRfidLed(RfidLed led, const std::function<void(bool)> &callback)
+{
+    QueuedModbusReply *reply = new QueuedModbusReply(
+        QueuedModbusReply::RequestTypeWrite, setRfidLedDataUnit(led), this);
+    connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
+    connect(reply, &QueuedModbusReply::finished, this, [reply, callback]() {
+        callback(reply->error() == QModbusDevice::NoError);
+    });
+    enqueueRequest(reply);
+}
+
+void PceWallbox::scheduleRfidLedReset(quint64 generation)
+{
+    QTimer::singleShot(500, this, [this, generation]() {
+        if (generation != m_rfidLedGeneration || !rfidTransportAvailable())
+            return;
+        writeRfidLed(RfidLedNone, [](bool) {});
+    });
+}
+
+void PceWallbox::resetRfidState()
+{
+    m_rfidInitializing = false;
+    m_rfidModeConfirmed = false;
+    m_rfidDecisionInProgress = false;
+    m_observedRfidToken.clear();
+    m_pendingRfidToken.clear();
+    ++m_rfidLedGeneration;
+}
+
+bool PceWallbox::isSensitiveDataUnit(const QModbusDataUnit &unit) const
+{
+    const int start = unit.startAddress();
+    const int end = start + unit.valueCount();
+
+    // Derived from the generated data units so this stays in sync with whichever
+    // registers EV11.3-registers.json marks as "sensitive", instead of duplicating
+    // their addresses here.
+    const QVector<QModbusDataUnit> sensitiveUnits = {rfidReadDataUnit(), rfidSessionDataUnit()};
+    for (const QModbusDataUnit &sensitiveUnit : sensitiveUnits) {
+        const int sensitiveStart = sensitiveUnit.startAddress();
+        const int sensitiveEnd = sensitiveStart + sensitiveUnit.valueCount();
+        if (start < sensitiveEnd && end > sensitiveStart)
+            return true;
+    }
+    return false;
+}
+
+bool PceWallbox::parseRfidToken(const QVector<quint16> &values, QString *code)
+{
+    if (values.size() != 6)
+        return false;
+
+    const quint8 version = static_cast<quint8>(values.at(0) >> 8);
+    const quint8 uidLength = static_cast<quint8>(values.at(0) & 0xff);
+    if (version != 1 || (uidLength != 4 && uidLength != 7 && uidLength != 10))
+        return false;
+
+    QByteArray token;
+    token.reserve(10);
+    for (int index = 1; index < values.size(); ++index) {
+        token.append(static_cast<char>(values.at(index) >> 8));
+        token.append(static_cast<char>(values.at(index) & 0xff));
+    }
+    token.truncate(uidLength);
+    if (!std::any_of(token.cbegin(), token.cend(), [](char byte) { return byte != 0; }))
+        return false;
+
+    if (code)
+        *code = QString::fromLatin1(token.toHex());
+
+    // Note: for real debug purpose wen need to see the actual code, logging level info never prints the code.
+    qCDebug(dcPcElectric()) << "Tag detected: Version" << version
+                            << "length:" << uidLength
+                            << "token:" << code;
+    return true;
+}
+
 QueuedModbusReply *PceWallbox::setChargingCurrentAsync(quint16 chargingCurrent)
 {
     if (m_aboutToDelete)
@@ -452,6 +705,27 @@ QueuedModbusReply *PceWallbox::setDigitalInputModeAsync(DigitalInputMode digital
             m_currentReply = nullptr;
 
         return;
+    });
+
+    enqueueRequest(reply);
+    return reply;
+}
+
+QueuedModbusReply *PceWallbox::setRfidOperatingModeAsync(RfidOperatingMode mode)
+{
+    if (m_aboutToDelete)
+        return nullptr;
+
+    m_rfidModeConfirmed = false;
+    QueuedModbusReply *reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeWrite, setRfidOperatingModeDataUnit(mode), this);
+
+    connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
+    connect(reply, &QueuedModbusReply::finished, this, [this, reply]() {
+        if (m_currentReply == reply)
+            m_currentReply = nullptr;
+
+        if (reply->error() == QModbusDevice::NoError)
+            readRfidOperatingModeOnce();
     });
 
     enqueueRequest(reply);
@@ -587,7 +861,9 @@ void PceWallbox::sendNextRequest()
             << "length:"
             << m_currentReply->dataUnit().valueCount()
             << "values:"
-            << m_currentReply->dataUnit().values();
+            << (isSensitiveDataUnit(m_currentReply->dataUnit())
+                    ? QVariant(QStringLiteral("[REDACTED]"))
+                    : QVariant::fromValue(m_currentReply->dataUnit().values()));
         m_currentReply->setReply(m_modbusTcpMaster->sendWriteRequest(m_currentReply->dataUnit(), m_slaveId));
         break;
     }
@@ -659,7 +935,7 @@ void PceWallbox::requestFinished(QueuedModbusReply *reply)
         return;
     }
 
-    if (!m_operational || !reachable())
+    if ((!m_operational && !m_rfidInitializing) || !reachable())
         return;
 
     m_requestTimer.start(RequestInterval);

@@ -31,6 +31,8 @@
 #include <QSet>
 #include <QTimer>
 
+#include <functional>
+
 #include <queuedmodbusreply.h>
 
 #include "ev11modbustcpconnection.h"
@@ -54,6 +56,14 @@ public:
     bool operational() const;
     void startOperationalMode();
 
+    void setRfidEnabled(bool enabled);
+    bool rfidEnabled() const;
+    bool initializeRfidOperatingMode(RfidOperatingMode mode);
+    bool hasPendingRfidTag() const;
+    bool submitRfidDecision(bool approved);
+
+    QueuedModbusReply *setRfidOperatingModeAsync(RfidOperatingMode mode);
+
     QueuedModbusReply *setChargingCurrentAsync(quint16 chargingCurrent); // mA
 
     QueuedModbusReply *setLedBrightnessAsync(quint16 percentage);
@@ -72,12 +82,23 @@ public:
 
     static quint16 deriveRegisterFromStates(PceWallbox::ChargingCurrentState state);
     static PceWallbox::ChargingCurrentState deriveStatesFromRegister(quint16 registerValue);
+    static bool parseRfidToken(const QVector<quint16> &values, QString *code);
+
+signals:
+    void rfidInitializationFinished(bool success);
+    void rfidTagDetected(const QString &code);
+    void rfidDecisionFinished(bool success);
 
 private slots:
     void sendHeartbeat();
     void sendNextRequest();
 
+protected:
+    virtual bool rfidTransportAvailable() const;
+
 private:
+    friend class TestPceWallbox;
+
     static constexpr int RequestInterval = 300;
     static constexpr int UpdateInterval = 1000;
 
@@ -93,10 +114,23 @@ private:
     bool m_operationalStartupEnabled = true;
     bool m_operational = false;
     bool m_updateInProgress = false;
+    bool m_rfidEnabled = false;
+    bool m_rfidInitializing = false;
+    bool m_rfidModeConfirmed = false;
+    bool m_rfidDecisionInProgress = false;
+    QVector<quint16> m_observedRfidToken;
+    QVector<quint16> m_pendingRfidToken;
+    quint64 m_rfidLedGeneration = 0;
 
     void enqueueRequest(QueuedModbusReply *reply, bool updateRequest = false);
     void requestFinished(QueuedModbusReply *reply);
     void finishUpdateRound();
+    void processRfidRead(const QVector<quint16> &values);
+    void readRfidOperatingModeOnce(bool updateRequest = false);
+    void writeRfidLed(RfidLed led, const std::function<void(bool)> &callback);
+    void scheduleRfidLedReset(quint64 generation);
+    void resetRfidState();
+    bool isSensitiveDataUnit(const QModbusDataUnit &unit) const;
 
     void cleanupQueues();
 };

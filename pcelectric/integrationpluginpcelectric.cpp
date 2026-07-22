@@ -84,6 +84,20 @@ QString spkiSha256Fingerprint(const QSslCertificate &certificate)
     return QString::fromLatin1(QCryptographicHash::hash(certificate.publicKey().toDer(),
                                                         QCryptographicHash::Sha256).toHex());
 }
+
+bool rfidOperatingModeFromSettingValue(const QString &value, EV11ModbusTcpConnection::RfidOperatingMode *mode)
+{
+    if (value == QStringLiteral("0 | Disabled")) {
+        *mode = EV11ModbusTcpConnection::RfidOperatingModeDisabled;
+    } else if (value == QStringLiteral("1 | Remote")) {
+        *mode = EV11ModbusTcpConnection::RfidOperatingModeRemote;
+    } else if (value == QStringLiteral("2 | Local")) {
+        *mode = EV11ModbusTcpConnection::RfidOperatingModeLocal;
+    } else {
+        return false;
+    }
+    return true;
+}
 }
 
 IntegrationPluginPcElectric::IntegrationPluginPcElectric() {}
@@ -93,15 +107,19 @@ void IntegrationPluginPcElectric::init()
     //qCCritical(dcPcElectric()) << QString("%1").arg(QString::number(49155, 2));
 
     m_addressParamTypes[ev11ThingClassId] = ev11ThingAddressParamTypeId;
+    m_addressParamTypes[ev11RfidThingClassId] = ev11RfidThingAddressParamTypeId;
     m_addressParamTypes[ev11NoMeterThingClassId] = ev11NoMeterThingAddressParamTypeId;
 
     m_hostNameParamTypes[ev11ThingClassId] = ev11ThingHostNameParamTypeId;
+    m_hostNameParamTypes[ev11RfidThingClassId] = ev11RfidThingHostNameParamTypeId;
     m_hostNameParamTypes[ev11NoMeterThingClassId] = ev11NoMeterThingHostNameParamTypeId;
 
     m_macParamTypes[ev11ThingClassId] = ev11ThingMacAddressParamTypeId;
+    m_macParamTypes[ev11RfidThingClassId] = ev11RfidThingMacAddressParamTypeId;
     m_macParamTypes[ev11NoMeterThingClassId] = ev11NoMeterThingMacAddressParamTypeId;
 
     m_serialNumberParamTypes[ev11ThingClassId] = ev11ThingSerialNumberParamTypeId;
+    m_serialNumberParamTypes[ev11RfidThingClassId] = ev11RfidThingSerialNumberParamTypeId;
     m_serialNumberParamTypes[ev11NoMeterThingClassId] = ev11NoMeterThingSerialNumberParamTypeId;
 
     m_modbusServiceBrowser = hardwareManager()->zeroConfController()->createServiceBrowser("_modbus._tcp");
@@ -328,6 +346,7 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
     Thing *thing = info->thing();
 
     if (info->action().actionTypeId() == ev11RefreshClientCertificateActionTypeId
+        || info->action().actionTypeId() == ev11RfidRefreshClientCertificateActionTypeId
         || info->action().actionTypeId() == ev11NoMeterRefreshClientCertificateActionTypeId) {
         qCInfo(dcPcElectric()) << "Refreshing the PCE TLS client certificate.";
         QPointer<ThingActionInfo> guardedInfo(info);
@@ -366,10 +385,28 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
         return;
     }
 
-    if (info->action().actionTypeId() == ev11PowerActionTypeId || info->action().actionTypeId() == ev11NoMeterPowerActionTypeId) {
+    if (info->action().actionTypeId() == ev11RfidTagAcceptedActionTypeId
+        || info->action().actionTypeId() == ev11RfidTagRejectedActionTypeId) {
+        if (!connection->hasPendingRfidTag()) {
+            info->finish(Thing::ThingErrorHardwareNotAvailable);
+            return;
+        }
+        connect(connection, &PceWallbox::rfidDecisionFinished, info, [info](bool success) {
+            info->finish(success ? Thing::ThingErrorNoError : Thing::ThingErrorHardwareFailure);
+        }, Qt::SingleShotConnection);
+        const bool approved = info->action().actionTypeId() == ev11RfidTagAcceptedActionTypeId;
+        if (!connection->submitRfidDecision(approved))
+            info->finish(Thing::ThingErrorHardwareNotAvailable);
+
+        return;
+    }
+
+    if (info->action().actionTypeId() == ev11PowerActionTypeId || info->action().actionTypeId() == ev11RfidPowerActionTypeId || info->action().actionTypeId() == ev11NoMeterPowerActionTypeId) {
         bool power = false;
         if (info->action().actionTypeId() == ev11PowerActionTypeId) {
             power = info->action().paramValue(ev11PowerActionPowerParamTypeId).toBool();
+        } else if (info->action().actionTypeId() == ev11RfidPowerActionTypeId) {
+            power = info->action().paramValue(ev11RfidPowerActionPowerParamTypeId).toBool();
         } else if (info->action().actionTypeId() == ev11NoMeterPowerActionTypeId) {
             power = info->action().paramValue(ev11NoMeterPowerActionPowerParamTypeId).toBool();
         }
@@ -398,10 +435,12 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
 
         return;
 
-    } else if (info->action().actionTypeId() == ev11MaxChargingCurrentActionTypeId || info->action().actionTypeId() == ev11NoMeterMaxChargingCurrentActionTypeId) {
+    } else if (info->action().actionTypeId() == ev11MaxChargingCurrentActionTypeId || info->action().actionTypeId() == ev11RfidMaxChargingCurrentActionTypeId || info->action().actionTypeId() == ev11NoMeterMaxChargingCurrentActionTypeId) {
         double desiredChargingCurrent = 6;
         if (info->action().actionTypeId() == ev11MaxChargingCurrentActionTypeId) {
             desiredChargingCurrent = info->action().paramValue(ev11MaxChargingCurrentActionMaxChargingCurrentParamTypeId).toDouble();
+        } else if (info->action().actionTypeId() == ev11RfidMaxChargingCurrentActionTypeId) {
+            desiredChargingCurrent = info->action().paramValue(ev11RfidMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toDouble();
         } else if (info->action().actionTypeId() == ev11NoMeterMaxChargingCurrentActionTypeId) {
             desiredChargingCurrent = info->action().paramValue(ev11NoMeterMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toDouble();
         }
@@ -431,10 +470,13 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
 
         return;
 
-    } else if (info->action().actionTypeId() == ev11DesiredPhaseCountActionTypeId || info->action().actionTypeId() == ev11NoMeterDesiredPhaseCountActionTypeId) {
+    } else if (info->action().actionTypeId() == ev11DesiredPhaseCountActionTypeId || info->action().actionTypeId() == ev11RfidDesiredPhaseCountActionTypeId || info->action().actionTypeId() == ev11NoMeterDesiredPhaseCountActionTypeId) {
         uint desiredPhaseCount = 1;
         if (info->action().actionTypeId() == ev11DesiredPhaseCountActionTypeId) {
             desiredPhaseCount = info->action().paramValue(ev11DesiredPhaseCountActionDesiredPhaseCountParamTypeId).toUInt();
+
+        } else if (info->action().actionTypeId() == ev11RfidDesiredPhaseCountActionTypeId) {
+            desiredPhaseCount = info->action().paramValue(ev11RfidDesiredPhaseCountActionDesiredPhaseCountParamTypeId).toUInt();
 
         } else if (info->action().actionTypeId() == ev11NoMeterDesiredPhaseCountActionTypeId) {
             desiredPhaseCount = info->action().paramValue(ev11NoMeterDesiredPhaseCountActionDesiredPhaseCountParamTypeId).toUInt();
@@ -480,6 +522,7 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
 
     PceWallbox *connection = new PceWallbox(address, 502, 1, this);
     connection->setOperationalStartupEnabled(false);
+    connection->setRfidEnabled(thing->thingClassId() == ev11RfidThingClassId);
     connect(connection, &QObject::destroyed, this, [this, connection]() {
         m_tlsUpgradesInProgress.remove(connection);
     });
@@ -501,7 +544,7 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
         thing->setStateValue("connected", reachable && connection->operational());
 
         // Reset energy related information if not reachable
-        if (!reachable && thing->thingClassId() == ev11ThingClassId) {
+        if (!reachable && (thing->thingClassId() == ev11ThingClassId || thing->thingClassId() == ev11RfidThingClassId)) {
             thing->setStateValue("currentPower", 0);
             thing->setStateValue("currentPowerPhaseA", 0);
             thing->setStateValue("currentPowerPhaseB", 0);
@@ -614,11 +657,38 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
             pluginStorage()->setValue(storagePrefix(thing) + "/serverFingerprint", fingerprint);
             pluginStorage()->sync();
         }
+
+        if (thing->thingClassId() == ev11RfidThingClassId) {
+            connect(connection, &PceWallbox::rfidInitializationFinished, thing,
+                    [thing, connection](bool rfidReady) {
+                if (!rfidReady) {
+                    qCWarning(dcPcElectric()) << "Could not confirm the requested RFID operating mode.";
+                    thing->setStateValue("connected", false);
+                    return;
+                }
+                connection->startOperationalMode();
+                thing->setStateValue("connected", true);
+            }, Qt::SingleShotConnection);
+
+            EV11ModbusTcpConnection::RfidOperatingMode operatingMode = EV11ModbusTcpConnection::RfidOperatingModeRemote;
+            rfidOperatingModeFromSettingValue(thing->setting("rfidOperatingMode").toString(), &operatingMode);
+            if (!connection->initializeRfidOperatingMode(operatingMode)) {
+                qCWarning(dcPcElectric()) << "Could not initialize the RFID operating mode.";
+                thing->setStateValue("connected", false);
+            }
+            return;
+        }
+
         connection->startOperationalMode();
         m_addressAttemptsInProgress.remove(thing);
         m_attemptedAddresses.remove(thing);
         m_unexpectedSerialNumbers.remove(thing);
         thing->setStateValue("connected", true);
+    });
+
+    connect(connection, &PceWallbox::rfidTagDetected, thing, [thing](const QString &code) {
+        qCInfo(dcPcElectric()) << "RFID tag detected" << QString(code.length(), '*');
+        thing->emitEvent(ev11RfidTagDetectedEventTypeId, {Param(ev11RfidTagDetectedEventCodeParamTypeId, code)});
     });
 
     connect(connection, &PceWallbox::updateFinished, thing, [this, thing, connection]() {
@@ -722,7 +792,7 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
             thing->setStateValue("modeR37", connection->modeR37());
 
             // Energy information only available with meter and 0025
-            if (thing->thingClassId() == ev11ThingClassId) {
+            if (thing->thingClassId() == ev11ThingClassId || thing->thingClassId() == ev11RfidThingClassId) {
                 thing->setStateValue("currentPower", connection->currentPower());
                 thing->setStateValue("sessionEnergy", connection->powerMeter0());
                 thing->setStateValue("totalEnergyConsumed", connection->totalEnergyConsumed());
@@ -740,7 +810,7 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
         } else {
             // In firmware 0019 there is no current power register, depending on the CP state we can assume the car is consuming the amount
             // we adjusted, if the car is full, the CP state will change back to B2
-            if (thing->thingClassId() == ev11ThingClassId) {
+            if (thing->thingClassId() == ev11ThingClassId || thing->thingClassId() == ev11RfidThingClassId) {
                 thing->setStateValue("sessionEnergy", connection->powerMeter0());
                 if (connection->chargingState() == PceWallbox::ChargingStateC2 && connection->currentPower() == 0) {
                     // We are currently chargin, but the wallbox reports 0 W (which is expected), let's calculate the theoretical power...
@@ -757,6 +827,20 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
                 } else {
                     thing->setStateValue("currentPower", 0);
                 }
+            }
+        }
+
+        if (thing->thingClassId() == ev11RfidThingClassId) {
+            switch (connection->rfidOperatingMode()) {
+            case EV11ModbusTcpConnection::RfidOperatingModeDisabled:
+                thing->setSettingValue("rfidOperatingMode", "0 | Disabled");
+                break;
+            case EV11ModbusTcpConnection::RfidOperatingModeRemote:
+                thing->setSettingValue("rfidOperatingMode", "1 | Remote");
+                break;
+            case EV11ModbusTcpConnection::RfidOperatingModeLocal:
+                thing->setSettingValue("rfidOperatingMode", "2 | Local");
+                break;
             }
         }
 
@@ -800,6 +884,7 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
                 thing->setSettingValue("phaseAutoSwitchMinChargingTime", connection->phaseAutoSwitchMinChargingTime());
                 thing->setSettingValue("forceChargingResume", connection->forceChargingResume() == 1 ? true : false);
             }
+
         }
     });
 
@@ -808,7 +893,7 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
             qCWarning(dcPcElectric()) << "Ignoring setting change while the wallbox connection is not operational.";
             return;
         }
-        if (paramTypeId == ev11SettingsLedBrightnessParamTypeId || paramTypeId == ev11NoMeterSettingsLedBrightnessParamTypeId) {
+        if (paramTypeId == ev11SettingsLedBrightnessParamTypeId || paramTypeId == ev11RfidSettingsLedBrightnessParamTypeId || paramTypeId == ev11NoMeterSettingsLedBrightnessParamTypeId) {
             quint16 percentage = value.toUInt();
 
             qCDebug(dcPcElectric()) << "Setting LED brightness to" << percentage << "%";
@@ -821,7 +906,7 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
 
                 qCDebug(dcPcElectric()) << "Successfully set led brightness to" << percentage << "%";
             });
-        } else if (paramTypeId == ev11SettingsDigitalInputModeParamTypeId || paramTypeId == ev11NoMeterSettingsDigitalInputModeParamTypeId) {
+        } else if (paramTypeId == ev11SettingsDigitalInputModeParamTypeId || paramTypeId == ev11RfidSettingsDigitalInputModeParamTypeId || paramTypeId == ev11NoMeterSettingsDigitalInputModeParamTypeId) {
             QString mode = value.toString();
             qCDebug(dcPcElectric()) << "Setting Digital input mode to" << mode;
 
@@ -849,7 +934,7 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
                 qCDebug(dcPcElectric()) << "Successfully set digital input mode to" << modeValue;
                 thing->setStateValue("digitalInputMode", modeValue);
             });
-        } else if (paramTypeId == ev11SettingsPhaseAutoSwitchPauseParamTypeId || paramTypeId == ev11NoMeterSettingsPhaseAutoSwitchPauseParamTypeId) {
+        } else if (paramTypeId == ev11SettingsPhaseAutoSwitchPauseParamTypeId || paramTypeId == ev11RfidSettingsPhaseAutoSwitchPauseParamTypeId || paramTypeId == ev11NoMeterSettingsPhaseAutoSwitchPauseParamTypeId) {
             quint16 registerValue = value.toUInt();
 
             qCDebug(dcPcElectric()) << "Setting phase auto switch pause to" << registerValue << "s";
@@ -862,7 +947,7 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
 
                 qCDebug(dcPcElectric()) << "Successfully set phase auto switch pause to" << registerValue << "s";
             });
-        } else if (paramTypeId == ev11SettingsPhaseAutoSwitchMinChargingTimeParamTypeId || paramTypeId == ev11NoMeterSettingsPhaseAutoSwitchMinChargingTimeParamTypeId) {
+        } else if (paramTypeId == ev11SettingsPhaseAutoSwitchMinChargingTimeParamTypeId || paramTypeId == ev11RfidSettingsPhaseAutoSwitchMinChargingTimeParamTypeId || paramTypeId == ev11NoMeterSettingsPhaseAutoSwitchMinChargingTimeParamTypeId) {
             quint16 registerValue = value.toUInt();
 
             qCDebug(dcPcElectric()) << "Setting phase auto switch min charging current" << registerValue << "s";
@@ -876,7 +961,7 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
                 qCDebug(dcPcElectric()) << "Successfully set phase auto switch min charging current to" << registerValue << "s";
                 //thing->setSettingValue("phaseAutoSwitchMinChargingTime", registerValue);
             });
-        } else if (paramTypeId == ev11SettingsForceChargingResumeParamTypeId || paramTypeId == ev11NoMeterSettingsForceChargingResumeParamTypeId) {
+        } else if (paramTypeId == ev11SettingsForceChargingResumeParamTypeId || paramTypeId == ev11RfidSettingsForceChargingResumeParamTypeId || paramTypeId == ev11NoMeterSettingsForceChargingResumeParamTypeId) {
             quint16 registerValue = value.toBool() ? 1 : 0;
 
             qCDebug(dcPcElectric()) << "Setting force charging resume to" << registerValue;
@@ -889,6 +974,25 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
 
                 qCDebug(dcPcElectric()) << "Successfully set force charging resume to" << registerValue;
                 //thing->setSettingValue("forceChargingResume", registerValue == 1 ? true : false);
+            });
+        } else if (paramTypeId == ev11RfidSettingsRfidOperatingModeParamTypeId) {
+            QString mode = value.toString();
+            qCDebug(dcPcElectric()) << "Setting RFID operating mode to" << mode;
+
+            EV11ModbusTcpConnection::RfidOperatingMode modeValue;
+            if (!rfidOperatingModeFromSettingValue(mode, &modeValue)) {
+                qCWarning(dcPcElectric()) << "Unknown RFID operating mode value" << mode;
+                return;
+            }
+
+            QueuedModbusReply *reply = connection->setRfidOperatingModeAsync(modeValue);
+            connect(reply, &QueuedModbusReply::finished, thing, [reply, modeValue]() {
+                if (reply->error() != QModbusDevice::NoError) {
+                    qCWarning(dcPcElectric()) << "Could not set RFID operating mode to" << modeValue << reply->errorString();
+                    return;
+                }
+
+                qCDebug(dcPcElectric()) << "Successfully set RFID operating mode to" << modeValue;
             });
         }
     });
