@@ -214,9 +214,6 @@ bool PceWallbox::update()
             const QVector<quint16> values = unit.values();
             processLedBrightnessRegisterValues(values);
 
-            if (firmwareRevision() < "0025")
-                emit updateFinished();
-
         });
 
         enqueueRequest(reply, true);
@@ -338,8 +335,6 @@ bool PceWallbox::update()
             const QModbusDataUnit unit = reply->reply()->result();
             const QVector<quint16> values = unit.values();
             processForceChargingResumeRegisterValues(values);
-
-            emit updateFinished();
 
         });
 
@@ -609,17 +604,15 @@ void PceWallbox::sendNextRequest()
             << "to"
             << m_modbusTcpMaster->hostAddress().toString()
             << m_modbusTcpMaster->errorString();
-        m_currentReply->deleteLater();
-        requestFinished(m_currentReply);
-        m_currentReply = nullptr;
+        QueuedModbusReply *finishedReply = m_currentReply;
+        emit finishedReply->finished();
         return;
     }
 
     if (m_currentReply->reply()->isFinished()) {
-        qCWarning(dcPcElectric()) << "Reply immediatly finished";
-        m_currentReply->deleteLater();
-        requestFinished(m_currentReply);
-        m_currentReply = nullptr;
+        qCWarning(dcPcElectric()) << "Reply immediately finished";
+        QueuedModbusReply *finishedReply = m_currentReply;
+        emit finishedReply->finished();
         return;
     }
 }
@@ -651,6 +644,12 @@ void PceWallbox::requestFinished(QueuedModbusReply *reply)
     if (m_currentReply == reply)
         m_currentReply = nullptr;
 
+    // The generated connection feeds every completed request into its
+    // communication failure counter. Requests sent through this custom queue
+    // must do the same so a half-open TCP connection becomes unreachable after
+    // repeated Modbus timeouts.
+    handleModbusError(reply->error());
+
     const bool wasUpdateRequest = m_updateReplies.remove(reply);
     if (wasUpdateRequest && m_updateReplies.isEmpty() && m_updateInProgress)
         finishUpdateRound();
@@ -669,6 +668,7 @@ void PceWallbox::requestFinished(QueuedModbusReply *reply)
 void PceWallbox::finishUpdateRound()
 {
     m_updateInProgress = false;
+    emit updateFinished();
 
     if (!m_aboutToDelete && m_operational && reachable())
         m_updateTimer.start();

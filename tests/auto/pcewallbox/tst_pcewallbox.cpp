@@ -50,6 +50,7 @@ public:
 
     QList<Request> requests() const { return m_requests; }
     void ignoreNextRead(quint16 address) { m_ignoredReadAddress = address; }
+    void ignoreAllRequests(bool ignore) { m_ignoreAllRequests = ignore; }
 
 private:
     void processRequests(QTcpSocket *socket)
@@ -77,6 +78,9 @@ private:
             request.receivedAt = m_elapsed.elapsed();
             const int requestIndex = m_requests.size();
             m_requests.append(request);
+
+            if (m_ignoreAllRequests)
+                continue;
 
             if (function == 3 && address == m_ignoredReadAddress) {
                 m_ignoredReadAddress = -1;
@@ -118,6 +122,7 @@ private:
     QHash<QTcpSocket *, QByteArray> m_buffers;
     QList<Request> m_requests;
     int m_ignoredReadAddress = -1;
+    bool m_ignoreAllRequests = false;
 };
 
 class TestPceWallbox : public QObject
@@ -125,6 +130,21 @@ class TestPceWallbox : public QObject
     Q_OBJECT
 
 private slots:
+    void unsentRequestStillFinishes()
+    {
+        PceWallbox wallbox(QHostAddress::LocalHost, 1, 1);
+        QueuedModbusReply *reply = wallbox.setLedBrightnessAsync(55);
+        QVERIFY(reply);
+        QSignalSpy finishedSpy(reply, &QueuedModbusReply::finished);
+        QModbusDevice::Error error = QModbusDevice::NoError;
+        connect(reply, &QueuedModbusReply::finished, this, [reply, &error]() {
+            error = reply->error();
+        });
+
+        QTRY_COMPARE_WITH_TIMEOUT(finishedSpy.size(), 1, 1000);
+        QCOMPARE(error, QModbusDevice::UnknownError);
+    }
+
     void writePreemptsRemainingPollReads()
     {
         DelayedModbusServer server(200);
@@ -223,6 +243,57 @@ private slots:
         QCOMPARE(requests.at(ignoredRequestIndex).repliedAt, qint64(0));
         QVERIFY(finalRequestIndex > ignoredRequestIndex);
         QTRY_VERIFY_WITH_TIMEOUT(server.requests().at(finalRequestIndex).repliedAt > 0, 1000);
+        wallbox.disconnectDevice();
+    }
+
+    void consecutiveTimeoutsMarkHalfOpenConnectionUnreachable()
+    {
+        DelayedModbusServer server(0);
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+
+        PceWallbox wallbox(QHostAddress::LocalHost, server.serverPort(), 1);
+        wallbox.modbusTcpMaster()->setTimeout(50);
+        wallbox.modbusTcpMaster()->setNumberOfRetries(0);
+        QVERIFY(wallbox.connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(wallbox.operational(), 5000);
+
+        server.ignoreAllRequests(true);
+        QTRY_VERIFY_WITH_TIMEOUT(!wallbox.reachable(), 7000);
+
+        // The peer deliberately keeps the TCP socket open. Reachability must
+        // therefore be lost based on Modbus errors, not a socket disconnect.
+        QVERIFY(wallbox.modbusTcpMaster()->connected());
+        wallbox.disconnectDevice();
+    }
+
+    void timedOutFinalPollStillFinishesUpdateRound()
+    {
+        DelayedModbusServer server(0);
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+
+        PceWallbox wallbox(QHostAddress::LocalHost, server.serverPort(), 1);
+        wallbox.setOperationalStartupEnabled(false);
+        wallbox.modbusTcpMaster()->setTimeout(120);
+        wallbox.modbusTcpMaster()->setNumberOfRetries(0);
+        QSignalSpy initializationSpy(&wallbox, &PceWallbox::initializationFinished);
+        QSignalSpy updateSpy(&wallbox, &PceWallbox::updateFinished);
+        QVERIFY(wallbox.connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(!initializationSpy.isEmpty(), 5000);
+        QVERIFY(initializationSpy.constFirst().constFirst().toBool());
+
+        server.ignoreNextRead(208);
+        wallbox.startOperationalMode();
+
+        const auto finalPollReceived = [&server]() {
+            const QList<DelayedModbusServer::Request> requests = server.requests();
+            for (const DelayedModbusServer::Request &request : requests) {
+                if (request.function == 3 && request.address == 208)
+                    return true;
+            }
+            return false;
+        };
+        QTRY_VERIFY_WITH_TIMEOUT(finalPollReceived(), 5000);
+        QTRY_COMPARE_WITH_TIMEOUT(updateSpy.size(), 1, 600);
         wallbox.disconnectDevice();
     }
 
