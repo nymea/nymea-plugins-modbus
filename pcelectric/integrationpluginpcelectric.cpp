@@ -42,6 +42,7 @@
 #include <QTemporaryDir>
 
 #include <algorithm>
+#include <memory>
 
 namespace {
 constexpr int addressRetryIntervalMs = 5000;
@@ -387,16 +388,23 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
 
     if (info->action().actionTypeId() == ev11RfidTagAcceptedActionTypeId
         || info->action().actionTypeId() == ev11RfidTagRejectedActionTypeId) {
-        if (!connection->hasPendingRfidTag()) {
+        // The externally defined tagRejected action is the RFID manager's tagDenied
+        // operation. It can deny a pending scan or time out a held authorization.
+        const bool approved = info->action().actionTypeId() == ev11RfidTagAcceptedActionTypeId;
+        if (!connection->canSubmitRfidDecision(approved)) {
             info->finish(Thing::ThingErrorHardwareNotAvailable);
             return;
         }
-        connect(connection, &PceWallbox::rfidDecisionFinished, info, [info](bool success) {
+        const auto decisionConnection = std::make_shared<QMetaObject::Connection>();
+        *decisionConnection = connect(connection, &PceWallbox::rfidDecisionFinished, info,
+                                      [info, decisionConnection](bool success) {
+            QObject::disconnect(*decisionConnection);
             info->finish(success ? Thing::ThingErrorNoError : Thing::ThingErrorHardwareFailure);
-        }, Qt::SingleShotConnection);
-        const bool approved = info->action().actionTypeId() == ev11RfidTagAcceptedActionTypeId;
-        if (!connection->submitRfidDecision(approved))
+        });
+        if (!connection->submitRfidDecision(approved)) {
+            QObject::disconnect(*decisionConnection);
             info->finish(Thing::ThingErrorHardwareNotAvailable);
+        }
 
         return;
     }
@@ -659,8 +667,10 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
         }
 
         if (thing->thingClassId() == ev11RfidThingClassId) {
-            connect(connection, &PceWallbox::rfidInitializationFinished, thing,
-                    [thing, connection](bool rfidReady) {
+            const auto initializationConnection = std::make_shared<QMetaObject::Connection>();
+            *initializationConnection = connect(connection, &PceWallbox::rfidInitializationFinished, thing,
+                    [thing, connection, initializationConnection](bool rfidReady) {
+                QObject::disconnect(*initializationConnection);
                 if (!rfidReady) {
                     qCWarning(dcPcElectric()) << "Could not confirm the requested RFID operating mode.";
                     thing->setStateValue("connected", false);
@@ -668,11 +678,12 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
                 }
                 connection->startOperationalMode();
                 thing->setStateValue("connected", true);
-            }, Qt::SingleShotConnection);
+            });
 
             EV11ModbusTcpConnection::RfidOperatingMode operatingMode = EV11ModbusTcpConnection::RfidOperatingModeRemote;
             rfidOperatingModeFromSettingValue(thing->setting("rfidOperatingMode").toString(), &operatingMode);
             if (!connection->initializeRfidOperatingMode(operatingMode)) {
+                QObject::disconnect(*initializationConnection);
                 qCWarning(dcPcElectric()) << "Could not initialize the RFID operating mode.";
                 thing->setStateValue("connected", false);
             }

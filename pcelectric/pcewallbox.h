@@ -60,6 +60,8 @@ public:
     bool rfidEnabled() const;
     bool initializeRfidOperatingMode(RfidOperatingMode mode);
     bool hasPendingRfidTag() const;
+    bool hasRfidAuthorization() const;
+    bool canSubmitRfidDecision(bool approved) const;
     bool submitRfidDecision(bool approved);
 
     QueuedModbusReply *setRfidOperatingModeAsync(RfidOperatingMode mode);
@@ -118,14 +120,23 @@ private:
     bool m_rfidInitializing = false;
     bool m_rfidModeConfirmed = false;
     bool m_rfidDecisionInProgress = false;
+    bool m_rfidSessionWriteInProgress = false;
+    bool m_rfidSessionCommitAttempted = false;
     QVector<quint16> m_observedRfidToken;
     QVector<quint16> m_pendingRfidToken;
+    QVector<quint16> m_acceptedRfidToken;
+    bool m_acceptedRfidTokenCommitted = false;
     quint64 m_rfidLedGeneration = 0;
 
     void enqueueRequest(QueuedModbusReply *reply, bool updateRequest = false);
     void requestFinished(QueuedModbusReply *reply);
     void finishUpdateRound();
     void processRfidRead(const QVector<quint16> &values);
+    void synchronizeRfidAuthorization();
+    bool isVehiclePluggedIn() const;
+    void writeRfidSession(const QVector<quint16> &token, const char *operation,
+                          const std::function<void(bool)> &callback);
+    void resetRfidSession(const char *operation, const std::function<void(bool)> &callback);
     void readRfidOperatingModeOnce(bool updateRequest = false);
     void writeRfidLed(RfidLed led, const std::function<void(bool)> &callback);
     void scheduleRfidLedReset(quint64 generation);

@@ -342,7 +342,7 @@
                     "displayName": "PCE EV11.3 RFID",
                     "id": "b6ad0ec3-1e91-5089-ab15-e28926284d72",
                     "createMethods": ["discovery"],
-                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable", "networkdevice", "rfid"],
+                    "interfaces": ["evchargerac", "smartmeterconsumer", "connectable", "networkdevice", "rfid"],
                     "paramTypes": [
                         {
                             "id": "1c35b8ca-1366-5ebe-a253-f2d4af4230b3",

@@ -194,6 +194,14 @@ class TestPceWallbox : public QObject
         return values;
     }
 
+    static void setChargingState(RfidTestWallbox &wallbox,
+                                 PceWallbox::ChargingState chargingState)
+    {
+        QVector<quint16> statusValues(11, 0);
+        statusValues[0] = static_cast<quint16>(chargingState);
+        wallbox.processBlockStatusRegisterValues(statusValues);
+    }
+
 private slots:
     void unsentRequestStillFinishes()
     {
@@ -360,7 +368,9 @@ private slots:
 
         for (const DelayedModbusServer::Request &request : server.requests()) {
             QVERIFY(!(request.function == 16 && request.address == 211));
-            QVERIFY(!(request.function == 16 && request.address == 217));
+            if (request.function == 16 && request.address == 217)
+                QCOMPARE(request.values, QVector<quint16>(6, 0));
+            QVERIFY(!(request.function == 6 && request.address == 200));
         }
 
         wallbox.disconnectDevice();
@@ -379,6 +389,7 @@ private slots:
 
         wallbox.processRfidOperatingModeRegisterValues({1});
         wallbox.m_rfidModeConfirmed = true;
+        setChargingState(wallbox, PceWallbox::ChargingStateB1);
         const QVector<quint16> token = rfidToken(10);
         wallbox.processRfidRead(token);
         QVERIFY(wallbox.submitRfidDecision(true));
@@ -428,6 +439,7 @@ private slots:
 
         wallbox.processRfidOperatingModeRegisterValues({1});
         wallbox.m_rfidModeConfirmed = true;
+        setChargingState(wallbox, PceWallbox::ChargingStateB1);
         wallbox.processRfidRead(rfidToken(7));
         server.failNextWrite(217);
         QVERIFY(wallbox.submitRfidDecision(true));
@@ -459,6 +471,215 @@ private slots:
                 ++sessionWrites;
         }
         QCOMPARE(sessionWrites, 4);
+        wallbox.disconnectDevice();
+    }
+
+    void rfidAcceptanceInStateAIsCommittedOnPlugIn()
+    {
+        DelayedModbusServer server(10);
+        server.setReadValue(100, PceWallbox::ChargingStateA1);
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+
+        RfidTestWallbox wallbox(QHostAddress::LocalHost, server.serverPort(), 1);
+        wallbox.setRfidEnabled(true);
+        QSignalSpy decisionSpy(&wallbox, &PceWallbox::rfidDecisionFinished);
+        QVERIFY(wallbox.connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(wallbox.operational(), 5000);
+
+        wallbox.processRfidOperatingModeRegisterValues({1});
+        wallbox.m_rfidModeConfirmed = true;
+        setChargingState(wallbox, PceWallbox::ChargingStateA1);
+        const QVector<quint16> token = rfidToken(7, 0x1011);
+        wallbox.processRfidRead(token);
+        QVERIFY(wallbox.submitRfidDecision(true));
+        QTRY_COMPARE_WITH_TIMEOUT(decisionSpy.size(), 1, 3000);
+        QCOMPARE(decisionSpy.first().first().toBool(), true);
+        QVERIFY(wallbox.hasRfidAuthorization());
+        QVERIFY(!wallbox.m_acceptedRfidTokenCommitted);
+
+        for (const auto &request : server.requests()) {
+            QVERIFY(!(request.function == 16 && request.address == 217));
+            QVERIFY(!(request.function == 6 && request.address == 200));
+        }
+
+        server.setReadValue(100, PceWallbox::ChargingStateB2);
+        setChargingState(wallbox, PceWallbox::ChargingStateB2);
+        wallbox.synchronizeRfidAuthorization();
+        QTRY_VERIFY_WITH_TIMEOUT(wallbox.m_acceptedRfidTokenCommitted, 3000);
+
+        int sessionWrites = 0;
+        for (const auto &request : server.requests()) {
+            if (request.function == 16 && request.address == 217) {
+                ++sessionWrites;
+                QCOMPARE(request.values, token);
+                QCOMPARE(request.valueOrQuantity, quint16(6));
+            }
+            QVERIFY(!(request.function == 16 && request.address == 211));
+            QVERIFY(!(request.function == 6 && request.address == 200));
+        }
+        QCOMPARE(sessionWrites, 1);
+        wallbox.disconnectDevice();
+    }
+
+    void delayedRfidCommitFailureIsRetried()
+    {
+        DelayedModbusServer server(10);
+        server.setReadValue(100, PceWallbox::ChargingStateA2);
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+
+        RfidTestWallbox wallbox(QHostAddress::LocalHost, server.serverPort(), 1);
+        wallbox.setRfidEnabled(true);
+        QSignalSpy decisionSpy(&wallbox, &PceWallbox::rfidDecisionFinished);
+        QVERIFY(wallbox.connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(wallbox.operational(), 5000);
+        wallbox.processRfidOperatingModeRegisterValues({1});
+        wallbox.m_rfidModeConfirmed = true;
+        setChargingState(wallbox, PceWallbox::ChargingStateA2);
+        const QVector<quint16> token = rfidToken(4, 0x3011);
+        wallbox.processRfidRead(token);
+        QVERIFY(wallbox.submitRfidDecision(true));
+        QTRY_COMPARE_WITH_TIMEOUT(decisionSpy.size(), 1, 3000);
+
+        server.setReadValue(100, PceWallbox::ChargingStateC1);
+        setChargingState(wallbox, PceWallbox::ChargingStateC1);
+        server.failNextWrite(217);
+        wallbox.synchronizeRfidAuthorization();
+        QTRY_VERIFY_WITH_TIMEOUT(!wallbox.m_rfidSessionWriteInProgress, 3000);
+        QVERIFY(!wallbox.m_acceptedRfidTokenCommitted);
+
+        wallbox.synchronizeRfidAuthorization();
+        QTRY_VERIFY_WITH_TIMEOUT(wallbox.m_acceptedRfidTokenCommitted, 3000);
+        int sessionWrites = 0;
+        for (const auto &request : server.requests()) {
+            if (request.function == 16 && request.address == 217) {
+                ++sessionWrites;
+                QCOMPARE(request.values, token);
+            }
+            QVERIFY(!(request.function == 6 && request.address == 200));
+        }
+        QCOMPARE(sessionWrites, 2);
+        wallbox.disconnectDevice();
+    }
+
+    void tagDeniedTimeoutClearsHeldAuthorization()
+    {
+        DelayedModbusServer server(10);
+        server.setReadValue(100, PceWallbox::ChargingStateA1);
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+
+        RfidTestWallbox wallbox(QHostAddress::LocalHost, server.serverPort(), 1);
+        wallbox.setRfidEnabled(true);
+        QSignalSpy decisionSpy(&wallbox, &PceWallbox::rfidDecisionFinished);
+        QVERIFY(wallbox.connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(wallbox.operational(), 5000);
+        wallbox.processRfidOperatingModeRegisterValues({1});
+        wallbox.m_rfidModeConfirmed = true;
+        setChargingState(wallbox, PceWallbox::ChargingStateA1);
+        wallbox.processRfidRead(rfidToken(4, 0x4011));
+        QVERIFY(wallbox.submitRfidDecision(true));
+        QTRY_COMPARE_WITH_TIMEOUT(decisionSpy.size(), 1, 3000);
+        QVERIFY(wallbox.hasRfidAuthorization());
+        QVERIFY(!wallbox.hasPendingRfidTag());
+
+        QVERIFY(wallbox.canSubmitRfidDecision(false));
+        QVERIFY(wallbox.submitRfidDecision(false));
+        QTRY_COMPARE_WITH_TIMEOUT(decisionSpy.size(), 2, 3000);
+        QCOMPARE(decisionSpy.at(1).at(0).toBool(), true);
+        QVERIFY(!wallbox.hasRfidAuthorization());
+
+        bool resetSeen = false;
+        bool rejectedSeen = false;
+        for (const auto &request : server.requests()) {
+            if (request.function == 16 && request.address == 217) {
+                resetSeen = true;
+                QCOMPARE(request.values, QVector<quint16>(6, 0));
+            } else if (request.function == 6 && request.address == 210
+                       && request.values == QVector<quint16>({1})) {
+                rejectedSeen = true;
+            }
+            QVERIFY(!(request.function == 6 && request.address == 200));
+        }
+        QVERIFY(resetSeen);
+        QVERIFY(rejectedSeen);
+        wallbox.disconnectDevice();
+    }
+
+    void denyingNewTagPreservesEarlierAuthorization()
+    {
+        DelayedModbusServer server(10);
+        server.setReadValue(100, PceWallbox::ChargingStateA1);
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+
+        RfidTestWallbox wallbox(QHostAddress::LocalHost, server.serverPort(), 1);
+        wallbox.setRfidEnabled(true);
+        QSignalSpy decisionSpy(&wallbox, &PceWallbox::rfidDecisionFinished);
+        QVERIFY(wallbox.connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(wallbox.operational(), 5000);
+        wallbox.processRfidOperatingModeRegisterValues({1});
+        wallbox.m_rfidModeConfirmed = true;
+        setChargingState(wallbox, PceWallbox::ChargingStateA1);
+
+        const QVector<quint16> acceptedToken = rfidToken(4, 0x5011);
+        wallbox.processRfidRead(acceptedToken);
+        QVERIFY(wallbox.submitRfidDecision(true));
+        QTRY_COMPARE_WITH_TIMEOUT(decisionSpy.size(), 1, 3000);
+
+        wallbox.processRfidRead(QVector<quint16>(6, 0));
+        wallbox.processRfidRead(rfidToken(7, 0x6011));
+        QVERIFY(wallbox.submitRfidDecision(false));
+        QTRY_COMPARE_WITH_TIMEOUT(decisionSpy.size(), 2, 3000);
+        QVERIFY(wallbox.hasRfidAuthorization());
+        QCOMPARE(wallbox.m_acceptedRfidToken, acceptedToken);
+
+        server.setReadValue(100, PceWallbox::ChargingStateC2);
+        setChargingState(wallbox, PceWallbox::ChargingStateC2);
+        wallbox.synchronizeRfidAuthorization();
+        QTRY_VERIFY_WITH_TIMEOUT(wallbox.m_acceptedRfidTokenCommitted, 3000);
+        int sessionWrites = 0;
+        for (const auto &request : server.requests()) {
+            if (request.function == 16 && request.address == 217) {
+                ++sessionWrites;
+                QCOMPARE(request.values, acceptedToken);
+            }
+        }
+        QCOMPARE(sessionWrites, 1);
+        wallbox.disconnectDevice();
+    }
+
+    void returningToStateAClearsOnlyLocalAuthorization()
+    {
+        DelayedModbusServer server(10);
+        server.setReadValue(100, PceWallbox::ChargingStateB1);
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+
+        RfidTestWallbox wallbox(QHostAddress::LocalHost, server.serverPort(), 1);
+        wallbox.setRfidEnabled(true);
+        QSignalSpy decisionSpy(&wallbox, &PceWallbox::rfidDecisionFinished);
+        QVERIFY(wallbox.connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(wallbox.operational(), 5000);
+        wallbox.processRfidOperatingModeRegisterValues({1});
+        wallbox.m_rfidModeConfirmed = true;
+        setChargingState(wallbox, PceWallbox::ChargingStateB1);
+        wallbox.processRfidRead(rfidToken(10, 0x7011));
+        QVERIFY(wallbox.submitRfidDecision(true));
+        QTRY_COMPARE_WITH_TIMEOUT(decisionSpy.size(), 1, 3000);
+        QVERIFY(wallbox.m_acceptedRfidTokenCommitted);
+
+        int writesBefore = 0;
+        for (const auto &request : server.requests())
+            writesBefore += request.function == 16 && request.address == 217;
+        QCOMPARE(writesBefore, 1);
+
+        server.setReadValue(100, PceWallbox::ChargingStateA2);
+        setChargingState(wallbox, PceWallbox::ChargingStateA2);
+        wallbox.synchronizeRfidAuthorization();
+        QVERIFY(!wallbox.hasRfidAuthorization());
+
+        QTest::qWait(500);
+        int writesAfter = 0;
+        for (const auto &request : server.requests())
+            writesAfter += request.function == 16 && request.address == 217;
+        QCOMPARE(writesAfter, writesBefore);
         wallbox.disconnectDevice();
     }
 
