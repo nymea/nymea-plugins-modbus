@@ -162,47 +162,141 @@ bool PceWallbox::hasPendingRfidTag() const
     return !m_pendingRfidToken.isEmpty() && !m_rfidDecisionInProgress;
 }
 
+bool PceWallbox::hasRfidAuthorization() const
+{
+    return !m_acceptedRfidToken.isEmpty();
+}
+
+bool PceWallbox::canSubmitRfidDecision(bool approved) const
+{
+    if (m_rfidDecisionInProgress || m_rfidSessionWriteInProgress
+            || !rfidTransportAvailable())
+        return false;
+
+    return approved ? !m_pendingRfidToken.isEmpty()
+                    : !m_pendingRfidToken.isEmpty() || !m_acceptedRfidToken.isEmpty();
+}
+
 bool PceWallbox::submitRfidDecision(bool approved)
 {
-    if (!rfidTransportAvailable() || !hasPendingRfidTag())
+    const char *operation = approved ? "tagAccepted" : "tagDenied";
+    qCDebug(dcPcElectric()) << "Received RFID operation" << operation
+                           << "for charger" << m_modbusTcpMaster->hostAddress().toString()
+                           << "slave" << m_slaveId << "charging state" << chargingState();
+
+    if (!canSubmitRfidDecision(approved)) {
+        qCWarning(dcPcElectric()) << "Cannot execute RFID operation" << operation
+                                  << "for charger" << m_modbusTcpMaster->hostAddress().toString()
+                                  << "slave" << m_slaveId << "charging state" << chargingState()
+                                  << "because no matching redacted authorization record is available";
         return false;
+    }
 
     m_rfidDecisionInProgress = true;
     const QVector<quint16> decisionToken = m_pendingRfidToken;
-    const auto finishDecision = [this, decisionToken](bool success) {
-        if (success) {
-            if (m_pendingRfidToken == decisionToken)
-                m_pendingRfidToken.clear();
-        }
+    const QVector<quint16> previousAuthorization = m_acceptedRfidToken;
+    const auto finishDecision = [this](bool success) {
         m_rfidDecisionInProgress = false;
         emit rfidDecisionFinished(success);
     };
 
     if (!approved) {
-        const quint64 generation = ++m_rfidLedGeneration;
-        writeRfidLed(RfidLedRejected, [this, generation, finishDecision](bool success) {
-            scheduleRfidLedReset(generation);
-            finishDecision(success);
-        });
+        const bool pendingScan = !decisionToken.isEmpty();
+        const bool preserveAuthorization = pendingScan && !previousAuthorization.isEmpty();
+        const auto showRejected = [this, decisionToken, pendingScan, preserveAuthorization,
+                                   finishDecision]() {
+            const quint64 generation = ++m_rfidLedGeneration;
+            writeRfidLed(RfidLedRejected,
+                         [this, generation, decisionToken, pendingScan,
+                          preserveAuthorization, finishDecision](bool success) {
+                scheduleRfidLedReset(generation);
+                if (success) {
+                    if (pendingScan && m_pendingRfidToken == decisionToken)
+                        m_pendingRfidToken.clear();
+                    if (!preserveAuthorization) {
+                        m_acceptedRfidToken.clear();
+                        m_acceptedRfidTokenCommitted = false;
+                        m_rfidSessionCommitAttempted = false;
+                    }
+                    qCDebug(dcPcElectric())
+                        << (pendingScan ? "Denied pending redacted authorization record"
+                                        : "Timed out and cleared held redacted authorization record")
+                        << "for charger" << m_modbusTcpMaster->hostAddress().toString()
+                        << "slave" << m_slaveId << "charging state" << chargingState()
+                        << (preserveAuthorization
+                                ? "while preserving the earlier authorization"
+                                : "and cleared local authorization");
+                } else {
+                    qCWarning(dcPcElectric())
+                        << "RFID tagDenied feedback failed for charger"
+                        << m_modbusTcpMaster->hostAddress().toString()
+                        << "slave" << m_slaveId << "charging state" << chargingState()
+                        << "and retryable authorization state was retained";
+                }
+                finishDecision(success);
+            });
+        };
+
+        if (preserveAuthorization) {
+            showRejected();
+        } else {
+            resetRfidSession(pendingScan ? "tagDenied safeguard" : "tagDenied timeout",
+                             [showRejected, finishDecision](bool success) {
+                if (success)
+                    showRejected();
+                else
+                    finishDecision(false);
+            });
+        }
         return true;
     }
 
-    QueuedModbusReply *sessionReply = new QueuedModbusReply(
-        QueuedModbusReply::RequestTypeWrite, setRfidSessionDataUnit(decisionToken), this);
-    connect(sessionReply, &QueuedModbusReply::finished, sessionReply, &QueuedModbusReply::deleteLater);
-    connect(sessionReply, &QueuedModbusReply::finished, this,
-            [this, sessionReply, finishDecision]() {
-        if (sessionReply->error() != QModbusDevice::NoError) {
-            finishDecision(false);
-            return;
-        }
+    const bool commitNow = isVehiclePluggedIn();
+    const auto showAccepted = [this, decisionToken, commitNow, finishDecision]() {
         const quint64 generation = ++m_rfidLedGeneration;
-        writeRfidLed(RfidLedAccepted, [this, generation, finishDecision](bool success) {
+        writeRfidLed(RfidLedAccepted, [this, generation, decisionToken, commitNow,
+                                      finishDecision](bool success) {
             scheduleRfidLedReset(generation);
+            if (success) {
+                const bool replacing = !m_acceptedRfidToken.isEmpty()
+                        && m_acceptedRfidToken != decisionToken;
+                m_acceptedRfidToken = decisionToken;
+                m_acceptedRfidTokenCommitted = commitNow;
+                m_rfidSessionCommitAttempted = commitNow;
+                if (m_pendingRfidToken == decisionToken)
+                    m_pendingRfidToken.clear();
+                qCDebug(dcPcElectric())
+                    << (replacing ? "Replaced" : "Stored")
+                    << "redacted RFID authorization record for charger"
+                    << m_modbusTcpMaster->hostAddress().toString()
+                    << "slave" << m_slaveId << "charging state" << chargingState()
+                    << (commitNow ? "and committed it to the RFID session"
+                                  : "without committing it while unplugged");
+            } else {
+                qCWarning(dcPcElectric())
+                    << "RFID tagAccepted feedback failed for charger"
+                    << m_modbusTcpMaster->hostAddress().toString()
+                    << "slave" << m_slaveId << "charging state" << chargingState()
+                    << "and retryable authorization state was retained";
+            }
             finishDecision(success);
         });
-    });
-    enqueueRequest(sessionReply);
+    };
+
+    if (commitNow) {
+        writeRfidSession(decisionToken, "tagAccepted", [showAccepted, finishDecision](bool success) {
+            if (success)
+                showAccepted();
+            else
+                finishDecision(false);
+        });
+    } else {
+        qCDebug(dcPcElectric()) << "Deferring RFID session write for charger"
+                               << m_modbusTcpMaster->hostAddress().toString()
+                               << "slave" << m_slaveId << "charging state" << chargingState()
+                               << "because the vehicle is not plugged in";
+        showAccepted();
+    }
     return true;
 }
 
@@ -234,6 +328,7 @@ bool PceWallbox::update()
         const QModbusDataUnit unit = reply->reply()->result();
         const QVector<quint16> blockValues = unit.values();
         processBlockStatusRegisterValues(blockValues);
+        synchronizeRfidAuthorization();
 
     });
 
@@ -493,8 +588,110 @@ void PceWallbox::processRfidRead(const QVector<quint16> &values)
         return;
 
     m_observedRfidToken = values;
+    if (!m_pendingRfidToken.isEmpty() && m_pendingRfidToken != values) {
+        qCDebug(dcPcElectric()) << "Replacing pending redacted RFID scan for charger"
+                               << m_modbusTcpMaster->hostAddress().toString()
+                               << "slave" << m_slaveId << "charging state" << chargingState();
+    }
     m_pendingRfidToken = values;
     emit rfidTagDetected(code);
+}
+
+bool PceWallbox::isVehiclePluggedIn() const
+{
+    return chargingState() == ChargingStateB1 || chargingState() == ChargingStateB2
+            || chargingState() == ChargingStateC1 || chargingState() == ChargingStateC2;
+}
+
+void PceWallbox::synchronizeRfidAuthorization()
+{
+    if (m_acceptedRfidToken.isEmpty())
+        return;
+
+    if (m_acceptedRfidTokenCommitted
+            && (chargingState() == ChargingStateA1 || chargingState() == ChargingStateA2)) {
+        qCDebug(dcPcElectric()) << "Clearing committed local RFID authorization for charger"
+                               << m_modbusTcpMaster->hostAddress().toString()
+                               << "slave" << m_slaveId << "charging state" << chargingState()
+                               << "after return to state A; firmware owns session cleanup";
+        m_acceptedRfidToken.clear();
+        m_acceptedRfidTokenCommitted = false;
+        m_rfidSessionCommitAttempted = false;
+        return;
+    }
+
+    if (m_acceptedRfidTokenCommitted || !isVehiclePluggedIn()
+            || m_rfidSessionWriteInProgress)
+        return;
+
+    const QVector<quint16> token = m_acceptedRfidToken;
+    const bool retry = m_rfidSessionCommitAttempted;
+    m_rfidSessionCommitAttempted = true;
+    qCDebug(dcPcElectric()) << (retry ? "Retrying" : "Starting delayed")
+                           << "RFID session commit for charger"
+                           << m_modbusTcpMaster->hostAddress().toString()
+                           << "slave" << m_slaveId << "charging state" << chargingState();
+    writeRfidSession(token, retry ? "delayed commit retry" : "delayed commit",
+                     [this, token](bool success) {
+        if (success && m_acceptedRfidToken == token) {
+            m_acceptedRfidTokenCommitted = true;
+            qCDebug(dcPcElectric()) << "Delayed RFID session commit succeeded for charger"
+                                   << m_modbusTcpMaster->hostAddress().toString()
+                                   << "slave" << m_slaveId << "charging state" << chargingState();
+        } else if (!success) {
+            qCWarning(dcPcElectric()) << "Delayed RFID session commit failed for charger"
+                                     << m_modbusTcpMaster->hostAddress().toString()
+                                     << "slave" << m_slaveId << "charging state" << chargingState()
+                                     << "and will be retried during a later update";
+        }
+    });
+}
+
+void PceWallbox::writeRfidSession(const QVector<quint16> &token, const char *operation,
+                                  const std::function<void(bool)> &callback)
+{
+    m_rfidSessionWriteInProgress = true;
+    qCDebug(dcPcElectric()) << "Starting RFID session write operation" << operation
+                           << "for charger" << m_modbusTcpMaster->hostAddress().toString()
+                           << "slave" << m_slaveId << "charging state" << chargingState();
+    QueuedModbusReply *reply = new QueuedModbusReply(
+        QueuedModbusReply::RequestTypeWrite, setRfidSessionDataUnit(token), this);
+    connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
+    connect(reply, &QueuedModbusReply::finished, this,
+            [this, reply, operation, callback]() {
+        m_rfidSessionWriteInProgress = false;
+        const bool success = reply->error() == QModbusDevice::NoError;
+        if (success) {
+            qCDebug(dcPcElectric()) << "RFID session write operation" << operation
+                                   << "succeeded for charger"
+                                   << m_modbusTcpMaster->hostAddress().toString()
+                                   << "slave" << m_slaveId << "charging state" << chargingState();
+        } else {
+            qCWarning(dcPcElectric()) << "RFID session write operation" << operation
+                                     << "failed for charger"
+                                     << m_modbusTcpMaster->hostAddress().toString()
+                                     << "slave" << m_slaveId << "charging state" << chargingState()
+                                     << reply->errorString();
+        }
+        callback(success);
+    });
+    enqueueRequest(reply);
+}
+
+void PceWallbox::resetRfidSession(const char *operation,
+                                  const std::function<void(bool)> &callback)
+{
+    qCDebug(dcPcElectric()) << "Starting RFID session reset operation" << operation
+                           << "for charger" << m_modbusTcpMaster->hostAddress().toString()
+                           << "slave" << m_slaveId << "charging state" << chargingState();
+    writeRfidSession(QVector<quint16>(6, 0), operation,
+                     [this, operation, callback](bool success) {
+        qCDebug(dcPcElectric()) << "RFID session reset operation" << operation
+                               << (success ? "succeeded" : "failed")
+                               << "for charger" << m_modbusTcpMaster->hostAddress().toString()
+                               << "slave" << m_slaveId << "charging state" << chargingState();
+        callback(success);
+    });
 }
 
 void PceWallbox::readRfidOperatingModeOnce(bool updateRequest)
@@ -541,11 +738,21 @@ void PceWallbox::scheduleRfidLedReset(quint64 generation)
 
 void PceWallbox::resetRfidState()
 {
+    if (!m_pendingRfidToken.isEmpty() || !m_acceptedRfidToken.isEmpty()) {
+        qCDebug(dcPcElectric()) << "Clearing local redacted RFID authorization state for charger"
+                               << m_modbusTcpMaster->hostAddress().toString()
+                               << "slave" << m_slaveId << "charging state" << chargingState()
+                               << "because the RFID transport is being reset";
+    }
     m_rfidInitializing = false;
     m_rfidModeConfirmed = false;
     m_rfidDecisionInProgress = false;
+    m_rfidSessionWriteInProgress = false;
+    m_rfidSessionCommitAttempted = false;
     m_observedRfidToken.clear();
     m_pendingRfidToken.clear();
+    m_acceptedRfidToken.clear();
+    m_acceptedRfidTokenCommitted = false;
     ++m_rfidLedGeneration;
 }
 
@@ -590,10 +797,7 @@ bool PceWallbox::parseRfidToken(const QVector<quint16> &values, QString *code)
     if (code)
         *code = QString::fromLatin1(token.toHex());
 
-    // Note: for real debug purpose wen need to see the actual code, logging level info never prints the code.
-    qCDebug(dcPcElectric()) << "Tag detected: Version" << version
-                            << "length:" << uidLength
-                            << "token:" << code;
+    qCDebug(dcPcElectric()) << "Parsed redacted RFID authorization record";
     return true;
 }
 
