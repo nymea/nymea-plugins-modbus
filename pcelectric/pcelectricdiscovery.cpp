@@ -79,15 +79,14 @@ void PcElectricDiscovery::startDiscovery()
 
 void PcElectricDiscovery::checkZeroConfService(const ZeroConfServiceEntry &entry)
 {
-    if (!m_discoveryRunning || entry.protocol() != QAbstractSocket::IPv4Protocol || !entry.name().startsWith("EV11.3-"))
+    if (!m_discoveryRunning || entry.protocol() != QAbstractSocket::IPv4Protocol || !entry.name().startsWith("EV11"))
         return;
 
     const QString serialNumber = entry.txt("serial");
     const MacAddress macAddress(entry.txt("mac"));
     const QString tlsValue = entry.txt("tls");
-    if (entry.serviceType() != "_modbus._tcp" || entry.port() != 502 || tlsValue != "0"
-        || serialNumber.isEmpty() || macAddress.isNull()) {
-        qCDebug(dcPcElectric()) << "Discovery: mDNS: Ignoring invalid PCE service" << entry;
+    if (entry.serviceType() != "_modbus._tcp" || entry.port() != 502 || serialNumber.isEmpty() || macAddress.isNull()) {
+        qCDebug(dcPcElectric()) << "Discovery: mDNS: Ignoring invalid service" << entry;
         return;
     }
 

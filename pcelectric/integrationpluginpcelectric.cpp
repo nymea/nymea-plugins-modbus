@@ -833,7 +833,7 @@ bool IntegrationPluginPcElectric::isMatchingZeroConfService(Thing *thing, const 
 {
     return isZeroConfManaged(thing) && entry.protocol() == QAbstractSocket::IPv4Protocol
            && entry.serviceType() == "_modbus._tcp" && entry.port() == 502
-           && entry.name().startsWith("EV11.3-") && entry.txt("tls") == "0"
+           && entry.name().startsWith("EV11")
            && entry.txt("serial") == thing->paramValue(m_serialNumberParamTypes.value(thing->thingClassId())).toString();
 }
 
