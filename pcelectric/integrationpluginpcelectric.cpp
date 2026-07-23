@@ -41,7 +41,11 @@
 #include <QSslCipher>
 #include <QTemporaryDir>
 
+#include <algorithm>
+
 namespace {
+constexpr int addressRetryIntervalMs = 5000;
+
 bool certificateIsUsable(const QSslCertificate &certificate)
 {
     const QDateTime now = QDateTime::currentDateTimeUtc();
@@ -144,11 +148,12 @@ void IntegrationPluginPcElectric::discoverThings(ThingDiscoveryInfo *info)
             }
 
             ParamList params;
-            if (!result.discoveredThroughZeroConf) {
-                params << Param(m_macParamTypes.value(result.thingClassId), result.networkDeviceInfo.thingParamValueMacAddress());
-                params << Param(m_hostNameParamTypes.value(result.thingClassId), result.networkDeviceInfo.thingParamValueHostName());
-                params << Param(m_addressParamTypes.value(result.thingClassId), result.networkDeviceInfo.thingParamValueAddress());
-            }
+            params << Param(m_macParamTypes.value(result.thingClassId), result.registerMacAddress.toString());
+            params << Param(m_hostNameParamTypes.value(result.thingClassId), result.networkDeviceInfo.thingParamValueHostName());
+            // An address explicitly configured by the user selects static mode.
+            // Discovered devices stay dynamic and obtain their current address
+            // independently from the MAC monitor or ZeroConf.
+            params << Param(m_addressParamTypes.value(result.thingClassId), QString());
             params << Param(m_serialNumberParamTypes.value(result.thingClassId), result.serialNumber);
             // Note: if we discover also the port and modbusaddress, we must fill them in from the discovery here, for now everywhere the defaults...
             descriptor.setParams(params);
@@ -167,13 +172,65 @@ void IntegrationPluginPcElectric::setupThing(ThingSetupInfo *info)
     Thing *thing = info->thing();
     qCInfo(dcPcElectric()) << "Setup thing" << thing << thing->params();
 
+    const QString serialNumber = thing->paramValue(m_serialNumberParamTypes.value(thing->thingClassId())).toString();
+    QString previousSerialNumber = m_configuredSerialNumbers.value(thing);
+    if (previousSerialNumber.isEmpty())
+        previousSerialNumber = pluginStorage()->value(storagePrefix(thing) + "/configuredSerialNumber").toString();
+    if (!previousSerialNumber.isEmpty() && previousSerialNumber != serialNumber) {
+        qCWarning(dcPcElectric()) << "The configured serial number changed for" << thing->name()
+                                  << "from" << previousSerialNumber << "to" << serialNumber
+                                  << "Clearing the wallbox TLS identity.";
+        pluginStorage()->remove(storagePrefix(thing) + "/serverFingerprint");
+        pluginStorage()->remove(storagePrefix(thing) + "/tlsRequired");
+        pluginStorage()->sync();
+    }
+    m_configuredSerialNumbers.insert(thing, serialNumber);
+
+    const QString addressModeKey = storagePrefix(thing) + "/addressMode";
+    const QString configuredAddressKey = storagePrefix(thing) + "/configuredAddress";
+    const QString storedAddressMode = pluginStorage()->value(addressModeKey).toString();
+    const QString storedConfiguredAddress = pluginStorage()->value(configuredAddressKey).toString();
+    const QHostAddress configuredAddress(thing->paramValue(m_addressParamTypes.value(thing->thingClassId())).toString());
+    const QString configuredAddressString = configuredAddress.toString();
+    const bool hasConfiguredAddress = !configuredAddress.isNull();
+    bool staticAddressMode = false;
+    if (info->isReconfigure() && !storedAddressMode.isEmpty()
+        && configuredAddressString == storedConfiguredAddress) {
+        staticAddressMode = storedAddressMode == "static";
+    } else if (info->isInitialSetup() || info->isReconfigure()) {
+        staticAddressMode = hasConfiguredAddress;
+    } else if (!storedAddressMode.isEmpty()) {
+        staticAddressMode = storedAddressMode == "static";
+    } else {
+        // Before address modes were persisted, network-discovered Things
+        // contained address, MAC and serial parameters. Preserve those as
+        // dynamic; an address without a complete discovered identity remains
+        // a manual/static configuration.
+        const MacAddress configuredMac(thing->paramValue(m_macParamTypes.value(thing->thingClassId())).toString());
+        staticAddressMode = hasConfiguredAddress && (serialNumber.isEmpty() || configuredMac.isNull());
+    }
+    m_staticAddressModes.insert(thing, staticAddressMode);
+    pluginStorage()->setValue(addressModeKey, staticAddressMode ? "static" : "dynamic");
+    pluginStorage()->setValue(configuredAddressKey, configuredAddressString);
+
+    if (!info->isInitialSetup()) {
+        if (serialNumber.isEmpty())
+            pluginStorage()->remove(storagePrefix(thing) + "/configuredSerialNumber");
+        else
+            pluginStorage()->setValue(storagePrefix(thing) + "/configuredSerialNumber", serialNumber);
+        pluginStorage()->sync();
+    }
+
     if (m_connections.contains(thing)) {
         qCInfo(dcPcElectric()) << "Reconfiguring existing thing" << thing->name();
-        m_connections.take(thing)->deleteLater();
+        PceWallbox *oldConnection = m_connections.take(thing);
+        oldConnection->disconnectDevice();
+        oldConnection->deleteLater();
 
         if (m_monitors.contains(thing)) {
             hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
         }
+        clearAddressState(thing);
     } else {
         connect(thing, &Thing::stateValueChanged, this, [thing](const StateTypeId &stateTypeId, const QVariant &value, const QVariant &minValue, const QVariant &maxValue, const QVariantList &possibleValues){
             Q_UNUSED(minValue)
@@ -190,57 +247,39 @@ void IntegrationPluginPcElectric::setupThing(ThingSetupInfo *info)
         });
     }
 
-    if (isZeroConfManaged(thing)) {
-        const ZeroConfServiceEntry entry = findZeroConfService(thing);
-        if (entry.isValid()) {
-            setupConnection(info, entry.hostAddress());
-        } else {
-            qCDebug(dcPcElectric()) << "Waiting for the ZeroConf service of" << thing->name();
-            const auto setupAddedService = [this, info](const ZeroConfServiceEntry &entry) {
-                if (!m_connections.contains(info->thing()) && isMatchingZeroConfService(info->thing(), entry))
-                    setupConnection(info, entry.hostAddress());
-            };
-            connect(m_modbusServiceBrowser, &ZeroConfServiceBrowser::serviceEntryAdded, info, setupAddedService);
-        }
-        return;
-    }
-
     NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(thing);
-    if (!monitor) {
-        qCWarning(dcPcElectric()) << "Could not create a valid network device monitor for the given parameters" << thing->params();
-        info->finish(Thing::ThingErrorInvalidParameter);
-        return;
-    }
+    if (monitor) {
+        m_monitors.insert(thing, monitor);
+        if (!isStaticThing(thing) && monitor->reachable() && !monitor->networkDeviceInfo().address().isNull())
+            m_monitorAddresses.insert(thing, monitor->networkDeviceInfo().address());
 
-    m_monitors.insert(thing, monitor);
-
-    connect(info, &ThingSetupInfo::aborted, monitor, [this, thing]() {
-        if (m_monitors.contains(thing)) {
-            qCDebug(dcPcElectric()) << "Unregistering monitor because setup has been aborted.";
-            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
-        }
-    });
-
-    // Only make sure the connection is working in the initial setup, otherwise we let the monitor do the work
-    if (info->isInitialSetup()) {
-        // Continue with setup only if we know that the network device is reachable
-        if (monitor->reachable()) {
-            setupConnection(info, monitor->networkDeviceInfo().address(), monitor);
-        } else {
-            // otherwise wait until we reach the networkdevice before setting up the device
-            qCDebug(dcPcElectric()) << "Network device" << thing->name() << "is not reachable yet. Continue with the setup once reachable.";
-            connect(monitor, &NetworkDeviceMonitor::reachableChanged, info, [=](bool reachable) {
-                if (reachable) {
-                    qCDebug(dcPcElectric()) << "Network device" << thing->name() << "is now reachable. Continue with the setup...";
-                    setupConnection(info, monitor->networkDeviceInfo().address(), monitor);
-                }
-            });
-        }
+        connect(monitor, &NetworkDeviceMonitor::reachableChanged, thing, [this, thing, monitor](bool reachable) {
+            qCDebug(dcPcElectric()) << "Network device monitor for" << thing->name()
+                                    << (reachable ? "is now reachable" : "is not reachable any more");
+            if (isStaticThing(thing))
+                return;
+            if (reachable && !monitor->networkDeviceInfo().address().isNull())
+                m_monitorAddresses.insert(thing, monitor->networkDeviceInfo().address());
+            else
+                m_monitorAddresses.remove(thing);
+            providerAddressesChanged(thing);
+        });
+        connect(monitor, &NetworkDeviceMonitor::networkDeviceInfoChanged, thing, [this, thing, monitor](const NetworkDeviceInfo &networkDeviceInfo) {
+            if (isStaticThing(thing) || !monitor->reachable())
+                return;
+            if (networkDeviceInfo.address().isNull())
+                m_monitorAddresses.remove(thing);
+            else
+                m_monitorAddresses.insert(thing, networkDeviceInfo.address());
+            providerAddressesChanged(thing);
+        });
     } else {
-        setupConnection(info, monitor->networkDeviceInfo().address(), monitor);
+        qCWarning(dcPcElectric()) << "Could not create a network device monitor for" << thing->name()
+                                  << "Continuing with the configured address and ZeroConf.";
     }
 
-    return;
+    refreshZeroConfAddresses(thing);
+    setupConnection(info);
 }
 
 void IntegrationPluginPcElectric::postSetupThing(Thing *thing)
@@ -270,6 +309,10 @@ void IntegrationPluginPcElectric::thingRemoved(Thing *thing)
 
     if (m_chargingCurrentStateBuffer.contains(thing))
         m_chargingCurrentStateBuffer.remove(thing);
+
+    clearAddressState(thing);
+    m_configuredSerialNumbers.remove(thing);
+    m_staticAddressModes.remove(thing);
 
     pluginStorage()->remove(storagePrefix(thing));
     pluginStorage()->sync();
@@ -426,9 +469,12 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
     Q_ASSERT_X(false, "IntegrationPluginPcElectric::executeAction", QString("Unhandled action: %1").arg(info->action().actionTypeId().toString()).toLocal8Bit());
 }
 
-void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info, const QHostAddress &address, NetworkDeviceMonitor *monitor)
+void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
 {
     Thing *thing = info->thing();
+    const QHostAddress address = isStaticThing(thing)
+                                     ? QHostAddress(thing->paramValue(m_addressParamTypes.value(thing->thingClassId())).toString())
+                                     : QHostAddress();
 
     qCDebug(dcPcElectric()) << "Setting up PCE wallbox using" << address.toString();
 
@@ -437,32 +483,20 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info, const QH
     connect(connection, &QObject::destroyed, this, [this, connection]() {
         m_tlsUpgradesInProgress.remove(connection);
     });
-    connect(info, &ThingSetupInfo::aborted, connection, &PceWallbox::deleteLater);
-
-    if (monitor && monitor->networkDeviceInfo().isComplete())
-        connection->modbusTcpMaster()->setHostAddress(monitor->networkDeviceInfo().address());
-
-    // Monitor reachability
-    if (monitor) {
-        connect(monitor, &NetworkDeviceMonitor::reachableChanged, thing, [thing, connection, monitor](bool reachable) {
-            if (!thing->setupComplete())
-                return;
-
-            qCDebug(dcPcElectric()) << "Network device monitor for" << thing->name() << (reachable ? "is now reachable" : "is not reachable any more");
-            if (reachable && !thing->stateValue("connected").toBool()) {
-                connection->modbusTcpMaster()->setHostAddress(monitor->networkDeviceInfo().address());
-                connection->connectDevice();
-            } else if (!reachable) {
-                // Note: We disable autoreconnect explicitly and we will
-                // connect the device once the monitor says it is reachable again
-                connection->disconnectDevice();
-            }
-        });
-    }
+    connect(info, &ThingSetupInfo::aborted, this, [this, thing, connection]() {
+        if (m_connections.value(thing) == connection)
+            m_connections.remove(thing);
+        connection->disconnectDevice();
+        connection->deleteLater();
+        if (m_monitors.contains(thing))
+            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+        clearAddressState(thing);
+    });
 
     // Connection reachability
     connect(connection, &PceWallbox::reachableChanged, thing, [this, thing, connection](bool reachable) {
         qCInfo(dcPcElectric()) << "Reachable changed to" << reachable << "for" << thing;
+        const bool wasConnected = thing->stateValue("connected").toBool();
         m_initialUpdate[thing] = true;
         thing->setStateValue("connected", reachable && connection->operational());
 
@@ -479,20 +513,61 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info, const QH
             thing->setStateValue("currentPhaseB", 0);
             thing->setStateValue("currentPhaseC", 0);
         }
+
+        if (!reachable && wasConnected && !isStaticThing(thing)) {
+            const QHostAddress failedAddress = connection->modbusTcpMaster()->hostAddress();
+            connection->disconnectDevice();
+            m_addressAttemptsInProgress.remove(thing);
+            m_attemptedAddresses.remove(thing);
+            if (!failedAddress.isNull())
+                m_attemptedAddresses[thing].insert(failedAddress);
+            QTimer::singleShot(0, thing, [this, thing]() {
+                tryNextAddress(thing);
+            });
+        }
+    });
+
+    connect(connection->modbusTcpMaster(), &ModbusTcpMaster::connectionErrorOccurred, thing, [this, thing](QModbusDevice::Error error) {
+        if (error == QModbusDevice::ConnectionError && m_addressAttemptsInProgress.contains(thing))
+            addressAttemptFailed(thing);
     });
 
     connect(connection, &PceWallbox::initializationFinished, thing, [this, thing, connection](bool success) {
-        if (!success)
+        if (!success) {
+            addressAttemptFailed(thing);
             return;
+        }
 
         const QString expectedSerial = thing->paramValue(m_serialNumberParamTypes.value(thing->thingClassId())).toString();
-        if (!expectedSerial.isEmpty() && wallboxSerialNumber(connection) != expectedSerial) {
-            qCWarning(dcPcElectric()) << "Rejecting PCE endpoint with unexpected serial number";
+        const QString actualSerial = wallboxSerialNumber(connection);
+        if (actualSerial.isEmpty() || actualSerial == "0") {
+            qCWarning(dcPcElectric()) << "Rejecting PCE endpoint with invalid serial number on"
+                                      << connection->modbusTcpMaster()->hostAddress();
+            connection->disconnectDevice();
+            addressAttemptFailed(thing);
+            return;
+        }
+        if (!expectedSerial.isEmpty() && actualSerial != expectedSerial) {
+            qCWarning(dcPcElectric()) << "Rejecting PCE endpoint on"
+                                      << connection->modbusTcpMaster()->hostAddress()
+                                      << "Expected serial:" << expectedSerial
+                                      << "actual serial:" << actualSerial;
             if (pluginStorage()->value(storagePrefix(thing) + "/serverFingerprint").toString().isEmpty())
                 connection->modbusTcpMaster()->setAcceptedPeerCertificateFingerprint(QString());
             connection->disconnectDevice();
+            addressAttemptFailed(thing, actualSerial);
             return;
         }
+
+        if (expectedSerial.isEmpty()) {
+            qCInfo(dcPcElectric()) << "Learned serial number" << actualSerial << "for" << thing->name();
+            thing->setParamValue(m_serialNumberParamTypes.value(thing->thingClassId()), actualSerial);
+            m_configuredSerialNumbers.insert(thing, actualSerial);
+            refreshZeroConfAddresses(thing);
+        }
+        pluginStorage()->setValue(storagePrefix(thing) + "/configuredSerialNumber", actualSerial);
+        pluginStorage()->sync();
+        finishInitialSetup(thing, Thing::ThingErrorNoError);
 
         ModbusTcpMaster *master = connection->modbusTcpMaster();
         if (master->transport() == ModbusTcpMaster::TransportTcp && connection->firmwareRevision() > "0025") {
@@ -511,6 +586,7 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info, const QH
                 if (!identityAvailable || !configureTls(guardedThing, guardedConnection)) {
                     qCWarning(dcPcElectric()) << "Could not upgrade the PCE wallbox to mandatory TLS:" << errorString;
                     guardedConnection->disconnectDevice();
+                    addressAttemptFailed(guardedThing);
                     return;
                 }
 
@@ -531,6 +607,7 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info, const QH
                                                      && fingerprint == master->acceptedPeerCertificateFingerprint());
             if (fingerprint.isEmpty()) {
                 connection->disconnectDevice();
+                addressAttemptFailed(thing);
                 return;
             }
             pluginStorage()->remove(storagePrefix(thing) + "/tlsRequired");
@@ -538,6 +615,9 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info, const QH
             pluginStorage()->sync();
         }
         connection->startOperationalMode();
+        m_addressAttemptsInProgress.remove(thing);
+        m_attemptedAddresses.remove(thing);
+        m_unexpectedSerialNumbers.remove(thing);
         thing->setStateValue("connected", true);
     });
 
@@ -814,68 +894,245 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info, const QH
     });
 
     m_connections.insert(thing, connection);
-    info->finish(Thing::ThingErrorNoError);
+    if (info->isInitialSetup()) {
+        m_pendingInitialSetups.insert(thing, info);
+    } else {
+        info->finish(Thing::ThingErrorNoError);
+    }
 
-    // Connect right the way if the monitor indicates reachable, otherwise the connect will handle the connect later
-    if (!monitor || monitor->reachable())
-        connection->connectDevice();
+    if (availableAddresses(thing).isEmpty()) {
+        qCInfo(dcPcElectric()) << "No address is currently available for" << thing->name()
+                               << "Waiting for the network monitor or ZeroConf.";
+        return;
+    }
+
+    tryNextAddress(thing);
 }
 
-bool IntegrationPluginPcElectric::isZeroConfManaged(Thing *thing) const
+bool IntegrationPluginPcElectric::isStaticThing(Thing *thing) const
 {
-    return !thing->paramValue(m_serialNumberParamTypes.value(thing->thingClassId())).toString().isEmpty()
-           && thing->paramValue(m_addressParamTypes.value(thing->thingClassId())).toString().isEmpty()
-           && thing->paramValue(m_hostNameParamTypes.value(thing->thingClassId())).toString().isEmpty()
-           && thing->paramValue(m_macParamTypes.value(thing->thingClassId())).toString().isEmpty();
+    if (m_staticAddressModes.contains(thing))
+        return m_staticAddressModes.value(thing);
+    return !QHostAddress(thing->paramValue(m_addressParamTypes.value(thing->thingClassId())).toString()).isNull();
 }
 
 bool IntegrationPluginPcElectric::isMatchingZeroConfService(Thing *thing, const ZeroConfServiceEntry &entry) const
 {
-    return isZeroConfManaged(thing) && entry.protocol() == QAbstractSocket::IPv4Protocol
+    const QString serialNumber = thing->paramValue(m_serialNumberParamTypes.value(thing->thingClassId())).toString();
+    return !serialNumber.isEmpty() && entry.protocol() == QAbstractSocket::IPv4Protocol
            && entry.serviceType() == "_modbus._tcp" && entry.port() == 502
            && entry.name().startsWith("EV11")
-           && entry.txt("serial") == thing->paramValue(m_serialNumberParamTypes.value(thing->thingClassId())).toString();
+           && entry.txt("serial") == serialNumber
+           && !MacAddress(entry.txt("mac")).isNull();
 }
 
-ZeroConfServiceEntry IntegrationPluginPcElectric::findZeroConfService(Thing *thing) const
+QSet<QHostAddress> IntegrationPluginPcElectric::availableAddresses(Thing *thing) const
 {
-    foreach (const ZeroConfServiceEntry &entry, m_modbusServiceBrowser->serviceEntries()) {
-        if (isMatchingZeroConfService(thing, entry))
-            return entry;
+    if (isStaticThing(thing)) {
+        return {QHostAddress(thing->paramValue(m_addressParamTypes.value(thing->thingClassId())).toString())};
     }
-    return ZeroConfServiceEntry();
+
+    QSet<QHostAddress> addresses = m_zeroConfAddresses.value(thing);
+    const QHostAddress monitorAddress = m_monitorAddresses.value(thing);
+    if (!monitorAddress.isNull())
+        addresses.insert(monitorAddress);
+    return addresses;
+}
+
+void IntegrationPluginPcElectric::refreshZeroConfAddresses(Thing *thing)
+{
+    QSet<QHostAddress> addresses;
+    foreach (const ZeroConfServiceEntry &entry, m_modbusServiceBrowser->serviceEntries()) {
+        if (!isMatchingZeroConfService(thing, entry) || entry.hostAddress().isNull())
+            continue;
+        if (isStaticThing(thing)) {
+            const QHostAddress configuredAddress(thing->paramValue(m_addressParamTypes.value(thing->thingClassId())).toString());
+            if (entry.hostAddress() != configuredAddress) {
+                qCWarning(dcPcElectric()) << "ZeroConf advertises serial" << entry.txt("serial")
+                                          << "on" << entry.hostAddress()
+                                          << "but" << thing->name()
+                                          << "is pinned to" << configuredAddress;
+            }
+        } else {
+            addresses.insert(entry.hostAddress());
+        }
+    }
+    m_zeroConfAddresses.insert(thing, addresses);
+}
+
+void IntegrationPluginPcElectric::providerAddressesChanged(Thing *thing)
+{
+    if (!m_connections.contains(thing))
+        return;
+
+    m_attemptedAddresses.remove(thing);
+    if (m_addressAttemptsInProgress.contains(thing)) {
+        const QHostAddress activeAddress = m_connections.value(thing)->modbusTcpMaster()->hostAddress();
+        if (!activeAddress.isNull())
+            m_attemptedAddresses[thing].insert(activeAddress);
+    }
+    m_unexpectedSerialNumbers.remove(thing);
+    tryNextAddress(thing);
+}
+
+void IntegrationPluginPcElectric::tryNextAddress(Thing *thing)
+{
+    PceWallbox *connection = m_connections.value(thing);
+    if (!connection || connection->operational() || m_addressAttemptsInProgress.contains(thing)
+        || m_tlsUpgradesInProgress.contains(connection)) {
+        return;
+    }
+
+    QList<QHostAddress> addresses = availableAddresses(thing).values();
+    const QHostAddress currentAddress = connection->modbusTcpMaster()->hostAddress();
+    std::sort(addresses.begin(), addresses.end(), [&currentAddress](const QHostAddress &left, const QHostAddress &right) {
+        if (left == currentAddress)
+            return false;
+        if (right == currentAddress)
+            return true;
+        return left.toString() < right.toString();
+    });
+
+    QHostAddress nextAddress;
+    foreach (const QHostAddress &address, addresses) {
+        if (!address.isNull() && !m_attemptedAddresses.value(thing).contains(address)) {
+            nextAddress = address;
+            break;
+        }
+    }
+
+    if (nextAddress.isNull()) {
+        if (m_pendingInitialSetups.contains(thing)) {
+            const QString unexpectedSerial = m_unexpectedSerialNumbers.value(thing);
+            if (!unexpectedSerial.isEmpty()) {
+                finishInitialSetup(
+                    thing,
+                    Thing::ThingErrorInvalidParameter,
+                    tr("The PCE wallbox serial number does not match. The endpoint reported %1.").arg(unexpectedSerial));
+            } else {
+                finishInitialSetup(thing,
+                                   Thing::ThingErrorHardwareNotAvailable,
+                                   QT_TR_NOOP("None of the available PCE wallbox addresses could be reached."));
+            }
+        } else {
+            if (addresses.isEmpty()) {
+                qCInfo(dcPcElectric()) << "No address is currently available for" << thing->name()
+                                       << "Waiting for the network monitor or ZeroConf.";
+            } else if (!m_addressRetriesScheduled.contains(thing)) {
+                qCInfo(dcPcElectric()) << "All currently known addresses have failed for" << thing->name()
+                                       << "Retrying them in" << addressRetryIntervalMs << "ms.";
+                m_addressRetriesScheduled.insert(thing);
+                QTimer::singleShot(addressRetryIntervalMs, thing, [this, thing]() {
+                    m_addressRetriesScheduled.remove(thing);
+                    if (!m_connections.contains(thing))
+                        return;
+                    m_attemptedAddresses.remove(thing);
+                    m_unexpectedSerialNumbers.remove(thing);
+                    tryNextAddress(thing);
+                });
+            }
+        }
+        return;
+    }
+
+    qCInfo(dcPcElectric()) << "Trying PCE wallbox address" << nextAddress << "for" << thing->name();
+    m_attemptedAddresses[thing].insert(nextAddress);
+    m_addressAttemptsInProgress.insert(thing);
+    const bool addressChanged = !currentAddress.isNull() && currentAddress != nextAddress;
+    connection->modbusTcpMaster()->setHostAddress(nextAddress);
+    if (addressChanged)
+        connection->modbusTcpMaster()->reconnectDevice();
+    else
+        connection->connectDevice();
+}
+
+void IntegrationPluginPcElectric::addressAttemptFailed(Thing *thing, const QString &unexpectedSerial)
+{
+    if (!m_connections.contains(thing) || !m_addressAttemptsInProgress.remove(thing))
+        return;
+
+    if (!unexpectedSerial.isEmpty())
+        m_unexpectedSerialNumbers.insert(thing, unexpectedSerial);
+
+    PceWallbox *connection = m_connections.value(thing);
+    if (isStaticThing(thing) && !m_pendingInitialSetups.contains(thing)) {
+        qCWarning(dcPcElectric()) << "Static PCE wallbox connection failed on"
+                                  << connection->modbusTcpMaster()->hostAddress()
+                                  << "Keeping the configured address.";
+        return;
+    }
+
+    connection->disconnectDevice();
+    QTimer::singleShot(0, thing, [this, thing]() {
+        tryNextAddress(thing);
+    });
+}
+
+void IntegrationPluginPcElectric::finishInitialSetup(Thing *thing, Thing::ThingError error, const QString &message)
+{
+    QPointer<ThingSetupInfo> info = m_pendingInitialSetups.take(thing);
+    if (!info)
+        return;
+    if (error != Thing::ThingErrorNoError) {
+        if (m_connections.contains(thing)) {
+            PceWallbox *connection = m_connections.take(thing);
+            connection->disconnectDevice();
+            connection->deleteLater();
+        }
+        if (m_monitors.contains(thing))
+            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+        clearAddressState(thing);
+        m_configuredSerialNumbers.remove(thing);
+        m_staticAddressModes.remove(thing);
+    }
+    info->finish(error, message);
+}
+
+void IntegrationPluginPcElectric::clearAddressState(Thing *thing)
+{
+    m_monitorAddresses.remove(thing);
+    m_zeroConfAddresses.remove(thing);
+    m_attemptedAddresses.remove(thing);
+    m_pendingInitialSetups.remove(thing);
+    m_unexpectedSerialNumbers.remove(thing);
+    m_addressAttemptsInProgress.remove(thing);
+    m_addressRetriesScheduled.remove(thing);
 }
 
 void IntegrationPluginPcElectric::handleZeroConfServiceAdded(const ZeroConfServiceEntry &entry)
 {
-    foreach (Thing *thing, myThings()) {
-        if (!isMatchingZeroConfService(thing, entry) || !m_connections.contains(thing))
+    foreach (Thing *thing, m_connections.keys()) {
+        if (!isMatchingZeroConfService(thing, entry))
             continue;
 
-        PceWallbox *connection = m_connections.value(thing);
-        if (connection->modbusTcpMaster()->hostAddress() != entry.hostAddress()) {
-            qCInfo(dcPcElectric()) << "ZeroConf address changed for" << thing->name() << "to" << entry.hostAddress();
-            connection->modbusTcpMaster()->setHostAddress(entry.hostAddress());
-            connection->modbusTcpMaster()->reconnectDevice();
-        } else if (!connection->reachable()) {
-            connection->connectDevice();
+        if (isStaticThing(thing)) {
+            const QHostAddress configuredAddress(thing->paramValue(m_addressParamTypes.value(thing->thingClassId())).toString());
+            if (entry.hostAddress() != configuredAddress) {
+                qCWarning(dcPcElectric()) << "ZeroConf advertises serial" << entry.txt("serial")
+                                          << "on" << entry.hostAddress()
+                                          << "but" << thing->name()
+                                          << "is pinned to" << configuredAddress;
+            }
+            continue;
         }
+
+        qCInfo(dcPcElectric()) << "ZeroConf provides address" << entry.hostAddress() << "for" << thing->name();
+        m_zeroConfAddresses[thing].insert(entry.hostAddress());
+        providerAddressesChanged(thing);
     }
 }
 
 void IntegrationPluginPcElectric::handleZeroConfServiceRemoved(const ZeroConfServiceEntry &entry)
 {
-    foreach (Thing *thing, myThings()) {
-        if (isMatchingZeroConfService(thing, entry) && m_connections.contains(thing)
-            && m_connections.value(thing)->modbusTcpMaster()->hostAddress() == entry.hostAddress()) {
-            const ZeroConfServiceEntry replacementEntry = findZeroConfService(thing);
-            if (replacementEntry.isValid()) {
-                handleZeroConfServiceAdded(replacementEntry);
-            } else {
-                qCInfo(dcPcElectric()) << "ZeroConf service disappeared for" << thing->name();
-                m_connections.value(thing)->disconnectDevice();
-            }
-        }
+    foreach (Thing *thing, m_connections.keys()) {
+        if (isStaticThing(thing) || !isMatchingZeroConfService(thing, entry))
+            continue;
+
+        qCInfo(dcPcElectric()) << "ZeroConf address disappeared for" << thing->name() << entry.hostAddress();
+        QTimer::singleShot(0, thing, [this, thing]() {
+            refreshZeroConfAddresses(thing);
+            providerAddressesChanged(thing);
+        });
     }
 }
 

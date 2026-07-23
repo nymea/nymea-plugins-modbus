@@ -54,7 +54,6 @@ public:
         NetworkDeviceInfo networkDeviceInfo;
         EV11ModbusTcpConnection::DigitalInputMode digitalInputMode;
         EV11ModbusTcpConnection::R37Mode r37Mode = EV11ModbusTcpConnection::R37ModeNoMonitoring;
-        bool discoveredThroughZeroConf = false;
     } Result;
 
     QList<PcElectricDiscovery::Result> results() const;

@@ -50,6 +50,30 @@ The plugin discovers EV11.3 wallboxes through the plain `_modbus._tcp` mDNS
 service or through network discovery. A wallbox can also be added manually by
 IP address.
 
+Network discovery and mDNS run independently and feed the same Modbus
+verification. The serial number and MAC address read from the wallbox registers
+are authoritative; discovery does not require either network discovery or mDNS
+to confirm the register MAC. Results reported by both methods are merged by
+serial number.
+
+Automatically discovered wallboxes remain dynamically addressed. Nymea stores
+their serial number and MAC address, then accepts the current IP from either the
+MAC-based network monitor or the matching mDNS service. A working connection is
+not replaced merely because the other source advertises a different address.
+If the connection fails, nymea tries the other currently advertised addresses.
+
+Entering an IP address manually selects static mode. In this mode nymea always
+uses the configured address. An mDNS service advertising the same serial number
+on another address is logged but does not redirect the connection. If no serial
+number was entered, the first successful setup reads and stores it from the
+wallbox.
+
+The serial number is checked whenever a connection is initialized. Initial
+setup succeeds only after the expected serial has been confirmed. During
+startup of an already configured wallbox, setup succeeds even when neither
+address source is currently available; the `connected` state remains false
+until the network monitor or mDNS provides a usable address.
+
 Every setup starts with plain Modbus TCP on port 502. The firmware revision is
 always read directly from the wallbox and is the only source used to select the
 operational transport. TLS information advertised through ZeroConf is ignored.

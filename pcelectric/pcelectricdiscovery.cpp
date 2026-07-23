@@ -84,7 +84,6 @@ void PcElectricDiscovery::checkZeroConfService(const ZeroConfServiceEntry &entry
 
     const QString serialNumber = entry.txt("serial");
     const MacAddress macAddress(entry.txt("mac"));
-    const QString tlsValue = entry.txt("tls");
     if (entry.serviceType() != "_modbus._tcp" || entry.port() != 502 || serialNumber.isEmpty() || macAddress.isNull()) {
         qCDebug(dcPcElectric()) << "Discovery: mDNS: Ignoring invalid service" << entry;
         return;
@@ -141,6 +140,11 @@ void PcElectricDiscovery::checkNetworkDevice(const QHostAddress &address)
 
                 quint64 serialNumber = serialRawData.toHex().toULongLong(nullptr, 16);
                 qCDebug(dcPcElectric()) << "Discovery: Serial number" << serialRawData.toHex() << serialNumber;
+                if (serialNumber == 0) {
+                    qCWarning(dcPcElectric()) << "Discovery: Rejecting PCE wallbox with invalid serial number on" << address.toString();
+                    cleanupConnection(connection);
+                    return;
+                }
 
                 Result result;
                 result.serialNumber = QString::number(serialNumber);
@@ -297,60 +301,71 @@ void PcElectricDiscovery::finishDiscovery()
 {
     m_discoveryRunning = false;
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
+    QSet<QString> ambiguousSerialNumbers;
 
     for (int i = 0; i < m_potentialResults.length(); i++) {
         NetworkDeviceInfo networkDeviceInfo = m_networkDeviceInfos.get(m_potentialResults.at(i).address);
 
         Result result = m_potentialResults.at(i);
-        bool zeroConfVerified = false;
+        if (networkDeviceInfo.address().isNull())
+            networkDeviceInfo.setAddress(result.address);
+        networkDeviceInfo.addMacAddress(result.registerMacAddress);
+
         const ZeroConfServiceEntry zeroConfEntry = m_zeroConfEntries.value(result.address);
         if (zeroConfEntry.isValid()) {
-            const MacAddress advertisedMacAddress(zeroConfEntry.txt("mac"));
-            zeroConfVerified = advertisedMacAddress == result.registerMacAddress
-                               && zeroConfEntry.txt("serial") == result.serialNumber;
-            if (zeroConfVerified) {
-                if (networkDeviceInfo.address().isNull())
-                    networkDeviceInfo.setAddress(result.address);
+            if (zeroConfEntry.txt("serial") == result.serialNumber) {
                 networkDeviceInfo.setHostName(zeroConfEntry.hostName());
-                networkDeviceInfo.addMacAddress(advertisedMacAddress);
-                result.discoveredThroughZeroConf = true;
+            } else {
+                qCWarning(dcPcElectric())
+                    << "Discovery: Ignoring mismatching mDNS identity for"
+                    << result.address.toString()
+                    << "advertised serial:"
+                    << zeroConfEntry.txt("serial")
+                    << "Modbus serial:"
+                    << result.serialNumber;
             }
         }
 
         result.networkDeviceInfo = networkDeviceInfo;
-        const bool legacyVerified = networkDeviceInfo.macAddressInfos().hasMacAddress(result.registerMacAddress);
-        if (zeroConfVerified || legacyVerified) {
-            qCInfo(dcPcElectric())
-                << "Discovery: --> Found EV11.3"
-                << (result.thingClassId == ev11NoMeterThingClassId ? "(No meter)" : "with meter")
-                << "Serial number:"
-                << result.serialNumber
-                << "Firmware revision:"
-                << result.firmwareRevision
-                << result.networkDeviceInfo
-                << result.digitalInputMode
-                << result.r37Mode;
-            int existingResultIndex = -1;
-            for (int resultIndex = 0; resultIndex < m_results.size(); ++resultIndex) {
-                if (m_results.at(resultIndex).serialNumber == result.serialNumber) {
-                    existingResultIndex = resultIndex;
-                    break;
-                }
+
+        if (ambiguousSerialNumbers.contains(result.serialNumber))
+            continue;
+
+        int existingResultIndex = -1;
+        for (int resultIndex = 0; resultIndex < m_results.size(); ++resultIndex) {
+            if (m_results.at(resultIndex).serialNumber == result.serialNumber) {
+                existingResultIndex = resultIndex;
+                break;
             }
-            if (existingResultIndex < 0) {
-                m_results.append(result);
-            } else if (result.discoveredThroughZeroConf && !m_results.at(existingResultIndex).discoveredThroughZeroConf) {
-                m_results[existingResultIndex] = result;
-            }
-        } else {
-            qCWarning(dcPcElectric())
-                << "Discovery: --> Found potential EV11.3, but not adding to the results due to imcomplete MAC address check:"
-                << "Serial number:"
-                << result.serialNumber
-                << "Firmware revision:"
-                << result.firmwareRevision
-                << result.networkDeviceInfo;
         }
+
+        if (existingResultIndex >= 0 && m_results.at(existingResultIndex).registerMacAddress != result.registerMacAddress) {
+            qCWarning(dcPcElectric())
+                << "Discovery: Rejecting ambiguous serial number advertised by different wallboxes:"
+                << result.serialNumber
+                << m_results.at(existingResultIndex).address
+                << m_results.at(existingResultIndex).registerMacAddress
+                << result.address
+                << result.registerMacAddress;
+            m_results.removeAt(existingResultIndex);
+            ambiguousSerialNumbers.insert(result.serialNumber);
+            continue;
+        }
+
+        if (existingResultIndex >= 0)
+            continue;
+
+        qCInfo(dcPcElectric())
+            << "Discovery: --> Found EV11.3"
+            << (result.thingClassId == ev11NoMeterThingClassId ? "(No meter)" : "with meter")
+            << "Serial number:"
+            << result.serialNumber
+            << "Firmware revision:"
+            << result.firmwareRevision
+            << result.networkDeviceInfo
+            << result.digitalInputMode
+            << result.r37Mode;
+        m_results.append(result);
     }
 
     m_potentialResults.clear();

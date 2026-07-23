@@ -27,6 +27,7 @@
 
 #include <QDebug>
 #include <QObject>
+#include <QPointer>
 #include <QSslCertificate>
 #include <QSslKey>
 
@@ -63,6 +64,15 @@ public:
 private:
     QHash<Thing *, PceWallbox *> m_connections;
     QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
+    QHash<Thing *, QHostAddress> m_monitorAddresses;
+    QHash<Thing *, QSet<QHostAddress>> m_zeroConfAddresses;
+    QHash<Thing *, QSet<QHostAddress>> m_attemptedAddresses;
+    QHash<Thing *, QPointer<ThingSetupInfo>> m_pendingInitialSetups;
+    QHash<Thing *, QString> m_unexpectedSerialNumbers;
+    QHash<Thing *, QString> m_configuredSerialNumbers;
+    QHash<Thing *, bool> m_staticAddressModes;
+    QSet<Thing *> m_addressAttemptsInProgress;
+    QSet<Thing *> m_addressRetriesScheduled;
     QHash<Thing *, bool> m_initialUpdate;
 
     // We need to buffer the desired power / current / phase count states because all 3 states
@@ -80,10 +90,16 @@ private:
     ZeroConfServiceBrowser *m_modbusServiceBrowser = nullptr;
     QSet<PceWallbox *> m_tlsUpgradesInProgress;
 
-    void setupConnection(ThingSetupInfo *info, const QHostAddress &address, NetworkDeviceMonitor *monitor = nullptr);
-    bool isZeroConfManaged(Thing *thing) const;
+    void setupConnection(ThingSetupInfo *info);
+    bool isStaticThing(Thing *thing) const;
     bool isMatchingZeroConfService(Thing *thing, const ZeroConfServiceEntry &entry) const;
-    ZeroConfServiceEntry findZeroConfService(Thing *thing) const;
+    QSet<QHostAddress> availableAddresses(Thing *thing) const;
+    void refreshZeroConfAddresses(Thing *thing);
+    void providerAddressesChanged(Thing *thing);
+    void tryNextAddress(Thing *thing);
+    void addressAttemptFailed(Thing *thing, const QString &unexpectedSerial = QString());
+    void finishInitialSetup(Thing *thing, Thing::ThingError error, const QString &message = QString());
+    void clearAddressState(Thing *thing);
     bool configureTls(Thing *thing, PceWallbox *connection);
     bool ensureClientIdentity(QString *errorString = nullptr);
     void ensureClientIdentityAsync(const std::function<void(bool, const QString &)> &callback, bool refresh = false);
