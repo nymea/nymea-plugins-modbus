@@ -673,6 +673,16 @@
                             "displayName": "Authorized tag hash",
                             "type": "QString",
                             "defaultValue": ""
+                        },
+                        {
+                            "id": "d245a8b2-617e-4d10-8ce7-6886a9690166",
+                            "name": "rfidEnrollmentActive",
+                            "displayName": "RFID enrollment active",
+                            "displayNameAction": "Start or stop RFID enrollment",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false,
+                            "writable": true
                         }
                     ],
                     "actionTypes": [

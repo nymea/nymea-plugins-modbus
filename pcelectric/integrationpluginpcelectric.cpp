@@ -380,6 +380,34 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
     }
 
     PceWallbox *connection = m_connections.value(thing);
+    if (info->action().actionTypeId() == ev11RfidRfidEnrollmentActiveActionTypeId) {
+        const bool active = info->action()
+                .paramValue(ev11RfidRfidEnrollmentActiveActionRfidEnrollmentActiveParamTypeId)
+                .toBool();
+        if (!connection) {
+            if (!active)
+                thing->setStateValue("rfidEnrollmentActive", false);
+            info->finish(active ? Thing::ThingErrorHardwareNotAvailable
+                                : Thing::ThingErrorNoError);
+            return;
+        }
+
+        const auto enrollmentConnection = std::make_shared<QMetaObject::Connection>();
+        *enrollmentConnection = connect(
+                    connection, &PceWallbox::rfidEnrollmentChangeFinished, info,
+                    [info, enrollmentConnection, active](bool requestedActive, bool success) {
+            if (requestedActive != active)
+                return;
+            QObject::disconnect(*enrollmentConnection);
+            info->finish(success ? Thing::ThingErrorNoError : Thing::ThingErrorHardwareFailure);
+        });
+        if (!connection->setRfidEnrollmentActive(active)) {
+            QObject::disconnect(*enrollmentConnection);
+            info->finish(Thing::ThingErrorHardwareNotAvailable);
+        }
+        return;
+    }
+
     if (!connection || !connection->operational()) {
         qCWarning(dcPcElectric()) << "Could not execute action because the connection is not available.";
         info->finish(Thing::ThingErrorHardwareNotAvailable);
@@ -563,6 +591,8 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
             thing->setStateValue("currentPhaseA", 0);
             thing->setStateValue("currentPhaseB", 0);
             thing->setStateValue("currentPhaseC", 0);
+            if (thing->thingClassId() == ev11RfidThingClassId)
+                thing->setStateValue("rfidEnrollmentActive", false);
         }
 
         if (!reachable && wasConnected && !isStaticThing(thing)) {
@@ -700,6 +730,10 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
     connect(connection, &PceWallbox::rfidTagDetected, thing, [thing](const QString &code) {
         qCInfo(dcPcElectric()) << "RFID tag detected" << QString(code.length(), '*');
         thing->emitEvent(ev11RfidTagDetectedEventTypeId, {Param(ev11RfidTagDetectedEventCodeParamTypeId, code)});
+    });
+    connect(connection, &PceWallbox::rfidEnrollmentActiveChanged, thing,
+            [thing](bool active) {
+        thing->setStateValue("rfidEnrollmentActive", active);
     });
 
     connect(connection, &PceWallbox::updateFinished, thing, [this, thing, connection]() {

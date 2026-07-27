@@ -159,7 +159,8 @@ bool PceWallbox::initializeRfidOperatingMode(RfidOperatingMode mode)
 
 bool PceWallbox::hasPendingRfidTag() const
 {
-    return !m_pendingRfidToken.isEmpty() && !m_rfidDecisionInProgress;
+    return (!m_pendingRfidToken.isEmpty() || !m_pendingRfidEnrollmentToken.isEmpty())
+            && !m_rfidDecisionInProgress;
 }
 
 bool PceWallbox::hasRfidAuthorization() const
@@ -172,6 +173,9 @@ bool PceWallbox::canSubmitRfidDecision(bool approved) const
     if (m_rfidDecisionInProgress || m_rfidSessionWriteInProgress
             || !rfidTransportAvailable())
         return false;
+
+    if (!m_pendingRfidEnrollmentToken.isEmpty())
+        return true;
 
     return approved ? !m_pendingRfidToken.isEmpty()
                     : !m_pendingRfidToken.isEmpty() || !m_acceptedRfidToken.isEmpty();
@@ -193,6 +197,24 @@ bool PceWallbox::submitRfidDecision(bool approved)
     }
 
     m_rfidDecisionInProgress = true;
+    if (!m_pendingRfidEnrollmentToken.isEmpty()) {
+        const QVector<quint16> enrollmentToken = m_pendingRfidEnrollmentToken;
+        const quint64 generation = ++m_rfidLedGeneration;
+        writeRfidLed(approved ? RfidLedAccepted : RfidLedRejected,
+                     [this, enrollmentToken, generation](bool success) {
+            scheduleRfidLedReset(generation);
+            if (m_pendingRfidEnrollmentToken == enrollmentToken)
+                m_pendingRfidEnrollmentToken.clear();
+            if (m_rfidEnrollmentActive) {
+                m_rfidEnrollmentActive = false;
+                emit rfidEnrollmentActiveChanged(false);
+            }
+            m_rfidDecisionInProgress = false;
+            emit rfidDecisionFinished(success);
+        });
+        return true;
+    }
+
     const QVector<quint16> decisionToken = m_pendingRfidToken;
     const QVector<quint16> previousAuthorization = m_acceptedRfidToken;
     const auto finishDecision = [this](bool success) {
@@ -297,6 +319,75 @@ bool PceWallbox::submitRfidDecision(bool approved)
                                << "because the vehicle is not plugged in";
         showAccepted();
     }
+    return true;
+}
+
+bool PceWallbox::rfidEnrollmentActive() const
+{
+    return m_rfidEnrollmentActive;
+}
+
+bool PceWallbox::setRfidEnrollmentActive(bool active)
+{
+    if (m_rfidEnrollmentChangeInProgress || m_rfidDecisionInProgress)
+        return false;
+
+    if (active == m_rfidEnrollmentActive
+            && (active || m_pendingRfidEnrollmentToken.isEmpty())) {
+        emit rfidEnrollmentChangeFinished(active, true);
+        return true;
+    }
+
+    const quint64 generation = ++m_rfidEnrollmentGeneration;
+    m_rfidEnrollmentChangeInProgress = true;
+    m_requestedRfidEnrollmentActive = active;
+    if (active) {
+        if (!reachable() || !rfidTransportAvailable()) {
+            m_rfidEnrollmentChangeInProgress = false;
+            emit rfidEnrollmentChangeFinished(true, false);
+            return true;
+        }
+
+        m_rfidEnrollmentArming = true;
+        m_rfidEnrollmentDisarming = false;
+        m_pendingRfidEnrollmentToken.clear();
+        ++m_rfidLedGeneration;
+        writeRfidLed(RfidLedLearn, [this, generation](bool success) {
+            if (generation != m_rfidEnrollmentGeneration)
+                return;
+            m_rfidEnrollmentArming = false;
+            m_rfidEnrollmentChangeInProgress = false;
+            if (success) {
+                m_rfidEnrollmentActive = true;
+                emit rfidEnrollmentActiveChanged(true);
+            }
+            emit rfidEnrollmentChangeFinished(true, success);
+        });
+        return true;
+    }
+
+    m_pendingRfidEnrollmentToken.clear();
+    m_rfidEnrollmentArming = false;
+    const bool writeAvailable = reachable() && rfidTransportAvailable();
+    m_rfidEnrollmentDisarming = writeAvailable;
+    m_rfidEnrollmentActive = false;
+    ++m_rfidLedGeneration;
+    if (!writeAvailable) {
+        m_rfidEnrollmentDisarming = false;
+        m_rfidEnrollmentChangeInProgress = false;
+        emit rfidEnrollmentActiveChanged(false);
+        emit rfidEnrollmentChangeFinished(false, true);
+        return true;
+    }
+
+    writeRfidLed(RfidLedNone, [this, generation](bool success) {
+        if (generation != m_rfidEnrollmentGeneration)
+            return;
+        m_rfidEnrollmentDisarming = false;
+        m_rfidEnrollmentChangeInProgress = false;
+        emit rfidEnrollmentActiveChanged(false);
+        emit rfidEnrollmentChangeFinished(false, success);
+    });
     return true;
 }
 
@@ -588,12 +679,15 @@ void PceWallbox::processRfidRead(const QVector<quint16> &values)
         return;
 
     m_observedRfidToken = values;
-    if (!m_pendingRfidToken.isEmpty() && m_pendingRfidToken != values) {
+    QVector<quint16> &pendingToken = (m_rfidEnrollmentActive || m_rfidEnrollmentArming
+                                      || m_rfidEnrollmentDisarming)
+            ? m_pendingRfidEnrollmentToken : m_pendingRfidToken;
+    if (!pendingToken.isEmpty() && pendingToken != values) {
         qCDebug(dcPcElectric()) << "Replacing pending redacted RFID scan for charger"
                                << m_modbusTcpMaster->hostAddress().toString()
                                << "slave" << m_slaveId << "charging state" << chargingState();
     }
-    m_pendingRfidToken = values;
+    pendingToken = values;
     emit rfidTagDetected(code);
 }
 
@@ -738,7 +832,11 @@ void PceWallbox::scheduleRfidLedReset(quint64 generation)
 
 void PceWallbox::resetRfidState()
 {
-    if (!m_pendingRfidToken.isEmpty() || !m_acceptedRfidToken.isEmpty()) {
+    const bool enrollmentWasActive = m_rfidEnrollmentActive;
+    const bool enrollmentChangeWasInProgress = m_rfidEnrollmentChangeInProgress;
+    const bool requestedEnrollmentActive = m_requestedRfidEnrollmentActive;
+    if (!m_pendingRfidToken.isEmpty() || !m_pendingRfidEnrollmentToken.isEmpty()
+            || !m_acceptedRfidToken.isEmpty()) {
         qCDebug(dcPcElectric()) << "Clearing local redacted RFID authorization state for charger"
                                << m_modbusTcpMaster->hostAddress().toString()
                                << "slave" << m_slaveId << "charging state" << chargingState()
@@ -747,13 +845,23 @@ void PceWallbox::resetRfidState()
     m_rfidInitializing = false;
     m_rfidModeConfirmed = false;
     m_rfidDecisionInProgress = false;
+    m_rfidEnrollmentActive = false;
+    m_rfidEnrollmentArming = false;
+    m_rfidEnrollmentDisarming = false;
+    m_rfidEnrollmentChangeInProgress = false;
     m_rfidSessionWriteInProgress = false;
     m_rfidSessionCommitAttempted = false;
     m_observedRfidToken.clear();
     m_pendingRfidToken.clear();
+    m_pendingRfidEnrollmentToken.clear();
     m_acceptedRfidToken.clear();
     m_acceptedRfidTokenCommitted = false;
     ++m_rfidLedGeneration;
+    ++m_rfidEnrollmentGeneration;
+    if (enrollmentWasActive)
+        emit rfidEnrollmentActiveChanged(false);
+    if (enrollmentChangeWasInProgress)
+        emit rfidEnrollmentChangeFinished(requestedEnrollmentActive, false);
 }
 
 bool PceWallbox::isSensitiveDataUnit(const QModbusDataUnit &unit) const
