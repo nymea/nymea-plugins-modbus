@@ -333,6 +333,209 @@ private slots:
         QCOMPARE(tagSpy.size(), 3);
     }
 
+    void rfidEnrollmentActivationRequiresLearnFeedback()
+    {
+        DelayedModbusServer server(10);
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+
+        RfidTestWallbox wallbox(QHostAddress::LocalHost, server.serverPort(), 1);
+        wallbox.setRfidEnabled(true);
+        QSignalSpy changedSpy(&wallbox, &PceWallbox::rfidEnrollmentActiveChanged);
+        QSignalSpy finishedSpy(&wallbox, &PceWallbox::rfidEnrollmentChangeFinished);
+        QVERIFY(wallbox.connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(wallbox.operational(), 5000);
+
+        server.failNextWrite(210);
+        QVERIFY(wallbox.setRfidEnrollmentActive(true));
+        QTRY_COMPARE_WITH_TIMEOUT(finishedSpy.size(), 1, 3000);
+        QCOMPARE(finishedSpy.at(0).at(0).toBool(), true);
+        QCOMPARE(finishedSpy.at(0).at(1).toBool(), false);
+        QVERIFY(!wallbox.rfidEnrollmentActive());
+        QCOMPARE(changedSpy.size(), 0);
+
+        QVERIFY(wallbox.setRfidEnrollmentActive(true));
+        QTRY_COMPARE_WITH_TIMEOUT(finishedSpy.size(), 2, 3000);
+        QCOMPARE(finishedSpy.at(1).at(1).toBool(), true);
+        QVERIFY(wallbox.rfidEnrollmentActive());
+        QCOMPARE(changedSpy.size(), 1);
+        QCOMPARE(changedSpy.first().first().toBool(), true);
+
+        QVector<quint16> ledValues;
+        for (const auto &request : server.requests()) {
+            if (request.function == 6 && request.address == 210)
+                ledValues.append(request.values.first());
+        }
+        QCOMPARE(ledValues, QVector<quint16>({3, 3}));
+        wallbox.disconnectDevice();
+    }
+
+    void rfidEnrollmentCancellationClearsPendingScan()
+    {
+        DelayedModbusServer server(10);
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+
+        RfidTestWallbox wallbox(QHostAddress::LocalHost, server.serverPort(), 1);
+        wallbox.setRfidEnabled(true);
+        QSignalSpy finishedSpy(&wallbox, &PceWallbox::rfidEnrollmentChangeFinished);
+        QVERIFY(wallbox.connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(wallbox.operational(), 5000);
+        wallbox.processRfidOperatingModeRegisterValues({1});
+        wallbox.m_rfidModeConfirmed = true;
+
+        QVERIFY(wallbox.setRfidEnrollmentActive(true));
+        QTRY_COMPARE_WITH_TIMEOUT(finishedSpy.size(), 1, 3000);
+        wallbox.processRfidRead(rfidToken(4, 0x9011));
+        QVERIFY(wallbox.hasPendingRfidTag());
+
+        QVERIFY(wallbox.setRfidEnrollmentActive(false));
+        QTRY_COMPARE_WITH_TIMEOUT(finishedSpy.size(), 2, 3000);
+        QCOMPARE(finishedSpy.at(1).at(0).toBool(), false);
+        QCOMPARE(finishedSpy.at(1).at(1).toBool(), true);
+        QVERIFY(!wallbox.rfidEnrollmentActive());
+        QVERIFY(!wallbox.hasPendingRfidTag());
+
+        QVector<quint16> ledValues;
+        for (const auto &request : server.requests()) {
+            if (request.function == 6 && request.address == 210)
+                ledValues.append(request.values.first());
+            QVERIFY(!(request.function == 16 && request.address == 217));
+        }
+        QCOMPARE(ledValues, QVector<quint16>({3, 0}));
+        wallbox.disconnectDevice();
+    }
+
+    void rfidEnrollmentArmingRaceNeverUsesSessionRegister()
+    {
+        DelayedModbusServer server(200);
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+
+        RfidTestWallbox wallbox(QHostAddress::LocalHost, server.serverPort(), 1);
+        wallbox.setRfidEnabled(true);
+        QSignalSpy enrollmentSpy(&wallbox, &PceWallbox::rfidEnrollmentChangeFinished);
+        QSignalSpy decisionSpy(&wallbox, &PceWallbox::rfidDecisionFinished);
+        QVERIFY(wallbox.connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(wallbox.operational(), 5000);
+        wallbox.processRfidOperatingModeRegisterValues({1});
+        wallbox.m_rfidModeConfirmed = true;
+
+        QVERIFY(wallbox.setRfidEnrollmentActive(true));
+        wallbox.processRfidRead(rfidToken(4, 0xc011));
+        QVERIFY(wallbox.hasPendingRfidTag());
+        QVERIFY(wallbox.submitRfidDecision(false));
+
+        QTRY_COMPARE_WITH_TIMEOUT(enrollmentSpy.size(), 1, 3000);
+        QTRY_COMPARE_WITH_TIMEOUT(decisionSpy.size(), 1, 3000);
+        QVERIFY(!wallbox.rfidEnrollmentActive());
+        QVERIFY(!wallbox.hasPendingRfidTag());
+        for (const auto &request : server.requests())
+            QVERIFY(!(request.function == 16 && request.address == 217));
+        wallbox.disconnectDevice();
+    }
+
+    void rfidEnrollmentDisarmingRaceNeverUsesSessionRegister()
+    {
+        DelayedModbusServer server(10);
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+
+        RfidTestWallbox wallbox(QHostAddress::LocalHost, server.serverPort(), 1);
+        wallbox.setRfidEnabled(true);
+        QSignalSpy enrollmentSpy(&wallbox, &PceWallbox::rfidEnrollmentChangeFinished);
+        QSignalSpy decisionSpy(&wallbox, &PceWallbox::rfidDecisionFinished);
+        QVERIFY(wallbox.connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(wallbox.operational(), 5000);
+        wallbox.processRfidOperatingModeRegisterValues({1});
+        wallbox.m_rfidModeConfirmed = true;
+
+        QVERIFY(wallbox.setRfidEnrollmentActive(true));
+        QTRY_COMPARE_WITH_TIMEOUT(enrollmentSpy.size(), 1, 3000);
+        QVERIFY(wallbox.setRfidEnrollmentActive(false));
+        wallbox.processRfidRead(rfidToken(7, 0xd011));
+        QVERIFY(wallbox.hasPendingRfidTag());
+        QVERIFY(wallbox.submitRfidDecision(false));
+
+        QTRY_COMPARE_WITH_TIMEOUT(enrollmentSpy.size(), 2, 3000);
+        QTRY_COMPARE_WITH_TIMEOUT(decisionSpy.size(), 1, 3000);
+        QCOMPARE(enrollmentSpy.size(), 2);
+        QVERIFY(!wallbox.hasPendingRfidTag());
+        for (const auto &request : server.requests())
+            QVERIFY(!(request.function == 16 && request.address == 217));
+        wallbox.disconnectDevice();
+    }
+
+    void rfidEnrollmentDecisionPreservesAuthorization_data()
+    {
+        QTest::addColumn<bool>("approved");
+        QTest::newRow("accepted") << true;
+        QTest::newRow("rejected") << false;
+    }
+
+    void rfidEnrollmentDecisionPreservesAuthorization()
+    {
+        QFETCH(bool, approved);
+
+        DelayedModbusServer server(10);
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+
+        RfidTestWallbox wallbox(QHostAddress::LocalHost, server.serverPort(), 1);
+        wallbox.setRfidEnabled(true);
+        QSignalSpy enrollmentSpy(&wallbox, &PceWallbox::rfidEnrollmentChangeFinished);
+        QSignalSpy decisionSpy(&wallbox, &PceWallbox::rfidDecisionFinished);
+        QVERIFY(wallbox.connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(wallbox.operational(), 5000);
+        wallbox.processRfidOperatingModeRegisterValues({1});
+        wallbox.m_rfidModeConfirmed = true;
+        setChargingState(wallbox, PceWallbox::ChargingStateA1);
+
+        const QVector<quint16> authorization = rfidToken(4, 0xa011);
+        wallbox.processRfidRead(authorization);
+        QVERIFY(wallbox.submitRfidDecision(true));
+        QTRY_COMPARE_WITH_TIMEOUT(decisionSpy.size(), 1, 3000);
+        QVERIFY(wallbox.hasRfidAuthorization());
+
+        wallbox.processRfidRead(QVector<quint16>(6, 0));
+        QVERIFY(wallbox.setRfidEnrollmentActive(true));
+        QTRY_COMPARE_WITH_TIMEOUT(enrollmentSpy.size(), 1, 3000);
+        wallbox.processRfidRead(rfidToken(7, 0xb011));
+        QVERIFY(wallbox.hasPendingRfidTag());
+        QVERIFY(wallbox.submitRfidDecision(approved));
+        QTRY_COMPARE_WITH_TIMEOUT(decisionSpy.size(), 2, 3000);
+
+        QCOMPARE(decisionSpy.at(1).at(0).toBool(), true);
+        QVERIFY(!wallbox.rfidEnrollmentActive());
+        QVERIFY(!wallbox.hasPendingRfidTag());
+        QVERIFY(wallbox.hasRfidAuthorization());
+        QCOMPARE(wallbox.m_acceptedRfidToken, authorization);
+        for (const auto &request : server.requests())
+            QVERIFY(!(request.function == 16 && request.address == 217));
+        wallbox.disconnectDevice();
+    }
+
+    void disconnectResetsRfidEnrollment()
+    {
+        DelayedModbusServer server(10);
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+
+        RfidTestWallbox wallbox(QHostAddress::LocalHost, server.serverPort(), 1);
+        wallbox.setRfidEnabled(true);
+        QSignalSpy changedSpy(&wallbox, &PceWallbox::rfidEnrollmentActiveChanged);
+        QSignalSpy finishedSpy(&wallbox, &PceWallbox::rfidEnrollmentChangeFinished);
+        QVERIFY(wallbox.connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(wallbox.operational(), 5000);
+        QVERIFY(wallbox.setRfidEnrollmentActive(true));
+        QTRY_COMPARE_WITH_TIMEOUT(finishedSpy.size(), 1, 3000);
+        QVERIFY(wallbox.rfidEnrollmentActive());
+
+        wallbox.disconnectDevice();
+        QTRY_VERIFY_WITH_TIMEOUT(!wallbox.reachable(), 3000);
+        QVERIFY(!wallbox.rfidEnrollmentActive());
+        QCOMPARE(changedSpy.last().first().toBool(), false);
+
+        QVERIFY(wallbox.setRfidEnrollmentActive(false));
+        QTRY_COMPARE_WITH_TIMEOUT(finishedSpy.size(), 2, 1000);
+        QCOMPARE(finishedSpy.last().at(1).toBool(), true);
+        QVERIFY(!wallbox.hasPendingRfidTag());
+    }
+
     void rfidRejectionWritesLedEdgeAndTimedReset()
     {
         DelayedModbusServer server(10);

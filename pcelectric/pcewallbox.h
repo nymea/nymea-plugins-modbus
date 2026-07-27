@@ -63,6 +63,8 @@ public:
     bool hasRfidAuthorization() const;
     bool canSubmitRfidDecision(bool approved) const;
     bool submitRfidDecision(bool approved);
+    bool rfidEnrollmentActive() const;
+    bool setRfidEnrollmentActive(bool active);
 
     QueuedModbusReply *setRfidOperatingModeAsync(RfidOperatingMode mode);
 
@@ -90,6 +92,8 @@ signals:
     void rfidInitializationFinished(bool success);
     void rfidTagDetected(const QString &code);
     void rfidDecisionFinished(bool success);
+    void rfidEnrollmentActiveChanged(bool active);
+    void rfidEnrollmentChangeFinished(bool active, bool success);
 
 private slots:
     void sendHeartbeat();
@@ -120,13 +124,20 @@ private:
     bool m_rfidInitializing = false;
     bool m_rfidModeConfirmed = false;
     bool m_rfidDecisionInProgress = false;
+    bool m_rfidEnrollmentActive = false;
+    bool m_rfidEnrollmentArming = false;
+    bool m_rfidEnrollmentDisarming = false;
+    bool m_rfidEnrollmentChangeInProgress = false;
+    bool m_requestedRfidEnrollmentActive = false;
     bool m_rfidSessionWriteInProgress = false;
     bool m_rfidSessionCommitAttempted = false;
     QVector<quint16> m_observedRfidToken;
     QVector<quint16> m_pendingRfidToken;
+    QVector<quint16> m_pendingRfidEnrollmentToken;
     QVector<quint16> m_acceptedRfidToken;
     bool m_acceptedRfidTokenCommitted = false;
     quint64 m_rfidLedGeneration = 0;
+    quint64 m_rfidEnrollmentGeneration = 0;
 
     void enqueueRequest(QueuedModbusReply *reply, bool updateRequest = false);
     void requestFinished(QueuedModbusReply *reply);
