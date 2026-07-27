@@ -13,6 +13,7 @@
 #include <QTcpSocket>
 #include <QTest>
 
+#include "pcelectriclogging.h"
 #include "pcewallbox.h"
 
 QStringList &nymeaLoggingCategories()
@@ -203,6 +204,37 @@ class TestPceWallbox : public QObject
     }
 
 private slots:
+    void loggingStateClassification()
+    {
+        QVERIFY(PcElectricLogging::isInstantaneousEnergyState("currentPower"));
+        QVERIFY(PcElectricLogging::isInstantaneousEnergyState("currentPowerPhaseA"));
+        QVERIFY(PcElectricLogging::isInstantaneousEnergyState("voltagePhaseC"));
+        QVERIFY(PcElectricLogging::isInstantaneousEnergyState("currentPhaseB"));
+        QVERIFY(!PcElectricLogging::isInstantaneousEnergyState("maxChargingCurrent"));
+        QVERIFY(!PcElectricLogging::isInstantaneousEnergyState("sessionEnergy"));
+
+        QVERIFY(PcElectricLogging::isCumulativeEnergyState("sessionEnergy"));
+        QVERIFY(PcElectricLogging::isCumulativeEnergyState("totalEnergyConsumed"));
+        QVERIFY(!PcElectricLogging::isCumulativeEnergyState("currentPower"));
+    }
+
+    void relevantMeasurementChangeUsesLastInfoValue()
+    {
+        QVERIFY(!PcElectricLogging::isRelevantMeasurementChange(100.0, 109.99));
+        QVERIFY(PcElectricLogging::isRelevantMeasurementChange(100.0, 110.0));
+        QVERIFY(PcElectricLogging::isRelevantMeasurementChange(100.0, 90.0));
+
+        // Suppressed samples do not move the baseline: their cumulative change
+        // is eventually relevant when compared with the last info value.
+        QVERIFY(!PcElectricLogging::isRelevantMeasurementChange(100.0, 105.0));
+        QVERIFY(PcElectricLogging::isRelevantMeasurementChange(100.0, 111.0));
+
+        QVERIFY(PcElectricLogging::isRelevantMeasurementChange(0.0, 0.1));
+        QVERIFY(PcElectricLogging::isRelevantMeasurementChange(0.1, 0.0));
+        QVERIFY(!PcElectricLogging::isRelevantMeasurementChange(0.0, 0.0));
+        QVERIFY(PcElectricLogging::isRelevantMeasurementChange(-100.0, -110.0));
+    }
+
     void unsentRequestStillFinishes()
     {
         PceWallbox wallbox(QHostAddress::LocalHost, 1, 1);

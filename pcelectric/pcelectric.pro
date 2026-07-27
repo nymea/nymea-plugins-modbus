@@ -6,6 +6,7 @@ MODBUS_TOOLS_CONFIG += VERBOSE
 include(../modbus.pri)
 
 HEADERS += \
+    pcelectriclogging.h \
     integrationpluginpcelectric.h \
     pcelectricdiscovery.h \
     pcewallbox.h
