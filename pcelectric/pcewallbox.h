@@ -105,8 +105,8 @@ protected:
 private:
     friend class TestPceWallbox;
 
-    static constexpr int RequestInterval = 300;
-    static constexpr int UpdateInterval = 1000;
+    static constexpr int RequestInterval = 100;
+    static constexpr int UpdateInterval = 500;
 
     QTimer m_timer;
     QTimer m_requestTimer;

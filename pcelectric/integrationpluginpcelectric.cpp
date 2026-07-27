@@ -24,6 +24,7 @@
 
 #include "integrationpluginpcelectric.h"
 #include "pcelectricdiscovery.h"
+#include "pcelectriclogging.h"
 #include "plugininfo.h"
 
 #include <hardware/electricity.h>
@@ -190,6 +191,7 @@ void IntegrationPluginPcElectric::setupThing(ThingSetupInfo *info)
 {
     Thing *thing = info->thing();
     qCInfo(dcPcElectric()) << "Setup thing" << thing << thing->params();
+    m_lastInfoMeasurementValues.remove(thing);
 
     const QString serialNumber = thing->paramValue(m_serialNumberParamTypes.value(thing->thingClassId())).toString();
     QString previousSerialNumber = m_configuredSerialNumbers.value(thing);
@@ -251,18 +253,41 @@ void IntegrationPluginPcElectric::setupThing(ThingSetupInfo *info)
         }
         clearAddressState(thing);
     } else {
-        connect(thing, &Thing::stateValueChanged, this, [thing](const StateTypeId &stateTypeId, const QVariant &value, const QVariant &minValue, const QVariant &maxValue, const QVariantList &possibleValues){
+        connect(thing, &Thing::stateValueChanged, this, [this, thing](const StateTypeId &stateTypeId, const QVariant &value, const QVariant &minValue, const QVariant &maxValue, const QVariantList &possibleValues){
             Q_UNUSED(minValue)
             Q_UNUSED(maxValue)
             Q_UNUSED(possibleValues)
 
-            QStringList blackList;
-            blackList << "temperature";
-
             StateType stateType = thing->thingClass().getStateType(stateTypeId);
-            if (!blackList.contains(stateType.name())) {
-                qCInfo(dcPcElectric()) << "State changed of" << thing->name() << "->" << stateType.name() << value;
+            const QString stateName = stateType.name();
+
+            if (stateName == QStringLiteral("temperature")
+                    || PcElectricLogging::isCumulativeEnergyState(stateName)) {
+                qCDebug(dcPcElectric()) << "State changed of" << thing->name()
+                                        << "->" << stateName << value;
+                return;
             }
+
+            if (PcElectricLogging::isInstantaneousEnergyState(stateName)) {
+                bool numericValue = false;
+                const double measurement = value.toDouble(&numericValue);
+                QHash<QString, double> &lastValues = m_lastInfoMeasurementValues[thing];
+                if (!numericValue || !lastValues.contains(stateName)
+                        || PcElectricLogging::isRelevantMeasurementChange(
+                            lastValues.value(stateName), measurement)) {
+                    qCInfo(dcPcElectric()) << "Relevant state change of" << thing->name()
+                                           << "->" << stateName << value;
+                    if (numericValue)
+                        lastValues.insert(stateName, measurement);
+                } else {
+                    qCDebug(dcPcElectric()) << "State changed of" << thing->name()
+                                            << "->" << stateName << value;
+                }
+                return;
+            }
+
+            qCInfo(dcPcElectric()) << "State changed of" << thing->name()
+                                   << "->" << stateName << value;
         });
     }
 
@@ -328,6 +353,7 @@ void IntegrationPluginPcElectric::thingRemoved(Thing *thing)
 
     if (m_chargingCurrentStateBuffer.contains(thing))
         m_chargingCurrentStateBuffer.remove(thing);
+    m_lastInfoMeasurementValues.remove(thing);
 
     clearAddressState(thing);
     m_configuredSerialNumbers.remove(thing);
@@ -345,17 +371,48 @@ void IntegrationPluginPcElectric::thingRemoved(Thing *thing)
 void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
 {
     Thing *thing = info->thing();
+    const ActionTypeId actionTypeId = info->action().actionTypeId();
+    QString actionName = QStringLiteral("unknown");
+    if (actionTypeId == ev11RefreshClientCertificateActionTypeId
+            || actionTypeId == ev11RfidRefreshClientCertificateActionTypeId
+            || actionTypeId == ev11NoMeterRefreshClientCertificateActionTypeId) {
+        actionName = QStringLiteral("refresh client certificate");
+    } else if (actionTypeId == ev11RfidRfidEnrollmentActiveActionTypeId) {
+        actionName = QStringLiteral("set RFID enrollment");
+    } else if (actionTypeId == ev11RfidTagAcceptedActionTypeId) {
+        actionName = QStringLiteral("accept RFID tag");
+    } else if (actionTypeId == ev11RfidTagRejectedActionTypeId) {
+        actionName = QStringLiteral("deny RFID tag");
+    } else if (actionTypeId == ev11PowerActionTypeId
+               || actionTypeId == ev11RfidPowerActionTypeId
+               || actionTypeId == ev11NoMeterPowerActionTypeId) {
+        actionName = QStringLiteral("set charging enabled");
+    } else if (actionTypeId == ev11MaxChargingCurrentActionTypeId
+               || actionTypeId == ev11RfidMaxChargingCurrentActionTypeId
+               || actionTypeId == ev11NoMeterMaxChargingCurrentActionTypeId) {
+        actionName = QStringLiteral("set maximum charging current");
+    } else if (actionTypeId == ev11DesiredPhaseCountActionTypeId
+               || actionTypeId == ev11RfidDesiredPhaseCountActionTypeId
+               || actionTypeId == ev11NoMeterDesiredPhaseCountActionTypeId) {
+        actionName = QStringLiteral("set desired phase count");
+    }
+    const char *trigger = info->action().triggeredBy() == Action::TriggeredByUser
+            ? "user" : "automation";
+    qCInfo(dcPcElectric()) << "Action requested for" << thing->name() << ":"
+                           << actionName << info->action().params()
+                           << "triggered by" << trigger;
 
-    if (info->action().actionTypeId() == ev11RefreshClientCertificateActionTypeId
-        || info->action().actionTypeId() == ev11RfidRefreshClientCertificateActionTypeId
-        || info->action().actionTypeId() == ev11NoMeterRefreshClientCertificateActionTypeId) {
-        qCInfo(dcPcElectric()) << "Refreshing the PCE TLS client certificate.";
+    if (actionTypeId == ev11RefreshClientCertificateActionTypeId
+        || actionTypeId == ev11RfidRefreshClientCertificateActionTypeId
+        || actionTypeId == ev11NoMeterRefreshClientCertificateActionTypeId) {
         QPointer<ThingActionInfo> guardedInfo(info);
-        ensureClientIdentityAsync([this, guardedInfo](bool success, const QString &errorString) {
+        const QString thingName = thing->name();
+        ensureClientIdentityAsync([this, guardedInfo, thingName](bool success, const QString &errorString) {
             if (!guardedInfo)
                 return;
             if (!success) {
-                qCWarning(dcPcElectric()) << "Could not refresh the PCE TLS client certificate:" << errorString;
+                qCWarning(dcPcElectric()) << "Action refresh client certificate failed for"
+                                          << thingName << ":" << errorString;
                 guardedInfo->finish(Thing::ThingErrorHardwareFailure);
                 return;
             }
@@ -373,8 +430,16 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
                 configuredConnection->modbusTcpMaster()->reconnectDevice();
             }
 
-            guardedInfo->finish(connectionsConfigured ? Thing::ThingErrorNoError
-                                                       : Thing::ThingErrorHardwareFailure);
+            if (connectionsConfigured) {
+                qCInfo(dcPcElectric()) << "Action refresh client certificate succeeded for"
+                                       << thingName;
+                guardedInfo->finish(Thing::ThingErrorNoError);
+            } else {
+                qCWarning(dcPcElectric()) << "Action refresh client certificate failed for"
+                                          << thingName
+                                          << "because not all TLS connections could be configured";
+                guardedInfo->finish(Thing::ThingErrorHardwareFailure);
+            }
         }, true);
         return;
     }
@@ -387,22 +452,39 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
         if (!connection) {
             if (!active)
                 thing->setStateValue("rfidEnrollmentActive", false);
-            info->finish(active ? Thing::ThingErrorHardwareNotAvailable
-                                : Thing::ThingErrorNoError);
+            if (active) {
+                qCWarning(dcPcElectric()) << "Action start RFID enrollment failed for"
+                                          << thing->name() << "because no connection is available";
+                info->finish(Thing::ThingErrorHardwareNotAvailable);
+            } else {
+                qCInfo(dcPcElectric()) << "Action stop RFID enrollment completed for"
+                                       << thing->name() << "while disconnected";
+                info->finish(Thing::ThingErrorNoError);
+            }
             return;
         }
 
         const auto enrollmentConnection = std::make_shared<QMetaObject::Connection>();
         *enrollmentConnection = connect(
                     connection, &PceWallbox::rfidEnrollmentChangeFinished, info,
-                    [info, enrollmentConnection, active](bool requestedActive, bool success) {
+                    [info, enrollmentConnection, active, thing](bool requestedActive, bool success) {
             if (requestedActive != active)
                 return;
             QObject::disconnect(*enrollmentConnection);
+            if (success) {
+                qCInfo(dcPcElectric()) << "Action" << (active ? "start" : "stop")
+                                       << "RFID enrollment succeeded for" << thing->name();
+            } else {
+                qCWarning(dcPcElectric()) << "Action" << (active ? "start" : "stop")
+                                          << "RFID enrollment failed for" << thing->name();
+            }
             info->finish(success ? Thing::ThingErrorNoError : Thing::ThingErrorHardwareFailure);
         });
         if (!connection->setRfidEnrollmentActive(active)) {
             QObject::disconnect(*enrollmentConnection);
+            qCWarning(dcPcElectric()) << "Action" << (active ? "start" : "stop")
+                                      << "RFID enrollment rejected for" << thing->name()
+                                      << "because another RFID operation is in progress";
             info->finish(Thing::ThingErrorHardwareNotAvailable);
         }
         return;
@@ -420,17 +502,33 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
         // operation. It can deny a pending scan or time out a held authorization.
         const bool approved = info->action().actionTypeId() == ev11RfidTagAcceptedActionTypeId;
         if (!connection->canSubmitRfidDecision(approved)) {
+            qCWarning(dcPcElectric()) << "Action RFID tag"
+                                      << (approved ? "acceptance" : "denial")
+                                      << "rejected for" << thing->name()
+                                      << "because no matching pending RFID authorization exists";
             info->finish(Thing::ThingErrorHardwareNotAvailable);
             return;
         }
         const auto decisionConnection = std::make_shared<QMetaObject::Connection>();
         *decisionConnection = connect(connection, &PceWallbox::rfidDecisionFinished, info,
-                                      [info, decisionConnection](bool success) {
+                                      [info, decisionConnection, approved, thing](bool success) {
             QObject::disconnect(*decisionConnection);
+            if (success) {
+                qCInfo(dcPcElectric()) << "Action RFID tag"
+                                       << (approved ? "acceptance" : "denial")
+                                       << "succeeded for" << thing->name();
+            } else {
+                qCWarning(dcPcElectric()) << "Action RFID tag"
+                                          << (approved ? "acceptance" : "denial")
+                                          << "failed for" << thing->name();
+            }
             info->finish(success ? Thing::ThingErrorNoError : Thing::ThingErrorHardwareFailure);
         });
         if (!connection->submitRfidDecision(approved)) {
             QObject::disconnect(*decisionConnection);
+            qCWarning(dcPcElectric()) << "Action RFID tag"
+                                      << (approved ? "acceptance" : "denial")
+                                      << "could not be started for" << thing->name();
             info->finish(Thing::ThingErrorHardwareNotAvailable);
         }
 
@@ -447,9 +545,6 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
             power = info->action().paramValue(ev11NoMeterPowerActionPowerParamTypeId).toBool();
         }
 
-        if (info->action().triggeredBy() == Action::TriggeredByUser)
-            qCInfo(dcPcElectric()) << "User: Set charging enabled of" << thing->name() << "to" << power;
-
         qCDebug(dcPcElectric()) << "Setting charging enabled to" << power;
         // Update buffer
         m_chargingCurrentStateBuffer[thing].power = power;
@@ -465,6 +560,8 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
             }
 
             qCDebug(dcPcElectric()) << "Successfully set power state to" << power << "(" << registerValue << ")";
+            qCInfo(dcPcElectric()) << "Action set charging enabled succeeded for"
+                                   << thing->name() << "with value" << power;
             thing->setStateValue("power", power);
             info->finish(Thing::ThingErrorNoError);
         });
@@ -480,9 +577,6 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
         } else if (info->action().actionTypeId() == ev11NoMeterMaxChargingCurrentActionTypeId) {
             desiredChargingCurrent = info->action().paramValue(ev11NoMeterMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toDouble();
         }
-
-        if (info->action().triggeredBy() == Action::TriggeredByUser)
-            qCInfo(dcPcElectric()) << "User: Set max charging current of" << thing->name() << "to" << desiredChargingCurrent << "A";
 
         qCDebug(dcPcElectric()) << "Setting max charging current to" << desiredChargingCurrent << "A";
 
@@ -500,6 +594,9 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
             }
 
             qCDebug(dcPcElectric()) << "Successfully set charging current (" << desiredChargingCurrent << ")";
+            qCInfo(dcPcElectric()) << "Action set maximum charging current succeeded for"
+                                   << thing->name() << "with value"
+                                   << desiredChargingCurrent << "A";
             thing->setStateValue("maxChargingCurrent", desiredChargingCurrent);
             info->finish(Thing::ThingErrorNoError);
         });
@@ -518,9 +615,6 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
             desiredPhaseCount = info->action().paramValue(ev11NoMeterDesiredPhaseCountActionDesiredPhaseCountParamTypeId).toUInt();
         }
 
-        if (info->action().triggeredBy() == Action::TriggeredByUser)
-            qCInfo(dcPcElectric()) << "User: Set desried phase count of" << thing->name() << "to" << desiredPhaseCount;
-
         qCDebug(dcPcElectric()) << "Setting desried phase count to" << desiredPhaseCount;
 
         // Update buffer
@@ -537,6 +631,8 @@ void IntegrationPluginPcElectric::executeAction(ThingActionInfo *info)
             }
 
             qCDebug(dcPcElectric()) << "Successfully set phase count (" << desiredPhaseCount << ")";
+            qCInfo(dcPcElectric()) << "Action set desired phase count succeeded for"
+                                   << thing->name() << "with value" << desiredPhaseCount;
             thing->setStateValue("desiredPhaseCount", desiredPhaseCount);
             info->finish(Thing::ThingErrorNoError);
         });
@@ -728,7 +824,7 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
     });
 
     connect(connection, &PceWallbox::rfidTagDetected, thing, [thing](const QString &code) {
-        qCInfo(dcPcElectric()) << "RFID tag detected" << QString(code.length(), '*');
+        qCInfo(dcPcElectric()) << "Redacted RFID tag detected for" << thing->name();
         thing->emitEvent(ev11RfidTagDetectedEventTypeId, {Param(ev11RfidTagDetectedEventCodeParamTypeId, code)});
     });
     connect(connection, &PceWallbox::rfidEnrollmentActiveChanged, thing,
@@ -1022,7 +1118,8 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
             });
         } else if (paramTypeId == ev11RfidSettingsRfidOperatingModeParamTypeId) {
             QString mode = value.toString();
-            qCDebug(dcPcElectric()) << "Setting RFID operating mode to" << mode;
+            qCInfo(dcPcElectric()) << "RFID operating mode setting requested for"
+                                   << thing->name() << "with value" << mode;
 
             EV11ModbusTcpConnection::RfidOperatingMode modeValue;
             if (!rfidOperatingModeFromSettingValue(mode, &modeValue)) {
@@ -1031,13 +1128,15 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
             }
 
             QueuedModbusReply *reply = connection->setRfidOperatingModeAsync(modeValue);
-            connect(reply, &QueuedModbusReply::finished, thing, [reply, modeValue]() {
+            connect(reply, &QueuedModbusReply::finished, thing, [reply, modeValue, thing]() {
                 if (reply->error() != QModbusDevice::NoError) {
                     qCWarning(dcPcElectric()) << "Could not set RFID operating mode to" << modeValue << reply->errorString();
                     return;
                 }
 
                 qCDebug(dcPcElectric()) << "Successfully set RFID operating mode to" << modeValue;
+                qCInfo(dcPcElectric()) << "RFID operating mode setting succeeded for"
+                                       << thing->name() << "with value" << modeValue;
             });
         }
     });
