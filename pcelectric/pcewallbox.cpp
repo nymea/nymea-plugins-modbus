@@ -740,14 +740,20 @@ void PceWallbox::processRfidRead(const QVector<quint16> &values)
     if (!m_rfidModeConfirmed || rfidOperatingMode() != RfidOperatingModeRemote)
         return;
 
-    QString code;
-    if (!parseRfidToken(values, &code))
-        return;
-
-    if (values == m_observedRfidToken)
-        return;
-
+    const bool newSnapshot = values != m_observedRfidToken;
     m_observedRfidToken = values;
+
+    QString code;
+    const bool validToken = parseRfidToken(values, &code);
+
+    // RFID_READ is a latch. Acknowledge every non-null snapshot independently
+    // from any upper-layer authorization decision so a rejected or ignored tag
+    // cannot block the reader. The complete zero block must be queued before a
+    // valid tag is announced.
+    clearRfidRead();
+    if (!validToken || !newSnapshot)
+        return;
+
     QVector<quint16> &pendingToken = (m_rfidEnrollmentActive || m_rfidEnrollmentArming
                                       || m_rfidEnrollmentDisarming)
             ? m_pendingRfidEnrollmentToken : m_pendingRfidToken;
@@ -758,6 +764,37 @@ void PceWallbox::processRfidRead(const QVector<quint16> &values)
     }
     pendingToken = values;
     emit rfidTagDetected(code);
+}
+
+void PceWallbox::clearRfidRead()
+{
+    if (m_rfidReadClearInProgress)
+        return;
+
+    m_rfidReadClearInProgress = true;
+    const quint64 generation = ++m_rfidReadClearGeneration;
+    QueuedModbusReply *reply = new QueuedModbusReply(
+        QueuedModbusReply::RequestTypeWrite,
+        setRfidReadDataUnit(QVector<quint16>(6, 0)), this);
+    connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
+    connect(reply, &QueuedModbusReply::finished, this, [this, reply, generation]() {
+        if (generation != m_rfidReadClearGeneration)
+            return;
+        m_rfidReadClearInProgress = false;
+        if (reply->error() == QModbusDevice::NoError) {
+            m_observedRfidToken.clear();
+            qCDebug(dcPcElectric()) << "Acknowledged redacted RFID read latch for charger"
+                                    << m_modbusTcpMaster->hostAddress().toString()
+                                    << "slave" << m_slaveId;
+        } else {
+            qCWarning(dcPcElectric()) << "Could not acknowledge RFID read latch for charger"
+                                      << m_modbusTcpMaster->hostAddress().toString()
+                                      << "slave" << m_slaveId
+                                      << reply->errorString()
+                                      << "and will retry during a later update";
+        }
+    });
+    enqueueRequest(reply);
 }
 
 bool PceWallbox::isVehiclePluggedIn() const
@@ -931,6 +968,7 @@ void PceWallbox::resetRfidState()
     m_rfidEnrollmentChangeInProgress = false;
     m_rfidSessionWriteInProgress = false;
     m_rfidSessionCommitAttempted = false;
+    m_rfidReadClearInProgress = false;
     m_observedRfidToken.clear();
     m_pendingRfidToken.clear();
     m_pendingRfidEnrollmentToken.clear();
@@ -938,6 +976,7 @@ void PceWallbox::resetRfidState()
     m_acceptedRfidTokenCommitted = false;
     ++m_rfidLedGeneration;
     ++m_rfidEnrollmentGeneration;
+    ++m_rfidReadClearGeneration;
     if (enrollmentWasActive)
         emit rfidEnrollmentActiveChanged(false);
     if (enrollmentChangeWasInProgress)

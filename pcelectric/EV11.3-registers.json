@@ -652,7 +652,7 @@
             "size": 6,
             "type": "raw",
             "registerType": "holdingRegister",
-            "description": "RFID opaque read buffer",
+            "description": "TLS-only RFID read latch. A detected token remains stable for up to 60 seconds and may only be acknowledged by writing one complete six-register zero block.",
             "access": "RW",
             "sensitive": true
         },
@@ -662,7 +662,7 @@
             "size": 6,
             "type": "raw",
             "registerType": "holdingRegister",
-            "description": "RFID session buffer",
+            "description": "TLS-only atomic RFID authorization marker. Writes must contain one complete valid token or one complete six-register zero block.",
             "access": "RW",
             "sensitive": true
         }

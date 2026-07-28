@@ -131,6 +131,7 @@ private:
     bool m_requestedRfidEnrollmentActive = false;
     bool m_rfidSessionWriteInProgress = false;
     bool m_rfidSessionCommitAttempted = false;
+    bool m_rfidReadClearInProgress = false;
     QVector<quint16> m_observedRfidToken;
     QVector<quint16> m_pendingRfidToken;
     QVector<quint16> m_pendingRfidEnrollmentToken;
@@ -138,11 +139,13 @@ private:
     bool m_acceptedRfidTokenCommitted = false;
     quint64 m_rfidLedGeneration = 0;
     quint64 m_rfidEnrollmentGeneration = 0;
+    quint64 m_rfidReadClearGeneration = 0;
 
     void enqueueRequest(QueuedModbusReply *reply, bool updateRequest = false);
     void requestFinished(QueuedModbusReply *reply);
     void finishUpdateRound();
     void processRfidRead(const QVector<quint16> &values);
+    void clearRfidRead();
     void synchronizeRfidAuthorization();
     bool isVehiclePluggedIn() const;
     void writeRfidSession(const QVector<quint16> &token, const char *operation,

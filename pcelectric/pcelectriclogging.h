@@ -34,7 +34,7 @@ inline bool isRelevantMeasurementChange(double lastInfoValue, double newValue)
     if (lastInfoValue == 0.0 || newValue == 0.0)
         return true;
 
-    return std::abs(newValue - lastInfoValue) >= std::abs(lastInfoValue) * 0.1;
+    return std::abs(newValue - lastInfoValue) >= std::abs(lastInfoValue) * 0.2;
 }
 
 }
