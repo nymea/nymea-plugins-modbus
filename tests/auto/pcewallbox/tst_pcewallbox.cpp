@@ -270,10 +270,14 @@ private slots:
         QCOMPARE(registers.value("rfidRead").value("size").toInt(), 6);
         QCOMPARE(registers.value("rfidRead").value("access").toString(), QStringLiteral("RW"));
         QVERIFY(registers.value("rfidRead").value("sensitive").toBool());
+        QVERIFY(registers.value("rfidRead").value("description").toString()
+                    .contains(QStringLiteral("zero block"), Qt::CaseInsensitive));
         QCOMPARE(registers.value("rfidSession").value("address").toInt(), 217);
         QCOMPARE(registers.value("rfidSession").value("size").toInt(), 6);
         QCOMPARE(registers.value("rfidSession").value("access").toString(), QStringLiteral("RW"));
         QVERIFY(registers.value("rfidSession").value("sensitive").toBool());
+        QVERIFY(registers.value("rfidSession").value("description").toString()
+                    .contains(QStringLiteral("atomic"), Qt::CaseInsensitive));
         QVERIFY(!registers.contains("rfidStatus"));
         QVERIFY(!registers.contains("rfidResult"));
         QVERIFY(!registers.contains("rfidLearn"));
@@ -363,6 +367,135 @@ private slots:
         wallbox.processRfidOperatingModeRegisterValues({2});
         wallbox.processRfidRead(rfidToken(10, 0x2011));
         QCOMPARE(tagSpy.size(), 3);
+    }
+
+    void rfidReadIsAcknowledgedIndependentlyAndCanBeReadAgain()
+    {
+        DelayedModbusServer server(10);
+        server.setReadValue(209, 1);
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+
+        RfidTestWallbox wallbox(QHostAddress::LocalHost, server.serverPort(), 1);
+        wallbox.setRfidEnabled(true);
+        QSignalSpy tagSpy(&wallbox, &PceWallbox::rfidTagDetected);
+        QVERIFY(wallbox.connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(wallbox.operational(), 5000);
+        wallbox.processRfidOperatingModeRegisterValues({1});
+        wallbox.m_rfidModeConfirmed = true;
+
+        const auto clearWrites = [&server]() {
+            QList<DelayedModbusServer::Request> writes;
+            for (const DelayedModbusServer::Request &request : server.requests()) {
+                if (request.function == 16 && request.address == 211)
+                    writes.append(request);
+            }
+            return writes;
+        };
+
+        const QVector<quint16> first = rfidToken(4, 0x1011);
+        wallbox.processRfidRead(first);
+        QCOMPARE(tagSpy.size(), 1);
+        QCOMPARE(tagSpy.at(0).at(0).toString(), QStringLiteral("10112233"));
+        QTRY_COMPARE_WITH_TIMEOUT(clearWrites().size(), 1, 3000);
+        QCOMPARE(clearWrites().at(0).valueOrQuantity, quint16(6));
+        QCOMPARE(clearWrites().at(0).values, QVector<quint16>(6, 0));
+        QTRY_VERIFY_WITH_TIMEOUT(!wallbox.m_rfidReadClearInProgress, 3000);
+        QVERIFY(!wallbox.hasRfidAuthorization());
+
+        const QVector<quint16> second = rfidToken(7, 0x2011);
+        wallbox.processRfidRead(second);
+        QTRY_COMPARE_WITH_TIMEOUT(tagSpy.size(), 2, 1000);
+        QTRY_COMPARE_WITH_TIMEOUT(clearWrites().size(), 2, 3000);
+        QTRY_VERIFY_WITH_TIMEOUT(!wallbox.m_rfidReadClearInProgress, 3000);
+
+        wallbox.processRfidRead(second);
+        QTRY_COMPARE_WITH_TIMEOUT(tagSpy.size(), 3, 1000);
+        QTRY_COMPARE_WITH_TIMEOUT(clearWrites().size(), 3, 3000);
+        for (const DelayedModbusServer::Request &request : clearWrites()) {
+            QCOMPARE(request.valueOrQuantity, quint16(6));
+            QCOMPARE(request.values, QVector<quint16>(6, 0));
+        }
+
+        wallbox.disconnectDevice();
+    }
+
+    void failedRfidReadAcknowledgementRetriesWithoutDuplicateDetection()
+    {
+        DelayedModbusServer server(10);
+        server.setReadValue(209, 1);
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+
+        RfidTestWallbox wallbox(QHostAddress::LocalHost, server.serverPort(), 1);
+        wallbox.setRfidEnabled(true);
+        QSignalSpy tagSpy(&wallbox, &PceWallbox::rfidTagDetected);
+        QVERIFY(wallbox.connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(wallbox.operational(), 5000);
+        wallbox.processRfidOperatingModeRegisterValues({1});
+        wallbox.m_rfidModeConfirmed = true;
+
+        const auto clearWriteCount = [&server]() {
+            int count = 0;
+            for (const DelayedModbusServer::Request &request : server.requests())
+                count += request.function == 16 && request.address == 211;
+            return count;
+        };
+
+        const QVector<quint16> token = rfidToken(10, 0x3011);
+        server.failNextWrite(211);
+        wallbox.processRfidRead(token);
+        QCOMPARE(tagSpy.size(), 1);
+        QTRY_COMPARE_WITH_TIMEOUT(clearWriteCount(), 1, 3000);
+        QTRY_VERIFY_WITH_TIMEOUT(!wallbox.m_rfidReadClearInProgress, 3000);
+
+        wallbox.processRfidRead(token);
+        QCOMPARE(tagSpy.size(), 1);
+        QTRY_COMPARE_WITH_TIMEOUT(clearWriteCount(), 2, 3000);
+        QTRY_VERIFY_WITH_TIMEOUT(!wallbox.m_rfidReadClearInProgress, 3000);
+
+        const QList<DelayedModbusServer::Request> requests = server.requests();
+        int checkedWrites = 0;
+        for (const DelayedModbusServer::Request &request : requests) {
+            if (request.function != 16 || request.address != 211)
+                continue;
+            QCOMPARE(request.valueOrQuantity, quint16(6));
+            QCOMPARE(request.values, QVector<quint16>(6, 0));
+            ++checkedWrites;
+        }
+        QCOMPARE(checkedWrites, 2);
+        wallbox.disconnectDevice();
+    }
+
+    void malformedRfidReadIsAcknowledgedWithoutDetection()
+    {
+        DelayedModbusServer server(10);
+        server.setReadValue(209, 1);
+        QVERIFY(server.listen(QHostAddress::LocalHost));
+
+        RfidTestWallbox wallbox(QHostAddress::LocalHost, server.serverPort(), 1);
+        wallbox.setRfidEnabled(true);
+        QSignalSpy tagSpy(&wallbox, &PceWallbox::rfidTagDetected);
+        QVERIFY(wallbox.connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(wallbox.operational(), 5000);
+        wallbox.processRfidOperatingModeRegisterValues({1});
+        wallbox.m_rfidModeConfirmed = true;
+
+        QVector<quint16> malformed = rfidToken(4, 0x4011);
+        malformed[0] = 0x0204;
+        wallbox.processRfidRead(malformed);
+        QCOMPARE(tagSpy.size(), 0);
+
+        QTRY_VERIFY_WITH_TIMEOUT([&server]() {
+            for (const DelayedModbusServer::Request &request : server.requests()) {
+                if (request.function == 16 && request.address == 211) {
+                    return request.valueOrQuantity == 6
+                            && request.values == QVector<quint16>(6, 0);
+                }
+            }
+            return false;
+        }(), 3000);
+        QTRY_VERIFY_WITH_TIMEOUT(!wallbox.m_rfidReadClearInProgress, 3000);
+        QCOMPARE(tagSpy.size(), 0);
+        wallbox.disconnectDevice();
     }
 
     void rfidEnrollmentActivationRequiresLearnFeedback()
@@ -598,15 +731,30 @@ private slots:
         QCOMPARE(decisionSpy.first().first().toBool(), true);
         QVERIFY(!wallbox.hasPendingRfidTag());
         QTRY_COMPARE_WITH_TIMEOUT(ledWrites().size(), 2, 3000);
+        QTRY_VERIFY_WITH_TIMEOUT(ledWrites().last().repliedAt > 0, 3000);
         QCOMPARE(ledWrites().at(0).values, QVector<quint16>({1}));
         QCOMPARE(ledWrites().at(1).values, QVector<quint16>({0}));
 
-        for (const DelayedModbusServer::Request &request : server.requests()) {
-            QVERIFY(!(request.function == 16 && request.address == 211));
+        int acknowledgementIndex = -1;
+        int rejectedLedIndex = -1;
+        const QList<DelayedModbusServer::Request> requests = server.requests();
+        for (int index = 0; index < requests.size(); ++index) {
+            const DelayedModbusServer::Request &request = requests.at(index);
+            if (request.function == 16 && request.address == 211) {
+                acknowledgementIndex = index;
+                QCOMPARE(request.valueOrQuantity, quint16(6));
+                QCOMPARE(request.values, QVector<quint16>(6, 0));
+            }
             if (request.function == 16 && request.address == 217)
                 QCOMPARE(request.values, QVector<quint16>(6, 0));
+            if (request.function == 6 && request.address == 210
+                    && request.values == QVector<quint16>({1})) {
+                rejectedLedIndex = index;
+            }
             QVERIFY(!(request.function == 6 && request.address == 200));
         }
+        QVERIFY(acknowledgementIndex >= 0);
+        QVERIFY(rejectedLedIndex > acknowledgementIndex);
 
         wallbox.disconnectDevice();
     }
@@ -631,12 +779,17 @@ private slots:
         QTRY_COMPARE_WITH_TIMEOUT(decisionSpy.size(), 1, 4000);
         QCOMPARE(decisionSpy.first().first().toBool(), true);
 
+        int acknowledgementIndex = -1;
         int sessionIndex = -1;
         int acceptedLedIndex = -1;
         const QList<DelayedModbusServer::Request> requests = server.requests();
         for (int index = 0; index < requests.size(); ++index) {
             const auto &request = requests.at(index);
-            if (request.function == 16 && request.address == 217) {
+            if (request.function == 16 && request.address == 211) {
+                acknowledgementIndex = index;
+                QCOMPARE(request.valueOrQuantity, quint16(6));
+                QCOMPARE(request.values, QVector<quint16>(6, 0));
+            } else if (request.function == 16 && request.address == 217) {
                 sessionIndex = index;
                 QCOMPARE(request.values, token);
                 QCOMPARE(request.valueOrQuantity, quint16(6));
@@ -644,15 +797,16 @@ private slots:
                        && request.values == QVector<quint16>({2})) {
                 acceptedLedIndex = index;
             }
-            QVERIFY(!(request.function == 16 && request.address == 211));
             QVERIFY(!(request.function == 6 && request.address == 200));
         }
-        QVERIFY(sessionIndex >= 0);
+        QVERIFY(acknowledgementIndex >= 0);
+        QVERIFY(sessionIndex > acknowledgementIndex);
         QVERIFY(acceptedLedIndex > sessionIndex);
         QTRY_VERIFY_WITH_TIMEOUT([&server]() {
             for (const auto &request : server.requests()) {
                 if (request.function == 6 && request.address == 210
-                        && request.values == QVector<quint16>({0}))
+                        && request.values == QVector<quint16>({0})
+                        && request.repliedAt > 0)
                     return true;
             }
             return false;
@@ -749,7 +903,6 @@ private slots:
                 QCOMPARE(request.values, token);
                 QCOMPARE(request.valueOrQuantity, quint16(6));
             }
-            QVERIFY(!(request.function == 16 && request.address == 211));
             QVERIFY(!(request.function == 6 && request.address == 200));
         }
         QCOMPARE(sessionWrites, 1);
@@ -994,18 +1147,32 @@ private slots:
         QVERIFY(wallbox.connectDevice());
         QTRY_VERIFY_WITH_TIMEOUT(wallbox.operational(), 5000);
         QTRY_COMPARE_WITH_TIMEOUT(tagSpy.size(), 1, 6000);
+        QTRY_VERIFY_WITH_TIMEOUT([&server]() {
+            for (const DelayedModbusServer::Request &request : server.requests()) {
+                if (request.function == 16 && request.address == 211)
+                    return true;
+            }
+            return false;
+        }(), 3000);
 
         bool modeRead = false;
         bool tokenRead = false;
+        bool tokenAcknowledged = false;
         for (const auto &request : server.requests()) {
             modeRead |= request.function == 3 && request.address == 209
                     && request.valueOrQuantity == 1;
             tokenRead |= request.function == 3 && request.address == 211
                     && request.valueOrQuantity == 6;
-            QVERIFY(!(request.function == 16 && request.address == 211));
+            if (request.function == 16 && request.address == 211) {
+                tokenAcknowledged = true;
+                QCOMPARE(request.valueOrQuantity, quint16(6));
+                QCOMPARE(request.values, QVector<quint16>(6, 0));
+            }
         }
         QVERIFY(modeRead);
         QVERIFY(tokenRead);
+        QVERIFY(tokenAcknowledged);
+        QTRY_VERIFY_WITH_TIMEOUT(!wallbox.m_rfidReadClearInProgress, 3000);
         wallbox.disconnectDevice();
     }
 
