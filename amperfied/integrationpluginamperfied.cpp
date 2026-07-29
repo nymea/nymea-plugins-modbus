@@ -42,10 +42,27 @@ IntegrationPluginAmperfied::ChargingCurrentState &IntegrationPluginAmperfied::ch
         ChargingCurrentState state;
         state.power = thing->stateValue("power").toBool();
         state.maxChargingCurrent = static_cast<quint16>(qRound(thing->stateValue("maxChargingCurrent").toDouble() * 10));
+        quint16 phaseCount = static_cast<quint16>(thing->stateValue("phaseCount").toUInt());
+        if (phaseCount == 1 || phaseCount == 3)
+            state.phaseCount = phaseCount;
         m_chargingCurrentStates.insert(thing, state);
     }
 
     return m_chargingCurrentStates[thing];
+}
+
+quint16 IntegrationPluginAmperfied::stablePhaseCount(Thing *thing, quint16 phaseSwitchControl)
+{
+    ChargingCurrentState &state = chargingCurrentState(thing);
+
+    // The phase count describes the configured topology. Do not derive it from
+    // instantaneous currents: startup and shutdown residuals can briefly make a
+    // three-phase charger look single-phase. Retain the last valid configuration
+    // and use the conservative three-phase default until one is available.
+    if (phaseSwitchControl == 1 || phaseSwitchControl == 3)
+        state.phaseCount = phaseSwitchControl;
+
+    return state.phaseCount;
 }
 
 void IntegrationPluginAmperfied::discoverThings(ThingDiscoveryInfo *info)
@@ -397,36 +414,30 @@ void IntegrationPluginAmperfied::setupRtuConnection(ThingSetupInfo *info)
         case AmperfiedModbusRtuConnection::ChargingStateA1:
         case AmperfiedModbusRtuConnection::ChargingStateA2:
             thing->setStateValue(energyControlPluggedInStateTypeId, false);
+            thing->setStateValue(energyControlChargingStateTypeId, false);
             break;
         case AmperfiedModbusRtuConnection::ChargingStateB1:
         case AmperfiedModbusRtuConnection::ChargingStateB2:
+            thing->setStateValue(energyControlPluggedInStateTypeId, true);
+            thing->setStateValue(energyControlChargingStateTypeId, false);
+            break;
         case AmperfiedModbusRtuConnection::ChargingStateC1:
         case AmperfiedModbusRtuConnection::ChargingStateC2:
-            thing->setStateValue(energyControlPluggedInStateTypeId, true);
-            break;
         case AmperfiedModbusRtuConnection::ChargingStateDerating:
+            thing->setStateValue(energyControlPluggedInStateTypeId, true);
+            thing->setStateValue(energyControlChargingStateTypeId, true);
+            break;
         case AmperfiedModbusRtuConnection::ChargingStateE:
         case AmperfiedModbusRtuConnection::ChargingStateError:
         case AmperfiedModbusRtuConnection::ChargingStateF:
             qCWarning(dcAmperfied()) << "Erraneous charging state:" << connection->chargingState();
             thing->setStateValue(energyControlPluggedInStateTypeId, false);
+            thing->setStateValue(energyControlChargingStateTypeId, false);
             break;
         }
 
-        int phaseCount = 0;
-        if (connection->currentL1() > 1) {
-            phaseCount++;
-        }
-        if (connection->currentL2() > 1) {
-            phaseCount++;
-        }
-        if (connection->currentL3() > 1) {
-            phaseCount++;
-        }
-        if (phaseCount > 0) {
-            thing->setStateValue(energyControlPhaseCountStateTypeId, phaseCount);
-        }
-        thing->setStateValue(energyControlChargingStateTypeId, phaseCount > 0);
+        thing->setStateValue(energyControlPhaseCountStateTypeId,
+                             stablePhaseCount(thing, connection->phaseSwitchControl()));
     });
 
     connection->update();
@@ -503,10 +514,10 @@ void IntegrationPluginAmperfied::setupTcpConnection(ThingSetupInfo *info)
             break;
         case AmperfiedModbusTcpConnection::ChargingStateC1:
         case AmperfiedModbusTcpConnection::ChargingStateC2:
+        case AmperfiedModbusTcpConnection::ChargingStateDerating:
             thing->setStateValue("pluggedIn", true);
             thing->setStateValue("charging", true);
             break;
-        case AmperfiedModbusTcpConnection::ChargingStateDerating:
         case AmperfiedModbusTcpConnection::ChargingStateE:
         case AmperfiedModbusTcpConnection::ChargingStateError:
         case AmperfiedModbusTcpConnection::ChargingStateF:
@@ -514,21 +525,8 @@ void IntegrationPluginAmperfied::setupTcpConnection(ThingSetupInfo *info)
             thing->setStateValue("charging", false);
         }
 
-        int phaseCount = 0;
-        if (connection->currentL1() > 1) {
-            phaseCount++;
-        }
-        if (connection->currentL2() > 1) {
-            phaseCount++;
-        }
-        if (connection->currentL3() > 1) {
-            phaseCount++;
-        }
-        if (phaseCount > 0) {
-            thing->setStateValue("phaseCount", phaseCount);
-        }
+        thing->setStateValue("phaseCount", stablePhaseCount(thing, connection->phaseSwitchControl()));
     });
 
     connection->connectDevice();
 }
-

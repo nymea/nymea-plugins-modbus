@@ -55,9 +55,11 @@ private:
     struct ChargingCurrentState {
         bool power = false;
         quint16 maxChargingCurrent = 60;
+        quint16 phaseCount = 3;
     };
 
     ChargingCurrentState &chargingCurrentState(Thing *thing);
+    quint16 stablePhaseCount(Thing *thing, quint16 phaseSwitchControl);
 
     void setupRtuConnection(ThingSetupInfo *info);
     void setupTcpConnection(ThingSetupInfo *info);
