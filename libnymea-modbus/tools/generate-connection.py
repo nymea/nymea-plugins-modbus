@@ -71,6 +71,10 @@ def writeTcpHeaderFile():
         for enumDefinition in registerJson['enums']:
             writeEnumDefinition(headerFile, enumDefinition)
 
+    if 'flags' in registerJson:
+        for flagsDefinition in registerJson['flags']:
+            writeFlagsDefinition(headerFile, flagsDefinition)
+
     if queuedRequests:
         writeLine(headerFile, '    typedef void(%s::*Function)(void);' % className)
         writeLine(headerFile)
@@ -238,6 +242,9 @@ def writeTcpHeaderFile():
     # End of class
     writeLine(headerFile)
     writeLine(headerFile, '};')
+    if 'flags' in registerJson:
+        for flagsDefinition in registerJson['flags']:
+            writeLine(headerFile, 'Q_DECLARE_OPERATORS_FOR_FLAGS(%s::%sFlags)' % (className, flagsDefinition['name']))
     writeLine(headerFile)
     writeLine(headerFile, 'QDebug operator<<(QDebug debug, %s *%s);' % (className, className[0].lower() + className[1:]))
     writeLine(headerFile)
@@ -622,6 +629,10 @@ def writeRtuHeaderFile():
         for enumDefinition in registerJson['enums']:
             writeEnumDefinition(headerFile, enumDefinition)
 
+    if 'flags' in registerJson:
+        for flagsDefinition in registerJson['flags']:
+            writeFlagsDefinition(headerFile, flagsDefinition)
+
     # Constructor
     writeLine(headerFile, '    explicit %s(ModbusRtuMaster *modbusRtuMaster, quint16 slaveId, QObject *parent = nullptr);' % className)
     writeLine(headerFile, '    ~%s() = default;' % className)
@@ -741,6 +752,9 @@ def writeRtuHeaderFile():
     # End of class
     writeLine(headerFile)
     writeLine(headerFile, '};')
+    if 'flags' in registerJson:
+        for flagsDefinition in registerJson['flags']:
+            writeLine(headerFile, 'Q_DECLARE_OPERATORS_FOR_FLAGS(%s::%sFlags)' % (className, flagsDefinition['name']))
     writeLine(headerFile)
     writeLine(headerFile, 'QDebug operator<<(QDebug debug, %s *%s);' % (className, className[0].lower() + className[1:]))
     writeLine(headerFile)
@@ -1128,6 +1142,7 @@ if 'protocol' in registerJson:
 
 if 'blocks' in registerJson:
     validateBlocks(registerJson['blocks'])
+validateFlags(registerJson)
 
 # Create classes depending on the protocol
 writeTcp = protocol in ["TCP", "BOTH"]

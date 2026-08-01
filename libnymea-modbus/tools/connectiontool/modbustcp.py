@@ -121,7 +121,7 @@ def writePropertyGetSetMethodImplementationsTcp(fileDescriptor, className, regis
 
         # Check if we require a read method
         if 'R' in registerDefinition['access']:
-            if 'enum' in registerDefinition:
+            if 'enum' in registerDefinition or 'flags' in registerDefinition:
                 writeLine(fileDescriptor, '%s::%s %s::%s() const' % (className, propertyTyp, className, propertyName))
             else:
                 writeLine(fileDescriptor, '%s %s::%s() const' % (propertyTyp, className, propertyName))

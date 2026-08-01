@@ -74,6 +74,7 @@ private:
     QSet<Thing *> m_addressAttemptsInProgress;
     QSet<Thing *> m_addressRetriesScheduled;
     QHash<Thing *, bool> m_initialUpdate;
+    QHash<Thing *, QHash<QString, double>> m_lastInfoMeasurementValues;
 
     // We need to buffer the desired power / current / phase count states because all 3 states
     // will be represented by one register (200 - chaegingCurrent). If all 3 actions get executed, they might
