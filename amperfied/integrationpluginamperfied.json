@@ -64,7 +64,8 @@
                             "type": "uint",
                             "minValue": 1,
                             "maxValue": 3,
-                            "defaultValue": 1
+                            "defaultValue": 3,
+                            "cached": false
                         },
                         {
                             "id": "b7ea8449-c76f-4d42-8433-505f542abfd4",
@@ -179,7 +180,8 @@
                             "type": "uint",
                             "minValue": 1,
                             "maxValue": 3,
-                            "defaultValue": 1
+                            "defaultValue": 3,
+                            "cached": false
                         },
                         {
                             "id": "6221212e-e21d-4006-bfdc-90a8a50b2587",
@@ -293,7 +295,8 @@
                             "type": "uint",
                             "minValue": 1,
                             "maxValue": 3,
-                            "defaultValue": 1
+                            "defaultValue": 3,
+                            "cached": false
                         },
                         {
                             "id": "040b919c-455a-4289-b14c-33e59c48da01",
@@ -419,7 +422,8 @@
                             "type": "uint",
                             "minValue": 1,
                             "maxValue": 3,
-                            "defaultValue": 1
+                            "defaultValue": 3,
+                            "cached": false
                         },
                         {
                             "id": "8096f537-748e-4040-a146-022a3aba05e1",
