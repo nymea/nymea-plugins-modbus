@@ -1,3 +1,23 @@
+nymea-plugins-modbus (1.16.0) resolute; urgency=medium
+
+  [ Simon Stürz ]
+  * New plugin: ABB Terra AC charger
+  * New plugin: Add Bender EVSE controller support
+  * Add modbus reply guard for error exceptions
+  * Sungrow: Update battery detection and improve overall string
+    handling
+  * Add Compleo eBox professional support
+  * PCE: Add modbus TLS support
+  * PCE: Add mDNS discovery
+  * libnymea-modbus: Add modbus TLS support
+  * Amperfied: Cache charging current state and power
+  * Update evcharger interface to evchargerac
+  * nymea-modbus-cli: Add man, bash completion and improve read write
+  * libnymea-sunpsec-dev: Fix model header installation path (fixes
+    issue…
+
+ -- jenkins <developer@nymea.io>  Wed, 05 Aug 2026 15:06:53 +0200
+
 nymea-plugins-modbus (1.15.2) resolute; urgency=medium
 
 
