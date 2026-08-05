@@ -1,0 +1,247 @@
+{
+    "className": "BenderTqDm100",
+    "protocol": "TCP",
+    "endianness": "BigEndian",
+    "errorLimitUntilNotReachable": 10,
+    "checkReachableRegister": "chargePointState",
+    "enums": [
+        {
+            "name": "ChargeState",
+            "values": [
+                { "key": "NotCharging", "value": 0 },
+                { "key": "Charging", "value": 1 }
+            ]
+        }
+    ],
+    "blocks": [
+        {
+            "id": "statusBlock",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "chargePointState",
+                    "address": 1000,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Charge point state",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "chargeState",
+                    "address": 1001,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Charge state",
+                    "enum": "ChargeState",
+                    "defaultValue": "ChargeStateNotCharging",
+                    "access": "RO"
+                },
+                {
+                    "id": "evseState",
+                    "address": 1002,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "EVSE state",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "reserved1003",
+                    "address": 1003,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Reserved register",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "cableState",
+                    "address": 1004,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Cable state",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "reserved1005",
+                    "address": 1005,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Reserved register",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "evseErrorCode",
+                    "address": 1006,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "EVSE error code",
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "currentLimitBlock",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "minimumCurrentLimit",
+                    "address": 1102,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Minimum current limit",
+                    "unit": "A",
+                    "defaultValue": "6",
+                    "access": "RO"
+                },
+                {
+                    "id": "reserved1103",
+                    "address": 1103,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Reserved register",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "evseMaxCurrent",
+                    "address": 1104,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Maximum current from EVSE",
+                    "unit": "A",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "reserved1105",
+                    "address": 1105,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Reserved register",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "cableMaxCurrent",
+                    "address": 1106,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Maximum current from cable",
+                    "unit": "A",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "reserved1107",
+                    "address": 1107,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Reserved register",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "evMaxCurrent",
+                    "address": 1108,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Maximum current from EV",
+                    "unit": "A",
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        }
+    ],
+    "registers": [
+        {
+            "id": "chargePointStateInit",
+            "address": 1000,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "init",
+            "registerType": "holdingRegister",
+            "description": "Charge point state used for discovery",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "totalPower",
+            "address": 1020,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Active power",
+            "unit": "W",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "totalEnergy",
+            "address": 1036,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Energy",
+            "unit": "Wh",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "sessionEnergy",
+            "address": 1502,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Charged energy for current session",
+            "unit": "Wh",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "chargeCurrent",
+            "address": 5004,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Charge current",
+            "unit": "A",
+            "defaultValue": "0",
+            "access": "RW"
+        },
+        {
+            "id": "lifeBit",
+            "address": 6000,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Life bit",
+            "defaultValue": "0",
+            "access": "RW"
+        }
+    ]
+}

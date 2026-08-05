@@ -1,0 +1,320 @@
+{
+    "className": "BenderOmcci",
+    "protocol": "TCP",
+    "endianness": "BigEndian",
+    "stringEndianness": "BigEndian",
+    "errorLimitUntilNotReachable": 10,
+    "checkReachableRegister": "ocppCpStatus",
+    "enums": [
+        {
+            "name": "OcppCpStatus",
+            "values": [
+                { "key": "Available", "value": 0 },
+                { "key": "Occupied", "value": 1 },
+                { "key": "Reserved", "value": 2 },
+                { "key": "Unavailable", "value": 3 },
+                { "key": "Faulted", "value": 4 },
+                { "key": "Preparing", "value": 5 },
+                { "key": "Charging", "value": 6 },
+                { "key": "SuspendedEvse", "value": 7 },
+                { "key": "SuspendedEv", "value": 8 },
+                { "key": "Finishing", "value": 9 }
+            ]
+        },
+        {
+            "name": "VehicleState",
+            "values": [
+                { "key": "Unknown", "value": 0 },
+                { "key": "A", "value": 1 },
+                { "key": "B", "value": 2 },
+                { "key": "C", "value": 3 },
+                { "key": "D", "value": 4 },
+                { "key": "E", "value": 5 }
+            ]
+        },
+        {
+            "name": "ChargePointAvailability",
+            "values": [
+                { "key": "Operative", "value": 0 },
+                { "key": "Inoperative", "value": 1 }
+            ]
+        }
+    ],
+    "blocks": [
+        {
+            "id": "systemInfoBlock",
+            "readSchedule": "init",
+            "registers": [
+                {
+                    "id": "protocolVersion",
+                    "address": 120,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Protocol version",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "vehicleState",
+                    "address": 122,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Vehicle state",
+                    "enum": "VehicleState",
+                    "defaultValue": "VehicleStateUnknown",
+                    "access": "RO"
+                },
+                {
+                    "id": "vehicleStateHex",
+                    "address": 123,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Vehicle state in hex format",
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "serialNumberBlock",
+            "readSchedule": "init",
+            "registers": [
+                {
+                    "id": "serialNumber",
+                    "address": 168,
+                    "size": 13,
+                    "type": "string",
+                    "registerType": "holdingRegister",
+                    "description": "Manufacturer serial number",
+                    "access": "RO"
+                }
+            ]
+        },
+        {
+            "id": "meterBlock",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "energyPhaseA",
+                    "address": 200,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Energy phase A",
+                    "unit": "Wh",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "energyPhaseB",
+                    "address": 202,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Energy phase B",
+                    "unit": "Wh",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "energyPhaseC",
+                    "address": 204,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Energy phase C",
+                    "unit": "Wh",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "powerPhaseA",
+                    "address": 206,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Power phase A",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "powerPhaseB",
+                    "address": 208,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Power phase B",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "powerPhaseC",
+                    "address": 210,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Power phase C",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "currentPhaseA",
+                    "address": 212,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Current phase A",
+                    "unit": "mA",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "currentPhaseB",
+                    "address": 214,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Current phase B",
+                    "unit": "mA",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "currentPhaseC",
+                    "address": 216,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Current phase C",
+                    "unit": "mA",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "totalEnergy",
+                    "address": 218,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Total energy",
+                    "unit": "Wh",
+                    "defaultValue": "0",
+                    "access": "RO"
+                },
+                {
+                    "id": "totalPower",
+                    "address": 220,
+                    "size": 2,
+                    "type": "uint32",
+                    "registerType": "holdingRegister",
+                    "description": "Total power",
+                    "unit": "W",
+                    "defaultValue": "0",
+                    "access": "RO"
+                }
+            ]
+        }
+    ],
+    "registers": [
+        {
+            "id": "firmwareVersion",
+            "address": 100,
+            "size": 2,
+            "type": "string",
+            "readSchedule": "init",
+            "registerType": "holdingRegister",
+            "description": "Firmware version",
+            "access": "RO"
+        },
+        {
+            "id": "ocppCpStatus",
+            "address": 104,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "OCPP charge point status",
+            "enum": "OcppCpStatus",
+            "defaultValue": "OcppCpStatusUnavailable",
+            "access": "RO"
+        },
+        {
+            "id": "chargePointAvailability",
+            "address": 124,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Charge point availability",
+            "enum": "ChargePointAvailability",
+            "defaultValue": "ChargePointAvailabilityOperative",
+            "access": "RW"
+        },
+        {
+            "id": "signaledCurrent",
+            "address": 706,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Signaled current",
+            "unit": "A",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "minimumCurrentLimit",
+            "address": 712,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Minimum current limit",
+            "unit": "A",
+            "defaultValue": "6",
+            "access": "RO"
+        },
+        {
+            "id": "evMaxCurrent",
+            "address": 715,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Maximum current from EV",
+            "unit": "A",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "sessionEnergy",
+            "address": 716,
+            "size": 2,
+            "type": "uint32",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Charged energy for current session",
+            "unit": "Wh",
+            "defaultValue": "0",
+            "access": "RO"
+        },
+        {
+            "id": "hemsCurrentLimit",
+            "address": 1000,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "HEMS current limit",
+            "unit": "A",
+            "defaultValue": "6",
+            "access": "RW"
+        }
+    ]
+}
