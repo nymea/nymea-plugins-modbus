@@ -30,8 +30,12 @@
 
 #include <QObject>
 #include <QHostAddress>
+#include <QPointer>
+#include <QQueue>
+#include <QSet>
 
 class PhoenixModbusTcpConnection;
+class EBoxProfessionalModbusTcpConnection;
 class NetworkDeviceMonitor;
 class PluginTimer;
 
@@ -54,10 +58,33 @@ private slots:
     void updatePhaseCount(Thing *thing);
 
 private:
+    struct EBoxChargingCurrentState
+    {
+        bool power = false;
+        double maxChargingCurrent = 6.0;
+    };
+
+    struct EBoxChargingCurrentRequest
+    {
+        EBoxChargingCurrentState state;
+        QPointer<ThingActionInfo> info;
+    };
+
+    void setupEBoxProfessional(ThingSetupInfo *info);
+    void executeEBoxProfessionalAction(ThingActionInfo *info);
+    void enqueueEBoxProfessionalStateWrite(ThingActionInfo *info,
+                                           EBoxProfessionalModbusTcpConnection *connection);
+    void sendNextEBoxProfessionalStateWrite(Thing *thing,
+                                            EBoxProfessionalModbusTcpConnection *connection);
+    void updateEBoxProfessionalState(Thing *thing);
     void evaluateChargingState(Thing *thing);
 
 private:
     QHash<Thing*, PhoenixModbusTcpConnection*> m_connections;
+    QHash<Thing*, EBoxProfessionalModbusTcpConnection*> m_eBoxConnections;
+    QHash<Thing*, EBoxChargingCurrentState> m_eBoxChargingCurrentStateBuffer;
+    QHash<Thing*, QQueue<EBoxChargingCurrentRequest>> m_eBoxChargingCurrentWriteQueues;
+    QSet<Thing*> m_eBoxChargingCurrentWritesActive;
     QHash<Thing*, NetworkDeviceMonitor*> m_monitors;
     PluginTimer *m_pluginTimer = nullptr;
 };
