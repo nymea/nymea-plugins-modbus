@@ -45,8 +45,13 @@ target.path = $$[QT_INSTALL_LIBS]
 INSTALLS += target
 
 # install header file with relative subdirectory
+# Note: generated model headers (models/models.pri) use $$PWD/-prefixed absolute paths,
+# while root headers are relative to this .pro file. Normalize both via relative_path()
+# before taking dirname(), otherwise dirname() on an absolute header path leaks the
+# build-time source directory into the install path.
 for (header, HEADERS) {
-    path = $$[QT_INSTALL_PREFIX]/include/nymea-sunspec/$${dirname(header)}
+    relHeader = $$relative_path($$absolute_path($$header, $$PWD), $$PWD)
+    path = $$[QT_INSTALL_PREFIX]/include/nymea-sunspec/$${dirname(relHeader)}
     eval(headers_$${path}.files += $${header})
     eval(headers_$${path}.path = $${path})
     eval(INSTALLS *= headers_$${path})
