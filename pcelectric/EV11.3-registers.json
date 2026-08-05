@@ -3,7 +3,7 @@
     "protocol": "TCP",
     "endianness": "BigEndian",
     "errorLimitUntilNotReachable": 10,
-    "checkReachableRegister": "chargingState",
+    "checkReachableRegister": "firmwareRevision",
     "enums": [
         {
             "name": "ChargingState",

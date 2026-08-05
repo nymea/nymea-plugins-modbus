@@ -27,13 +27,22 @@
 
 #include <QDebug>
 #include <QObject>
+#include <QPointer>
+#include <QSslCertificate>
+#include <QSslKey>
+
+#include <functional>
 
 #include <integrations/integrationplugin.h>
 #include <network/networkdevicediscovery.h>
-#include <plugintimer.h>
-
+#include <network/zeroconf/zeroconfserviceentry.h>
 #include "extern-plugininfo.h"
 #include "pcewallbox.h"
+
+class ZeroConfServiceBrowser;
+class ZeroConfServiceEntry;
+class QProcess;
+class QTemporaryDir;
 
 class IntegrationPluginPcElectric : public IntegrationPlugin
 {
@@ -53,10 +62,17 @@ public:
     void executeAction(ThingActionInfo *info) override;
 
 private:
-    PluginTimer *m_refreshTimer = nullptr;
-
     QHash<Thing *, PceWallbox *> m_connections;
     QHash<Thing *, NetworkDeviceMonitor *> m_monitors;
+    QHash<Thing *, QHostAddress> m_monitorAddresses;
+    QHash<Thing *, QSet<QHostAddress>> m_zeroConfAddresses;
+    QHash<Thing *, QSet<QHostAddress>> m_attemptedAddresses;
+    QHash<Thing *, QPointer<ThingSetupInfo>> m_pendingInitialSetups;
+    QHash<Thing *, QString> m_unexpectedSerialNumbers;
+    QHash<Thing *, QString> m_configuredSerialNumbers;
+    QHash<Thing *, bool> m_staticAddressModes;
+    QSet<Thing *> m_addressAttemptsInProgress;
+    QSet<Thing *> m_addressRetriesScheduled;
     QHash<Thing *, bool> m_initialUpdate;
 
     // We need to buffer the desired power / current / phase count states because all 3 states
@@ -71,7 +87,34 @@ private:
     QHash<ThingClassId, ParamTypeId> m_macParamTypes;
     QHash<ThingClassId, ParamTypeId> m_serialNumberParamTypes;
 
+    ZeroConfServiceBrowser *m_modbusServiceBrowser = nullptr;
+    QSet<PceWallbox *> m_tlsUpgradesInProgress;
+
     void setupConnection(ThingSetupInfo *info);
+    bool isStaticThing(Thing *thing) const;
+    bool isMatchingZeroConfService(Thing *thing, const ZeroConfServiceEntry &entry) const;
+    QSet<QHostAddress> availableAddresses(Thing *thing) const;
+    void refreshZeroConfAddresses(Thing *thing);
+    void providerAddressesChanged(Thing *thing);
+    void tryNextAddress(Thing *thing);
+    void addressAttemptFailed(Thing *thing, const QString &unexpectedSerial = QString());
+    void finishInitialSetup(Thing *thing, Thing::ThingError error, const QString &message = QString());
+    void clearAddressState(Thing *thing);
+    bool configureTls(Thing *thing, PceWallbox *connection);
+    bool ensureClientIdentity(QString *errorString = nullptr);
+    void ensureClientIdentityAsync(const std::function<void(bool, const QString &)> &callback, bool refresh = false);
+    QString resolvedIdentityPath(const QString &configuredPath) const;
+    QString storagePrefix(Thing *thing) const;
+    QString wallboxSerialNumber(PceWallbox *connection) const;
+    void handleZeroConfServiceAdded(const ZeroConfServiceEntry &entry);
+    void handleZeroConfServiceRemoved(const ZeroConfServiceEntry &entry);
+
+    QSslCertificate m_clientCertificate;
+    QSslKey m_clientPrivateKey;
+    QProcess *m_identityProcess = nullptr;
+    QTemporaryDir *m_identityTemporaryDirectory = nullptr;
+    QList<std::function<void(bool, const QString &)>> m_identityCallbacks;
+    bool m_identityRefreshInProgress = false;
 };
 
 #endif // INTEGRATIONPLUGINPCELECTRIC_H

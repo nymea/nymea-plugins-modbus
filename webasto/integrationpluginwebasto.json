@@ -13,7 +13,7 @@
                     "displayName": "Webasto Live",
                     "name": "webastoLive",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable", "networkdevice"],
+                    "interfaces": ["evchargerac", "smartmeterconsumer", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "51fa3ea8-e819-46ca-b975-1bee6285441c",
@@ -212,7 +212,7 @@
                     "displayName": "Webasto NEXT",
                     "name": "webastoNext",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable", "networkdevice"],
+                    "interfaces": ["evchargerac", "smartmeterconsumer", "connectable", "networkdevice"],
                     "settingsTypes": [
                         {
                             "id": "5292e079-515c-47ae-9117-6a70d5c02566",
@@ -466,7 +466,7 @@
                     "displayName": "Webasto Unite",
                     "id": "f7598439-a794-44d4-ae51-47ab40189d61",
                     "createMethods": ["discovery", "user"],
-                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable", "networkdevice"],
+                    "interfaces": ["evchargerac", "smartmeterconsumer", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "41d713fb-4658-4797-ab0f-a978f5677eb9",

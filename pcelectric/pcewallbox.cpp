@@ -35,9 +35,21 @@ PceWallbox::PceWallbox(const QHostAddress &hostAddress, uint port, quint16 slave
     m_timer.setSingleShot(false);
     connect(&m_timer, &QTimer::timeout, this, &PceWallbox::sendHeartbeat);
 
+    m_requestTimer.setSingleShot(true);
+    connect(&m_requestTimer, &QTimer::timeout, this, &PceWallbox::sendNextRequest);
+
+    m_updateTimer.setInterval(UpdateInterval);
+    m_updateTimer.setSingleShot(true);
+    connect(&m_updateTimer, &QTimer::timeout, this, [this]() {
+        update();
+    });
+
     connect(this, &EV11ModbusTcpConnection::reachableChanged, this, [this](bool reachable) {
         if (!reachable) {
             m_timer.stop();
+            m_requestTimer.stop();
+            m_updateTimer.stop();
+            m_operational = false;
 
             cleanupQueues();
 
@@ -53,10 +65,8 @@ PceWallbox::PceWallbox(const QHostAddress &hostAddress, uint port, quint16 slave
     connect(this, &EV11ModbusTcpConnection::initializationFinished, this, [this](bool success) {
         if (success) {
             qCDebug(dcPcElectric()) << "Connection initialized successfully" << m_modbusTcpMaster->hostAddress().toString();
-            m_timer.start();
-
-            sendHeartbeat();
-            update();
+            if (m_operationalStartupEnabled)
+                startOperationalMode();
 
         } else {
             qCWarning(dcPcElectric()) << "Connection initialization failed for" << m_modbusTcpMaster->hostAddress().toString();
@@ -64,20 +74,42 @@ PceWallbox::PceWallbox(const QHostAddress &hostAddress, uint port, quint16 slave
     });
 }
 
+void PceWallbox::setOperationalStartupEnabled(bool enabled)
+{
+    m_operationalStartupEnabled = enabled;
+    if (!enabled)
+        m_timer.stop();
+}
+
+bool PceWallbox::operational() const
+{
+    return m_operational;
+}
+
+void PceWallbox::startOperationalMode()
+{
+    if (!reachable() || m_operational)
+        return;
+    m_operational = true;
+    m_timer.start();
+    sendHeartbeat();
+    update();
+}
+
 bool PceWallbox::update()
 {
-    if (m_aboutToDelete)
+    if (m_aboutToDelete || !m_operational)
         return false;
 
     if (!reachable())
         return false;
 
-    // Make sure we only have one update call in the queue
-    foreach (QueuedModbusReply *r, m_readQueue) {
-        if (r->dataUnit().startAddress() == readBlockInitInfosDataUnit().startAddress()) {
-            return true;
-        }
-    }
+    // A completed update round owns the one-second cool-down before the next
+    // one starts. This also prevents callers from overlapping polling rounds.
+    if (m_updateInProgress || m_updateTimer.isActive())
+        return true;
+
+    m_updateInProgress = true;
 
     QueuedModbusReply *reply = new QueuedModbusReply(QueuedModbusReply::RequestTypeRead, readBlockStatusDataUnit(), this);
     connect(reply, &QueuedModbusReply::finished, reply, &QueuedModbusReply::deleteLater);
@@ -86,7 +118,6 @@ bool PceWallbox::update()
             m_currentReply = nullptr;
 
         if (reply->error() != QModbusDevice::NoError) {
-            QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
             return;
         }
 
@@ -94,10 +125,9 @@ bool PceWallbox::update()
         const QVector<quint16> blockValues = unit.values();
         processBlockStatusRegisterValues(blockValues);
 
-        QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
     });
 
-    enqueueRequest(reply);
+    enqueueRequest(reply, true);
 
     // charging current register. Contains
     // - power state
@@ -119,7 +149,6 @@ bool PceWallbox::update()
                 m_currentReply = nullptr;
 
             if (reply->error() != QModbusDevice::NoError) {
-                QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
                 return;
             }
 
@@ -127,10 +156,9 @@ bool PceWallbox::update()
             const QVector<quint16> values = unit.values();
             processChargingCurrentRegisterValues(values);
 
-            QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
         });
 
-        enqueueRequest(reply);
+        enqueueRequest(reply, true);
     }
 
     // Digital input
@@ -150,7 +178,6 @@ bool PceWallbox::update()
                 m_currentReply = nullptr;
 
             if (reply->error() != QModbusDevice::NoError) {
-                QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
                 return;
             }
 
@@ -158,10 +185,9 @@ bool PceWallbox::update()
             const QVector<quint16> values = unit.values();
             processDigitalInputModeRegisterValues(values);
 
-            QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
         });
 
-        enqueueRequest(reply);
+        enqueueRequest(reply, true);
     }
 
     // Led brightness
@@ -181,7 +207,6 @@ bool PceWallbox::update()
                 m_currentReply = nullptr;
 
             if (reply->error() != QModbusDevice::NoError) {
-                QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
                 return;
             }
 
@@ -189,13 +214,9 @@ bool PceWallbox::update()
             const QVector<quint16> values = unit.values();
             processLedBrightnessRegisterValues(values);
 
-            if (firmwareRevision() < "0025")
-                emit updateFinished();
-
-            QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
         });
 
-        enqueueRequest(reply);
+        enqueueRequest(reply, true);
     }
 
     if (firmwareRevision() < "0025")
@@ -222,7 +243,6 @@ bool PceWallbox::update()
 
             if (reply->error() != QModbusDevice::NoError) {
                 qCWarning(dcPcElectric()) << "Failed to fetch update 2 block" << reply->error() << reply->errorString();
-                QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
                 return;
             }
 
@@ -230,10 +250,9 @@ bool PceWallbox::update()
             const QVector<quint16> blockValues = unit.values();
             processBlockUpdate2RegisterValues(blockValues);
 
-            QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
         });
 
-        enqueueRequest(reply);
+        enqueueRequest(reply, true);
     }
 
     bool phaseAutoSwitchPauseQueued = false;
@@ -252,7 +271,6 @@ bool PceWallbox::update()
                 m_currentReply = nullptr;
 
             if (reply->error() != QModbusDevice::NoError) {
-                QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
                 return;
             }
 
@@ -260,10 +278,9 @@ bool PceWallbox::update()
             const QVector<quint16> values = unit.values();
             processPhaseAutoSwitchPauseRegisterValues(values);
 
-            QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
         });
 
-        enqueueRequest(reply);
+        enqueueRequest(reply, true);
     }
 
     // Phase auto switch pause (since firmware version 0.25 ...)
@@ -283,7 +300,6 @@ bool PceWallbox::update()
                 m_currentReply = nullptr;
 
             if (reply->error() != QModbusDevice::NoError) {
-                QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
                 return;
             }
 
@@ -291,10 +307,9 @@ bool PceWallbox::update()
             const QVector<quint16> values = unit.values();
             processPhaseAutoSwitchMinChargingTimeRegisterValues(values);
 
-            QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
         });
 
-        enqueueRequest(reply);
+        enqueueRequest(reply, true);
     }
 
     // Phase auto switch pause (since firmware version 0.25 ...)
@@ -314,7 +329,6 @@ bool PceWallbox::update()
                 m_currentReply = nullptr;
 
             if (reply->error() != QModbusDevice::NoError) {
-                QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
                 return;
             }
 
@@ -322,12 +336,9 @@ bool PceWallbox::update()
             const QVector<quint16> values = unit.values();
             processForceChargingResumeRegisterValues(values);
 
-            emit updateFinished();
-
-            QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
         });
 
-        enqueueRequest(reply);
+        enqueueRequest(reply, true);
     }
 
     return true;
@@ -345,7 +356,6 @@ QueuedModbusReply *PceWallbox::setChargingCurrentAsync(quint16 chargingCurrent)
         if (m_currentReply == reply)
             m_currentReply = nullptr;
 
-        QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
         return;
     });
 
@@ -365,7 +375,6 @@ QueuedModbusReply *PceWallbox::setLedBrightnessAsync(quint16 percentage)
         if (m_currentReply == reply)
             m_currentReply = nullptr;
 
-        QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
         return;
     });
 
@@ -385,7 +394,6 @@ QueuedModbusReply *PceWallbox::setPhaseAutoSwitchPauseAsync(quint16 seconds)
         if (m_currentReply == reply)
             m_currentReply = nullptr;
 
-        QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
         return;
     });
 
@@ -405,7 +413,6 @@ QueuedModbusReply *PceWallbox::setPhaseAutoSwitchMinChargingTimeAsync(quint16 se
         if (m_currentReply == reply)
             m_currentReply = nullptr;
 
-        QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
         return;
     });
 
@@ -425,7 +432,6 @@ QueuedModbusReply *PceWallbox::setForceChargingResumeAsync(quint16 value)
         if (m_currentReply == reply)
             m_currentReply = nullptr;
 
-        QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
         return;
     });
 
@@ -445,7 +451,6 @@ QueuedModbusReply *PceWallbox::setDigitalInputModeAsync(DigitalInputMode digital
         if (m_currentReply == reply)
             m_currentReply = nullptr;
 
-        QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
         return;
     });
 
@@ -460,6 +465,8 @@ void PceWallbox::gracefullDeleteLater()
     cleanupQueues();
 
     m_timer.stop();
+    m_requestTimer.stop();
+    m_updateTimer.stop();
 
     if (!m_currentReply) {
         qCDebug(dcPcElectric()) << "Deleting object without pending request...";
@@ -520,7 +527,6 @@ void PceWallbox::sendHeartbeat()
             qCDebug(dcPcElectric()) << "Successfully sent heartbeat to" << m_modbusTcpMaster->hostAddress().toString();
         }
 
-        QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
         return;
     });
 
@@ -529,18 +535,23 @@ void PceWallbox::sendHeartbeat()
 
 void PceWallbox::sendNextRequest()
 {
-    if (m_writeQueue.isEmpty() && m_readQueue.isEmpty())
-        return;
-
-    if (m_currentReply)
-        return;
-
     if (m_aboutToDelete) {
         disconnect(this, nullptr, nullptr, nullptr);
         disconnectDevice();
         deleteLater();
         return;
     }
+
+    // Ignore immediate dispatch callbacks left by a completed reply while the
+    // inter-request delay is active. The timer's timeout performs the dispatch.
+    if (m_requestTimer.isActive())
+        return;
+
+    if (m_writeQueue.isEmpty() && m_readQueue.isEmpty())
+        return;
+
+    if (m_currentReply)
+        return;
 
     // Note: due to the fact that we have one register which controls 3 states,
     // the order of the execution is critical at this point. We have to make sure
@@ -593,23 +604,28 @@ void PceWallbox::sendNextRequest()
             << "to"
             << m_modbusTcpMaster->hostAddress().toString()
             << m_modbusTcpMaster->errorString();
-        m_currentReply->deleteLater();
-        m_currentReply = nullptr;
-        QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
+        QueuedModbusReply *finishedReply = m_currentReply;
+        emit finishedReply->finished();
         return;
     }
 
     if (m_currentReply->reply()->isFinished()) {
-        qCWarning(dcPcElectric()) << "Reply immediatly finished";
-        m_currentReply->deleteLater();
-        m_currentReply = nullptr;
-        QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
+        qCWarning(dcPcElectric()) << "Reply immediately finished";
+        QueuedModbusReply *finishedReply = m_currentReply;
+        emit finishedReply->finished();
         return;
     }
 }
 
-void PceWallbox::enqueueRequest(QueuedModbusReply *reply)
+void PceWallbox::enqueueRequest(QueuedModbusReply *reply, bool updateRequest)
 {
+    connect(reply, &QueuedModbusReply::finished, this, [this, reply]() {
+        requestFinished(reply);
+    });
+
+    if (updateRequest)
+        m_updateReplies.insert(reply);
+
     switch (reply->requestType()) {
     case QueuedModbusReply::RequestTypeRead:
         m_readQueue.enqueue(reply);
@@ -619,7 +635,43 @@ void PceWallbox::enqueueRequest(QueuedModbusReply *reply)
         break;
     }
 
-    QTimer::singleShot(0, this, &PceWallbox::sendNextRequest);
+    if (!m_currentReply && !m_requestTimer.isActive())
+        m_requestTimer.start(0);
+}
+
+void PceWallbox::requestFinished(QueuedModbusReply *reply)
+{
+    if (m_currentReply == reply)
+        m_currentReply = nullptr;
+
+    // The generated connection feeds every completed request into its
+    // communication failure counter. Requests sent through this custom queue
+    // must do the same so a half-open TCP connection becomes unreachable after
+    // repeated Modbus timeouts.
+    handleModbusError(reply->error());
+
+    const bool wasUpdateRequest = m_updateReplies.remove(reply);
+    if (wasUpdateRequest && m_updateReplies.isEmpty() && m_updateInProgress)
+        finishUpdateRound();
+
+    if (m_aboutToDelete) {
+        sendNextRequest();
+        return;
+    }
+
+    if (!m_operational || !reachable())
+        return;
+
+    m_requestTimer.start(RequestInterval);
+}
+
+void PceWallbox::finishUpdateRound()
+{
+    m_updateInProgress = false;
+    emit updateFinished();
+
+    if (!m_aboutToDelete && m_operational && reachable())
+        m_updateTimer.start();
 }
 
 void PceWallbox::cleanupQueues()
@@ -629,6 +681,9 @@ void PceWallbox::cleanupQueues()
 
     qDeleteAll(m_writeQueue);
     m_writeQueue.clear();
+
+    m_updateReplies.clear();
+    m_updateInProgress = false;
 }
 
 QDebug operator<<(QDebug debug, const PceWallbox::ChargingCurrentState &chargingCurrentState)

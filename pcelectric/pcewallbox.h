@@ -28,6 +28,7 @@
 #include <QDebug>
 #include <QObject>
 #include <QQueue>
+#include <QSet>
 #include <QTimer>
 
 #include <queuedmodbusreply.h>
@@ -48,6 +49,10 @@ public:
     explicit PceWallbox(const QHostAddress &hostAddress, uint port, quint16 slaveId, QObject *parent = nullptr);
 
     bool update() override;
+
+    void setOperationalStartupEnabled(bool enabled);
+    bool operational() const;
+    void startOperationalMode();
 
     QueuedModbusReply *setChargingCurrentAsync(quint16 chargingCurrent); // mA
 
@@ -73,14 +78,25 @@ private slots:
     void sendNextRequest();
 
 private:
+    static constexpr int RequestInterval = 300;
+    static constexpr int UpdateInterval = 1000;
+
     QTimer m_timer;
+    QTimer m_requestTimer;
+    QTimer m_updateTimer;
     quint16 m_heartbeat = 1;
     QueuedModbusReply *m_currentReply = nullptr;
     QQueue<QueuedModbusReply *> m_writeQueue;
     QQueue<QueuedModbusReply *> m_readQueue;
+    QSet<QueuedModbusReply *> m_updateReplies;
     bool m_aboutToDelete = false;
+    bool m_operationalStartupEnabled = true;
+    bool m_operational = false;
+    bool m_updateInProgress = false;
 
-    void enqueueRequest(QueuedModbusReply *reply);
+    void enqueueRequest(QueuedModbusReply *reply, bool updateRequest = false);
+    void requestFinished(QueuedModbusReply *reply);
+    void finishUpdateRound();
 
     void cleanupQueues();
 };

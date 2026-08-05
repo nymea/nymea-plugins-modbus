@@ -24,10 +24,16 @@
 
 #include "pcelectricdiscovery.h"
 #include "extern-plugininfo.h"
+#include <network/zeroconf/zeroconfservicebrowser.h>
 
-PcElectricDiscovery::PcElectricDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery, quint16 port, quint16 modbusAddress, QObject *parent)
+PcElectricDiscovery::PcElectricDiscovery(NetworkDeviceDiscovery *networkDeviceDiscovery,
+                                         ZeroConfServiceBrowser *modbusServiceBrowser,
+                                         quint16 port,
+                                         quint16 modbusAddress,
+                                         QObject *parent)
     : QObject{parent}
     , m_networkDeviceDiscovery{networkDeviceDiscovery}
+    , m_modbusServiceBrowser{modbusServiceBrowser}
     , m_port{port}
     , m_modbusAddress{modbusAddress}
 {}
@@ -41,6 +47,21 @@ void PcElectricDiscovery::startDiscovery()
 {
     qCInfo(dcPcElectric()) << "Discovery: Start searching for PCE wallboxes in the network...";
     m_startDateTime = QDateTime::currentDateTime();
+    m_discoveryRunning = true;
+
+    connect(m_modbusServiceBrowser, &ZeroConfServiceBrowser::serviceEntryAdded, this, [this](const ZeroConfServiceEntry &entry) {
+        checkZeroConfService(entry);
+    });
+
+    foreach (const ZeroConfServiceEntry &entry, m_modbusServiceBrowser->serviceEntries())
+        checkZeroConfService(entry);
+
+    if (!m_networkDeviceDiscovery->available()) {
+        // ZeroConf does not depend on the subnet scanner. Give cached/new service
+        // entries enough time to complete their Modbus verification.
+        QTimer::singleShot(10000, this, &PcElectricDiscovery::finishDiscovery);
+        return;
+    }
 
     NetworkDeviceDiscoveryReply *discoveryReply = m_networkDeviceDiscovery->discover();
     connect(discoveryReply, &NetworkDeviceDiscoveryReply::hostAddressDiscovered, this, &PcElectricDiscovery::checkNetworkDevice);
@@ -56,8 +77,29 @@ void PcElectricDiscovery::startDiscovery()
     });
 }
 
+void PcElectricDiscovery::checkZeroConfService(const ZeroConfServiceEntry &entry)
+{
+    if (!m_discoveryRunning || entry.protocol() != QAbstractSocket::IPv4Protocol || !entry.name().startsWith("EV11"))
+        return;
+
+    const QString serialNumber = entry.txt("serial");
+    const MacAddress macAddress(entry.txt("mac"));
+    if (entry.serviceType() != "_modbus._tcp" || entry.port() != 502 || serialNumber.isEmpty() || macAddress.isNull()) {
+        qCDebug(dcPcElectric()) << "Discovery: mDNS: Ignoring invalid service" << entry;
+        return;
+    }
+
+    qCDebug(dcPcElectric()) << "Discovery: mDNS: Found PCE bootstrap endpoint" << entry;
+    m_zeroConfEntries.insert(entry.hostAddress(), entry);
+    checkNetworkDevice(entry.hostAddress());
+}
+
 void PcElectricDiscovery::checkNetworkDevice(const QHostAddress &address)
 {
+    if (!m_discoveryRunning || address.isNull() || m_checkedAddresses.contains(address))
+        return;
+
+    m_checkedAddresses.insert(address);
     EV11ModbusTcpConnection *connection = new EV11ModbusTcpConnection(address, m_port, m_modbusAddress, this);
     m_connections.append(connection);
 
@@ -98,6 +140,11 @@ void PcElectricDiscovery::checkNetworkDevice(const QHostAddress &address)
 
                 quint64 serialNumber = serialRawData.toHex().toULongLong(nullptr, 16);
                 qCDebug(dcPcElectric()) << "Discovery: Serial number" << serialRawData.toHex() << serialNumber;
+                if (serialNumber == 0) {
+                    qCWarning(dcPcElectric()) << "Discovery: Rejecting PCE wallbox with invalid serial number on" << address.toString();
+                    cleanupConnection(connection);
+                    return;
+                }
 
                 Result result;
                 result.serialNumber = QString::number(serialNumber);
@@ -234,43 +281,91 @@ void PcElectricDiscovery::checkNetworkDevice(const QHostAddress &address)
 
 void PcElectricDiscovery::cleanupConnection(EV11ModbusTcpConnection *connection)
 {
-    m_connections.removeAll(connection);
+    // This method can be called from a QModbusReply::finished handler. Do not
+    // disconnect the device synchronously here: closing the client aborts its
+    // active replies, while the generated handler still accesses the reply
+    // after emitting checkReachabilityFailed(). Deleting the connection later
+    // lets the current signal unwind first; ModbusTcpMaster's destructor then
+    // disconnects the device.
+    if (!m_connections.removeOne(connection))
+        return;
+
     m_runningVerifications.remove(connection);
 
-    connection->disconnectDevice();
+    disconnect(connection, nullptr, this, nullptr);
+    disconnect(connection->modbusTcpMaster(), nullptr, this, nullptr);
     connection->deleteLater();
 }
 
 void PcElectricDiscovery::finishDiscovery()
 {
+    m_discoveryRunning = false;
     qint64 durationMilliSeconds = QDateTime::currentMSecsSinceEpoch() - m_startDateTime.toMSecsSinceEpoch();
+    QSet<QString> ambiguousSerialNumbers;
 
     for (int i = 0; i < m_potentialResults.length(); i++) {
-        const NetworkDeviceInfo networkDeviceInfo = m_networkDeviceInfos.get(m_potentialResults.at(i).address);
-        m_potentialResults[i].networkDeviceInfo = networkDeviceInfo;
+        NetworkDeviceInfo networkDeviceInfo = m_networkDeviceInfos.get(m_potentialResults.at(i).address);
 
         Result result = m_potentialResults.at(i);
-        if (networkDeviceInfo.macAddressInfos().hasMacAddress(result.registerMacAddress)) {
-            qCInfo(dcPcElectric())
-                << "Discovery: --> Found EV11.3"
-                << (result.thingClassId == ev11NoMeterThingClassId ? "(No meter)" : "with meter")
-                << "Serial number:"
-                << result.serialNumber
-                << "Firmware revision:"
-                << result.firmwareRevision
-                << result.networkDeviceInfo
-                << result.digitalInputMode
-                << result.r37Mode;
-            m_results.append(result);
-        } else {
-            qCWarning(dcPcElectric())
-                << "Discovery: --> Found potential EV11.3, but not adding to the results due to imcomplete MAC address check:"
-                << "Serial number:"
-                << result.serialNumber
-                << "Firmware revision:"
-                << result.firmwareRevision
-                << result.networkDeviceInfo;
+        if (networkDeviceInfo.address().isNull())
+            networkDeviceInfo.setAddress(result.address);
+        networkDeviceInfo.addMacAddress(result.registerMacAddress);
+
+        const ZeroConfServiceEntry zeroConfEntry = m_zeroConfEntries.value(result.address);
+        if (zeroConfEntry.isValid()) {
+            if (zeroConfEntry.txt("serial") == result.serialNumber) {
+                networkDeviceInfo.setHostName(zeroConfEntry.hostName());
+            } else {
+                qCWarning(dcPcElectric())
+                    << "Discovery: Ignoring mismatching mDNS identity for"
+                    << result.address.toString()
+                    << "advertised serial:"
+                    << zeroConfEntry.txt("serial")
+                    << "Modbus serial:"
+                    << result.serialNumber;
+            }
         }
+
+        result.networkDeviceInfo = networkDeviceInfo;
+
+        if (ambiguousSerialNumbers.contains(result.serialNumber))
+            continue;
+
+        int existingResultIndex = -1;
+        for (int resultIndex = 0; resultIndex < m_results.size(); ++resultIndex) {
+            if (m_results.at(resultIndex).serialNumber == result.serialNumber) {
+                existingResultIndex = resultIndex;
+                break;
+            }
+        }
+
+        if (existingResultIndex >= 0 && m_results.at(existingResultIndex).registerMacAddress != result.registerMacAddress) {
+            qCWarning(dcPcElectric())
+                << "Discovery: Rejecting ambiguous serial number advertised by different wallboxes:"
+                << result.serialNumber
+                << m_results.at(existingResultIndex).address
+                << m_results.at(existingResultIndex).registerMacAddress
+                << result.address
+                << result.registerMacAddress;
+            m_results.removeAt(existingResultIndex);
+            ambiguousSerialNumbers.insert(result.serialNumber);
+            continue;
+        }
+
+        if (existingResultIndex >= 0)
+            continue;
+
+        qCInfo(dcPcElectric())
+            << "Discovery: --> Found EV11.3"
+            << (result.thingClassId == ev11NoMeterThingClassId ? "(No meter)" : "with meter")
+            << "Serial number:"
+            << result.serialNumber
+            << "Firmware revision:"
+            << result.firmwareRevision
+            << result.networkDeviceInfo
+            << result.digitalInputMode
+            << result.r37Mode;
+        m_results.append(result);
     }
 
     m_potentialResults.clear();

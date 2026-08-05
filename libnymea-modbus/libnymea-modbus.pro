@@ -32,12 +32,14 @@ HEADERS += \
     modbusdatautils.h \
     modbustcpconnection.h \
     modbustcpmaster.h \
-    queuedmodbusreply.h
+    queuedmodbusreply.h \
+    modbustlstunnel_p.h
 
 SOURCES += \
     modbusdatautils.cpp \
     modbustcpmaster.cpp \
-    queuedmodbusreply.cpp
+    queuedmodbusreply.cpp \
+    modbustlstunnel.cpp
 
 
 # define install target
@@ -55,10 +57,12 @@ INSTALLS += modbustoolpri modbustool modbustoolmodules
 
 # install header file with relative subdirectory
 for (header, HEADERS) {
-    path = $$[QT_INSTALL_PREFIX]/include/nymea-modbus/$${dirname(header)}
-    eval(headers_$${path}.files += $${header})
-    eval(headers_$${path}.path = $${path})
-    eval(INSTALLS *= headers_$${path})
+    !contains(header, _p.h$) {
+        path = $$[QT_INSTALL_PREFIX]/include/nymea-modbus/$${dirname(header)}
+        eval(headers_$${path}.files += $${header})
+        eval(headers_$${path}.path = $${path})
+        eval(INSTALLS *= headers_$${path})
+    }
 }
 
 # Create pkgconfig file

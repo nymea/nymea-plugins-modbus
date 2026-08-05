@@ -1,0 +1,318 @@
+.TH NYMEA-MODBUS-CLI 1 "July 2026" "nymea-modbus-cli 1.5.0" "User Commands"
+.SH NAME
+nymea-modbus-cli \- inspect, read, and write Modbus TCP, TLS, and RTU devices
+.SH SYNOPSIS
+.B nymea-modbus-cli
+.BI --address " address"
+.RI [ TCP-options ]
+.RI [ request-options ]
+.br
+.B nymea-modbus-cli
+.BI --serial " device"
+.RI [ RTU-options ]
+.RI [ request-options ]
+.br
+.B nymea-modbus-cli
+.BI --address " address"
+.B --tls-info
+.RI [ TLS-options ]
+.br
+.B nymea-modbus-cli
+.B --list-serials
+.SH DESCRIPTION
+.B nymea-modbus-cli
+is a diagnostic command-line client for Modbus TCP, Modbus TCP over TLS, and
+Modbus RTU. It can read input or holding registers and discrete inputs or
+coils, write a value, inspect a TLS endpoint without sending Modbus traffic,
+and list local serial ports.
+.PP
+Select exactly one transport using
+.B --address
+for TCP or
+.B --serial
+for RTU. A normal read or write also requires a register address. The
+.B --tls-info
+and
+.B --list-serials
+modes do not require one.
+.SH GENERAL OPTIONS
+.TP
+.BR \-h , " --help"
+Display command-line help and exit.
+.TP
+.B --help-all
+Display command-line help including generic Qt options and exit.
+.TP
+.BR \-v , " --version"
+Display version information and exit.
+.TP
+.BR \-d , " --debug"
+Print additional connection and protocol information.
+.TP
+.B --list-serials
+List serial ports detected on the host and exit.
+.SH TCP OPTIONS
+.TP
+.BR \-a , " --address " \fIaddress\fR
+Connect to the specified Modbus TCP server IP address.
+.TP
+.BR \-p , " --port " \fIport\fR
+Set the TCP port. The default is 502 for plain Modbus TCP and 802 when TLS is
+enabled.
+.TP
+.B --tls
+Use Modbus TCP over TLS.
+.SH TLS OPTIONS
+.TP
+.BI --tls-version " version"
+Select the TLS protocol. Supported values are
+.B auto
+and
+.BR 1.2 .
+The default is
+.BR auto .
+.TP
+.BI --tls-fingerprint " sha256"
+Accept only a server certificate whose DER-encoded SubjectPublicKeyInfo has
+the specified SHA-256 fingerprint. Hexadecimal fingerprints may contain
+colons or whitespace.
+.TP
+.B --tls-accept-any-fingerprint
+Accept the SPKI fingerprint presented by the server during each handshake.
+This disables server identity verification and cannot be combined with
+.BR --tls-fingerprint .
+The connection remains encrypted but is vulnerable to a man-in-the-middle
+attack. Use this option only for controlled diagnostics.
+.TP
+.BI --tls-server-name " name"
+Set the TLS server name used for Server Name Indication (SNI) and certificate
+hostname verification.
+.TP
+.BI --tls-client-certificate " file"
+Present the PEM client certificate in
+.IR file .
+The file may contain the leaf certificate followed by intermediate
+certificates. This option requires
+.BR --tls-client-key .
+.TP
+.BI --tls-client-key " file"
+Read the PEM EC or RSA client private key from
+.IR file .
+This option requires
+.BR --tls-client-certificate .
+.TP
+.BI --tls-client-key-passphrase-file " file"
+Read the client private-key passphrase from
+.IR file .
+One trailing newline is ignored. This option requires
+.BR --tls-client-key .
+.TP
+.B --tls-info
+Perform a TLS handshake, print connection timing, negotiated protocol and
+cipher, session information, and the server certificate chain, then exit
+without sending Modbus traffic. This option enables TLS and uses port 802
+unless
+.B --port
+is supplied.
+.SH RTU OPTIONS
+.TP
+.BI --serial " device"
+Use Modbus RTU through the serial
+.IR device ,
+for example
+.BR /dev/ttyUSB0 .
+.TP
+.BI --baudrate " baud"
+Set the serial baud rate. The default is 19200. Common values include 1200,
+2400, 4800, 9600, 19200, 38400, 57600, and 115200.
+.TP
+.BI --parity " parity"
+Set serial parity to
+.BR none ,
+.BR even ,
+.BR odd ,
+.BR space ,
+or
+.BR mark .
+The default is
+.BR none .
+.TP
+.BI --databits " bits"
+Set the number of data bits to 5, 6, 7, or 8. The default is 8.
+.TP
+.BI --stopbits " bits"
+Set the number of stop bits to 1, 1.5, or 2. The default is 1.
+.SH MODBUS REQUEST OPTIONS
+.TP
+.BR \-m , " --modbus-address " \fIid\fR
+Set the Modbus server address (unit or slave ID). The default is 1. Address 0
+must be selected using
+.BR --broadcast .
+.TP
+.B --broadcast
+Send the request to Modbus server address 0. This option cannot be combined
+with an explicit
+.BR --modbus-address .
+.TP
+.BR \-t , " --type " \fItype\fR
+Select the register type:
+.BR input ,
+.BR holding ,
+.BR discrete ,
+or
+.BR coils .
+The default is
+.BR holding .
+.TP
+.BR \-r , " --register " \fIregister\fR
+Set the first Modbus register address.
+.TP
+.BR \-l , " --length " \fIcount\fR
+Set the number of registers or bits to read. The default read count is 1. For
+a write, the count is inferred from the data; an explicitly supplied length
+must match it.
+.TP
+.BR \-w , " --write " \fIdata\fR
+Write holding registers or coils instead of reading. Holding-register data may
+be a decimal or hexadecimal word, a comma-separated word list, or compact hex.
+Compact value
+.B 0x00010002
+writes words
+.B 0x0001
+and
+.B 0x0002
+to consecutive addresses. Coil lists accept 0, 1, false, and true.
+.TP
+.BI --output " format"
+Select
+.BR table ,
+.BR json ,
+or
+.B legacy
+output. The default is
+.BR table .
+.TP
+.BI --decode " type"
+Decode register data as
+.BR uint16 ,
+.BR int16 ,
+.BR uint32 ,
+.BR int32 ,
+.BR uint64 ,
+.BR int64 ,
+.BR float32 ,
+or
+.BR float64 .
+This option may be repeated. The read length must be divisible by the selected
+type's register width.
+.TP
+.BI --byte-order " order"
+Set byte order inside each 16-bit register used by
+.B --decode
+to
+.B big
+or
+.BR little .
+The default is
+.BR big .
+.TP
+.BI --word-order " order"
+Set word order inside each decoded value to
+.B forward
+or
+.BR reverse .
+The default is
+.BR forward .
+.SH REGISTER REPRESENTATION
+The table output for holding and input registers shows raw hex, signed and
+unsigned 16-bit interpretations in both byte orders, and escaped ASCII. It also
+shows the complete response in bulk raw and ASCII forms. Coils and discrete
+inputs are shown as Boolean values.
+.PP
+Byte order affects the two bytes within each register. Word order affects the
+sequence of 16-bit registers within each decoded 32- or 64-bit value. Raw
+compact write data always uses wire order: the leftmost word is written to the
+lowest address.
+.SH TLS AUTHENTICATION
+Without
+.BR --tls-fingerprint ,
+normal CA and hostname validation is used. When validation fails, the CLI
+prints the server SPKI-SHA256 fingerprint so it can be verified out of band
+and supplied to a subsequent invocation.
+.PP
+The CLI does not save fingerprints, certificates, private keys, or TLS
+sessions. A fingerprint passed with
+.B --tls-fingerprint
+is valid only for that invocation.
+.SH EXAMPLES
+Read two holding registers over plain Modbus TCP:
+.PP
+.EX
+nymea-modbus-cli -a 192.168.0.10 -p 502 -r 1000 -l 2
+.EE
+.PP
+Read register 1000 over TLS 1.2 with an SPKI pin:
+.PP
+.EX
+nymea-modbus-cli -a 192.168.0.10 --tls --tls-version 1.2 \\
+    --tls-fingerprint 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef \\
+    -r 1000
+.EE
+.PP
+Inspect a TLS endpoint without sending Modbus traffic:
+.PP
+.EX
+nymea-modbus-cli -a 192.168.0.10 --tls-info --tls-version 1.2 \\
+    --tls-accept-any-fingerprint
+.EE
+.PP
+Read two holding registers over Modbus RTU:
+.PP
+.EX
+nymea-modbus-cli --serial /dev/ttyUSB0 --baudrate 9600 -r 1000 -l 2
+.EE
+.PP
+Write decimal value 16 to holding register 200:
+.PP
+.EX
+nymea-modbus-cli -a 192.168.0.10 -r 200 -w 16
+.EE
+.PP
+Write two holding registers using compact hexadecimal data:
+.PP
+.EX
+nymea-modbus-cli -a 192.168.0.10 -r 200 -w 0x00010002
+.EE
+.PP
+Decode two registers as both an unsigned integer and IEEE-754 float:
+.PP
+.EX
+nymea-modbus-cli -a 192.168.0.10 -r 200 -l 2 \\
+    --decode uint32 --decode float32
+.EE
+.PP
+Write four coils:
+.PP
+.EX
+nymea-modbus-cli -a 192.168.0.10 -t coils -r 20 \\
+    --write true,false,1,0
+.EE
+.SH EXIT STATUS
+Returns zero after a successful request, TLS inspection, or serial-port list.
+Returns non-zero for invalid arguments, connection or TLS failures, Modbus
+errors, and unsuccessful reads or writes.
+.SH FILES
+.TP
+.I /usr/share/bash-completion/completions/nymea-modbus-cli
+Bash command completion definitions.
+.SH SECURITY
+Prefer a verified CA chain or an independently verified SPKI fingerprint.
+Private-key passphrases should be supplied using
+.B --tls-client-key-passphrase-file
+rather than placed directly on the command line. Protect all client private
+keys and passphrase files from other users.
+.SH SEE ALSO
+.BR openssl (1),
+.BR bash (1)
+.SH AUTHORS
+nymea GmbH and chargebyte austria GmbH.

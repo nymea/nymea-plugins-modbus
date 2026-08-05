@@ -31,13 +31,24 @@
 #include <QHostAddress>
 #include <QtSerialBus>
 #include <QLoggingCategory>
+#include <QSslCertificate>
+#include <QSslConfiguration>
+#include <QSslError>
 
 Q_DECLARE_LOGGING_CATEGORY(dcModbusTcpMaster)
+
+class ModbusTlsTunnel;
 
 class ModbusTcpMaster : public QObject
 {
     Q_OBJECT
 public:
+    enum Transport {
+        TransportTcp,
+        TransportTls
+    };
+    Q_ENUM(Transport)
+
     explicit ModbusTcpMaster(const QHostAddress &hostAddress, uint port, QObject *parent = nullptr);
     ~ModbusTcpMaster();
 
@@ -50,6 +61,26 @@ public:
     void setPort(uint port);
 
     QString connectionUrl() const;
+
+    Transport transport() const;
+    void setTransport(Transport transport);
+
+    QSslConfiguration tlsConfiguration() const;
+    void setTlsConfiguration(const QSslConfiguration &configuration);
+
+    QString tlsServerName() const;
+    void setTlsServerName(const QString &serverName);
+
+    QString acceptedPeerCertificateFingerprint() const;
+    bool setAcceptedPeerCertificateFingerprint(const QString &fingerprint);
+    QString peerCertificateFingerprint() const;
+    QSslCertificate peerCertificate() const;
+    QSslConfiguration negotiatedTlsConfiguration() const;
+
+    bool tlsSessionResumptionEnabled() const;
+    void setTlsSessionResumptionEnabled(bool enabled);
+    bool tlsSessionAvailable() const;
+    void clearTlsSession();
 
     bool connected() const;
 
@@ -94,6 +125,16 @@ protected:
     int m_numberOfRetries = 3;
     bool m_connected = false;
 
+    Transport m_transport = TransportTcp;
+    QSslConfiguration m_tlsConfiguration = QSslConfiguration::defaultConfiguration();
+    QSslConfiguration m_negotiatedTlsConfiguration;
+    QString m_tlsServerName;
+    QString m_acceptedPeerCertificateFingerprint;
+    QString m_peerCertificateFingerprint;
+    QSslCertificate m_peerCertificate;
+    QByteArray m_tlsSessionTicket;
+    bool m_tlsSessionResumptionEnabled = true;
+
 private slots:
     void onModbusErrorOccurred(QModbusDevice::Error error);
     void onModbusStateChanged(QModbusDevice::State state);
@@ -101,6 +142,11 @@ private slots:
 signals:
     void connectionStateChanged(bool status);
     void connectionErrorOccurred(QModbusDevice::Error error);
+    void tcpConnectionEstablished();
+    void tlsHandshakeFinished(const QSslConfiguration &configuration);
+    void peerCertificateAvailable(const QSslCertificate &certificate, const QString &spkiSha256Fingerprint);
+    void tlsErrors(const QList<QSslError> &errors);
+    void tlsPeerVerificationFailed(const QString &expectedFingerprint, const QString &actualFingerprint);
 
     void writeRequestExecuted(const QUuid &requestId, bool success);
     void writeRequestError(const QUuid &requestId, const QString &error);
@@ -112,6 +158,18 @@ signals:
     void receivedDiscreteInput(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values);
     void receivedHoldingRegister(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values);
     void receivedInputRegister(uint slaveAddress, uint modbusRegister, const QVector<quint16> &values);
+
+private:
+    ModbusTlsTunnel *m_tlsTunnel = nullptr;
+    QString m_tlsErrorString;
+    bool m_connectionRequested = false;
+    bool m_tlsConnecting = false;
+    bool m_immediateReconnectRequested = false;
+
+    void setupTlsTunnel();
+    void connectModbusClient(const QHostAddress &address, quint16 port);
+    void handleTransportDisconnected();
+    void scheduleReconnect(int delay = 4000);
 
 };
 

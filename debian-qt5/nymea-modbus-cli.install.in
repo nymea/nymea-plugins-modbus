@@ -1,1 +1,3 @@
 usr/bin/nymea-modbus-cli
+usr/share/man/man1/nymea-modbus-cli.1
+usr/share/bash-completion/completions/nymea-modbus-cli

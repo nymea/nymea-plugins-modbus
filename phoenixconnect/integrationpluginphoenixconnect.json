@@ -14,7 +14,7 @@
                     "name": "wallbeEco2",
                     "createMethods": ["discovery", "user"],
                     "discoveryType": "weak",
-                    "interfaces": ["evcharger", "connectable", "networkdevice"],
+                    "interfaces": ["evchargerac", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "551b03f0-dd70-4463-929b-3668dbd3290f",
@@ -138,7 +138,7 @@
                     "name": "wallbePro",
                     "createMethods": ["discovery", "user"],
                     "discoveryType": "weak",
-                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable", "networkdevice"],
+                    "interfaces": ["evchargerac", "smartmeterconsumer", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "71a147c7-a87c-45e0-9e91-657d5c7fd0cd",
@@ -278,7 +278,7 @@
                     "name": "compleoEcoS",
                     "createMethods": ["discovery", "user"],
                     "discoveryType": "weak",
-                    "interfaces": ["evcharger", "connectable", "networkdevice"],
+                    "interfaces": ["evchargerac", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "d65aa536-e60d-4e0d-986c-80c1023e0e81",
@@ -402,7 +402,7 @@
                     "name": "compleoPro",
                     "createMethods": ["discovery", "user"],
                     "discoveryType": "weak",
-                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable", "networkdevice"],
+                    "interfaces": ["evchargerac", "smartmeterconsumer", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "e7ca8712-4a4a-44e8-a36b-233486acd687",
@@ -666,7 +666,7 @@
                     "name": "scapoEco",
                     "createMethods": ["discovery", "user"],
                     "discoveryType": "weak",
-                    "interfaces": ["evcharger", "connectable", "networkdevice"],
+                    "interfaces": ["evchargerac", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "2b544329-4d59-4974-8c3d-8b6aadf26c2c",
@@ -790,7 +790,7 @@
                     "name": "scapoVision",
                     "createMethods": ["discovery", "user"],
                     "discoveryType": "weak",
-                    "interfaces": ["evcharger", "smartmeterconsumer", "connectable", "networkdevice"],
+                    "interfaces": ["evchargerac", "smartmeterconsumer", "connectable", "networkdevice"],
                     "paramTypes": [
                         {
                             "id": "8a0a3c7c-1197-4c55-8a7d-ee87587235bd",
