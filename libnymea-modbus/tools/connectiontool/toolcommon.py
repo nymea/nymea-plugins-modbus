@@ -181,8 +181,74 @@ def writeEnumDefinition(fileDescriptor, enumDefinition):
     writeLine(fileDescriptor)
 
 
+def writeFlagsDefinition(fileDescriptor, flagsDefinition):
+    logger.debug('Writing flags %s', flagsDefinition)
+    flagsBaseName = flagsDefinition['name']
+    flagName = flagsBaseName + 'Flag'
+    flagsName = flagsBaseName + 'Flags'
+    flagValues = flagsDefinition['values']
+    writeLine(fileDescriptor, '    enum %s {' % flagName)
+    for i in range(len(flagValues)):
+        flagData = flagValues[i]
+        line = ('        %s%s = %s' % (flagName, flagData['key'], flagData['value']))
+        if i < (len(flagValues) - 1):
+            line += ','
+        writeLine(fileDescriptor, line)
+    writeLine(fileDescriptor, '    };')
+    writeLine(fileDescriptor, '    Q_ENUM(%s)' % flagName)
+    writeLine(fileDescriptor, '    Q_DECLARE_FLAGS(%s, %s)' % (flagsName, flagName))
+    writeLine(fileDescriptor, '    Q_FLAG(%s)' % flagsName)
+    writeLine(fileDescriptor)
+
+
+def validateFlags(registerJson):
+    flagsDefinitions = registerJson.get('flags', [])
+    knownFlags = set()
+    for flagsDefinition in flagsDefinitions:
+        flagsName = flagsDefinition.get('name')
+        if not flagsName or flagsName in knownFlags:
+            logger.warning('Error: duplicate or missing flags definition name "%s".' % flagsName)
+            exit(1)
+        knownFlags.add(flagsName)
+        masks = set()
+        for flagData in flagsDefinition.get('values', []):
+            mask = flagData.get('value')
+            if isinstance(mask, bool) or not isinstance(mask, int) or mask == 0 or mask > 0xffff or mask & (mask - 1):
+                logger.warning('Error: flag "%s.%s" must be a literal, nonzero, single-bit uint16 mask.' % (flagsName, flagData.get('key')))
+                exit(1)
+            if mask in masks:
+                logger.warning('Error: duplicate mask %s in flags definition "%s".' % (mask, flagsName))
+                exit(1)
+            masks.add(mask)
+
+    registerDefinitions = list(registerJson.get('registers', []))
+    for blockDefinition in registerJson.get('blocks', []):
+        registerDefinitions.extend(blockDefinition.get('registers', []))
+    for registerDefinition in registerDefinitions:
+        if 'enum' in registerDefinition and 'flags' in registerDefinition:
+            logger.warning('Error: register "%s" cannot declare both enum and flags.' % registerDefinition.get('id'))
+            exit(1)
+        if 'flags' not in registerDefinition:
+            continue
+        if registerDefinition['flags'] not in knownFlags:
+            logger.warning('Error: register "%s" references unknown flags definition "%s".' % (registerDefinition.get('id'), registerDefinition['flags']))
+            exit(1)
+        if registerDefinition.get('type') != 'uint16':
+            logger.warning('Error: flags are currently supported only for uint16 registers ("%s").' % registerDefinition.get('id'))
+            exit(1)
+
+
+def getLoggedValuesExpression(registerDefinitions, variableName):
+    if isinstance(registerDefinitions, dict):
+        registerDefinitions = [registerDefinitions]
+    return '"[REDACTED]"' if any(registerDefinition.get('sensitive', False) for registerDefinition in registerDefinitions) else variableName
+
+
 def getCppDataType(registerDefinition, rawType = False):
     if not rawType:
+        if 'flags' in registerDefinition:
+            return registerDefinition['flags'] + 'Flags'
+
         if 'enum' in registerDefinition:
             return registerDefinition['enum']
 
@@ -228,8 +294,7 @@ def getConversionToValueMethod(registerDefinition):
     propertyName = registerDefinition['id']
     propertyTyp = getCppDataType(registerDefinition, True)
 
-    if 'enum' in registerDefinition:
-        enumName = registerDefinition['enum']
+    if 'enum' in registerDefinition or 'flags' in registerDefinition:
         if registerDefinition['type'] == 'uint16':
             return ('ModbusDataUtils::convertFromUInt16(static_cast<%s>(%s))' % (propertyTyp, propertyName))
         elif registerDefinition['type'] == 'int16':
@@ -291,12 +356,14 @@ def getConversionToValueMethod(registerDefinition):
         return ('ModbusDataUtils::convertFromFloat64(%s, m_endianness)' % propertyName)
     elif registerDefinition['type'] == 'string':
         return ('ModbusDataUtils::convertFromString(%s, m_stringEndianness)' % propertyName)
+    elif registerDefinition['type'] == 'raw':
+        return propertyName
 
 
 def getValueConversionMethod(registerDefinition):
     # Handle enums
-    if 'enum' in registerDefinition:
-        enumName = registerDefinition['enum']
+    if 'enum' in registerDefinition or 'flags' in registerDefinition:
+        enumName = getCppDataType(registerDefinition)
         if registerDefinition['type'] == 'uint16':
             return ('static_cast<%s>(ModbusDataUtils::convertToUInt16(values))' % (enumName))
         elif registerDefinition['type'] == 'int16':
@@ -469,7 +536,10 @@ def writeRegistersDebugLine(fileDescriptor, debugObjectParamName, registerDefini
         elif registerType == 'discreteInputs':
             typeString = 'discrete'
 
-        line = ('"    - %s %s | %s: " << %s->%s()' % (typeString, registerDefinition['address'], registerDefinition['description'], debugObjectParamName, propertyName))
+        if registerDefinition.get('sensitive', False):
+            line = ('"    - %s %s | %s: [REDACTED]"' % (typeString, registerDefinition['address'], registerDefinition['description']))
+        else:
+            line = ('"    - %s %s | %s: " << %s->%s()' % (typeString, registerDefinition['address'], registerDefinition['description'], debugObjectParamName, propertyName))
         if 'unit' in registerDefinition and registerDefinition['unit'] != '':
             line += (' << " [%s]"' % registerDefinition['unit'])
         writeLine(fileDescriptor, '    debug.nospace().noquote() << %s << "\\n";' % (line))
@@ -529,7 +599,8 @@ def writePropertyProcessMethodImplementations(fileDescriptor, className, registe
 
         writeLine(fileDescriptor, 'void %s::process%sRegisterValues(const QVector<quint16> &values)' % (className, propertyName[0].upper() + propertyName[1:]))
         writeLine(fileDescriptor, '{')
-        writeLine(fileDescriptor, '    qCDebug(dc%s()) << "<-- Response from \\"%s\\" register" << %s << "size:" << %s << values;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
+        loggedValues = getLoggedValuesExpression(registerDefinition, 'values')
+        writeLine(fileDescriptor, '    qCDebug(dc%s()) << "<-- Response from \\"%s\\" register" << %s << "size:" << %s << %s;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size'], loggedValues))
         writeLine(fileDescriptor, '    if (values.size() == %s) {' % (registerDefinition['size']))
         writeLine(fileDescriptor, '        %s received%s = %s;' % (propertyTyp, propertyName[0].upper() + propertyName[1:], getValueConversionMethod(registerDefinition)))
         writeLine(fileDescriptor, '        emit %sReadFinished(received%s);' % (propertyName, propertyName[0].upper() + propertyName[1:]))
@@ -539,7 +610,7 @@ def writePropertyProcessMethodImplementations(fileDescriptor, className, registe
         writeLine(fileDescriptor, '            emit %sChanged(m_%s);' % (propertyName, propertyName))
         writeLine(fileDescriptor, '        }')
         writeLine(fileDescriptor, '    } else {')
-        writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Reading from \\"%s\\" registers" << %s << "size:" << %s << "returned different size than requested. Ignoring incomplete data" << values;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size']))
+        writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Reading from \\"%s\\" registers" << %s << "size:" << %s << "returned different size than requested. Ignoring incomplete data" << %s;' % (className, registerDefinition['description'], registerDefinition['address'], registerDefinition['size'], loggedValues))
         writeLine(fileDescriptor, '    }')
         writeLine(fileDescriptor, '}')
         writeLine(fileDescriptor)
@@ -584,7 +655,8 @@ def writeBlockPropertiesProcessMethodImplementations(fileDescriptor, className, 
 
         writeLine(fileDescriptor, 'void %s::processBlock%sRegisterValues(const QVector<quint16> &blockValues)' % (className, blockName[0].upper() + blockName[1:]))
         writeLine(fileDescriptor, '{')
-        writeLine(fileDescriptor, '    qCDebug(dc%s()) << "<-- Response from reading block \\"%s\\" register" << %s << "size:" << %s << blockValues;' % (className, blockName, blockStartAddress, blockSize))
+        loggedBlockValues = getLoggedValuesExpression(blockRegisters, 'blockValues')
+        writeLine(fileDescriptor, '    qCDebug(dc%s()) << "<-- Response from reading block \\"%s\\" register" << %s << "size:" << %s << %s;' % (className, blockName, blockStartAddress, blockSize, loggedBlockValues))
         writeLine(fileDescriptor, '    if (blockValues.size() == %s) {' % (blockSize))
 
         # Start parsing the registers using offsets
@@ -595,7 +667,7 @@ def writeBlockPropertiesProcessMethodImplementations(fileDescriptor, className, 
             offset += blockRegister['size']
 
         writeLine(fileDescriptor, '    } else {')
-        writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Reading from \\"%s\\" block registers" << %s << "size:" << %s << "returned different size than requested. Ignoring incomplete data" << blockValues;' % (className, blockName, blockStartAddress, blockSize))
+        writeLine(fileDescriptor, '        qCWarning(dc%s()) << "Reading from \\"%s\\" block registers" << %s << "size:" << %s << "returned different size than requested. Ignoring incomplete data" << %s;' % (className, blockName, blockStartAddress, blockSize, loggedBlockValues))
         writeLine(fileDescriptor, '    }')
         writeLine(fileDescriptor, '}')
         writeLine(fileDescriptor)
