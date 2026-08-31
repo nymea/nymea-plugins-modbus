@@ -1,3 +1,14 @@
+nymea-plugins-modbus (1.17.0) resolute; urgency=medium
+
+  [ Simon Stürz ]
+  * PCE: Add modbus TLS support
+  * PCE: Add mDNS discovery
+  * libnymea-modbus: Add modbus TLS support
+  * nymea-modbus-cli: Add man, bash completion and improve read write
+  * PCE: Add RFID support
+
+ -- jenkins <developer@nymea.io>  Mon, 31 Aug 2026 11:06:41 +0200
+
 nymea-plugins-modbus (1.16.0) resolute; urgency=medium
 
   [ Simon Stürz ]
