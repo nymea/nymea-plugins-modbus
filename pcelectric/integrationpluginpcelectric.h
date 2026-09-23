@@ -67,6 +67,7 @@ private:
     QHash<Thing *, QHostAddress> m_monitorAddresses;
     QHash<Thing *, QSet<QHostAddress>> m_zeroConfAddresses;
     QHash<Thing *, QSet<QHostAddress>> m_attemptedAddresses;
+    QHash<Thing *, QString> m_addressFailureReasons;
     QHash<Thing *, QPointer<ThingSetupInfo>> m_pendingInitialSetups;
     QHash<Thing *, QString> m_unexpectedSerialNumbers;
     QHash<Thing *, QString> m_configuredSerialNumbers;
@@ -97,7 +98,8 @@ private:
     void refreshZeroConfAddresses(Thing *thing);
     void providerAddressesChanged(Thing *thing);
     void tryNextAddress(Thing *thing);
-    void addressAttemptFailed(Thing *thing, const QString &unexpectedSerial = QString());
+    void addressAttemptFailed(Thing *thing, const QString &unexpectedSerial = QString(),
+                              const QString &failureReason = QString());
     void finishInitialSetup(Thing *thing, Thing::ThingError error, const QString &message = QString());
     void clearAddressState(Thing *thing);
     bool configureTls(Thing *thing, PceWallbox *connection);

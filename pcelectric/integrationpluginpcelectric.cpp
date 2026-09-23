@@ -527,14 +527,37 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
         }
     });
 
-    connect(connection->modbusTcpMaster(), &ModbusTcpMaster::connectionErrorOccurred, thing, [this, thing](QModbusDevice::Error error) {
+    connect(connection->modbusTcpMaster(), &ModbusTcpMaster::connectionErrorOccurred, thing,
+            [this, thing, connection](QModbusDevice::Error error) {
+        ModbusTcpMaster *master = connection->modbusTcpMaster();
+        const QString failureReason = master->errorString();
+        const QString effectiveFailureReason = failureReason.isEmpty()
+            ? QStringLiteral("No error details reported.")
+            : failureReason;
+        qCWarning(dcPcElectric()) << "PCE connection attempt failed for" << thing->name()
+                                  << "at" << master->connectionUrl()
+                                  << "Modbus error:" << error
+                                  << "reason:" << effectiveFailureReason;
+        if (master->transport() == ModbusTcpMaster::TransportTls) {
+            qCWarning(dcPcElectric()) << "PCE firmware requires mutually authenticated TLS on port 802."
+                                      << "A remote close at this stage commonly means that port 802 is"
+                                      << "blocked, or that the wallbox has not accepted this client identity."
+                                      << "Initial pairing is only open for 60 minutes after power-up or a local pairing reset.";
+        }
         if (error == QModbusDevice::ConnectionError && m_addressAttemptsInProgress.contains(thing))
-            addressAttemptFailed(thing);
+            addressAttemptFailed(thing, QString(), effectiveFailureReason);
     });
 
     connect(connection, &PceWallbox::initializationFinished, thing, [this, thing, connection](bool success) {
         if (!success) {
-            addressAttemptFailed(thing);
+            const QString failureReason = connection->modbusTcpMaster()->errorString();
+            const QString effectiveFailureReason = failureReason.isEmpty()
+                ? QStringLiteral("The initial Modbus register read did not complete.")
+                : failureReason;
+            qCWarning(dcPcElectric()) << "PCE initialization failed for" << thing->name()
+                                      << "at" << connection->modbusTcpMaster()->connectionUrl()
+                                      << "reason:" << effectiveFailureReason;
+            addressAttemptFailed(thing, QString(), effectiveFailureReason);
             return;
         }
 
@@ -586,7 +609,10 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
                 if (!identityAvailable || !configureTls(guardedThing, guardedConnection)) {
                     qCWarning(dcPcElectric()) << "Could not upgrade the PCE wallbox to mandatory TLS:" << errorString;
                     guardedConnection->disconnectDevice();
-                    addressAttemptFailed(guardedThing);
+                    addressAttemptFailed(guardedThing, QString(),
+                                         errorString.isEmpty()
+                                             ? QStringLiteral("Could not configure the TLS client identity.")
+                                             : errorString);
                     return;
                 }
 
@@ -607,7 +633,8 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
                                                      && fingerprint == master->acceptedPeerCertificateFingerprint());
             if (fingerprint.isEmpty()) {
                 connection->disconnectDevice();
-                addressAttemptFailed(thing);
+                addressAttemptFailed(thing, QString(),
+                                     QStringLiteral("The TLS server did not provide a certificate fingerprint."));
                 return;
             }
             pluginStorage()->remove(storagePrefix(thing) + "/tlsRequired");
@@ -618,6 +645,7 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
         m_addressAttemptsInProgress.remove(thing);
         m_attemptedAddresses.remove(thing);
         m_unexpectedSerialNumbers.remove(thing);
+        m_addressFailureReasons.remove(thing);
         thing->setStateValue("connected", true);
     });
 
@@ -1010,9 +1038,12 @@ void IntegrationPluginPcElectric::tryNextAddress(Thing *thing)
                     Thing::ThingErrorInvalidParameter,
                     tr("The PCE wallbox serial number does not match. The endpoint reported %1.").arg(unexpectedSerial));
             } else {
+                const QString failureReason = m_addressFailureReasons.value(
+                    thing, QStringLiteral("No error details reported."));
                 finishInitialSetup(thing,
                                    Thing::ThingErrorHardwareNotAvailable,
-                                   QT_TR_NOOP("None of the available PCE wallbox addresses could be reached."));
+                                   tr("None of the available PCE wallbox addresses could be reached. Last error: %1")
+                                       .arg(failureReason));
             }
         } else {
             if (addresses.isEmpty()) {
@@ -1020,6 +1051,8 @@ void IntegrationPluginPcElectric::tryNextAddress(Thing *thing)
                                        << "Waiting for the network monitor or ZeroConf.";
             } else if (!m_addressRetriesScheduled.contains(thing)) {
                 qCInfo(dcPcElectric()) << "All currently known addresses have failed for" << thing->name()
+                                       << "Last failure:" << m_addressFailureReasons.value(thing,
+                                                                                             QStringLiteral("No error details reported."))
                                        << "Retrying them in" << addressRetryIntervalMs << "ms.";
                 m_addressRetriesScheduled.insert(thing);
                 QTimer::singleShot(addressRetryIntervalMs, thing, [this, thing]() {
@@ -1028,6 +1061,7 @@ void IntegrationPluginPcElectric::tryNextAddress(Thing *thing)
                         return;
                     m_attemptedAddresses.remove(thing);
                     m_unexpectedSerialNumbers.remove(thing);
+                    m_addressFailureReasons.remove(thing);
                     tryNextAddress(thing);
                 });
             }
@@ -1036,6 +1070,7 @@ void IntegrationPluginPcElectric::tryNextAddress(Thing *thing)
     }
 
     qCInfo(dcPcElectric()) << "Trying PCE wallbox address" << nextAddress << "for" << thing->name();
+    m_addressFailureReasons.remove(thing);
     m_attemptedAddresses[thing].insert(nextAddress);
     m_addressAttemptsInProgress.insert(thing);
     const bool addressChanged = !currentAddress.isNull() && currentAddress != nextAddress;
@@ -1046,18 +1081,23 @@ void IntegrationPluginPcElectric::tryNextAddress(Thing *thing)
         connection->connectDevice();
 }
 
-void IntegrationPluginPcElectric::addressAttemptFailed(Thing *thing, const QString &unexpectedSerial)
+void IntegrationPluginPcElectric::addressAttemptFailed(Thing *thing, const QString &unexpectedSerial,
+                                                       const QString &failureReason)
 {
     if (!m_connections.contains(thing) || !m_addressAttemptsInProgress.remove(thing))
         return;
 
     if (!unexpectedSerial.isEmpty())
         m_unexpectedSerialNumbers.insert(thing, unexpectedSerial);
+    if (!failureReason.isEmpty())
+        m_addressFailureReasons.insert(thing, failureReason);
 
     PceWallbox *connection = m_connections.value(thing);
     if (isStaticThing(thing) && !m_pendingInitialSetups.contains(thing)) {
         qCWarning(dcPcElectric()) << "Static PCE wallbox connection failed on"
                                   << connection->modbusTcpMaster()->hostAddress()
+                                  << "Reason:" << m_addressFailureReasons.value(thing,
+                                                                                   QStringLiteral("No error details reported."))
                                   << "Keeping the configured address.";
         return;
     }
@@ -1093,6 +1133,7 @@ void IntegrationPluginPcElectric::clearAddressState(Thing *thing)
     m_monitorAddresses.remove(thing);
     m_zeroConfAddresses.remove(thing);
     m_attemptedAddresses.remove(thing);
+    m_addressFailureReasons.remove(thing);
     m_pendingInitialSetups.remove(thing);
     m_unexpectedSerialNumbers.remove(thing);
     m_addressAttemptsInProgress.remove(thing);
@@ -1431,11 +1472,27 @@ bool IntegrationPluginPcElectric::configureTls(Thing *thing, PceWallbox *connect
                                << "protocol:" << negotiatedConfiguration.sessionProtocol()
                                << "cipher:" << negotiatedConfiguration.sessionCipher().name();
     });
-    connect(master, &ModbusTcpMaster::tlsErrors, connection, [](const QList<QSslError> &errors) {
+    connect(master, &ModbusTcpMaster::tlsErrors, connection, [thing, master](const QList<QSslError> &errors) {
         QStringList errorStrings;
         for (const QSslError &error : errors)
             errorStrings.append(error.errorString());
-        qCDebug(dcPcElectric()) << "PCE TLS handshake reported SSL errors:" << errorStrings;
+        qCWarning(dcPcElectric()) << "PCE TLS certificate validation reported errors for" << thing->name()
+                                  << "at" << master->connectionUrl() << ":" << errorStrings
+                                  << "A self-signed server certificate is expected during first TOFU pairing,"
+                                  << "but the TLS connection can continue only if its server key is accepted.";
+    });
+    connect(master, &ModbusTcpMaster::tlsPeerVerificationFailed, connection,
+            [thing, master](const QString &expectedFingerprint, const QString &actualFingerprint) {
+        qCWarning(dcPcElectric()) << "PCE TLS server certificate was rejected for" << thing->name()
+                                  << "at" << master->connectionUrl()
+                                  << "expected SPKI-SHA256:"
+                                  << (expectedFingerprint.isEmpty()
+                                          ? QStringLiteral("<TOFU: no accepted server certificate>")
+                                          : expectedFingerprint)
+                                  << "received SPKI-SHA256:"
+                                  << (actualFingerprint.isEmpty()
+                                          ? QStringLiteral("<no server certificate received>")
+                                          : actualFingerprint);
     });
 
     if (!storedFingerprint.isEmpty()) {
