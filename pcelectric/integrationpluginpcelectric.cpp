@@ -498,7 +498,10 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
         qCInfo(dcPcElectric()) << "Reachable changed to" << reachable << "for" << thing;
         const bool wasConnected = thing->stateValue("connected").toBool();
         m_initialUpdate[thing] = true;
-        thing->setStateValue("connected", reachable && connection->operational());
+        // A reachable TCP socket is not enough to consider the wallbox connected:
+        // initialization may still trigger the 502-to-TLS/802 handover.
+        if (!reachable)
+            thing->setStateValue("connected", false);
 
         // Reset energy related information if not reachable
         if (!reachable && thing->thingClassId() == ev11ThingClassId) {
@@ -676,8 +679,37 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
         }
 
         thing->setStateMaxValue("maxChargingCurrent", connection->maxChargingCurrentDip() / 1000);
-        thing->setStateValue("pluggedIn", connection->chargingState() >= PceWallbox::ChargingStateB1 && connection->chargingState() < PceWallbox::ChargingStateError);
+        const bool pluggedIn = connection->chargingState() >= PceWallbox::ChargingStateB1
+            && connection->chargingState() < PceWallbox::ChargingStateError;
+        const bool wasPluggedIn = thing->stateValue("pluggedIn").toBool();
+        thing->setStateValue("pluggedIn", pluggedIn);
         thing->setStateValue("charging", connection->chargingState() == PceWallbox::ChargingStateC2);
+
+        if (pluggedIn && !wasPluggedIn) {
+            PceWallbox::ChargingCurrentState chargingCurrentState;
+            chargingCurrentState.power = thing->stateValue("power").toBool();
+            chargingCurrentState.maxChargingCurrent = thing->stateValue("maxChargingCurrent").toDouble();
+            chargingCurrentState.desiredPhaseCount = thing->stateValue("desiredPhaseCount").toUInt();
+            m_chargingCurrentStateBuffer[thing] = chargingCurrentState;
+
+            const quint16 registerValue = PceWallbox::deriveRegisterFromStates(chargingCurrentState);
+            qCInfo(dcPcElectric()) << "Car plugged in; synchronizing nymea charging settings to the wallbox"
+                                   << chargingCurrentState << "register:" << registerValue;
+            QueuedModbusReply *reply = connection->setChargingCurrentAsync(registerValue);
+            if (reply) {
+                connect(reply, &QueuedModbusReply::finished, thing, [reply, thing, chargingCurrentState, registerValue]() {
+                    if (reply->error() != QModbusDevice::NoError) {
+                        qCWarning(dcPcElectric()) << "Could not synchronize charging settings after plug-in for"
+                                                  << thing->name() << "register:" << registerValue
+                                                  << reply->errorString();
+                        return;
+                    }
+
+                    qCDebug(dcPcElectric()) << "Synchronized nymea charging settings to the wallbox after plug-in"
+                                            << chargingCurrentState;
+                });
+            }
+        }
 
         switch (connection->chargingState()) {
         case PceWallbox::ChargingStateInitializing:
@@ -791,14 +823,23 @@ void IntegrationPluginPcElectric::setupConnection(ThingSetupInfo *info)
         if (m_initialUpdate.value(thing)) {
             m_initialUpdate[thing] = false;
 
-            qCDebug(dcPcElectric()) << "Update initial charger states from charging current register...";
+            qCDebug(dcPcElectric()) << "Synchronize initial charger settings from the charging current register when available...";
 
             PceWallbox::ChargingCurrentState chargingCurrentState = PceWallbox::deriveStatesFromRegister(connection->chargingCurrent());
-            qCDebug(dcPcElectric()) << chargingCurrentState;
-            thing->setStateValue("power", chargingCurrentState.power);
-            thing->setStateValue("desiredPhaseCount", chargingCurrentState.desiredPhaseCount);
-            if (chargingCurrentState.power)
+            if (chargingCurrentState.power) {
+                qCDebug(dcPcElectric()) << "Charging current register contains active settings:" << chargingCurrentState;
+                thing->setStateValue("power", true);
                 thing->setStateValue("maxChargingCurrent", chargingCurrentState.maxChargingCurrent);
+                thing->setStateValue("desiredPhaseCount", chargingCurrentState.desiredPhaseCount);
+            } else {
+                // A paused wallbox reports zero, which does not contain its saved
+                // current limit or phase setting. Keep nymea's desired values.
+                chargingCurrentState.power = thing->stateValue("power").toBool();
+                chargingCurrentState.maxChargingCurrent = thing->stateValue("maxChargingCurrent").toDouble();
+                chargingCurrentState.desiredPhaseCount = thing->stateValue("desiredPhaseCount").toUInt();
+                qCDebug(dcPcElectric()) << "Charging current register is zero; preserving nymea settings:"
+                                        << chargingCurrentState;
+            }
 
             m_chargingCurrentStateBuffer[thing] = chargingCurrentState;
 
@@ -1473,13 +1514,27 @@ bool IntegrationPluginPcElectric::configureTls(Thing *thing, PceWallbox *connect
                                << "cipher:" << negotiatedConfiguration.sessionCipher().name();
     });
     connect(master, &ModbusTcpMaster::tlsErrors, connection, [thing, master](const QList<QSslError> &errors) {
-        QStringList errorStrings;
-        for (const QSslError &error : errors)
-            errorStrings.append(error.errorString());
-        qCWarning(dcPcElectric()) << "PCE TLS certificate validation reported errors for" << thing->name()
-                                  << "at" << master->connectionUrl() << ":" << errorStrings
-                                  << "A self-signed server certificate is expected during first TOFU pairing,"
-                                  << "but the TLS connection can continue only if its server key is accepted.";
+        QStringList unexpectedErrorStrings;
+        for (const QSslError &error : errors) {
+            switch (error.error()) {
+            // PCE wallboxes use self-signed certificates, often without an IP
+            // subject name. These standard PKI errors are covered by SPKI pinning.
+            case QSslError::UnableToGetIssuerCertificate:
+            case QSslError::SelfSignedCertificate:
+            case QSslError::SelfSignedCertificateInChain:
+            case QSslError::UnableToGetLocalIssuerCertificate:
+            case QSslError::UnableToVerifyFirstCertificate:
+            case QSslError::HostNameMismatch:
+                break;
+            default:
+                unexpectedErrorStrings.append(error.errorString());
+                break;
+            }
+        }
+        if (!unexpectedErrorStrings.isEmpty()) {
+            qCWarning(dcPcElectric()) << "Unexpected PCE TLS certificate validation errors for" << thing->name()
+                                      << "at" << master->connectionUrl() << ":" << unexpectedErrorStrings;
+        }
     });
     connect(master, &ModbusTcpMaster::tlsPeerVerificationFailed, connection,
             [thing, master](const QString &expectedFingerprint, const QString &actualFingerprint) {
