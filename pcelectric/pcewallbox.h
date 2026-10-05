@@ -31,6 +31,8 @@
 #include <QSet>
 #include <QTimer>
 
+#include <functional>
+
 #include <queuedmodbusreply.h>
 
 #include "ev11modbustcpconnection.h"
@@ -54,6 +56,18 @@ public:
     bool operational() const;
     void startOperationalMode();
 
+    void setRfidEnabled(bool enabled);
+    bool rfidEnabled() const;
+    bool initializeRfidOperatingMode(RfidOperatingMode mode);
+    bool hasPendingRfidTag() const;
+    bool hasRfidAuthorization() const;
+    bool canSubmitRfidDecision(bool approved) const;
+    bool submitRfidDecision(bool approved);
+    bool rfidEnrollmentActive() const;
+    bool setRfidEnrollmentActive(bool active);
+
+    QueuedModbusReply *setRfidOperatingModeAsync(RfidOperatingMode mode);
+
     QueuedModbusReply *setChargingCurrentAsync(quint16 chargingCurrent); // mA
 
     QueuedModbusReply *setLedBrightnessAsync(quint16 percentage);
@@ -72,14 +86,27 @@ public:
 
     static quint16 deriveRegisterFromStates(PceWallbox::ChargingCurrentState state);
     static PceWallbox::ChargingCurrentState deriveStatesFromRegister(quint16 registerValue);
+    static bool parseRfidToken(const QVector<quint16> &values, QString *code);
+
+signals:
+    void rfidInitializationFinished(bool success);
+    void rfidTagDetected(const QString &code);
+    void rfidDecisionFinished(bool success);
+    void rfidEnrollmentActiveChanged(bool active);
+    void rfidEnrollmentChangeFinished(bool active, bool success);
 
 private slots:
     void sendHeartbeat();
     void sendNextRequest();
 
+protected:
+    virtual bool rfidTransportAvailable() const;
+
 private:
-    static constexpr int RequestInterval = 300;
-    static constexpr int UpdateInterval = 1000;
+    friend class TestPceWallbox;
+
+    static constexpr int RequestInterval = 100;
+    static constexpr int UpdateInterval = 500;
 
     QTimer m_timer;
     QTimer m_requestTimer;
@@ -93,10 +120,42 @@ private:
     bool m_operationalStartupEnabled = true;
     bool m_operational = false;
     bool m_updateInProgress = false;
+    bool m_rfidEnabled = false;
+    bool m_rfidInitializing = false;
+    bool m_rfidModeConfirmed = false;
+    bool m_rfidDecisionInProgress = false;
+    bool m_rfidEnrollmentActive = false;
+    bool m_rfidEnrollmentArming = false;
+    bool m_rfidEnrollmentDisarming = false;
+    bool m_rfidEnrollmentChangeInProgress = false;
+    bool m_requestedRfidEnrollmentActive = false;
+    bool m_rfidSessionWriteInProgress = false;
+    bool m_rfidSessionCommitAttempted = false;
+    bool m_rfidReadClearInProgress = false;
+    QVector<quint16> m_observedRfidToken;
+    QVector<quint16> m_pendingRfidToken;
+    QVector<quint16> m_pendingRfidEnrollmentToken;
+    QVector<quint16> m_acceptedRfidToken;
+    bool m_acceptedRfidTokenCommitted = false;
+    quint64 m_rfidLedGeneration = 0;
+    quint64 m_rfidEnrollmentGeneration = 0;
+    quint64 m_rfidReadClearGeneration = 0;
 
     void enqueueRequest(QueuedModbusReply *reply, bool updateRequest = false);
     void requestFinished(QueuedModbusReply *reply);
     void finishUpdateRound();
+    void processRfidRead(const QVector<quint16> &values);
+    void clearRfidRead();
+    void synchronizeRfidAuthorization();
+    bool isVehiclePluggedIn() const;
+    void writeRfidSession(const QVector<quint16> &token, const char *operation,
+                          const std::function<void(bool)> &callback);
+    void resetRfidSession(const char *operation, const std::function<void(bool)> &callback);
+    void readRfidOperatingModeOnce(bool updateRequest = false);
+    void writeRfidLed(RfidLed led, const std::function<void(bool)> &callback);
+    void scheduleRfidLedReset(quint64 generation);
+    void resetRfidState();
+    bool isSensitiveDataUnit(const QModbusDataUnit &unit) const;
 
     void cleanupQueues();
 };
