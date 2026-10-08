@@ -239,9 +239,12 @@ void PcElectricDiscovery::checkNetworkDevice(const QHostAddress &address)
                                         m_runningVerifications[connection].thingClassId = ev11ThingClassId;
                                     }
 
-                                    if (connection->firmwareRevision() > QStringLiteral("0025")
-                                        && m_runningVerifications[connection].thingClassId == ev11ThingClassId) {
-                                        m_runningVerifications[connection].thingClassId = ev11RfidThingClassId;
+                                    if (connection->firmwareRevision() > QStringLiteral("0025")) {
+                                        if (m_runningVerifications[connection].thingClassId == ev11ThingClassId) {
+                                            m_runningVerifications[connection].thingClassId = ev11RfidThingClassId;
+                                        } else if (m_runningVerifications[connection].thingClassId == ev11NoMeterThingClassId) {
+                                            m_runningVerifications[connection].thingClassId = ev11RfidNoMeterThingClassId;
+                                        }
                                     }
 
                                     // Done with this connection
@@ -360,9 +363,17 @@ void PcElectricDiscovery::finishDiscovery()
         if (existingResultIndex >= 0)
             continue;
 
+        QString variant = QStringLiteral("with meter");
+        if (result.thingClassId == ev11NoMeterThingClassId)
+            variant = QStringLiteral("(no meter)");
+        else if (result.thingClassId == ev11RfidThingClassId)
+            variant = QStringLiteral("RFID with meter");
+        else if (result.thingClassId == ev11RfidNoMeterThingClassId)
+            variant = QStringLiteral("RFID (no meter)");
+
         qCInfo(dcPcElectric())
             << "Discovery: --> Found EV11.3"
-            << (result.thingClassId == ev11NoMeterThingClassId ? "(No meter)" : "with meter")
+            << variant
             << "Serial number:"
             << result.serialNumber
             << "Firmware revision:"

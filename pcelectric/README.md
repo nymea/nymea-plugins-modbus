@@ -11,19 +11,22 @@ The following EV11.3 models are supported:
 - EV11.3 Wallbox Basic (`37031110-ss`)
 - EV11.3 Wallbox Basic Z (`37031111-ss`)
 
-Nymea exposes the detected wallbox as one of two device types:
+Nymea exposes the detected wallbox as one of four device types:
 
 | Device type | Intended configuration | Additional data |
 | --- | --- | --- |
 | **PCE EV11.3** | Wallbox with an energy meter | Active power, session energy, phase voltages and phase currents |
+| **PCE EV11.3 RFID** | Wallbox with an energy meter and RFID reader | Meter measurements and RFID authorization |
 | **PCE EV11.3 (no meter)** | Wallbox without an energy meter | Charging and wallbox status without meter measurements |
+| **PCE EV11.3 RFID (no meter)** | Wallbox without an energy meter and with an RFID reader | Charging, wallbox status, and RFID authorization without meter measurements |
 
 Discovery determines the device type from the firmware revision, digital-input
-mode, and R37 monitoring mode. It does not rely only on the advertised product
-name. If a configuration is ambiguous, discovery selects the meter-equipped
-device type.
+mode, and R37 monitoring mode. Firmware newer than 0.25 selects the matching
+RFID variant after the meter configuration has been determined. Discovery does
+not rely only on the advertised product name. If a configuration is ambiguous,
+discovery selects the meter-equipped device type.
 
-Both device types support the common wallbox functions, including:
+All device types support the common wallbox functions, including:
 
 - enabling and disabling charging;
 - setting the maximum charging current from 6 A to 16 A;
