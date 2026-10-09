@@ -36,6 +36,35 @@ IntegrationPluginAmperfied::IntegrationPluginAmperfied()
 
 }
 
+IntegrationPluginAmperfied::ChargingCurrentState &IntegrationPluginAmperfied::chargingCurrentState(Thing *thing)
+{
+    if (!m_chargingCurrentStates.contains(thing)) {
+        ChargingCurrentState state;
+        state.power = thing->stateValue("power").toBool();
+        state.maxChargingCurrent = static_cast<quint16>(qRound(thing->stateValue("maxChargingCurrent").toDouble() * 10));
+        quint16 phaseCount = static_cast<quint16>(thing->stateValue("phaseCount").toUInt());
+        if (phaseCount == 1 || phaseCount == 3)
+            state.phaseCount = phaseCount;
+        m_chargingCurrentStates.insert(thing, state);
+    }
+
+    return m_chargingCurrentStates[thing];
+}
+
+quint16 IntegrationPluginAmperfied::stablePhaseCount(Thing *thing, quint16 phaseSwitchControl)
+{
+    ChargingCurrentState &state = chargingCurrentState(thing);
+
+    // The phase count describes the configured topology. Do not derive it from
+    // instantaneous currents: startup and shutdown residuals can briefly make a
+    // three-phase charger look single-phase. Retain the last valid configuration
+    // and use the conservative three-phase default until one is available.
+    if (phaseSwitchControl == 1 || phaseSwitchControl == 3)
+        state.phaseCount = phaseSwitchControl;
+
+    return state.phaseCount;
+}
+
 void IntegrationPluginAmperfied::discoverThings(ThingDiscoveryInfo *info)
 {
     if (info->thingClassId() == energyControlThingClassId) {
@@ -176,7 +205,8 @@ void IntegrationPluginAmperfied::setupThing(ThingSetupInfo *info)
 
 void IntegrationPluginAmperfied::postSetupThing(Thing *thing)
 {
-    Q_UNUSED(thing)
+    chargingCurrentState(thing);
+
     if (!m_pluginTimer) {
         qCDebug(dcAmperfied()) << "Starting plugin timer...";
         m_pluginTimer = hardwareManager()->pluginTimerManager()->registerTimer(2);
@@ -201,7 +231,9 @@ void IntegrationPluginAmperfied::executeAction(ThingActionInfo *info)
 
         if (info->action().actionTypeId() == energyControlPowerActionTypeId) {
             bool power = info->action().paramValue(energyControlPowerActionPowerParamTypeId).toBool();
-            ModbusRtuReply *reply = connection->setChargingCurrent(power ? static_cast<quint16>(qRound(info->thing()->stateValue(energyControlMaxChargingCurrentStateTypeId).toDouble() * 10)) : 0);
+            ChargingCurrentState &state = chargingCurrentState(info->thing());
+            state.power = power;
+            ModbusRtuReply *reply = connection->setChargingCurrent(state.power ? state.maxChargingCurrent : 0);
             connect(reply, &ModbusRtuReply::finished, info, [info, reply, power](){
                 if (reply->error() == ModbusRtuReply::NoError) {
                     info->thing()->setStateValue(energyControlPowerStateTypeId, power);
@@ -215,9 +247,10 @@ void IntegrationPluginAmperfied::executeAction(ThingActionInfo *info)
         }
 
         if (info->action().actionTypeId() == energyControlMaxChargingCurrentActionTypeId) {
-            bool power = info->thing()->stateValue(energyControlPowerStateTypeId).toBool();
             double current = qRound(info->action().paramValue(energyControlMaxChargingCurrentActionMaxChargingCurrentParamTypeId).toDouble() * 10) / 10.0;
-            ModbusRtuReply *reply = connection->setChargingCurrent(power ? static_cast<quint16>(qRound(current * 10)) : 0);
+            ChargingCurrentState &state = chargingCurrentState(info->thing());
+            state.maxChargingCurrent = static_cast<quint16>(qRound(current * 10));
+            ModbusRtuReply *reply = connection->setChargingCurrent(state.power ? state.maxChargingCurrent : 0);
             connect(reply, &ModbusRtuReply::finished, info, [info, reply, current](){
                 if (reply->error() == ModbusRtuReply::NoError) {
                     info->thing()->setStateValue(energyControlMaxChargingCurrentStateTypeId, current);
@@ -241,8 +274,9 @@ void IntegrationPluginAmperfied::executeAction(ThingActionInfo *info)
 
         if (actionType.name() == "power") {
             bool power = info->action().paramValue(actionType.paramTypes().findByName("power").id()).toBool();
-            double current = info->thing()->stateValue("maxChargingCurrent").toDouble();
-            QModbusReply *reply = connection->setChargingCurrent(power ? static_cast<quint16>(qRound(current * 10)) : 0);
+            ChargingCurrentState &state = chargingCurrentState(info->thing());
+            state.power = power;
+            QModbusReply *reply = connection->setChargingCurrent(state.power ? state.maxChargingCurrent : 0);
             connect(reply, &QModbusReply::finished, info, [info, reply, power](){
                 if (reply->error() == QModbusDevice::NoError) {
                     info->thing()->setStateValue("power", power);
@@ -253,9 +287,10 @@ void IntegrationPluginAmperfied::executeAction(ThingActionInfo *info)
                 }
             });
         } else if (actionType.name() == "maxChargingCurrent") {
-            bool power = info->thing()->stateValue("power").toBool();
-            double current = info->action().paramValue(actionType.paramTypes().findByName("maxChargingCurrent").id()).toDouble();
-            QModbusReply *reply = connection->setChargingCurrent(power ?static_cast<quint16>(qRound(current * 10)): 0);
+            double current = qRound(info->action().paramValue(actionType.paramTypes().findByName("maxChargingCurrent").id()).toDouble() * 10) / 10.0;
+            ChargingCurrentState &state = chargingCurrentState(info->thing());
+            state.maxChargingCurrent = static_cast<quint16>(qRound(current * 10));
+            QModbusReply *reply = connection->setChargingCurrent(state.power ? state.maxChargingCurrent : 0);
             connect(reply, &QModbusReply::finished, info, [info, reply, current](){
                 if (reply->error() == QModbusDevice::NoError) {
                     info->thing()->setStateValue("maxChargingCurrent", current);
@@ -287,6 +322,9 @@ void IntegrationPluginAmperfied::executeAction(ThingActionInfo *info)
 
 void IntegrationPluginAmperfied::thingRemoved(Thing *thing)
 {
+    m_chargingCurrentStates.remove(thing);
+    m_initialUpdates.remove(thing);
+
     if (thing->thingClassId() == energyControlThingClassId) {
         delete m_rtuConnections.take(thing);
     }
@@ -309,6 +347,7 @@ void IntegrationPluginAmperfied::thingRemoved(Thing *thing)
 void IntegrationPluginAmperfied::setupRtuConnection(ThingSetupInfo *info)
 {
     Thing *thing = info->thing();
+    m_initialUpdates.insert(thing);
     ModbusRtuMaster *master = hardwareManager()->modbusRtuResource()->getModbusRtuMaster(thing->paramValue(energyControlThingRtuMasterParamTypeId).toUuid());
     if (!master) {
         qCWarning(dcAmperfied()) << "The Modbus Master is not available any more.";
@@ -350,8 +389,15 @@ void IntegrationPluginAmperfied::setupRtuConnection(ThingSetupInfo *info)
         }
     });
 
-    connect(connection, &AmperfiedModbusRtuConnection::updateFinished, thing, [connection, thing](){
+    connect(connection, &AmperfiedModbusRtuConnection::updateFinished, thing, [this, connection, thing](){
         qCDebug(dcAmperfied()) << "Updated:" << connection;
+
+        ChargingCurrentState &state = chargingCurrentState(thing);
+        if (m_initialUpdates.remove(thing)) {
+            state.power = connection->chargingCurrent() != 0;
+            if (state.power)
+                state.maxChargingCurrent = connection->chargingCurrent();
+        }
 
         if (connection->chargingCurrent() == 0) {
             thing->setStateValue(energyControlPowerStateTypeId, false);
@@ -368,36 +414,30 @@ void IntegrationPluginAmperfied::setupRtuConnection(ThingSetupInfo *info)
         case AmperfiedModbusRtuConnection::ChargingStateA1:
         case AmperfiedModbusRtuConnection::ChargingStateA2:
             thing->setStateValue(energyControlPluggedInStateTypeId, false);
+            thing->setStateValue(energyControlChargingStateTypeId, false);
             break;
         case AmperfiedModbusRtuConnection::ChargingStateB1:
         case AmperfiedModbusRtuConnection::ChargingStateB2:
+            thing->setStateValue(energyControlPluggedInStateTypeId, true);
+            thing->setStateValue(energyControlChargingStateTypeId, false);
+            break;
         case AmperfiedModbusRtuConnection::ChargingStateC1:
         case AmperfiedModbusRtuConnection::ChargingStateC2:
-            thing->setStateValue(energyControlPluggedInStateTypeId, true);
-            break;
         case AmperfiedModbusRtuConnection::ChargingStateDerating:
+            thing->setStateValue(energyControlPluggedInStateTypeId, true);
+            thing->setStateValue(energyControlChargingStateTypeId, true);
+            break;
         case AmperfiedModbusRtuConnection::ChargingStateE:
         case AmperfiedModbusRtuConnection::ChargingStateError:
         case AmperfiedModbusRtuConnection::ChargingStateF:
             qCWarning(dcAmperfied()) << "Erraneous charging state:" << connection->chargingState();
             thing->setStateValue(energyControlPluggedInStateTypeId, false);
+            thing->setStateValue(energyControlChargingStateTypeId, false);
             break;
         }
 
-        int phaseCount = 0;
-        if (connection->currentL1() > 1) {
-            phaseCount++;
-        }
-        if (connection->currentL2() > 1) {
-            phaseCount++;
-        }
-        if (connection->currentL3() > 1) {
-            phaseCount++;
-        }
-        if (phaseCount > 0) {
-            thing->setStateValue(energyControlPhaseCountStateTypeId, phaseCount);
-        }
-        thing->setStateValue(energyControlChargingStateTypeId, phaseCount > 0);
+        thing->setStateValue(energyControlPhaseCountStateTypeId,
+                             stablePhaseCount(thing, connection->phaseSwitchControl()));
     });
 
     connection->update();
@@ -408,6 +448,7 @@ void IntegrationPluginAmperfied::setupTcpConnection(ThingSetupInfo *info)
 {
     qCDebug(dcAmperfied()) << "setting up TCP connection";
     Thing *thing = info->thing();
+    m_initialUpdates.insert(thing);
     NetworkDeviceMonitor *monitor = m_monitors.value(info->thing());
     AmperfiedModbusTcpConnection *connection = new AmperfiedModbusTcpConnection(monitor->networkDeviceInfo().address(), 502, 1, info->thing());
 
@@ -437,10 +478,17 @@ void IntegrationPluginAmperfied::setupTcpConnection(ThingSetupInfo *info)
         }
     });
 
-    connect(connection, &AmperfiedModbusTcpConnection::updateFinished, thing, [connection, thing](){
+    connect(connection, &AmperfiedModbusTcpConnection::updateFinished, thing, [this, connection, thing](){
         qCDebug(dcAmperfied()) << "Updated:" << connection;
 
         thing->setStateValue("connected", true);
+
+        ChargingCurrentState &state = chargingCurrentState(thing);
+        if (m_initialUpdates.remove(thing)) {
+            state.power = connection->chargingCurrent() != 0;
+            if (state.power)
+                state.maxChargingCurrent = connection->chargingCurrent();
+        }
 
         if (connection->chargingCurrent() == 0) {
             thing->setStateValue("power", false);
@@ -466,10 +514,10 @@ void IntegrationPluginAmperfied::setupTcpConnection(ThingSetupInfo *info)
             break;
         case AmperfiedModbusTcpConnection::ChargingStateC1:
         case AmperfiedModbusTcpConnection::ChargingStateC2:
+        case AmperfiedModbusTcpConnection::ChargingStateDerating:
             thing->setStateValue("pluggedIn", true);
             thing->setStateValue("charging", true);
             break;
-        case AmperfiedModbusTcpConnection::ChargingStateDerating:
         case AmperfiedModbusTcpConnection::ChargingStateE:
         case AmperfiedModbusTcpConnection::ChargingStateError:
         case AmperfiedModbusTcpConnection::ChargingStateF:
@@ -477,22 +525,8 @@ void IntegrationPluginAmperfied::setupTcpConnection(ThingSetupInfo *info)
             thing->setStateValue("charging", false);
         }
 
-        int phaseCount = 0;
-        if (connection->currentL1() > 1) {
-            phaseCount++;
-        }
-        if (connection->currentL2() > 1) {
-            phaseCount++;
-        }
-        if (connection->currentL3() > 1) {
-            phaseCount++;
-        }
-        if (phaseCount > 0) {
-            thing->setStateValue("phaseCount", phaseCount);
-        }
+        thing->setStateValue("phaseCount", stablePhaseCount(thing, connection->phaseSwitchControl()));
     });
 
     connection->connectDevice();
 }
-
-

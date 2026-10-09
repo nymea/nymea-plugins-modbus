@@ -13,9 +13,11 @@ disabletesting {
 }
 
 PLUGIN_DIRS = \
+    abbterra               \
     alphainnotec            \
     amperfied               \
     bgetech                 \
+    bender                  \
     drexelundweiss          \
     huawei                  \
     idm                     \

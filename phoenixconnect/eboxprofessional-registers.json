@@ -1,0 +1,190 @@
+{
+    "className": "EBoxProfessional",
+    "protocol": "TCP",
+    "endianness": "BigEndian",
+    "stringEndianness": "BigEndian",
+    "errorLimitUntilNotReachable": 20,
+    "queuedRequests": true,
+    "queuedRequestsDelay": 100,
+    "checkReachableRegister": "modbusTableVersion",
+    "enums": [
+        {
+            "name": "CableState",
+            "values": [
+                {
+                    "key": "NoCable",
+                    "value": 0
+                },
+                {
+                    "key": "CableWithoutCar",
+                    "value": 1
+                },
+                {
+                    "key": "UnlockedCableWithoutCar",
+                    "value": 2
+                },
+                {
+                    "key": "LockedCableWithCar",
+                    "value": 3
+                }
+            ]
+        }
+    ],
+    "blocks": [
+        {
+            "id": "identity",
+            "readSchedule": "init",
+            "registers": [
+                {
+                    "id": "chargeboxId",
+                    "address": 0,
+                    "size": 25,
+                    "type": "string",
+                    "registerType": "inputRegister",
+                    "description": "Chargebox ID",
+                    "access": "R"
+                },
+                {
+                    "id": "serialNumber",
+                    "address": 25,
+                    "size": 25,
+                    "type": "string",
+                    "registerType": "inputRegister",
+                    "description": "Serial number",
+                    "access": "R"
+                }
+            ]
+        },
+        {
+            "id": "operatingCurrent",
+            "readSchedule": "update",
+            "registers": [
+                {
+                    "id": "maxCurrentPhase1",
+                    "address": 1012,
+                    "size": 2,
+                    "type": "float",
+                    "registerType": "holdingRegister",
+                    "description": "Maximum operating current for phase 1",
+                    "unit": "A",
+                    "defaultValue": 6,
+                    "access": "RW"
+                },
+                {
+                    "id": "maxCurrentPhase2",
+                    "address": 1014,
+                    "size": 2,
+                    "type": "float",
+                    "registerType": "holdingRegister",
+                    "description": "Maximum operating current for phase 2",
+                    "unit": "A",
+                    "defaultValue": 6,
+                    "access": "RW"
+                },
+                {
+                    "id": "maxCurrentPhase3",
+                    "address": 1016,
+                    "size": 2,
+                    "type": "float",
+                    "registerType": "holdingRegister",
+                    "description": "Maximum operating current for phase 3",
+                    "unit": "A",
+                    "defaultValue": 6,
+                    "access": "RW"
+                }
+            ]
+        },
+        {
+            "id": "phaseSetup",
+            "readSchedule": "init",
+            "registers": [
+                {
+                    "id": "stationPhaseSetupL1",
+                    "address": 1025,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Station phase setup for L1",
+                    "defaultValue": 1,
+                    "access": "R"
+                },
+                {
+                    "id": "stationPhaseSetupL2",
+                    "address": 1026,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Station phase setup for L2",
+                    "defaultValue": 0,
+                    "access": "R"
+                },
+                {
+                    "id": "stationPhaseSetupL3",
+                    "address": 1027,
+                    "size": 1,
+                    "type": "uint16",
+                    "registerType": "holdingRegister",
+                    "description": "Station phase setup for L3",
+                    "defaultValue": 0,
+                    "access": "R"
+                }
+            ]
+        }
+    ],
+    "registers": [
+        {
+            "id": "modbusTableVersion",
+            "address": 175,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "init",
+            "registerType": "inputRegister",
+            "description": "Modbus table version",
+            "defaultValue": 0,
+            "access": "R"
+        },
+        {
+            "id": "firmwareVersion",
+            "address": 200,
+            "size": 25,
+            "type": "string",
+            "readSchedule": "init",
+            "registerType": "inputRegister",
+            "description": "Firmware version",
+            "access": "R"
+        },
+        {
+            "id": "socket1Mode3State",
+            "address": 275,
+            "size": 2,
+            "type": "string",
+            "readSchedule": "update",
+            "registerType": "inputRegister",
+            "description": "Socket 1 Mode 3 state according to IEC 61851-1",
+            "access": "R"
+        },
+        {
+            "id": "socket1CableState",
+            "address": 300,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "inputRegister",
+            "description": "Socket 1 cable state",
+            "defaultValue": "CableStateNoCable",
+            "enum": "CableState",
+            "access": "R"
+        },
+        {
+            "id": "availability",
+            "address": 1028,
+            "size": 1,
+            "type": "uint16",
+            "readSchedule": "update",
+            "registerType": "holdingRegister",
+            "description": "Operative state of the wallbox",
+            "defaultValue": 1,
+            "access": "RW"
+        }
+    ]
+}

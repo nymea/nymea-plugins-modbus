@@ -26,6 +26,8 @@
 #include "plugininfo.h"
 
 #include "phoenixmodbustcpconnection.h"
+#include "eboxprofessionalmodbustcpconnection.h"
+#include "eboxprofessionaldiscovery.h"
 #include "phoenixdiscovery.h"
 
 #include <network/networkdevicediscovery.h>
@@ -36,6 +38,33 @@
 #include <QStringList>
 #include <QJsonDocument>
 #include <QNetworkInterface>
+#include <QSet>
+
+namespace {
+
+QString normalizedModbusString(QString value)
+{
+    value.remove(QChar('\0'));
+    return value.trimmed();
+}
+
+int phaseCountFromSetup(quint16 phaseL1, quint16 phaseL2, quint16 phaseL3)
+{
+    if (phaseL1 < 1 || phaseL1 > 3)
+        return 0;
+
+    QSet<quint16> phases = {phaseL1};
+    for (quint16 phase : {phaseL2, phaseL3}) {
+        if (phase == 0)
+            continue;
+        if (phase > 3 || phases.contains(phase))
+            return 0;
+        phases.insert(phase);
+    }
+    return phases.size();
+}
+
+}
 
 
 IntegrationPluginPhoenixConnect::IntegrationPluginPhoenixConnect()
@@ -48,6 +77,32 @@ void IntegrationPluginPhoenixConnect::discoverThings(ThingDiscoveryInfo *info)
     if (!hardwareManager()->networkDeviceDiscovery()->available()) {
         qCWarning(dcPhoenixConnect()) << "Failed to discover network devices. The network device discovery is not available.";
         info->finish(Thing::ThingErrorHardwareNotAvailable, QT_TR_NOOP("The network cannot be searched."));
+        return;
+    }
+
+    if (info->thingClassId() == compleoEBoxProfessionalThingClassId) {
+        EBoxProfessionalDiscovery *discovery = new EBoxProfessionalDiscovery(hardwareManager()->networkDeviceDiscovery(), info);
+        connect(discovery, &EBoxProfessionalDiscovery::discoveryFinished, info, [this, discovery, info]() {
+            for (const EBoxProfessionalDiscovery::Result &result : discovery->results()) {
+                ThingDescriptor descriptor(compleoEBoxProfessionalThingClassId,
+                                           QStringLiteral("Compleo eBOX professional"),
+                                           result.serialNumber);
+
+                ParamList params;
+                params << Param(compleoEBoxProfessionalThingMacAddressParamTypeId, result.networkDeviceInfo.thingParamValueMacAddress());
+                params << Param(compleoEBoxProfessionalThingHostNameParamTypeId, result.networkDeviceInfo.thingParamValueHostName());
+                params << Param(compleoEBoxProfessionalThingAddressParamTypeId, result.networkDeviceInfo.thingParamValueAddress());
+                params << Param(compleoEBoxProfessionalThingPortParamTypeId, result.port);
+                descriptor.setParams(params);
+
+                if (Thing *existingThing = myThings().findByParams(params))
+                    descriptor.setThingId(existingThing->id());
+
+                info->addThingDescriptor(descriptor);
+            }
+            info->finish(Thing::ThingErrorNoError);
+        });
+        discovery->startDiscovery();
         return;
     }
 
@@ -90,6 +145,11 @@ void IntegrationPluginPhoenixConnect::discoverThings(ThingDiscoveryInfo *info)
 void IntegrationPluginPhoenixConnect::setupThing(ThingSetupInfo *info)
 {
     Thing *thing = info->thing();
+
+    if (thing->thingClassId() == compleoEBoxProfessionalThingClassId) {
+        setupEBoxProfessional(info);
+        return;
+    }
 
     if (m_connections.contains(thing)) {
         qCDebug(dcPhoenixConnect()) << "Reconfiguring existing thing" << thing->name();
@@ -222,9 +282,14 @@ void IntegrationPluginPhoenixConnect::postSetupThing(Thing *thing)
         m_pluginTimer = hardwareManager()->pluginTimerManager()->registerTimer(10);
         connect(m_pluginTimer, &PluginTimer::timeout, this, [this] {
             foreach (Thing *thing, myThings()) {
-                if (thing->setupStatus() == Thing::ThingSetupStatusComplete && m_monitors.value(thing)->reachable()) {
-                    qCDebug(dcPhoenixConnect()) << "Updating" << thing->name() << m_monitors.value(thing)->macAddress() << m_monitors.value(thing)->networkDeviceInfo().address().toString();
-                    m_connections.value(thing)->update();
+                NetworkDeviceMonitor *monitor = m_monitors.value(thing);
+                if (thing->setupStatus() == Thing::ThingSetupStatusComplete && monitor && monitor->reachable()) {
+                    qCDebug(dcPhoenixConnect()) << "Updating" << thing->name() << monitor->macAddress() << monitor->networkDeviceInfo().address().toString();
+                    if (EBoxProfessionalModbusTcpConnection *connection = m_eBoxConnections.value(thing)) {
+                        connection->update();
+                    } else if (PhoenixModbusTcpConnection *connection = m_connections.value(thing)) {
+                        connection->update();
+                    }
                 } else {
                     qCDebug(dcPhoenixConnect()) << thing->name() << "isn't reachable. Not updating.";
                 }
@@ -237,6 +302,11 @@ void IntegrationPluginPhoenixConnect::executeAction(ThingActionInfo *info)
 {
     Thing *thing = info->thing();
     Action action = info->action();
+
+    if (thing->thingClassId() == compleoEBoxProfessionalThingClassId) {
+        executeEBoxProfessionalAction(info);
+        return;
+    }
 
     PhoenixModbusTcpConnection *connection = m_connections.value(thing);
     if (!connection) {
@@ -287,13 +357,257 @@ void IntegrationPluginPhoenixConnect::thingRemoved(Thing *thing)
     qCDebug(dcPhoenixConnect()) << "Removing device" << thing->name();
     if (m_connections.contains(thing)) {
         m_connections.take(thing)->deleteLater();
-        hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
     }
+    if (m_eBoxConnections.contains(thing))
+        m_eBoxConnections.take(thing)->deleteLater();
+    m_eBoxChargingCurrentStateBuffer.remove(thing);
+    m_eBoxChargingCurrentWriteQueues.remove(thing);
+    m_eBoxChargingCurrentWritesActive.remove(thing);
+    if (m_monitors.contains(thing))
+        hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
 
     if (myThings().isEmpty()) {
         hardwareManager()->pluginTimerManager()->unregisterTimer(m_pluginTimer);
         m_pluginTimer = nullptr;
     }
+}
+
+void IntegrationPluginPhoenixConnect::setupEBoxProfessional(ThingSetupInfo *info)
+{
+    Thing *thing = info->thing();
+
+    if (m_eBoxConnections.contains(thing))
+        m_eBoxConnections.take(thing)->deleteLater();
+    if (m_monitors.contains(thing))
+        hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(m_monitors.take(thing));
+
+    NetworkDeviceMonitor *monitor = hardwareManager()->networkDeviceDiscovery()->registerMonitor(thing);
+    if (!monitor) {
+        qCWarning(dcPhoenixConnect()) << "Unable to create network monitor for" << thing;
+        info->finish(Thing::ThingErrorInvalidParameter);
+        return;
+    }
+
+    const quint16 port = thing->paramValue(compleoEBoxProfessionalThingPortParamTypeId).toUInt();
+    constexpr quint16 slaveId = 1;
+    EBoxProfessionalModbusTcpConnection *connection = new EBoxProfessionalModbusTcpConnection(
+                monitor->networkDeviceInfo().address(), port, slaveId, this);
+
+    connect(thing, &Thing::settingChanged, connection, [this, thing](const ParamTypeId &paramTypeId, const QVariant &) {
+        if (paramTypeId == compleoEBoxProfessionalSettingsPhaseCountParamTypeId)
+            updateEBoxProfessionalState(thing);
+    });
+
+    connect(info, &ThingSetupInfo::aborted, connection, &EBoxProfessionalModbusTcpConnection::deleteLater);
+    connect(info, &ThingSetupInfo::aborted, monitor, [this, monitor]() {
+        hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(monitor);
+    });
+
+    connect(monitor, &NetworkDeviceMonitor::networkDeviceInfoChanged, connection,
+            [connection](const NetworkDeviceInfo &networkDeviceInfo) {
+        connection->modbusTcpMaster()->setHostAddress(networkDeviceInfo.address());
+    });
+
+    connect(connection, &EBoxProfessionalModbusTcpConnection::reachableChanged, thing,
+            [connection, thing](bool reachable) {
+        qCDebug(dcPhoenixConnect()) << "Compleo eBOX reachable changed:" << reachable;
+        if (reachable) {
+            if (!connection->initializing())
+                connection->initialize();
+        } else {
+            thing->setStateValue(compleoEBoxProfessionalConnectedStateTypeId, false);
+        }
+    });
+
+    connect(connection, &EBoxProfessionalModbusTcpConnection::initializationFinished, info,
+            [this, info, thing, connection, monitor](bool success) {
+        if (!success || connection->modbusTableVersion() == 0
+                || normalizedModbusString(connection->chargeboxId()).isEmpty()
+                || normalizedModbusString(connection->serialNumber()).isEmpty()) {
+            qCWarning(dcPhoenixConnect()) << "Could not identify Compleo eBOX professional at"
+                                         << connection->modbusTcpMaster()->hostAddress();
+            hardwareManager()->networkDeviceDiscovery()->unregisterMonitor(monitor);
+            connection->deleteLater();
+            info->finish(Thing::ThingErrorHardwareFailure,
+                         QT_TR_NOOP("Could not initialize the communication with the wallbox."));
+            return;
+        }
+
+        m_eBoxConnections.insert(thing, connection);
+        m_monitors.insert(thing, monitor);
+        info->finish(Thing::ThingErrorNoError);
+    });
+
+    connect(connection, &EBoxProfessionalModbusTcpConnection::initializationFinished, thing,
+            [this, thing, connection](bool success) {
+        if (!success)
+            return;
+
+        thing->setStateValue(compleoEBoxProfessionalConnectedStateTypeId, true);
+        thing->setStateValue(compleoEBoxProfessionalFirmwareVersionStateTypeId,
+                             normalizedModbusString(connection->firmwareVersion()));
+        updateEBoxProfessionalState(thing);
+        connection->update();
+    });
+
+    connect(connection, &EBoxProfessionalModbusTcpConnection::updateFinished, thing,
+            [this, thing, connection]() {
+        if (!connection->reachable()) {
+            thing->setStateValue(compleoEBoxProfessionalConnectedStateTypeId, false);
+            return;
+        }
+        thing->setStateValue(compleoEBoxProfessionalConnectedStateTypeId, true);
+        updateEBoxProfessionalState(thing);
+    });
+
+    connection->connectDevice();
+}
+
+void IntegrationPluginPhoenixConnect::executeEBoxProfessionalAction(ThingActionInfo *info)
+{
+    Thing *thing = info->thing();
+    EBoxProfessionalModbusTcpConnection *connection = m_eBoxConnections.value(thing);
+    if (!connection) {
+        info->finish(Thing::ThingErrorHardwareFailure);
+        return;
+    }
+
+    const ActionType actionType = thing->thingClass().actionTypes().findById(info->action().actionTypeId());
+    if (actionType.name() == "power") {
+        const bool enabled = info->action().paramValue(actionType.id()).toBool();
+        m_eBoxChargingCurrentStateBuffer[thing].power = enabled;
+        enqueueEBoxProfessionalStateWrite(info, connection);
+        return;
+    }
+
+    if (actionType.name() == "maxChargingCurrent") {
+        const double current = qRound(info->action().paramValue(actionType.id()).toDouble() * 10) / 10.0;
+        if (current < 6 || current > 32) {
+            info->finish(Thing::ThingErrorInvalidParameter);
+            return;
+        }
+
+        m_eBoxChargingCurrentStateBuffer[thing].maxChargingCurrent = current;
+        enqueueEBoxProfessionalStateWrite(info, connection);
+        return;
+    }
+
+    Q_ASSERT_X(false, "executeEBoxProfessionalAction", QString("Unhandled action: %1").arg(actionType.name()).toUtf8());
+}
+
+void IntegrationPluginPhoenixConnect::enqueueEBoxProfessionalStateWrite(
+        ThingActionInfo *info, EBoxProfessionalModbusTcpConnection *connection)
+{
+    Thing *thing = info->thing();
+    EBoxChargingCurrentRequest request;
+    request.state = m_eBoxChargingCurrentStateBuffer.value(thing);
+    request.info = info;
+    m_eBoxChargingCurrentWriteQueues[thing].enqueue(request);
+
+    sendNextEBoxProfessionalStateWrite(thing, connection);
+}
+
+void IntegrationPluginPhoenixConnect::sendNextEBoxProfessionalStateWrite(
+        Thing *thing, EBoxProfessionalModbusTcpConnection *connection)
+{
+    if (m_eBoxChargingCurrentWritesActive.contains(thing)
+            || m_eBoxChargingCurrentWriteQueues.value(thing).isEmpty())
+        return;
+
+    const EBoxChargingCurrentRequest request = m_eBoxChargingCurrentWriteQueues[thing].dequeue();
+    const float registerCurrent = request.state.power
+            ? static_cast<float>(request.state.maxChargingCurrent) : 0.0f;
+
+    QVector<quint16> values;
+    values.append(connection->setMaxCurrentPhase1DataUnit(registerCurrent).values());
+    values.append(connection->setMaxCurrentPhase2DataUnit(registerCurrent).values());
+    values.append(connection->setMaxCurrentPhase3DataUnit(registerCurrent).values());
+
+    QModbusDataUnit dataUnit(QModbusDataUnit::HoldingRegisters,
+                             EBoxProfessionalModbusTcpConnection::RegisterMaxCurrentPhase1,
+                             values.size());
+    dataUnit.setValues(values);
+
+    m_eBoxChargingCurrentWritesActive.insert(thing);
+    QModbusReply *reply = connection->modbusTcpMaster()->sendWriteRequest(dataUnit, connection->slaveId());
+
+    if (!reply) {
+        qCWarning(dcPhoenixConnect()) << "Could not create eBOX charging current block write request";
+        m_eBoxChargingCurrentWritesActive.remove(thing);
+        if (request.info)
+            request.info->finish(Thing::ThingErrorHardwareFailure);
+        sendNextEBoxProfessionalStateWrite(thing, connection);
+        return;
+    }
+
+    connect(reply, &QModbusReply::finished, this, [this, thing, connection, reply, request, registerCurrent]() {
+        reply->deleteLater();
+        m_eBoxChargingCurrentWritesActive.remove(thing);
+
+        if (reply->error() != QModbusDevice::NoError) {
+            qCWarning(dcPhoenixConnect()) << "Error setting eBOX charging state"
+                                         << request.state.power << request.state.maxChargingCurrent << "A:"
+                                         << reply->errorString();
+            if (request.info)
+                request.info->finish(Thing::ThingErrorHardwareFailure);
+        } else {
+            qCDebug(dcPhoenixConnect()) << "Set eBOX charging state"
+                                       << request.state.power << request.state.maxChargingCurrent << "A"
+                                       << "using register current" << registerCurrent << "A";
+            thing->setStateValue(compleoEBoxProfessionalPowerStateTypeId, request.state.power);
+            thing->setStateValue(compleoEBoxProfessionalMaxChargingCurrentStateTypeId,
+                                 request.state.maxChargingCurrent);
+            if (request.info)
+                request.info->finish(Thing::ThingErrorNoError);
+        }
+
+        if (m_eBoxConnections.value(thing) == connection)
+            sendNextEBoxProfessionalStateWrite(thing, connection);
+    });
+}
+
+void IntegrationPluginPhoenixConnect::updateEBoxProfessionalState(Thing *thing)
+{
+    EBoxProfessionalModbusTcpConnection *connection = m_eBoxConnections.value(thing);
+    if (!connection)
+        return;
+
+    qCDebug(dcPhoenixConnect()) << "Updated" << thing->name() << connection;
+
+    const QString mode3State = normalizedModbusString(connection->socket1Mode3State()).toUpper();
+    const bool pluggedIn = mode3State.startsWith('B') || mode3State.startsWith('C') || mode3State.startsWith('D')
+            || connection->socket1CableState() == EBoxProfessionalModbusTcpConnection::CableStateLockedCableWithCar;
+    const bool charging = mode3State == QStringLiteral("C2") || mode3State == QStringLiteral("D2");
+    thing->setStateValue(compleoEBoxProfessionalPluggedInStateTypeId, pluggedIn);
+    thing->setStateValue(compleoEBoxProfessionalChargingStateTypeId, charging);
+
+    const double maxCurrent = qRound(qMin(connection->maxCurrentPhase1(),
+                                          qMin(connection->maxCurrentPhase2(), connection->maxCurrentPhase3())) * 10.0) / 10.0;
+    if (maxCurrent >= 6 && maxCurrent <= 32)
+        thing->setStateValue(compleoEBoxProfessionalMaxChargingCurrentStateTypeId, maxCurrent);
+    const bool power = maxCurrent > 0.0;
+    thing->setStateValue(compleoEBoxProfessionalPowerStateTypeId, power);
+
+    if (!m_eBoxChargingCurrentStateBuffer.contains(thing)) {
+        EBoxChargingCurrentState state;
+        state.power = power;
+        if (maxCurrent >= 6.0 && maxCurrent <= 32.0)
+            state.maxChargingCurrent = maxCurrent;
+        else
+            state.maxChargingCurrent = qBound(6.0,
+                                              thing->stateValue(compleoEBoxProfessionalMaxChargingCurrentStateTypeId).toDouble(),
+                                              32.0);
+        m_eBoxChargingCurrentStateBuffer.insert(thing, state);
+    }
+
+    const int mappedPhaseCount = phaseCountFromSetup(connection->stationPhaseSetupL1(),
+                                                     connection->stationPhaseSetupL2(),
+                                                     connection->stationPhaseSetupL3());
+    const uint configuredPhaseCount = qBound(1u,
+                                             thing->setting(compleoEBoxProfessionalSettingsPhaseCountParamTypeId).toUInt(),
+                                             3u);
+    thing->setStateValue(compleoEBoxProfessionalPhaseCountStateTypeId,
+                         mappedPhaseCount > 0 ? mappedPhaseCount : configuredPhaseCount);
 }
 
 void IntegrationPluginPhoenixConnect::updatePhaseCount(Thing *thing)

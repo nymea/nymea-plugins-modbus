@@ -145,8 +145,26 @@
                     "value": 2
                 }
             ]
+        },
+        {
+            "name": "RfidOperatingMode",
+            "values": [
+                { "key": "Disabled", "value": 0 },
+                { "key": "Remote", "value": 1 },
+                { "key": "Local", "value": 2 }
+            ]
+        },
+        {
+            "name": "RfidLed",
+            "values": [
+                { "key": "None", "value": 0 },
+                { "key": "Rejected", "value": 1 },
+                { "key": "Accepted", "value": 2 },
+                { "key": "Learn", "value": 3 }
+            ]
         }
     ],
+    "flags": [],
     "blocks": [
         {
             "id": "status",
@@ -605,6 +623,48 @@
             "description": "Force charging resume (>= 0.25)",
             "defaultValue": "0",
             "access": "RW"
+        },
+        {
+            "id": "rfidOperatingMode",
+            "address": 209,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "description": "RFID operating mode",
+            "enum": "RfidOperatingMode",
+            "defaultValue": "RfidOperatingModeDisabled",
+            "access": "RW"
+        },
+        {
+            "id": "rfidLed",
+            "address": 210,
+            "size": 1,
+            "type": "uint16",
+            "registerType": "holdingRegister",
+            "description": "RFID feedback LED",
+            "enum": "RfidLed",
+            "defaultValue": "RfidLedNone",
+            "access": "RW"
+        },
+        {
+            "id": "rfidRead",
+            "address": 211,
+            "size": 6,
+            "type": "raw",
+            "registerType": "holdingRegister",
+            "description": "TLS-only RFID read latch. A detected token remains stable for up to 60 seconds and may only be acknowledged by writing one complete six-register zero block.",
+            "access": "RW",
+            "sensitive": true
+        },
+        {
+            "id": "rfidSession",
+            "address": 217,
+            "size": 6,
+            "type": "raw",
+            "registerType": "holdingRegister",
+            "description": "TLS-only atomic RFID authorization marker. Writes must contain one complete valid token or one complete six-register zero block.",
+            "access": "RW",
+            "sensitive": true
         }
     ]
 }
