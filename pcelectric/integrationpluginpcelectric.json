@@ -933,6 +933,286 @@
                             "displayName": "Refresh client certificate"
                         }
                     ]
+                },
+                {
+                    "name": "ev11RfidNoMeter",
+                    "displayName": "PCE EV11.3 RFID (no meter)",
+                    "id": "87b428fd-ff10-4f64-a286-88dcdc9891cd",
+                    "createMethods": ["discovery", "user"],
+                    "interfaces": ["evchargerac", "connectable", "networkdevice", "rfid"],
+                    "paramTypes": [
+                        {
+                            "id": "3d4a3480-211d-464a-b53e-cb2d5df26945",
+                            "name": "address",
+                            "displayName": "Host address",
+                            "type": "QString",
+                            "inputType": "IPv4Address",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "867c5eb1-dc9e-479b-9799-ea9112897134",
+                            "name": "hostName",
+                            "displayName": "Host name",
+                            "type": "QString",
+                            "inputType": "TextLine",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "dc26faae-f003-4d0e-91fc-5ce3927c5cba",
+                            "name": "macAddress",
+                            "displayName": "MAC address",
+                            "type": "QString",
+                            "inputType": "MacAddress",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "9dbe7395-8c18-4ccf-8a2b-75a5463bbf55",
+                            "name": "serialNumber",
+                            "displayName": "Serial number",
+                            "type": "QString",
+                            "defaultValue": ""
+                        }
+                    ],
+                    "settingsTypes": [
+                        {
+                            "id": "cc904a23-4423-46c2-b89a-c66d849b40a9",
+                            "name": "ledBrightness",
+                            "displayName": "LED brightness",
+                            "type": "uint",
+                            "minValue": 0,
+                            "maxValue": 100,
+                            "unit": "Percentage",
+                            "defaultValue": 100
+                        },
+                        {
+                            "id": "5da61ddb-eca2-44c3-a7d1-d9a0fe8df4e0",
+                            "name": "digitalInputMode",
+                            "displayName": "Digital input mode",
+                            "type": "QString",
+                            "defaultValue": "0 | Charging allowed",
+                            "allowedValues": ["0 | Charging allowed", "1 | Charging allowed inverted", "2 | PWM and S0 signaling", "3 | Limit and S0 signaling"]
+                        },
+                        {
+                            "id": "3e2733e3-f827-469d-9265-f14b709f6342",
+                            "name": "phaseAutoSwitchPause",
+                            "displayName": "Phase autoswitch pause",
+                            "type": "int",
+                            "unit": "Seconds",
+                            "minValue": 5,
+                            "maxValue": 600,
+                            "defaultValue": 6
+                        },
+                        {
+                            "id": "960c542e-43c9-4714-9c07-6903b81b5592",
+                            "name": "phaseAutoSwitchMinChargingTime",
+                            "displayName": "Phase autoswitch minimal charging time",
+                            "type": "int",
+                            "unit": "Seconds",
+                            "minValue": 5,
+                            "maxValue": 600,
+                            "defaultValue": 120
+                        },
+                        {
+                            "id": "4d322624-c070-4672-87cd-a754a898e7ff",
+                            "name": "forceChargingResume",
+                            "displayName": "Force charging resume",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "3b69594f-cad8-4942-8746-03e01103eaed",
+                            "name": "rfidOperatingMode",
+                            "displayName": "RFID operating mode",
+                            "type": "QString",
+                            "defaultValue": "1 | Remote",
+                            "allowedValues": ["0 | Disabled", "1 | Remote", "2 | Local"]
+                        }
+                    ],
+                    "stateTypes": [
+                        {
+                            "id": "a8f0810d-44fb-4f5c-becc-33bcd1417288",
+                            "name": "connected",
+                            "displayName": "Connected",
+                            "type": "bool",
+                            "cached": false,
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "81276f74-0a38-4043-914e-bf9e0aca8414",
+                            "name": "power",
+                            "displayName": "Charging enabled",
+                            "displayNameAction": "Enable or disable charging",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "writable": true
+                        },
+                        {
+                            "id": "90987490-f2cd-4fcc-9632-4016cac5aa68",
+                            "name": "maxChargingCurrent",
+                            "displayName": "Maximum charging current",
+                            "displayNameAction": "Set maximum charging current",
+                            "type": "double",
+                            "unit": "Ampere",
+                            "defaultValue": 6,
+                            "minValue": 6,
+                            "maxValue": 16,
+                            "stepSize": 0.01,
+                            "writable": true
+                        },
+                        {
+                            "id": "19a8ce9b-7c17-4392-b8bd-330174d8c34d",
+                            "name": "pluggedIn",
+                            "displayName": "Plugged in",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "11be10e4-894b-4002-8f87-8ca013e1e0ea",
+                            "name": "charging",
+                            "displayName": "Charging",
+                            "type": "bool",
+                            "defaultValue": false
+                        },
+                        {
+                            "id": "4e4ac6a2-4eb9-4544-8eb7-41c5aa06b1a4",
+                            "name": "phaseCount",
+                            "displayName": "Active phases",
+                            "type": "uint",
+                            "minValue": 1,
+                            "maxValue": 3,
+                            "defaultValue": 3
+                        },
+                        {
+                            "id": "45f0f5a0-d42d-4328-8e0e-fef1d3309a73",
+                            "name": "desiredPhaseCount",
+                            "displayName": "Desired phase count",
+                            "displayNameAction": "Set desired phase count",
+                            "type": "uint",
+                            "minValue": 1,
+                            "maxValue": 3,
+                            "possibleValues": [1, 3],
+                            "defaultValue": 3,
+                            "writable": true
+                        },
+                        {
+                            "id": "52fdc5ee-a64a-4126-833e-7694aa88c1b1",
+                            "name": "temperature",
+                            "displayName": "Onboard temperature",
+                            "unit": "DegreeCelsius",
+                            "type": "double",
+                            "defaultValue": 0,
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "ad1154d6-59ac-40ad-a2a3-dabf4f2e57a0",
+                            "name": "error",
+                            "displayName": "Error",
+                            "type": "QString",
+                            "defaultValue": "Kein Fehler",
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "d63b028d-4ff5-49a5-bf16-bfbc62da8741",
+                            "name": "currentVersion",
+                            "displayName": "Firmware version",
+                            "type": "QString",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "f021002e-7fa1-4c8e-92cc-2119b593b25a",
+                            "name": "digitalInputFlag",
+                            "displayName": "Digital input flag",
+                            "type": "QString",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "3311bcc2-cbbc-4a26-8392-3eaa178053a8",
+                            "name": "status",
+                            "displayName": "Status",
+                            "type": "QString",
+                            "defaultValue": "Init",
+                            "suggestLogging": true
+                        },
+                        {
+                            "id": "fb930ff3-bd13-4e7a-83ce-56b3ee8f209a",
+                            "name": "digitalInputMode",
+                            "displayName": "Digital input mode",
+                            "type": "uint",
+                            "defaultValue": 0,
+                            "minValue": 0,
+                            "maxValue": 3
+                        },
+                        {
+                            "id": "900b8cc4-c6a6-43de-ae73-e83ba697d169",
+                            "name": "modeR37",
+                            "displayName": "R37 mode",
+                            "type": "int",
+                            "defaultValue": 0
+                        },
+                        {
+                            "id": "4d6dab93-d68a-43e0-ab45-00b1544d8836",
+                            "name": "authorizedUsername",
+                            "displayName": "Authorized username",
+                            "type": "QString",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "64f9f6ff-b3d6-487f-9aa3-70de7493964a",
+                            "name": "authorizedDisplayName",
+                            "displayName": "Authorized display name",
+                            "type": "QString",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "a3d41cae-6c98-40de-b6ad-34fc8e179bc0",
+                            "name": "authorizedTagHash",
+                            "displayName": "Authorized tag hash",
+                            "type": "QString",
+                            "defaultValue": ""
+                        },
+                        {
+                            "id": "9b918d1c-3a0a-48ef-8095-05a441f647b5",
+                            "name": "rfidEnrollmentActive",
+                            "displayName": "RFID enrollment active",
+                            "displayNameAction": "Start or stop RFID enrollment",
+                            "type": "bool",
+                            "defaultValue": false,
+                            "cached": false,
+                            "writable": true
+                        }
+                    ],
+                    "actionTypes": [
+                        {
+                            "id": "4444bd11-cf07-4d60-8c28-931f2ffcbe1f",
+                            "name": "refreshClientCertificate",
+                            "displayName": "Refresh client certificate"
+                        },
+                        {
+                            "id": "ccb062a9-e16c-49a6-aa29-5a3c6dc2d0b8",
+                            "name": "tagAccepted",
+                            "displayName": "Tag accepted"
+                        },
+                        {
+                            "id": "1d7a88bb-5231-4d0b-b07c-28dd23100d81",
+                            "name": "tagRejected",
+                            "displayName": "Tag rejected"
+                        }
+                    ],
+                    "eventTypes": [
+                        {
+                            "id": "362b9589-235a-42a4-bb04-abba33dc0a02",
+                            "name": "tagDetected",
+                            "displayName": "Tag detected",
+                            "paramTypes": [
+                                {
+                                    "id": "73200464-6610-4745-9d6a-956f93991ae5",
+                                    "name": "code",
+                                    "displayName": "Code",
+                                    "type": "QString"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ]
         }

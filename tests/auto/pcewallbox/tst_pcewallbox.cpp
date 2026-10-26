@@ -204,6 +204,73 @@ class TestPceWallbox : public QObject
     }
 
 private slots:
+    void rfidNoMeterThingClassContract()
+    {
+        const QString fileName = QFINDTESTDATA("../../../pcelectric/integrationpluginpcelectric.json");
+        QVERIFY2(!fileName.isEmpty(), "Could not locate integrationpluginpcelectric.json");
+        QFile file(fileName);
+        QVERIFY(file.open(QIODevice::ReadOnly));
+        const QJsonObject root = QJsonDocument::fromJson(file.readAll()).object();
+
+        QJsonObject thingClass;
+        const QJsonArray vendors = root.value("vendors").toArray();
+        for (const QJsonValue &vendorValue : vendors) {
+            for (const QJsonValue &thingClassValue : vendorValue.toObject().value("thingClasses").toArray()) {
+                const QJsonObject candidate = thingClassValue.toObject();
+                if (candidate.value("name").toString() == QStringLiteral("ev11RfidNoMeter")) {
+                    thingClass = candidate;
+                    break;
+                }
+            }
+        }
+        QVERIFY(!thingClass.isEmpty());
+        QCOMPARE(thingClass.value("displayName").toString(), QStringLiteral("PCE EV11.3 RFID (no meter)"));
+
+        const auto stringValues = [](const QJsonArray &array) {
+            QStringList values;
+            for (const QJsonValue &value : array)
+                values.append(value.toString());
+            return values;
+        };
+        const auto objectNames = [](const QJsonArray &array) {
+            QStringList names;
+            for (const QJsonValue &value : array)
+                names.append(value.toObject().value("name").toString());
+            return names;
+        };
+
+        const QStringList createMethods = stringValues(thingClass.value("createMethods").toArray());
+        QVERIFY(createMethods.contains("discovery"));
+        QVERIFY(createMethods.contains("user"));
+
+        const QStringList interfaces = stringValues(thingClass.value("interfaces").toArray());
+        QVERIFY(interfaces.contains("evchargerac"));
+        QVERIFY(interfaces.contains("connectable"));
+        QVERIFY(interfaces.contains("networkdevice"));
+        QVERIFY(interfaces.contains("rfid"));
+        QVERIFY(!interfaces.contains("smartmeterconsumer"));
+
+        const QStringList settings = objectNames(thingClass.value("settingsTypes").toArray());
+        QVERIFY(settings.contains("rfidOperatingMode"));
+
+        const QStringList states = objectNames(thingClass.value("stateTypes").toArray());
+        QVERIFY(states.contains("authorizedUsername"));
+        QVERIFY(states.contains("authorizedDisplayName"));
+        QVERIFY(states.contains("authorizedTagHash"));
+        QVERIFY(states.contains("rfidEnrollmentActive"));
+        QVERIFY(!states.contains("currentPower"));
+        QVERIFY(!states.contains("sessionEnergy"));
+        QVERIFY(!states.contains("totalEnergyConsumed"));
+
+        const QStringList actions = objectNames(thingClass.value("actionTypes").toArray());
+        QVERIFY(actions.contains("refreshClientCertificate"));
+        QVERIFY(actions.contains("tagAccepted"));
+        QVERIFY(actions.contains("tagRejected"));
+
+        const QStringList events = objectNames(thingClass.value("eventTypes").toArray());
+        QVERIFY(events.contains("tagDetected"));
+    }
+
     void loggingStateClassification()
     {
         QVERIFY(PcElectricLogging::isInstantaneousEnergyState("currentPower"));
