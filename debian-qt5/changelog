@@ -1,3 +1,11 @@
+nymea-plugins-modbus (1.17.0) resolute; urgency=medium
+
+  [ Simon Stürz ]
+  * PCE: Add RFID support
+  * PCE: Add RFID charger with no meter support
+
+ -- jenkins <developer@nymea.io>  Mon, 26 Oct 2026 17:12:56 +0100
+
 nymea-plugins-modbus (1.16.2) resolute; urgency=medium
 
 
